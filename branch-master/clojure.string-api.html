@@ -79,6 +79,9 @@ namespace.
       <a class="toc-entry-anchor" href="#clojure.string/lower-case">lower-case</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/re-quote-replacement">re-quote-replacement</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.string/replace">replace</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
@@ -140,7 +143,7 @@ namespace.
     <pre id="var-docstr">True if s is nil, empty, or contains only whitespace.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L225" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L273" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -152,7 +155,7 @@ namespace.
 characters to lower-case.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L146" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L194" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -167,7 +170,7 @@ If (cmap ch) is nil, append ch to the new string.
 If (cmap ch) is non-nil, append (str (cmap ch)) instead.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L238" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L286" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -180,7 +183,7 @@ If (cmap ch) is non-nil, append (str (cmap ch)) instead.</pre>
 separated by an optional separator.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L130" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L178" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -191,7 +194,20 @@ separated by an optional separator.</pre>
     <pre id="var-docstr">Converts string to all lower-case.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L163" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L211" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/re-quote-replacement">re-quote-replacement</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (re-quote-replacement replacement)
+</pre>
+    <pre id="var-docstr">Given a replacement string that you wish to be a literal
+replacement for a pattern match in replace or replace-first, do the
+necessary escaping of special characters in the replacement.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.4</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L52" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -207,10 +223,24 @@ string / string
 char / char
 pattern / (string or function of match).
 
-See also replace-first.</pre>
+See also replace-first.
+
+The replacement is literal (i.e. none of its characters are treated
+specially) for all cases above except pattern / string.
+
+For pattern / string, $1, $2, etc. in the replacement string are
+substituted with the string that matched the corresponding
+parenthesized group in the pattern.  If you wish your replacement
+string r to be used literally, use (re-quote-replacement r) as the
+replacement argument.  See also documentation for
+java.util.regex.Matcher's appendReplacement method.
+
+Example:
+(clojure.string/replace "Almost Pig Latin" #"\b(\w)(\w+)\b" "$2$1ay")
+-&gt; "lmostAay igPay atinLay"</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L63" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L73" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -226,10 +256,25 @@ char / char
 string / string
 pattern / (string or function of match).
 
-See also replace-all.</pre>
+See also replace.
+
+The replacement is literal (i.e. none of its characters are treated
+specially) for all cases above except pattern / string.
+
+For pattern / string, $1, $2, etc. in the replacement string are
+substituted with the string that matched the corresponding
+parenthesized group in the pattern.  If you wish your replacement
+string r to be used literally, use (re-quote-replacement r) as the
+replacement argument.  See also documentation for
+java.util.regex.Matcher's appendReplacement method.
+
+Example:
+(clojure.string/replace-first "swap first two words"
+                              #"(\w+)(\s+)(\w+)" "$3$2$1")
+-&gt; "first swap two words"</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L103" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L136" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -240,7 +285,7 @@ See also replace-all.</pre>
     <pre id="var-docstr">Returns s with its characters reversed.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L46" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L46" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -253,7 +298,7 @@ See also replace-all.</pre>
 the maximum number of splits. Not lazy. Returns vector of the splits.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L169" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L217" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -264,7 +309,7 @@ the maximum number of splits. Not lazy. Returns vector of the splits.</pre>
     <pre id="var-docstr">Splits s on \n or \r\n.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L178" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L226" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -275,7 +320,7 @@ the maximum number of splits. Not lazy. Returns vector of the splits.</pre>
     <pre id="var-docstr">Removes whitespace from both ends of string.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L184" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L232" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -287,7 +332,7 @@ the maximum number of splits. Not lazy. Returns vector of the splits.</pre>
 string.  Similar to Perl's chomp.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L212" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L260" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -298,7 +343,7 @@ string.  Similar to Perl's chomp.</pre>
     <pre id="var-docstr">Removes whitespace from the left side of string.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L190" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L238" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -309,7 +354,7 @@ string.  Similar to Perl's chomp.</pre>
     <pre id="var-docstr">Removes whitespace from the right side of string.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L201" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L249" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -320,7 +365,7 @@ string.  Similar to Perl's chomp.</pre>
     <pre id="var-docstr">Converts string to all upper-case.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/f30995c86056959abca53d0ca35dcb9cfa73e6e6/src/clj/clojure/string.clj#L157" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/92528932261b58a8ab8a89a6b2980e5d308075a0/src/clj/clojure/string.clj#L205" id="var-source">Source</a>
   </div>
 </div>
 
