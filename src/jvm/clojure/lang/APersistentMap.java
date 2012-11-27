@@ -15,6 +15,7 @@ import java.util.*;
 
 public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable, Serializable, MapEquivalence, IHashEq {
 int _hash = -1;
+int _hasheq = -1;
 
 public String toString(){
 	return RT.printString(this);
@@ -111,8 +112,16 @@ static public int mapHash(IPersistentMap m){
 }
 
 public int hasheq(){
+	if(_hasheq == -1)
+		{
+		this._hasheq = mapHasheq(this);
+		}
+	return _hasheq;
+}
+
+static public int mapHasheq(IPersistentMap m) {
 	int hash = 0;
-	for(ISeq s = this.seq(); s != null; s = s.next())
+	for(ISeq s = m.seq(); s != null; s = s.next())
 		{
 		Map.Entry e = (Map.Entry) s.first();
 		hash += Util.hasheq(e.getKey()) ^

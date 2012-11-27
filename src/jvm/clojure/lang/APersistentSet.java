@@ -19,6 +19,7 @@ import java.util.Set;
 
 public abstract class APersistentSet extends AFn implements IPersistentSet, Collection, Set, Serializable, IHashEq {
 int _hash = -1;
+int _hasheq = -1;
 final IPersistentMap impl;
 
 protected APersistentSet(IPersistentMap impl){
@@ -93,13 +94,16 @@ public int hashCode(){
 }
 
 public int hasheq(){
-	int hash = 0;
-	for(ISeq s = seq(); s != null; s = s.next())
-		{
-		Object e = s.first();
-		hash +=  Util.hasheq(e);
-		}
-	return hash;
+	if(_hasheq == -1){
+		int hash = 0;
+		for(ISeq s = seq(); s != null; s = s.next())
+			{
+			Object e = s.first();
+			hash +=  Util.hasheq(e);
+			}
+		this._hasheq = hash;		
+	}
+	return _hasheq;		
 }
 
 public Object[] toArray(){

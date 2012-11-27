@@ -20,6 +20,7 @@ public abstract class APersistentVector extends AFn implements IPersistentVector
                                                                RandomAccess, Comparable,
                                                                Serializable, IHashEq {
 int _hash = -1;
+int _hasheq = -1;
 
 public String toString(){
 	return RT.printString(this);
@@ -153,6 +154,7 @@ public int hashCode(){
 }
 
 public int hasheq(){
+	if(_hasheq == -1) {
 	int hash = 1;
 	Iterator i = iterator();
 	while(i.hasNext())
@@ -160,7 +162,9 @@ public int hasheq(){
 		Object obj = i.next();
 		hash = 31 * hash + Util.hasheq(obj);
 		}
-	return hash;
+	_hasheq = hash;
+	}
+	return _hasheq;
 }
 
 public Object get(int index){

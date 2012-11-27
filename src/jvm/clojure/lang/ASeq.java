@@ -15,6 +15,7 @@ import java.util.*;
 
 public abstract class ASeq extends Obj implements ISeq, Sequential, List, Serializable, IHashEq {
 transient int _hash = -1;
+transient int _hasheq = -1;
 
 public String toString(){
 	return RT.printString(this);
@@ -74,12 +75,16 @@ public int hashCode(){
 }
 
 public int hasheq(){
-	int hash = 1;
-	for(ISeq s = seq(); s != null; s = s.next())
+	if(_hasheq == -1)
 		{
-		hash = 31 * hash + Util.hasheq(s.first());
+		int hash = 1;
+		for(ISeq s = seq(); s != null; s = s.next())
+			{
+			hash = 31 * hash + Util.hasheq(s.first());
+			}
+		this._hasheq = hash;
 		}
-	return hash;
+	return _hasheq;
 }
 
 
