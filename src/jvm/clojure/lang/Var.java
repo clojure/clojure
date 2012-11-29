@@ -417,111 +417,296 @@ public Object invoke() {
 }
 
 public Object invoke(Object arg1) {
-	return fn().invoke(arg1);
+    return fn().invoke(Util.ret1(arg1,arg1=null));
 }
 
 public Object invoke(Object arg1, Object arg2) {
-	return fn().invoke(arg1, arg2);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3) {
-	return fn().invoke(arg1, arg2, arg3);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) {
-	return fn().invoke(arg1, arg2, arg3, arg4);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7)
 		{
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null),
+                       Util.ret1(arg12,arg12=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13)
 		{
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null),
+                       Util.ret1(arg12,arg12=null),
+                       Util.ret1(arg13,arg13=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14)
 		{
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null),
+                       Util.ret1(arg12,arg12=null),
+                       Util.ret1(arg13,arg13=null),
+                       Util.ret1(arg14,arg14=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null),
+                       Util.ret1(arg12,arg12=null),
+                       Util.ret1(arg13,arg13=null),
+                       Util.ret1(arg14,arg14=null),
+                       Util.ret1(arg15,arg15=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-	                   arg16);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null),
+                       Util.ret1(arg12,arg12=null),
+                       Util.ret1(arg13,arg13=null),
+                       Util.ret1(arg14,arg14=null),
+                       Util.ret1(arg15,arg15=null),
+                       Util.ret1(arg16,arg16=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-	                   arg16, arg17);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null),
+                       Util.ret1(arg12,arg12=null),
+                       Util.ret1(arg13,arg13=null),
+                       Util.ret1(arg14,arg14=null),
+                       Util.ret1(arg15,arg15=null),
+                       Util.ret1(arg16,arg16=null),
+                       Util.ret1(arg17,arg17=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-	                   arg16, arg17, arg18);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null),
+                       Util.ret1(arg12,arg12=null),
+                       Util.ret1(arg13,arg13=null),
+                       Util.ret1(arg14,arg14=null),
+                       Util.ret1(arg15,arg15=null),
+                       Util.ret1(arg16,arg16=null),
+                       Util.ret1(arg17,arg17=null),
+                       Util.ret1(arg18,arg18=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19) {
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-	                   arg16, arg17, arg18, arg19);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null),
+                       Util.ret1(arg12,arg12=null),
+                       Util.ret1(arg13,arg13=null),
+                       Util.ret1(arg14,arg14=null),
+                       Util.ret1(arg15,arg15=null),
+                       Util.ret1(arg16,arg16=null),
+                       Util.ret1(arg17,arg17=null),
+                       Util.ret1(arg18,arg18=null),
+                       Util.ret1(arg19,arg19=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20)
 		{
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-	                   arg16, arg17, arg18, arg19, arg20);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null),
+                       Util.ret1(arg12,arg12=null),
+                       Util.ret1(arg13,arg13=null),
+                       Util.ret1(arg14,arg14=null),
+                       Util.ret1(arg15,arg15=null),
+                       Util.ret1(arg16,arg16=null),
+                       Util.ret1(arg17,arg17=null),
+                       Util.ret1(arg18,arg18=null),
+                       Util.ret1(arg19,arg19=null),
+                       Util.ret1(arg20,arg20=null));
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
@@ -529,8 +714,27 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20,
                      Object... args)
 		{
-	return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-	                   arg16, arg17, arg18, arg19, arg20, args);
+    return fn().invoke(Util.ret1(arg1,arg1=null),
+                       Util.ret1(arg2,arg2=null),
+                       Util.ret1(arg3,arg3=null),
+                       Util.ret1(arg4,arg4=null),
+                       Util.ret1(arg5,arg5=null),
+                       Util.ret1(arg6,arg6=null),
+                       Util.ret1(arg7,arg7=null),
+                       Util.ret1(arg8,arg8=null),
+                       Util.ret1(arg9,arg9=null),
+                       Util.ret1(arg10,arg10=null),
+                       Util.ret1(arg11,arg11=null),
+                       Util.ret1(arg12,arg12=null),
+                       Util.ret1(arg13,arg13=null),
+                       Util.ret1(arg14,arg14=null),
+                       Util.ret1(arg15,arg15=null),
+                       Util.ret1(arg16,arg16=null),
+                       Util.ret1(arg17,arg17=null),
+                       Util.ret1(arg18,arg18=null),
+                       Util.ret1(arg19,arg19=null),
+                       Util.ret1(arg20,arg20=null),
+                       (Object[])Util.ret1(args, args=null));
 }
 
 public Object applyTo(ISeq arglist) {
