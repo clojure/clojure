@@ -116,18 +116,18 @@ static public int hash(Object o){
 	return o.hashCode();
 }
 
-static public int hasheq(Object o){
+public static int hasheq(Object o){
 	if(o == null)
 		return 0;
+	if(o instanceof IHashEq)
+		return dohasheq((IHashEq) o);	
 	if(o instanceof Number)
 		return Numbers.hasheq((Number)o);
-	else if(o instanceof IHashEq)
-		return dohasheq(o);
 	return o.hashCode();
 }
 
-public static int dohasheq(Object o) {
-	return ((IHashEq)o).hasheq();
+private static int dohasheq(IHashEq o) {
+	return o.hasheq();
 }
 
 static public int hashCombine(int seed, int hash){

@@ -21,7 +21,7 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 
 
-public class Keyword implements IFn, Comparable, Named, Serializable {
+public class Keyword implements IFn, Comparable, Named, Serializable, IHashEq {
 
 private static ConcurrentHashMap<Symbol, Reference<Keyword>> table = new ConcurrentHashMap();
 static final ReferenceQueue rq = new ReferenceQueue();
@@ -75,6 +75,10 @@ public static Keyword find(String nsname){
 }
 
 public final int hashCode(){
+	return hash;
+}
+
+public int hasheq() {
 	return hash;
 }
 

@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.io.ObjectStreamException;
 
 
-public class Symbol extends AFn implements IObj, Comparable, Named, Serializable{
+public class Symbol extends AFn implements IObj, Comparable, Named, Serializable, IHashEq{
 //these must be interned strings!
 final String ns;
 final String name;
@@ -84,6 +84,10 @@ public boolean equals(Object o){
 }
 
 public int hashCode(){
+	return hash;
+}
+
+public int hasheq() {
 	return hash;
 }
 
