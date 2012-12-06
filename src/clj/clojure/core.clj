@@ -4789,6 +4789,22 @@
   (when (instance? IExceptionInfo ex)
     (.getData ^IExceptionInfo ex)))
 
+(defn ex-message
+  "Returns the message attached to ex if ex is a Throwable.
+  Otherwise returns nil."
+  {:added "1.10"}
+  [ex]
+  (when (instance? Throwable ex)
+    (.getMessage ^Throwable ex)))
+
+(defn ex-cause
+  "Returns the cause of ex if ex is a Throwable.
+  Otherwise returns nil."
+  {:added "1.10"}
+  [ex]
+  (when (instance? Throwable ex)
+    (.getCause ^Throwable ex)))
+
 (defmacro assert
   "Evaluates expr and throws an exception if it does not evaluate to
   logical true."
