@@ -16,3 +16,21 @@
 ; ->
 ; defmacro definline macroexpand-1 macroexpand
 
+
+;; -> and ->> should not be dependent on the meaning of their arguments
+
+(defmacro c
+  [arg]
+  (if (= 'b (first arg))
+    :foo
+    :bar))
+
+(deftest ->test
+  (let [a 2, b identity]
+    (is (= (-> a b c)
+           (c (b a))))))
+
+(deftest ->>test
+  (let [a 2, b identity]
+    (is (= (->> a b c)
+           (c (b a))))))
