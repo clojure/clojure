@@ -384,7 +384,7 @@ static final class TransientArrayMap extends ATransientMap {
 			}
 		else //didn't have key, grow
 			{
-			if(len >= array.length)
+			if(len > array.length)
 				return PersistentHashMap.create(array).asTransient().assoc(key, val);
 			array[len++] = key;
 			array[len++] = val;
