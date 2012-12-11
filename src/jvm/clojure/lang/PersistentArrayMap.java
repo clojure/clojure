@@ -250,16 +250,33 @@ public int capacity(){
 	return count();
 }
 
-private int indexOf(Object key){
-	for(int i = 0; i < array.length; i += 2)
-		{
-		if(equalKey(array[i], key))
-			return i;
-		}
+private int indexOfObject(Object key){
+    Util.EquivPred ep = Util.equivPred(key);
+    for(int i = 0; i < array.length; i += 2)
+        {
+        if(ep.equiv(key, array[i]))
+            return i;
+        }
 	return -1;
 }
 
+private int indexOf(Object key){
+    if(key instanceof Keyword)
+        {
+        for(int i = 0; i < array.length; i += 2)
+            {
+            if(key == array[i])
+                return i;
+            }
+    	return -1;
+        }
+    else
+        return indexOfObject(key);
+}
+
 static boolean equalKey(Object k1, Object k2){
+    if(k1 instanceof Keyword)
+        return k1 == k2;
 	return Util.equiv(k1, k2);
 }
 
