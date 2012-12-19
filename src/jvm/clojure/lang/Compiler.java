@@ -5228,7 +5228,11 @@ public static class FnMethod extends ObjMethod{
 	}
 
 	public void doEmitPrim(ObjExpr fn, ClassVisitor cv){
-		Method ms = new Method("invokePrim", getReturnType(), argtypes);
+		Type returnType;
+		if (retClass == double.class || retClass == long.class)
+			returnType = getReturnType();
+		else returnType = OBJECT_TYPE;
+		Method ms = new Method("invokePrim", returnType, argtypes);
 
 		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_FINAL,
 		                                            ms,
