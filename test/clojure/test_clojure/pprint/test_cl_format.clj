@@ -823,3 +823,21 @@ but it was called with an argument of type short-float.\n")
 |    -2/3 |    | panda |            dog |
 "
   )
+
+(simple-tests *-at-tests
+  (format nil "~*~c defaults to ~D, so ~~@* goes ~A to the ~@*~A arg."
+          'first \n 0 'back)
+  "n defaults to 0, so ~@* goes back to the first arg."
+  (format nil "~~n@* is an ~1@*~A ~0@*~A rather than a ~2@*~A ~0@*~A."
+             'goto 'absolute 'relative)
+  "~n@* is an absolute goto rather than a relative goto."
+  (format nil "We will see no numbers: ~6@*~S"
+             0 1 2 3 4 5 :see?) "We will see no numbers: :see?"
+  (format nil "~4@*~D ~3@*~D ~2@*~D ~1@*~D ~0@*~D"
+             0 1 2 3 4) "4 3 2 1 0"
+  (format nil "~{~A a ~~{ ~3@*~A, the ~1@*~A is ~A to the ~4@*~A of ~A~}[...]"
+            '("Within" goto relative construct list arguments))
+  "Within a ~{ construct, the goto is relative to the list of arguments[...]"
+  (format nil "~{~2@*~S ~1@*~S ~4@*~S ~3@*~S ~S~}"
+          '(:a :b :c :d :e)) ":c :b :e :d :e"
+          )

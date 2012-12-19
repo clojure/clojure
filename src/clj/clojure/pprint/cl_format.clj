@@ -111,7 +111,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
 
 (defn- absolute-reposition [navigator position]
   (if (>= position (:pos navigator))
-    (relative-reposition navigator (- (:pos navigator) position))
+    (relative-reposition navigator (- position (:pos navigator)))
     (struct arg-navigator (:seq navigator) (drop position (:seq navigator)) position)))
 
 (defn- relative-reposition [navigator position]
@@ -1471,14 +1471,15 @@ not a pretty writer (which keeps track of columns), this function always outputs
      #(absolute-tabulation %1 %2 %3)))
 
   (\* 
-   [ :n [1 Integer] ] 
+   [ :n [nil Integer] ] 
    #{ :colon :at } {}
-   (fn [params navigator offsets]
-     (let [n (:n params)]
-       (if (:at params)
-         (absolute-reposition navigator n)
-         (relative-reposition navigator (if (:colon params) (- n) n)))
-       )))
+   (if (:at params)
+     (fn [params navigator offsets]
+       (let [n (or (:n params) 0)] ; ~@* has a default n = 0
+         (absolute-reposition navigator n)))
+     (fn [params navigator offsets]
+       (let [n (or (:n params) 1)] ; whereas ~* and ~:* have a default n = 1
+         (relative-reposition navigator (if (:colon params) (- n) n))))))
 
   (\? 
    [ ] 
