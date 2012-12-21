@@ -2103,6 +2103,14 @@
       (.setMinHistory r (:min-history opts)))
     r)))
 
+(defn ^:private deref-future
+  ([^java.util.concurrent.Future fut]
+     (.get fut))
+  ([^java.util.concurrent.Future fut timeout-ms timeout-val]
+     (try (.get fut timeout-ms java.util.concurrent.TimeUnit/MILLISECONDS)
+          (catch java.util.concurrent.TimeoutException e
+            timeout-val))))
+     
 (defn deref
   "Also reader macro: @ref/@agent/@var/@atom/@delay/@future/@promise. Within a transaction,
   returns the in-transaction-value of ref, else returns the
@@ -2116,8 +2124,13 @@
   value is available. See also - realized?."
   {:added "1.0"
    :static true}
-  ([^clojure.lang.IDeref ref] (.deref ref))
-  ([^clojure.lang.IBlockingDeref ref timeout-ms timeout-val] (.deref ref timeout-ms timeout-val)))
+  ([ref] (if (instance? clojure.lang.IDeref ref)
+           (.deref ^clojure.lang.IDeref ref)
+           (deref-future ref)))
+  ([ref timeout-ms timeout-val]
+     (if (instance? clojure.lang.IBlockingDeref ref)
+       (.deref ^clojure.lang.IBlockingDeref ref timeout-ms timeout-val)
+       (deref-future ref timeout-ms timeout-val))))
 
 (defn atom
   "Creates and returns an Atom with an initial value of x and zero or
@@ -6259,13 +6272,11 @@
         fut (.submit clojure.lang.Agent/soloExecutor ^Callable f)]
     (reify 
      clojure.lang.IDeref 
-     (deref [_] (.get fut))
+     (deref [_] (deref-future fut))
      clojure.lang.IBlockingDeref
      (deref
       [_ timeout-ms timeout-val]
-      (try (.get fut timeout-ms java.util.concurrent.TimeUnit/MILLISECONDS)
-           (catch java.util.concurrent.TimeoutException e
-             timeout-val)))
+      (deref-future fut timeout-ms timeout-val))
      clojure.lang.IPending
      (isRealized [_] (.isDone fut))
      java.util.concurrent.Future
