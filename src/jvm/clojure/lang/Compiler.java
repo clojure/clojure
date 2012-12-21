@@ -458,7 +458,7 @@ static class DefExpr implements Expr{
 				{
                 IPersistentMap metaMap = (IPersistentMap) meta.eval();
                 if (initProvided || true)//includesExplicitMetadata((MapExpr) meta))
-				    var.setMeta((IPersistentMap) meta.eval());
+				    var.setMeta(metaMap);
 				}
 			return var.setDynamic(isDynamic);
 			}
