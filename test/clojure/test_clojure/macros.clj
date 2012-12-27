@@ -34,3 +34,36 @@
   (let [a 2, b identity]
     (is (= (->> a b c)
            (c (b a))))))
+
+(deftest ->metadata-test
+  (testing "a trivial form"
+    (is (= {:hardy :har :har :-D}
+           (meta (macroexpand-1 (list `-> (with-meta
+                                            'quoted-symbol
+                                            {:hardy :har :har :-D})))))))
+  (testing "a nontrivial form"
+    (let [a (with-meta 'a {:foo :bar})
+          b (with-meta '(b c d) {:bar :baz})
+          e (with-meta 'e {:baz :quux})
+          expanded (macroexpand-1 (list `-> a b e))]
+      (is (= expanded '(e (b a c d))))
+      (is (= {:baz :quux} (meta (first expanded))))
+      (is (= {:bar :baz} (meta (second expanded))))
+      (is (= {:foo :bar} (meta (second (second expanded))))))))
+
+
+(deftest ->>metadata-test
+  (testing "a trivial form"
+    (is (= {:hardy :har :har :-D}
+           (meta (macroexpand-1 (list `->> (with-meta
+                                             'quoted-symbol
+                                             {:hardy :har :har :-D})))))))
+  (testing "a non-trivial form"
+    (let [a (with-meta 'a {:foo :bar})
+          b (with-meta '(b c d) {:bar :baz})
+          e (with-meta 'e {:baz :quux})
+          expanded (macroexpand-1 (list `->> a b e))]
+      (is (= expanded '(e (b c d a))))
+      (is (= {:baz :quux} (meta (first expanded))))
+      (is (= {:bar :baz} (meta (second expanded))))
+      (is (= {:foo :bar} (meta (last (second expanded))))))))
