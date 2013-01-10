@@ -5210,7 +5210,7 @@
   supported. The :gen-class directive is ignored when not
   compiling. If :gen-class is not supplied, when compiled only an
   nsname__init.class will be generated. If :refer-clojure is not used, a
-  default (refer 'clojure) is used.  Use of ns is preferred to
+  default (refer 'clojure.core) is used.  Use of ns is preferred to
   individual calls to in-ns/require/use/import:
 
   (ns foo.bar
