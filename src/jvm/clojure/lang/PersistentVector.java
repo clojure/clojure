@@ -19,11 +19,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PersistentVector extends APersistentVector implements IObj, IEditableCollection{
 
-static class Node implements Serializable {
-	transient final AtomicReference<Thread> edit;
-	final Object[] array;
+public static class Node implements Serializable {
+	transient public final AtomicReference<Thread> edit;
+	public final Object[] array;
 
-	Node(AtomicReference<Thread> edit, Object[] array){
+	public Node(AtomicReference<Thread> edit, Object[] array){
 		this.edit = edit;
 		this.array = array;
 	}
@@ -35,12 +35,12 @@ static class Node implements Serializable {
 }
 
 final static AtomicReference<Thread> NOEDIT = new AtomicReference<Thread>(null);
-final static Node EMPTY_NODE = new Node(NOEDIT, new Object[32]);
+public final static Node EMPTY_NODE = new Node(NOEDIT, new Object[32]);
 
 final int cnt;
-final int shift;
-final Node root;
-final Object[] tail;
+public final int shift;
+public final Node root;
+public final Object[] tail;
 final IPersistentMap _meta;
 
 

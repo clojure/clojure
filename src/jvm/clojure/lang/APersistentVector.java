@@ -502,9 +502,9 @@ public static class RSeq extends ASeq implements IndexedSeq, Counted{
 }
 
 static class SubVector extends APersistentVector implements IObj{
-	final IPersistentVector v;
-	final int start;
-	final int end;
+	public final IPersistentVector v;
+	public final int start;
+	public final int end;
 	final IPersistentMap _meta;
 
 
