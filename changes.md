@@ -25,6 +25,7 @@
  4 Improved error messages
  5 Improved documentation strings
  6 Bug Fixes
+ 7 Binary Compatibility Notes
 </pre>
 
 ## 1 Deprecated and Removed Features
@@ -436,7 +437,12 @@ their input collections.
 * [CLJ-1085](http://dev.clojure.org/jira/browse/CLJ-1085) clojure.main/repl unconditionally refers REPL utilities into `*ns*`
 * (no ticket) Rich Hickey fix: syntax-quote was walking records, returning maps
 
+## 7 Binary Compatibility Notes
 
+* `public static inner class LispReader.ReaderException(int line, Throwable cause)`
+  Constructor changed to `ReaderException(int line, int column, Throwable cause)`
+* `public Object clojure.lang.Agent.dispatch(IFn fn, ISeq args, boolean solo)`
+  Replaced with `dispatch(IFn fn, ISeq args, Executor exec)`
 
 # Changes to Clojure in Version 1.4
 
