@@ -44,6 +44,7 @@ static final Symbol LET = Symbol.intern("let*");
 static final Symbol LETFN = Symbol.intern("letfn*");
 static final Symbol DO = Symbol.intern("do");
 static final Symbol FN = Symbol.intern("fn*");
+static final Symbol FNONCE = (Symbol) Symbol.intern("fn*").withMeta(RT.map(Keyword.intern(null, "once"), RT.T));
 static final Symbol QUOTE = Symbol.intern("quote");
 static final Symbol THE_VAR = Symbol.intern("var");
 static final Symbol DOT = Symbol.intern(".");
@@ -2123,7 +2124,7 @@ public static class TryExpr implements Expr{
 			ISeq form = (ISeq) frm;
 //			if(context == C.EVAL || context == C.EXPRESSION)
 			if(context != C.RETURN)
-				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+				return analyze(context, RT.list(RT.list(FNONCE, PersistentVector.EMPTY, form)));
 
 			//(try try-expr* catch-expr* finally-expr?)
 			//catch-expr: (catch class sym expr*)
@@ -2299,7 +2300,7 @@ static class ThrowExpr extends UntypedExpr{
 	static class Parser implements IParser{
 		public Expr parse(C context, Object form) {
 			if(context == C.EVAL)
-				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+				return analyze(context, RT.list(RT.list(FNONCE, PersistentVector.EMPTY, form)));
 			return new ThrowExpr(analyze(C.EXPRESSION, RT.second(form)));
 		}
 	}
@@ -5805,7 +5806,7 @@ public static class LetFnExpr implements Expr{
 			ISeq body = RT.next(RT.next(form));
 
 			if(context == C.EVAL)
-				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+				return analyze(context, RT.list(RT.list(FNONCE, PersistentVector.EMPTY, form)));
 
 			IPersistentMap dynamicBindings = RT.map(LOCAL_ENV, LOCAL_ENV.deref(),
 			                                        NEXT_LOCAL_NUM, NEXT_LOCAL_NUM.deref());
@@ -5934,7 +5935,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 
 			if(context == C.EVAL
 			   || (context == C.EXPRESSION && isLoop))
-				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+				return analyze(context, RT.list(RT.list(FNONCE, PersistentVector.EMPTY, form)));
 
 			ObjMethod method = (ObjMethod) METHOD.deref();
 			IPersistentMap backupMethodLocals = method.locals;
@@ -8366,7 +8367,7 @@ public static class CaseExpr implements Expr, MaybePrimitiveExpr{
 		public Expr parse(C context, Object frm) {
 			ISeq form = (ISeq) frm;
 			if(context == C.EVAL)
-				return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+				return analyze(context, RT.list(RT.list(FNONCE, PersistentVector.EMPTY, form)));
 			PersistentVector args = PersistentVector.create(form.next());
 
 			Object exprForm = args.nth(0);

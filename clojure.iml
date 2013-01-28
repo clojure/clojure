@@ -18,7 +18,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.codehaus.jsr166-mirror:jsr166y:1.7.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.clojure:test.generative:0.1.9" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.clojure:test.generative:0.2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.clojure:tools.namespace:0.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.clojure:java.classpath:0.1.1" level="project" />
   </component>
