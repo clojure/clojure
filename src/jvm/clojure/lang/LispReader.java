@@ -1054,7 +1054,7 @@ public static class EvalReader extends AFn{
 			Class c = (Class) primclasses.valAt(s);
 			if(c != null)
 				return c;
-			return RT.classForName(s);
+			return RT.classForNameNonLoading(s);
 			}
 		else if(o instanceof IPersistentList)
 			{

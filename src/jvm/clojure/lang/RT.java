@@ -2073,6 +2073,17 @@ static public Class classForName(String name) {
 		}
 }
 
+static Class classForNameNonLoading(String name) {
+	try
+		{
+		return Class.forName(name, false, baseLoader());
+		}
+	catch(ClassNotFoundException e)
+		{
+		throw Util.sneakyThrow(e);
+		}
+}
+
 static public Class loadClassForName(String name) throws ClassNotFoundException{
 	try
 		{
