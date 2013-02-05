@@ -187,8 +187,7 @@ final static public Var READEVAL = Var.intern(CLOJURE_NS, Symbol.intern("*read-e
 final static public Var READWHITELIST = Var.intern(CLOJURE_NS, Symbol.intern("*read-whitelist*"),
                                                    RT.vector(java.lang.Number.class,
                                                           java.util.Collection.class,
-                                                          java.util.Map.class,
-                                                          clojure.lang.Fn.class)).setDynamic();
+                                                          java.util.Map.class)).setDynamic();
 final static public Var DATA_READERS = Var.intern(CLOJURE_NS, Symbol.intern("*data-readers*"), RT.map()).setDynamic();
 final static public Var DEFAULT_DATA_READER_FN = Var.intern(CLOJURE_NS, Symbol.intern("*default-data-reader-fn*"), RT.map()).setDynamic();
 final static public Var DEFAULT_DATA_READERS = Var.intern(CLOJURE_NS, Symbol.intern("default-data-readers"), RT.map());

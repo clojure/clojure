@@ -5918,7 +5918,7 @@
   reading of static methods and constructors of derivees of the
   *read-whitelist* is alowed.
 
-  Defaults to [java.util.Map, java.util.Collection, java.lang.Number, clojure.lang.Fn]"
+  Defaults to [java.util.Map, java.util.Collection, java.lang.Number]"
 
   {:added "1.5"})
 

@@ -1077,7 +1077,7 @@ public static class EvalReader extends AFn{
 			if(fs.name.endsWith("."))
 				{
 				Class c = RT.classForName(fs.name.substring(0, fs.name.length() - 1));
-				if(readeval || onWhiteList(c))
+				if(readeval || onWhiteList(c) || clojure.lang.Fn.class.isAssignableFrom(c))
 					{
 					Object[] args = RT.toArray(RT.next(o));
 					return Reflector.invokeConstructor(c, args);
