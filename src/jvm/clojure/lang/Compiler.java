@@ -7043,6 +7043,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) {
 			       LOCAL_ENV, null,
 					LOOP_LOCALS, null,
 					NEXT_LOCAL_NUM, 0,
+					RT.READEVAL, RT.T,
 			       RT.CURRENT_NS, RT.CURRENT_NS.deref(),
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
 			       COLUMN_BEFORE, pushbackReader.getColumnNumber(),

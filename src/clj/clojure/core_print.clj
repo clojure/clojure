@@ -360,7 +360,7 @@
 (defmethod print-dup java.util.regex.Pattern [p ^Writer w] (print-method p w))
 
 (defmethod print-dup clojure.lang.Namespace [^clojure.lang.Namespace n ^Writer w]
-  (.write w "#=(clojure.lang.Namespace/find ")
+  (.write w "#=(find-ns ")
   (print-dup (.name n) w)
   (.write w ")"))
 

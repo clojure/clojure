@@ -3389,7 +3389,13 @@
 (defn read
   "Reads the next object from stream, which must be an instance of
   java.io.PushbackReader or some derivee.  stream defaults to the
-  current value of *in* ."
+  current value of *in*.
+
+  In the :default mode, governed by *read-eval*, reading of class objects,
+  vars, namespaces are allowed, as well as static methods and
+  constructors of derivees of the *read-whitelist*
+
+  See also - safe-read"
   {:added "1.0"
    :static true}
   ([]
@@ -3399,7 +3405,14 @@
   ([stream eof-error? eof-value]
    (read stream eof-error? eof-value false))
   ([stream eof-error? eof-value recursive?]
-   (. clojure.lang.LispReader (read stream (boolean eof-error?) eof-value recursive?))))
+     (. clojure.lang.LispReader (read stream (boolean eof-error?) eof-value recursive?))))
+
+(defn safe-read
+  "Same as read, with *read-eval* bound to false"
+  {:added "1.5"}
+  [& args]
+  (binding [*read-eval* false]
+    (apply read args)))
 
 (defn read-line
   "Reads the next line from stream that is the current value of *in* ."
@@ -3411,10 +3424,23 @@
     (.readLine ^java.io.BufferedReader *in*)))
 
 (defn read-string
-  "Reads one object from the string s"
+  "Reads one object from the string s.
+
+  In the :default mode, governed by *read-eval*, reading of class objects,
+  vars, namespaces are allowed, as well as static methods and
+  constructors of derivees of the *read-whitelist*
+
+  See also - safe-read-string"
   {:added "1.0"
    :static true}
   [s] (clojure.lang.RT/readString s))
+
+(defn safe-read-string
+  "Same as read-string, with *read-eval* bound to false"
+  {:added "1.5"}
+  [s]
+  (binding [*read-eval* false]
+    (read-string s)))
 
 (defn subvec
   "Returns a persistent vector of the items in vector from
@@ -5871,13 +5897,28 @@
   {:added "1.0"})
 
 (add-doc-and-meta *read-eval*
-  "When set to logical true in the thread-local binding, the eval
-  reader (#=(...)) for arbitrary expressions is enabled in read/load.
+  "When set to logical false in the thread-local binding, #= reading is disabled.
   Example:
-  (binding [*read-eval* true] (read-string \"#=(* 2 21)\"))
+  (binding [*read-eval* false] (read-string \"#=(not allowed)\"))
 
-  Defaults to false"
+  Defaults to :default
+
+  In :default mode, reading of class objects, vars, namespaces are allowed, as well as
+  static methods and constructors of derivees of the *read-whitelist*.
+
+  When set to true in the thread-local binding, the eval
+  reader (#=(...)) for arbitrary expressions is enabled in read/load.
+  "
   {:added "1.0"})
+
+(add-doc-and-meta *read-whitelist*
+  "In the reader's :default *read-eval* mode,
+  reading of static methods and constructors of derivees of the
+  *read-whitelist* is alowed.
+
+  Defaults to [java.util.Map, java.util.Collection, java.lang.Number, clojure.lang.Fn]"
+
+  {:added "1.5"})
 
 (defn future?
   "Returns true if x is a future"

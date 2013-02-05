@@ -38,6 +38,7 @@ public class LispReader{
 
 static final Symbol QUOTE = Symbol.intern("quote");
 static final Symbol THE_VAR = Symbol.intern("var");
+static final Symbol FIND_NS = Symbol.intern("find-ns");
 //static Symbol SYNTAX_QUOTE = Symbol.intern(null, "syntax-quote");
 static Symbol UNQUOTE = Symbol.intern("clojure.core", "unquote");
 static Symbol UNQUOTE_SPLICING = Symbol.intern("clojure.core", "unquote-splicing");
@@ -1044,8 +1045,12 @@ static boolean onWhiteList(Class c){
 
 public static class EvalReader extends AFn{
 	public Object invoke(Object reader, Object eq) {
-		boolean readeval = RT.booleanCast(RT.READEVAL.deref());
-
+		Object rawreadeval = RT.READEVAL.deref();
+		if (!RT.booleanCast(rawreadeval))
+			{
+			throw Util.runtimeException("eval reading not allowed when *read-eval* is false.");
+			}
+		Boolean readeval = (rawreadeval == RT.T);
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
 		if(o instanceof Symbol || o instanceof String)
@@ -1064,6 +1069,11 @@ public static class EvalReader extends AFn{
 				Symbol vs = (Symbol) RT.second(o);
 				return RT.var(vs.ns, vs.name);  //Compiler.resolve((Symbol) RT.second(o),true);
 				}
+			if(fs.equals(FIND_NS))
+				{
+				Symbol sym = (Symbol) RT.second(o);
+				return Namespace.find(sym);
+				}
 			if(fs.name.endsWith("."))
 				{
 				Class c = RT.classForName(fs.name.substring(0, fs.name.length() - 1));
@@ -1072,7 +1082,7 @@ public static class EvalReader extends AFn{
 					Object[] args = RT.toArray(RT.next(o));
 					return Reflector.invokeConstructor(c, args);
 					}
-				throw Util.runtimeException("eval reading not allowed when *read-eval* is false.");
+				throw Util.runtimeException("eval reading not allowed.");
 				}
 			if(Compiler.namesStaticMember(fs))
 				{
@@ -1083,7 +1093,7 @@ public static class EvalReader extends AFn{
 					Object[] args = RT.toArray(RT.next(o));
 					return Reflector.invokeStaticMethod(c, fs.name, args);
 					}
-				throw Util.runtimeException("eval reading not allowed when *read-eval* is false.");
+				throw Util.runtimeException("eval reading not allowed.");
 				}
 			if(readeval)
 				{
@@ -1094,7 +1104,7 @@ public static class EvalReader extends AFn{
 					}
 				throw Util.runtimeException("Can't resolve " + fs);
 				}
-			throw Util.runtimeException("eval reading not allowed when *read-eval* is false.");
+			throw Util.runtimeException("eval reading not allowed.");
 			}
 		else
 			throw new IllegalArgumentException("Unsupported #= form");
@@ -1227,7 +1237,14 @@ public static class CtorReader extends AFn{
 	}
 
         private Object readRecord(PushbackReader r, Symbol recordName){
-		Class recordClass = RT.classForName(recordName.toString());
+		Class recordClass = RT.classForNameNonLoading(recordName.toString());
+        boolean readeval = (RT.READEVAL.deref() == RT.T);
+
+	    if(!readeval && !clojure.lang.IRecord.class.isAssignableFrom(recordClass))
+		    {
+		    throw Util.runtimeException("Record construction syntax can only be used for records, unless *read-eval* == true");
+		    }
+
 		char endch;
 		boolean shortForm = true;
 		int ch = read1(r);
