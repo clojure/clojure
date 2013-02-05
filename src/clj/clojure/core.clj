@@ -3391,11 +3391,10 @@
   java.io.PushbackReader or some derivee.  stream defaults to the
   current value of *in*.
 
-  In the :default mode, governed by *read-eval*, reading of class objects,
-  vars, namespaces are allowed, as well as static methods and
-  constructors of derivees of the *read-whitelist*
+  Note that read can execute code (controlled by *read-eval*),
+  and as such should be used only with trusted sources.
 
-  See also - safe-read"
+  For data structure interop use read-edn"
   {:added "1.0"
    :static true}
   ([]
@@ -3405,14 +3404,24 @@
   ([stream eof-error? eof-value]
    (read stream eof-error? eof-value false))
   ([stream eof-error? eof-value recursive?]
-     (. clojure.lang.LispReader (read stream (boolean eof-error?) eof-value recursive?))))
+   (. clojure.lang.LispReader (read stream (boolean eof-error?) eof-value recursive?))))
 
-(defn safe-read
-  "Same as read, with *read-eval* bound to false"
+(defn read-edn
+  "Reads the next object from stream, which must be an instance of
+  java.io.PushbackReader or some derivee.  stream defaults to the
+  current value of *in*.
+
+  Reads data in the edn format (subset of Clojure data):
+  http://edn-format.org"
   {:added "1.5"}
-  [& args]
-  (binding [*read-eval* false]
-    (apply read args)))
+  ([]
+   (read *in*))
+  ([stream]
+   (read stream true nil))
+  ([stream eof-error? eof-value]
+   (read stream eof-error? eof-value false))
+  ([stream eof-error? eof-value recursive?]
+     (. clojure.lang.EdnReader (read stream (boolean eof-error?) eof-value recursive?))))
 
 (defn read-line
   "Reads the next line from stream that is the current value of *in* ."
@@ -3426,23 +3435,21 @@
 (defn read-string
   "Reads one object from the string s.
 
-  In the :default mode, governed by *read-eval*, reading of class objects,
-  vars, namespaces are allowed, as well as static methods and
-  constructors of derivees of the *read-whitelist*
+  Note that read-string can execute code (controlled by *read-eval*),
+  and as such should be used only with trusted sources.
 
-  Returns nil when string is nil or empty.
-
-  See also - safe-read-string"
+  For data structure interop use read-edn-string"
   {:added "1.0"
    :static true}
-  [^String s] (when (pos? (count s)) (clojure.lang.RT/readString s)))
+  [s] (clojure.lang.RT/readString s))
 
-(defn safe-read-string
-  "Same as read-string, with *read-eval* bound to false"
+(defn read-edn-string
+  "Reads one object from the string s. Returns nil when s is nil or empty.
+
+  Reads data in the edn format (subset of Clojure data):
+  http://edn-format.org"
   {:added "1.5"}
-  [s]
-  (binding [*read-eval* false]
-    (read-string s)))
+  [s] (when (pos? (count s)) (clojure.lang.EdnReader/readString s)))
 
 (defn subvec
   "Returns a persistent vector of the items in vector from
@@ -5899,28 +5906,12 @@
   {:added "1.0"})
 
 (add-doc-and-meta *read-eval*
-  "When set to logical false in the thread-local binding, #= reading is disabled.
-  Example:
-  (binding [*read-eval* false] (read-string \"#=(not allowed)\"))
+  "When set to logical false in the thread-local binding,
+  the eval reader (#=(...)) is disabled in read/load.
+  Example: (binding [*read-eval* false] (read-string \"#=(eval (def x 3))\"))
 
-  Defaults to :default
-
-  In :default mode, reading of class objects, vars, namespaces are allowed, as well as
-  static methods and constructors of derivees of the *read-whitelist*.
-
-  When set to true in the thread-local binding, the eval
-  reader (#=(...)) for arbitrary expressions is enabled in read/load.
-  "
+  Defaults to true"
   {:added "1.0"})
-
-(add-doc-and-meta *read-whitelist*
-  "In the reader's :default *read-eval* mode,
-  reading of static methods and constructors of derivees of the
-  *read-whitelist* is alowed.
-
-  Defaults to [java.util.Map, java.util.Collection, java.lang.Number]"
-
-  {:added "1.5"})
 
 (defn future?
   "Returns true if x is a future"

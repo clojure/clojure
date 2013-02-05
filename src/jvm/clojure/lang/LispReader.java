@@ -30,7 +30,9 @@ import java.lang.UnsupportedOperationException;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,7 +40,6 @@ public class LispReader{
 
 static final Symbol QUOTE = Symbol.intern("quote");
 static final Symbol THE_VAR = Symbol.intern("var");
-static final Symbol FIND_NS = Symbol.intern("find-ns");
 //static Symbol SYNTAX_QUOTE = Symbol.intern(null, "syntax-quote");
 static Symbol UNQUOTE = Symbol.intern("clojure.core", "unquote");
 static Symbol UNQUOTE_SPLICING = Symbol.intern("clojure.core", "unquote-splicing");
@@ -78,7 +79,7 @@ static Var GENSYM_ENV = Var.create(null).setDynamic();
 static Var ARG_ENV = Var.create(null).setDynamic();
 static IFn ctorReader = new CtorReader();
 
-    static
+static
 	{
 	macros['"'] = new StringReader();
 	macros[';'] = new CommentReader();
@@ -149,7 +150,7 @@ static public int read1(Reader r){
 }
 
 static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
-		{
+{
 
 	try
 		{
@@ -343,10 +344,10 @@ private static Object matchSymbol(String s){
 			else
 				kns = Compiler.currentNS();
 			//auto-resolving keyword
-            if (kns != null)
-			    return Keyword.intern(kns.name.name,ks.name);
-            else
-                return null;    
+			if (kns != null)
+				return Keyword.intern(kns.name.name,ks.name);
+			else
+				return null;
 			}
 		boolean isKeyword = s.charAt(0) == ':';
 		Symbol sym = Symbol.intern(s.substring(isKeyword ? 1 : 0));
@@ -387,8 +388,8 @@ private static Object matchNumber(String s){
 		if(m.group(8) != null)
 			return BigInt.fromBigInteger(bn);
 		return bn.bitLength() < 64 ?
-		        Numbers.num(bn.longValue())
-				: BigInt.fromBigInteger(bn);
+		       Numbers.num(bn.longValue())
+		                           : BigInt.fromBigInteger(bn);
 		}
 	m = floatPat.matcher(s);
 	if(m.matches())
@@ -400,10 +401,10 @@ private static Object matchNumber(String s){
 	m = ratioPat.matcher(s);
 	if(m.matches())
 		{
-            String numerator = m.group(1);
-            if (numerator.startsWith("+")) numerator = numerator.substring(1);
+		String numerator = m.group(1);
+		if (numerator.startsWith("+")) numerator = numerator.substring(1);
 
-            return Numbers.divide(Numbers.reduceBigInt(BigInt.fromBigInteger(new BigInteger(numerator))),
+		return Numbers.divide(Numbers.reduceBigInt(BigInt.fromBigInteger(new BigInteger(numerator))),
 		                      Numbers.reduceBigInt(BigInt.fromBigInteger(new BigInteger(m.group(2)))));
 		}
 	return null;
@@ -485,7 +486,7 @@ public static class StringReader extends AFn{
 					{
 					ch = read1(r);
 					if (Character.digit(ch, 16) == -1)
-					    throw Util.runtimeException("Invalid unicode escape: \\u" + (char) ch);
+						throw Util.runtimeException("Invalid unicode escape: \\u" + (char) ch);
 					ch = readUnicodeChar((PushbackReader) r, ch, 16, 4, true);
 					break;
 					}
@@ -546,17 +547,17 @@ public static class WrappingReader extends AFn{
 
 public static class DeprecatedWrappingReader extends AFn{
 	final Symbol sym;
-        final String macro;
+	final String macro;
 
 	public DeprecatedWrappingReader(Symbol sym, String macro){
 		this.sym = sym;
-                this.macro = macro;
+		this.macro = macro;
 	}
 
 	public Object invoke(Object reader, Object quote) {
-                System.out.println("WARNING: reader macro " + macro +
-                                   " is deprecated; use " + sym.getName() +
-                                   " instead");
+		System.out.println("WARNING: reader macro " + macro +
+		                   " is deprecated; use " + sym.getName() +
+		                   " instead");
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
 		return RT.list(sym, o);
@@ -611,13 +612,13 @@ public static class DispatchReader extends AFn{
 
 		// Try the ctor reader first
 		if(fn == null) {
-			unread((PushbackReader) reader, ch);
-			Object result = ctorReader.invoke(reader, ch);
+		unread((PushbackReader) reader, ch);
+		Object result = ctorReader.invoke(reader, ch);
 
-			if(result != null)
-				return result;
-			else
-				throw Util.runtimeException(String.format("No dispatch macro for: %c", (char) ch));
+		if(result != null)
+			return result;
+		else
+			throw Util.runtimeException(String.format("No dispatch macro for: %c", (char) ch));
 		}
 		return fn.invoke(reader, ch);
 	}
@@ -715,10 +716,10 @@ public static class MetaReader extends AFn{
 		int line = -1;
 		int column = -1;
 		if(r instanceof LineNumberingPushbackReader)
-      {
+			{
 			line = ((LineNumberingPushbackReader) r).getLineNumber();
 			column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
-      }
+			}
 		Object meta = read(r, true, null, true);
 		if(meta instanceof Symbol || meta instanceof String)
 			meta = RT.map(RT.TAG_KEY, meta);
@@ -731,9 +732,9 @@ public static class MetaReader extends AFn{
 		if(o instanceof IMeta)
 			{
 			if(line != -1 && o instanceof ISeq)
-        {
+				{
 				meta = ((IPersistentMap) meta).assoc(RT.LINE_KEY, line).assoc(RT.COLUMN_KEY, column);
-        }
+				}
 			if(o instanceof IReference)
 				{
 				((IReference)o).resetMeta((IPersistentMap) meta);
@@ -741,9 +742,9 @@ public static class MetaReader extends AFn{
 				}
 			Object ometa = RT.meta(o);
 			for(ISeq s = RT.seq(meta); s != null; s = s.next()) {
-				IMapEntry kv = (IMapEntry) s.first();
-				ometa = RT.assoc(ometa, kv.getKey(), kv.getValue());
-				}
+			IMapEntry kv = (IMapEntry) s.first();
+			ometa = RT.assoc(ometa, kv.getKey(), kv.getValue());
+			}
 			return ((IObj) o).withMeta((IPersistentMap) ometa);
 			}
 		else
@@ -797,21 +798,21 @@ public static class SyntaxQuoteReader extends AFn{
 			else if(sym.ns == null && sym.name.startsWith("."))
 				{
 				// Simply quote method names.
- 				}
-            else
+				}
+			else
 				{
-					Object maybeClass = null;
-					if(sym.ns != null)
-						maybeClass = Compiler.currentNS().getMapping(
-								Symbol.intern(null, sym.ns));
-					if(maybeClass instanceof Class)
-						{
-						// Classname/foo -> package.qualified.Classname/foo
-						sym = Symbol.intern(
-								((Class)maybeClass).getName(), sym.name);
-						}
-					else
-						sym = Compiler.resolveSymbol(sym);
+				Object maybeClass = null;
+				if(sym.ns != null)
+					maybeClass = Compiler.currentNS().getMapping(
+							Symbol.intern(null, sym.ns));
+				if(maybeClass instanceof Class)
+					{
+					// Classname/foo -> package.qualified.Classname/foo
+					sym = Symbol.intern(
+							((Class)maybeClass).getName(), sym.name);
+					}
+				else
+					sym = Compiler.resolveSymbol(sym);
 				}
 			ret = RT.list(Compiler.QUOTE, sym);
 			}
@@ -826,23 +827,23 @@ public static class SyntaxQuoteReader extends AFn{
 			else if(form instanceof IPersistentMap)
 				{
 				IPersistentVector keyvals = flattenMap(form);
-                ret = RT.list(APPLY, HASHMAP, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(keyvals.seq()))));
+				ret = RT.list(APPLY, HASHMAP, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(keyvals.seq()))));
 				}
 			else if(form instanceof IPersistentVector)
-                {
-                ret = RT.list(APPLY, VECTOR, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(((IPersistentVector) form).seq()))));
-                }
+				{
+				ret = RT.list(APPLY, VECTOR, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(((IPersistentVector) form).seq()))));
+				}
 			else if(form instanceof IPersistentSet)
-                    {
-                    ret = RT.list(APPLY, HASHSET, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(((IPersistentSet) form).seq()))));
-                    }
+				{
+				ret = RT.list(APPLY, HASHSET, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(((IPersistentSet) form).seq()))));
+				}
 			else if(form instanceof ISeq || form instanceof IPersistentList)
 				{
 				ISeq seq = RT.seq(form);
-                if(seq == null)
-                    ret = RT.cons(LIST,null);
-                else
-                    ret = RT.list(SEQ, RT.cons(CONCAT, sqExpandList(seq)));
+				if(seq == null)
+					ret = RT.cons(LIST,null);
+				else
+					ret = RT.list(SEQ, RT.cons(CONCAT, sqExpandList(seq)));
 				}
 			else
 				throw new UnsupportedOperationException("Unknown Collection type");
@@ -944,12 +945,12 @@ public static class CharacterReader extends AFn{
 		else if(token.equals("return"))
 			return '\r';
 		else if(token.startsWith("u"))
-		    {
-			 char c = (char) readUnicodeChar(token, 1, 4, 16);
-			 if(c >= '\uD800' && c <= '\uDFFF') // surrogate code unit?
-			     throw Util.runtimeException("Invalid character constant: \\u" + Integer.toString(c, 16));
-			 return c;
-		    }
+			{
+			char c = (char) readUnicodeChar(token, 1, 4, 16);
+			if(c >= '\uD800' && c <= '\uDFFF') // surrogate code unit?
+				throw Util.runtimeException("Invalid character constant: \\u" + Integer.toString(c, 16));
+			return c;
+			}
 		else if(token.startsWith("o"))
 			{
 			int len = token.length() - 1;
@@ -969,21 +970,21 @@ public static class ListReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) {
 		PushbackReader r = (PushbackReader) reader;
 		int line = -1;
-    int column = -1;
+		int column = -1;
 		if(r instanceof LineNumberingPushbackReader)
-      {
+			{
 			line = ((LineNumberingPushbackReader) r).getLineNumber();
 			column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
-      }
+			}
 		List list = readDelimitedList(')', r, true);
 		if(list.isEmpty())
 			return PersistentList.EMPTY;
 		IObj s = (IObj) PersistentList.create(list);
 //		IObj s = (IObj) RT.seq(list);
 		if(line != -1)
-      {
+			{
 			return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));
-      }
+			}
 		else
 			return s;
 	}
@@ -1022,44 +1023,18 @@ static class CtorReader extends AFn{
 }
 */
 
-static IPersistentMap primclasses = RT.map("int", int.class,
-                                "long", long.class,
-                                "float", float.class,
-                                "double", double.class,
-                                "char", char.class,
-                                "boolean", boolean.class,
-                                "short", short.class,
-                                "byte", byte.class,
-                                "void", void.class);
-
-static boolean onWhiteList(Class c){
-	Collection<Class> whitelist = (Collection<Class>) RT.READWHITELIST.deref();
-
-	for(Class wc : whitelist)
-		{
-		if(wc.isAssignableFrom(c))
-			return true;
-		}
-	return false;
-}
-
 public static class EvalReader extends AFn{
 	public Object invoke(Object reader, Object eq) {
-		Object rawreadeval = RT.READEVAL.deref();
-		if (!RT.booleanCast(rawreadeval))
+		if (!RT.booleanCast(RT.READEVAL.deref()))
 			{
-			throw Util.runtimeException("eval reading not allowed when *read-eval* is false.");
+			throw Util.runtimeException("EvalReader not allowed when *read-eval* is false.");
 			}
-		Boolean readeval = (rawreadeval == RT.T);
+
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
-		if(o instanceof Symbol || o instanceof String)
+		if(o instanceof Symbol)
 			{
-			String s = o.toString();
-			Class c = (Class) primclasses.valAt(s);
-			if(c != null)
-				return c;
-			return RT.classForNameNonLoading(s);
+			return RT.classForName(o.toString());
 			}
 		else if(o instanceof IPersistentList)
 			{
@@ -1069,42 +1044,22 @@ public static class EvalReader extends AFn{
 				Symbol vs = (Symbol) RT.second(o);
 				return RT.var(vs.ns, vs.name);  //Compiler.resolve((Symbol) RT.second(o),true);
 				}
-			if(fs.equals(FIND_NS))
-				{
-				Symbol sym = (Symbol) RT.second(o);
-				return Namespace.find(sym);
-				}
 			if(fs.name.endsWith("."))
 				{
-				Class c = RT.classForName(fs.name.substring(0, fs.name.length() - 1));
-				if(readeval || onWhiteList(c) || clojure.lang.Fn.class.isAssignableFrom(c))
-					{
-					Object[] args = RT.toArray(RT.next(o));
-					return Reflector.invokeConstructor(c, args);
-					}
-				throw Util.runtimeException("eval reading not allowed.");
+				Object[] args = RT.toArray(RT.next(o));
+				return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
 				}
 			if(Compiler.namesStaticMember(fs))
 				{
-				Class c = RT.classForName(fs.ns);
-
-				if(readeval || onWhiteList(c))
-					{
-					Object[] args = RT.toArray(RT.next(o));
-					return Reflector.invokeStaticMethod(c, fs.name, args);
-					}
-				throw Util.runtimeException("eval reading not allowed.");
+				Object[] args = RT.toArray(RT.next(o));
+				return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
 				}
-			if(readeval)
+			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
+			if(v instanceof Var)
 				{
-				Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
-				if(v instanceof Var)
-					{
-					return ((IFn) v).applyTo(RT.next(o));
-					}
-				throw Util.runtimeException("Can't resolve " + fs);
+				return ((IFn) v).applyTo(RT.next(o));
 				}
-			throw Util.runtimeException("eval reading not allowed.");
+			throw Util.runtimeException("Can't resolve " + fs);
 			}
 		else
 			throw new IllegalArgumentException("Unsupported #= form");
@@ -1161,8 +1116,8 @@ public static class UnreadableReader extends AFn{
 
 public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive) {
 	final int firstline =
-		(r instanceof LineNumberingPushbackReader) ?
-		((LineNumberingPushbackReader) r).getLineNumber() : -1;
+			(r instanceof LineNumberingPushbackReader) ?
+			((LineNumberingPushbackReader) r).getLineNumber() : -1;
 
 	ArrayList a = new ArrayList();
 
@@ -1210,8 +1165,8 @@ public static class CtorReader extends AFn{
 	public Object invoke(Object reader, Object firstChar){
 		PushbackReader r = (PushbackReader) reader;
 		Object name = read(r, true, null, false);
-                if (!(name instanceof Symbol)) 
-                        throw new RuntimeException("Reader tag must be a symbol");
+		if (!(name instanceof Symbol))
+			throw new RuntimeException("Reader tag must be a symbol");
 		Symbol sym = (Symbol)name;
 		return sym.getName().contains(".") ? readRecord(r, sym) : readTagged(r, sym);
 	}
@@ -1222,23 +1177,23 @@ public static class CtorReader extends AFn{
 		ILookup data_readers = (ILookup)RT.DATA_READERS.deref();
 		IFn data_reader = (IFn)RT.get(data_readers, tag);
 		if(data_reader == null){
-                        data_readers = (ILookup)RT.DEFAULT_DATA_READERS.deref();
-                        data_reader = (IFn)RT.get(data_readers, tag);
-                        if(data_reader == null){
-                            IFn default_reader = (IFn)RT.DEFAULT_DATA_READER_FN.deref();
-                            if(default_reader != null)
-                                return default_reader.invoke(tag, o);
-                            else
-                                throw new RuntimeException("No reader function for tag " + tag.toString());
-                        }
-                }
+		data_readers = (ILookup)RT.DEFAULT_DATA_READERS.deref();
+		data_reader = (IFn)RT.get(data_readers, tag);
+		if(data_reader == null){
+		IFn default_reader = (IFn)RT.DEFAULT_DATA_READER_FN.deref();
+		if(default_reader != null)
+			return default_reader.invoke(tag, o);
+		else
+			throw new RuntimeException("No reader function for tag " + tag.toString());
+		}
+		}
 
-                return data_reader.invoke(o);
+		return data_reader.invoke(o);
 	}
 
-        private Object readRecord(PushbackReader r, Symbol recordName){
+	private Object readRecord(PushbackReader r, Symbol recordName){
 		Class recordClass = RT.classForNameNonLoading(recordName.toString());
-        boolean readeval = (RT.READEVAL.deref() == RT.T);
+        boolean readeval = RT.booleanCast(RT.READEVAL.deref());
 
 	    if(!readeval && !clojure.lang.IRecord.class.isAssignableFrom(recordClass))
 		    {
@@ -1256,8 +1211,8 @@ public static class CtorReader extends AFn{
 		// A defrecord ctor can take two forms. Check for map->R version first.
 		if(ch == '{')
 			{
-				endch = '}';
-				shortForm = false;
+			endch = '}';
+			shortForm = false;
 			}
 		else if (ch == '[')
 			endch = ']';
@@ -1292,7 +1247,7 @@ public static class CtorReader extends AFn{
 			ret = Reflector.invokeStaticMethod(recordClass, "create", new Object[]{vals});
 			}
 
-	return ret;
+		return ret;
 	}
 }
 

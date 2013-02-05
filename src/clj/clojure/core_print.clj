@@ -309,23 +309,31 @@
 (defmethod print-dup clojure.lang.LazilyPersistentVector [o w] (print-method o w))
 
 (def primitives-classnames
-  {Float/TYPE "float"
-   Integer/TYPE "int"
-   Long/TYPE "long"
-   Boolean/TYPE "boolean"
-   Character/TYPE "char"
-   Double/TYPE "double"
-   Byte/TYPE "byte"
-   Short/TYPE "short"})
+  {Float/TYPE "Float/TYPE"
+   Integer/TYPE "Integer/TYPE"
+   Long/TYPE "Long/TYPE"
+   Boolean/TYPE "Boolean/TYPE"
+   Character/TYPE "Character/TYPE"
+   Double/TYPE "Double/TYPE"
+   Byte/TYPE "Byte/TYPE"
+   Short/TYPE "Short/TYPE"})
 
 (defmethod print-method Class [^Class c, ^Writer w]
   (.write w (.getName c)))
 
 (defmethod print-dup Class [^Class c, ^Writer w]
-  (let [^String cs (or (primitives-classnames c) (.getName c))]
-    (.write w "#=\"")
-    (.write w cs)
-    (.write w "\"")))
+  (cond
+    (.isPrimitive c) (do
+                       (.write w "#=(identity ")
+                       (.write w ^String (primitives-classnames c))
+                       (.write w ")"))
+    (.isArray c) (do
+                   (.write w "#=(java.lang.Class/forName \"")
+                   (.write w (.getName c))
+                   (.write w "\")"))
+    :else (do
+            (.write w "#=")
+            (.write w (.getName c)))))
 
 (defmethod print-method java.math.BigDecimal [b, ^Writer w]
   (.write w (str b))
