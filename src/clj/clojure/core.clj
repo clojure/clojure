@@ -3430,10 +3430,12 @@
   vars, namespaces are allowed, as well as static methods and
   constructors of derivees of the *read-whitelist*
 
+  Returns nil when string is nil or empty.
+
   See also - safe-read-string"
   {:added "1.0"
    :static true}
-  [s] (clojure.lang.RT/readString s))
+  [^String s] (when (pos? (count s)) (clojure.lang.RT/readString s)))
 
 (defn safe-read-string
   "Same as read-string, with *read-eval* bound to false"
