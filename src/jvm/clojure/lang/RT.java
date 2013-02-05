@@ -181,7 +181,13 @@ final static public Var ERR =
 final static Keyword TAG_KEY = Keyword.intern(null, "tag");
 final static Keyword CONST_KEY = Keyword.intern(null, "const");
 final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.intern("*agent*"), null).setDynamic();
-final static public Var READEVAL = Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), T).setDynamic();
+final static public Var READEVAL = Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), F).setDynamic();
+final static public Var READWHITELIST = Var.intern(CLOJURE_NS, Symbol.intern("*read-whitelist*"),
+                                                   RT.vector(java.lang.Number.class,
+                                                          java.util.Collection.class,
+                                                          java.util.Map.class,
+                                                          clojure.lang.Namespace.class,
+                                                          clojure.lang.Fn.class)).setDynamic();
 final static public Var DATA_READERS = Var.intern(CLOJURE_NS, Symbol.intern("*data-readers*"), RT.map()).setDynamic();
 final static public Var DEFAULT_DATA_READER_FN = Var.intern(CLOJURE_NS, Symbol.intern("*default-data-reader-fn*"), RT.map()).setDynamic();
 final static public Var DEFAULT_DATA_READERS = Var.intern(CLOJURE_NS, Symbol.intern("default-data-readers"), RT.map());
@@ -1861,8 +1867,9 @@ static public void print(Object x, Writer w) throws IOException{
 			}
 		}
 		else if(x instanceof Class) {
-			w.write("#=");
+			w.write("#=\"");
 			w.write(((Class) x).getName());
+			w.write('"');
 		}
 		else if(x instanceof BigDecimal && readably) {
 			w.write(x.toString());

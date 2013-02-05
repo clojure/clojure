@@ -309,31 +309,23 @@
 (defmethod print-dup clojure.lang.LazilyPersistentVector [o w] (print-method o w))
 
 (def primitives-classnames
-  {Float/TYPE "Float/TYPE"
-   Integer/TYPE "Integer/TYPE"
-   Long/TYPE "Long/TYPE"
-   Boolean/TYPE "Boolean/TYPE"
-   Character/TYPE "Character/TYPE"
-   Double/TYPE "Double/TYPE"
-   Byte/TYPE "Byte/TYPE"
-   Short/TYPE "Short/TYPE"})
+  {Float/TYPE "float"
+   Integer/TYPE "int"
+   Long/TYPE "long"
+   Boolean/TYPE "boolean"
+   Character/TYPE "char"
+   Double/TYPE "double"
+   Byte/TYPE "byte"
+   Short/TYPE "short"})
 
 (defmethod print-method Class [^Class c, ^Writer w]
   (.write w (.getName c)))
 
 (defmethod print-dup Class [^Class c, ^Writer w]
-  (cond
-    (.isPrimitive c) (do
-                       (.write w "#=(identity ")
-                       (.write w ^String (primitives-classnames c))
-                       (.write w ")"))
-    (.isArray c) (do
-                   (.write w "#=(java.lang.Class/forName \"")
-                   (.write w (.getName c))
-                   (.write w "\")"))
-    :else (do
-            (.write w "#=")
-            (.write w (.getName c)))))
+  (let [^String cs (or (primitives-classnames c) (.getName c))]
+    (.write w "#=\"")
+    (.write w cs)
+    (.write w "\"")))
 
 (defmethod print-method java.math.BigDecimal [b, ^Writer w]
   (.write w (str b))
@@ -368,7 +360,7 @@
 (defmethod print-dup java.util.regex.Pattern [p ^Writer w] (print-method p w))
 
 (defmethod print-dup clojure.lang.Namespace [^clojure.lang.Namespace n ^Writer w]
-  (.write w "#=(find-ns ")
+  (.write w "#=(clojure.lang.Namespace/find ")
   (print-dup (.name n) w)
   (.write w ")"))
 
@@ -380,7 +372,8 @@
                                      (agent-error o))
                               " FAILED"
                               ""))
-                    pr-on, "", ">", (list (if (and (instance? clojure.lang.IPending o) (not (.isRealized o)))
+                    pr-on, "", ">", (list (if (and (instance? clojure.lang.IPending o)
+                                                   (not (.isRealized ^clojure.lang.IPending o)))
                                             :pending
                                             @o)), w))
 

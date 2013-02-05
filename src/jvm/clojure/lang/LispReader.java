@@ -30,9 +30,7 @@ import java.lang.UnsupportedOperationException;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1023,18 +1021,40 @@ static class CtorReader extends AFn{
 }
 */
 
+static IPersistentMap primclasses = RT.map("int", int.class,
+                                "long", long.class,
+                                "float", float.class,
+                                "double", double.class,
+                                "char", char.class,
+                                "boolean", boolean.class,
+                                "short", short.class,
+                                "byte", byte.class,
+                                "void", void.class);
+
+static boolean onWhiteList(Class c){
+	Collection<Class> whitelist = (Collection<Class>) RT.READWHITELIST.deref();
+
+	for(Class wc : whitelist)
+		{
+		if(wc.isAssignableFrom(c))
+			return true;
+		}
+	return false;
+}
+
 public static class EvalReader extends AFn{
 	public Object invoke(Object reader, Object eq) {
-		if (!RT.booleanCast(RT.READEVAL.deref()))
-	    {
-		  throw Util.runtimeException("EvalReader not allowed when *read-eval* is false.");
-	    }
-		
+		boolean readeval = RT.booleanCast(RT.READEVAL.deref());
+
 		PushbackReader r = (PushbackReader) reader;
 		Object o = read(r, true, null, true);
-		if(o instanceof Symbol)
+		if(o instanceof Symbol || o instanceof String)
 			{
-			return RT.classForName(o.toString());
+			String s = o.toString();
+			Class c = (Class) primclasses.valAt(s);
+			if(c != null)
+				return c;
+			return RT.classForName(s);
 			}
 		else if(o instanceof IPersistentList)
 			{
@@ -1046,20 +1066,35 @@ public static class EvalReader extends AFn{
 				}
 			if(fs.name.endsWith("."))
 				{
-				Object[] args = RT.toArray(RT.next(o));
-				return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
+				Class c = RT.classForName(fs.name.substring(0, fs.name.length() - 1));
+				if(readeval || onWhiteList(c))
+					{
+					Object[] args = RT.toArray(RT.next(o));
+					return Reflector.invokeConstructor(c, args);
+					}
+				throw Util.runtimeException("eval reading not allowed when *read-eval* is false.");
 				}
 			if(Compiler.namesStaticMember(fs))
 				{
-				Object[] args = RT.toArray(RT.next(o));
-				return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
+				Class c = RT.classForName(fs.ns);
+
+				if(readeval || onWhiteList(c))
+					{
+					Object[] args = RT.toArray(RT.next(o));
+					return Reflector.invokeStaticMethod(c, fs.name, args);
+					}
+				throw Util.runtimeException("eval reading not allowed when *read-eval* is false.");
 				}
-			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
-			if(v instanceof Var)
+			if(readeval)
 				{
-				return ((IFn) v).applyTo(RT.next(o));
+				Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
+				if(v instanceof Var)
+					{
+					return ((IFn) v).applyTo(RT.next(o));
+					}
+				throw Util.runtimeException("Can't resolve " + fs);
 				}
-			throw Util.runtimeException("Can't resolve " + fs);
+			throw Util.runtimeException("eval reading not allowed when *read-eval* is false.");
 			}
 		else
 			throw new IllegalArgumentException("Unsupported #= form");
