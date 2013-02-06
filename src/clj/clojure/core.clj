@@ -3415,11 +3415,11 @@
   http://edn-format.org"
   {:added "1.5"}
   ([]
-   (read *in*))
+   (read-edn *in*))
   ([stream]
-   (read stream true nil))
+   (read-edn stream true nil))
   ([stream eof-error? eof-value]
-   (read stream eof-error? eof-value false))
+   (read-edn stream eof-error? eof-value false))
   ([stream eof-error? eof-value recursive?]
      (. clojure.lang.EdnReader (read stream (boolean eof-error?) eof-value recursive?))))
 
