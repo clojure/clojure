@@ -7043,6 +7043,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) {
 			       LOCAL_ENV, null,
 					LOOP_LOCALS, null,
 					NEXT_LOCAL_NUM, 0,
+					RT.READEVAL, RT.T,
 			       RT.CURRENT_NS, RT.CURRENT_NS.deref(),
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
 			       COLUMN_BEFORE, pushbackReader.getColumnNumber(),
@@ -7112,7 +7113,9 @@ public static void pushNSandLoader(ClassLoader loader){
 	Var.pushThreadBindings(RT.map(Var.intern(Symbol.intern("clojure.core"),
 	                                         Symbol.intern("*ns*")).setDynamic(),
 	                              null,
-	                              RT.FN_LOADER_VAR, loader));
+	                              RT.FN_LOADER_VAR, loader,
+	                              RT.READEVAL, RT.T
+	                              ));
 }
 
 public static ILookupThunk getLookupThunk(Object target, Keyword k){
@@ -7172,7 +7175,8 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       LOCAL_ENV, null,
 					LOOP_LOCALS, null,
 					NEXT_LOCAL_NUM, 0,
-			       RT.CURRENT_NS, RT.CURRENT_NS.deref(),
+					RT.READEVAL, RT.T,
+					RT.CURRENT_NS, RT.CURRENT_NS.deref(),
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
 			       COLUMN_BEFORE, pushbackReader.getColumnNumber(),
 			       LINE_AFTER, pushbackReader.getLineNumber(),

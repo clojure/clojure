@@ -53,6 +53,7 @@ static Symbol VECTOR = Symbol.intern("clojure.core", "vector");
 static Symbol WITH_META = Symbol.intern("clojure.core", "with-meta");
 static Symbol META = Symbol.intern("clojure.core", "meta");
 static Symbol DEREF = Symbol.intern("clojure.core", "deref");
+static Keyword UNKNOWN = Keyword.intern(null, "unknown");
 //static Symbol DEREF_BANG = Symbol.intern("clojure.core", "deref!");
 
 static IFn[] macros = new IFn[256];
@@ -151,6 +152,8 @@ static public int read1(Reader r){
 
 static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
 {
+	if(RT.READEVAL.deref() == UNKNOWN)
+		throw Util.runtimeException("Reading disallowed - *read-eval* bound to :unknown");
 
 	try
 		{
@@ -1192,13 +1195,14 @@ public static class CtorReader extends AFn{
 	}
 
 	private Object readRecord(PushbackReader r, Symbol recordName){
-		Class recordClass = RT.classForNameNonLoading(recordName.toString());
         boolean readeval = RT.booleanCast(RT.READEVAL.deref());
 
-	    if(!readeval && !clojure.lang.IRecord.class.isAssignableFrom(recordClass))
+	    if(!readeval)
 		    {
-		    throw Util.runtimeException("Record construction syntax can only be used for records, unless *read-eval* == true");
+		    throw Util.runtimeException("Record construction syntax can only be used when *read-eval* == true");
 		    }
+
+		Class recordClass = RT.classForNameNonLoading(recordName.toString());
 
 		char endch;
 		boolean shortForm = true;
