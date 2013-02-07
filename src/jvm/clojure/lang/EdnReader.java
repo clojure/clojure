@@ -32,6 +32,8 @@ static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?");
 static final Symbol SLASH = Symbol.intern("/");
 
+static IFn taggedReader = new TaggedReader();
+
 static
 	{
 	macros['"'] = new StringReader();
@@ -54,10 +56,14 @@ static
 	dispatchMacros['_'] = new DiscardReader();
 	}
 
-static public Object readString(String s){
+static boolean nonConstituent(int ch){
+	return ch == '@' || ch == '`' || ch == '~';
+}
+
+static public Object readString(String s, IPersistentMap opts){
 	PushbackReader r = new PushbackReader(new java.io.StringReader(s));
 	try {
-	return EdnReader.read(r, true, null, false);
+	return read(r, opts);
 	}
 	catch(Exception e) {
 	throw Util.sneakyThrow(e);
@@ -102,7 +108,14 @@ static public int read1(Reader r){
 		}
 }
 
-static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
+static final Keyword EOF = Keyword.intern(null,"eof");
+
+static public Object read(PushbackReader r, IPersistentMap opts){
+	return read(r,!opts.containsKey(EOF),opts.valAt(EOF),false,opts);
+}
+
+static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive,
+                          Object opts)
 {
 
 	try
@@ -132,7 +145,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 			IFn macroFn = getMacro(ch);
 			if(macroFn != null)
 				{
-				Object ret = macroFn.invoke(r, (char) ch);
+				Object ret = macroFn.invoke(r, (char) ch, opts);
 				if(RT.suppressRead())
 					return null;
 				//no op macros return the reader
@@ -173,16 +186,22 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 
 static private String readToken(PushbackReader r, char initch) {
 	StringBuilder sb = new StringBuilder();
+	if(nonConstituent(initch))
+		throw Util.runtimeException("Invalid leading character: " + (char)initch);
+
 	sb.append(initch);
 
 	for(; ;)
 		{
 		int ch = read1(r);
+
 		if(ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
 			{
 			unread(r, ch);
 			return sb.toString();
 			}
+		else if(nonConstituent(ch))
+			throw Util.runtimeException("Invalid constituent character: " + (char)ch);
 		sb.append((char) ch);
 		}
 }
@@ -391,7 +410,7 @@ public static class RegexReader extends AFn{
 */
 
 public static class StringReader extends AFn{
-	public Object invoke(Object reader, Object doublequote) {
+	public Object invoke(Object reader, Object doublequote, Object opts) {
 		StringBuilder sb = new StringBuilder();
 		Reader r = (Reader) reader;
 
@@ -453,7 +472,7 @@ public static class StringReader extends AFn{
 }
 
 public static class CommentReader extends AFn{
-	public Object invoke(Object reader, Object semicolon) {
+	public Object invoke(Object reader, Object semicolon, Object opts) {
 		Reader r = (Reader) reader;
 		int ch;
 		do
@@ -466,29 +485,36 @@ public static class CommentReader extends AFn{
 }
 
 public static class DiscardReader extends AFn{
-	public Object invoke(Object reader, Object underscore) {
+	public Object invoke(Object reader, Object underscore, Object opts) {
 		PushbackReader r = (PushbackReader) reader;
-		read(r, true, null, true);
+		read(r, true, null, true, opts);
 		return r;
 	}
 }
 
 public static class DispatchReader extends AFn{
-	public Object invoke(Object reader, Object hash) {
+	public Object invoke(Object reader, Object hash, Object opts) {
 		int ch = read1((Reader) reader);
 		if(ch == -1)
 			throw Util.runtimeException("EOF while reading character");
 		IFn fn = dispatchMacros[ch];
 
 		if(fn == null) {
+			//try tagged reader
+		    if(Character.isLetter(ch))
+				{
+				unread((PushbackReader) reader, ch);
+		        return taggedReader.invoke(reader, ch, opts);
+				}
+
 			throw Util.runtimeException(String.format("No dispatch macro for: %c", (char) ch));
 		}
-		return fn.invoke(reader, ch);
+		return fn.invoke(reader, ch, opts);
 	}
 }
 
 public static class MetaReader extends AFn{
-	public Object invoke(Object reader, Object caret) {
+	public Object invoke(Object reader, Object caret, Object opts) {
 		PushbackReader r = (PushbackReader) reader;
 		int line = -1;
 		int column = -1;
@@ -497,7 +523,7 @@ public static class MetaReader extends AFn{
 			line = ((LineNumberingPushbackReader) r).getLineNumber();
 			column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
 			}
-		Object meta = read(r, true, null, true);
+		Object meta = read(r, true, null, true, opts);
 		if(meta instanceof Symbol || meta instanceof String)
 			meta = RT.map(RT.TAG_KEY, meta);
 		else if (meta instanceof Keyword)
@@ -505,7 +531,7 @@ public static class MetaReader extends AFn{
 		else if(!(meta instanceof IPersistentMap))
 			throw new IllegalArgumentException("Metadata must be Symbol,Keyword,String or Map");
 
-		Object o = read(r, true, null, true);
+		Object o = read(r, true, null, true, opts);
 		if(o instanceof IMeta)
 			{
 			if(line != -1 && o instanceof ISeq)
@@ -531,7 +557,7 @@ public static class MetaReader extends AFn{
 }
 
 public static class CharacterReader extends AFn{
-	public Object invoke(Object reader, Object backslash) {
+	public Object invoke(Object reader, Object backslash, Object opts) {
 		PushbackReader r = (PushbackReader) reader;
 		int ch = read1(r);
 		if(ch == -1)
@@ -574,7 +600,7 @@ public static class CharacterReader extends AFn{
 }
 
 public static class ListReader extends AFn{
-	public Object invoke(Object reader, Object leftparen) {
+	public Object invoke(Object reader, Object leftparen, Object opts) {
 		PushbackReader r = (PushbackReader) reader;
 		int line = -1;
 		int column = -1;
@@ -583,7 +609,7 @@ public static class ListReader extends AFn{
 			line = ((LineNumberingPushbackReader) r).getLineNumber();
 			column = ((LineNumberingPushbackReader) r).getColumnNumber()-1;
 			}
-		List list = readDelimitedList(')', r, true);
+		List list = readDelimitedList(')', r, true, opts);
 		if(list.isEmpty())
 			return PersistentList.EMPTY;
 		IObj s = (IObj) PersistentList.create(list);
@@ -599,17 +625,17 @@ public static class ListReader extends AFn{
 }
 
 public static class VectorReader extends AFn{
-	public Object invoke(Object reader, Object leftparen) {
+	public Object invoke(Object reader, Object leftparen, Object opts) {
 		PushbackReader r = (PushbackReader) reader;
-		return LazilyPersistentVector.create(readDelimitedList(']', r, true));
+		return LazilyPersistentVector.create(readDelimitedList(']', r, true, opts));
 	}
 
 }
 
 public static class MapReader extends AFn{
-	public Object invoke(Object reader, Object leftparen) {
+	public Object invoke(Object reader, Object leftparen, Object opts) {
 		PushbackReader r = (PushbackReader) reader;
-		Object[] a = readDelimitedList('}', r, true).toArray();
+		Object[] a = readDelimitedList('}', r, true, opts).toArray();
 		if((a.length & 1) == 1)
 			throw Util.runtimeException("Map literal must contain an even number of forms");
 		return RT.map(a);
@@ -618,27 +644,27 @@ public static class MapReader extends AFn{
 }
 
 public static class SetReader extends AFn{
-	public Object invoke(Object reader, Object leftbracket) {
+	public Object invoke(Object reader, Object leftbracket, Object opts) {
 		PushbackReader r = (PushbackReader) reader;
-		return PersistentHashSet.createWithCheck(readDelimitedList('}', r, true));
+		return PersistentHashSet.createWithCheck(readDelimitedList('}', r, true, opts));
 	}
 
 }
 
 public static class UnmatchedDelimiterReader extends AFn{
-	public Object invoke(Object reader, Object rightdelim) {
+	public Object invoke(Object reader, Object rightdelim, Object opts) {
 		throw Util.runtimeException("Unmatched delimiter: " + rightdelim);
 	}
 
 }
 
 public static class UnreadableReader extends AFn{
-	public Object invoke(Object reader, Object leftangle) {
+	public Object invoke(Object reader, Object leftangle, Object opts) {
 		throw Util.runtimeException("Unreadable form");
 	}
 }
 
-public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive) {
+public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive, Object opts) {
 	final int firstline =
 			(r instanceof LineNumberingPushbackReader) ?
 			((LineNumberingPushbackReader) r).getLineNumber() : -1;
@@ -666,7 +692,7 @@ public static List readDelimitedList(char delim, PushbackReader r, boolean isRec
 		IFn macroFn = getMacro(ch);
 		if(macroFn != null)
 			{
-			Object mret = macroFn.invoke(r, (char) ch);
+			Object mret = macroFn.invoke(r, (char) ch, opts);
 			//no op macros return the reader
 			if(mret != r)
 				a.add(mret);
@@ -675,7 +701,7 @@ public static List readDelimitedList(char delim, PushbackReader r, boolean isRec
 			{
 			unread(r, ch);
 
-			Object o = read(r, true, null, isRecursive);
+			Object o = read(r, true, null, isRecursive, opts);
 			if(o != r)
 				a.add(o);
 			}
@@ -685,5 +711,37 @@ public static List readDelimitedList(char delim, PushbackReader r, boolean isRec
 	return a;
 }
 
+public static class TaggedReader extends AFn{
+	public Object invoke(Object reader, Object firstChar, Object opts){
+		PushbackReader r = (PushbackReader) reader;
+		Object name = read(r, true, null, false, opts);
+		if (!(name instanceof Symbol))
+			throw new RuntimeException("Reader tag must be a symbol");
+		Symbol sym = (Symbol)name;
+		return readTagged(r, sym, (IPersistentMap) opts);
+	}
+
+	static Keyword READERS = Keyword.intern(null,"readers");
+	static Keyword DEFAULT = Keyword.intern(null,"default");
+
+	private Object readTagged(PushbackReader reader, Symbol tag, IPersistentMap opts){
+		Object o = read(reader, true, null, true, opts);
+
+		ILookup readers = (ILookup)RT.get(opts, READERS);
+		IFn dataReader = (IFn)RT.get(readers, tag);
+		if(dataReader == null)
+			dataReader = (IFn)RT.get(RT.DEFAULT_DATA_READERS.deref(),tag);
+		if(dataReader == null){
+			IFn defaultReader = (IFn)RT.get(opts, DEFAULT);
+			if(defaultReader != null)
+				return defaultReader.invoke(tag, o);
+			else
+				throw new RuntimeException("No reader function for tag " + tag.toString());
+		}
+		else
+			return dataReader.invoke(o);
+	}
+
+}
 }
 
