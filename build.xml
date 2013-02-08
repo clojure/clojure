@@ -55,6 +55,7 @@
       <arg value="clojure.core.protocols"/>
       <arg value="clojure.main"/>
       <arg value="clojure.set"/>
+      <arg value="clojure.edn"/>
       <arg value="clojure.xml"/>
       <arg value="clojure.zip"/>
       <arg value="clojure.inspector"/>
