@@ -15,7 +15,7 @@
   (:use clojure.test
         [clojure.test.generative :exclude (is)]
         clojure.template)
-  (:require [clojure.test.generative.generators :as gen]))
+  (:require [clojure.data.generators :as gen]))
 
 
 ; TODO:
