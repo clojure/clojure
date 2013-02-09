@@ -66,7 +66,7 @@
    gen/byte
    gen/long
    gen/boolean
-   #_gen/printable-ascii-char  ;; waiting on character reader fix
+   gen/printable-ascii-char
    gen/string
    gen/symbol
    gen/keyword
