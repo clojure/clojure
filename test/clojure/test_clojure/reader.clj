@@ -21,7 +21,9 @@
   (:use [clojure.instant :only [read-instant-date
                                 read-instant-calendar
                                 read-instant-timestamp]])
-  (:require clojure.walk)
+  (:require clojure.walk
+            [clojure.test.generative :refer (defspec)]
+            [clojure.test-clojure.generators :as cgen])
   (:import [clojure.lang BigInt Ratio]
            java.io.File
            java.util.TimeZone))
@@ -571,3 +573,38 @@
            Exception #"No reader function for tag foo" "#foo [1 2]"
            Exception #"No reader function for tag bar/foo" "#bar/foo [1 2]"
            Exception #"No reader function for tag bar.baz/foo" "#bar.baz/foo [1 2]"))))
+
+
+(defn roundtrip
+  "Print an object and read it back. Returns rather than throws
+   any exceptions."
+  [o]
+  (binding [*print-length* nil
+            *print-dup* nil
+            *print-level* nil]
+    (try
+     (-> o pr-str read-string)
+     (catch Throwable t t))))
+
+(defn roundtrip-dup
+  "Print an object with print-dup and read it back.
+   Returns rather than throws any exceptions."
+  [o]
+  (binding [*print-length* nil
+            *print-dup* true
+            *print-level* nil]
+    (try
+     (-> o pr-str read-string)
+     (catch Throwable t t))))
+
+(defspec types-that-should-roundtrip
+  roundtrip
+  [^anything o]
+  (when-not (= o %)
+    (throw (ex-info "Value cannot roundtrip, see ex-data" {:printed o :read %}))))
+
+(defspec types-that-need-dup-to-roundtrip
+  roundtrip-dup
+  [^{:tag cgen/dup-readable} o]
+  (when-not (= o %)
+    (throw (ex-info "Value cannot roundtrip, see ex-data" {:printed o :read %}))))
