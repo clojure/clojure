@@ -168,7 +168,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 				unread(r, ch2);
 				}
 
-			String token = readToken(r, (char) ch);
+			String token = readToken(r, (char) ch, true);
 			if(RT.suppressRead())
 				return null;
 			return interpretToken(token);
@@ -184,9 +184,9 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 		}
 }
 
-static private String readToken(PushbackReader r, char initch) {
+static private String readToken(PushbackReader r, char initch, boolean leadConstituent) {
 	StringBuilder sb = new StringBuilder();
-	if(nonConstituent(initch))
+	if(leadConstituent && nonConstituent(initch))
 		throw Util.runtimeException("Invalid leading character: " + (char)initch);
 
 	sb.append(initch);
@@ -562,7 +562,7 @@ public static class CharacterReader extends AFn{
 		int ch = read1(r);
 		if(ch == -1)
 			throw Util.runtimeException("EOF while reading character");
-		String token = readToken(r, (char) ch);
+		String token = readToken(r, (char) ch, false);
 		if(token.length() == 1)
 			return Character.valueOf(token.charAt(0));
 		else if(token.equals("newline"))
