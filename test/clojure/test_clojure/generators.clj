@@ -61,6 +61,15 @@
   []
   (gen/rand-nth (:records @shared-generation)))
 
+(def keyword-pool
+  (delay
+   (binding [gen/*rnd* (java.util.Random. 42)]
+     (into [] (repeatedly 1000 gen/keyword)))))
+
+(defn keyword-from-pool
+  []
+  (gen/rand-nth @keyword-pool))
+
 (def ednable-scalars
   [(constantly nil)
    gen/byte
@@ -69,7 +78,7 @@
    gen/printable-ascii-char
    gen/string
    gen/symbol
-   gen/keyword
+   keyword-from-pool
    gen/uuid
    gen/date
    gen/ratio
