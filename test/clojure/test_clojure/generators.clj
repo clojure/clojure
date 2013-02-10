@@ -70,6 +70,15 @@
   []
   (gen/rand-nth @keyword-pool))
 
+(def symbol-pool
+  (delay
+   (binding [gen/*rnd* (java.util.Random. 42)]
+     (into [] (repeatedly 1000 gen/symbol)))))
+
+(defn symbol-from-pool
+  []
+  (gen/rand-nth @keyword-pool))
+
 (def ednable-scalars
   [(constantly nil)
    gen/byte
@@ -77,7 +86,7 @@
    gen/boolean
    gen/printable-ascii-char
    gen/string
-   gen/symbol
+   symbol-from-pool
    keyword-from-pool
    gen/uuid
    gen/date
