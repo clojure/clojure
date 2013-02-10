@@ -21,6 +21,7 @@
     2.9 clojure.string/replace and replace-first handle special characters more predictably
     2.10 Set and map constructor functions allow duplicates
     2.11 More functions preserve metadata
+    2.12 New edn reader, improvements to *read-eval*
  3 Performance Enhancements
  4 Improved error messages
  5 Improved documentation strings
@@ -324,6 +325,19 @@ Now the functions `into`, `select-keys`, `clojure.set/project`, and
 `clojure.set/rename` return collections with the same metadata as
 their input collections.
 
+### 2.12 New edn reader, improvements to *real-eval*
+
+The new clojure.edn namespace reads edn (http://edn-format.org) data,
+and should be used for reading data from untrusted sources.
+
+Clojure's core read* functions can evaluate code, and should not be
+used to read data from untrusted sources. As of 1.5, *read-eval*
+supports a documented set of thread-local bindings, see the doc string
+for details.
+
+*read-eval*'s default can be set to false by setting a system property:
+
+    -Dclojure.read.eval=false
 
 ## 3 Performance Enhancements
 
