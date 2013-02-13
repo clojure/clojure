@@ -325,17 +325,17 @@ Now the functions `into`, `select-keys`, `clojure.set/project`, and
 `clojure.set/rename` return collections with the same metadata as
 their input collections.
 
-### 2.12 New edn reader, improvements to *real-eval*
+### 2.12 New edn reader, improvements to `*read-eval*`
 
-The new clojure.edn namespace reads edn (http://edn-format.org) data,
+The new `clojure.edn` namespace reads edn (http://edn-format.org) data,
 and should be used for reading data from untrusted sources.
 
 Clojure's core read* functions can evaluate code, and should not be
-used to read data from untrusted sources. As of 1.5, *read-eval*
+used to read data from untrusted sources. As of 1.5, `*read-eval*`
 supports a documented set of thread-local bindings, see the doc string
 for details.
 
-*read-eval*'s default can be set to false by setting a system property:
+`*read-eval*`'s default can be set to false by setting a system property:
 
     -Dclojure.read.eval=false
 
@@ -349,6 +349,11 @@ for details.
   `PersistentVector$ChunkedSeq` now implements `Counted` interface, to avoid some cases where vector elements were being counted by iterating over their elements.
 * [CLJ-867](http://dev.clojure.org/jira/browse/CLJ-867)
   Records with same fields and field values, but different types, now usually hash to different values.
+* [CLJ-1000](http://dev.clojure.org/jira/browse/CLJ-1000)
+  Cache hasheq() for seqs, sets, vectors, maps and queues
+* (no ticket) array-map perf tweaks
+* [CLJ-1111](http://dev.clojure.org/jira/browse/CLJ-1111)
+  Allows loop to evaluate to primitive values
 
 
 ## 4 Improved error messages
@@ -383,6 +388,7 @@ for details.
   "be come" should be "become"
 * [CLJ-917](http://dev.clojure.org/jira/browse/CLJ-917)
   clojure.core/definterface is not included in the API docs
+* (no ticket) clojure.core/read, read-string, and *read-eval* all have more extensive documentation.
 
 
 ## 6 Bug Fixes
@@ -450,6 +456,15 @@ for details.
 * [CLJ-1071](http://dev.clojure.org/jira/browse/CLJ-1071) ExceptionInfo does no abstraction
 * [CLJ-1085](http://dev.clojure.org/jira/browse/CLJ-1085) clojure.main/repl unconditionally refers REPL utilities into `*ns*`
 * (no ticket) Rich Hickey fix: syntax-quote was walking records, returning maps
+* [CLJ-1116](http://dev.clojure.org/jira/browse/CLJ-1116) More REPL-friendly 'ns macro
+* (no ticket) Rich Hickey fix: deref any j.u.c.Future
+* [CLJ-1092](http://dev.clojure.org/jira/browse/CLJ-1092) New function re-quote-replacement has incorrect :added metadata
+* [CLJ-1098](http://dev.clojure.org/jira/browse/CLJ-1098) Implement IKVReduce and CollFold for nil
+* (no ticket) Rich Hickey fix: impose once semantics on fabricated closures for e.g. loops
+* [CLJ-1140](http://dev.clojure.org/jira/browse/CLJ-1140) Restore {:as x} destructuring for empty lists
+* [CLJ-1150](http://dev.clojure.org/jira/browse/CLJ-1150) Make some PersistentVector's and APersistentVector.SubVector's internals public
+* (no ticket) Rich Hickey fix: use non-loading classForName
+* [CLJ-1106](http://dev.clojure.org/jira/browse/CLJ-1106) Fixing set equality
 
 ## 7 Binary Compatibility Notes
 
