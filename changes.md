@@ -368,8 +368,6 @@ for details.
   Better error messages for syntax errors w/ defn and fn
 * [CLJ-940](http://dev.clojure.org/jira/browse/CLJ-940)
   Passing a non-sequence to refer :only results in uninformative exception
-* [CLJ-1024](http://dev.clojure.org/jira/browse/CLJ-1024)
-  Check for invalid varargs/destructuring uses.
 * [CLJ-1052](http://dev.clojure.org/jira/browse/CLJ-1052)
   `assoc` now throws an exception if the last key argument is missing a value.
 
