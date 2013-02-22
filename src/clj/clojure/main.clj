@@ -183,6 +183,13 @@ by default when a new command-line REPL is started."} repl-requires
     [clojure.java.javadoc :refer (javadoc)]
     [clojure.pprint :refer (pp pprint)]])
 
+(defmacro with-read-known
+  "Evaluates body with *read-eval* set to a \"known\" value,
+   i.e. substituting true for :unknown if necessary."
+  [& body]
+  `(binding [*read-eval* (if (= :unknown *read-eval*) true *read-eval*)]
+     ~@body))
+
 (defn repl
   "Generic, reusable, read-eval-print loop. By default, reads from *in*,
   writes to *out*, and prints exception summaries to *err*. If you use the
@@ -247,8 +254,7 @@ by default when a new command-line REPL is started."} repl-requires
         (fn []
           (try
             (let [read-eval *read-eval*
-                  input (binding [*read-eval* (if (= :unknown read-eval) true read-eval)]
-                          (read request-prompt request-exit))]
+                  input (with-read-known (read request-prompt request-exit))]
              (or (#{request-prompt request-exit} input)
                  (let [value (binding [*read-eval* read-eval] (eval input))]
                    (print value)
@@ -297,12 +303,12 @@ by default when a new command-line REPL is started."} repl-requires
   [str]
   (let [eof (Object.)
         reader (LineNumberingPushbackReader. (java.io.StringReader. str))]
-      (loop [input (read reader false eof)]
+      (loop [input (with-read-known (read reader false eof))]
         (when-not (= input eof)
           (let [value (eval input)]
             (when-not (nil? value)
               (prn value))
-            (recur (read reader false eof)))))))
+            (recur (with-read-known (read reader false eof))))))))
 
 (defn- init-dispatch
   "Returns the handler associated with an init opt"
