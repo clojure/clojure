@@ -3579,7 +3579,7 @@ static class InvokeExpr implements Expr{
 		if(context != C.EVAL)
 			context = C.EXPRESSION;
 		Expr fexpr = analyze(context, form.first());
-		if(fexpr instanceof VarExpr && ((VarExpr)fexpr).var.equals(INSTANCE))
+		if(fexpr instanceof VarExpr && ((VarExpr)fexpr).var.equals(INSTANCE) && RT.count(form) == 3)
 			{
 			Expr sexpr = analyze(C.EXPRESSION, RT.second(form));
 			if(sexpr instanceof ConstantExpr)
