@@ -102,8 +102,11 @@
       java.lang.Integer false
       java.lang.Long true
       java.lang.Character false
-      java.lang.String false ))
+      java.lang.String false )
 
+  ; test compiler macro
+  (is (let [Long String] (instance? Long "abc")))
+  (is (thrown? clojure.lang.ArityException (instance? Long))))
 
 ; set!
 
