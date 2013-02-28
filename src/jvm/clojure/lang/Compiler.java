@@ -3581,11 +3581,14 @@ static class InvokeExpr implements Expr{
 		Expr fexpr = analyze(context, form.first());
 		if(fexpr instanceof VarExpr && ((VarExpr)fexpr).var.equals(INSTANCE))
 			{
-			if(RT.second(form) instanceof Symbol)
+			Expr sexpr = analyze(C.EXPRESSION, RT.second(form));
+			if(sexpr instanceof ConstantExpr)
 				{
-				Class c = HostExpr.maybeClass(RT.second(form),false);
-				if(c != null)
-					return new InstanceOfExpr(c, analyze(context, RT.third(form)));
+				Object val = ((ConstantExpr) sexpr).val();
+				if(val instanceof Class)
+					{
+					return new InstanceOfExpr((Class) val, analyze(context, RT.third(form)));
+					}
 				}
 			}
 
