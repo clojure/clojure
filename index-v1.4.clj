@@ -18,6 +18,12 @@
    :author "Rich Hickey",
    :doc "Graphical object inspector for Clojure data structures."}
   {:source-url
+   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure/clojure.instant-api.html",
+   :name "clojure.instant",
+   :doc nil}
+  {:source-url
    "https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/java/browse.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.java.browse-api.html",
@@ -8225,6 +8231,72 @@
    :var-type "function",
    :line 87,
    :file "src/clj/clojure/inspector.clj"}
+  {:file "src/clj/clojure/instant.clj",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L48",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.instant-api.html#clojure.instant/parse-timestamp",
+   :namespace "clojure.instant",
+   :line 48,
+   :var-type "var",
+   :doc
+   "Parse a string containing an RFC3339-like like timestamp.\n\nThe function new-instant is called with the following arguments.\n\n                min  max           default\n                ---  ------------  -------\n  years          0           9999      N/A (s must provide years)\n  months         1             12        1\n  days           1             31        1 (actual max days depends\n  hours          0             23        0  on month and year)\n  minutes        0             59        0\n  seconds        0             60        0 (though 60 is only valid\n  nanoseconds    0      999999999        0  when minutes is 59)\n  offset-sign   -1              1        0\n  offset-hours   0             23        0\n  offset-minutes 0             59        0\n\nThese are all integers and will be non-nil. (The listed defaults\nwill be passed if the corresponding field is not present in s.)\n\nGrammar (of s):\n\n  date-fullyear   = 4DIGIT\n  date-month      = 2DIGIT  ; 01-12\n  date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on\n                            ; month/year\n  time-hour       = 2DIGIT  ; 00-23\n  time-minute     = 2DIGIT  ; 00-59\n  time-second     = 2DIGIT  ; 00-58, 00-59, 00-60 based on leap second\n                            ; rules\n  time-secfrac    = '.' 1*DIGIT\n  time-numoffset  = ('+' / '-') time-hour ':' time-minute\n  time-offset     = 'Z' / time-numoffset\n\n  time-part       = time-hour [ ':' time-minute [ ':' time-second\n                    [time-secfrac] [time-offset] ] ]\n\n  timestamp       = date-year [ '-' date-month [ '-' date-mday\n                    [ 'T' time-part ] ] ]\n\nUnlike RFC3339:\n\n  - we only parse the timestamp format\n  - timestamp can elide trailing components\n  - time-offset is optional (defaults to +00:00)\n\nThough time-offset is syntactically optional, a missing time-offset\nwill be treated as if the time-offset zero (+00:00) had been\nspecified.",
+   :name "parse-timestamp"}
+  {:file "src/clj/clojure/instant.clj",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L277",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.instant-api.html#clojure.instant/read-instant-calendar",
+   :namespace "clojure.instant",
+   :line 277,
+   :var-type "var",
+   :doc
+   "To read an instant as a java.util.Calendar, bind *data-readers* to a map with\nthis var as the value for the 'inst key.  Calendar preserves the timezone\noffset.",
+   :name "read-instant-calendar"}
+  {:file "src/clj/clojure/instant.clj",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L271",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.instant-api.html#clojure.instant/read-instant-date",
+   :namespace "clojure.instant",
+   :line 271,
+   :var-type "var",
+   :doc
+   "To read an instant as a java.util.Date, bind *data-readers* to a map with\nthis var as the value for the 'inst key. The timezone offset will be used\nto convert into UTC.",
+   :name "read-instant-date"}
+  {:file "src/clj/clojure/instant.clj",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L283",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.instant-api.html#clojure.instant/read-instant-timestamp",
+   :namespace "clojure.instant",
+   :line 283,
+   :var-type "var",
+   :doc
+   "To read an instant as a java.sql.Timestamp, bind *data-readers* to a\nmap with this var as the value for the 'inst key. Timestamp preserves\nfractional seconds with nanosecond precision. The timezone offset will\nbe used to convert into UTC.",
+   :name "read-instant-timestamp"}
+  {:arglists ([new-instance]),
+   :name "validated",
+   :namespace "clojure.instant",
+   :source-url
+   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L136",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.instant-api.html#clojure.instant/validated",
+   :doc
+   "Return a function which constructs and instant by calling constructor\nafter first validting that those arguments are in range and otherwise\nplausible. The resulting function will throw an exception if called\nwith invalid arguments.",
+   :var-type "function",
+   :line 136,
+   :file "src/clj/clojure/instant.clj"}
   {:arglists ([url]),
    :name "browse-url",
    :namespace "clojure.java.browse",
