@@ -12,15 +12,15 @@
       <sourceFolder url="file://$MODULE_DIR$/src/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/clj" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/jvm" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.codehaus.jsr166-mirror:jsr166y:1.7.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.clojure:test.generative:0.2.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.clojure:test.generative:0.4.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.clojure:tools.namespace:0.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.clojure:java.classpath:0.1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.clojure:data.generators:0.1.2" level="project" />
   </component>
 </module>
 

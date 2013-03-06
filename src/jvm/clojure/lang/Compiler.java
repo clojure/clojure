@@ -2153,7 +2153,7 @@ public static class TryExpr implements Expr{
                                             if(bodyExpr == null)
                                                 try {
                                                     Var.pushThreadBindings(RT.map(NO_RECUR, true));
-						    bodyExpr = (new BodyExpr.Parser()).parse(C.EXPRESSION, RT.seq(body));
+						                            bodyExpr = (new BodyExpr.Parser()).parse(context, RT.seq(body));
                                                 } finally {
                                                     Var.popThreadBindings();
                                                 }
