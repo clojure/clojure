@@ -1,6 +1,8 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.5.1
 
+* fix for leak caused by ddc65a96fdb1163b
 
 # Changes to Clojure in Version 1.5
 
