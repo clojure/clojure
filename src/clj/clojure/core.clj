@@ -6829,10 +6829,12 @@
         (reductions f (first s) (rest s))
         (list (f)))))
   ([f init coll]
-     (cons init
-           (lazy-seq
-            (when-let [s (seq coll)]
-              (reductions f (f init (first s)) (rest s)))))))
+     (if (reduced? init)
+       (list @init)
+       (cons init
+             (lazy-seq
+              (when-let [s (seq coll)]
+                (reductions f (f init (first s)) (rest s))))))))
 
 (defn rand-nth
   "Return a random element of the (sequential) collection. Will have

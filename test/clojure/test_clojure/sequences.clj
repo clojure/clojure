@@ -1153,6 +1153,21 @@
   (is (= (reductions + 10 [1 2 3 4 5])
 	 [10 11 13 16 20 25])))
 
+(deftest test-reductions-obeys-reduced
+  (is (= [0 :x]
+         (reductions (constantly (reduced :x))
+                     (range))))
+  (is (= [:x]
+         (reductions (fn [acc x] x)
+                     (reduced :x)
+                     (range))))
+  (is (= [2 6 12 12]
+         (reductions (fn [acc x]
+                       (if (= x :stop)
+                         (reduced acc)
+                         (+ acc x)))
+                     [2 4 6 :stop 8 10]))))
+
 (deftest test-rand-nth-invariants
   (let [elt (rand-nth [:a :b :c :d])]
     (is (#{:a :b :c :d} elt))))
