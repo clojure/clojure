@@ -543,13 +543,15 @@ Note this should only be used for the last one in the sequence"
   "Produce string parts for the mantissa (normalized 1-9) and exponent"
   [^Object f]
   (let [^String s (.toLowerCase (.toString f))
-        exploc (.indexOf s (int \e))]
+        exploc (.indexOf s (int \e))
+        dotloc (.indexOf s (int \.))]
     (if (neg? exploc)
-      (let [dotloc (.indexOf s (int \.))]
-        (if (neg? dotloc)
-          [s (str (dec (count s)))]
-          [(str (subs s 0 dotloc) (subs s (inc dotloc))) (str (dec dotloc))]))
-      [(str (subs s 0 1) (subs s 2 exploc)) (subs s (inc exploc))])))
+      (if (neg? dotloc)
+        [s (str (dec (count s)))]
+        [(str (subs s 0 dotloc) (subs s (inc dotloc))) (str (dec dotloc))])
+      (if (neg? dotloc)
+        [(subs s 0 exploc) (subs s (inc exploc))]
+        [(str (subs s 0 1) (subs s 2 exploc)) (subs s (inc exploc))]))))
 
 
 (defn- float-parts
@@ -650,6 +652,21 @@ string, or one character longer."
     (str "." m)
     (str (subs m 0 k) "." (subs m k))))
 
+(defn- convert-ratio [x]
+  (if (ratio? x)
+    ;; Usually convert to a double, only resorting to the slower
+    ;; bigdec conversion if the result does not fit within the range
+    ;; of a double.
+    (let [d (double x)]
+      (if (== d 0.0)
+        (if (not= x 0)
+          (bigdec x)
+          d)
+        (if (or (== d Double/POSITIVE_INFINITY) (== d Double/NEGATIVE_INFINITY))
+          (bigdec x)
+          d)))
+    x))
+
 ;; the function to render ~F directives
 ;; TODO: support rationals. Back off to ~D/~A is the appropriate cases
 (defn- fixed-float [params navigator offsets]
@@ -657,6 +674,7 @@ string, or one character longer."
         d (:d params)
         [arg navigator] (next-arg navigator)
         [sign abs] (if (neg? arg) ["-" (- arg)] ["+" arg])
+        abs (convert-ratio abs)
         [mantissa exp] (float-parts abs)
         scaled-exp (+ exp (:k params))
         add-sign (or (:at params) (neg? arg))
@@ -700,7 +718,8 @@ string, or one character longer."
 ;; TODO: support rationals. Back off to ~D/~A is the appropriate cases
 ;; TODO: define ~E representation for Infinity
 (defn- exponential-float [params navigator offsets]
-  (let [[arg navigator] (next-arg navigator)]
+  (let [[arg navigator] (next-arg navigator)
+        arg (convert-ratio arg)]
     (loop [[mantissa exp] (float-parts (if (neg? arg) (- arg) arg))]
       (let [w (:w params)
             d (:d params)
@@ -774,6 +793,7 @@ string, or one character longer."
 ;; TODO: refactor so that float-parts isn't called twice
 (defn- general-float [params navigator offsets]
   (let [[arg _] (next-arg navigator)
+        arg (convert-ratio arg)
         [mantissa exp] (float-parts (if (neg? arg) (- arg) arg))
         w (:w params)
         d (:d params)
