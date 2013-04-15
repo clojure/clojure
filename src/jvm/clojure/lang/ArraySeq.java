@@ -18,7 +18,6 @@ public class ArraySeq extends ASeq implements IndexedSeq, IReduce{
 public final Object array;
 final int i;
 final Object[] oa;
-final Class ct;
 //ISeq _rest;
 
 static public ArraySeq create(){
@@ -54,7 +53,6 @@ static ISeq createFromObject(Object array){
 
 ArraySeq(Object array, int i){
 	this.array = array;
-	this.ct = array.getClass().getComponentType();
 	this.i = i;
 	this.oa = (Object[]) (array instanceof Object[] ? array : null);
 //    this._rest = this;
@@ -63,7 +61,6 @@ ArraySeq(Object array, int i){
 ArraySeq(IPersistentMap meta, Object array, int i){
 	super(meta);
 	this.array = array;
-	this.ct = array.getClass().getComponentType();
 	this.i = i;
 	this.oa = (Object[]) (array instanceof Object[] ? array : null);
 }
@@ -71,7 +68,7 @@ ArraySeq(IPersistentMap meta, Object array, int i){
 public Object first(){
 	if(oa != null)
 		return oa[i];
-	return Reflector.prepRet(ct, Array.get(array, i));
+	return Reflector.prepRet(Object.class, Array.get(array, i));
 }
 
 public ISeq next(){
@@ -111,9 +108,9 @@ public Object reduce(IFn f) {
 		return ret;
 		}
 
-	Object ret = Reflector.prepRet(ct, Array.get(array, i));
+	Object ret = Reflector.prepRet(Object.class, Array.get(array, i));
 	for(int x = i + 1; x < Array.getLength(array); x++)
-		ret = f.invoke(ret, Reflector.prepRet(ct, Array.get(array, x)));
+		ret = f.invoke(ret, Reflector.prepRet(Object.class, Array.get(array, x)));
 	return ret;
 }
 
@@ -125,9 +122,9 @@ public Object reduce(IFn f, Object start) {
 			ret = f.invoke(ret, oa[x]);
 		return ret;
 		}
-	Object ret = f.invoke(start, Reflector.prepRet(ct, Array.get(array, i)));
+	Object ret = f.invoke(start, Reflector.prepRet(Object.class, Array.get(array, i)));
 	for(int x = i + 1; x < Array.getLength(array); x++)
-		ret = f.invoke(ret, Reflector.prepRet(ct, Array.get(array, x)));
+		ret = f.invoke(ret, Reflector.prepRet(Object.class, Array.get(array, x)));
 	return ret;
 }
 
@@ -138,7 +135,7 @@ public int indexOf(Object o) {
 	} else {
 		int n = Array.getLength(array); 
 		for (int j = i; j < n; j++)
-			if (Util.equals(o, Reflector.prepRet(ct, Array.get(array, j)))) return j - i;
+			if (Util.equals(o, Reflector.prepRet(Object.class, Array.get(array, j)))) return j - i;
 	}
 	return -1;
 }
@@ -155,10 +152,10 @@ public int lastIndexOf(Object o) {
 	} else {
 		if (o == null) {
 			for (int j = Array.getLength(array) - 1 ; j >= i; j--)
-				if (Reflector.prepRet(ct, Array.get(array, j)) == null) return j - i;
+				if (Reflector.prepRet(Object.class, Array.get(array, j)) == null) return j - i;
 		} else {
 			for (int j = Array.getLength(array) - 1 ; j >= i; j--)
-				if (o.equals(Reflector.prepRet(ct, Array.get(array, j)))) return j - i;
+				if (o.equals(Reflector.prepRet(Object.class, Array.get(array, j)))) return j - i;
 		}
 	}
 	return -1;
