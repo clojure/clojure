@@ -554,7 +554,7 @@
                     (let [gargs (map #(gensym (str "gf__" % "__")) args)
                           target (first gargs)]
                       `([~@gargs]
-                          (. ~(with-meta target {:tag on-interface})  ~(or on-method method) ~@(rest gargs)))))
+                          (. ~(with-meta target {:tag on-interface}) (~(or on-method method) ~@(rest gargs))))))
                   arglists))
              ^clojure.lang.AFunction f#
              (fn ~gthis
