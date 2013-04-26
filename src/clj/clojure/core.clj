@@ -4414,9 +4414,9 @@
          (cons (re-groups m) (lazy-seq (step))))))))
 
 (defn re-matches
-  "Returns the match, if any, of string to pattern, using
-  java.util.regex.Matcher.matches().  Uses re-groups to return the
-  groups."
+  "Returns the match, if any, only if the entire string matches the
+  pattern, using java.util.regex.Matcher.matches().  Uses re-groups
+  to return the groups."
   {:added "1.0"
    :static true}
   [^java.util.regex.Pattern re s]
@@ -4426,9 +4426,9 @@
 
 
 (defn re-find
-  "Returns the next regex match, if any, of string to pattern, using
-  java.util.regex.Matcher.find().  Uses re-groups to return the
-  groups."
+  "Returns the first match, if any, of any part of the string that
+  matches the pattern, using java.util.regex.Matcher.find().  Uses
+  re-groups to return the groups."
   {:added "1.0"
    :static true}
   ([^java.util.regex.Matcher m]
