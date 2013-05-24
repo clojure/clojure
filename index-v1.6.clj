@@ -1,6 +1,6 @@
 {:namespaces
  ({:source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url "http://clojure.github.com/clojure/clojure.core-api.html",
    :name "clojure.core",
    :doc "Fundamental library of the Clojure language"}
@@ -17,27 +17,27 @@
    :author "Rich Hickey",
    :doc "edn reading."}
   {:source-url
-   "https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj",
+   "https://github.com/clojure/clojure/blob/9b1db94bf707c155472864d1a823965b72a0fe0e/src/clj/clojure/inspector.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.inspector-api.html",
    :name "clojure.inspector",
    :author "Rich Hickey",
    :doc "Graphical object inspector for Clojure data structures."}
   {:source-url
-   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   "https://github.com/clojure/clojure/blob/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.instant-api.html",
    :name "clojure.instant",
    :doc nil}
   {:source-url
-   "https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/java/browse.clj",
+   "https://github.com/clojure/clojure/blob/ef00c7cffad10e6104d333f7f71a29163b06cd0a/src/clj/clojure/java/browse.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.java.browse-api.html",
    :name "clojure.java.browse",
    :author "Christophe Grand",
    :doc "Start a web browser from Clojure"}
   {:source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.java.io-api.html",
    :name "clojure.java.io",
@@ -56,7 +56,7 @@
    :name "clojure.java.shell",
    :doc nil}
   {:source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url "http://clojure.github.com/clojure/clojure.main-api.html",
    :name "clojure.main",
    :doc nil}
@@ -77,7 +77,7 @@
    :doc
    "Reflection on Host Types\nAlpha - subject to change.\n\nTwo main entry points: \n\n* type-reflect reflects on something that implements TypeReference.\n* reflect (for REPL use) reflects on the class of an instance, or\n  on a class if passed a class\n\nKey features:\n\n* Exposes the read side of reflection as pure data. Reflecting\n  on a type returns a map with keys :bases, :flags, and :members.\n\n* Canonicalizes class names as Clojure symbols. Types can extend\n  to the TypeReference protocol to indicate that they can be\n  unambiguously resolved as a type name. The canonical format\n  requires one non-Java-ish convention: array brackets are <>\n  instead of [] so they can be part of a Clojure symbol.\n\n* Pluggable Reflectors for different implementations. The default\n  JavaReflector is good when you have a class in hand, or use\n  the AsmReflector for \"hands off\" reflection without forcing\n  classes to load.\n\nPlatform implementers must:\n\n* Create an implementation of Reflector.\n* Create one or more implementations of TypeReference.\n* def default-reflector to be an instance that satisfies Reflector."}
   {:source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url "http://clojure.github.com/clojure/clojure.repl-api.html",
    :name "clojure.repl",
    :author
@@ -170,10 +170,10 @@
    :name "*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L960",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L960",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*",
    :doc
@@ -185,10 +185,10 @@
    :name "*'",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L948",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L948",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*'",
    :doc
@@ -199,46 +199,46 @@
   {:name "*1",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5659",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5664",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*1",
    :doc "bound in a repl thread to the most recent value printed",
    :var-type "var",
-   :line 5659,
+   :line 5664,
    :file "src/clj/clojure/core.clj"}
   {:name "*2",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5664",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5669",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*2",
    :doc
    "bound in a repl thread to the second most recent value printed",
    :var-type "var",
-   :line 5664,
+   :line 5669,
    :file "src/clj/clojure/core.clj"}
   {:name "*3",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5669",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5674",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*3",
    :doc
    "bound in a repl thread to the third most recent value printed",
    :var-type "var",
-   :line 5669,
+   :line 5674,
    :file "src/clj/clojure/core.clj"}
   {:file nil,
    :raw-source-url nil,
@@ -254,17 +254,17 @@
   {:name "*clojure-version*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6401",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6406",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*clojure-version*",
    :doc
    "The version info for Clojure core, as a map containing :major :minor \n:incremental and :qualifier keys. Feature releases may increment \n:minor and/or :major, bugfix releases will increment :incremental. \nPossible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\"",
    :var-type "var",
-   :line 6401,
+   :line 6406,
    :file "src/clj/clojure/core.clj"}
   {:file nil,
    :raw-source-url nil,
@@ -312,47 +312,47 @@
   {:name "*data-readers*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6843",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6848",
    :dynamic true,
    :added "1.4",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*data-readers*",
    :doc
    "Map from reader tag symbols to data reader Vars.\n\nWhen Clojure starts, it searches for files named 'data_readers.clj'\nat the root of the classpath. Each such file must contain a literal\nmap of symbols, like this:\n\n    {foo/bar my.project.foo/bar\n     foo/baz my.project/baz}\n\nThe first symbol in each pair is a tag that will be recognized by\nthe Clojure reader. The second symbol in the pair is the\nfully-qualified name of a Var which will be invoked by the reader to\nparse the form following the tag. For example, given the\ndata_readers.clj file above, the Clojure reader would parse this\nform:\n\n    #foo/bar [1 2 3]\n\nby invoking the Var #'my.project.foo/bar on the vector [1 2 3]. The\ndata reader function is invoked on the form AFTER it has been read\nas a normal Clojure data structure by the reader.\n\nReader tags without namespace qualifiers are reserved for\nClojure. Default reader tags are defined in\nclojure.core/default-data-readers but may be overridden in\ndata_readers.clj or by rebinding this Var.",
    :var-type "var",
-   :line 6843,
+   :line 6848,
    :file "src/clj/clojure/core.clj"}
   {:name "*default-data-reader-fn*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6872",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6877",
    :dynamic true,
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*default-data-reader-fn*",
    :doc
    "When no data reader is found for a tag and *default-data-reader-fn*\nis non-nil, it will be called with two arguments,\nthe tag and the value.  If *default-data-reader-fn* is nil (the\ndefault), an exception will be thrown for the unknown tag.",
    :var-type "var",
-   :line 6872,
+   :line 6877,
    :file "src/clj/clojure/core.clj"}
   {:name "*e",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5674",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5679",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*e",
    :doc
    "bound in a repl thread to the most recent exception caught by the repl",
    :var-type "var",
-   :line 5674,
+   :line 5679,
    :file "src/clj/clojure/core.clj"}
   {:file nil,
    :raw-source-url nil,
@@ -434,11 +434,11 @@
   {:name "*print-length*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/53201d8c38a984401ae9d70190cf1959902edf64/src/clj/clojure/core_print.clj#L15",
+   "https://github.com/clojure/clojure/blob/4a29ce2ffdb44a346e9ae4702fa30089597dfc81/src/clj/clojure/core_print.clj#L15",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/53201d8c38a984401ae9d70190cf1959902edf64/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/4a29ce2ffdb44a346e9ae4702fa30089597dfc81/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-length*",
    :doc
@@ -449,11 +449,11 @@
   {:name "*print-level*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/53201d8c38a984401ae9d70190cf1959902edf64/src/clj/clojure/core_print.clj#L26",
+   "https://github.com/clojure/clojure/blob/4a29ce2ffdb44a346e9ae4702fa30089597dfc81/src/clj/clojure/core_print.clj#L26",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/53201d8c38a984401ae9d70190cf1959902edf64/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/4a29ce2ffdb44a346e9ae4702fa30089597dfc81/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-level*",
    :doc
@@ -520,10 +520,10 @@
    :name "+",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L936",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L936",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/+",
    :doc
@@ -535,10 +535,10 @@
    :name "+'",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L924",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L924",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/+'",
    :doc
@@ -550,10 +550,10 @@
    :name "-",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L995",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L995",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/-",
    :doc
@@ -565,10 +565,10 @@
    :name "-'",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L983",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L983",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/-'",
    :doc
@@ -580,10 +580,10 @@
    :name "->",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1545",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1545",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/->",
    :doc
@@ -595,10 +595,10 @@
    :name "->>",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1557",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1557",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/->>",
    :doc
@@ -610,9 +610,9 @@
    :name "->ArrayChunk",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/0245f15c9c7bd2d043f0f6e59fff0a692d7466b1/src/clj/clojure/gvec.clj#L34",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/gvec.clj#L34",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/0245f15c9c7bd2d043f0f6e59fff0a692d7466b1/src/clj/clojure/gvec.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/gvec.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/->ArrayChunk",
    :doc
@@ -624,9 +624,9 @@
    :name "->Vec",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/0245f15c9c7bd2d043f0f6e59fff0a692d7466b1/src/clj/clojure/gvec.clj#L122",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/gvec.clj#L122",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/0245f15c9c7bd2d043f0f6e59fff0a692d7466b1/src/clj/clojure/gvec.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/gvec.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/->Vec",
    :doc "Positional factory function for class clojure.core.Vec.",
@@ -637,9 +637,9 @@
    :name "->VecNode",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/0245f15c9c7bd2d043f0f6e59fff0a692d7466b1/src/clj/clojure/gvec.clj#L15",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/gvec.clj#L15",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/0245f15c9c7bd2d043f0f6e59fff0a692d7466b1/src/clj/clojure/gvec.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/gvec.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/->VecNode",
    :doc "Positional factory function for class clojure.core.VecNode.",
@@ -650,9 +650,9 @@
    :name "->VecSeq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/0245f15c9c7bd2d043f0f6e59fff0a692d7466b1/src/clj/clojure/gvec.clj#L54",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/gvec.clj#L54",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/0245f15c9c7bd2d043f0f6e59fff0a692d7466b1/src/clj/clojure/gvec.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/gvec.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/->VecSeq",
    :doc "Positional factory function for class clojure.core.VecSeq.",
@@ -663,10 +663,10 @@
    :name "..",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1527",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1527",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/..",
    :doc
@@ -678,10 +678,10 @@
    :name "/",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L972",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L972",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core//",
    :doc
@@ -693,10 +693,10 @@
    :name "<",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L852",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L852",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/<",
    :doc
@@ -708,10 +708,10 @@
    :name "<=",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1007",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1007",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/<=",
    :doc
@@ -723,10 +723,10 @@
    :name "=",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L735",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L735",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/=",
    :doc
@@ -738,10 +738,10 @@
    :name "==",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1052",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1052",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/==",
    :doc
@@ -753,10 +753,10 @@
    :name ">",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1022",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1022",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/>",
    :doc
@@ -768,10 +768,10 @@
    :name ">=",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1037",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1037",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/>=",
    :doc
@@ -783,56 +783,56 @@
    :name "accessor",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3680",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3683",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/accessor",
    :doc
    "Returns a fn that, given an instance of a structmap with the basis,\nreturns the value at the key.  The key must be in the basis. The\nreturned function should be (slightly) more efficient than using\nget, but such use of accessors should be limited to known\nperformance-critical areas.",
    :var-type "function",
-   :line 3680,
+   :line 3683,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array]),
    :name "aclone",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3514",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3517",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aclone",
    :doc
    "Returns a clone of the Java array. Works on arrays of known\ntypes.",
    :var-type "function",
-   :line 3514,
+   :line 3517,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([url]),
    :name "add-classpath",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4645",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4650",
    :deprecated "1.1",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/add-classpath",
    :doc
    "DEPRECATED \n\nAdds the url (String or URL object) to the classpath per\nURLClassLoader.addURL",
    :var-type "function",
-   :line 4645,
+   :line 4650,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([reference key fn]),
    :name "add-watch",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1950",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1950",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/add-watch",
    :doc
@@ -844,10 +844,10 @@
    :name "agent",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1860",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1860",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/agent",
    :doc
@@ -859,10 +859,10 @@
    :name "agent-error",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1977",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1977",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/agent-error",
    :doc
@@ -874,11 +874,11 @@
    :name "agent-errors",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2044",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2044",
    :deprecated "1.2",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/agent-errors",
    :doc
@@ -890,69 +890,69 @@
    :name "aget",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3521",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3524",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aget",
    :doc
    "Returns the value at the index/indices. Works on Java arrays of all\ntypes.",
    :var-type "function",
-   :line 3521,
+   :line 3524,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array]),
    :name "alength",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3507",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3510",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/alength",
    :doc
    "Returns the length of the Java array. Works on arrays of all\ntypes.",
    :var-type "function",
-   :line 3507,
+   :line 3510,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([alias namespace-sym]),
    :name "alias",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3862",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3865",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/alias",
    :doc
    "Add an alias in the current namespace to another\nnamespace. Arguments are two symbols: the alias to be used, and\nthe symbolic name of the target namespace. Use :as in the ns macro in preference\nto calling this directly.",
    :var-type "function",
-   :line 3862,
+   :line 3865,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([]),
    :name "all-ns",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3745",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3748",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/all-ns",
    :doc "Returns a sequence of all namespaces.",
    :var-type "function",
-   :line 3745,
+   :line 3748,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ref fun & args]),
    :name "alter",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2234",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2234",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/alter",
    :doc
@@ -964,10 +964,10 @@
    :name "alter-meta!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2197",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2197",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/alter-meta!",
    :doc
@@ -979,55 +979,55 @@
    :name "alter-var-root",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4941",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4946",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/alter-var-root",
    :doc
    "Atomically alters the root binding of var v by applying f to its\ncurrent value plus any args",
    :var-type "function",
-   :line 4941,
+   :line 4946,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([a idx ret expr]),
    :name "amap",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4693",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4698",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/amap",
    :doc
    "Maps an expression across an array a, using an index named idx, and\nreturn value named ret, initialized to a clone of a, then setting \neach element of ret to the evaluation of expr, returning the new \narray ret.",
    :var-type "macro",
-   :line 4693,
+   :line 4698,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([tag] [h tag]),
    :name "ancestors",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5034",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5039",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ancestors",
    :doc
    "Returns the immediate and indirect parents of tag, either via a Java type\ninheritance relationship or a relationship established via derive. h\nmust be a hierarchy obtained from make-hierarchy, if not supplied\ndefaults to the global hierarchy",
    :var-type "function",
-   :line 5034,
+   :line 5039,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([] [x] [x & next]),
    :name "and",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L794",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L794",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/and",
    :doc
@@ -1044,10 +1044,10 @@
    :name "apply",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L612",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L612",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/apply",
    :doc
@@ -1059,205 +1059,205 @@
    :name "areduce",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4709",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4714",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/areduce",
    :doc
    "Reduces an expression across an array a, using an index named idx,\nand return value named ret, initialized to init, setting ret to the \nevaluation of expr at each step, returning ret.",
    :var-type "macro",
-   :line 4709,
+   :line 4714,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([] [& keyvals]),
    :name "array-map",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3963",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3968",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/array-map",
    :doc
    "Constructs an array-map. If any keys are equal, they are handled as\nif by repeated uses of assoc.",
    :var-type "function",
-   :line 3963,
+   :line 3968,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([expr name & forms]),
    :name "as->",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6803",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6808",
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/as->",
    :doc
    "Binds name to expr, evaluates the first form in the lexical context\nof that binding, then binds name to that result, repeating for each\nsuccessive form, returning the result of the last form.",
    :var-type "macro",
-   :line 6803,
+   :line 6808,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array idx val] [array idx idx2 & idxv]),
    :name "aset",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3532",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3535",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aset",
    :doc
    "Sets the value at the index/indices. Works on Java arrays of\nreference types. Returns val.",
    :var-type "function",
-   :line 3532,
+   :line 3535,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array idx val] [array idx idx2 & idxv]),
    :name "aset-boolean",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3565",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3568",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aset-boolean",
    :doc
    "Sets the value at the index/indices. Works on arrays of boolean. Returns val.",
    :var-type "function",
-   :line 3565,
+   :line 3568,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array idx val] [array idx idx2 & idxv]),
    :name "aset-byte",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3585",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3588",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aset-byte",
    :doc
    "Sets the value at the index/indices. Works on arrays of byte. Returns val.",
    :var-type "function",
-   :line 3585,
+   :line 3588,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array idx val] [array idx idx2 & idxv]),
    :name "aset-char",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3590",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3593",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aset-char",
    :doc
    "Sets the value at the index/indices. Works on arrays of char. Returns val.",
    :var-type "function",
-   :line 3590,
+   :line 3593,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array idx val] [array idx idx2 & idxv]),
    :name "aset-double",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3575",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3578",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aset-double",
    :doc
    "Sets the value at the index/indices. Works on arrays of double. Returns val.",
    :var-type "function",
-   :line 3575,
+   :line 3578,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array idx val] [array idx idx2 & idxv]),
    :name "aset-float",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3570",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3573",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aset-float",
    :doc
    "Sets the value at the index/indices. Works on arrays of float. Returns val.",
    :var-type "function",
-   :line 3570,
+   :line 3573,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array idx val] [array idx idx2 & idxv]),
    :name "aset-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3555",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3558",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aset-int",
    :doc
    "Sets the value at the index/indices. Works on arrays of int. Returns val.",
    :var-type "function",
-   :line 3555,
+   :line 3558,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array idx val] [array idx idx2 & idxv]),
    :name "aset-long",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3560",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3563",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aset-long",
    :doc
    "Sets the value at the index/indices. Works on arrays of long. Returns val.",
    :var-type "function",
-   :line 3560,
+   :line 3563,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([array idx val] [array idx idx2 & idxv]),
    :name "aset-short",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3580",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3583",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/aset-short",
    :doc
    "Sets the value at the index/indices. Works on arrays of short. Returns val.",
    :var-type "function",
-   :line 3580,
+   :line 3583,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x] [x message]),
    :name "assert",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4346",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4351",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/assert",
    :doc
    "Evaluates expr and throws an exception if it does not evaluate to\nlogical true.",
    :var-type "macro",
-   :line 4346,
+   :line 4351,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([map key val] [map key val & kvs]),
    :name "assoc",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L177",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L177",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/assoc",
    :doc
@@ -1269,54 +1269,54 @@
    :name "assoc!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3007",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3010",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/assoc!",
    :doc
    "Alpha - subject to change.\nWhen applied to a transient map, adds mapping of key(s) to\nval(s). When applied to a transient vector, sets the val at index.\nNote - index must be <= (count vector). Returns coll.",
    :var-type "function",
-   :line 3007,
+   :line 3010,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([m [k & ks] v]),
    :name "assoc-in",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5565",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5570",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/assoc-in",
    :doc
    "Associates a value in a nested associative structure, where ks is a\nsequence of keys and v is the new value and returns a new nested structure.\nIf any levels do not exist, hash-maps will be created.",
    :var-type "function",
-   :line 5565,
+   :line 5570,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "associative?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5629",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5634",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/associative?",
    :doc "Returns true if coll implements Associative",
    :var-type "function",
-   :line 5629,
+   :line 5634,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x] [x & options]),
    :name "atom",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2135",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2135",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/atom",
    :doc
@@ -1328,46 +1328,46 @@
    :name "await",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2912",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2915",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/await",
    :doc
    "Blocks the current thread (indefinitely!) until all actions\ndispatched thus far, from this thread or agent, to the agent(s) have\noccurred.  Will block on failed agents.  Will never return if\na failed agent is restarted with :clear-actions true.",
    :var-type "function",
-   :line 2912,
+   :line 2915,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([timeout-ms & agents]),
    :name "await-for",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2934",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2937",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/await-for",
    :doc
    "Blocks the current thread until all actions dispatched thus\nfar (from this thread or agent) to the agents have occurred, or the\ntimeout (in milliseconds) has elapsed. Returns logical false if\nreturning due to timeout, logical true otherwise.",
    :var-type "function",
-   :line 2934,
+   :line 2937,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([c]),
    :name "bases",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4979",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4984",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bases",
    :doc
    "Returns the immediate superclass and direct interfaces of c, if any",
    :var-type "function",
-   :line 4979,
+   :line 4984,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "bean",
@@ -1388,52 +1388,52 @@
    :name "bigdec",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3295",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3298",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bigdec",
    :doc "Coerce to BigDecimal",
    :var-type "function",
-   :line 3295,
+   :line 3298,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "bigint",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3269",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3272",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bigint",
    :doc "Coerce to BigInt",
    :var-type "function",
-   :line 3269,
+   :line 3272,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "biginteger",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3282",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3285",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/biginteger",
    :doc "Coerce to BigInteger",
    :var-type "function",
-   :line 3282,
+   :line 3285,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([bindings & body]),
    :name "binding",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1753",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1753",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/binding",
    :doc
@@ -1445,10 +1445,10 @@
    :name "bit-and",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1245",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1245",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-and",
    :doc "Bitwise and",
@@ -1459,10 +1459,10 @@
    :name "bit-and-not",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1272",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1272",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-and-not",
    :doc "Bitwise and with complement",
@@ -1473,10 +1473,10 @@
    :name "bit-clear",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1283",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1283",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-clear",
    :doc "Clear bit at index n",
@@ -1487,10 +1487,10 @@
    :name "bit-flip",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1295",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1295",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-flip",
    :doc "Flip bit at index n",
@@ -1501,10 +1501,10 @@
    :name "bit-not",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1238",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1238",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-not",
    :doc "Bitwise complement",
@@ -1515,10 +1515,10 @@
    :name "bit-or",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1254",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1254",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-or",
    :doc "Bitwise or",
@@ -1529,10 +1529,10 @@
    :name "bit-set",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1289",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1289",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-set",
    :doc "Set bit at index n",
@@ -1543,10 +1543,10 @@
    :name "bit-shift-left",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1308",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1308",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-shift-left",
    :doc "Bitwise shift left",
@@ -1557,10 +1557,10 @@
    :name "bit-shift-right",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1314",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1314",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-shift-right",
    :doc "Bitwise shift right",
@@ -1571,10 +1571,10 @@
    :name "bit-test",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1301",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1301",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-test",
    :doc "Test bit at index n",
@@ -1585,10 +1585,10 @@
    :name "bit-xor",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1263",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1263",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bit-xor",
    :doc "Bitwise exclusive or",
@@ -1599,52 +1599,52 @@
    :name "boolean",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3159",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3162",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/boolean",
    :doc "Coerce to boolean",
    :var-type "function",
-   :line 3159,
+   :line 3162,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([size-or-seq] [size init-val-or-seq]),
    :name "boolean-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4729",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4734",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/boolean-array",
    :doc "Creates an array of booleans",
    :var-type "function",
-   :line 4729,
+   :line 4734,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([xs]),
    :name "booleans",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4792",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4797",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/booleans",
    :doc "Casts to boolean[]",
    :var-type "function",
-   :line 4792,
+   :line 4797,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& fntail]),
    :name "bound-fn",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1812",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1812",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bound-fn",
    :doc
@@ -1656,10 +1656,10 @@
    :name "bound-fn*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1800",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1800",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bound-fn*",
    :doc
@@ -1671,25 +1671,25 @@
    :name "bound?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4948",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4953",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bound?",
    :doc
    "Returns true if all of the vars provided as arguments have any bound value, root or thread-local.\nImplies that deref'ing the provided vars will succeed. Returns true if no vars are provided.",
    :var-type "function",
-   :line 4948,
+   :line 4953,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "butlast",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L255",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L255",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/butlast",
    :doc
@@ -1701,67 +1701,67 @@
    :name "byte",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3147",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3150",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/byte",
    :doc "Coerce to byte",
    :var-type "function",
-   :line 3147,
+   :line 3150,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([size-or-seq] [size init-val-or-seq]),
    :name "byte-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4737",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4742",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/byte-array",
    :doc "Creates an array of bytes",
    :var-type "function",
-   :line 4737,
+   :line 4742,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([xs]),
    :name "bytes",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4797",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4802",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bytes",
    :doc "Casts to bytes[]",
    :var-type "function",
-   :line 4797,
+   :line 4802,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([e & clauses]),
    :name "case",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6075",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6080",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/case",
    :doc
    "Takes an expression, and a set of clauses.\n\nEach clause can take the form of either:\n\ntest-constant result-expr\n\n(test-constant1 ... test-constantN)  result-expr\n\nThe test-constants are not evaluated. They must be compile-time\nliterals, and need not be quoted.  If the expression is equal to a\ntest-constant, the corresponding result-expr is returned. A single\ndefault expression can follow the clauses, and its value will be\nreturned if no clause matches. If no default expression is provided\nand no clause matches, an IllegalArgumentException is thrown.\n\nUnlike cond and condp, case does a constant-time dispatch, the\nclauses are not considered sequentially.  All manner of constant\nexpressions are acceptable in case, including numbers, strings,\nsymbols, keywords, and (Clojure) composites thereof. Note that since\nlists are used to group multiple constants that map to the same\nexpression, a vector can be used to match a list if needed. The\ntest-constants need not be all of the same type.",
    :var-type "macro",
-   :line 6075,
+   :line 6080,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([c x]),
    :name "cast",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L320",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L320",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/cast",
    :doc "Throws a ClassCastException if x is not a c, else returns x.",
@@ -1772,64 +1772,64 @@
    :name "char",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3153",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3156",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/char",
    :doc "Coerce to char",
    :var-type "function",
-   :line 3153,
+   :line 3156,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([size-or-seq] [size init-val-or-seq]),
    :name "char-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4745",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4750",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/char-array",
    :doc "Creates an array of chars",
    :var-type "function",
-   :line 4745,
+   :line 4750,
    :file "src/clj/clojure/core.clj"}
   {:name "char-escape-string",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/53201d8c38a984401ae9d70190cf1959902edf64/src/clj/clojure/core_print.clj#L167",
+   "https://github.com/clojure/clojure/blob/4a29ce2ffdb44a346e9ae4702fa30089597dfc81/src/clj/clojure/core_print.clj#L171",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/53201d8c38a984401ae9d70190cf1959902edf64/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/4a29ce2ffdb44a346e9ae4702fa30089597dfc81/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/char-escape-string",
    :doc "Returns escape string for char or nil if none",
    :var-type "var",
-   :line 167,
+   :line 171,
    :file "src/clj/clojure/core_print.clj"}
   {:name "char-name-string",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/53201d8c38a984401ae9d70190cf1959902edf64/src/clj/clojure/core_print.clj#L281",
+   "https://github.com/clojure/clojure/blob/4a29ce2ffdb44a346e9ae4702fa30089597dfc81/src/clj/clojure/core_print.clj#L285",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/53201d8c38a984401ae9d70190cf1959902edf64/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/4a29ce2ffdb44a346e9ae4702fa30089597dfc81/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/char-name-string",
    :doc "Returns name string for char or nil if none",
    :var-type "var",
-   :line 281,
+   :line 285,
    :file "src/clj/clojure/core_print.clj"}
   {:arglists ([x]),
    :name "char?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L149",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L149",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/char?",
    :doc "Return true if x is a Character",
@@ -1840,53 +1840,53 @@
    :name "chars",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4802",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4807",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/chars",
    :doc "Casts to chars[]",
    :var-type "function",
-   :line 4802,
+   :line 4807,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "class",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3103",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3106",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/class",
    :doc "Returns the Class of x",
    :var-type "function",
-   :line 3103,
+   :line 3106,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "class?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4879",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4884",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/class?",
    :doc "Returns true if x is an instance of Class",
    :var-type "function",
-   :line 4879,
+   :line 4884,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([a]),
    :name "clear-agent-errors",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2054",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2054",
    :deprecated "1.2",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/clear-agent-errors",
    :doc
@@ -1898,52 +1898,52 @@
    :name "clojure-version",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6413",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6418",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/clojure-version",
    :doc "Returns clojure version as a printable string.",
    :var-type "function",
-   :line 6413,
+   :line 6418,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "coll?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5597",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5602",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/coll?",
    :doc "Returns true if x implements IPersistentCollection",
    :var-type "function",
-   :line 5597,
+   :line 5602,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& body]),
    :name "comment",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4265",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4270",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/comment",
    :doc "Ignores body, yields nil",
    :var-type "macro",
-   :line 4265,
+   :line 4270,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ref fun & args]),
    :name "commute",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2213",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2213",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/commute",
    :doc
@@ -1955,10 +1955,10 @@
    :name "comp",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2319",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2319",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/comp",
    :doc
@@ -1970,25 +1970,25 @@
    :name "comparator",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2734",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2737",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/comparator",
    :doc
    "Returns an implementation of java.util.Comparator based upon pred.",
    :var-type "function",
-   :line 2734,
+   :line 2737,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x y]),
    :name "compare",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L783",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L783",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/compare",
    :doc
@@ -2000,10 +2000,10 @@
    :name "compare-and-set!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2165",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2165",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/compare-and-set!",
    :doc
@@ -2015,25 +2015,25 @@
    :name "compile",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5532",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5537",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/compile",
    :doc
    "Compiles the namespace named by the symbol lib into a set of\nclassfiles. The source for the lib must be in a proper\nclasspath-relative directory. The output files will go into the\ndirectory specified by *compile-path*, and that directory too must\nbe in the classpath.",
    :var-type "function",
-   :line 5532,
+   :line 5537,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f]),
    :name "complement",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1349",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1349",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/complement",
    :doc
@@ -2045,10 +2045,10 @@
    :name "concat",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L670",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L670",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/concat",
    :doc
@@ -2060,10 +2060,10 @@
    :name "cond",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L551",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L551",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/cond",
    :doc
@@ -2075,55 +2075,55 @@
    :name "cond->",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6775",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6780",
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/cond->",
    :doc
    "Takes an expression and a set of test/form pairs. Threads expr (via ->)\nthrough each form for which the corresponding test\nexpression is true. Note that, unlike cond branching, cond-> threading does\nnot short circuit after the first true test expression.",
    :var-type "macro",
-   :line 6775,
+   :line 6780,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([expr & clauses]),
    :name "cond->>",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6789",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6794",
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/cond->>",
    :doc
    "Takes an expression and a set of test/form pairs. Threads expr (via ->>)\nthrough each form for which the corresponding test expression\nis true.  Note that, unlike cond branching, cond->> threading does not short circuit\nafter the first true test expression.",
    :var-type "macro",
-   :line 6789,
+   :line 6794,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([pred expr & clauses]),
    :name "condp",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5739",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5744",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/condp",
    :doc
    "Takes a binary predicate, an expression, and a set of clauses.\nEach clause can take the form of either:\n\ntest-expr result-expr\n\ntest-expr :>> result-fn\n\nNote :>> is an ordinary keyword.\n\nFor each clause, (pred test-expr expr) is evaluated. If it returns\nlogical true, the clause is a match. If a binary clause matches, the\nresult-expr is returned, if a ternary clause matches, its result-fn,\nwhich must be a unary function, is called with the result of the\npredicate as its argument, the result of that call being the return\nvalue of condp. A single default expression can follow the clauses,\nand its value will be returned if no clause matches. If no default\nexpression is provided and no clause matches, an\nIllegalArgumentException is thrown.",
    :var-type "macro",
-   :line 5739,
+   :line 5744,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll x] [coll x & xs]),
    :name "conj",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L75",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L75",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/conj",
    :doc
@@ -2135,25 +2135,25 @@
    :name "conj!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2998",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3001",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/conj!",
    :doc
    "Alpha - subject to change.\nAdds x to the transient collection, and return coll. The 'addition'\nmay happen at different 'places' depending on the concrete type.",
    :var-type "function",
-   :line 2998,
+   :line 3001,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x seq]),
    :name "cons",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L22",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L22",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/cons",
    :doc
@@ -2165,10 +2165,10 @@
    :name "constantly",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1361",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1361",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/constantly",
    :doc
@@ -2195,10 +2195,10 @@
    :name "contains?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1394",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1394",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/contains?",
    :doc
@@ -2210,10 +2210,10 @@
    :name "count",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L826",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L826",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/count",
    :doc
@@ -2225,53 +2225,53 @@
    :name "counted?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5647",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5652",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/counted?",
    :doc "Returns true if coll implements count in constant time",
    :var-type "function",
-   :line 5647,
+   :line 5652,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([sym]),
    :name "create-ns",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3730",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3733",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/create-ns",
    :doc
    "Create a new namespace named by the symbol if one doesn't already\nexist, returns it or the already-existing namespace of the same\nname.",
    :var-type "function",
-   :line 3730,
+   :line 3733,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& keys]),
    :name "create-struct",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3647",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3650",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/create-struct",
    :doc "Returns a structure basis object.",
    :var-type "function",
-   :line 3647,
+   :line 3650,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "cycle",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2611",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2611",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/cycle",
    :doc
@@ -2283,10 +2283,10 @@
    :name "dec",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1094",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1094",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/dec",
    :doc
@@ -2298,10 +2298,10 @@
    :name "dec'",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1087",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1087",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/dec'",
    :doc
@@ -2313,59 +2313,59 @@
    :name "decimal?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3248",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3251",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/decimal?",
    :doc "Returns true if n is a BigDecimal",
    :var-type "function",
-   :line 3248,
+   :line 3251,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& names]),
    :name "declare",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2720",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2723",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/declare",
    :doc
    "defs the supplied var names with no bindings, useful for making forward declarations.",
    :var-type "macro",
-   :line 2720,
+   :line 2723,
    :file "src/clj/clojure/core.clj"}
   {:name "default-data-readers",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6837",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6842",
    :added "1.4",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/default-data-readers",
    :doc
    "Default map of data reader functions provided by Clojure. May be\noverridden by binding *data-readers*.",
    :var-type "var",
-   :line 6837,
+   :line 6842,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([name & decl]),
    :name "definline",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4673",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4678",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/definline",
    :doc
    "Experimental - like defmacro, except defines a named function whose\nbody is the expansion, calls to which may be expanded inline as if\nit were a macro. Cannot be used with variadic (&) args.",
    :var-type "macro",
-   :line 4673,
+   :line 4678,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([name & sigs]),
    :name "definterface",
@@ -2388,10 +2388,10 @@
    :name "defmacro",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L422",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L422",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defmacro",
    :doc
@@ -2403,10 +2403,10 @@
    :name "defmethod",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1626",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1626",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defmethod",
    :doc
@@ -2418,10 +2418,10 @@
    :name "defmulti",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1584",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1584",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defmulti",
    :doc
@@ -2440,10 +2440,10 @@
    :name "defn",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L266",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L266",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defn",
    :doc
@@ -2455,30 +2455,30 @@
    :name "defn-",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4455",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4460",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defn-",
    :doc "same as defn, yielding non-public def",
    :var-type "macro",
-   :line 4455,
+   :line 4460,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([name expr]),
    :name "defonce",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5260",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5265",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defonce",
    :doc
    "defs name to have the root value of the expr iff the named var has no root value,\nelse expr is unevaluated",
    :var-type "macro",
-   :line 5260,
+   :line 5265,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([name & opts+sigs]),
    :name "defprotocol",
@@ -2514,15 +2514,15 @@
    :name "defstruct",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3654",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3657",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defstruct",
    :doc "Same as (def name (create-struct keys...))",
    :var-type "macro",
-   :line 3654,
+   :line 3657,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([name [& fields] & opts+specs]),
    :name "deftype",
@@ -2543,10 +2543,10 @@
    :name "delay",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L698",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L698",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/delay",
    :doc
@@ -2558,10 +2558,10 @@
    :name "delay?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L707",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L707",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/delay?",
    :doc "returns true if x is a Delay created with delay",
@@ -2572,39 +2572,39 @@
    :name "deliver",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6460",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6465",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/deliver",
    :doc
    "Alpha - subject to change.\nDelivers the supplied value to the promise, releasing any pending\nderefs. A subsequent call to deliver on a promise will have no effect.",
    :var-type "function",
-   :line 6460,
+   :line 6465,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([r]),
    :name "denominator",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3240",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3243",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/denominator",
    :doc "Returns the denominator part of a Ratio.",
    :var-type "function",
-   :line 3240,
+   :line 3243,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ref] [ref timeout-ms timeout-val]),
    :name "deref",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2114",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2114",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/deref",
    :doc
@@ -2616,40 +2616,40 @@
    :name "derive",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5062",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5067",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/derive",
    :doc
    "Establishes a parent/child relationship between parent and\ntag. Parent must be a namespace-qualified symbol or keyword and\nchild can be either a namespace-qualified symbol or keyword or a\nclass. h must be a hierarchy obtained from make-hierarchy, if not\nsupplied defaults to, and modifies, the global hierarchy.",
    :var-type "function",
-   :line 5062,
+   :line 5067,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([tag] [h tag]),
    :name "descendants",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5050",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5055",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/descendants",
    :doc
    "Returns the immediate and indirect children of tag, through a\nrelationship established via derive. h must be a hierarchy obtained\nfrom make-hierarchy, if not supplied defaults to the global\nhierarchy. Note: does not work on Java type inheritance\nrelationships.",
    :var-type "function",
-   :line 5050,
+   :line 5055,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([set] [set key] [set key & ks]),
    :name "disj",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1428",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1428",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/disj",
    :doc
@@ -2661,25 +2661,25 @@
    :name "disj!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3042",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3045",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/disj!",
    :doc
    "Alpha - subject to change.\ndisj[oin]. Returns a transient set of the same (hashed/sorted) type, that\ndoes not contain key(s).",
    :var-type "function",
-   :line 3042,
+   :line 3045,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([map] [map key] [map key & ks]),
    :name "dissoc",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1414",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1414",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/dissoc",
    :doc
@@ -2691,186 +2691,186 @@
    :name "dissoc!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3021",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3024",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/dissoc!",
    :doc
    "Alpha - subject to change.\nReturns a transient map that doesn't contain a mapping for key(s).",
    :var-type "function",
-   :line 3021,
+   :line 3024,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "distinct",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4537",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4542",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/distinct",
    :doc
    "Returns a lazy sequence of the elements of coll with duplicates removed",
    :var-type "function",
-   :line 4537,
+   :line 4542,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x] [x y] [x y & more]),
    :name "distinct?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5121",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5126",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/distinct?",
    :doc "Returns true if no two of the arguments are =",
    :var-type "function",
-   :line 5121,
+   :line 5126,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll] [n coll]),
    :name "doall",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2786",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2789",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/doall",
    :doc
    "When lazy sequences are produced via functions that have side\neffects, any effects other than those needed to produce the first\nelement in the seq do not occur until the seq is consumed. doall can\nbe used to force any effects. Walks through the successive nexts of\nthe seq, retains the head and returns it, thus causing the entire\nseq to reside in memory at one time.",
    :var-type "function",
-   :line 2786,
+   :line 2789,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll] [n coll]),
    :name "dorun",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2771",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2774",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/dorun",
    :doc
    "When lazy sequences are produced via functions that have side\neffects, any effects other than those needed to produce the first\nelement in the seq do not occur until the seq is consumed. dorun can\nbe used to force any effects. Walks through the successive nexts of\nthe seq, does not retain the head and returns nil.",
    :var-type "function",
-   :line 2771,
+   :line 2774,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([seq-exprs & body]),
    :name "doseq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2854",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2857",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/doseq",
    :doc
    "Repeatedly executes body (presumably for side-effects) with\nbindings and filtering as provided by \"for\".  Does not retain\nthe head of the sequence. Returns nil.",
    :var-type "macro",
-   :line 2854,
+   :line 2857,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& exprs]),
    :name "dosync",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4569",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4574",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/dosync",
    :doc
    "Runs the exprs (in an implicit do) in a transaction that encompasses\nexprs and any nested calls.  Starts a transaction if none is already\nrunning on this thread. Any uncaught exception will abort the\ntransaction and flow out of dosync. The exprs may be run more than\nonce, but any effects on Refs will be atomic.",
    :var-type "macro",
-   :line 4569,
+   :line 4574,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([bindings & body]),
    :name "dotimes",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2951",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2954",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/dotimes",
    :doc
    "bindings => name n\n\nRepeatedly executes body (presumably for side-effects) with name\nbound to integers from 0 through n-1.",
    :var-type "macro",
-   :line 2951,
+   :line 2954,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x & forms]),
    :name "doto",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3463",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3466",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/doto",
    :doc
    "Evaluates x then calls all of the methods and functions with the\nvalue of x supplied at the front of the given arguments.  The forms\nare evaluated in order.  Returns x.\n\n(doto (new java.util.HashMap) (.put \"a\" 1) (.put \"b\" 2))",
    :var-type "macro",
-   :line 3463,
+   :line 3466,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "double",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3135",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3138",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/double",
    :doc "Coerce to double",
    :var-type "function",
-   :line 3135,
+   :line 3138,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([size-or-seq] [size init-val-or-seq]),
    :name "double-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4761",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4766",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/double-array",
    :doc "Creates an array of doubles",
    :var-type "function",
-   :line 4761,
+   :line 4766,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([xs]),
    :name "doubles",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4822",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4827",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/doubles",
    :doc "Casts to double[]",
    :var-type "function",
-   :line 4822,
+   :line 4827,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([n coll]),
    :name "drop",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2568",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2568",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/drop",
    :doc
@@ -2882,10 +2882,10 @@
    :name "drop-last",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2580",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2580",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/drop-last",
    :doc
@@ -2897,10 +2897,10 @@
    :name "drop-while",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2598",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2598",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/drop-while",
    :doc
@@ -2912,40 +2912,40 @@
    :name "empty",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4685",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4690",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/empty",
    :doc
    "Returns an empty collection of the same category as coll, or nil",
    :var-type "function",
-   :line 4685,
+   :line 4690,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "empty?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5590",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5595",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/empty?",
    :doc
    "Returns true if coll has no items - same as (not (seq coll)).\nPlease use the idiom (seq x) rather than (not (empty? x))",
    :var-type "function",
-   :line 5590,
+   :line 5595,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ref]),
    :name "ensure",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2279",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2279",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ensure",
    :doc
@@ -2957,24 +2957,24 @@
    :name "enumeration-seq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5165",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5170",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/enumeration-seq",
    :doc "Returns a seq on a java.util.Enumeration",
    :var-type "function",
-   :line 5165,
+   :line 5170,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([a]),
    :name "error-handler",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2012",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2012",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/error-handler",
    :doc
@@ -2986,10 +2986,10 @@
    :name "error-mode",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2037",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2037",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/error-mode",
    :doc "Returns the error-mode of agent a.  See set-error-mode!",
@@ -3000,25 +3000,25 @@
    :name "eval",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2848",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2851",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/eval",
    :doc
    "Evaluates the form data structure (not text!) and returns the result.",
    :var-type "function",
-   :line 2848,
+   :line 2851,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([n]),
    :name "even?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1332",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1332",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/even?",
    :doc
@@ -3030,25 +3030,25 @@
    :name "every-pred",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6633",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6638",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/every-pred",
    :doc
    "Takes a set of predicates and returns a function f that returns true if all of its\ncomposing predicates return a logical true value against all of its arguments, else it returns\nfalse. Note that f is short-circuiting in that it will stop execution on the first\nargument that triggers a logical false result against the original predicates.",
    :var-type "function",
-   :line 6633,
+   :line 6638,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([pred coll]),
    :name "every?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2414",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2414",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/every?",
    :doc
@@ -3060,31 +3060,31 @@
    :name "ex-data",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4337",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4342",
    :added "1.4",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ex-data",
    :doc
    "Alpha - subject to change.\nReturns exception data (a map) if ex is an IExceptionInfo.\nOtherwise returns nil.",
    :var-type "function",
-   :line 4337,
+   :line 4342,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([msg map] [msg map cause]),
    :name "ex-info",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4327",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4332",
    :added "1.4",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ex-info",
    :doc
    "Alpha - subject to change.\nCreate an instance of ExceptionInfo, a RuntimeException subclass\nthat carries a map of additional data.",
    :var-type "function",
-   :line 4327,
+   :line 4332,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([atype & proto+mmaps]),
    :name "extend",
@@ -3164,10 +3164,10 @@
    :name "false?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L483",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L483",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/false?",
    :doc "Returns true if x is the value false, false otherwise.",
@@ -3178,10 +3178,10 @@
    :name "ffirst",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L96",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L96",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ffirst",
    :doc "Same as (first (first x))",
@@ -3192,24 +3192,24 @@
    :name "file-seq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4478",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4483",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/file-seq",
    :doc "A tree seq on java.io.Files",
    :var-type "function",
-   :line 4478,
+   :line 4483,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([pred coll]),
    :name "filter",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2516",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2516",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/filter",
    :doc
@@ -3221,25 +3221,25 @@
    :name "filterv",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6250",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6255",
    :added "1.4",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/filterv",
    :doc
    "Returns a vector of the items in coll for which\n(pred item) returns true. pred must be free of side-effects.",
    :var-type "function",
-   :line 6250,
+   :line 6255,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([map key]),
    :name "find",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1444",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1444",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/find",
    :doc "Returns the map entry for key, or nil if key not present.",
@@ -3250,10 +3250,10 @@
    :name "find-keyword",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L577",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L577",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/find-keyword",
    :doc
@@ -3265,25 +3265,25 @@
    :name "find-ns",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3724",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3727",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/find-ns",
    :doc
    "Returns the namespace named by the symbol or nil if it doesn't exist.",
    :var-type "function",
-   :line 3724,
+   :line 3727,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([sym]),
    :name "find-var",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1821",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1821",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/find-var",
    :doc
@@ -3295,10 +3295,10 @@
    :name "first",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L49",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L49",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/first",
    :doc
@@ -3310,126 +3310,126 @@
    :name "flatten",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6470",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6475",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/flatten",
    :doc
    "Takes any nested combination of sequential things (lists, vectors,\netc.) and returns their contents as a single, flat sequence.\n(flatten nil) returns an empty sequence.",
    :var-type "function",
-   :line 6470,
+   :line 6475,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "float",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3129",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3132",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/float",
    :doc "Coerce to float",
    :var-type "function",
-   :line 3129,
+   :line 3132,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([size-or-seq] [size init-val-or-seq]),
    :name "float-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4721",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4726",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/float-array",
    :doc "Creates an array of floats",
    :var-type "function",
-   :line 4721,
+   :line 4726,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([n]),
    :name "float?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3254",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3257",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/float?",
    :doc "Returns true if n is a floating point number",
    :var-type "function",
-   :line 3254,
+   :line 3257,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([xs]),
    :name "floats",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4812",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4817",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/floats",
    :doc "Casts to float[]",
    :var-type "function",
-   :line 4812,
+   :line 4817,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([]),
    :name "flush",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3353",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3356",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/flush",
    :doc
    "Flushes the output stream that is the current value of\n*out*",
    :var-type "function",
-   :line 3353,
+   :line 3356,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& sigs]),
    :name "fn",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4067",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4072",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/fn",
    :doc
    "params => positional-params* , or positional-params* & next-param\npositional-param => binding-form\nnext-param => binding-form\nname => symbol\n\nDefines a function",
    :var-type "macro",
-   :line 4067,
+   :line 4072,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "fn?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5622",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5627",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/fn?",
    :doc
    "Returns true if x implements Fn, i.e. is an object created via fn.",
    :var-type "function",
-   :line 5622,
+   :line 5627,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "fnext",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L110",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L110",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/fnext",
    :doc "Same as (first (next x))",
@@ -3440,40 +3440,40 @@
    :name "fnil",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5935",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5940",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/fnil",
    :doc
    "Takes a function f, and returns a function that calls f, replacing\na nil first argument to f with the supplied value x. Higher arity\nversions can replace arguments in the second and third\npositions (y, z). Note that the function f can take any number of\narguments, not just the one(s) being nil-patched.",
    :var-type "function",
-   :line 5935,
+   :line 5940,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([seq-exprs body-expr]),
    :name "for",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4178",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4183",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/for",
    :doc
    "List comprehension. Takes a vector of one or more\n binding-form/collection-expr pairs, each followed by zero or more\n modifiers, and yields a lazy sequence of evaluations of expr.\n Collections are iterated in a nested fashion, rightmost fastest,\n and nested coll-exprs can refer to bindings created in prior\n binding-forms.  Supported modifiers are: :let [binding-form expr ...],\n :while test, :when test.\n\n(take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)] [x y]))",
    :var-type "macro",
-   :line 4178,
+   :line 4183,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "force",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L713",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L713",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/force",
    :doc
@@ -3485,117 +3485,117 @@
    :name "format",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5172",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5177",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/format",
    :doc
    "Formats a string using java.lang.String.format, see java.util.Formatter for format\nstring syntax",
    :var-type "function",
-   :line 5172,
+   :line 5177,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "frequencies",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6507",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6512",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/frequencies",
    :doc
    "Returns a map from distinct items in coll to the number of times\nthey appear.",
    :var-type "function",
-   :line 6507,
+   :line 6512,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& body]),
    :name "future",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6322",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6327",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/future",
    :doc
    "Takes a body of expressions and yields a future object that will\ninvoke the body in another thread, and will cache the result and\nreturn it on all subsequent calls to deref/@. If the computation has\nnot yet finished, calls to deref/@ will block, unless the variant of\nderef with timeout is used. See also - realized?.",
    :var-type "macro",
-   :line 6322,
+   :line 6327,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f]),
    :name "future-call",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6295",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6300",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/future-call",
    :doc
    "Takes a function of no args and yields a future object that will\ninvoke the function in another thread, and will cache the result and\nreturn it on all subsequent calls to deref/@. If the computation has\nnot yet finished, calls to deref/@ will block, unless the variant\nof deref with timeout is used. See also - realized?.",
    :var-type "function",
-   :line 6295,
+   :line 6300,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f]),
    :name "future-cancel",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6332",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6337",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/future-cancel",
    :doc "Cancels the future, if possible.",
    :var-type "function",
-   :line 6332,
+   :line 6337,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f]),
    :name "future-cancelled?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6338",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6343",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/future-cancelled?",
    :doc "Returns true if future f is cancelled",
    :var-type "function",
-   :line 6338,
+   :line 6343,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f]),
    :name "future-done?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5915",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5920",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/future-done?",
    :doc "Returns true if future f is done",
    :var-type "function",
-   :line 5915,
+   :line 5920,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "future?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5909",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5914",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/future?",
    :doc "Returns true if x is a future",
    :var-type "function",
-   :line 5909,
+   :line 5914,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& options]),
    :name "gen-class",
@@ -3631,10 +3631,10 @@
    :name "gensym",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L542",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L542",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/gensym",
    :doc
@@ -3646,10 +3646,10 @@
    :name "get",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1404",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1404",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/get",
    :doc
@@ -3661,25 +3661,25 @@
    :name "get-in",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5546",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5551",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/get-in",
    :doc
    "Returns the value in a nested associative structure,\nwhere ks is a sequence of keys. Returns nil if the key\nis not present, or the not-found value if supplied.",
    :var-type "function",
-   :line 5546,
+   :line 5551,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([multifn dispatch-val]),
    :name "get-method",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1660",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1660",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/get-method",
    :doc
@@ -3706,10 +3706,10 @@
    :name "get-thread-bindings",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1745",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1745",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/get-thread-bindings",
    :doc
@@ -3721,10 +3721,10 @@
    :name "get-validator",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2191",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2191",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/get-validator",
    :doc "Gets the validator-fn for a var/ref/agent/atom.",
@@ -3735,40 +3735,40 @@
    :name "group-by",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6480",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6485",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/group-by",
    :doc
    "Returns a map of the elements of coll keyed by the result of\nf on each element. The value at each key will be a vector of the\ncorresponding elements, in the order they appeared in coll.",
    :var-type "function",
-   :line 6480,
+   :line 6485,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "hash",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4658",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4663",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/hash",
    :doc
    "Returns the hash code of its argument. Note this is the hash code\nconsistent with =, and thus is different than .hashCode for Integer,\nShort, Byte and Clojure collections.",
    :var-type "function",
-   :line 4658,
+   :line 4663,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([] [& keyvals]),
    :name "hash-map",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L357",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L357",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/hash-map",
    :doc
@@ -3780,10 +3780,10 @@
    :name "hash-set",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L367",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L367",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/hash-set",
    :doc
@@ -3795,10 +3795,10 @@
    :name "identical?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L727",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L727",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/identical?",
    :doc "Tests if 2 arguments are the same object",
@@ -3809,10 +3809,10 @@
    :name "identity",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1367",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1367",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/identity",
    :doc "Returns its argument.",
@@ -3823,10 +3823,10 @@
    :name "if-let",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1684",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1684",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/if-let",
    :doc
@@ -3838,10 +3838,10 @@
    :name "if-not",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L719",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L719",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/if-not",
    :doc
@@ -3853,31 +3853,31 @@
    :name "ifn?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5615",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5620",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ifn?",
    :doc
    "Returns true if x implements IFn. Note that many data structures\n(e.g. sets and maps) implement IFn",
    :var-type "function",
-   :line 5615,
+   :line 5620,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& import-symbols-or-lists]),
    :name "import",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3068",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3071",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/import",
    :doc
    "import-list => (package-symbol class-name-symbols*)\n\nFor each name in class-name-symbols, adds a mapping from name to the\nclass named by package.name to the current namespace. Use :import in the ns\nmacro in preference to calling this directly.",
    :var-type "macro",
-   :line 3068,
+   :line 3071,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([name]),
    :name "in-ns",
@@ -3895,10 +3895,10 @@
    :name "inc",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L874",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L874",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/inc",
    :doc
@@ -3910,10 +3910,10 @@
    :name "inc'",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L867",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L867",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/inc'",
    :doc
@@ -3940,10 +3940,10 @@
    :name "instance?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L135",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L135",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/instance?",
    :doc
@@ -3955,10 +3955,10 @@
    :name "int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L834",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L834",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/int",
    :doc "Coerce to int",
@@ -3969,126 +3969,126 @@
    :name "int-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4776",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4781",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/int-array",
    :doc "Creates an array of ints",
    :var-type "function",
-   :line 4776,
+   :line 4781,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([n]),
    :name "integer?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1320",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1320",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/integer?",
    :doc "Returns true if n is an integer",
    :var-type "function",
    :line 1320,
    :file "src/clj/clojure/core.clj"}
-  {:arglists ([c1 c2] [c1 c2 & colls]),
+  {:arglists ([] [c1] [c1 c2] [c1 c2 & colls]),
    :name "interleave",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3895",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3898",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/interleave",
    :doc
    "Returns a lazy seq of the first item in each coll, then the second etc.",
    :var-type "function",
-   :line 3895,
+   :line 3898,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns name] [ns name val]),
    :name "intern",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5697",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5702",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/intern",
    :doc
    "Finds or creates a var named by the symbol name in the namespace\nns (which can be a symbol or a namespace), setting its root binding\nto val if supplied. The namespace must exist. The var will adopt any\nmetadata from the name symbol.  Returns the var.",
    :var-type "function",
-   :line 5697,
+   :line 5702,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([sep coll]),
    :name "interpose",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4667",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4672",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/interpose",
    :doc "Returns a lazy seq of the elements of coll separated by sep",
    :var-type "function",
-   :line 4667,
+   :line 4672,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([to from]),
    :name "into",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6222",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6227",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/into",
    :doc
    "Returns a new coll consisting of to-coll with all of the items of\nfrom-coll conjoined.",
    :var-type "function",
-   :line 6222,
+   :line 6227,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([aseq] [type aseq]),
    :name "into-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3086",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3089",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/into-array",
    :doc
    "Returns an array with components set to the values in aseq. The array's\ncomponent type is type if provided, or the type of the first value in\naseq if present, or Object. All values in aseq must be compatible with\nthe component type. Class objects for the primitive types can be obtained\nusing, e.g., Integer/TYPE.",
    :var-type "function",
-   :line 3086,
+   :line 3089,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([xs]),
    :name "ints",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4817",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4822",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ints",
    :doc "Casts to int[]",
    :var-type "function",
-   :line 4817,
+   :line 4822,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& body]),
    :name "io!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2303",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2303",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/io!",
    :doc
@@ -4100,25 +4100,25 @@
    :name "isa?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5000",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5005",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/isa?",
    :doc
    "Returns true if (= child parent), or child is directly or indirectly derived from\nparent, either via a Java type inheritance relationship or a\nrelationship established via derive. h must be a hierarchy obtained\nfrom make-hierarchy, if not supplied defaults to the global\nhierarchy",
    :var-type "function",
-   :line 5000,
+   :line 5005,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f x]),
    :name "iterate",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2647",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2647",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/iterate",
    :doc
@@ -4130,25 +4130,25 @@
    :name "iterator-seq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5157",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5162",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/iterator-seq",
    :doc
    "Returns a seq on a java.util.Iterator. Note that most collections\nproviding iterators implement Iterable and thus support seq directly.",
    :var-type "function",
-   :line 5157,
+   :line 5162,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f] [f g] [f g h] [f g h & fs]),
    :name "juxt",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2350",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2350",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/juxt",
    :doc
@@ -4160,40 +4160,40 @@
    :name "keep",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6585",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6590",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/keep",
    :doc
    "Returns a lazy sequence of the non-nil results of (f item). Note,\nthis means false return values will be included.  f must be free of\nside-effects.",
    :var-type "function",
-   :line 6585,
+   :line 6590,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f coll]),
    :name "keep-indexed",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6608",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6613",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/keep-indexed",
    :doc
    "Returns a lazy sequence of the non-nil results of (f index item). Note,\nthis means false return values will be included.  f must be free of\nside-effects.",
    :var-type "function",
-   :line 6608,
+   :line 6613,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([e]),
    :name "key",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1477",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1477",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/key",
    :doc "Returns the key of the map entry.",
@@ -4204,10 +4204,10 @@
    :name "keys",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1465",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1465",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/keys",
    :doc "Returns a sequence of the map's keys.",
@@ -4218,10 +4218,10 @@
    :name "keyword",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L566",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L566",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/keyword",
    :doc
@@ -4233,10 +4233,10 @@
    :name "keyword?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L528",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L528",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/keyword?",
    :doc "Return true if x is a Keyword",
@@ -4247,10 +4247,10 @@
    :name "last",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L245",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L245",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/last",
    :doc "Return the last item in coll, in linear time",
@@ -4261,25 +4261,25 @@
    :name "lazy-cat",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4168",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4173",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/lazy-cat",
    :doc
    "Expands to code which yields a lazy sequence of the concatenation\nof the supplied colls.  Each coll expr is not evaluated until it is\nneeded. \n\n(lazy-cat xs ys zs) === (concat (lazy-seq xs) (lazy-seq ys) (lazy-seq zs))",
    :var-type "macro",
-   :line 4168,
+   :line 4173,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& body]),
    :name "lazy-seq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L635",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L635",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/lazy-seq",
    :doc
@@ -4291,55 +4291,55 @@
    :name "let",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4035",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4040",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/let",
    :doc
    "binding => binding-form init-expr\n\nEvaluates the exprs in a lexical context in which the symbols in\nthe binding-forms are bound to their respective init-exprs or parts\ntherein.",
    :var-type "macro",
-   :line 4035,
+   :line 4040,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([fnspecs & body]),
    :name "letfn",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5922",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5927",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/letfn",
    :doc
    "fnspec ==> (fname [params*] exprs) or (fname ([params*] exprs)+)\n\nTakes a vector of function specs and a body, and generates a set of\nbindings of functions to their names. All of the names are available\nin all of the definitions of the functions, as well as the body.",
    :var-type "macro",
-   :line 5922,
+   :line 5927,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([rdr]),
    :name "line-seq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2725",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2728",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/line-seq",
    :doc
    "Returns the lines of text from rdr as a lazy sequence of strings.\nrdr must implement java.io.BufferedReader.",
    :var-type "function",
-   :line 2725,
+   :line 2728,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& items]),
    :name "list",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L16",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L16",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/list",
    :doc "Creates a new list containing the items.",
@@ -4351,10 +4351,10 @@
    :name "list*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L600",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L600",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/list*",
    :doc
@@ -4366,30 +4366,30 @@
    :name "list?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5603",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5608",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/list?",
    :doc "Returns true if x implements IPersistentList",
    :var-type "function",
-   :line 5603,
+   :line 5608,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& paths]),
    :name "load",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5514",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5519",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/load",
    :doc
    "Loads Clojure code from resources in classpath. A path is interpreted as\nclasspath-relative if it begins with a slash or relative to the root\ndirectory for the current namespace otherwise.",
    :var-type "function",
-   :line 5514,
+   :line 5519,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([name]),
    :name "load-file",
@@ -4407,55 +4407,55 @@
    :name "load-reader",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3691",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3694",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/load-reader",
    :doc
    "Sequentially read and evaluate the set of forms contained in the\nstream/file",
    :var-type "function",
-   :line 3691,
+   :line 3694,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([s]),
    :name "load-string",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3698",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3701",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/load-string",
    :doc
    "Sequentially read and evaluate the set of forms contained in the\nstring",
    :var-type "function",
-   :line 3698,
+   :line 3701,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([]),
    :name "loaded-libs",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5509",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5514",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/loaded-libs",
    :doc
    "Returns a sorted set of symbols naming the currently loaded libs",
    :var-type "function",
-   :line 5509,
+   :line 5514,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x & body]),
    :name "locking",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1515",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1515",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/locking",
    :doc
@@ -4467,126 +4467,126 @@
    :name "long",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3123",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3126",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/long",
    :doc "Coerce to long",
    :var-type "function",
-   :line 3123,
+   :line 3126,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([size-or-seq] [size init-val-or-seq]),
    :name "long-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4784",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4789",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/long-array",
    :doc "Creates an array of longs",
    :var-type "function",
-   :line 4784,
+   :line 4789,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([xs]),
    :name "longs",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4827",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4832",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/longs",
    :doc "Casts to long[]",
    :var-type "function",
-   :line 4827,
+   :line 4832,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([bindings & body]),
    :name "loop",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4129",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4134",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/loop",
    :doc
    "Evaluates the exprs in a lexical context in which the symbols in\nthe binding-forms are bound to their respective init-exprs or parts\ntherein. Acts as a recur target.",
    :var-type "macro",
-   :line 4129,
+   :line 4134,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([form]),
    :name "macroexpand",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3635",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3638",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/macroexpand",
    :doc
    "Repeatedly calls macroexpand-1 on form until it no longer\nrepresents a macro form, then returns it.  Note neither\nmacroexpand-1 nor macroexpand expand macros in subforms.",
    :var-type "function",
-   :line 3635,
+   :line 3638,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([form]),
    :name "macroexpand-1",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3627",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3630",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/macroexpand-1",
    :doc
    "If form represents a macro form, returns its expansion,\nelse returns form.",
    :var-type "function",
-   :line 3627,
+   :line 3630,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([type len] [type dim & more-dims]),
    :name "make-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3595",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3598",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/make-array",
    :doc
    "Creates and returns an array of instances of the specified class of\nthe specified dimension(s).  Note that a class object is required.\nClass objects can be obtained by using their imported or\nfully-qualified name.  Class objects for the primitive types can be\nobtained using, e.g., Integer/TYPE.",
    :var-type "function",
-   :line 3595,
+   :line 3598,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([]),
    :name "make-hierarchy",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4964",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4969",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/make-hierarchy",
    :doc "Creates a hierarchy object for use with derive, isa? etc.",
    :var-type "function",
-   :line 4964,
+   :line 4969,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f coll] [f c1 c2] [f c1 c2 c3] [f c1 c2 c3 & colls]),
    :name "map",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2469",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2469",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/map",
    :doc
@@ -4598,25 +4598,25 @@
    :name "map-indexed",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6564",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6569",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/map-indexed",
    :doc
    "Returns a lazy sequence consisting of the result of applying f to 0\nand the first item of coll, followed by applying f to 1 and the second\nitem in coll, etc, until coll is exhausted. Thus function f should\naccept 2 arguments, index and item.",
    :var-type "function",
-   :line 6564,
+   :line 6569,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "map?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L163",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L163",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/map?",
    :doc "Return true if x implements IPersistentMap",
@@ -4627,10 +4627,10 @@
    :name "mapcat",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2508",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2508",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/mapcat",
    :doc
@@ -4642,25 +4642,25 @@
    :name "mapv",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6232",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6237",
    :added "1.4",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/mapv",
    :doc
    "Returns a vector consisting of the result of applying f to the\nset of first items of each coll, followed by applying f to the set\nof second items in each coll, until any one of the colls is\nexhausted.  Any remaining items in other colls are ignored. Function\nf should accept number-of-colls arguments.",
    :var-type "function",
-   :line 6232,
+   :line 6237,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x] [x y] [x y & more]),
    :name "max",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1067",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1067",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/max",
    :doc "Returns the greatest of the nums.",
@@ -4671,84 +4671,84 @@
    :name "max-key",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4519",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4524",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/max-key",
    :doc "Returns the x for which (k x), a number, is greatest.",
    :var-type "function",
-   :line 4519,
+   :line 4524,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([name & args]),
    :name "memfn",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3480",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3483",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/memfn",
    :doc
    "Expands into code that creates a fn that expects to be passed an\nobject and any args and calls the named instance method on the\nobject passing the args. Use when you want to treat a Java method as\na first-class fn. name may be type-hinted with the method receiver's\ntype in order to avoid reflective calls.",
    :var-type "macro",
-   :line 3480,
+   :line 3483,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f]),
    :name "memoize",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5723",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5728",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/memoize",
    :doc
    "Returns a memoized version of a referentially transparent function. The\nmemoized version of the function keeps a cache of the mapping from arguments\nto results and, when calls with the same arguments are repeated often, has\nhigher performance at the expense of higher memory use.",
    :var-type "function",
-   :line 5723,
+   :line 5728,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& maps]),
    :name "merge",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2676",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2679",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/merge",
    :doc
    "Returns a map that consists of the rest of the maps conj-ed onto\nthe first.  If a key occurs in more than one map, the mapping from\nthe latter (left-to-right) will be the mapping in the result.",
    :var-type "function",
-   :line 2676,
+   :line 2679,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f & maps]),
    :name "merge-with",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2686",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2689",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/merge-with",
    :doc
    "Returns a map that consists of the rest of the maps conj-ed onto\nthe first.  If a key occurs in more than one map, the mapping(s)\nfrom the latter (left-to-right) will be combined with the mapping in\nthe result by calling (f val-in-result val-in-latter).",
    :var-type "function",
-   :line 2686,
+   :line 2689,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([obj]),
    :name "meta",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L198",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L198",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/meta",
    :doc
@@ -4760,10 +4760,10 @@
    :name "methods",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1654",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1654",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/methods",
    :doc
@@ -4775,10 +4775,10 @@
    :name "min",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1077",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1077",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/min",
    :doc "Returns the least of the nums.",
@@ -4789,38 +4789,38 @@
    :name "min-key",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4528",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4533",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/min-key",
    :doc "Returns the x for which (k x), a number, is least.",
    :var-type "function",
-   :line 4528,
+   :line 4533,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([num div]),
    :name "mod",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3216",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3219",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/mod",
    :doc "Modulus of num and div. Truncates toward negative infinity.",
    :var-type "function",
-   :line 3216,
+   :line 3219,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "name",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1499",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1499",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/name",
    :doc "Returns the name String of a string, symbol or keyword.",
@@ -4831,10 +4831,10 @@
    :name "namespace",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1507",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1507",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/namespace",
    :doc
@@ -4861,10 +4861,10 @@
    :name "neg?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1206",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1206",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/neg?",
    :doc "Returns true if num is less than zero, else false",
@@ -4875,24 +4875,24 @@
    :name "newline",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3345",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3348",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/newline",
    :doc "Writes a platform-specific newline to *out*",
    :var-type "function",
-   :line 3345,
+   :line 3348,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "next",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L57",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L57",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/next",
    :doc
@@ -4904,10 +4904,10 @@
    :name "nfirst",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L103",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L103",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/nfirst",
    :doc "Same as (next (first x))",
@@ -4918,10 +4918,10 @@
    :name "nil?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L414",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L414",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/nil?",
    :doc "Returns true if x is nil, false otherwise.",
@@ -4932,10 +4932,10 @@
    :name "nnext",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L117",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L117",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/nnext",
    :doc "Same as (next (next x))",
@@ -4946,10 +4946,10 @@
    :name "not",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L497",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L497",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/not",
    :doc "Returns true if x is logical false, false otherwise.",
@@ -4960,10 +4960,10 @@
    :name "not-any?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2445",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2445",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/not-any?",
    :doc
@@ -4975,24 +4975,24 @@
    :name "not-empty",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4973",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4978",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/not-empty",
    :doc "If coll is empty, returns nil, else coll",
    :var-type "function",
-   :line 4973,
+   :line 4978,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([pred coll]),
    :name "not-every?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2426",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2426",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/not-every?",
    :doc
@@ -5004,10 +5004,10 @@
    :name "not=",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L771",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L771",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/not=",
    :doc "Same as (not (= obj1 obj2))",
@@ -5018,167 +5018,167 @@
    :name "ns",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5198",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5203",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns",
    :doc
-   "Sets *ns* to the namespace named by name (unevaluated), creating it\nif needed.  references can be zero or more of: (:refer-clojure ...)\n(:require ...) (:use ...) (:import ...) (:load ...) (:gen-class)\nwith the syntax of refer-clojure/require/use/import/load/gen-class\nrespectively, except the arguments are unevaluated and need not be\nquoted. (:gen-class ...), when supplied, defaults to :name\ncorresponding to the ns name, :main true, :impl-ns same as ns, and\n:init-impl-ns true. All options of gen-class are\nsupported. The :gen-class directive is ignored when not\ncompiling. If :gen-class is not supplied, when compiled only an\nnsname__init.class will be generated. If :refer-clojure is not used, a\ndefault (refer 'clojure) is used.  Use of ns is preferred to\nindividual calls to in-ns/require/use/import:\n\n(ns foo.bar\n  (:refer-clojure :exclude [ancestors printf])\n  (:require (clojure.contrib sql combinatorics))\n  (:use (my.lib this that))\n  (:import (java.util Date Timer Random)\n           (java.sql Connection Statement)))",
+   "Sets *ns* to the namespace named by name (unevaluated), creating it\nif needed.  references can be zero or more of: (:refer-clojure ...)\n(:require ...) (:use ...) (:import ...) (:load ...) (:gen-class)\nwith the syntax of refer-clojure/require/use/import/load/gen-class\nrespectively, except the arguments are unevaluated and need not be\nquoted. (:gen-class ...), when supplied, defaults to :name\ncorresponding to the ns name, :main true, :impl-ns same as ns, and\n:init-impl-ns true. All options of gen-class are\nsupported. The :gen-class directive is ignored when not\ncompiling. If :gen-class is not supplied, when compiled only an\nnsname__init.class will be generated. If :refer-clojure is not used, a\ndefault (refer 'clojure.core) is used.  Use of ns is preferred to\nindividual calls to in-ns/require/use/import:\n\n(ns foo.bar\n  (:refer-clojure :exclude [ancestors printf])\n  (:require (clojure.contrib sql combinatorics))\n  (:use (my.lib this that))\n  (:import (java.util Date Timer Random)\n           (java.sql Connection Statement)))",
    :var-type "macro",
-   :line 5198,
+   :line 5203,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns]),
    :name "ns-aliases",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3872",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3875",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns-aliases",
    :doc "Returns a map of the aliases for the namespace.",
    :var-type "function",
-   :line 3872,
+   :line 3875,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns]),
    :name "ns-imports",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3798",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3801",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns-imports",
    :doc "Returns a map of the import mappings for the namespace.",
    :var-type "function",
-   :line 3798,
+   :line 3801,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns]),
    :name "ns-interns",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3805",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3808",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns-interns",
    :doc "Returns a map of the intern mappings for the namespace.",
    :var-type "function",
-   :line 3805,
+   :line 3808,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns]),
    :name "ns-map",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3769",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3772",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns-map",
    :doc "Returns a map of all the mappings for the namespace.",
    :var-type "function",
-   :line 3769,
+   :line 3772,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns]),
    :name "ns-name",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3762",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3765",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns-name",
    :doc "Returns the name of the namespace, a symbol.",
    :var-type "function",
-   :line 3762,
+   :line 3765,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns]),
    :name "ns-publics",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3787",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3790",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns-publics",
    :doc
    "Returns a map of the public intern mappings for the namespace.",
    :var-type "function",
-   :line 3787,
+   :line 3790,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns]),
    :name "ns-refers",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3852",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3855",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns-refers",
    :doc "Returns a map of the refer mappings for the namespace.",
    :var-type "function",
-   :line 3852,
+   :line 3855,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns sym] [ns env sym]),
    :name "ns-resolve",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3943",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3948",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns-resolve",
    :doc
    "Returns the var or Class to which a symbol will be resolved in the\nnamespace (unless found in the environment), else nil.  Note that\nif the symbol is fully qualified, the var/Class to which it resolves\nneed not be present in the namespace.",
    :var-type "function",
-   :line 3943,
+   :line 3948,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns sym]),
    :name "ns-unalias",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3879",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3882",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns-unalias",
    :doc "Removes the alias for the symbol from the namespace.",
    :var-type "function",
-   :line 3879,
+   :line 3882,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([ns sym]),
    :name "ns-unmap",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3776",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3779",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ns-unmap",
    :doc "Removes the mappings for the symbol from the namespace.",
    :var-type "function",
-   :line 3776,
+   :line 3779,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll index] [coll index not-found]),
    :name "nth",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L841",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L841",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/nth",
    :doc
@@ -5190,94 +5190,94 @@
    :name "nthnext",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2802",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2805",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/nthnext",
    :doc "Returns the nth next of coll, (seq coll) when n is 0.",
    :var-type "function",
-   :line 2802,
+   :line 2805,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll n]),
    :name "nthrest",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2812",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2815",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/nthrest",
    :doc "Returns the nth rest of coll, coll when n is 0.",
    :var-type "function",
-   :line 2812,
+   :line 2815,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "num",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3116",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3119",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/num",
    :doc "Coerce to Number",
    :var-type "function",
-   :line 3116,
+   :line 3119,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "number?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3209",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3212",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/number?",
    :doc "Returns true if x is a Number",
    :var-type "function",
-   :line 3209,
+   :line 3212,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([r]),
    :name "numerator",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3232",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3235",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/numerator",
    :doc "Returns the numerator part of a Ratio.",
    :var-type "function",
-   :line 3232,
+   :line 3235,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([size-or-seq]),
    :name "object-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4769",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4774",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/object-array",
    :doc "Creates an array of objects",
    :var-type "function",
-   :line 4769,
+   :line 4774,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([n]),
    :name "odd?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1340",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1340",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/odd?",
    :doc
@@ -5289,10 +5289,10 @@
    :name "or",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L806",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L806",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/or",
    :doc
@@ -5304,16 +5304,16 @@
    :name "parents",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5021",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5026",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/parents",
    :doc
    "Returns the immediate parents of tag, either via a Java type\ninheritance relationship or a relationship established via derive. h\nmust be a hierarchy obtained from make-hierarchy, if not supplied\ndefaults to the global hierarchy",
    :var-type "function",
-   :line 5021,
+   :line 5026,
    :file "src/clj/clojure/core.clj"}
   {:arglists
    ([f]
@@ -5324,10 +5324,10 @@
    :name "partial",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2388",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2388",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/partial",
    :doc
@@ -5339,70 +5339,70 @@
    :name "partition",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2822",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2825",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/partition",
    :doc
    "Returns a lazy sequence of lists of n items each, at offsets step\napart. If step is not supplied, defaults to n, i.e. the partitions\ndo not overlap. If a pad collection is supplied, use its elements as\nnecessary to complete last partition upto n items. In case there are\nnot enough padding elements, return a partition with less than n items.",
    :var-type "function",
-   :line 2822,
+   :line 2825,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([n coll] [n step coll]),
    :name "partition-all",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6542",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6547",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/partition-all",
    :doc
    "Returns a lazy sequence of lists like partition, but may include\npartitions with fewer than n items at the end.",
    :var-type "function",
-   :line 6542,
+   :line 6547,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f coll]),
    :name "partition-by",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6494",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6499",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/partition-by",
    :doc
    "Applies f to each value in coll, splitting it each time f returns\na new value.  Returns a lazy seq of partitions.",
    :var-type "function",
-   :line 6494,
+   :line 6499,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& fns]),
    :name "pcalls",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6369",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6374",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/pcalls",
    :doc
    "Executes the no-arg fns in parallel, returning a lazy sequence of\ntheir values",
    :var-type "function",
-   :line 6369,
+   :line 6374,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "peek",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1376",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1376",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/peek",
    :doc
@@ -5414,40 +5414,40 @@
    :name "persistent!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2988",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2991",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/persistent!",
    :doc
    "Alpha - subject to change.\nReturns a new, persistent version of the transient collection, in\nconstant time. The transient collection cannot be used after this\ncall, any such use will throw an exception.",
    :var-type "function",
-   :line 2988,
+   :line 2991,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f coll] [f coll & colls]),
    :name "pmap",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6344",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6349",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/pmap",
    :doc
    "Like map, except f is applied in parallel. Semi-lazy in that the\nparallel computation stays ahead of the consumption, but doesn't\nrealize the entire result unless required. Only useful for\ncomputationally intensive functions where the time of f dominates\nthe coordination overhead.",
    :var-type "function",
-   :line 6344,
+   :line 6349,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "pop",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1383",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1383",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/pop",
    :doc
@@ -5459,25 +5459,25 @@
    :name "pop!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3033",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3036",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/pop!",
    :doc
    "Alpha - subject to change.\nRemoves the last item from a transient vector. If\nthe collection is empty, throws an exception. Returns coll",
    :var-type "function",
-   :line 3033,
+   :line 3036,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([]),
    :name "pop-thread-bindings",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1737",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1737",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/pop-thread-bindings",
    :doc
@@ -5489,10 +5489,10 @@
    :name "pos?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1199",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1199",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/pos?",
    :doc "Returns true if num is greater than zero, else false",
@@ -5503,40 +5503,40 @@
    :name "pr",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3325",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3328",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/pr",
    :doc
    "Prints the object(s) to the output stream that is the current value\nof *out*.  Prints the object(s), separated by spaces if there is\nmore than one.  By default, pr and prn print in a way that objects\ncan be read by the reader",
    :var-type "function",
-   :line 3325,
+   :line 3328,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& xs]),
    :name "pr-str",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4290",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4295",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/pr-str",
    :doc "pr to a string, returning it",
    :var-type "function",
-   :line 4290,
+   :line 4295,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([multifn dispatch-val-x dispatch-val-y]),
    :name "prefer-method",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1646",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1646",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/prefer-method",
    :doc
@@ -5548,10 +5548,10 @@
    :name "prefers",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1667",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1667",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/prefers",
    :doc
@@ -5563,116 +5563,116 @@
    :name "print",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3372",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3375",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/print",
    :doc
    "Prints the object(s) to the output stream that is the current value\nof *out*.  print and println produce output for human consumption.",
    :var-type "function",
-   :line 3372,
+   :line 3375,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& xs]),
    :name "print-str",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4308",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4313",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/print-str",
    :doc "print to a string, returning it",
    :var-type "function",
-   :line 4308,
+   :line 4313,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([fmt & args]),
    :name "printf",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5180",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5185",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/printf",
    :doc "Prints formatted output, as per format",
    :var-type "function",
-   :line 5180,
+   :line 5185,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& more]),
    :name "println",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3381",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3384",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/println",
    :doc "Same as print followed by (newline)",
    :var-type "function",
-   :line 3381,
+   :line 3384,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& xs]),
    :name "println-str",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4317",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4322",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/println-str",
    :doc "println to a string, returning it",
    :var-type "function",
-   :line 4317,
+   :line 4322,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& more]),
    :name "prn",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3362",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3365",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/prn",
    :doc
    "Same as pr followed by (newline). Observes *flush-on-newline*",
    :var-type "function",
-   :line 3362,
+   :line 3365,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& xs]),
    :name "prn-str",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4299",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4304",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/prn-str",
    :doc "prn to a string, returning it",
    :var-type "function",
-   :line 4299,
+   :line 4304,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([]),
    :name "promise",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6428",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6433",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/promise",
    :doc
    "Alpha - subject to change.\nReturns a promise object that can be read with deref/@, and set,\nonce only, with deliver. Calls to deref/@ prior to delivery will\nblock, unless the variant of deref with timeout is used. All\nsubsequent derefs will return the same delivered value without\nblocking. See also - realized?.",
    :var-type "function",
-   :line 6428,
+   :line 6433,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([class-and-interfaces args & fs]),
    :name "proxy",
@@ -5722,10 +5722,10 @@
    :name "push-thread-bindings",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1719",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1719",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/push-thread-bindings",
    :doc
@@ -5737,25 +5737,25 @@
    :name "pvalues",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6376",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6381",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/pvalues",
    :doc
    "Returns a lazy sequence of the values of the exprs, which are\nevaluated in parallel",
    :var-type "macro",
-   :line 6376,
+   :line 6381,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([num div]),
    :name "quot",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1213",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1213",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/quot",
    :doc "quot[ient] of dividing numerator by denominator.",
@@ -5766,59 +5766,59 @@
    :name "rand",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4441",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4446",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/rand",
    :doc
    "Returns a random floating point number between 0 (inclusive) and\nn (default 1) (exclusive).",
    :var-type "function",
-   :line 4441,
+   :line 4446,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([n]),
    :name "rand-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4449",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4454",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/rand-int",
    :doc
    "Returns a random integer between 0 (inclusive) and n (exclusive).",
    :var-type "function",
-   :line 4449,
+   :line 4454,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "rand-nth",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6533",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6538",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/rand-nth",
    :doc
    "Return a random element of the (sequential) collection. Will have\nthe same performance characteristics as nth for the given\ncollection.",
    :var-type "function",
-   :line 6533,
+   :line 6538,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([] [end] [start end] [start end step]),
    :name "range",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2653",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2653",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/range",
    :doc
-   "Returns a lazy seq of nums from start (inclusive) to end\n(exclusive), by step, where start defaults to 0, step to 1, and end\nto infinity.",
+   "Returns a lazy seq of nums from start (inclusive) to end\n(exclusive), by step, where start defaults to 0, step to 1, and end to\ninfinity. When step is equal to 0, returns an infinite sequence of\nstart. When start is equal to end, returns empty list.",
    :var-type "function",
    :line 2653,
    :file "src/clj/clojure/core.clj"}
@@ -5826,38 +5826,38 @@
    :name "ratio?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3226",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3229",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ratio?",
    :doc "Returns true if n is a Ratio",
    :var-type "function",
-   :line 3226,
+   :line 3229,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([n]),
    :name "rational?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3262",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3265",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/rational?",
    :doc "Returns true if n is a rational number",
    :var-type "function",
-   :line 3262,
+   :line 3265,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([num]),
    :name "rationalize",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1229",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1229",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/rationalize",
    :doc "returns the rational value of num",
@@ -5868,91 +5868,91 @@
    :name "re-find",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4428",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4433",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/re-find",
    :doc
    "Returns the next regex match, if any, of string to pattern, using\njava.util.regex.Matcher.find().  Uses re-groups to return the\ngroups.",
    :var-type "function",
-   :line 4428,
+   :line 4433,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([m]),
    :name "re-groups",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4388",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4393",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/re-groups",
    :doc
    "Returns the groups from the most recent match/find. If there are no\nnested groups, returns a string of the entire match. If there are\nnested groups, returns a vector of the groups, the first element\nbeing the entire match.",
    :var-type "function",
-   :line 4388,
+   :line 4393,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([re s]),
    :name "re-matcher",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4379",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4384",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/re-matcher",
    :doc
    "Returns an instance of java.util.regex.Matcher, for use, e.g. in\nre-find.",
    :var-type "function",
-   :line 4379,
+   :line 4384,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([re s]),
    :name "re-matches",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4416",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4421",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/re-matches",
    :doc
    "Returns the match, if any, of string to pattern, using\njava.util.regex.Matcher.matches().  Uses re-groups to return the\ngroups.",
    :var-type "function",
-   :line 4416,
+   :line 4421,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([s]),
    :name "re-pattern",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4369",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4374",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/re-pattern",
    :doc
    "Returns an instance of java.util.regex.Pattern, for use, e.g. in\nre-matcher.",
    :var-type "function",
-   :line 4369,
+   :line 4374,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([re s]),
    :name "re-seq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4404",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4409",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/re-seq",
    :doc
    "Returns a lazy sequence of successive matches of pattern in string,\nusing java.util.regex.Matcher.find(), each such match processed with\nre-groups.",
    :var-type "function",
-   :line 4404,
+   :line 4409,
    :file "src/clj/clojure/core.clj"}
   {:arglists
    ([]
@@ -5962,144 +5962,144 @@
    :name "read",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3389",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3392",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/read",
    :doc
    "Reads the next object from stream, which must be an instance of\njava.io.PushbackReader or some derivee.  stream defaults to the\ncurrent value of *in*.\n\nNote that read can execute code (controlled by *read-eval*),\nand as such should be used only with trusted sources.\n\nFor data structure interop use clojure.edn/read",
    :var-type "function",
-   :line 3389,
+   :line 3392,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([]),
    :name "read-line",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3409",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3412",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/read-line",
    :doc
    "Reads the next line from stream that is the current value of *in* .",
    :var-type "function",
-   :line 3409,
+   :line 3412,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([s]),
    :name "read-string",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3418",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3421",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/read-string",
    :doc
    "Reads one object from the string s.\n\nNote that read-string can execute code (controlled by *read-eval*),\nand as such should be used only with trusted sources.\n\nFor data structure interop use clojure.edn/read-string",
    :var-type "function",
-   :line 3418,
+   :line 3421,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "realized?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6770",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6775",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/realized?",
    :doc
    "Returns true if a value has been produced for a promise, delay, future or lazy sequence.",
    :var-type "function",
-   :line 6770,
+   :line 6775,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f coll] [f val coll]),
    :name "reduce",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6163",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6168",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reduce",
    :doc
    "f should be a function of 2 arguments. If val is not supplied,\nreturns the result of applying f to the first 2 items in coll, then\napplying f to that result and the 3rd item, etc. If coll contains no\nitems, f must accept no arguments as well, and reduce returns the\nresult of calling f with no arguments.  If coll has only 1 item, it\nis returned and f is not called.  If val is supplied, returns the\nresult of applying f to val and the first item in coll, then\napplying f to that result and the 2nd item, etc. If coll contains no\nitems, returns val and f is not called.",
    :var-type "function",
-   :line 6163,
+   :line 6168,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f init coll]),
    :name "reduce-kv",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6211",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6216",
    :added "1.4",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reduce-kv",
    :doc
    "Reduces an associative collection. f should be a function of 3\narguments. Returns the result of applying f to init, the first key\nand the first value in coll, then applying f to that result and the\n2nd key and value, etc. If coll contains no entries, returns init\nand f is not called. Note that reduce-kv is supported on vectors,\nwhere the keys will be the ordinals.",
    :var-type "function",
-   :line 6211,
+   :line 6216,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "reduced",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6139",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6144",
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reduced",
    :doc
    "Wraps x in a way such that a reduce will terminate with the value x",
    :var-type "function",
-   :line 6139,
+   :line 6144,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "reduced?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6145",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6150",
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reduced?",
    :doc "Returns true if x is the result of a call to reduced",
    :var-type "function",
-   :line 6145,
+   :line 6150,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f coll] [f init coll]),
    :name "reductions",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6518",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6523",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reductions",
    :doc
    "Returns a lazy seq of the intermediate values of the reduction (as\nper reduce) of coll by f, starting with init.",
    :var-type "function",
-   :line 6518,
+   :line 6523,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x] [x & options]),
    :name "ref",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2070",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2070",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ref",
    :doc
@@ -6111,10 +6111,10 @@
    :name "ref-history-count",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2254",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2254",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ref-history-count",
    :doc "Returns the history count of a ref",
@@ -6125,10 +6125,10 @@
    :name "ref-max-history",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2270",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2270",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ref-max-history",
    :doc
@@ -6140,10 +6140,10 @@
    :name "ref-min-history",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2261",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2261",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ref-min-history",
    :doc
@@ -6155,10 +6155,10 @@
    :name "ref-set",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2246",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2246",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/ref-set",
    :doc
@@ -6170,30 +6170,30 @@
    :name "refer",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3815",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3818",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/refer",
    :doc
    "refers to all public vars of ns, subject to filters.\nfilters can include at most one each of:\n\n:exclude list-of-symbols\n:only list-of-symbols\n:rename map-of-fromsymbol-tosymbol\n\nFor each public interned var in the namespace named by the symbol,\nadds a mapping from the name of the var to the var to the current\nnamespace.  Throws an exception if name is already mapped to\nsomething else in the current namespace. Filters can be used to\nselect a subset, via inclusion or exclusion, or to provide a mapping\nto a symbol different from the var's name, in order to prevent\nclashes. Use :use in the ns macro in preference to calling this directly.",
    :var-type "function",
-   :line 3815,
+   :line 3818,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& filters]),
    :name "refer-clojure",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5254",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5259",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/refer-clojure",
    :doc "Same as (refer 'clojure.core <filters>)",
    :var-type "macro",
-   :line 5254,
+   :line 5259,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& opts+specs]),
    :name "reify",
@@ -6214,10 +6214,10 @@
    :name "release-pending-sends",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1939",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1939",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/release-pending-sends",
    :doc
@@ -6229,10 +6229,10 @@
    :name "rem",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1221",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1221",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/rem",
    :doc "remainder of dividing numerator by denominator.",
@@ -6243,10 +6243,10 @@
    :name "remove",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2538",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2538",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/remove",
    :doc
@@ -6258,10 +6258,10 @@
    :name "remove-all-methods",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1632",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1632",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/remove-all-methods",
    :doc "Removes all of the methods of multimethod.",
@@ -6272,10 +6272,10 @@
    :name "remove-method",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1639",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1639",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/remove-method",
    :doc
@@ -6287,25 +6287,25 @@
    :name "remove-ns",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3738",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3741",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/remove-ns",
    :doc
    "Removes the namespace named by the symbol. Use with caution.\nCannot be used to remove the clojure namespace.",
    :var-type "function",
-   :line 3738,
+   :line 3741,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([reference key]),
    :name "remove-watch",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1969",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1969",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/remove-watch",
    :doc
@@ -6317,10 +6317,10 @@
    :name "repeat",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2633",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2633",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/repeat",
    :doc
@@ -6332,41 +6332,41 @@
    :name "repeatedly",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4636",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4641",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/repeatedly",
    :doc
    "Takes a function of no args, presumably with side effects, and\nreturns an infinite (or length n if supplied) lazy sequence of calls\nto it",
    :var-type "function",
-   :line 4636,
+   :line 4641,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([smap coll]),
    :name "replace",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4554",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4559",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/replace",
    :doc
    "Given a map of replacement pairs and a vector/collection, returns a\nvector/seq with any elements = a key in smap replaced with the\ncorresponding val in smap",
    :var-type "function",
-   :line 4554,
+   :line 4559,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([n x]),
    :name "replicate",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2640",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2640",
    :deprecated "1.3",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/replicate",
    :doc
@@ -6378,25 +6378,25 @@
    :name "require",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5434",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5439",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/require",
    :doc
    "Loads libs, skipping any that are already loaded. Each argument is\neither a libspec that identifies a lib, a prefix list that identifies\nmultiple libs whose names share a common prefix, or a flag that modifies\nhow all the identified libs are loaded. Use :require in the ns macro\nin preference to calling this directly.\n\nLibs\n\nA 'lib' is a named set of resources in classpath whose contents define a\nlibrary of Clojure code. Lib names are symbols and each lib is associated\nwith a Clojure namespace and a Java package that share its name. A lib's\nname also locates its root directory within classpath using Java's\npackage name to classpath-relative path mapping. All resources in a lib\nshould be contained in the directory structure under its root directory.\nAll definitions a lib makes should be in its associated namespace.\n\n'require loads a lib by loading its root resource. The root resource path\nis derived from the lib name in the following manner:\nConsider a lib named by the symbol 'x.y.z; it has the root directory\n<classpath>/x/y/, and its root resource is <classpath>/x/y/z.clj. The root\nresource should contain code to create the lib's namespace (usually by using\nthe ns macro) and load any additional lib resources.\n\nLibspecs\n\nA libspec is a lib name or a vector containing a lib name followed by\noptions expressed as sequential keywords and arguments.\n\nRecognized options:\n:as takes a symbol as its argument and makes that symbol an alias to the\n  lib's namespace in the current namespace.\n:refer takes a list of symbols to refer from the namespace or the :all\n  keyword to bring in all public vars.\n\nPrefix Lists\n\nIt's common for Clojure code to depend on several libs whose names have\nthe same prefix. When specifying libs, prefix lists can be used to reduce\nrepetition. A prefix list contains the shared prefix followed by libspecs\nwith the shared prefix removed from the lib names. After removing the\nprefix, the names that remain must not contain any periods.\n\nFlags\n\nA flag is a keyword.\nRecognized flags: :reload, :reload-all, :verbose\n:reload forces loading of all the identified libs even if they are\n  already loaded\n:reload-all implies :reload and also forces loading of all libs that the\n  identified libs directly or indirectly load via require or use\n:verbose triggers printing information about each load, alias, and refer\n\nExample:\n\nThe following would load the libraries clojure.zip and clojure.set\nabbreviated as 's'.\n\n(require '(clojure zip [set :as s]))",
    :var-type "function",
-   :line 5434,
+   :line 5439,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([atom newval]),
    :name "reset!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2173",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2173",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reset!",
    :doc
@@ -6408,10 +6408,10 @@
    :name "reset-meta!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2207",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2207",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reset-meta!",
    :doc
@@ -6423,25 +6423,25 @@
    :name "resolve",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3956",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3961",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/resolve",
    :doc
    "same as (ns-resolve *ns* symbol) or (ns-resolve *ns* &env symbol)",
    :var-type "function",
-   :line 3956,
+   :line 3961,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "rest",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L66",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L66",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/rest",
    :doc
@@ -6453,10 +6453,10 @@
    :name "restart-agent",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1985",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1985",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/restart-agent",
    :doc
@@ -6468,25 +6468,25 @@
    :name "resultset-seq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5138",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5143",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/resultset-seq",
    :doc
    "Creates and returns a lazy sequence of structmaps corresponding to\nthe rows in the java.sql.ResultSet rs",
    :var-type "function",
-   :line 5138,
+   :line 5143,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "reverse",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L899",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L899",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reverse",
    :doc
@@ -6498,24 +6498,24 @@
    :name "reversible?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5653",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5658",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reversible?",
    :doc "Returns true if coll implements Reversible",
    :var-type "function",
-   :line 5653,
+   :line 5658,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([rev]),
    :name "rseq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1491",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1491",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/rseq",
    :doc
@@ -6528,16 +6528,16 @@
    :name "rsubseq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4619",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4624",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/rsubseq",
    :doc
    "sc must be a sorted collection, test(s) one of <, <=, > or\n>=. Returns a reverse seq of those entries with keys ek for\nwhich (test (.. sc comparator (compare ek key)) 0) is true",
    :var-type "function",
-   :line 4619,
+   :line 4624,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([protocol x]),
    :name "satisfies?",
@@ -6557,10 +6557,10 @@
    :name "second",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L89",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L89",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/second",
    :doc "Same as (first (next x))",
@@ -6571,10 +6571,10 @@
    :name "select-keys",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1450",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1450",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/select-keys",
    :doc
@@ -6586,10 +6586,10 @@
    :name "send",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1917",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1917",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/send",
    :doc
@@ -6601,10 +6601,10 @@
    :name "send-off",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1928",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1928",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/send-off",
    :doc
@@ -6616,10 +6616,10 @@
    :name "send-via",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1907",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1907",
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/send-via",
    :doc
@@ -6631,10 +6631,10 @@
    :name "seq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L124",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L124",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/seq",
    :doc
@@ -6646,10 +6646,10 @@
    :name "seq?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L142",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L142",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/seq?",
    :doc "Return true if x implements ISeq",
@@ -6660,25 +6660,25 @@
    :name "seque",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4834",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4839",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/seque",
    :doc
    "Creates a queued seq on another (presumably lazy) seq s. The queued\nseq will produce a concrete seq in the background, and can get up to\nn items ahead of the consumer. n-or-q can be an integer n buffer\nsize, or an instance of java.util.concurrent BlockingQueue. Note\nthat reading from a seque can block if the reader gets ahead of the\nproducer.",
    :var-type "function",
-   :line 4834,
+   :line 4839,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "sequence",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2405",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2405",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/sequence",
    :doc
@@ -6690,38 +6690,38 @@
    :name "sequential?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5635",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5640",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/sequential?",
    :doc "Returns true if coll implements Sequential",
    :var-type "function",
-   :line 5635,
+   :line 5640,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "set",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3708",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3711",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/set",
    :doc "Returns a set of the distinct elements of coll.",
    :var-type "function",
-   :line 3708,
+   :line 3711,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([executor]),
    :name "set-agent-send-executor!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1895",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1895",
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/set-agent-send-executor!",
    :doc "Sets the ExecutorService to be used by send",
@@ -6732,10 +6732,10 @@
    :name "set-agent-send-off-executor!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1901",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1901",
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/set-agent-send-off-executor!",
    :doc "Sets the ExecutorService to be used by send-off",
@@ -6746,10 +6746,10 @@
    :name "set-error-handler!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2002",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2002",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/set-error-handler!",
    :doc
@@ -6761,10 +6761,10 @@
    :name "set-error-mode!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2020",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2020",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/set-error-mode!",
    :doc
@@ -6776,10 +6776,10 @@
    :name "set-validator!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2180",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2180",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/set-validator!",
    :doc
@@ -6791,80 +6791,80 @@
    :name "set?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5609",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5614",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/set?",
    :doc "Returns true if x implements IPersistentSet",
    :var-type "function",
-   :line 5609,
+   :line 5614,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "short",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3141",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3144",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/short",
    :doc "Coerce to short",
    :var-type "function",
-   :line 3141,
+   :line 3144,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([size-or-seq] [size init-val-or-seq]),
    :name "short-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4753",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4758",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/short-array",
    :doc "Creates an array of shorts",
    :var-type "function",
-   :line 4753,
+   :line 4758,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([xs]),
    :name "shorts",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4807",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4812",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/shorts",
    :doc "Casts to shorts[]",
    :var-type "function",
-   :line 4807,
+   :line 4812,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "shuffle",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6555",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6560",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/shuffle",
    :doc "Return a random permutation of coll",
    :var-type "function",
-   :line 6555,
+   :line 6560,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([]),
    :name "shutdown-agents",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2062",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2062",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/shutdown-agents",
    :doc
@@ -6876,25 +6876,25 @@
    :name "slurp",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6271",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6276",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/slurp",
    :doc
    "Opens a reader on f and reads all its contents, returning a string.\nSee clojure.java.io/reader for a complete list of supported arguments.",
    :var-type "function",
-   :line 6271,
+   :line 6276,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([pred coll]),
    :name "some",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2434",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2434",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/some",
    :doc
@@ -6906,85 +6906,85 @@
    :name "some->",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6813",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6818",
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/some->",
    :doc
    "When expr is not nil, threads it into the first form (via ->),\nand when that result is not nil, through the next etc",
    :var-type "macro",
-   :line 6813,
+   :line 6818,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([expr & forms]),
    :name "some->>",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6824",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6829",
    :added "1.5",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/some->>",
    :doc
    "When expr is not nil, threads it into the first form (via ->>),\nand when that result is not nil, through the next etc",
    :var-type "macro",
-   :line 6824,
+   :line 6829,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([p] [p1 p2] [p1 p2 p3] [p1 p2 p3 & ps]),
    :name "some-fn",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6673",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6678",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/some-fn",
    :doc
    "Takes a set of predicates and returns a function f that returns the first logical true value\nreturned by one of its composing predicates against any of its arguments, else it returns\nlogical false. Note that f is short-circuiting in that it will stop execution on the first\nargument that triggers a logical true result against the original predicates.",
    :var-type "function",
-   :line 6673,
+   :line 6678,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll] [comp coll]),
    :name "sort",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2742",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2745",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/sort",
    :doc
    "Returns a sorted sequence of the items in coll. If no comparator is\nsupplied, uses compare.  comparator must implement\njava.util.Comparator.  If coll is a Java array, it will be modified.\nTo avoid this, sort a copy of the array.",
    :var-type "function",
-   :line 2742,
+   :line 2745,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([keyfn coll] [keyfn comp coll]),
    :name "sort-by",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2758",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2761",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/sort-by",
    :doc
    "Returns a sorted sequence of the items in coll, where the sort\norder is determined by comparing (keyfn item).  If no comparator is\nsupplied, uses compare.  comparator must implement\njava.util.Comparator.  If coll is a Java array, it will be modified.\nTo avoid this, sort a copy of the array.",
    :var-type "function",
-   :line 2758,
+   :line 2761,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& keyvals]),
    :name "sorted-map",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L376",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L376",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/sorted-map",
    :doc
@@ -6996,10 +6996,10 @@
    :name "sorted-map-by",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L385",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L385",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/sorted-map-by",
    :doc
@@ -7011,10 +7011,10 @@
    :name "sorted-set",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L395",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L395",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/sorted-set",
    :doc
@@ -7026,10 +7026,10 @@
    :name "sorted-set-by",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L403",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L403",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/sorted-set-by",
    :doc
@@ -7041,53 +7041,53 @@
    :name "sorted?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5641",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5646",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/sorted?",
    :doc "Returns true if coll implements Sorted",
    :var-type "function",
-   :line 5641,
+   :line 5646,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([s]),
    :name "special-symbol?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4498",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4503",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/special-symbol?",
    :doc "Returns true if s names a special form",
    :var-type "function",
-   :line 4498,
+   :line 4503,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f content & options]),
    :name "spit",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6286",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6291",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/spit",
    :doc
    "Opposite of slurp.  Opens f with writer, writes content, then\ncloses f. Options passed to clojure.java.io/writer.",
    :var-type "function",
-   :line 6286,
+   :line 6291,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([n coll]),
    :name "split-at",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2619",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2619",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/split-at",
    :doc "Returns a vector of [(take n coll) (drop n coll)]",
@@ -7098,10 +7098,10 @@
    :name "split-with",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2626",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2626",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/split-with",
    :doc
@@ -7113,10 +7113,10 @@
    :name "str",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L504",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L504",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/str",
    :doc
@@ -7128,10 +7128,10 @@
    :name "string?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L156",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L156",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/string?",
    :doc "Return true if x is a String",
@@ -7142,101 +7142,101 @@
    :name "struct",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3671",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3674",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/struct",
    :doc
    "Returns a new structmap instance with the keys of the\nstructure-basis. vals must be supplied for basis keys in order -\nwhere values are not supplied they will default to nil.",
    :var-type "function",
-   :line 3671,
+   :line 3674,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([s & inits]),
    :name "struct-map",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3661",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3664",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/struct-map",
    :doc
    "Returns a new structmap instance with the keys of the\nstructure-basis. keyvals may contain all, some or none of the basis\nkeys - where values are not supplied they will default to nil.\nkeyvals can also contain keys not in the basis.",
    :var-type "function",
-   :line 3661,
+   :line 3664,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([s start] [s start end]),
    :name "subs",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4511",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4516",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/subs",
    :doc
    "Returns the substring of s beginning at start inclusive, and ending\nat end (defaults to length of string), exclusive.",
    :var-type "function",
-   :line 4511,
+   :line 4516,
    :file "src/clj/clojure/core.clj"}
   {:arglists
    ([sc test key] [sc start-test start-key end-test end-key]),
    :name "subseq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4602",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4607",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/subseq",
    :doc
    "sc must be a sorted collection, test(s) one of <, <=, > or\n>=. Returns a seq of those entries with keys ek for\nwhich (test (.. sc comparator (compare ek key)) 0) is true",
    :var-type "function",
-   :line 4602,
+   :line 4607,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([v start] [v start end]),
    :name "subvec",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3429",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3432",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/subvec",
    :doc
    "Returns a persistent vector of the items in vector from\nstart (inclusive) to end (exclusive).  If end is not supplied,\ndefaults to (count vector). This operation is O(1) and very fast, as\nthe resulting vector shares structure with the original and no\ntrimming is done.",
    :var-type "function",
-   :line 3429,
+   :line 3432,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([class]),
    :name "supers",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4989",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4994",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/supers",
    :doc
    "Returns the immediate and indirect superclasses and interfaces of c, if any",
    :var-type "function",
-   :line 4989,
+   :line 4994,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([atom f] [atom f x] [atom f x y] [atom f x y & args]),
    :name "swap!",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2153",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2153",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/swap!",
    :doc
@@ -7248,10 +7248,10 @@
    :name "symbol",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L534",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L534",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/symbol",
    :doc "Returns a Symbol with the given namespace and name.",
@@ -7262,10 +7262,10 @@
    :name "symbol?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L522",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L522",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/symbol?",
    :doc "Return true if x is a Symbol",
@@ -7276,10 +7276,10 @@
    :name "sync",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2289",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2289",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/sync",
    :doc
@@ -7291,10 +7291,10 @@
    :name "take",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2546",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2546",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/take",
    :doc
@@ -7306,10 +7306,10 @@
    :name "take-last",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2587",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2587",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/take-last",
    :doc
@@ -7321,24 +7321,24 @@
    :name "take-nth",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3886",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3889",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/take-nth",
    :doc "Returns a lazy seq of every nth item in coll.",
    :var-type "function",
-   :line 3886,
+   :line 3889,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([pred coll]),
    :name "take-while",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2557",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2557",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/take-while",
    :doc
@@ -7350,70 +7350,70 @@
    :name "test",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4359",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4364",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/test",
    :doc
    "test [v] finds fn at key :test in var metadata and calls it,\npresuming failure will throw exception",
    :var-type "function",
-   :line 4359,
+   :line 4364,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "the-ns",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3751",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3754",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/the-ns",
    :doc
    "If passed a namespace, returns it. Else, when passed a symbol,\nreturns the namespace named by it, throwing an exception if not\nfound.",
    :var-type "function",
-   :line 3751,
+   :line 3754,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& vars]),
    :name "thread-bound?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4956",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4961",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/thread-bound?",
    :doc
    "Returns true if all of the vars provided as arguments have thread-local bindings.\nImplies that set!'ing the provided vars will succeed.  Returns true if no vars are provided.",
    :var-type "function",
-   :line 4956,
+   :line 4961,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([expr]),
    :name "time",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3493",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3496",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/time",
    :doc
    "Evaluates expr and prints the time it took.  Returns the value of\nexpr.",
    :var-type "macro",
-   :line 3493,
+   :line 3496,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "to-array",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L327",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L327",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/to-array",
    :doc
@@ -7425,70 +7425,70 @@
    :name "to-array-2d",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3612",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3615",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/to-array-2d",
    :doc
    "Returns a (potentially-ragged) 2-dimensional array of Objects\ncontaining the contents of coll, which can be any Collection of any\nCollection.",
    :var-type "function",
-   :line 3612,
+   :line 3615,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([f] [f & args]),
    :name "trampoline",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5679",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5684",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/trampoline",
    :doc
    "trampoline can be used to convert algorithms requiring mutual\nrecursion without stack consumption. Calls f with supplied args, if\nany. If f returns a fn, calls that fn with no arguments, and\ncontinues to repeat, until the return value is not a fn, then\nreturns that non-fn value. Note that if you want to return a fn as a\nfinal value, you must wrap it in some data structure and unpack it\nafter trampoline returns.",
    :var-type "function",
-   :line 5679,
+   :line 5684,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([coll]),
    :name "transient",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2980",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2983",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/transient",
    :doc
    "Alpha - subject to change.\nReturns a new, transient version of the collection, in constant time.",
    :var-type "function",
-   :line 2980,
+   :line 2983,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([branch? children root]),
    :name "tree-seq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4461",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4466",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/tree-seq",
    :doc
    "Returns a lazy sequence of the nodes in a tree, via a depth-first walk.\n branch? must be a fn of one arg that returns true if passed a node\n that can have children (but may not).  children must be a fn of one\n arg that returns a sequence of the children. Will only be called on\n nodes for which branch? returns true. Root is the root node of the\ntree.",
    :var-type "function",
-   :line 4461,
+   :line 4466,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "true?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L490",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L490",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/true?",
    :doc "Returns true if x is the value true, false otherwise.",
@@ -7499,24 +7499,24 @@
    :name "type",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3109",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3112",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/type",
    :doc "Returns the :type metadata of x, or its Class if none",
    :var-type "function",
-   :line 3109,
+   :line 3112,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x y]),
    :name "unchecked-add",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1150",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1150",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-add",
    :doc
@@ -7528,10 +7528,10 @@
    :name "unchecked-add-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1143",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1143",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-add-int",
    :doc
@@ -7543,38 +7543,38 @@
    :name "unchecked-byte",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3166",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3169",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-byte",
    :doc "Coerce to byte. Subject to rounding or truncation.",
    :var-type "function",
-   :line 3166,
+   :line 3169,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "unchecked-char",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3178",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3181",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-char",
    :doc "Coerce to char. Subject to rounding or truncation.",
    :var-type "function",
-   :line 3178,
+   :line 3181,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "unchecked-dec",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1122",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1122",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-dec",
    :doc
@@ -7586,10 +7586,10 @@
    :name "unchecked-dec-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1115",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1115",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-dec-int",
    :doc
@@ -7601,10 +7601,10 @@
    :name "unchecked-divide-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1185",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1185",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-divide-int",
    :doc
@@ -7616,38 +7616,38 @@
    :name "unchecked-double",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3202",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3205",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-double",
    :doc "Coerce to double. Subject to rounding.",
    :var-type "function",
-   :line 3202,
+   :line 3205,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "unchecked-float",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3196",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3199",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-float",
    :doc "Coerce to float. Subject to rounding.",
    :var-type "function",
-   :line 3196,
+   :line 3199,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "unchecked-inc",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1108",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1108",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-inc",
    :doc
@@ -7659,10 +7659,10 @@
    :name "unchecked-inc-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1101",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1101",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-inc-int",
    :doc
@@ -7674,38 +7674,38 @@
    :name "unchecked-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3184",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3187",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-int",
    :doc "Coerce to int. Subject to rounding or truncation.",
    :var-type "function",
-   :line 3184,
+   :line 3187,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "unchecked-long",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3190",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3193",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-long",
    :doc "Coerce to long. Subject to rounding or truncation.",
    :var-type "function",
-   :line 3190,
+   :line 3193,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x y]),
    :name "unchecked-multiply",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1178",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1178",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-multiply",
    :doc
@@ -7717,10 +7717,10 @@
    :name "unchecked-multiply-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1171",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1171",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-multiply-int",
    :doc
@@ -7732,10 +7732,10 @@
    :name "unchecked-negate",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1136",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1136",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-negate",
    :doc
@@ -7747,10 +7747,10 @@
    :name "unchecked-negate-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1129",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1129",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-negate-int",
    :doc
@@ -7762,10 +7762,10 @@
    :name "unchecked-remainder-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1192",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1192",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-remainder-int",
    :doc
@@ -7777,24 +7777,24 @@
    :name "unchecked-short",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3172",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3175",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-short",
    :doc "Coerce to short. Subject to rounding or truncation.",
    :var-type "function",
-   :line 3172,
+   :line 3175,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x y]),
    :name "unchecked-subtract",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1164",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1164",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-subtract",
    :doc
@@ -7806,10 +7806,10 @@
    :name "unchecked-subtract-int",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1157",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1157",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/unchecked-subtract-int",
    :doc
@@ -7821,31 +7821,31 @@
    :name "underive",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5100",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5105",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/underive",
    :doc
    "Removes a parent/child relationship between parent and\ntag. h must be a hierarchy obtained from make-hierarchy, if not\nsupplied defaults to, and modifies, the global hierarchy.",
    :var-type "function",
-   :line 5100,
+   :line 5105,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([m [k & ks] f & args]),
    :name "update-in",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5576",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5581",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/update-in",
    :doc
    "'Updates' a value in a nested associative structure, where ks is a\nsequence of keys and f is a function that will take the old value\nand any supplied args and return the new value, and returns a new\nnested structure.  If any levels do not exist, hash-maps will be\ncreated.",
    :var-type "function",
-   :line 5576,
+   :line 5581,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([proxy mappings]),
    :name "update-proxy",
@@ -7866,25 +7866,25 @@
    :name "use",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5498",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5503",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/use",
    :doc
    "Like 'require, but also refers to each lib's namespace using\nclojure.core/refer. Use :use in the ns macro in preference to calling\nthis directly.\n\n'use accepts additional options in libspecs: :exclude, :only, :rename.\nThe arguments and semantics for :exclude, :only, and :rename are the same\nas those documented for clojure.core/refer.",
    :var-type "function",
-   :line 5498,
+   :line 5503,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([e]),
    :name "val",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1484",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1484",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/val",
    :doc "Returns the value in the map entry.",
@@ -7895,10 +7895,10 @@
    :name "vals",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1471",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1471",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/vals",
    :doc "Returns a sequence of the map's values.",
@@ -7909,53 +7909,53 @@
    :name "var-get",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3911",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3916",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/var-get",
    :doc "Gets the value in the var object",
    :var-type "function",
-   :line 3911,
+   :line 3916,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x val]),
    :name "var-set",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3917",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3922",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/var-set",
    :doc
    "Sets the value in the var object to val. The var must be\nthread-locally bound.",
    :var-type "function",
-   :line 3917,
+   :line 3922,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([v]),
    :name "var?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4505",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4510",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/var?",
    :doc "Returns true if v is of type clojure.lang.Var",
    :var-type "function",
-   :line 4505,
+   :line 4510,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([obj f & args]),
    :name "vary-meta",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L627",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L627",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/vary-meta",
    :doc
@@ -7967,10 +7967,10 @@
    :name "vec",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L347",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L347",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/vec",
    :doc
@@ -7982,10 +7982,10 @@
    :name "vector",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L335",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L335",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/vector",
    :doc "Creates a new vector containing the args.",
@@ -7996,10 +7996,10 @@
    :name "vector-of",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/0245f15c9c7bd2d043f0f6e59fff0a692d7466b1/src/clj/clojure/gvec.clj#L452",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/gvec.clj#L452",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/0245f15c9c7bd2d043f0f6e59fff0a692d7466b1/src/clj/clojure/gvec.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/gvec.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/vector-of",
    :doc
@@ -8011,10 +8011,10 @@
    :name "vector?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L170",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L170",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/vector?",
    :doc "Return true if x implements IPersistentVector",
@@ -8025,10 +8025,10 @@
    :name "when",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L471",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L471",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/when",
    :doc
@@ -8040,25 +8040,25 @@
    :name "when-first",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4154",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4159",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/when-first",
    :doc
    "bindings => x xs\n\nRoughly the same as (when (seq xs) (let [x (first xs)] body)) but xs is evaluated only once",
    :var-type "macro",
-   :line 4154,
+   :line 4159,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([bindings & body]),
    :name "when-let",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1704",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1704",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/when-let",
    :doc
@@ -8070,10 +8070,10 @@
    :name "when-not",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L477",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L477",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/when-not",
    :doc
@@ -8085,25 +8085,25 @@
    :name "while",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L5713",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L5718",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/while",
    :doc
    "Repeatedly executes body while test expression is true. Presumes\nsome side-effect will cause test to become false/nil. Returns nil",
    :var-type "macro",
-   :line 5713,
+   :line 5718,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([binding-map & body]),
    :name "with-bindings",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1792",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1792",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/with-bindings",
    :doc
@@ -8115,10 +8115,10 @@
    :name "with-bindings*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L1779",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L1779",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/with-bindings*",
    :doc
@@ -8130,40 +8130,40 @@
    :name "with-in-str",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4281",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4286",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/with-in-str",
    :doc
    "Evaluates body in a context in which *in* is bound to a fresh\nStringReader initialized with the string s.",
    :var-type "macro",
-   :line 4281,
+   :line 4286,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([name-vals-vec & body]),
    :name "with-local-vars",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3924",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3929",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/with-local-vars",
    :doc
    "varbinding=> symbol init-expr\n\nExecutes the exprs in a context in which the symbols are bound to\nvars with per-thread bindings to the init-exprs.  The symbols refer\nto the var objects themselves, and must be accessed with var-get and\nvar-set",
    :var-type "macro",
-   :line 3924,
+   :line 3929,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([obj m]),
    :name "with-meta",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L207",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L207",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/with-meta",
    :doc
@@ -8175,99 +8175,99 @@
    :name "with-open",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L3442",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L3445",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/with-open",
    :doc
    "bindings => [name init ...]\n\nEvaluates body in a try expression with names bound to the values\nof the inits, and a finally clause that calls (.close name) on each\nname in reverse order.",
    :var-type "macro",
-   :line 3442,
+   :line 3445,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& body]),
    :name "with-out-str",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4270",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4275",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/with-out-str",
    :doc
    "Evaluates exprs in a context in which *out* is bound to a fresh\nStringWriter.  Returns the string created by any nested printing\ncalls.",
    :var-type "macro",
-   :line 4270,
+   :line 4275,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([precision & exprs]),
    :name "with-precision",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4579",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4584",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/with-precision",
    :doc
    "Sets the precision and rounding mode to be used for BigDecimal operations.\n\nUsage: (with-precision 10 (/ 1M 3))\nor:    (with-precision 10 :rounding HALF_DOWN (/ 1M 3))\n\nThe rounding mode is one of CEILING, FLOOR, HALF_UP, HALF_DOWN,\nHALF_EVEN, UP, DOWN and UNNECESSARY; it defaults to HALF_UP.",
    :var-type "macro",
-   :line 4579,
+   :line 4584,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([bindings & body]),
    :name "with-redefs",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6755",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6760",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/with-redefs",
    :doc
    "binding => var-symbol temp-value-expr\n\nTemporarily redefines Vars while executing the body.  The\ntemp-value-exprs will be evaluated and each resulting value will\nreplace in parallel the root value of its Var.  After the body is\nexecuted, the root values of all the Vars will be set back to their\nold values.  These temporary changes will be visible in all threads.\nUseful for mocking out functions during testing.",
    :var-type "macro",
-   :line 6755,
+   :line 6760,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([binding-map func]),
    :name "with-redefs-fn",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L6735",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L6740",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/with-redefs-fn",
    :doc
    "Temporarily redefines Vars during a call to func.  Each val of\nbinding-map will replace the root value of its key which must be\na Var.  After func is called with no args, the root values of all\nthe Vars will be set back to their old values.  These temporary\nchanges will be visible in all threads.  Useful for mocking out\nfunctions during testing.",
    :var-type "function",
-   :line 6735,
+   :line 6740,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([root]),
    :name "xml-seq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L4488",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L4493",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/xml-seq",
    :doc "A tree seq on the xml elements as per xml/parse",
    :var-type "function",
-   :line 4488,
+   :line 4493,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([x]),
    :name "zero?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L819",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L819",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/zero?",
    :doc "Returns true if num is zero, else false",
@@ -8278,16 +8278,16 @@
    :name "zipmap",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj#L2706",
+   "https://github.com/clojure/clojure/blob/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj#L2709",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/core.clj",
+   "https://github.com/clojure/clojure/raw/6e585cf725cf3577afc3416d1367cea68162d45d/src/clj/clojure/core.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/zipmap",
    :doc
    "Returns a map with the keys mapped to the corresponding vals.",
    :var-type "function",
-   :line 2706,
+   :line 2709,
    :file "src/clj/clojure/core.clj"}
   {:file nil,
    :raw-source-url nil,
@@ -8418,51 +8418,51 @@
    :name "inspect",
    :namespace "clojure.inspector",
    :source-url
-   "https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L150",
+   "https://github.com/clojure/clojure/blob/9b1db94bf707c155472864d1a823965b72a0fe0e/src/clj/clojure/inspector.clj#L154",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj",
+   "https://github.com/clojure/clojure/raw/9b1db94bf707c155472864d1a823965b72a0fe0e/src/clj/clojure/inspector.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.inspector-api.html#clojure.inspector/inspect",
    :doc "creates a graphical (Swing) inspector on the supplied object",
    :var-type "function",
-   :line 150,
+   :line 154,
    :file "src/clj/clojure/inspector.clj"}
   {:arglists ([data]),
    :name "inspect-table",
    :namespace "clojure.inspector",
    :source-url
-   "https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L96",
+   "https://github.com/clojure/clojure/blob/9b1db94bf707c155472864d1a823965b72a0fe0e/src/clj/clojure/inspector.clj#L100",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj",
+   "https://github.com/clojure/clojure/raw/9b1db94bf707c155472864d1a823965b72a0fe0e/src/clj/clojure/inspector.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.inspector-api.html#clojure.inspector/inspect-table",
    :doc
    "creates a graphical (Swing) inspector on the supplied regular\ndata, which must be a sequential data structure of data structures\nof equal length",
    :var-type "function",
-   :line 96,
+   :line 100,
    :file "src/clj/clojure/inspector.clj"}
   {:arglists ([data]),
    :name "inspect-tree",
    :namespace "clojure.inspector",
    :source-url
-   "https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj#L87",
+   "https://github.com/clojure/clojure/blob/9b1db94bf707c155472864d1a823965b72a0fe0e/src/clj/clojure/inspector.clj#L91",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/inspector.clj",
+   "https://github.com/clojure/clojure/raw/9b1db94bf707c155472864d1a823965b72a0fe0e/src/clj/clojure/inspector.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.inspector-api.html#clojure.inspector/inspect-tree",
    :doc
    "creates a graphical (Swing) inspector on the supplied hierarchical data",
    :var-type "function",
-   :line 87,
+   :line 91,
    :file "src/clj/clojure/inspector.clj"}
   {:file "src/clj/clojure/instant.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   "https://github.com/clojure/clojure/raw/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L48",
+   "https://github.com/clojure/clojure/blob/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj#L48",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.instant-api.html#clojure.instant/parse-timestamp",
    :namespace "clojure.instant",
@@ -8473,9 +8473,9 @@
    :name "parse-timestamp"}
   {:file "src/clj/clojure/instant.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   "https://github.com/clojure/clojure/raw/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L277",
+   "https://github.com/clojure/clojure/blob/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj#L277",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.instant-api.html#clojure.instant/read-instant-calendar",
    :namespace "clojure.instant",
@@ -8486,9 +8486,9 @@
    :name "read-instant-calendar"}
   {:file "src/clj/clojure/instant.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   "https://github.com/clojure/clojure/raw/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L271",
+   "https://github.com/clojure/clojure/blob/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj#L271",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.instant-api.html#clojure.instant/read-instant-date",
    :namespace "clojure.instant",
@@ -8499,9 +8499,9 @@
    :name "read-instant-date"}
   {:file "src/clj/clojure/instant.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   "https://github.com/clojure/clojure/raw/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L283",
+   "https://github.com/clojure/clojure/blob/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj#L283",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.instant-api.html#clojure.instant/read-instant-timestamp",
    :namespace "clojure.instant",
@@ -8514,13 +8514,13 @@
    :name "validated",
    :namespace "clojure.instant",
    :source-url
-   "https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L136",
+   "https://github.com/clojure/clojure/blob/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj#L136",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj",
+   "https://github.com/clojure/clojure/raw/5e9ad16e11aad1228ca3d1b0a9c3b52ccd602dbc/src/clj/clojure/instant.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.instant-api.html#clojure.instant/validated",
    :doc
-   "Return a function which constructs and instant by calling constructor\nafter first validting that those arguments are in range and otherwise\nplausible. The resulting function will throw an exception if called\nwith invalid arguments.",
+   "Return a function which constructs and instant by calling constructor\nafter first validating that those arguments are in range and otherwise\nplausible. The resulting function will throw an exception if called\nwith invalid arguments.",
    :var-type "function",
    :line 136,
    :file "src/clj/clojure/instant.clj"}
@@ -8528,24 +8528,24 @@
    :name "browse-url",
    :namespace "clojure.java.browse",
    :source-url
-   "https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/java/browse.clj#L46",
+   "https://github.com/clojure/clojure/blob/ef00c7cffad10e6104d333f7f71a29163b06cd0a/src/clj/clojure/java/browse.clj#L66",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/java/browse.clj",
+   "https://github.com/clojure/clojure/raw/ef00c7cffad10e6104d333f7f71a29163b06cd0a/src/clj/clojure/java/browse.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.browse-api.html#clojure.java.browse/browse-url",
    :doc "Open url in a browser",
    :var-type "function",
-   :line 46,
+   :line 66,
    :file "src/clj/clojure/java/browse.clj"}
   {:arglists ([x]),
    :name "as-relative-path",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L397",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L397",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/as-relative-path",
    :doc
@@ -8557,10 +8557,10 @@
    :name "copy",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L380",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L380",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/copy",
    :doc
@@ -8572,10 +8572,10 @@
    :name "delete-file",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L419",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L419",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/delete-file",
    :doc
@@ -8587,10 +8587,10 @@
    :name "file",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L407",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L407",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/file",
    :doc
@@ -8602,10 +8602,10 @@
    :name "input-stream",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L125",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L125",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/input-stream",
    :doc
@@ -8617,10 +8617,10 @@
    :name "make-parents",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L427",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L427",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-parents",
    :doc
@@ -8632,10 +8632,10 @@
    :name "output-stream",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L142",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L142",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/output-stream",
    :doc
@@ -8647,10 +8647,10 @@
    :name "reader",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L90",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L90",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/reader",
    :doc
@@ -8662,10 +8662,10 @@
    :name "resource",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L435",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L435",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/resource",
    :doc
@@ -8677,10 +8677,10 @@
    :name "writer",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L108",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L108",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/writer",
    :doc
@@ -8691,10 +8691,10 @@
   {:name "Coercions",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L35",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L35",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/Coercions",
    :doc "Coerce between various 'resource-namish' things.",
@@ -8704,10 +8704,10 @@
   {:name "IOFactory",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj#L73",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj#L73",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/af81bca10c2ba783d56d132aeb7b8474fcf3dbdd/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/IOFactory",
    :doc
@@ -8872,10 +8872,10 @@
    :name "demunge",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L51",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L51",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/demunge",
    :doc
@@ -8887,106 +8887,106 @@
    :name "load-script",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L287",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L288",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/load-script",
    :doc
    "Loads Clojure source from a file or resource given its path. Paths\nbeginning with @ or @/ are considered relative to classpath.",
    :var-type "function",
-   :line 287,
+   :line 288,
    :file "src/clj/clojure/main.clj"}
   {:arglists ([& args]),
    :name "main",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L403",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L404",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/main",
    :doc
    "Usage: java -cp clojure.jar clojure.main [init-opt*] [main-opt] [arg*]\n\nWith no options or args, runs an interactive Read-Eval-Print Loop\n\ninit options:\n  -i, --init path     Load a file or resource\n  -e, --eval string   Evaluate expressions in string; print non-nil values\n\nmain options:\n  -m, --main ns-name  Call the -main function from a namespace with args\n  -r, --repl          Run a repl\n  path                Run a script from from a file or resource\n  -                   Run a script from standard input\n  -h, -?, --help      Print this help message and exit\n\noperation:\n\n  - Establishes thread-local bindings for commonly set!-able vars\n  - Enters the user namespace\n  - Binds *command-line-args* to a seq of strings containing command line\n    args that appear after any main option\n  - Runs all init options in order\n  - Calls a -main function or runs a repl or script if requested\n\nThe init options may be repeated and mixed freely, but must appear before\nany main option. The appearance of any eval option before running a repl\nsuppresses the usual repl greeting message: \"Clojure ~(clojure-version)\".\n\nPaths may be absolute or relative in the filesystem or relative to\nclasspath. Classpath-relative paths have prefix of @ or @/",
    :var-type "function",
-   :line 403,
+   :line 404,
    :file "src/clj/clojure/main.clj"}
   {:arglists ([& options]),
    :name "repl",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L193",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L194",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl",
    :doc
    "Generic, reusable, read-eval-print loop. By default, reads from *in*,\nwrites to *out*, and prints exception summaries to *err*. If you use the\ndefault :read hook, *in* must either be an instance of\nLineNumberingPushbackReader or duplicate its behavior of both supporting\n.unread and collapsing CR, LF, and CRLF into a single \\newline. Options\nare sequential keyword-value pairs. Available options and their defaults:\n\n   - :init, function of no arguments, initialization hook called with\n     bindings for set!-able vars in place.\n     default: #()\n\n   - :need-prompt, function of no arguments, called before each\n     read-eval-print except the first, the user will be prompted if it\n     returns true.\n     default: (if (instance? LineNumberingPushbackReader *in*)\n                #(.atLineStart *in*)\n                #(identity true))\n\n   - :prompt, function of no arguments, prompts for more input.\n     default: repl-prompt\n\n   - :flush, function of no arguments, flushes output\n     default: flush\n\n   - :read, function of two arguments, reads from *in*:\n       - returns its first argument to request a fresh prompt\n         - depending on need-prompt, this may cause the repl to prompt\n           before reading again\n       - returns its second argument to request an exit from the repl\n       - else returns the next object read from the input stream\n     default: repl-read\n\n   - :eval, funtion of one argument, returns the evaluation of its\n     argument\n     default: eval\n\n   - :print, function of one argument, prints its argument to the output\n     default: prn\n\n   - :caught, function of one argument, a throwable, called when\n     read, eval, or print throws an exception or error\n     default: repl-caught",
    :var-type "function",
-   :line 193,
+   :line 194,
    :file "src/clj/clojure/main.clj"}
   {:arglists ([e]),
    :name "repl-caught",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L168",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L169",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-caught",
    :doc "Default :caught hook for repl",
    :var-type "function",
-   :line 168,
+   :line 169,
    :file "src/clj/clojure/main.clj"}
   {:arglists ([throwable]),
    :name "repl-exception",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L163",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L164",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-exception",
    :doc "Returns the root cause of throwables",
    :var-type "function",
-   :line 163,
+   :line 164,
    :file "src/clj/clojure/main.clj"}
   {:arglists ([]),
    :name "repl-prompt",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L108",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L109",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-prompt",
    :doc "Default :prompt hook for repl",
    :var-type "function",
-   :line 108,
+   :line 109,
    :file "src/clj/clojure/main.clj"}
   {:arglists ([request-prompt request-exit]),
    :name "repl-read",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L145",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L146",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-read",
    :doc
    "Default :read hook for repl. Reads from *in* which must either be an\ninstance of LineNumberingPushbackReader or duplicate its behavior of both\nsupporting .unread and collapsing all of CR, LF, and CRLF into a single\n\\newline. repl-read:\n  - skips whitespace, then\n    - returns request-prompt on start of line, or\n    - returns request-exit on end of stream, or\n    - reads an object from the input stream, then\n      - skips the next input character if it's end of line, then\n      - returns the object.",
    :var-type "function",
-   :line 145,
+   :line 146,
    :file "src/clj/clojure/main.clj"}
   {:file "src/clj/clojure/main.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L180",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L181",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-requires",
    :namespace "clojure.main",
-   :line 180,
+   :line 181,
    :var-type "var",
    :doc
    "A sequence of lib specs that are applied to `require`\nby default when a new command-line REPL is started.",
@@ -8995,10 +8995,10 @@
    :name "root-cause",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L58",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L58",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/root-cause",
    :doc
@@ -9010,38 +9010,38 @@
    :name "skip-if-eol",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L113",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L114",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/skip-if-eol",
    :doc
    "If the next character on stream s is a newline, skips it, otherwise\nleaves the stream untouched. Returns :line-start, :stream-end, or :body\nto indicate the relative location of the next character on s. The stream\nmust either be an instance of LineNumberingPushbackReader or duplicate\nits behavior of both supporting .unread and collapsing all of CR, LF, and\nCRLF to a single \\newline.",
    :var-type "function",
-   :line 113,
+   :line 114,
    :file "src/clj/clojure/main.clj"}
   {:arglists ([s]),
    :name "skip-whitespace",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L127",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L128",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/skip-whitespace",
    :doc
    "Skips whitespace characters on stream s. Returns :line-start, :stream-end,\nor :body to indicate the relative location of the next character on s.\nInterprets comma as whitespace and semicolon as comment to end of line.\nDoes not interpret #! as comment to end of line because only one\ncharacter of lookahead is available. The stream must either be an\ninstance of LineNumberingPushbackReader or duplicate its behavior of both\nsupporting .unread and collapsing all of CR, LF, and CRLF to a single\n\\newline.",
    :var-type "function",
-   :line 127,
+   :line 128,
    :file "src/clj/clojure/main.clj"}
   {:arglists ([el]),
    :name "stack-element-str",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L71",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L71",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/stack-element-str",
    :doc
@@ -9053,9 +9053,9 @@
    :name "with-bindings",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L85",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L85",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/with-bindings",
    :doc
@@ -9067,15 +9067,15 @@
    :name "with-read-known",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L186",
+   "https://github.com/clojure/clojure/blob/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj#L187",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/5045ac124e24ed1fe02be86cccca10f7f212a4dc/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/with-read-known",
    :doc
    "Evaluates body with *read-eval* set to a \"known\" value,\ni.e. substituting true for :unknown if necessary.",
    :var-type "macro",
-   :line 186,
+   :line 187,
    :file "src/clj/clojure/main.clj"}
   {:name "*print-base*",
    :namespace "clojure.pprint",
@@ -9709,9 +9709,9 @@
    :name "apropos",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L165",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L165",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/apropos",
    :doc
@@ -9723,10 +9723,10 @@
    :name "demunge",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L210",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L210",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/demunge",
    :doc
@@ -9738,9 +9738,9 @@
    :name "dir",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L183",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L183",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/dir",
    :doc "Prints a sorted directory of public vars in a namespace",
@@ -9751,9 +9751,9 @@
    :name "dir-fn",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L177",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L177",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/dir-fn",
    :doc
@@ -9765,10 +9765,10 @@
    :name "doc",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L120",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L120",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/doc",
    :doc
@@ -9780,10 +9780,10 @@
    :name "find-doc",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L104",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L104",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/find-doc",
    :doc
@@ -9795,10 +9795,10 @@
    :name "pst",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L242",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L242",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/pst",
    :doc
@@ -9810,10 +9810,10 @@
    :name "root-cause",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L217",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L217",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/root-cause",
    :doc
@@ -9825,9 +9825,9 @@
    :name "set-break-handler!",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L278",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L278",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/set-break-handler!",
    :doc
@@ -9839,9 +9839,9 @@
    :name "source",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L156",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L156",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/source",
    :doc
@@ -9853,9 +9853,9 @@
    :name "source-fn",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L134",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L134",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/source-fn",
    :doc
@@ -9867,10 +9867,10 @@
    :name "stack-element-str",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L230",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L230",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/stack-element-str",
    :doc
@@ -9882,9 +9882,9 @@
    :name "thread-stopper",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj#L272",
+   "https://github.com/clojure/clojure/blob/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj#L272",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4004d267e124f12b65b0d7fb6522f32a75e3c4fb/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/7ac5ad84ea4cae899606a1ea8762db0caaab5b55/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/thread-stopper",
    :doc
