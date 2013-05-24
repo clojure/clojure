@@ -532,8 +532,24 @@ Math/pow overflows to Infinity."
        0 (bit-shift-right 2r10 -1) ; truncated to least 6-bits, 63
        1 (bit-shift-right (expt 2 32) 32)
        1 (bit-shift-right (expt 2 16) 10000) ; truncated to least 6-bits, 16
+       -1 (bit-shift-right -2r10 1)
        )
   (is (thrown? IllegalArgumentException (bit-shift-right 1N 1))))
+
+(deftest test-unsigned-bit-shift-right
+  (are [x y] (= x y)
+       2r0 (unsigned-bit-shift-right 2r1 1)
+       2r010 (unsigned-bit-shift-right 2r100 1)
+       2r001 (unsigned-bit-shift-right 2r100 2)
+       2r000 (unsigned-bit-shift-right 2r100 3)
+       2r0001011 (unsigned-bit-shift-right 2r00010111 1)
+       2r0001011 (apply unsigned-bit-shift-right [2r00010111 1])
+       0 (unsigned-bit-shift-right 2r10 -1) ; truncated to least 6-bits, 63
+       1 (unsigned-bit-shift-right (expt 2 32) 32)
+       1 (unsigned-bit-shift-right (expt 2 16) 10000) ; truncated to least 6-bits, 16
+       9223372036854775807 (unsigned-bit-shift-right -2r10 1)
+       )
+  (is (thrown? IllegalArgumentException (unsigned-bit-shift-right 1N 1))))
 
 (deftest test-bit-clear
   (is (= 2r1101 (bit-clear 2r1111 1)))
