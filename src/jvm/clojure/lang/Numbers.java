@@ -389,20 +389,20 @@ static public long shiftRight(long x, long n){
 	return x >> n;
 }
 
-static public int shiftRightLogicalInt(int x, int n){
+static public int unsignedShiftRightInt(int x, int n){
 	return x >>> n;
 }
 
-static public long shiftRightLogical(Object x, Object y){
-    return shiftRightLogical(bitOpsCast(x),bitOpsCast(y));
+static public long unsignedShiftRight(Object x, Object y){
+    return unsignedShiftRight(bitOpsCast(x),bitOpsCast(y));
 }
-static public long shiftRightLogical(Object x, long y){
-    return shiftRightLogical(bitOpsCast(x),y);
+static public long unsignedShiftRight(Object x, long y){
+    return unsignedShiftRight(bitOpsCast(x),y);
 }
-static public long shiftRightLogical(long x, Object y){
-    return shiftRightLogical(x,bitOpsCast(y));
+static public long unsignedShiftRight(long x, Object y){
+    return unsignedShiftRight(x,bitOpsCast(y));
 }
-static public long shiftRightLogical(long x, long n){
+static public long unsignedShiftRight(long x, long n){
 	return x >>> n;
 }
 

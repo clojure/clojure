@@ -1317,11 +1317,11 @@
    :added "1.0"}
   [x n] (. clojure.lang.Numbers shiftRight x n))
 
-(defn bit-shift-right-logical
+(defn unsigned-bit-shift-right
   "Bitwise shift right, without sign-extension."
-  {:inline (fn [x n] `(. clojure.lang.Numbers (shiftRightLogical ~x ~n)))
-   :added "1.4"}
-  [x n] (. clojure.lang.Numbers shiftRightLogical x n))
+  {:inline (fn [x n] `(. clojure.lang.Numbers (unsignedShiftRight ~x ~n)))
+   :added "1.6"}
+  [x n] (. clojure.lang.Numbers unsignedShiftRight x n))
 
 (defn integer?
   "Returns true if n is an integer"
