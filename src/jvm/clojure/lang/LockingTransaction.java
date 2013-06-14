@@ -222,13 +222,23 @@ static LockingTransaction getRunning(){
 
 static public Object runInTransaction(Callable fn) throws Exception{
 	LockingTransaction t = transaction.get();
-	if(t == null)
-		transaction.set(t = new LockingTransaction());
+        Object ret;
+	if(t == null) {
+            transaction.set(t = new LockingTransaction());
+            try {
+                ret = t.run(fn);
+            } finally {
+                transaction.remove();
+            }
+        } else {
+            if(t.info != null) {
+                ret = fn.call();
+            } else {
+                ret = t.run(fn);
+            }
+        }
 
-	if(t.info != null)
-		return fn.call();
-
-	return t.run(fn);
+        return ret;
 }
 
 static class Notify{
