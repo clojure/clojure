@@ -444,6 +444,8 @@ final static class LongOps implements Ops{
 
 	final public Number multiplyP(Number x, Number y){
 		long lx = x.longValue(), ly = y.longValue();
+    if (lx == Long.MIN_VALUE && ly < 0)
+      return BIGINT_OPS.multiply(x, y);
 		long ret = lx * ly;
 		if (ly != 0 && ret/ly != lx)
 			return BIGINT_OPS.multiply(x, y);
@@ -1747,6 +1749,8 @@ static public Number decP(long x){
 
 
 static public long multiply(long x, long y){
+  if (x == Long.MIN_VALUE && y < 0)
+		return throwIntOverflow();
 	long ret = x * y;
 	if (y != 0 && ret/y != x)
 		return throwIntOverflow();
@@ -1754,6 +1758,8 @@ static public long multiply(long x, long y){
 }
 
 static public Number multiplyP(long x, long y){
+  if (x == Long.MIN_VALUE && y < 0)
+		return multiplyP((Number)x,(Number)y);
 	long ret = x * y;
 	if (y != 0 && ret/y != x)
 		return multiplyP((Number)x,(Number)y);

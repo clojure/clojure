@@ -214,6 +214,17 @@
 
   (is (> (* 3 (int (/ Integer/MAX_VALUE 2.0))) Integer/MAX_VALUE)) )  ; no overflow
 
+(deftest test-multiply-longs-at-edge
+  (are [x] (= x 9223372036854775808N)
+       (*' -1 Long/MIN_VALUE)
+       (*' Long/MIN_VALUE -1)
+       (* -1N Long/MIN_VALUE)
+       (* Long/MIN_VALUE -1N)
+       (* -1 (bigint Long/MIN_VALUE))
+       (* (bigint Long/MIN_VALUE) -1))
+  (is (thrown? ArithmeticException (* Long/MIN_VALUE -1)))
+  (is (thrown? ArithmeticException (* -1 Long/MIN_VALUE))))
+
 (deftest test-ratios-simplify-to-ints-where-appropriate
   (testing "negative denominator (assembla #275)"
     (is (integer? (/ 1 -1/2)))

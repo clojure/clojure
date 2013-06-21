@@ -144,7 +144,8 @@ public BigInt add(BigInt y) {
 public BigInt multiply(BigInt y) {
     if ((bipart == null) && (y.bipart == null)) {
         long ret = lpart * y.lpart;
-            if (y.lpart == 0 || ret / y.lpart == lpart)
+            if (y.lpart == 0 ||
+                (ret / y.lpart == lpart && lpart != Long.MIN_VALUE))
                 return BigInt.valueOf(ret);
         }
     return BigInt.fromBigInteger(this.toBigInteger().multiply(y.toBigInteger()));
