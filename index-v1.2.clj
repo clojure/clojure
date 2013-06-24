@@ -8121,7 +8121,7 @@
    "http://clojure.github.com/clojure//clojure.pprint-api.html#clojure.pprint/*print-pprint-dispatch*",
    :doc
    "The pretty print dispatch function. Use with-pprint-dispatch or set-pprint-dispatch\nto modify.",
-   :var-type "var",
+   :var-type "multimethod",
    :line 34,
    :file "src/clj/clojure/pprint/pprint_base.clj"}
   {:name "*print-pretty*",
@@ -9244,7 +9244,7 @@
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/report",
    :doc
    "Generic reporting function, may be overridden to plug in\ndifferent report formats (e.g., TAP, JUnit).  Assertions such as\n'is' call 'report' to indicate results.  The argument given to\n'report' will be a map with a :type key.  See the documentation at\nthe top of test_is.clj for more information on the types of\narguments for 'report'.",
-   :var-type "var",
+   :var-type "multimethod",
    :line 319,
    :file "src/clj/clojure/test.clj"}
   {:arglists ([] [re]),

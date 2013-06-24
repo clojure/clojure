@@ -9118,7 +9118,7 @@
    "http://clojure.github.com/clojure//clojure.pprint-api.html#clojure.pprint/*print-pprint-dispatch*",
    :doc
    "The pretty print dispatch function. Use with-pprint-dispatch or set-pprint-dispatch\nto modify.",
-   :var-type "var",
+   :var-type "multimethod",
    :line 34,
    :file "src/clj/clojure/pprint/pprint_base.clj"}
   {:name "*print-pretty*",
@@ -9195,6 +9195,21 @@
    :var-type "function",
    :line 27,
    :file "src/clj/clojure/pprint/cl_format.clj"}
+  {:arglists [[object]],
+   :name "code-dispatch",
+   :namespace "clojure.pprint",
+   :source-url
+   "https://github.com/clojure/clojure/blob/4ca0f7ea17888ba7ed56d2fde0bc2d6397e8e1c0/src/clj/clojure/pprint/dispatch.clj#L448",
+   :added "1.2",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/4ca0f7ea17888ba7ed56d2fde0bc2d6397e8e1c0/src/clj/clojure/pprint/dispatch.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.pprint-api.html#clojure.pprint/code-dispatch",
+   :doc
+   "The pretty print dispatch function for pretty printing Clojure code.",
+   :var-type "multimethod",
+   :line 448,
+   :file "src/clj/clojure/pprint/dispatch.clj"}
   {:arglists ([format-in]),
    :name "formatter",
    :namespace "clojure.pprint",
@@ -9390,6 +9405,21 @@
    :var-type "function",
    :line 260,
    :file "src/clj/clojure/pprint/pprint_base.clj"}
+  {:arglists [[object]],
+   :name "simple-dispatch",
+   :namespace "clojure.pprint",
+   :source-url
+   "https://github.com/clojure/clojure/blob/4ca0f7ea17888ba7ed56d2fde0bc2d6397e8e1c0/src/clj/clojure/pprint/dispatch.clj#L147",
+   :added "1.2",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/4ca0f7ea17888ba7ed56d2fde0bc2d6397e8e1c0/src/clj/clojure/pprint/dispatch.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.pprint-api.html#clojure.pprint/simple-dispatch",
+   :doc
+   "The pretty print dispatch function for simple data structure format.",
+   :var-type "multimethod",
+   :line 147,
+   :file "src/clj/clojure/pprint/dispatch.clj"}
   {:arglists ([function & body]),
    :name "with-pprint-dispatch",
    :namespace "clojure.pprint",
@@ -9524,7 +9554,7 @@
    :doc
    "The Java access bitflags, along with their friendly names and\nthe kinds of objects to which they can apply.",
    :name "flag-descriptors"}
-  {:arglists ([m__1112__auto__]),
+  {:arglists ([m__1192__auto__]),
    :name "map->Constructor",
    :namespace "clojure.reflect",
    :source-url
@@ -9538,7 +9568,7 @@
    :var-type "function",
    :line 109,
    :file "src/clj/clojure/reflect/java.clj"}
-  {:arglists ([m__1112__auto__]),
+  {:arglists ([m__1192__auto__]),
    :name "map->Field",
    :namespace "clojure.reflect",
    :source-url
@@ -9552,7 +9582,7 @@
    :var-type "function",
    :line 148,
    :file "src/clj/clojure/reflect/java.clj"}
-  {:arglists ([m__1112__auto__]),
+  {:arglists ([m__1192__auto__]),
    :name "map->Method",
    :namespace "clojure.reflect",
    :source-url
@@ -10650,7 +10680,7 @@
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/report",
    :doc
    "Generic reporting function, may be overridden to plug in\ndifferent report formats (e.g., TAP, JUnit).  Assertions such as\n'is' call 'report' to indicate results.  The argument given to\n'report' will be a map with a :type key.  See the documentation at\nthe top of test_is.clj for more information on the types of\narguments for 'report'.",
-   :var-type "var",
+   :var-type "multimethod",
    :line 324,
    :file "src/clj/clojure/test.clj"}
   {:arglists ([] [re]),
@@ -10830,7 +10860,7 @@
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/use-fixtures",
    :doc
    "Wrap test runs in a fixture function to perform setup and\nteardown. Using a fixture-type of :each wraps every test\nindividually, while:once wraps the whole run in a single function.",
-   :var-type "var",
+   :var-type "multimethod",
    :line 654,
    :file "src/clj/clojure/test.clj"}
   {:arglists ([definition & body]),

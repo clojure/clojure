@@ -8618,7 +8618,7 @@
    "http://clojure.github.com/clojure//clojure.pprint-api.html#clojure.pprint/*print-pprint-dispatch*",
    :doc
    "The pretty print dispatch function. Use with-pprint-dispatch or set-pprint-dispatch\nto modify.",
-   :var-type "var",
+   :var-type "multimethod",
    :line 34,
    :file "src/clj/clojure/pprint/pprint_base.clj"}
   {:name "*print-pretty*",
@@ -8695,6 +8695,21 @@
    :var-type "function",
    :line 27,
    :file "src/clj/clojure/pprint/cl_format.clj"}
+  {:arglists [[object]],
+   :name "code-dispatch",
+   :namespace "clojure.pprint",
+   :source-url
+   "https://github.com/clojure/clojure/blob/84710838d6996d9144d83c5b659bdeda4c656100/src/clj/clojure/pprint/dispatch.clj#L375",
+   :added "1.2",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/84710838d6996d9144d83c5b659bdeda4c656100/src/clj/clojure/pprint/dispatch.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.pprint-api.html#clojure.pprint/code-dispatch",
+   :doc
+   "The pretty print dispatch function for pretty printing Clojure code.",
+   :var-type "multimethod",
+   :line 375,
+   :file "src/clj/clojure/pprint/dispatch.clj"}
   {:arglists ([format-in]),
    :name "formatter",
    :namespace "clojure.pprint",
@@ -8890,6 +8905,21 @@
    :var-type "function",
    :line 260,
    :file "src/clj/clojure/pprint/pprint_base.clj"}
+  {:arglists [[object]],
+   :name "simple-dispatch",
+   :namespace "clojure.pprint",
+   :source-url
+   "https://github.com/clojure/clojure/blob/84710838d6996d9144d83c5b659bdeda4c656100/src/clj/clojure/pprint/dispatch.clj#L147",
+   :added "1.2",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/84710838d6996d9144d83c5b659bdeda4c656100/src/clj/clojure/pprint/dispatch.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.pprint-api.html#clojure.pprint/simple-dispatch",
+   :doc
+   "The pretty print dispatch function for simple data structure format.",
+   :var-type "multimethod",
+   :line 147,
+   :file "src/clj/clojure/pprint/dispatch.clj"}
   {:arglists ([function & body]),
    :name "with-pprint-dispatch",
    :namespace "clojure.pprint",
@@ -10017,7 +10047,7 @@
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/report",
    :doc
    "Generic reporting function, may be overridden to plug in\ndifferent report formats (e.g., TAP, JUnit).  Assertions such as\n'is' call 'report' to indicate results.  The argument given to\n'report' will be a map with a :type key.  See the documentation at\nthe top of test_is.clj for more information on the types of\narguments for 'report'.",
-   :var-type "var",
+   :var-type "multimethod",
    :line 324,
    :file "src/clj/clojure/test.clj"}
   {:arglists ([] [re]),
@@ -10185,6 +10215,20 @@
    "Used by the 'is' macro to catch unexpected exceptions.\nYou don't call this.",
    :var-type "macro",
    :line 522,
+   :file "src/clj/clojure/test.clj"}
+  {:name "use-fixtures",
+   :namespace "clojure.test",
+   :source-url
+   "https://github.com/clojure/clojure/blob/6b6356340282e56162a6f365ec08281ad614b488/src/clj/clojure/test.clj#L646",
+   :added "1.1",
+   :raw-source-url
+   "https://github.com/clojure/clojure/raw/6b6356340282e56162a6f365ec08281ad614b488/src/clj/clojure/test.clj",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/use-fixtures",
+   :doc
+   "Wrap test runs in a fixture function to perform setup and\nteardown. Using a fixture-type of :each wraps every test\nindividually, while:once wraps the whole run in a single function.",
+   :var-type "multimethod",
+   :line 646,
    :file "src/clj/clojure/test.clj"}
   {:arglists ([definition & body]),
    :name "with-test",
