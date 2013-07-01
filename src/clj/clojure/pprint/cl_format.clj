@@ -1110,7 +1110,7 @@ string, or one character longer."
              s)))))
 
 (defn- capitalize-word-writer
-  "Returns a proxy that wraps writer, captializing all words"
+  "Returns a proxy that wraps writer, capitalizing all words"
   [^java.io.Writer writer]
   (let [last-was-whitespace? (ref true)] 
     (proxy [java.io.Writer] []
@@ -1182,7 +1182,7 @@ string, or one character longer."
 
 (defn get-pretty-writer 
   "Returns the java.io.Writer passed in wrapped in a pretty writer proxy, unless it's 
-already a pretty writer. Generally, it is unneccesary to call this function, since pprint,
+already a pretty writer. Generally, it is unnecessary to call this function, since pprint,
 write, and cl-format all call it if they need to. However if you want the state to be 
 preserved across calls, you will want to wrap them with this. 
 

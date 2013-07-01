@@ -305,7 +305,7 @@
   are optional. The only methods that can be supplied are those
   declared in the protocols/interfaces.  Note that method bodies are
   not closures, the local environment includes only the named fields,
-  and those fields can be accessed directy.
+  and those fields can be accessed directly.
 
   Method definitions take the form:
 
