@@ -87,7 +87,6 @@ public static void main(String[] args) throws IOException{
 		try
 			{
 			out.flush();
-			out.close();
 			}
 		catch(IOException e)
 			{
