@@ -52,6 +52,14 @@
           #"Invalid signature \{:a :b\} should be a list"
           (eval-in-temp-ns (defn a "asdf" ([a] 1) {:a :b} ([] 1)))))))
 
+(deftest non-dynamic-warnings
+  (testing "no warning for **"
+    (is (empty? (with-err-print-writer
+                  (eval-in-temp-ns (defn ** ([a b] (Math/pow (double a) (double b)))))))))
+  (testing "warning for *hello*"
+    (is (not (empty? (with-err-print-writer
+                       (eval-in-temp-ns (def *hello* "hi"))))))))
+
 (deftest dynamic-redefinition
   ;; too many contextual things for this kind of caching to work...
   (testing "classes are never cached, even if their bodies are the same"
