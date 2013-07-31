@@ -514,7 +514,10 @@ static class DefExpr implements Expr{
 			if(!v.ns.equals(currentNS()))
 				{
 				if(sym.ns == null)
+					{
 					v = currentNS().intern(sym);
+					registerVar(v);
+					}
 //					throw Util.runtimeException("Name conflict, can't def " + sym + " because namespace: " + currentNS().name +
 //					                    " refers to:" + v);
 				else
