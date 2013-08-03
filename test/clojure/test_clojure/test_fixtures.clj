@@ -33,10 +33,15 @@
 (defn inc-n-fixture [f]
   (binding [*n* (inc *n*)] (f)))
 
+(def side-effects (atom 0))
+(defn side-effecting-fixture [f]
+  (swap! side-effects inc)
+  (f))
+
 (use-fixtures :once fixture-a fixture-b)
 
-(use-fixtures :each fixture-c fixture-d inc-n-fixture)
-(use-fixtures :each fixture-c fixture-d inc-n-fixture)
+(use-fixtures :each fixture-c fixture-d inc-n-fixture side-effecting-fixture)
+(use-fixtures :each fixture-c fixture-d inc-n-fixture side-effecting-fixture)
 
 (deftest can-use-once-fixtures
   (is (= 3 *a*))
@@ -48,3 +53,15 @@
 
 (deftest use-fixtures-replaces
   (is (= *n* 1)))
+
+(deftest can-run-a-single-test-with-fixtures
+  ;; We have to use a side-effecting fixture to test that the fixtures are
+  ;; running, in order to distinguish fixtures run because of our call to
+  ;; test-vars below from the same fixtures running prior to this test
+  (let [side-effects-so-far @side-effects
+
+        reported (atom [])]
+    (binding [report (fn [m] (swap! reported conj (:type m)))]
+      (test-vars [#'can-use-each-fixtures]))
+    (is (= [:begin-test-var :pass :pass :end-test-var] @reported))
+    (is (= (inc side-effects-so-far) @side-effects))))
