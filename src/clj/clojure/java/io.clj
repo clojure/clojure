@@ -342,9 +342,14 @@
     (do-copy in output opts)))
 
 (defmethod do-copy [File File] [^File input ^File output opts]
-  (with-open [in (FileInputStream. input)
-              out (FileOutputStream. output)]
-    (do-copy in out opts)))
+  (with-open [in (-> input FileInputStream. .getChannel)
+              out (-> output FileOutputStream. .getChannel)]
+    (let [sz (.size in)]
+      (loop [pos 0]
+        (let [bytes-xferred (.transferTo in pos (- sz pos) out)
+              pos (+ pos bytes-xferred)]
+          (when (< pos sz)
+            (recur pos)))))))
 
 (defmethod do-copy [String OutputStream] [^String input ^OutputStream output opts]
   (do-copy (StringReader. input) output opts))
