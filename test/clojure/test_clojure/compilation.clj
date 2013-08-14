@@ -173,7 +173,7 @@
   (should-print-err-message #"(?s).*k is not matching primitive.*"
     #(loop [k (clojure.test-clojure.compilation/primfn)] (recur :foo))))
 
-(deftest CLJ-1154-use-out-after-compile
+#_(deftest CLJ-1154-use-out-after-compile
   ;; This test creates a dummy file to compile, sets up a dummy
   ;; compiled output directory, and a dummy output stream, and
   ;; verifies the stream is still usable after compiling.
