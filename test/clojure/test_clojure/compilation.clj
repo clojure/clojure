@@ -172,3 +172,30 @@
   
   (should-print-err-message #"(?s).*k is not matching primitive.*"
     #(loop [k (clojure.test-clojure.compilation/primfn)] (recur :foo))))
+
+#_(deftest CLJ-1154-use-out-after-compile
+  ;; This test creates a dummy file to compile, sets up a dummy
+  ;; compiled output directory, and a dummy output stream, and
+  ;; verifies the stream is still usable after compiling.
+  (spit "test/dummy.clj" "(ns dummy)")
+  (try
+    (let [compile-path (System/getProperty "clojure.compile.path")
+          tmp (java.io.File. "tmp")
+          new-out (java.io.OutputStreamWriter. (java.io.ByteArrayOutputStream.))]
+      (binding [clojure.core/*out* new-out]
+        (try
+          (.mkdir tmp)
+          (System/setProperty "clojure.compile.path" "tmp")
+          (clojure.lang.Compile/main (into-array ["dummy"]))
+          (println "this should still work without throwing an exception" )
+          (finally
+            (if compile-path
+              (System/setProperty "clojure.compile.path" compile-path)
+              (System/clearProperty "clojure.compile.path"))
+            (doseq [f (.listFiles tmp)]
+              (.delete f))
+            (.delete tmp)))))
+    (finally
+      (doseq [f (.listFiles (java.io.File. "test"))
+              :when (re-find #"dummy.clj" (str f))]
+        (.delete f)))))

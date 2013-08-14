@@ -176,6 +176,11 @@
 	    <goals>
 	      <goal>jar</goal>
 	    </goals>
+            <configuration>
+              <excludes>
+                <exclude>clojure/version.properties</exclude>
+              </excludes>
+            </configuration>
 	  </execution>
 	</executions>
       </plugin>
