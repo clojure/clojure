@@ -3303,6 +3303,8 @@
    :line 3297,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([& sigs]),
+   :forms
+   [(fn name? [params*] exprs*) (fn name? ([params*] exprs*) +)],
    :name "fn",
    :namespace "clojure.core",
    :source-url
@@ -4197,6 +4199,7 @@
    :line 619,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([bindings & body]),
+   :forms [(let [bindings*] exprs*)],
    :name "let",
    :namespace "clojure.core",
    :source-url
@@ -4212,6 +4215,7 @@
    :line 3957,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([fnspecs & body]),
+   :forms [(letfn [fnspecs*] exprs*)],
    :name "letfn",
    :namespace "clojure.core",
    :source-url
@@ -4415,6 +4419,7 @@
    :line 4727,
    :file "src/clj/clojure/core.clj"}
   {:arglists ([bindings & body]),
+   :forms [(loop [bindings*] exprs*)],
    :name "loop",
    :namespace "clojure.core",
    :source-url

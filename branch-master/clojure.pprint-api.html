@@ -192,7 +192,7 @@ complete documentation on the the clojure web site on github.</pre>
     <br />
     <hr />
     <h2 id="clojure.pprint/*print-base*">*print-base*</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">The base to use for printing integers and rationals.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
@@ -202,7 +202,7 @@ complete documentation on the the clojure web site on github.</pre>
     <br />
     <hr />
     <h2 id="clojure.pprint/*print-miser-width*">*print-miser-width*</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">The column at which to enter miser style. Depending on the dispatch table, 
 miser style add newlines in more places to try to keep lines short allowing for further 
@@ -214,7 +214,7 @@ levels of nesting.</pre>
     <br />
     <hr />
     <h2 id="clojure.pprint/*print-pprint-dispatch*">*print-pprint-dispatch*</h2>
-    <span id="var-type">multimethod</span><br />
+    <span id="var-type">dynamic multimethod</span><br />
     <pre id="var-usage">No usage documentation available</pre>
     <pre id="var-docstr">The pretty print dispatch function. Use with-pprint-dispatch or set-pprint-dispatch
 to modify.</pre>
@@ -225,7 +225,7 @@ to modify.</pre>
     <br />
     <hr />
     <h2 id="clojure.pprint/*print-pretty*">*print-pretty*</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">Bind to true if you want write to use pretty printing</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
@@ -235,7 +235,7 @@ to modify.</pre>
     <br />
     <hr />
     <h2 id="clojure.pprint/*print-radix*">*print-radix*</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">Print a radix specifier in front of integers and rationals. If *print-base* is 2, 8, 
 or 16, then the radix specifier used is #b, #o, or #x, respectively. Otherwise the 
@@ -247,7 +247,7 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
     <br />
     <hr />
     <h2 id="clojure.pprint/*print-right-margin*">*print-right-margin*</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">Pretty printing will try to avoid anything going beyond this column.
 Set it to nil to have pprint let the line be arbitrarily long. This will ignore all 
@@ -259,7 +259,7 @@ non-mandatory newlines.</pre>
     <br />
     <hr />
     <h2 id="clojure.pprint/*print-suppress-namespaces*">*print-suppress-namespaces*</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">Don't print namespaces with symbols. This is particularly useful when 
 pretty printing the results of macro expansions</pre>

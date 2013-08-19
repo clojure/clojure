@@ -1775,7 +1775,7 @@ See also: *</pre>
     <br />
     <hr />
     <h2 id="clojure.core/*1">*1</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">bound in a repl thread to the most recent value printed</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
@@ -1785,7 +1785,7 @@ See also: *</pre>
     <br />
     <hr />
     <h2 id="clojure.core/*2">*2</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">bound in a repl thread to the second most recent value printed</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
@@ -1795,7 +1795,7 @@ See also: *</pre>
     <br />
     <hr />
     <h2 id="clojure.core/*3">*3</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">bound in a repl thread to the third most recent value printed</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
@@ -1815,7 +1815,7 @@ See also: *</pre>
     <br />
     <hr />
     <h2 id="clojure.core/*clojure-version*">*clojure-version*</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">The version info for Clojure core, as a map containing :major :minor 
 :incremental and :qualifier keys. Feature releases may increment 
@@ -1863,7 +1863,7 @@ Defaults to "classes"</pre>
     <br />
     <hr />
     <h2 id="clojure.core/*e">*e</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">bound in a repl thread to the most recent exception caught by the repl</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
@@ -1956,7 +1956,7 @@ Defaults to false.</pre>
     <br />
     <hr />
     <h2 id="clojure.core/*print-length*">*print-length*</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">*print-length* controls how many items of each collection the
 printer will print. If it is bound to logical false, there is no
@@ -1972,7 +1972,7 @@ indicating no limit.</pre>
     <br />
     <hr />
     <h2 id="clojure.core/*print-level*">*print-level*</h2>
-    <span id="var-type">var</span><br />
+    <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
     <pre id="var-docstr">*print-level* controls how many levels deep the printer will
 print nested objects. If it is bound to logical false, there is no
@@ -4712,7 +4712,8 @@ etc.) and returns their contents as a single, flat sequence.
     <hr />
     <h2 id="clojure.core/fn">fn</h2>
     <span id="var-type">macro</span><br />
-    <pre id="var-usage">Usage: (fn &amp; sigs)
+    <pre id="var-usage">Usage: (fn name? [params*] exprs*)
+       (fn name? ([params*] exprs*) +)
 </pre>
     <pre id="var-docstr">params =&gt; positional-params* , or positional-params* &amp; next-param
 positional-param =&gt; binding-form
@@ -5637,7 +5638,7 @@ seq calls. See also - realized?</pre>
     <hr />
     <h2 id="clojure.core/let">let</h2>
     <span id="var-type">macro</span><br />
-    <pre id="var-usage">Usage: (let bindings &amp; body)
+    <pre id="var-usage">Usage: (let [bindings*] exprs*)
 </pre>
     <pre id="var-docstr">binding =&gt; binding-form init-expr
 
@@ -5652,7 +5653,7 @@ therein.</pre>
     <hr />
     <h2 id="clojure.core/letfn">letfn</h2>
     <span id="var-type">macro</span><br />
-    <pre id="var-usage">Usage: (letfn fnspecs &amp; body)
+    <pre id="var-usage">Usage: (letfn [fnspecs*] exprs*)
 </pre>
     <pre id="var-docstr">fnspec ==&gt; (fname [params*] exprs) or (fname ([params*] exprs)+)
 
@@ -5822,7 +5823,7 @@ Will release the monitor of x in all circumstances.</pre>
     <hr />
     <h2 id="clojure.core/loop">loop</h2>
     <span id="var-type">macro</span><br />
-    <pre id="var-usage">Usage: (loop bindings &amp; body)
+    <pre id="var-usage">Usage: (loop [bindings*] exprs*)
 </pre>
     <pre id="var-docstr">Evaluates the exprs in a lexical context in which the symbols in
 the binding-forms are bound to their respective init-exprs or parts
@@ -6669,7 +6670,7 @@ pop bindings without pushing before.</pre>
     <br />
     <hr />
     <h2 id="clojure.core/pr">pr</h2>
-    <span id="var-type">function</span><br />
+    <span id="var-type">dynamic function</span><br />
     <pre id="var-usage">Usage: (pr)
        (pr x)
        (pr x &amp; more)

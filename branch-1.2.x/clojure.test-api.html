@@ -626,7 +626,7 @@ fixture function, even if the collection is empty.</pre>
     <br />
     <hr />
     <h2 id="clojure.test/report">report</h2>
-    <span id="var-type">multimethod</span><br />
+    <span id="var-type">dynamic multimethod</span><br />
     <pre id="var-usage">No usage documentation available</pre>
     <pre id="var-docstr">Generic reporting function, may be overridden to plug in
 different report formats (e.g., TAP, JUnit).  Assertions such as
@@ -725,7 +725,7 @@ Internally binds *report-counters* to a ref initialized to
     <br />
     <hr />
     <h2 id="clojure.test/test-var">test-var</h2>
-    <span id="var-type">function</span><br />
+    <span id="var-type">dynamic function</span><br />
     <pre id="var-usage">Usage: (test-var v)
 </pre>
     <pre id="var-docstr">If v has a function in its :test metadata, calls that function,
