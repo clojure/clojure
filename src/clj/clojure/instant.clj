@@ -134,7 +134,7 @@ specified.
          ((if leap-year? dim-leap dim-norm) month))))
 
 (defn validated
-  "Return a function which constructs and instant by calling constructor
+  "Return a function which constructs an instant by calling constructor
 after first validating that those arguments are in range and otherwise
 plausible. The resulting function will throw an exception if called
 with invalid arguments."
