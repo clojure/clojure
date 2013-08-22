@@ -18,7 +18,8 @@
                         java.lang.Object
                         java.io.FileInputStream
                         clojure.lang.Compiler
-                        clojure.lang.PersistentVector]]
+                        clojure.lang.PersistentVector
+                        java.lang.SuppressWarnings]]
       (nodiff (type-reflect classname :reflector asm-reflector)
               (type-reflect classname :reflector java-reflector)))))
 

@@ -219,6 +219,7 @@ the kinds of objects to which they can apply."}
                                   (not-empty))]
                    (swap! result merge {:bases bases 
                                         :flags flags})))
+          (visitAnnotation [_ desc visible])
           (visitSource [_ name debug])
           (visitInnerClass [_ name outerName innerName access])
           (visitField [_ access name desc signature value]
