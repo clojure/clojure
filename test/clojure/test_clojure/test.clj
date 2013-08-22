@@ -16,7 +16,8 @@
 
 
 (ns clojure.test-clojure.test
-  (:use clojure.test))
+  (:use clojure.test)
+  (:require [clojure.stacktrace :as stack]))
 
 (deftest can-test-symbol
   (let [x true]
@@ -71,6 +72,13 @@
   (is (re-matches #"^cd.*$" "abbabba") "Should fail")
   (is (re-find #"ab" "abbabba") "Should pass")
   (is (re-find #"cd" "abbabba") "Should fail"))
+
+(deftest clj-1102-empty-stack-trace-should-not-throw-exceptions
+  (let [empty-stack (into-array (Class/forName "java.lang.StackTraceElement")
+                                [])
+        t (doto (Exception.) (.setStackTrace empty-stack))]
+    (is (map? (#'clojure.test/file-and-line t 0)) "Should pass")
+    (is (string? (with-out-str (stack/print-stack-trace t))) "Should pass")))
 
 (deftest #^{:has-meta true} can-add-metadata-to-tests
   (is (:has-meta (meta #'can-add-metadata-to-tests)) "Should pass"))

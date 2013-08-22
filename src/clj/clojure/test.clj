@@ -333,9 +333,12 @@
   report :type)
 
 (defn- file-and-line 
-  [exception depth]
-  (let [^StackTraceElement s (nth (.getStackTrace exception) depth)]
-    {:file (.getFileName s) :line (.getLineNumber s)}))
+  [^Throwable exception depth]
+  (let [stacktrace (.getStackTrace exception)]
+    (if (< depth (count stacktrace))
+      (let [^StackTraceElement s (nth stacktrace depth)]
+        {:file (.getFileName s) :line (.getLineNumber s)})
+      {:file nil :line nil})))
 
 (defn do-report
   "Add file and line information to a test result and call report.
