@@ -1144,7 +1144,7 @@ static public short[] short_array(int size, Object init){
 		{
 		ISeq s = RT.seq(init);
 		for(int i = 0; i < size && s != null; i++, s = s.next())
-			ret[i] = (Short) s.first();
+			ret[i] = ((Number) s.first()).shortValue();
 		}
 	return ret;
 }
@@ -1158,7 +1158,7 @@ static public short[] short_array(Object sizeOrSeq){
 		int size = RT.count(s);
 		short[] ret = new short[size];
 		for(int i = 0; i < size && s != null; i++, s = s.next())
-			ret[i] = (Short) s.first();
+			ret[i] = ((Number) s.first()).shortValue();
 		return ret;
 		}
 }
@@ -1206,7 +1206,7 @@ static public byte[] byte_array(int size, Object init){
 		{
 		ISeq s = RT.seq(init);
 		for(int i = 0; i < size && s != null; i++, s = s.next())
-			ret[i] = (Byte) s.first();
+			ret[i] = ((Number) s.first()).byteValue();
 		}
 	return ret;
 }
@@ -1220,7 +1220,7 @@ static public byte[] byte_array(Object sizeOrSeq){
 		int size = RT.count(s);
 		byte[] ret = new byte[size];
 		for(int i = 0; i < size && s != null; i++, s = s.next())
-			ret[i] = (Byte)s.first();
+			ret[i] = ((Number) s.first()).byteValue();
 		return ret;
 		}
 }
