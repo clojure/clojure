@@ -61,12 +61,7 @@ static boolean nonConstituent(int ch){
 
 static public Object readString(String s, IPersistentMap opts){
 	PushbackReader r = new PushbackReader(new java.io.StringReader(s));
-	try {
 	return read(r, opts);
-	}
-	catch(Exception e) {
-	throw Util.sneakyThrow(e);
-	}
 }
 
 static boolean isWhitespace(int ch){

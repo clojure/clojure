@@ -86,7 +86,6 @@ public V remove(Object k){
 	Ref r = bins[binFor(k)];
 	IPersistentMap map = (IPersistentMap) r.deref();
 	Object ret = map.valAt(k);
-	//checked exceptions are a bad idea, especially in an interface
 	r.set(map.without(k));
 	return (V) ret;
 }
@@ -149,7 +148,6 @@ public boolean remove(Object k, Object v){
 	Entry e = map.entryAt(k);
 	if(e != null && e.getValue().equals(v))
 		{
-		//checked exceptions are a bad idea, especially in an interface
 		r.set(map.without(k));
 		return true;
 		}
