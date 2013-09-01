@@ -126,6 +126,7 @@
        (File. "bar+baz") (URL. "file:bar+baz")
        (File. "bar baz qux") (URL. "file:bar%20baz%20qux")
        (File. "quux") (URI. "file:quux")
+       (File. "abcíd/foo.txt") (URL. "file:abc%c3%add/foo.txt")
        nil nil))
 
 (deftest test-resources-with-spaces

@@ -19,7 +19,7 @@
               StringReader ByteArrayInputStream
               BufferedInputStream BufferedOutputStream
               CharArrayReader Closeable)
-     (java.net URI URL MalformedURLException Socket)))
+     (java.net URI URL MalformedURLException Socket URLDecoder URLEncoder)))
 
 (def
     ^{:doc "Type object for a Java primitive byte array."
@@ -36,6 +36,10 @@
   "Coerce between various 'resource-namish' things."
   (^{:tag java.io.File, :added "1.2"} as-file [x] "Coerce argument to a file.")
   (^{:tag java.net.URL, :added "1.2"} as-url [x] "Coerce argument to a URL."))
+
+(defn- escaped-utf8-urlstring->str [s]
+  (-> (clojure.string/replace s "+" (URLEncoder/encode "+" "UTF-8"))
+      (URLDecoder/decode "UTF-8")))
 
 (extend-protocol Coercions
   nil
@@ -54,16 +58,8 @@
   (as-url [u] u)
   (as-file [u]
     (if (= "file" (.getProtocol u))
-      (as-file
-        (clojure.string/replace
-          (.replace (.getFile u) \/ File/separatorChar)
-          #"%.."
-          (fn [escape]
-            (-> escape
-                (.substring 1 3)
-                (Integer/parseInt 16)
-                (char)
-                (str)))))
+      (as-file (escaped-utf8-urlstring->str
+                (.replace (.getFile u) \/ File/separatorChar)))
       (throw (IllegalArgumentException. (str "Not a file: " u)))))
 
   URI
