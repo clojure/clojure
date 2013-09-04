@@ -7148,10 +7148,10 @@ static Object maybeBreakString(String literal) {
 	while (end > 0)
 		{
 		int chunk = Math.min(end, MAX_STR_LEN);
-		acc = RT.cons(literal.substring(end - chunk, end), acc);
+		acc = acc.cons(literal.substring(end - chunk, end));
 		end -= chunk;
 		}
-	return RT.cons(Symbol.intern("clojure.core", "str"), acc);
+	return acc.cons(Symbol.intern("clojure.core", "str"));
 }
 
 static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) {
