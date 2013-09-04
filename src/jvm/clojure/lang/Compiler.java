@@ -6559,6 +6559,8 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 	try
 		{
 		Object me = macroexpand1(form);
+		if (me instanceof String)
+			me = maybeBreakString((String) me);
 		if(me != form)
 			return analyze(context, me, name);
 
@@ -7137,6 +7139,21 @@ public static ILookupThunk getLookupThunk(Object target, Keyword k){
 	return null;  //To change body of created methods use File | Settings | File Templates.
 }
 
+static final int MAX_STR_LEN = 65535;
+static Object maybeBreakString(String literal) {
+	if (literal.length() <= MAX_STR_LEN)
+		return literal;
+	ISeq acc = PersistentList.EMPTY;
+	int end = literal.length();
+	while (end > 0)
+		{
+		int chunk = Math.min(end, MAX_STR_LEN);
+		acc = RT.cons(literal.substring(end - chunk, end), acc);
+		end -= chunk;
+		}
+	return RT.cons(Symbol.intern("clojure.core", "str"), acc);
+}
+
 static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) {
 	Object line = lineDeref();
 	Object column = columnDeref();
@@ -7151,6 +7168,8 @@ static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) {
 	try
 		{
 		form = macroexpand(form);
+		if (form instanceof String)
+			form = maybeBreakString((String) form);
 		if(form instanceof IPersistentCollection && Util.equals(RT.first(form), DO))
 			{
 			for(ISeq s = RT.next(form); s != null; s = RT.next(s))
