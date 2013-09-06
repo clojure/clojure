@@ -160,6 +160,8 @@ public BigInt multiply(BigInt y) {
 
 public BigInt quotient(BigInt y) {
     if ((bipart == null) && (y.bipart == null)) {
+        if (lpart == Long.MIN_VALUE && y.lpart == -1)
+            return BigInt.fromBigInteger(this.toBigInteger().negate());
         return BigInt.valueOf(lpart / y.lpart);
     }
     return BigInt.fromBigInteger(this.toBigInteger().divide(y.toBigInteger()));
