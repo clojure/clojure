@@ -1201,8 +1201,8 @@ public static class CtorReader extends AFn{
 		int ch = read1(r);
 
 		// flush whitespace
-		//while(isWhitespace(ch))
-		//	ch = read1(r);
+		while(isWhitespace(ch))
+			ch = read1(r);
 
 		// A defrecord ctor can take two forms. Check for map->R version first.
 		if(ch == '{')

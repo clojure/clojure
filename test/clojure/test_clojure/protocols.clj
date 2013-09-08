@@ -436,6 +436,10 @@
     (is (thrown? Exception (read-string "(let [s \"en\"] #java.util.Locale[(str 'en)])")))
     (is (thrown? Exception (read-string "#clojure.test_clojure.protocols.RecordToTestLiterals{(keyword \"a\") 42}"))))
   
+  (testing "that ctors can have whitespace after class name but before {"
+    (is (= (RecordToTestLiterals. 42)
+           (read-string "#clojure.test_clojure.protocols.RecordToTestLiterals   {:a 42}"))))
+
   (testing "that the correct errors are thrown with malformed literals"
     (is (thrown-with-msg?
           Exception
