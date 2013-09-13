@@ -10,6 +10,7 @@
 
 (ns clojure.test-clojure.pprint
   (:refer-clojure :exclude [format])
+  (:require [clojure.string :as str])
   (:use [clojure.test :only (deftest is are run-tests)]
         [clojure.test-helper :only [platform-newlines]]
         clojure.test-clojure.pprint.test-helper

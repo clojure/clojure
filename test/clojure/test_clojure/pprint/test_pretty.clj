@@ -130,10 +130,11 @@ Usage: *hello*
   `(simple-tests ~test-name
      ~@(apply concat
               (for [block blocks]
-                `[(with-out-str
-                    (with-pprint-dispatch code-dispatch
-                      (pprint (read-string ~block))))
-                  (str ~block "\n")]))))
+                `[(str/split-lines
+                   (with-out-str
+                     (with-pprint-dispatch code-dispatch
+                       (pprint (read-string ~block)))))
+                  (str/split-lines ~block)]))))
 
 (code-block code-block-tests
   "(defn cl-format
