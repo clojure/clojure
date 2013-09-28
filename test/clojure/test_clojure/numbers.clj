@@ -50,6 +50,52 @@
         (not (decimal? v))
         (not (float? v))))))
 
+(defn all-pairs-equal [equal-var vals]
+  (doseq [val1 vals]
+    (doseq [val2 vals]
+      (is (equal-var val1 val2)
+          (str "Test that " val1 " (" (class val1) ") "
+               equal-var " " val2 " (" (class val2) ")")))))
+
+(defn all-pairs-hash-consistent-with-= [vals]
+  (doseq [val1 vals]
+    (doseq [val2 vals]
+      (when (= val1 val2)
+        (is (= (hash val1) (hash val2))
+            (str "Test that (hash " val1 ") (" (class val1) ") "
+                 " = (hash " val2 ") (" (class val2) ")"))))))
+
+(deftest equality-tests
+  ;; = only returns true for numbers that are in the same category,
+  ;; where category is one of INTEGER, FLOATING, DECIMAL, RATIO.
+  (all-pairs-equal #'= [(byte 2) (short 2) (int 2) (long 2)
+                        (bigint 2) (biginteger 2)])
+  (all-pairs-equal #'= [(float 2.0) (double 2.0)])
+  (all-pairs-equal #'= [2.0M 2.00M])
+  (all-pairs-equal #'= [(float 1.5) (double 1.5)])
+  (all-pairs-equal #'= [1.50M 1.500M])
+  (all-pairs-equal #'= [0.0M 0.00M])
+  (all-pairs-equal #'= [(/ 1 2) (/ 2 4)])
+
+  ;; No BigIntegers or floats in following tests, because hash
+  ;; consistency with = for them is out of scope for Clojure
+  ;; (CLJ-1036).
+  (all-pairs-hash-consistent-with-= [(byte 2) (short 2) (int 2) (long 2)
+                                     (bigint 2)
+                                     (double 2.0) 2.0M 2.00M])
+  (all-pairs-hash-consistent-with-= [(/ 3 2) (double 1.5) 1.50M 1.500M])
+  (all-pairs-hash-consistent-with-= [(double 0.0) 0.0M 0.00M])
+
+  ;; == tests for numerical equality, returning true even for numbers
+  ;; in different categories.
+  (all-pairs-equal #'== [(byte 0) (short 0) (int 0) (long 0)
+                         (bigint 0) (biginteger 0)
+                         (float 0.0) (double 0.0) 0.0M 0.00M])
+  (all-pairs-equal #'== [(byte 2) (short 2) (int 2) (long 2)
+                         (bigint 2) (biginteger 2)
+                         (float 2.0) (double 2.0) 2.0M 2.00M])
+  (all-pairs-equal #'== [(/ 3 2) (float 1.5) (double 1.5) 1.50M 1.500M]))
+
 (deftest unchecked-cast-num-obj
   (do-template [prim-array cast]
     (are [n]

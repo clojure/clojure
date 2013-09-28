@@ -900,7 +900,7 @@ final static class BigDecimalOps extends OpsP{
 	}
 
 	public boolean equiv(Number x, Number y){
-		return toBigDecimal(x).equals(toBigDecimal(y));
+		return toBigDecimal(x).compareTo(toBigDecimal(y)) == 0;
 	}
 
 	public boolean lt(Number x, Number y){
@@ -973,6 +973,21 @@ static int hasheq(Number x){
 		{
 		long lpart = x.longValue();
 		return (int) (lpart ^ (lpart >>> 32));
+		}
+	if(xc == BigDecimal.class)
+		{
+		// stripTrailingZeros() to make all numerically equal
+		// BigDecimal values come out the same before calling
+		// hashCode.  Special check for 0 because
+		// stripTrailingZeros() does not do anything to values
+		// equal to 0 with different scales.
+		if (isZero(x))
+			return BigDecimal.ZERO.hashCode();
+		else
+			{
+			BigDecimal tmp = ((BigDecimal) x).stripTrailingZeros();
+			return tmp.hashCode();
+			}
 		}
 	return x.hashCode();
 }
