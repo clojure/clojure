@@ -38,7 +38,7 @@
           description="Compile Java sources.">
     <javac srcdir="${jsrc}" destdir="${build}" includeJavaRuntime="yes"
            includeAntRuntime="false"
-           debug="true" source="1.5" target="1.5"/>
+           debug="true" source="1.6" target="1.6"/>
   </target>
 
   <target name="compile-clojure"
@@ -83,7 +83,7 @@
           unless="maven.test.skip">
     <mkdir dir="${test-classes}"/>
     <javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes"
-           debug="true" source="1.5" target="1.5" includeantruntime="no"/>
+           debug="true" source="1.6" target="1.6" includeantruntime="no"/>
     <java classname="clojure.lang.Compile"
           classpath="${test-classes}:${test}:${build}:${cljsrc}"
           failonerror="true"
