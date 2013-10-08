@@ -15,9 +15,8 @@ package clojure.lang;
 import java.lang.reflect.Array;
 
 public class ArraySeq extends ASeq implements IndexedSeq, IReduce{
-public final Object array;
+public final Object[] array;
 final int i;
-final Object[] oa;
 //ISeq _rest;
 
 static public ArraySeq create(){
@@ -46,49 +45,41 @@ static ISeq createFromObject(Object array){
 		return new ArraySeq_byte(null, (byte[]) array, 0);
 	if(aclass == char[].class)
 		return new ArraySeq_char(null, (char[]) array, 0);
+        if(aclass == short[].class)
+            return new ArraySeq_short(null, (short[]) array, 0);
 	if(aclass == boolean[].class)
 		return new ArraySeq_boolean(null, (boolean[]) array, 0);
 	return new ArraySeq(array, 0);
 }
 
 ArraySeq(Object array, int i){
-	this.array = array;
 	this.i = i;
-	this.oa = (Object[]) (array instanceof Object[] ? array : null);
+	this.array = (Object[]) array;
 //    this._rest = this;
 }
 
 ArraySeq(IPersistentMap meta, Object array, int i){
 	super(meta);
-	this.array = array;
 	this.i = i;
-	this.oa = (Object[]) (array instanceof Object[] ? array : null);
+	this.array = (Object[]) array;
 }
 
 public Object first(){
-	if(oa != null)
-		return oa[i];
-	return Reflector.prepRet(Object.class, Array.get(array, i));
+	if(array != null)
+		return array[i];
+	return null;
 }
 
 public ISeq next(){
-	if(oa != null)
-		{
-		if(i + 1 < oa.length)
-			return new ArraySeq(array, i + 1);
-		}
-	else
-		{
-		if(i + 1 < Array.getLength(array))
-			return new ArraySeq(array, i + 1);
-		}
+	if(array != null && i + 1 < array.length)
+		return new ArraySeq(array, i + 1);
 	return null;
 }
 
 public int count(){
-	if(oa != null)
-		return oa.length - i;
-	return Array.getLength(array) - i;
+	if(array != null)
+		return array.length - i;
+	return 0;
 }
 
 public int index(){
@@ -100,62 +91,40 @@ public ArraySeq withMeta(IPersistentMap meta){
 }
 
 public Object reduce(IFn f) {
-	if(oa != null)
-		{
-		Object ret = oa[i];
-		for(int x = i + 1; x < oa.length; x++)
-			ret = f.invoke(ret, oa[x]);
+	if(array != null) {
+		Object ret = array[i];
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
 		return ret;
-		}
-
-	Object ret = Reflector.prepRet(Object.class, Array.get(array, i));
-	for(int x = i + 1; x < Array.getLength(array); x++)
-		ret = f.invoke(ret, Reflector.prepRet(Object.class, Array.get(array, x)));
-	return ret;
+	}
+	return null;
 }
 
 public Object reduce(IFn f, Object start) {
-	if(oa != null)
-		{
-		Object ret = f.invoke(start, oa[i]);
-		for(int x = i + 1; x < oa.length; x++)
-			ret = f.invoke(ret, oa[x]);
+	if(array != null) {
+		Object ret = f.invoke(start, array[i]);
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
 		return ret;
-		}
-	Object ret = f.invoke(start, Reflector.prepRet(Object.class, Array.get(array, i)));
-	for(int x = i + 1; x < Array.getLength(array); x++)
-		ret = f.invoke(ret, Reflector.prepRet(Object.class, Array.get(array, x)));
-	return ret;
+	}
+	return null;
 }
 
 public int indexOf(Object o) {
-	if (oa != null) {
-		for (int j = i; j < oa.length; j++)
-			if (Util.equals(o, oa[j])) return j - i;
-	} else {
-		int n = Array.getLength(array); 
-		for (int j = i; j < n; j++)
-			if (Util.equals(o, Reflector.prepRet(Object.class, Array.get(array, j)))) return j - i;
-	}
+	if(array != null)
+		for (int j = i; j < array.length; j++)
+			if (Util.equals(o, array[j])) return j - i;
 	return -1;
 }
 
 public int lastIndexOf(Object o) {
-	if (oa != null) {
+	if (array != null) {
 		if (o == null) {
-			for (int j = oa.length - 1 ; j >= i; j--)
-				if (oa[j] == null) return j - i;
+			for (int j = array.length - 1 ; j >= i; j--)
+				if (array[j] == null) return j - i;
 		} else {
-			for (int j = oa.length - 1 ; j >= i; j--)
-				if (o.equals(oa[j])) return j - i;
-		}
-	} else {
-		if (o == null) {
-			for (int j = Array.getLength(array) - 1 ; j >= i; j--)
-				if (Reflector.prepRet(Object.class, Array.get(array, j)) == null) return j - i;
-		} else {
-			for (int j = Array.getLength(array) - 1 ; j >= i; j--)
-				if (o.equals(Reflector.prepRet(Object.class, Array.get(array, j)))) return j - i;
+			for (int j = array.length - 1 ; j >= i; j--)
+				if (o.equals(array[j])) return j - i;
 		}
 	}
 	return -1;
@@ -570,6 +539,81 @@ static public class ArraySeq_char extends ASeq implements IndexedSeq, IReduce{
 			char c = ((Character) o).charValue();
 			for (int j = array.length - 1; j >= i; j--)
 				if (c == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = array.length - 1; j >= i; j--)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+}
+
+static public class ArraySeq_short extends ASeq implements IndexedSeq, IReduce{
+	public final short[] array;
+	final int i;
+
+	ArraySeq_short(IPersistentMap meta, short[] array, int i){
+		super(meta);
+		this.array = array;
+		this.i = i;
+	}
+
+	public Object first(){
+		return array[i];
+	}
+
+	public ISeq next(){
+		if(i + 1 < array.length)
+			return new ArraySeq_short(meta(), array, i + 1);
+		return null;
+	}
+
+	public int count(){
+		return array.length - i;
+	}
+
+	public int index(){
+		return i;
+	}
+
+	public ArraySeq_short withMeta(IPersistentMap meta){
+		return new ArraySeq_short(meta, array, i);
+	}
+
+	public Object reduce(IFn f) {
+		Object ret = array[i];
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
+
+	public Object reduce(IFn f, Object start) {
+		Object ret = f.invoke(start, array[i]);
+		for(int x = i + 1; x < array.length; x++)
+			ret = f.invoke(ret, array[x]);
+		return ret;
+	}
+
+	public int indexOf(Object o) {
+		if (o instanceof Short) {
+			short s = ((Short) o).shortValue();
+			for (int j = i; j < array.length; j++)
+				if (s == array[j]) return j - i;
+		}
+		if (o == null) {
+			return -1;
+		}
+		for (int j = i; j < array.length; j++)
+			if (o.equals(array[j])) return j - i;
+		return -1;
+	}
+
+	public int lastIndexOf(Object o) {
+		if (o instanceof Short) {
+			short s = ((Short) o).shortValue();
+			for (int j = array.length - 1; j >= i; j--)
+				if (s == array[j]) return j - i;
 		}
 		if (o == null) {
 			return -1;
