@@ -3502,8 +3502,7 @@ static class InvokeExpr implements Expr{
 		e.emit(C.EXPRESSION, objx, gen);
 		gen.dup(); //target, target
 		gen.invokeStatic(UTIL_TYPE,Method.getMethod("Class classOf(Object)")); //target,class
-		gen.loadThis();
-		gen.getField(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target,class,cached-class
+		gen.getStatic(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target,class,cached-class
 		gen.visitJumpInsn(IF_ACMPEQ, callLabel); //target
 		if(protocolOn != null)
 			{
@@ -3514,9 +3513,7 @@ static class InvokeExpr implements Expr{
 
 		gen.dup(); //target, target
 		gen.invokeStatic(UTIL_TYPE,Method.getMethod("Class classOf(Object)")); //target,class
-		gen.loadThis();
-		gen.swap();
-		gen.putField(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target
+		gen.putStatic(objx.objtype, objx.cachedClassName(siteIndex),CLASS_TYPE); //target
 
 		gen.mark(callLabel); //target
 		objx.emitVar(gen, v);
@@ -4154,12 +4151,10 @@ static public class ObjExpr implements Expr{
 				}
 			}
 
-		//instance fields for callsites and thunks
+		//static fields for callsites and thunks
 		for(int i=0;i<protocolCallsites.count();i++)
 			{
-			cv.visitField(ACC_PRIVATE, cachedClassName(i), CLASS_TYPE.getDescriptor(), null, null);
-			cv.visitField(ACC_PRIVATE, cachedProtoFnName(i), AFUNCTION_TYPE.getDescriptor(), null, null);
-			cv.visitField(ACC_PRIVATE, cachedProtoImplName(i), IFN_TYPE.getDescriptor(), null, null);			
+			cv.visitField(ACC_PRIVATE + ACC_STATIC, cachedClassName(i), CLASS_TYPE.getDescriptor(), null, null);
 			}
 
  		//ctor that takes closed-overs and inits base + fields
@@ -4920,14 +4915,6 @@ static public class ObjExpr implements Expr{
 
 	String cachedVarName(int n){
 		return "__cached_var__" + n;
-	}
-
-	String cachedProtoFnName(int n){
-		return "__cached_proto_fn__" + n;
-	}
-
-	String cachedProtoImplName(int n){
-		return "__cached_proto_impl__" + n;
 	}
 
 	String varCallsiteName(int n){
