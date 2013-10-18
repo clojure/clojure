@@ -71,6 +71,15 @@
                      (baz [a b] "two-arg baz!"))]
       (is (= "two-arg baz!" (baz obj nil)))
       (is (thrown? AbstractMethodError (baz obj)))))
+  (testing "error conditions checked when defining protocols"
+    (is (thrown-with-msg?
+         Exception
+         #"Definition of function m in protocol badprotdef must take at least one arg."
+         (eval '(defprotocol badprotdef (m [])))))
+    (is (thrown-with-msg?
+         Exception
+         #"Function m in protocol badprotdef was redefined. Specify all arities in single definition."
+         (eval '(defprotocol badprotdef (m [this arg]) (m [this arg1 arg2]))))))
   (testing "you can redefine a protocol with different methods"
     (eval '(defprotocol Elusive (old-method [x])))
     (eval '(defprotocol Elusive (new-method [x])))

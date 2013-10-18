@@ -606,7 +606,9 @@
                                     (recur (conj as (first rs)) (next rs))
                                     [(seq as) (first rs)]))]
                             (when (some #{0} (map count arglists))
-                              (throw (IllegalArgumentException. (str "Protocol fn: " mname " must take at least one arg"))))
+                              (throw (IllegalArgumentException. (str "Definition of function " mname " in protocol " name " must take at least one arg."))))
+                            (when (m (keyword mname))
+                              (throw (IllegalArgumentException. (str "Function " mname " in protocol " name " was redefined. Specify all arities in single definition."))))
                             (assoc m (keyword mname)
                                    (merge name-meta
                                           {:name (vary-meta mname assoc :doc doc :arglists arglists)
