@@ -11,6 +11,8 @@
 
 (ns clojure.test-clojure.compilation
   (:import (clojure.lang Compiler Compiler$CompilerException))
+  (:require [clojure.test.generative :refer (defspec)]
+            [clojure.data.generators :as gen])
   (:use clojure.test
         [clojure.test-helper :only (should-not-reflect should-print-err-message)]))
 
@@ -223,3 +225,20 @@
       (is (thrown? Compiler$CompilerException (compile "[do 1 2 3]"))))
     (testing "do in a set throws an exception in compilation"
       (is (thrown? Compiler$CompilerException (compile "#{do}"))))))
+
+(defn gen-name []
+  ;; Not all names can be correctly demunged. Skip names that contain
+  ;; a munge word as they will not properly demunge.
+  (let [munge-words (remove clojure.string/blank?
+                            (conj (map #(clojure.string/replace % "_" "")
+                                       (vals Compiler/CHAR_MAP)) "_"))]
+    (first (filter (fn [n] (not-any? #(>= (.indexOf n %) 0) munge-words))
+                   (repeatedly #(name (gen/symbol (constantly 10))))))))
+
+(defn munge-roundtrip [n]
+  (Compiler/demunge (Compiler/munge n)))
+
+(defspec test-munge-roundtrip
+  munge-roundtrip
+  [^{:tag clojure.test-clojure.compilation/gen-name} n]
+  (assert (= n %)))

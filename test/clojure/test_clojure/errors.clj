@@ -16,6 +16,9 @@
 
 (defn f1 [a] a)
 
+;; Function name that includes many special characters to test demunge
+(defn f2:+><->!#%&*|b [x] x)
+
 (defmacro m0 [] `(identity 0))
 
 (defmacro m1 [a] `(inc ~a))
@@ -29,7 +32,10 @@
   (is (thrown-with-msg? ArityException #"Wrong number of args \(1\) passed to"
         (macroexpand `(m0 1))))
   (is (thrown-with-msg? ArityException #"Wrong number of args \(2\) passed to"
-        (macroexpand `(m1 1 2)))))
+        (macroexpand `(m1 1 2))))
+  (is (thrown-with-msg? ArityException #"\Q/f2:+><->!#%&*|b\E"
+        (f2:+><->!#%&*|b 1 2))
+        "ArityException messages should demunge function names"))
 
 (deftest assert-arg-messages
   ; used to ensure that error messages properly use local names for macros

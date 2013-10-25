@@ -23,6 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 //*/
 /*
@@ -2723,6 +2724,49 @@ static final public IPersistentMap CHAR_MAP =
 '\\', "_BSLASH_",
 '?', "_QMARK_");
 
+static final public IPersistentMap DEMUNGE_MAP;
+static final public Pattern DEMUNGE_PATTERN;
+
+static {
+	// DEMUNGE_MAP maps strings to characters in the opposite
+	// direction that CHAR_MAP does, plus it maps "$" to '/'
+	IPersistentMap m = RT.map("$", '/');
+	for(ISeq s = RT.seq(CHAR_MAP); s != null; s = s.next())
+		{
+		IMapEntry e = (IMapEntry) s.first();
+		Character origCh = (Character) e.key();
+		String escapeStr = (String) e.val();
+		m = m.assoc(escapeStr, origCh);
+		}
+	DEMUNGE_MAP = m;
+
+	// DEMUNGE_PATTERN searches for the first of any occurrence of
+	// the strings that are keys of DEMUNGE_MAP.
+	// Note: Regex matching rules mean that #"_|_COLON_" "_COLON_"
+       // returns "_", but #"_COLON_|_" "_COLON_" returns "_COLON_"
+       // as desired.  Sorting string keys of DEMUNGE_MAP from longest to
+       // shortest ensures correct matching behavior, even if some strings are
+	// prefixes of others.
+	Object[] mungeStrs = RT.toArray(RT.keys(m));
+	Arrays.sort(mungeStrs, new Comparator() {
+                public int compare(Object s1, Object s2) {
+                    return ((String) s2).length() - ((String) s1).length();
+                }});
+	StringBuilder sb = new StringBuilder();
+	boolean first = true;
+	for(Object s : mungeStrs)
+		{
+		String escapeStr = (String) s;
+		if (!first)
+			sb.append("|");
+		first = false;
+		sb.append("\\Q");
+		sb.append(escapeStr);
+		sb.append("\\E");
+		}
+	DEMUNGE_PATTERN = Pattern.compile(sb.toString());
+}
+
 static public String munge(String name){
 	StringBuilder sb = new StringBuilder();
 	for(char c : name.toCharArray())
@@ -2733,6 +2777,26 @@ static public String munge(String name){
 		else
 			sb.append(c);
 		}
+	return sb.toString();
+}
+
+static public String demunge(String mungedName){
+	StringBuilder sb = new StringBuilder();
+	Matcher m = DEMUNGE_PATTERN.matcher(mungedName);
+	int lastMatchEnd = 0;
+	while (m.find())
+		{
+		int start = m.start();
+		int end = m.end();
+		// Keep everything before the match
+		sb.append(mungedName.substring(lastMatchEnd, start));
+		lastMatchEnd = end;
+		// Replace the match with DEMUNGE_MAP result
+		Character origCh = (Character) DEMUNGE_MAP.valAt(m.group());
+		sb.append(origCh);
+		}
+	// Keep everything after the last match
+	sb.append(mungedName.substring(lastMatchEnd));
 	return sb.toString();
 }
 
