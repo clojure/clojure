@@ -7075,6 +7075,13 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) {
 		{
 		throw new CompilerException(sourcePath, e.line, e.column, e.getCause());
 		}
+	catch(Throwable e)
+		{
+		if(!(e instanceof CompilerException))
+			throw new CompilerException(sourcePath, (Integer) LINE_BEFORE.deref(), (Integer) COLUMN_BEFORE.deref(), e);
+		else
+			throw (CompilerException) e;
+		}
 	finally
 		{
 		Var.popThreadBindings();

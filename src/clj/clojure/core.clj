@@ -5304,7 +5304,7 @@
   *loading-verbosely* false)
 
 (defn- throw-if
-  "Throws an exception with a message if pred is true"
+  "Throws a CompilerException with a message if pred is true"
   [pred fmt & args]
   (when pred
     (let [^String message (apply format fmt args)
@@ -5313,7 +5313,11 @@
           boring? #(not= (.getMethodName ^StackTraceElement %) "doInvoke")
           trace (into-array (drop 2 (drop-while boring? raw-trace)))]
       (.setStackTrace exception trace)
-      (throw exception))))
+      (throw (clojure.lang.Compiler$CompilerException.
+              *file*
+              (.deref clojure.lang.Compiler/LINE)
+              (.deref clojure.lang.Compiler/COLUMN)
+              exception)))))
 
 (defn- libspec?
   "Returns true if x is a libspec"
@@ -5377,7 +5381,8 @@
   "Loads a lib with options"
   [prefix lib & options]
   (throw-if (and prefix (pos? (.indexOf (name lib) (int \.))))
-            "lib names inside prefix lists must not contain periods")
+            "Found lib name '%s' containing period with prefix '%s'.  lib names inside prefix lists must not contain periods"
+            (name lib) prefix)
   (let [lib (if prefix (symbol (str prefix \. lib)) lib)
         opts (apply hash-map options)
         {:keys [as reload reload-all require use verbose]} opts
@@ -5447,7 +5452,7 @@
     (let [pending (map #(if (= % path) (str "[ " % " ]") %)
                        (cons path *pending-paths*))
           chain (apply str (interpose "->" pending))]
-      (throw (Exception. (str "Cyclic load dependency: " chain))))))
+      (throw-if true "Cyclic load dependency: %s" chain))))
 
 ;; Public
 
