@@ -31,3 +31,10 @@
 
 (deftest empty-transient
   (is (= false (.contains (transient #{}) :bogus-key))))
+
+(deftest persistent-assoc-on-collision
+  (testing "Persistent assoc on a collision node which underwent a transient dissoc"
+    (let [a (reify Object (hashCode [_] 42))
+          b (reify Object (hashCode [_] 42))]
+      (is (= (-> #{a b} transient (disj! a) persistent! (conj a))
+            (-> #{a b} transient (disj! a) persistent! (conj a)))))))

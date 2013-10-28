@@ -836,10 +836,10 @@ final static class HashCollisionNode implements INode{
 					return this;
 				return new HashCollisionNode(null, hash, count, cloneAndSet(array, idx + 1, val));
 			}
-			Object[] newArray = new Object[array.length + 2];
-			System.arraycopy(array, 0, newArray, 0, array.length);
-			newArray[array.length] = key;
-			newArray[array.length + 1] = val;
+			Object[] newArray = new Object[2 * (count + 1)];
+			System.arraycopy(array, 0, newArray, 0, 2 * count);
+			newArray[2 * count] = key;
+			newArray[2 * count + 1] = val;
 			addedLeaf.val = addedLeaf;
 			return new HashCollisionNode(edit, hash, count + 1, newArray);
 		}
