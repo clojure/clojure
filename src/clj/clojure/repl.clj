@@ -142,7 +142,8 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
   [x]
   (when-let [v (resolve x)]
     (when-let [filepath (:file (meta v))]
-      (when-let [strm (.getResourceAsStream (RT/baseLoader) filepath)]
+      (when-let [strm (or (.getResourceAsStream (RT/baseLoader) filepath)
+                          (java.io.FileInputStream. filepath))]
         (with-open [rdr (LineNumberReader. (InputStreamReader. strm))]
           (dotimes [_ (dec (:line (meta v)))] (.readLine rdr))
           (let [text (StringBuilder.)
