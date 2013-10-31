@@ -324,7 +324,7 @@
            :set #{3 2 1}
            :set (sorted-set 2 1 3))))
   (testing "test number equivalence"
-    (is (= :one (case 1N 1 :one :else))))
+    (is (= :1 (case 1N 1 :1 :else))))
   (testing "test warn when boxing/hashing expr for all-ints case"
     (should-print-err-message
       #"Performance warning, .*:\d+ - case has int tests, but tested expression is not primitive..*\r?\n"
@@ -348,10 +348,10 @@
     (should-not-reflect (Long. (case 1 1 1))) ; new Long(long)
     (should-not-reflect (Long. (case 1 1 "1")))) ; new Long(String)
   (testing "non-equivalence of chars and nums"
-    (are [result input] (= result (case input 97 :got97 :else))
+    (are [result input] (= result (case input 97 :97 :else))
       :else \a
       :else (char \a)
-      :got97 (int \a))
+      :97 (int \a))
     (are [result input] (= result (case input \a :a :else))
       :else 97
       :else 97N

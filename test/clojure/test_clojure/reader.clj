@@ -353,9 +353,7 @@
   (are [err msg form] (thrown-with-msg? err msg (read-string form))
        Exception #"Invalid token: foo:" "foo:"
        Exception #"Invalid token: :bar/" ":bar/"
-       Exception #"Invalid token: ::does.not/exist" "::does.not/exist"
-       Exception #"Invalid token: :5" ":5"))
-
+       Exception #"Invalid token: ::does.not/exist" "::does.not/exist"))
 ;; Lists
 
 (deftest t-Lists)
