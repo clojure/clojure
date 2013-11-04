@@ -12,7 +12,8 @@
 (ns clojure.test-clojure.data-structures
   (:use clojure.test
         [clojure.test.generative :exclude (is)])
-  (:require [clojure.test-clojure.generators :as cgen]))
+  (:require [clojure.test-clojure.generators :as cgen]
+            [clojure.data.generators :as gen]))
 
 
 ;; *** Helper functions ***
@@ -30,6 +31,48 @@
       (is (= n
              (+ i (count (nthnext coll i)))
              (+ i (count (drop i coll))))))))
+
+(defn- transient? [x]
+  (instance? clojure.lang.ITransientCollection x))
+
+(defn gen-transient-action []
+  (gen/rand-nth [[#(conj! %1 %2) #(conj %1 %2) (gen/uniform -100 100)]
+                 [#(disj! %1 %2) #(disj %1 %2) (gen/uniform -100 100)]
+                 [persistent! identity]
+                 [identity transient]]))
+
+(defn gen-transient-actions []
+  (gen/reps #(gen/uniform 0 100) gen-transient-action))
+
+(defn assert-same-collection [a b]
+  (assert (= (count a) (count b) (.size a) (.size b)))
+  (assert (= a b))
+  (assert (= b a))
+  (assert (.equals ^Object a b))
+  (assert (.equals ^Object b a))
+  (assert (= (hash a) (hash b)))
+  (assert (= (.hashCode ^Object a) (.hashCode ^Object b)))
+  (assert (= a
+             (into (empty a) a)
+             (into (empty b) b)
+             (into (empty a) b)
+             (into (empty b) a))))
+
+(defn apply-actions [coll actions]
+  (reduce (fn [c [tfunc pfunc & args]]
+            (apply (if (transient? c) tfunc pfunc) c args))
+          coll
+          actions))
+
+(defn to-persistent [c]
+  (if (transient? c) (persistent! c) c))
+
+(defspec conj-persistent-transient
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-transient-actions} actions]
+  (assert-same-collection
+   (to-persistent (apply-actions #{} actions))
+   (to-persistent (apply-actions #{} actions))))
 
 ;; *** General ***
 
