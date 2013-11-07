@@ -283,9 +283,7 @@
       (throw (AssertionError. (str "The names in " specials " cannot be used as field names for types or records."))))))
 
 (defmacro defrecord
-  "Alpha - subject to change
-  
-  (defrecord name [fields*]  options* specs*)
+  "(defrecord name [fields*]  options* specs*)
   
   Currently there are no options.
 
@@ -381,9 +379,7 @@
        ~@methods)))
 
 (defmacro deftype
-  "Alpha - subject to change
-  
-  (deftype name [fields*]  options* specs*)
+  "(deftype name [fields*]  options* specs*)
   
   Currently there are no options.
 
