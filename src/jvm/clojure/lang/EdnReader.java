@@ -71,7 +71,7 @@ static public Object readString(String s, IPersistentMap opts){
 }
 
 static boolean isWhitespace(int ch){
-	return Character.isWhitespace(ch) || ch == ',';
+	return Character.isWhitespace((char)ch) || ch == ',';
 }
 
 static void unread(PushbackReader r, int ch) {
@@ -134,7 +134,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 				return eofValue;
 				}
 
-			if(Character.isDigit(ch))
+			if(Character.isDigit((char)ch))
 				{
 				Object n = readNumber(r, (char) ch);
 				if(RT.suppressRead())
@@ -157,7 +157,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 			if(ch == '+' || ch == '-')
 				{
 				int ch2 = read1(r);
-				if(Character.isDigit(ch2))
+				if(Character.isDigit((char)ch2))
 					{
 					unread(r, ch2);
 					Object n = readNumber(r, (char) ch);
@@ -243,7 +243,7 @@ static private int readUnicodeChar(String token, int offset, int length, int bas
 }
 
 static private int readUnicodeChar(PushbackReader r, int initch, int base, int length, boolean exact) {
-	int uc = Character.digit(initch, base);
+	int uc = Character.digit((char)initch, base);
 	if(uc == -1)
 		throw new IllegalArgumentException("Invalid digit: " + (char) initch);
 	int i = 1;
@@ -255,7 +255,7 @@ static private int readUnicodeChar(PushbackReader r, int initch, int base, int l
 			unread(r, ch);
 			break;
 			}
-		int d = Character.digit(ch, base);
+		int d = Character.digit((char)ch, base);
 		if(d == -1)
 			throw new IllegalArgumentException("Invalid digit: " + (char) ch);
 		uc = uc * base + d;
@@ -447,14 +447,14 @@ public static class StringReader extends AFn{
 					case 'u':
 					{
 					ch = read1(r);
-					if (Character.digit(ch, 16) == -1)
+					if (Character.digit((char)ch, 16) == -1)
 						throw Util.runtimeException("Invalid unicode escape: \\u" + (char) ch);
 					ch = readUnicodeChar((PushbackReader) r, ch, 16, 4, true);
 					break;
 					}
 					default:
 					{
-					if(Character.isDigit(ch))
+					if(Character.isDigit((char)ch))
 						{
 						ch = readUnicodeChar((PushbackReader) r, ch, 8, 3, false);
 						if(ch > 0377)
@@ -501,7 +501,7 @@ public static class DispatchReader extends AFn{
 
 		if(fn == null) {
 			//try tagged reader
-		    if(Character.isLetter(ch))
+		    if(Character.isLetter((char)ch))
 				{
 				unread((PushbackReader) reader, ch);
 		        return taggedReader.invoke(reader, ch, opts);

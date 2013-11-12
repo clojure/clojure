@@ -13,20 +13,6 @@ package clojure.lang;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
-import java.lang.Character;
-import java.lang.Class;
-import java.lang.Exception;
-import java.lang.IllegalArgumentException;
-import java.lang.IllegalStateException;
-import java.lang.Integer;
-import java.lang.Number;
-import java.lang.NumberFormatException;
-import java.lang.Object;
-import java.lang.RuntimeException;
-import java.lang.String;
-import java.lang.StringBuilder;
-import java.lang.Throwable;
-import java.lang.UnsupportedOperationException;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -113,7 +99,7 @@ static
 	}
 
 static boolean isWhitespace(int ch){
-	return Character.isWhitespace(ch) || ch == ',';
+	return Character.isWhitespace((char)ch) || ch == ',';
 }
 
 static void unread(PushbackReader r, int ch) {
@@ -171,7 +157,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 				return eofValue;
 				}
 
-			if(Character.isDigit(ch))
+			if(Character.isDigit((char)ch))
 				{
 				Object n = readNumber(r, (char) ch);
 				if(RT.suppressRead())
@@ -194,7 +180,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 			if(ch == '+' || ch == '-')
 				{
 				int ch2 = read1(r);
-				if(Character.isDigit(ch2))
+				if(Character.isDigit((char)ch2))
 					{
 					unread(r, ch2);
 					Object n = readNumber(r, (char) ch);
@@ -274,7 +260,7 @@ static private int readUnicodeChar(String token, int offset, int length, int bas
 }
 
 static private int readUnicodeChar(PushbackReader r, int initch, int base, int length, boolean exact) {
-	int uc = Character.digit(initch, base);
+	int uc = Character.digit((char)initch, base);
 	if(uc == -1)
 		throw new IllegalArgumentException("Invalid digit: " + (char) initch);
 	int i = 1;
@@ -286,7 +272,7 @@ static private int readUnicodeChar(PushbackReader r, int initch, int base, int l
 			unread(r, ch);
 			break;
 			}
-		int d = Character.digit(ch, base);
+		int d = Character.digit((char)ch, base);
 		if(d == -1)
 			throw new IllegalArgumentException("Invalid digit: " + (char) ch);
 		uc = uc * base + d;
@@ -480,14 +466,14 @@ public static class StringReader extends AFn{
 					case 'u':
 					{
 					ch = read1(r);
-					if (Character.digit(ch, 16) == -1)
+					if (Character.digit((char)ch, 16) == -1)
 						throw Util.runtimeException("Invalid unicode escape: \\u" + (char) ch);
 					ch = readUnicodeChar((PushbackReader) r, ch, 16, 4, true);
 					break;
 					}
 					default:
 					{
-					if(Character.isDigit(ch))
+					if(Character.isDigit((char)ch))
 						{
 						ch = readUnicodeChar((PushbackReader) r, ch, 8, 3, false);
 						if(ch > 0377)
@@ -1042,12 +1028,14 @@ public static class EvalReader extends AFn{
 			if(fs.name.endsWith("."))
 				{
 				Object[] args = RT.toArray(RT.next(o));
-				return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
+				throw new RuntimeException();
+				//return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
 				}
 			if(Compiler.namesStaticMember(fs))
 				{
 				Object[] args = RT.toArray(RT.next(o));
-				return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
+				throw new RuntimeException();
+				//return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
 				}
 			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
 			if(v instanceof Var)
@@ -1228,8 +1216,8 @@ public static class CtorReader extends AFn{
 
 			if(!ctorFound)
 				throw Util.runtimeException("Unexpected number of constructor arguments to " + recordClass.toString() + ": got " + recordEntries.length);
-
-			ret = Reflector.invokeConstructor(recordClass, recordEntries);
+			throw new RuntimeException();
+			//ret = Reflector.invokeConstructor(recordClass, recordEntries);
 			}
 		else
 			{
@@ -1240,10 +1228,11 @@ public static class CtorReader extends AFn{
 				if(!(s.first() instanceof Keyword))
 					throw Util.runtimeException("Unreadable defrecord form: key must be of type clojure.lang.Keyword, got " + s.first().toString());
 				}
-			ret = Reflector.invokeStaticMethod(recordClass, "create", new Object[]{vals});
+			throw new RuntimeException();
+			//ret = Reflector.invokeStaticMethod(recordClass, "create", new Object[]{vals});
 			}
 
-		return ret;
+		//return ret;
 	}
 }
 

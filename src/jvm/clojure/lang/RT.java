@@ -12,21 +12,39 @@
 
 package clojure.lang;
 
-import java.net.MalformedURLException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.Callable;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectStreamException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.PushbackReader;
+import java.io.Reader;
+import java.io.Serializable;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.net.URL;
-import java.net.JarURLConnection;
-import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.RandomAccess;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RT{
 
@@ -418,7 +436,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 	URL cljURL = getResource(baseLoader(), cljfile);
 	boolean loaded = false;
 
-	if((classURL != null &&
+	if(!scriptbase.equals("clojure/gal") && (classURL != null &&
 	    (cljURL == null
 	     || lastModified(classURL, classfile) > lastModified(cljURL, cljfile)))
 	   || classURL == null) {

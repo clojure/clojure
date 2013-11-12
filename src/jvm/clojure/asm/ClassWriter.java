@@ -29,6 +29,8 @@
  */
 package clojure.asm;
 
+import clojure.lang.SourceWriter;
+
 /**
  * A {@link ClassVisitor} that generates classes in bytecode form. More
  * precisely this visitor generates a byte array conforming to the Java class
@@ -434,6 +436,8 @@ private boolean computeFrames;
  */
 boolean invalidFrames;
 
+private final SourceWriter sc;
+
 // ------------------------------------------------------------------------
 // Static initializer
 // ------------------------------------------------------------------------
@@ -534,6 +538,7 @@ static
  *              of this class. See {@link #COMPUTE_MAXS}, {@link #COMPUTE_FRAMES}.
  */
 public ClassWriter(final int flags){
+  this.sc = new SourceWriter();
 	index = 1;
 	pool = new ByteVector();
 	items = new Item[256];
@@ -1411,5 +1416,9 @@ private void put(final Item i){
  */
 private void put122(final int b, final int s1, final int s2){
 	pool.put12(b, s1).putShort(s2);
+}
+
+public SourceWriter getSc() {
+  return sc;
 }
 }
