@@ -1028,14 +1028,12 @@ public static class EvalReader extends AFn{
 			if(fs.name.endsWith("."))
 				{
 				Object[] args = RT.toArray(RT.next(o));
-				throw new RuntimeException();
-				//return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
+				return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
 				}
 			if(Compiler.namesStaticMember(fs))
 				{
 				Object[] args = RT.toArray(RT.next(o));
-				throw new RuntimeException();
-				//return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
+				return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
 				}
 			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
 			if(v instanceof Var)
@@ -1216,8 +1214,7 @@ public static class CtorReader extends AFn{
 
 			if(!ctorFound)
 				throw Util.runtimeException("Unexpected number of constructor arguments to " + recordClass.toString() + ": got " + recordEntries.length);
-			throw new RuntimeException();
-			//ret = Reflector.invokeConstructor(recordClass, recordEntries);
+			ret = Reflector.invokeConstructor(recordClass, recordEntries);
 			}
 		else
 			{
@@ -1228,11 +1225,10 @@ public static class CtorReader extends AFn{
 				if(!(s.first() instanceof Keyword))
 					throw Util.runtimeException("Unreadable defrecord form: key must be of type clojure.lang.Keyword, got " + s.first().toString());
 				}
-			throw new RuntimeException();
-			//ret = Reflector.invokeStaticMethod(recordClass, "create", new Object[]{vals});
+			ret = Reflector.invokeStaticMethod(recordClass, "create", new Object[]{vals});
 			}
 
-		//return ret;
+		return ret;
 	}
 }
 

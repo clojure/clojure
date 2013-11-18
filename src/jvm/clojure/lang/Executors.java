@@ -2,14 +2,14 @@ package clojure.lang;
 
 public class Executors {
 
-  public static ExecutorService newFixedThreadPool(int i,
-      ThreadFactory createThreadFactory) {
-    return null;
+  public static java.util.concurrent.ExecutorService newFixedThreadPool(int i,
+      java.util.concurrent.ThreadFactory createThreadFactory) {
+    return java.util.concurrent.Executors.newFixedThreadPool(i, createThreadFactory);
   }
 
-  public static ExecutorService newCachedThreadPool(
-      ThreadFactory createThreadFactory) {
-    return null;
+  public static java.util.concurrent.ExecutorService newCachedThreadPool(
+      java.util.concurrent.ThreadFactory createThreadFactory) {
+    return java.util.concurrent.Executors.newCachedThreadPool(createThreadFactory);
   }
 
 }
