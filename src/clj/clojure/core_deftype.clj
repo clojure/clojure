@@ -369,7 +369,14 @@
          ([m#] (~(symbol (str classname "/create")) m#)))
        ~classname)))
 
-(defn- emit-deftype* 
+(defn record?
+  "Returns true if x is a record"
+  {:added "1.6"
+   :static true}
+  [x]
+  (instance? clojure.lang.IRecord x))
+
+(defn- emit-deftype*
   "Do not use this directly - use deftype"
   [tagname name fields interfaces methods]
   (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
