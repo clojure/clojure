@@ -359,15 +359,10 @@ public static void pushThreadBindings(Associative bindings){
 }
 
 public static void popThreadBindings(){
-    Frame f = dvals.get();
-    if(f.prev == null)
-        throw new IllegalStateException("Pop without matching push");
-    f = f.prev;
-    if (f.prev == null) {
-        dvals.remove();
-    } else {
-        dvals.set(f);
-    }
+	Frame f = dvals.get();
+	if(f.prev == null)
+		throw new IllegalStateException("Pop without matching push");
+	dvals.set(f.prev);
 }
 
 public static Associative getThreadBindings(){
