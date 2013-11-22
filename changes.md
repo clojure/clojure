@@ -4,9 +4,23 @@
 
 ## CONTENTS
 
-## 1 Deprecated and Removed Features
+## 1 Compatibility and Dependencies
 
-None.
+## 1.1 JDK Version Updates
+
+Clojure now builds with Java SE 1.6 and emits bytecode requiring Java SE 1.6 instead of Java SE 1.5. [CLJ-1268]
+
+## 1.2 Promoted "Alpha" Features
+
+The following features are no longer marked Alpha in Clojure:
+
+* Watches - add-watch, remove-watch
+* Transients - transient, persistent!, conj!, assoc!, dissoc!, pop!, disj!
+* Exception data - ex-info, ex-data
+* Promises - promise, deliver
+* Records - defrecord
+* Types - deftype
+* Pretty-print tables - print-table
 
 ## 2 New and Improved Features
 
@@ -19,6 +33,7 @@ The clojure.api package provides a minimal interface to bootstrap Clojure access
 IFns provide complete access to Clojure's APIs. You can also access any other library written in Clojure, after adding either its source or compiled form to the classpath.
 
 The public Java API for Clojure consists of the following classes and interfaces:
+
 * clojure.api.API
 * clojure.lang.IFn
 
@@ -45,42 +60,48 @@ Most IFns in Clojure refer to functions. A few, however, refer to non-function d
     IFn printLength = API.var("clojure.core", "*print-length*");
     API.var("clojure.core", "deref").invoke(printLength);
 
-### 2.2 JDK and Dependency Version Updates
+### 2.2 bitops
 
-Clojure now builds with Java SE 1.6 and emits bytecode requiring Java SE 1.6 instead of Java SE 1.5. [CLJ-1268]
+* [CLJ-827](http://dev.clojure.org/jira/browse/CLJ-827) - unsigned-bit-shift-right
 
-### 2.3 Printing 
+A new unsigned-bit-shift-right (Java's >>>) has been added to the core library.  The shift distance
+is truncated to the least 6 bits (per the Java specification for long >>>).
+
+Examples:
+  (unsigned-bit-shift-right 2r100 1) ;; 2r010
+  (unsigned-bit-shift-right 2r100 2) ;; 2r001
+  (unsigned-bit-shift-right 2r100 3) ;; 2r000
+
+### 2.3 clojure.test
+
+* [CLJ-866](http://dev.clojure.org/jira/browse/CLJ-866) - test-vars
+
+Added a new clojure.test/test-vars function that takes a list of vars, groups them by namespace, and
+runs them *with their fixtures*.
+
+## 3 Enhancements
+
+### 3.1 Printing
 
 * [CLJ-908](http://dev.clojure.org/jira/browse/CLJ-908)
   Print metadata for functions when *print-meta* is true and remove errant space at beginning.
 * [CLJ-937](http://dev.clojure.org/jira/browse/CLJ-937)
   pprint cl-format now supports E, F, and G formats for ratios.
 
-### 2.4 Other improvements
-
-* [CLJ-908](http://dev.clojure.org/jira/browse/CLJ-908)
-  Make *default-data-reader-fn* set!-able in REPL, similar to *data-readers*.
-* [CLJ-783](http://dev.clojure.org/jira/browse/CLJ-783)
-  Make clojure.inspector/inspect-tree work on sets.
-* [CLJ-896](http://dev.clojure.org/jira/browse/CLJ-896)
-  Make browse-url aware of xdg-open.
-* [CLJ-1160](http://dev.clojure.org/jira/browse/CLJ-1160)
-  Fix clojure.core.reducers/mapcat does not stop on reduced? values.
-* [CLJ-1121](http://dev.clojure.org/jira/browse/CLJ-1121)
-  -> and ->> have been rewritten to work with a broader set of macros.
-  
-## 3 Improved error messages
+### 3.2 Error messages
 
 * [CLJ-1099](http://dev.clojure.org/jira/browse/CLJ-1099)
   If non-seq passed where seq is needed, error message now is an ExceptionInfo with the instance value, retrievable via ex-data.
 * [CLJ-1083](http://dev.clojure.org/jira/browse/CLJ-1083)
   Fix error message reporting for "munged" function names (like a->b).
 * [CLJ-1056](http://dev.clojure.org/jira/browse/CLJ-1056)
-  Handle more cases and improve error message for errors in defprotocol definnitions.
+  Handle more cases and improve error message for errors in defprotocol definitions.
 * [CLJ-1102](http://dev.clojure.org/jira/browse/CLJ-1102)
   Better handling of exceptions with empty stack traces.
+* [CLJ-939](http://dev.clojure.org/jira/browse/CLJ-939)
+  Exceptions thrown in the top level ns form are reported without file or line number.
 
-## 4 Improved documentation strings
+### 3.3 Documentation strings
 
 * [CLJ-1164](http://dev.clojure.org/jira/browse/CLJ-1164)
   Fix typos in clojure.instant/validated and other internal instant functions.
@@ -93,7 +114,35 @@ Clojure now builds with Java SE 1.6 and emits bytecode requiring Java SE 1.6 ins
 * [CLJ-835](http://dev.clojure.org/jira/browse/CLJ-835)
   Update defmulti doc to clarify expectations for hierarchy argument.
 
-## 5 Bug Fixes
+### 3.4 Performance
+
+* [CLJ-858](http://dev.clojure.org/jira/browse/CLJ-858)
+  Improve speed of STM by removing System.currentTimeMillis.
+* [CLJ-669](http://dev.clojure.org/jira/browse/CLJ-669)
+  clojure.java.io/do-copy: use java.nio for Files
+
+### 3.5 Other improvements
+
+* [CLJ-908](http://dev.clojure.org/jira/browse/CLJ-908)
+  Make *default-data-reader-fn* set!-able in REPL, similar to *data-readers*.
+* [CLJ-783](http://dev.clojure.org/jira/browse/CLJ-783)
+  Make clojure.inspector/inspect-tree work on sets.
+* [CLJ-896](http://dev.clojure.org/jira/browse/CLJ-896)
+  Make browse-url aware of xdg-open.
+* [CLJ-1160](http://dev.clojure.org/jira/browse/CLJ-1160)
+  Fix clojure.core.reducers/mapcat does not stop on reduced? values.
+* [CLJ-1121](http://dev.clojure.org/jira/browse/CLJ-1121)
+  -> and ->> have been rewritten to work with a broader set of macros.
+* [CLJ-1105](http://dev.clojure.org/jira/browse/CLJ-1105)
+  clojure.walk now supports records.
+* [CLJ-949](http://dev.clojure.org/jira/browse/CLJ-949)
+  Removed all unnecessary cases of sneakyThrow.
+* [CLJ-1238](http://dev.clojure.org/jira/browse/CLJ-1238)
+  Allow EdnReader to read foo// (matches LispReader behavior).
+* [CLJ-1264](http://dev.clojure.org/jira/browse/CLJ-1264)
+  Remove uses of _ as a var in the Java code (causes warning in Java 8).
+
+## 4 Bug Fixes
 
 * [CLJ-1018](http://dev.clojure.org/jira/browse/CLJ-1018)
   Make range consistently return () with a step of 0.
@@ -125,8 +174,6 @@ Clojure now builds with Java SE 1.6 and emits bytecode requiring Java SE 1.6 ins
   Add support to clojure.reflect for classes with annotations.
   * [CLJ-1184](http://dev.clojure.org/jira/browse/CLJ-1184)
   Evaling #{do ...} or [do ...] is treated as do special form.
-* [CLJ-1125](http://dev.clojure.org/jira/browse/CLJ-1125)
-  Clojure can leak memory in a servlet container when using dynamic bindings or STM transactions.
 * [CLJ-1090](http://dev.clojure.org/jira/browse/CLJ-1090)
   Indirect function calls through Var instances fail to clear locals.
 * [CLJ-1076](http://dev.clojure.org/jira/browse/CLJ-1076)
@@ -135,12 +182,11 @@ Clojure now builds with Java SE 1.6 and emits bytecode requiring Java SE 1.6 ins
   Make into-array work consistently with short-array and byte-array on bigger types.
 * [CLJ-1285](http://dev.clojure.org/jira/browse/CLJ-1285)
   Data structure invariants are violated after persistent operations when collision node created by transients.
+* [CLJ-1222](http://dev.clojure.org/jira/browse/CLJ-1222)
+  Multiplication overflow issues around Long/MIN_VALUE
+* [CLJ-1118](http://dev.clojure.org/jira/browse/CLJ-1118)
+  Inconsistent numeric comparison semantics between BigDecimals and other numerics
   
-
-## 6 Compatibility Notes
-
-None.
-
 # Changes to Clojure in Version 1.5.1
 
 * fix for leak caused by ddc65a96fdb1163b
