@@ -45,16 +45,12 @@ static public class Unbound extends AFn{
 }
 
 static class Frame{
+	final static Frame TOP = new Frame(PersistentHashMap.EMPTY, null);
 	//Var->TBox
 	Associative bindings;
 	//Var->val
 //	Associative frameBindings;
 	Frame prev;
-
-
-	public Frame(){
-		this(PersistentHashMap.EMPTY, null);
-	}
 
 	public Frame(Associative bindings, Frame prev){
 //		this.frameBindings = frameBindings;
@@ -63,9 +59,7 @@ static class Frame{
 	}
 
     	protected Object clone() {
-		Frame f = new Frame();
-		f.bindings = this.bindings;
-		return f;
+		return new Frame(this.bindings, null);
     	}
 
 }
@@ -73,7 +67,7 @@ static class Frame{
 static final ThreadLocal<Frame> dvals = new ThreadLocal<Frame>(){
 
 	protected Frame initialValue(){
-		return new Frame();
+		return Frame.TOP;
 	}
 };
 
@@ -96,17 +90,11 @@ public final Namespace ns;
 //IPersistentMap _meta;
 
 public static Object getThreadBindingFrame(){
-	Frame f = dvals.get();
-	if(f != null)
-		return f;
-	return new Frame();
+	return dvals.get();
 }
 
 public static Object cloneThreadBindingFrame(){
-	Frame f = dvals.get();
-	if(f != null)
-		return f.clone();
-	return new Frame();
+	return dvals.get().clone();
 }
 
 public static void resetThreadBindingFrame(Object frame){
@@ -338,10 +326,14 @@ public static void pushThreadBindings(Associative bindings){
 }
 
 public static void popThreadBindings(){
-	Frame f = dvals.get();
-	if(f.prev == null)
-		throw new IllegalStateException("Pop without matching push");
-	dvals.set(f.prev);
+    Frame f = dvals.get().prev;
+    if (f == null) {
+        throw new IllegalStateException("Pop without matching push");
+    } else if (f == Frame.TOP) {
+        dvals.remove();
+    } else {
+        dvals.set(f);
+    }
 }
 
 public static Associative getThreadBindings(){
