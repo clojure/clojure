@@ -141,7 +141,16 @@
    :doc
    "clojure.test extensions for the Test Anything Protocol (TAP)\n\nTAP is a simple text-based syntax for reporting test results.  TAP\nwas originally develped for Perl, and now has implementations in\nseveral languages.  For more information on TAP, see\nhttp://testanything.org/ and\nhttp://search.cpan.org/~petdance/TAP-1.0.0/TAP.pm\n\nTo use this library, wrap any calls to\nclojure.test/run-tests in the with-tap-output macro,\nlike this:\n\n  (use 'clojure.test)\n  (use 'clojure.test.tap)\n\n  (with-tap-output\n   (run-tests 'my.cool.library))"}),
  :vars
- ({:arglists ([] [x] [x y] [x y & more]),
+ ({:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/&",
+   :namespace "clojure.core",
+   :var-type "special syntax",
+   :doc "Please see http://clojure.org/special_forms#fn",
+   :name "&"}
+  {:arglists ([] [x] [x y] [x y & more]),
    :name "*",
    :namespace "clojure.core",
    :source-url
@@ -475,6 +484,15 @@
    :var-type "macro",
    :line 1296,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/.",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#.",
+   :name "."}
   {:arglists ([x form] [x form & more]),
    :name "..",
    :namespace "clojure.core",
@@ -1549,6 +1567,15 @@
    :var-type "function",
    :line 289,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/catch",
+   :namespace "clojure.core",
+   :var-type "special syntax",
+   :doc "Please see http://clojure.org/special_forms#try",
+   :name "catch"}
   {:arglists ([x]),
    :name "char",
    :namespace "clojure.core",
@@ -2073,6 +2100,15 @@
    :var-type "macro",
    :line 2309,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/def",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#def",
+   :name "def"}
   {:arglists ([name & decl]),
    :name "definline",
    :namespace "clojure.core",
@@ -2432,6 +2468,15 @@
    :var-type "function",
    :line 4521,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/do",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#do",
+   :name "do"}
   {:arglists ([coll] [n coll]),
    :name "doall",
    :namespace "clojure.core",
@@ -2888,6 +2933,15 @@
    :var-type "function",
    :line 2124,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/finally",
+   :namespace "clojure.core",
+   :var-type "special syntax",
+   :doc "Please see http://clojure.org/special_forms#try",
+   :name "finally"}
   {:arglists ([map key]),
    :name "find",
    :namespace "clojure.core",
@@ -3063,6 +3117,15 @@
    :var-type "macro",
    :line 3491,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/fn",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#fn",
+   :name "fn"}
   {:arglists ([x]),
    :name "fn?",
    :namespace "clojure.core",
@@ -3473,6 +3536,15 @@
    :var-type "function",
    :line 1117,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/if",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#if",
+   :name "if"}
   {:arglists ([bindings then] [bindings then else & oldform]),
    :name "if-let",
    :namespace "clojure.core",
@@ -3940,6 +4012,15 @@
    :var-type "macro",
    :line 3461,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/let",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#let",
+   :name "let"}
   {:arglists ([fnspecs & body]),
    :name "letfn",
    :namespace "clojure.core",
@@ -4158,6 +4239,15 @@
    :var-type "macro",
    :line 3533,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/loop",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#loop",
+   :name "loop"}
   {:arglists ([form]),
    :name "macroexpand",
    :namespace "clojure.core",
@@ -4436,6 +4526,24 @@
    :var-type "function",
    :line 2734,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/monitor-enter",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#monitor-enter",
+   :name "monitor-enter"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/monitor-exit",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#monitor-exit",
+   :name "monitor-exit"}
   {:arglists ([x]),
    :name "name",
    :namespace "clojure.core",
@@ -4494,6 +4602,15 @@
    :var-type "function",
    :line 997,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/new",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#new",
+   :name "new"}
   {:arglists ([]),
    :name "newline",
    :namespace "clojure.core",
@@ -5385,6 +5502,15 @@
    :var-type "function",
    :line 1004,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/quote",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#quote",
+   :name "quote"}
   {:arglists ([] [n]),
    :name "rand",
    :namespace "clojure.core",
@@ -5611,6 +5737,15 @@
    :var-type "function",
    :line 2894,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/recur",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#recur",
+   :name "recur"}
   {:arglists ([f coll] [f val coll]),
    :name "reduce",
    :namespace "clojure.core",
@@ -6245,6 +6380,15 @@
    :var-type "function",
    :line 3163,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/set!",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#set!",
+   :name "set!"}
   {:arglists ([a handler-fn]),
    :name "set-error-handler!",
    :namespace "clojure.core",
@@ -6878,6 +7022,15 @@
    :var-type "function",
    :line 4360,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/throw",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#throw",
+   :name "throw"}
   {:arglists ([expr]),
    :name "time",
    :namespace "clojure.core",
@@ -6982,6 +7135,15 @@
    :var-type "function",
    :line 437,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/try",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#try",
+   :name "try"}
   {:arglists ([x]),
    :name "type",
    :namespace "clojure.core",
@@ -7204,6 +7366,15 @@
    :var-type "function",
    :line 1216,
    :file "src/clj/clojure/core.clj"}
+  {:file nil,
+   :raw-source-url nil,
+   :source-url nil,
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/var",
+   :namespace "clojure.core",
+   :var-type "special form",
+   :doc "Please see http://clojure.org/special_forms#var",
+   :name "var"}
   {:arglists ([x]),
    :name "var-get",
    :namespace "clojure.core",
