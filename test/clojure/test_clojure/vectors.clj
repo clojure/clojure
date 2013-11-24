@@ -79,6 +79,11 @@
            vs-32 vs
            vs nil))))
 
+(deftest test-primitive-subvector-reduce
+  ;; regression test for CLJ-1082
+  (is (== 60 (let [prim-vec (into (vector-of :long) (range 1000))]
+               (reduce + (subvec prim-vec 10 15))))))
+
 (deftest test-vec-compare
   (let [nums      (range 1 100)
         ; randomly replaces a single item with the given value

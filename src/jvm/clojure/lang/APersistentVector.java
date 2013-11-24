@@ -241,6 +241,24 @@ public ListIterator listIterator(final int index){
 	};
 }
 
+Iterator rangedIterator(final int start, final int end){
+	return new Iterator(){
+		int i = start;
+
+		public boolean hasNext(){
+			return i < end;
+		}
+
+		public Object next(){
+			return nth(i++);
+		}
+
+		public void remove(){
+			throw new UnsupportedOperationException();
+		}
+	};
+}
+
 public List subList(int fromIndex, int toIndex){
 	return (List) RT.subvec(this, fromIndex, toIndex);
 }
@@ -524,7 +542,12 @@ static class SubVector extends APersistentVector implements IObj{
 		this.end = end;
 	}
 
-	public Iterator iterator(){return ((PersistentVector)v).rangedIterator(start,end);}
+	public Iterator iterator(){
+		if (v instanceof APersistentVector) {
+			return ((APersistentVector)v).rangedIterator(start,end);
+		}
+		return super.iterator();
+	}
 
 	public Object nth(int i){
 		if((start + i >= end) || (i < 0))
