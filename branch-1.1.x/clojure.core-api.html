@@ -646,9 +646,6 @@ namespace.
       <a class="toc-entry-anchor" href="#clojure.core/fn">fn</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.core/fn">fn</a>
-      
-    </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core/fn?">fn?</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
@@ -817,9 +814,6 @@ namespace.
       <a class="toc-entry-anchor" href="#clojure.core/let">let</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.core/let">let</a>
-      
-    </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core/letfn">letfn</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
@@ -860,9 +854,6 @@ namespace.
       
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core/longs">longs</a>
-      
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.core/loop">loop</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core/loop">loop</a>
@@ -1564,8 +1555,10 @@ namespace.
     <h2 id="clojure.core/&amp;">&amp;</h2>
     <span id="var-type">special syntax</span><br />
     <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#fn">http://clojure.org/special_forms#fn</a></pre>
-    
+    <pre id="var-docstr">Syntax for use with fn.
+
+Please see <a href="http://clojure.org/special_forms#fn">http://clojure.org/special_forms#fn</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -1913,9 +1906,16 @@ last item in second form, etc.</pre>
     <hr />
     <h2 id="clojure.core/.">.</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#">http://clojure.org/special_forms#</a>.</pre>
-    
+    <pre id="var-usage">Usage: (.instanceMember instance args*)
+       (.instanceMember Classname args*)
+       (Classname/staticMethod args*)
+       Classname/staticField
+</pre>
+    <pre id="var-docstr">The instance member form works for both fields and methods.
+They all expand into calls to the dot operator at macroexpansion time.
+
+Please see <a href="http://clojure.org/java_interop#dot">http://clojure.org/java_interop#dot</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -2848,8 +2848,10 @@ different thread, but needs the same bindings in place.</pre>
     <h2 id="clojure.core/catch">catch</h2>
     <span id="var-type">special syntax</span><br />
     <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#try">http://clojure.org/special_forms#try</a></pre>
-    
+    <pre id="var-docstr">Syntax for use with try.
+
+Please see <a href="http://clojure.org/special_forms#try">http://clojure.org/special_forms#try</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -3320,9 +3322,16 @@ name.</pre>
     <hr />
     <h2 id="clojure.core/def">def</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#def">http://clojure.org/special_forms#def</a></pre>
-    
+    <pre id="var-usage">Usage: (def symbol doc-string? init?)
+</pre>
+    <pre id="var-docstr">Creates and interns a global var with the name
+of symbol in the current namespace (*ns*) or locates such a var if
+it already exists.  If init is supplied, it is evaluated, and the
+root binding of the var is set to the resulting value.  If init is
+not supplied, the root binding of the var is unaffected.
+
+Please see <a href="http://clojure.org/special_forms#def">http://clojure.org/special_forms#def</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -3599,9 +3608,13 @@ Returns a transient map that doesn't contain a mapping for key(s).</pre>
     <hr />
     <h2 id="clojure.core/do">do</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#do">http://clojure.org/special_forms#do</a></pre>
-    
+    <pre id="var-usage">Usage: (do exprs*)
+</pre>
+    <pre id="var-docstr">Evaluates the expressions in order and returns the value of
+the last. If no expressions are supplied, returns nil.
+
+Please see <a href="http://clojure.org/special_forms#do">http://clojure.org/special_forms#do</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -3906,8 +3919,10 @@ false.</pre>
     <h2 id="clojure.core/finally">finally</h2>
     <span id="var-type">special syntax</span><br />
     <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#try">http://clojure.org/special_forms#try</a></pre>
-    
+    <pre id="var-docstr">Syntax for use with try.
+
+Please see <a href="http://clojure.org/special_forms#try">http://clojure.org/special_forms#try</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -4044,16 +4059,6 @@ Defines a function</pre>
     
     
     <a href="https://github.com/clojure/clojure/blob/f4c58e3500b3668a0941ca21f9aa4f444de2c652/src/clj/clojure/core.clj#L2913" id="var-source">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.core/fn">fn</h2>
-    <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#fn">http://clojure.org/special_forms#fn</a></pre>
-    
-    
-    
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4510,9 +4515,14 @@ Returns a new hash map with supplied mappings.</pre>
     <hr />
     <h2 id="clojure.core/if">if</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#if">http://clojure.org/special_forms#if</a></pre>
-    
+    <pre id="var-usage">Usage: (if test then else?)
+</pre>
+    <pre id="var-docstr">Evaluates test. If not the singular values nil or false,
+evaluates and yields then, otherwise, evaluates and yields else. If
+else is not supplied it defaults to nil.
+
+Please see <a href="http://clojure.org/special_forms#if">http://clojure.org/special_forms#if</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -4904,16 +4914,6 @@ therein.</pre>
   </div><div id="var-entry">
     <br />
     <hr />
-    <h2 id="clojure.core/let">let</h2>
-    <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#let">http://clojure.org/special_forms#let</a></pre>
-    
-    
-    
-  </div><div id="var-entry">
-    <br />
-    <hr />
     <h2 id="clojure.core/letfn">letfn</h2>
     <span id="var-type">macro</span><br />
     <pre id="var-usage">Usage: (letfn fnspecs &amp; body)
@@ -5094,16 +5094,6 @@ therein. Acts as a recur target.</pre>
     
     
     <a href="https://github.com/clojure/clojure/blob/f4c58e3500b3668a0941ca21f9aa4f444de2c652/src/clj/clojure/core.clj#L2967" id="var-source">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.core/loop">loop</h2>
-    <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#loop">http://clojure.org/special_forms#loop</a></pre>
-    
-    
-    
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5342,9 +5332,13 @@ the result by calling (f val-in-result val-in-latter).</pre>
     <hr />
     <h2 id="clojure.core/monitor-enter">monitor-enter</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#monitor-enter">http://clojure.org/special_forms#monitor-enter</a></pre>
-    
+    <pre id="var-usage">Usage: (monitor-enter x)
+</pre>
+    <pre id="var-docstr">Synchronization primitive that should be avoided
+in user code. Use the 'locking' macro.
+
+Please see <a href="http://clojure.org/special_forms#monitor-enter">http://clojure.org/special_forms#monitor-enter</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -5352,9 +5346,13 @@ the result by calling (f val-in-result val-in-latter).</pre>
     <hr />
     <h2 id="clojure.core/monitor-exit">monitor-exit</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#monitor-exit">http://clojure.org/special_forms#monitor-exit</a></pre>
-    
+    <pre id="var-usage">Usage: (monitor-exit x)
+</pre>
+    <pre id="var-docstr">Synchronization primitive that should be avoided
+in user code. Use the 'locking' macro.
+
+Please see <a href="http://clojure.org/special_forms#monitor-exit">http://clojure.org/special_forms#monitor-exit</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -5395,9 +5393,15 @@ the result by calling (f val-in-result val-in-latter).</pre>
     <hr />
     <h2 id="clojure.core/new">new</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#new">http://clojure.org/special_forms#new</a></pre>
-    
+    <pre id="var-usage">Usage: (Classname. args*)
+       (new Classname args*)
+</pre>
+    <pre id="var-docstr">The args, if any, are evaluated from left to right, and
+passed to the constructor of the class named by Classname. The
+constructed object is returned.
+
+Please see <a href="http://clojure.org/java_interop#new">http://clojure.org/java_interop#new</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -6146,9 +6150,12 @@ evaluated in parallel</pre>
     <hr />
     <h2 id="clojure.core/quote">quote</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#quote">http://clojure.org/special_forms#quote</a></pre>
-    
+    <pre id="var-usage">Usage: (quote form)
+</pre>
+    <pre id="var-docstr">Yields the unevaluated form.
+
+Please see <a href="http://clojure.org/special_forms#quote">http://clojure.org/special_forms#quote</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -6332,9 +6339,14 @@ current value of *in* .</pre>
     <hr />
     <h2 id="clojure.core/recur">recur</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#recur">http://clojure.org/special_forms#recur</a></pre>
-    
+    <pre id="var-usage">Usage: (recur exprs*)
+</pre>
+    <pre id="var-docstr">Evaluates the exprs in order, then, in parallel, rebinds
+the bindings of the recursion point to the values of the exprs.
+Execution then jumps back to the recursion point, a loop or fn method.
+
+Please see <a href="http://clojure.org/special_forms#recur">http://clojure.org/special_forms#recur</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -6899,9 +6911,15 @@ one. Will not force a lazy seq. (sequence nil) yields ()</pre>
     <hr />
     <h2 id="clojure.core/set!">set!</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#set">http://clojure.org/special_forms#set</a>!</pre>
-    
+    <pre id="var-usage">Usage: (set! var-symbol expr)
+       (set! (. instance-expr instanceFieldName-symbol) expr)
+       (set! (. Classname-symbol staticFieldName-symbol) expr)
+</pre>
+    <pre id="var-docstr">Used to set thread-local-bound vars, Java object instance
+fields, and Java class static fields.
+
+Please see <a href="http://clojure.org/vars#set">http://clojure.org/vars#set</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -7400,9 +7418,13 @@ found.</pre>
     <hr />
     <h2 id="clojure.core/throw">throw</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#throw">http://clojure.org/special_forms#throw</a></pre>
-    
+    <pre id="var-usage">Usage: (throw expr)
+</pre>
+    <pre id="var-docstr">The expr is evaluated and thrown, therefore it should
+yield an instance of some derivee of Throwable.
+
+Please see <a href="http://clojure.org/special_forms#throw">http://clojure.org/special_forms#throw</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -7504,9 +7526,15 @@ tree.</pre>
     <hr />
     <h2 id="clojure.core/try">try</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#try">http://clojure.org/special_forms#try</a></pre>
-    
+    <pre id="var-usage">Usage: (try expr* catch-clause* finally-clause?)
+</pre>
+    <pre id="var-docstr">catch-clause =&gt; (catch classname name expr*)
+finally-clause =&gt; (finally expr*)
+
+Catches and handles Java exceptions.
+
+Please see <a href="http://clojure.org/special_forms#try">http://clojure.org/special_forms#try</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">
@@ -7707,9 +7735,14 @@ as those documented for clojure.core/refer.</pre>
     <hr />
     <h2 id="clojure.core/var">var</h2>
     <span id="var-type">special form</span><br />
-    <pre id="var-usage"></pre>
-    <pre id="var-docstr">Please see <a href="http://clojure.org/special_forms#var">http://clojure.org/special_forms#var</a></pre>
-    
+    <pre id="var-usage">Usage: (var symbol)
+</pre>
+    <pre id="var-docstr">The symbol must resolve to a var, and the Var object
+itself (not its value) is returned. The reader macro #'x
+expands to (var x).
+
+Please see <a href="http://clojure.org/special_forms#var">http://clojure.org/special_forms#var</a></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     
   </div><div id="var-entry">

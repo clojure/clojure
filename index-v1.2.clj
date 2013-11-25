@@ -147,8 +147,10 @@
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/&",
    :namespace "clojure.core",
+   :added "1.0",
    :var-type "special syntax",
-   :doc "Please see http://clojure.org/special_forms#fn",
+   :doc
+   "Syntax for use with fn.\n\nPlease see http://clojure.org/special_forms#fn",
    :name "&"}
   {:arglists ([] [x] [x y] [x y & more]),
    :name "*",
@@ -484,15 +486,22 @@
    :var-type "macro",
    :line 1296,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms
+   [(.instanceMember instance args*)
+    (.instanceMember Classname args*)
+    (Classname/staticMethod args*)
+    Classname/staticField],
+   :name ".",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/.",
-   :namespace "clojure.core",
+   :doc
+   "The instance member form works for both fields and methods.\nThey all expand into calls to the dot operator at macroexpansion time.\n\nPlease see http://clojure.org/java_interop#dot",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#.",
-   :name "."}
+   :file nil}
   {:arglists ([x form] [x form & more]),
    :name "..",
    :namespace "clojure.core",
@@ -1573,8 +1582,10 @@
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/catch",
    :namespace "clojure.core",
+   :added "1.0",
    :var-type "special syntax",
-   :doc "Please see http://clojure.org/special_forms#try",
+   :doc
+   "Syntax for use with try.\n\nPlease see http://clojure.org/special_forms#try",
    :name "catch"}
   {:arglists ([x]),
    :name "char",
@@ -2100,15 +2111,18 @@
    :var-type "macro",
    :line 2309,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms [(def symbol doc-string? init?)],
+   :name "def",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/def",
-   :namespace "clojure.core",
+   :doc
+   "Creates and interns a global var with the name\nof symbol in the current namespace (*ns*) or locates such a var if\nit already exists.  If init is supplied, it is evaluated, and the\nroot binding of the var is set to the resulting value.  If init is\nnot supplied, the root binding of the var is unaffected.\n\nPlease see http://clojure.org/special_forms#def",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#def",
-   :name "def"}
+   :file nil}
   {:arglists ([name & decl]),
    :name "definline",
    :namespace "clojure.core",
@@ -2468,15 +2482,18 @@
    :var-type "function",
    :line 4521,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms [(do exprs*)],
+   :name "do",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/do",
-   :namespace "clojure.core",
+   :doc
+   "Evaluates the expressions in order and returns the value of\nthe last. If no expressions are supplied, returns nil.\n\nPlease see http://clojure.org/special_forms#do",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#do",
-   :name "do"}
+   :file nil}
   {:arglists ([coll] [n coll]),
    :name "doall",
    :namespace "clojure.core",
@@ -2939,8 +2956,10 @@
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/finally",
    :namespace "clojure.core",
+   :added "1.0",
    :var-type "special syntax",
-   :doc "Please see http://clojure.org/special_forms#try",
+   :doc
+   "Syntax for use with try.\n\nPlease see http://clojure.org/special_forms#try",
    :name "finally"}
   {:arglists ([map key]),
    :name "find",
@@ -3117,15 +3136,6 @@
    :var-type "macro",
    :line 3491,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
-   :source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/fn",
-   :namespace "clojure.core",
-   :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#fn",
-   :name "fn"}
   {:arglists ([x]),
    :name "fn?",
    :namespace "clojure.core",
@@ -3536,15 +3546,18 @@
    :var-type "function",
    :line 1117,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms [(if test then else?)],
+   :name "if",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/if",
-   :namespace "clojure.core",
+   :doc
+   "Evaluates test. If not the singular values nil or false,\nevaluates and yields then, otherwise, evaluates and yields else. If\nelse is not supplied it defaults to nil.\n\nPlease see http://clojure.org/special_forms#if",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#if",
-   :name "if"}
+   :file nil}
   {:arglists ([bindings then] [bindings then else & oldform]),
    :name "if-let",
    :namespace "clojure.core",
@@ -4012,15 +4025,6 @@
    :var-type "macro",
    :line 3461,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
-   :source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/let",
-   :namespace "clojure.core",
-   :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#let",
-   :name "let"}
   {:arglists ([fnspecs & body]),
    :name "letfn",
    :namespace "clojure.core",
@@ -4239,15 +4243,6 @@
    :var-type "macro",
    :line 3533,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
-   :source-url nil,
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/loop",
-   :namespace "clojure.core",
-   :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#loop",
-   :name "loop"}
   {:arglists ([form]),
    :name "macroexpand",
    :namespace "clojure.core",
@@ -4526,24 +4521,30 @@
    :var-type "function",
    :line 2734,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms [(monitor-enter x)],
+   :name "monitor-enter",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/monitor-enter",
-   :namespace "clojure.core",
+   :doc
+   "Synchronization primitive that should be avoided\nin user code. Use the 'locking' macro.\n\nPlease see http://clojure.org/special_forms#monitor-enter",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#monitor-enter",
-   :name "monitor-enter"}
-  {:file nil,
-   :raw-source-url nil,
+   :file nil}
+  {:forms [(monitor-exit x)],
+   :name "monitor-exit",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/monitor-exit",
-   :namespace "clojure.core",
+   :doc
+   "Synchronization primitive that should be avoided\nin user code. Use the 'locking' macro.\n\nPlease see http://clojure.org/special_forms#monitor-exit",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#monitor-exit",
-   :name "monitor-exit"}
+   :file nil}
   {:arglists ([x]),
    :name "name",
    :namespace "clojure.core",
@@ -4602,15 +4603,18 @@
    :var-type "function",
    :line 997,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms [(Classname. args*) (new Classname args*)],
+   :name "new",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/new",
-   :namespace "clojure.core",
+   :doc
+   "The args, if any, are evaluated from left to right, and\npassed to the constructor of the class named by Classname. The\nconstructed object is returned.\n\nPlease see http://clojure.org/java_interop#new",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#new",
-   :name "new"}
+   :file nil}
   {:arglists ([]),
    :name "newline",
    :namespace "clojure.core",
@@ -5502,15 +5506,18 @@
    :var-type "function",
    :line 1004,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms ['form],
+   :name "quote",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/quote",
-   :namespace "clojure.core",
+   :doc
+   "Yields the unevaluated form.\n\nPlease see http://clojure.org/special_forms#quote",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#quote",
-   :name "quote"}
+   :file nil}
   {:arglists ([] [n]),
    :name "rand",
    :namespace "clojure.core",
@@ -5737,15 +5744,18 @@
    :var-type "function",
    :line 2894,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms [(recur exprs*)],
+   :name "recur",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/recur",
-   :namespace "clojure.core",
+   :doc
+   "Evaluates the exprs in order, then, in parallel, rebinds\nthe bindings of the recursion point to the values of the exprs.\nExecution then jumps back to the recursion point, a loop or fn method.\n\nPlease see http://clojure.org/special_forms#recur",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#recur",
-   :name "recur"}
+   :file nil}
   {:arglists ([f coll] [f val coll]),
    :name "reduce",
    :namespace "clojure.core",
@@ -6380,15 +6390,21 @@
    :var-type "function",
    :line 3163,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms
+   [(set! var-symbol expr)
+    (set! (. instance-expr instanceFieldName-symbol) expr)
+    (set! (. Classname-symbol staticFieldName-symbol) expr)],
+   :name "set!",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/set!",
-   :namespace "clojure.core",
+   :doc
+   "Used to set thread-local-bound vars, Java object instance\nfields, and Java class static fields.\n\nPlease see http://clojure.org/vars#set",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#set!",
-   :name "set!"}
+   :file nil}
   {:arglists ([a handler-fn]),
    :name "set-error-handler!",
    :namespace "clojure.core",
@@ -7022,15 +7038,18 @@
    :var-type "function",
    :line 4360,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms [(throw expr)],
+   :name "throw",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/throw",
-   :namespace "clojure.core",
+   :doc
+   "The expr is evaluated and thrown, therefore it should\nyield an instance of some derivee of Throwable.\n\nPlease see http://clojure.org/special_forms#throw",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#throw",
-   :name "throw"}
+   :file nil}
   {:arglists ([expr]),
    :name "time",
    :namespace "clojure.core",
@@ -7135,15 +7154,18 @@
    :var-type "function",
    :line 437,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms [(try expr* catch-clause* finally-clause?)],
+   :name "try",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/try",
-   :namespace "clojure.core",
+   :doc
+   "catch-clause => (catch classname name expr*)\nfinally-clause => (finally expr*)\n\nCatches and handles Java exceptions.\n\nPlease see http://clojure.org/special_forms#try",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#try",
-   :name "try"}
+   :file nil}
   {:arglists ([x]),
    :name "type",
    :namespace "clojure.core",
@@ -7366,15 +7388,18 @@
    :var-type "function",
    :line 1216,
    :file "src/clj/clojure/core.clj"}
-  {:file nil,
-   :raw-source-url nil,
+  {:forms [#'symbol],
+   :name "var",
+   :namespace "clojure.core",
    :source-url nil,
+   :added "1.0",
+   :raw-source-url nil,
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/var",
-   :namespace "clojure.core",
+   :doc
+   "The symbol must resolve to a var, and the Var object\nitself (not its value) is returned. The reader macro #'x\nexpands to (var x).\n\nPlease see http://clojure.org/special_forms#var",
    :var-type "special form",
-   :doc "Please see http://clojure.org/special_forms#var",
-   :name "var"}
+   :file nil}
   {:arglists ([x]),
    :name "var-get",
    :namespace "clojure.core",
