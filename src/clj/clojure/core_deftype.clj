@@ -31,7 +31,7 @@
         psig (fn [[name [& args]]]
                (vector name (vec (map tag args)) (tag name) (map meta args)))
         cname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))]
-    `(let [] 
+    `(let []
        (gen-interface :name ~cname :methods ~(vec (map psig sigs)))
        (import ~cname))))
 
@@ -53,7 +53,7 @@
 (defn- parse-opts+specs [opts+specs]
   (let [[opts specs] (parse-opts opts+specs)
         impls (parse-impls specs)
-        interfaces (-> (map #(if (var? (resolve %)) 
+        interfaces (-> (map #(if (var? (resolve %))
                                (:on (deref (resolve %)))
                                %)
                             (keys impls))
@@ -64,14 +64,14 @@
                        (cons name (maybe-destructured params body)))
                      (apply concat (vals impls)))]
     (when-let [bad-opts (seq (remove #{:no-print} (keys opts)))]
-      (throw (IllegalArgumentException. (apply print-str "Unsupported option(s) -" bad-opts))))
+      (throw (IllegalArgumentException. ^String (apply print-str "Unsupported option(s) -" bad-opts))))
     [interfaces methods opts]))
 
-(defmacro reify 
+(defmacro reify
   "reify is a macro with the following structure:
 
  (reify options* specs*)
-  
+
   Currently there are no options.
 
   Each spec consists of the protocol or interface name followed by zero
@@ -102,28 +102,28 @@
 
   recur works to method heads The method bodies of reify are lexical
   closures, and can refer to the surrounding local scope:
-  
-  (str (let [f \"foo\"] 
-       (reify Object 
+
+  (str (let [f \"foo\"]
+       (reify Object
          (toString [this] f))))
   == \"foo\"
 
-  (seq (let [f \"foo\"] 
-       (reify clojure.lang.Seqable 
+  (seq (let [f \"foo\"]
+       (reify clojure.lang.Seqable
          (seq [this] (seq f)))))
   == (\\f \\o \\o))
-  
+
   reify always implements clojure.lang.IObj and transfers meta
   data of the form to the created object.
-  
+
   (meta ^{:k :v} (reify Object (toString [this] \"foo\")))
   == {:k :v}"
-  {:added "1.2"} 
+  {:added "1.2"}
   [& opts+specs]
   (let [[interfaces methods] (parse-opts+specs opts+specs)]
     (with-meta `(reify* ~interfaces ~@methods) (meta &form))))
 
-(defn hash-combine [x y] 
+(defn hash-combine [x y]
   (clojure.lang.Util/hashCombine x (clojure.lang.Util/hash y)))
 
 (defn munge [s]
@@ -145,7 +145,7 @@
           (recur (.assoc this (.getKey pair) (.getValue pair)) (rest o)))
         this))))
 
-(defn- emit-defrecord 
+(defn- emit-defrecord
   "Do not use this directly - use defrecord"
   {:added "1.2"}
   [tagname name fields interfaces methods]
@@ -161,32 +161,32 @@
     (when (some #{:volatile-mutable :unsynchronized-mutable} (mapcat (comp keys meta) hinted-fields))
       (throw (IllegalArgumentException. ":volatile-mutable or :unsynchronized-mutable not supported for record fields")))
     (let [gs (gensym)]
-    (letfn 
+    (letfn
      [(irecord [[i m]]
         [(conj i 'clojure.lang.IRecord)
          m])
-      (eqhash [[i m]] 
+      (eqhash [[i m]]
         [(conj i 'clojure.lang.IHashEq)
          (conj m
                `(hasheq [this#] (bit-xor ~type-hash (clojure.lang.APersistentMap/mapHasheq this#)))
                `(hashCode [this#] (clojure.lang.APersistentMap/mapHash this#))
                `(equals [this# ~gs] (clojure.lang.APersistentMap/mapEquals this# ~gs)))])
-      (iobj [[i m]] 
+      (iobj [[i m]]
             [(conj i 'clojure.lang.IObj)
              (conj m `(meta [this#] ~'__meta)
                    `(withMeta [this# ~gs] (new ~tagname ~@(replace {'__meta gs} fields))))])
-      (ilookup [[i m]] 
+      (ilookup [[i m]]
          [(conj i 'clojure.lang.ILookup 'clojure.lang.IKeywordLookup)
           (conj m `(valAt [this# k#] (.valAt this# k# nil))
-                `(valAt [this# k# else#] 
-                   (case k# ~@(mapcat (fn [fld] [(keyword fld) fld]) 
+                `(valAt [this# k# else#]
+                   (case k# ~@(mapcat (fn [fld] [(keyword fld) fld])
                                        base-fields)
                          (get ~'__extmap k# else#)))
                 `(getLookupThunk [this# k#]
-                   (let [~'gclass (class this#)]              
+                   (let [~'gclass (class this#)]
                      (case k#
-                           ~@(let [hinted-target (with-meta 'gtarget {:tag tagname})] 
-                               (mapcat 
+                           ~@(let [hinted-target (with-meta 'gtarget {:tag tagname})]
+                               (mapcat
                                 (fn [fld]
                                   [(keyword fld)
                                    `(reify clojure.lang.ILookupThunk
@@ -196,14 +196,14 @@
                                                   ~'thunk)))])
                                 base-fields))
                            nil))))])
-      (imap [[i m]] 
+      (imap [[i m]]
             [(conj i 'clojure.lang.IPersistentMap)
-             (conj m 
+             (conj m
                    `(count [this#] (+ ~(count base-fields) (count ~'__extmap)))
                    `(empty [this#] (throw (UnsupportedOperationException. (str "Can't create empty: " ~(str classname)))))
                    `(cons [this# e#] ((var imap-cons) this# e#))
-                   `(equiv [this# ~gs] 
-                        (boolean 
+                   `(equiv [this# ~gs]
+                        (boolean
                          (or (identical? this# ~gs)
                              (when (identical? (class this#) (class ~gs))
                                (let [~gs ~(with-meta gs {:tag tagname})]
@@ -213,7 +213,7 @@
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
                                             (when-not (identical? this# v#)
                                               (clojure.lang.MapEntry. k# v#))))
-                   `(seq [this#] (seq (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
+                   `(seq [this#] (seq (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)]
                                               ~'__extmap)))
                    `(iterator [this#] (clojure.lang.SeqIterator. (.seq this#)))
                    `(assoc [this# k# ~gs]
@@ -224,7 +224,7 @@
                        (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap k# ~gs))))
                    `(without [this# k#] (if (contains? #{~@(map keyword base-fields)} k#)
                                             (dissoc (with-meta (into {} this#) ~'__meta) k#)
-                                            (new ~tagname ~@(remove #{'__extmap} fields) 
+                                            (new ~tagname ~@(remove #{'__extmap} fields)
                                                  (not-empty (dissoc ~'__extmap k#))))))])
       (ijavamap [[i m]]
                 [(conj i 'java.util.Map 'java.io.Serializable)
@@ -242,8 +242,8 @@
                        `(entrySet [this#] (set this#)))])
       ]
      (let [[i m] (-> [interfaces methods] irecord eqhash iobj ilookup imap ijavamap)]
-       `(deftype* ~tagname ~classname ~(conj hinted-fields '__meta '__extmap) 
-          :implements ~(vec i) 
+       `(deftype* ~tagname ~classname ~(conj hinted-fields '__meta '__extmap)
+          :implements ~(vec i)
           ~@m))))))
 
 (defn- build-positional-factory
@@ -284,9 +284,9 @@
 
 (defmacro defrecord
   "Alpha - subject to change
-  
+
   (defrecord name [fields*]  options* specs*)
-  
+
   Currently there are no options.
 
   Each spec consists of a protocol or interface name followed by zero
@@ -371,20 +371,20 @@
          ([m#] (~(symbol (str classname "/create")) m#)))
        ~classname)))
 
-(defn- emit-deftype* 
+(defn- emit-deftype*
   "Do not use this directly - use deftype"
   [tagname name fields interfaces methods]
   (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
         interfaces (conj interfaces 'clojure.lang.IType)]
-    `(deftype* ~tagname ~classname ~fields 
-       :implements ~interfaces 
+    `(deftype* ~tagname ~classname ~fields
+       :implements ~interfaces
        ~@methods)))
 
 (defmacro deftype
   "Alpha - subject to change
-  
+
   (deftype name [fields*]  options* specs*)
-  
+
   Currently there are no options.
 
   Each spec consists of a protocol or interface name followed by zero
@@ -396,7 +396,7 @@
   Dynamically generates compiled bytecode for class with the given
   name, in a package with the same name as the current namespace, the
   given fields, and, optionally, methods for protocols and/or
-  interfaces. 
+  interfaces.
 
   The class will have the (by default, immutable) fields named by
   fields, which can have type hints. Protocols/interfaces and methods
@@ -486,7 +486,7 @@
 
 (defn- pref
   ([] nil)
-  ([a] a) 
+  ([a] a)
   ([^Class a ^Class b]
      (if (.isAssignableFrom a b) b a)))
 
@@ -511,20 +511,20 @@
 (defn- implements? [protocol atype]
   (and atype (.isAssignableFrom ^Class (:on-interface protocol) atype)))
 
-(defn extends? 
+(defn extends?
   "Returns true if atype extends protocol"
   {:added "1.2"}
   [protocol atype]
-  (boolean (or (implements? protocol atype) 
+  (boolean (or (implements? protocol atype)
                (get (:impls protocol) atype))))
 
-(defn extenders 
+(defn extenders
   "Returns a collection of the types explicitly extending protocol"
   {:added "1.2"}
   [protocol]
   (keys (:impls protocol)))
 
-(defn satisfies? 
+(defn satisfies?
   "Returns true if x satisfies the protocol"
   {:added "1.2"}
   [protocol x]
@@ -533,11 +533,11 @@
 (defn -cache-protocol-fn [^clojure.lang.AFunction pf x ^Class c ^clojure.lang.IFn interf]
   (let [cache  (.__methodImplCache pf)
         f (if (.isInstance c x)
-            interf 
+            interf
             (find-protocol-method (.protocol cache) (.methodk cache) x))]
     (when-not f
-      (throw (IllegalArgumentException. (str "No implementation of method: " (.methodk cache) 
-                                             " of protocol: " (:var (.protocol cache)) 
+      (throw (IllegalArgumentException. (str "No implementation of method: " (.methodk cache)
+                                             " of protocol: " (:var (.protocol cache))
                                              " found for class: " (if (nil? x) "nil" (.getName (class x)))))))
     (set! (.__methodImplCache pf) (expand-method-impl-cache cache (class x) f))
     f))
@@ -549,7 +549,7 @@
     `(fn [cache#]
        (let [~ginterf
              (fn
-               ~@(map 
+               ~@(map
                   (fn [args]
                     (let [gargs (map #(gensym (str "gf__" % "__")) args)
                           target (first gargs)]
@@ -558,14 +558,14 @@
                   arglists))
              ^clojure.lang.AFunction f#
              (fn ~gthis
-               ~@(map 
+               ~@(map
                   (fn [args]
                     (let [gargs (map #(gensym (str "gf__" % "__")) args)
                           target (first gargs)]
                       `([~@gargs]
                           (let [cache# (.__methodImplCache ~gthis)
                                 f# (.fnFor cache# (clojure.lang.Util/classOf ~target))]
-                            (if f# 
+                            (if f#
                               (f# ~@gargs)
                               ((-cache-protocol-fn ~gthis ~target ~on-interface ~ginterf) ~@gargs))))))
                   arglists))]
@@ -592,7 +592,7 @@
   (let [iname (symbol (str (munge (namespace-munge *ns*)) "." (munge name)))
         [opts sigs]
         (loop [opts {:on (list 'quote iname) :on-interface iname} sigs opts+sigs]
-          (condp #(%1 %2) (first sigs) 
+          (condp #(%1 %2) (first sigs)
             string? (recur (assoc opts :doc (first sigs)) (next sigs))
             keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
             [opts sigs]))
@@ -617,7 +617,7 @@
                         {} sigs))
         meths (mapcat (fn [sig]
                         (let [m (munge (:name sig))]
-                          (map #(vector m (vec (repeat (dec (count %))'Object)) 'Object) 
+                          (map #(vector m (vec (repeat (dec (count %))'Object)) 'Object)
                                (:arglists sig))))
                       (vals sigs))]
   `(do
@@ -626,20 +626,20 @@
      (alter-meta! (var ~name) assoc :doc ~(:doc opts))
      ~(when sigs
         `(#'assert-same-protocol (var ~name) '~(map :name (vals sigs))))
-     (alter-var-root (var ~name) merge 
-                     (assoc ~opts 
-                       :sigs '~sigs 
+     (alter-var-root (var ~name) merge
+                     (assoc ~opts
+                       :sigs '~sigs
                        :var (var ~name)
-                       :method-map 
+                       :method-map
                          ~(and (:on opts)
-                               (apply hash-map 
-                                      (mapcat 
-                                       (fn [s] 
+                               (apply hash-map
+                                      (mapcat
+                                       (fn [s]
                                          [(keyword (:name s)) (keyword (or (:on s) (:name s)))])
                                        (vals sigs))))
-                       :method-builders 
-                        ~(apply hash-map 
-                                (mapcat 
+                       :method-builders
+                        ~(apply hash-map
+                                (mapcat
                                  (fn [s]
                                    [`(intern *ns* (with-meta '~(:name s) (merge '~s {:protocol (var ~name)})))
                                     (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s))])
@@ -647,7 +647,7 @@
      (-reset-methods ~name)
      '~name)))
 
-(defmacro defprotocol 
+(defmacro defprotocol
   "A protocol is a named set of named methods and their signatures:
   (defprotocol AProtocolName
 
@@ -663,9 +663,9 @@
   polymorphic functions and a protocol object. All are
   namespace-qualified by the ns enclosing the definition The resulting
   functions dispatch on the type of their first argument, which is
-  required and corresponds to the implicit target object ('this' in 
-  Java parlance). defprotocol is dynamic, has no special compile-time 
-  effect, and defines no new types or classes. Implementations of 
+  required and corresponds to the implicit target object ('this' in
+  Java parlance). defprotocol is dynamic, has no special compile-time
+  effect, and defines no new types or classes. Implementations of
   the protocol methods can be provided using extend.
 
   defprotocol will automatically generate a corresponding interface,
@@ -677,31 +677,31 @@
   Note that you should not use this interface with deftype or
   reify, as they support the protocol directly:
 
-  (defprotocol P 
-    (foo [this]) 
+  (defprotocol P
+    (foo [this])
     (bar-me [this] [this y]))
 
-  (deftype Foo [a b c] 
+  (deftype Foo [a b c]
    P
     (foo [this] a)
     (bar-me [this] b)
     (bar-me [this y] (+ c y)))
-  
+
   (bar-me (Foo. 1 2 3) 42)
   => 45
 
-  (foo 
+  (foo
     (let [x 42]
-      (reify P 
+      (reify P
         (foo [this] 17)
         (bar-me [this] x)
         (bar-me [this y] x))))
   => 17"
-  {:added "1.2"} 
+  {:added "1.2"}
   [name & opts+sigs]
   (emit-protocol name opts+sigs))
 
-(defn extend 
+(defn extend
   "Implementations of protocol methods can be provided using the extend construct:
 
   (extend AType
@@ -709,14 +709,14 @@
      {:foo an-existing-fn
       :bar (fn [a b] ...)
       :baz (fn ([a]...) ([a b] ...)...)}
-    BProtocol 
-      {...} 
+    BProtocol
+      {...}
     ...)
- 
+
   extend takes a type/class (or interface, see below), and one or more
   protocol + method map pairs. It will extend the polymorphism of the
   protocol's methods to call the supplied methods when an AType is
-  provided as the first argument. 
+  provided as the first argument.
 
   Method maps are maps of the keyword-ized method names to ordinary
   fns. This facilitates easy reuse of existing fns and fn maps, for
@@ -736,15 +736,15 @@
 
   See also:
   extends?, satisfies?, extenders"
-  {:added "1.2"} 
+  {:added "1.2"}
   [atype & proto+mmaps]
   (doseq [[proto mmap] (partition 2 proto+mmaps)]
     (when-not (protocol? proto)
       (throw (IllegalArgumentException.
               (str proto " is not a protocol"))))
     (when (implements? proto atype)
-      (throw (IllegalArgumentException. 
-              (str atype " already directly implements " (:on-interface proto) " for protocol:"  
+      (throw (IllegalArgumentException.
+              (str atype " already directly implements " (:on-interface proto) " for protocol:"
                    (:var proto)))))
     (-reset-methods (alter-var-root (:var proto) assoc-in [:impls atype] mmap))))
 
@@ -754,8 +754,8 @@
 
 (defn- emit-hinted-impl [c [p fs]]
   (let [hint (fn [specs]
-               (let [specs (if (vector? (first specs)) 
-                                        (list specs) 
+               (let [specs (if (vector? (first specs))
+                                        (list specs)
                                         specs)]
                  (map (fn [[[target & args] & body]]
                         (cons (apply vector (vary-meta target assoc :tag c) args)
@@ -769,13 +769,13 @@
     `(extend ~c
              ~@(mapcat (partial emit-hinted-impl c) impls))))
 
-(defmacro extend-type 
+(defmacro extend-type
   "A macro that expands into an extend call. Useful when you are
   supplying the definitions explicitly inline, extend-type
   automatically creates the maps required by extend.  Propagates the
   class as a type hint on the first argument of all fns.
 
-  (extend-type MyType 
+  (extend-type MyType
     Countable
       (cnt [c] ...)
     Foo
@@ -790,7 +790,7 @@
    Foo
      {:baz (fn ([x] ...) ([x y & zs] ...))
       :bar (fn [x y] ...)})"
-  {:added "1.2"} 
+  {:added "1.2"}
   [t & specs]
   (emit-extend-type t specs))
 
@@ -801,7 +801,7 @@
                 `(extend-type ~t ~p ~@fs))
               impls))))
 
-(defmacro extend-protocol 
+(defmacro extend-protocol
   "Useful when you want to provide several implementations of the same
   protocol all at once. Takes a single protocol and the implementation
   of that protocol for one or more types. Expands into calls to
@@ -824,17 +824,17 @@
   expands into:
 
   (do
-   (clojure.core/extend-type AType Protocol 
-     (foo [x] ...) 
+   (clojure.core/extend-type AType Protocol
+     (foo [x] ...)
      (bar [x y] ...))
-   (clojure.core/extend-type BType Protocol 
-     (foo [x] ...) 
+   (clojure.core/extend-type BType Protocol
+     (foo [x] ...)
      (bar [x y] ...))
-   (clojure.core/extend-type AClass Protocol 
-     (foo [x] ...) 
+   (clojure.core/extend-type AClass Protocol
+     (foo [x] ...)
      (bar [x y] ...))
-   (clojure.core/extend-type nil Protocol 
-     (foo [x] ...) 
+   (clojure.core/extend-type nil Protocol
+     (foo [x] ...)
      (bar [x y] ...)))"
   {:added "1.2"}
 
