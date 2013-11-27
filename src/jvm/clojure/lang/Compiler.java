@@ -1578,7 +1578,7 @@ public class Compiler implements Opcodes {
           gen.invokeInterface(type, m);
         else
           gen.invokeVirtual(type, m);
-        return ret(context) + first + "." + method.getName() + "(" + argsList
+        return ret(context) + "((" + type.getJavaClassName() + ")" + first + ")." + method.getName() + "(" + argsList
             + ")" + statement(context);
       } else
         throw new UnsupportedOperationException(
@@ -1609,7 +1609,11 @@ public class Compiler implements Opcodes {
         // if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
         ret = "((" + type.getJavaClassName() + ")" + val + ")." + methodName
             + "(" + argsList + ")";
-        ret = HostExpr.emitBoxReturn(objx, gen, method.getReturnType(), ret);
+        String ret1 = HostExpr.emitBoxReturn(objx, gen, method.getReturnType(),
+            ret);
+        if (context != C.STATEMENT) {
+          ret = ret1;
+        }
       } else {
         String t = target.emit(C.EXPRESSION, objx, gen);
         gen.push(methodName);
@@ -2433,8 +2437,8 @@ public class Compiler implements Opcodes {
       String val = excExpr.emit(C.EXPRESSION, objx, gen);
       gen.checkCast(THROWABLE_TYPE);
       gen.throwException();
-      emitSource("throw " + val + ";");
-      return "";
+      emitSource("throw Util.sneakyThrow((Throwable)" + val + ");");
+      return null;
     }
 
     static class Parser implements IParser {
@@ -2472,7 +2476,7 @@ public class Compiler implements Opcodes {
         sb.append("\\n");
         break;
       case '"':
-        sb.append("\\\"");
+        sb.append('\\').append('"');
         break;
       case '\t':
         sb.append("\\t");
@@ -2767,14 +2771,20 @@ public class Compiler implements Opcodes {
       sb.append(") {");
       emitSource(sb.toString());
       tab();
-      if (emitUnboxed)
-        emitSource((C.EXPRESSION == context ? ret + " = " : "")
-            + ((MaybePrimitiveExpr) thenExpr).emitUnboxed(context, objx, gen)
-            + (C.EXPRESSION == context ? ";" : ""));
-      else
-        emitSource((C.EXPRESSION == context ? ret + " = " : "")
-            + thenExpr.emit(context, objx, gen)
-            + (C.EXPRESSION == context ? ";" : ""));
+      if (emitUnboxed) {
+        String e = ((MaybePrimitiveExpr) thenExpr).emitUnboxed(context, objx,
+            gen);
+        if (e != null) {
+          emitSource((C.EXPRESSION == context ? ret + " = " : "") + e
+              + (C.EXPRESSION == context ? ";" : ""));
+        }
+      } else {
+        String e = thenExpr.emit(context, objx, gen);
+        if (e != null) {
+          emitSource((C.EXPRESSION == context ? ret + " = " : "") + e
+              + (C.EXPRESSION == context ? ";" : ""));
+        }
+      }
       gen.goTo(endLabel);
       gen.mark(nullLabel);
       gen.pop();
@@ -2783,14 +2793,20 @@ public class Compiler implements Opcodes {
       emitSource("} else {");
       tab();
 
-      if (emitUnboxed)
-        emitSource((C.EXPRESSION == context ? ret + " = " : "")
-            + ((MaybePrimitiveExpr) elseExpr).emitUnboxed(context, objx, gen)
-            + (C.EXPRESSION == context ? ";" : ""));
-      else
-        emitSource((C.EXPRESSION == context ? ret + " = " : "")
-            + elseExpr.emit(context, objx, gen)
-            + (C.EXPRESSION == context ? ";" : ""));
+      if (emitUnboxed) {
+        String e = ((MaybePrimitiveExpr) elseExpr).emitUnboxed(context, objx,
+            gen);
+        if (e != null) {
+          emitSource((C.EXPRESSION == context ? ret + " = " : "") + e
+              + (C.EXPRESSION == context ? ";" : ""));
+        }
+      } else {
+        String e = elseExpr.emit(context, objx, gen);
+        if (e != null) {
+          emitSource((C.EXPRESSION == context ? ret + " = " : "") + e
+              + (C.EXPRESSION == context ? ";" : ""));
+        }
+      }
       gen.mark(endLabel);
 
       untab();
@@ -4366,12 +4382,13 @@ public class Compiler implements Opcodes {
       untab();
       emitSource("}");
 
+      StringBuilder sb = new StringBuilder();
       if (supportsMeta()) {
         emitSource("final " + IPERSISTENTMAP_TYPE.getClassName() + " __meta;");
         cv.visitField(ACC_FINAL, "__meta", IPERSISTENTMAP_TYPE.getDescriptor(),
             null, null);
+        sb.append("final " + IPERSISTENTMAP_TYPE.getClassName() + " __meta");
       }
-      StringBuilder sb = new StringBuilder();
       // instance fields for closed-overs
       for (ISeq s = RT.keys(closes); s != null; s = s.next()) {
         if (sb.length() > 0) {
@@ -4462,6 +4479,7 @@ public class Compiler implements Opcodes {
         ctorgen.loadThis();
         ctorgen.visitVarInsn(IPERSISTENTMAP_TYPE.getOpcode(Opcodes.ILOAD), 1);
         ctorgen.putField(objtype, "__meta", IPERSISTENTMAP_TYPE);
+        emitSource("this.__meta = __meta;");
       }
 
       int a = supportsMeta() ? 2 : 1;
@@ -4502,11 +4520,22 @@ public class Compiler implements Opcodes {
         ctorgen.visitCode();
         ctorgen.loadThis();
         ctorgen.loadArgs();
-        for (int i = 0; i < altCtorDrops; i++)
+        StringBuilder params = new StringBuilder();
+        for (int i = 0; i < altCtorDrops; i++) {
+          if (params.length() > 0) {
+            params.append(", ");
+          }
+          params.append("null");
           ctorgen.visitInsn(Opcodes.ACONST_NULL);
-
+        }
         ctorgen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE,
             ctorTypes));
+
+        emitSource("public " + className + "() {");
+        tab();
+        emitSource("this(" + params + ");");
+        untab();
+        emitSource("}");
 
         ctorgen.returnValue();
         ctorgen.endMethod();
@@ -4516,8 +4545,18 @@ public class Compiler implements Opcodes {
         // ctor that takes closed-overs but not meta
         Type[] ctorTypes = ctorTypes();
         Type[] noMetaCtorTypes = new Type[ctorTypes.length - 1];
-        for (int i = 1; i < ctorTypes.length; i++)
+        StringBuilder params = new StringBuilder();
+        StringBuilder paramNames = new StringBuilder();
+        for (int i = 1; i < ctorTypes.length; i++) {
+          if (params.length() > 0) {
+            params.append(", ");
+          }
+          paramNames.append(", ");
+          String t = registerTemp();
           noMetaCtorTypes[i - 1] = ctorTypes[i];
+          params.append(ctorTypes[i].getClassName() + " " + t);
+          paramNames.append(t);
+        }
         Method alt = new Method("<init>", Type.VOID_TYPE, noMetaCtorTypes);
         ctorgen = new GeneratorAdapter(ACC_PUBLIC, alt, null, null, cv);
         ctorgen.visitCode();
@@ -4526,6 +4565,12 @@ public class Compiler implements Opcodes {
         ctorgen.loadArgs();
         ctorgen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE,
             ctorTypes));
+
+        emitSource("public " + className + "(" + params + ") {");
+        tab();
+        emitSource("this(null" + paramNames + ");");
+        untab();
+        emitSource("}");
 
         ctorgen.returnValue();
         ctorgen.endMethod();
@@ -4687,7 +4732,8 @@ public class Compiler implements Opcodes {
         gen.push(((Long) value).longValue());
         gen.invokeStatic(Type.getType(Long.class),
             Method.getMethod("Long valueOf(long)"));
-        str = (((Long)value).longValue() < 0 ? "(" + value + "L)" : value + "L");
+        str = (((Long) value).longValue() < 0 ? "(" + value + "L)" : value
+            + "L");
       } else if (value instanceof Double) {
         gen.push(((Double) value).doubleValue());
         gen.invokeStatic(Type.getType(Double.class),
@@ -4869,7 +4915,8 @@ public class Compiler implements Opcodes {
               IOBJ_TYPE,
               Method
                   .getMethod("clojure.lang.IObj withMeta(clojure.lang.IPersistentMap)"));
-          return str + ".withMeta(" + val + ")";
+          return "((clojure.lang.IObj)" + str + ").withMeta((IPersistentMap)"
+              + val + ")";
         }
       }
       return str;
@@ -5046,12 +5093,14 @@ public class Compiler implements Opcodes {
 
     private String emitLocal(GeneratorAdapter gen, LocalBinding lb,
         boolean clear) {
+      String nn = (lb.idx == 0 ? "this" : lb.name + lb.idx);
       if (closes.containsKey(lb)) {
         Class primc = lb.getPrimitiveType();
         gen.loadThis();
         if (primc != null) {
           gen.getField(objtype, lb.name, Type.getType(primc));
-          return HostExpr.emitBoxReturn(this, gen, primc, lb.name + lb.idx);
+          return (nn.equals("this") ? "" : "this.")
+              + HostExpr.emitBoxReturn(this, gen, primc, nn);
         } else {
           gen.getField(objtype, lb.name, OBJECT_TYPE);
           if (onceOnly && clear && lb.canBeCleared) {
@@ -5059,7 +5108,7 @@ public class Compiler implements Opcodes {
             gen.visitInsn(Opcodes.ACONST_NULL);
             gen.putField(objtype, lb.name, OBJECT_TYPE);
           }
-          return lb.name + lb.idx;
+          return (nn.equals("this") ? "" : "this.") + nn;
         }
       } else {
         int argoff = isStatic ? 0 : 1;
@@ -5069,7 +5118,7 @@ public class Compiler implements Opcodes {
         if (lb.isArg) {
           gen.loadArg(lb.idx - argoff);
           if (primc != null)
-            return HostExpr.emitBoxReturn(this, gen, primc, lb.name + lb.idx);
+            return HostExpr.emitBoxReturn(this, gen, primc, nn);
           else {
             if (clear && lb.canBeCleared) {
               // System.out.println("clear: " + rep);
@@ -5078,13 +5127,13 @@ public class Compiler implements Opcodes {
             } else {
               // System.out.println("use: " + rep);
             }
-            return lb.name + lb.idx;
+            return nn;
           }
         } else {
           if (primc != null) {
             gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD),
                 lb.idx);
-            return HostExpr.emitBoxReturn(this, gen, primc, lb.name + lb.idx);
+            return HostExpr.emitBoxReturn(this, gen, primc, nn);
           } else {
             gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
             if (clear && lb.canBeCleared) {
@@ -5094,7 +5143,7 @@ public class Compiler implements Opcodes {
             } else {
               // System.out.println("use: " + rep);
             }
-            return lb.name + lb.idx;
+            return nn;
           }
         }
       }
@@ -5196,6 +5245,16 @@ public class Compiler implements Opcodes {
         // return Type.getType(KeywordCallSite.class);
         else if (RestFn.class.isAssignableFrom(c))
           return Type.getType(RestFn.class);
+        else if (IPersistentMap.class.isAssignableFrom(c))
+          return Type.getType(IPersistentMap.class);
+        else if (IPersistentSet.class.isAssignableFrom(c))
+          return Type.getType(IPersistentSet.class);
+        else if (IPersistentStack.class.isAssignableFrom(c))
+          return Type.getType(IPersistentStack.class);
+        else if (IPersistentVector.class.isAssignableFrom(c))
+          return Type.getType(IPersistentVector.class);
+        else if (IPersistentList.class.isAssignableFrom(c))
+          return Type.getType(IPersistentList.class);
         else if (AFn.class.isAssignableFrom(c))
           return Type.getType(AFn.class);
         else if (c == Var.class)
@@ -5897,7 +5956,7 @@ public class Compiler implements Opcodes {
     }
 
     public String emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen) {
-      return objx.emitUnboxedLocal(gen, b);
+      return ret(context) + objx.emitUnboxedLocal(gen, b) + statement(context);
     }
 
     public String emit(C context, ObjExpr objx, GeneratorAdapter gen) {
