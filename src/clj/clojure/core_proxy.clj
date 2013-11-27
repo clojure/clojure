@@ -11,7 +11,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; proxy ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (import
- '(clojure.asm ClassWriter ClassVisitor Opcodes Type) 
+ '(clojure.asm ClassWriter ClassVisitor Opcodes Type)
  '(java.lang.reflect Modifier Constructor)
  '(clojure.asm.commons Method GeneratorAdapter)
  '(clojure.lang IProxy Reflector DynamicClassLoader IPersistentMap PersistentHashMap RT))
@@ -32,7 +32,7 @@
           {} coll)))
 
 (defn proxy-name
- {:tag String} 
+ {:tag String}
  [^Class super interfaces]
   (let [inames (into1 (sorted-set) (map #(.getName ^Class %) interfaces))]
     (apply str (.replace (str *ns*) \- \_) ".proxy"
@@ -59,7 +59,7 @@
         sym-type (totype clojure.lang.Symbol)
         rt-type  (totype clojure.lang.RT)
         ex-type  (totype java.lang.UnsupportedOperationException)
-        gen-bridge 
+        gen-bridge
         (fn [^java.lang.reflect.Method meth ^java.lang.reflect.Method dest]
             (let [pclasses (. meth (getParameterTypes))
                   ptypes (to-types pclasses)
@@ -93,7 +93,7 @@
                 (do
                   (. gen (loadThis))
                   (. gen (getField ctype fmap imap-type))
-                  
+
                   (. gen (push (. meth (getName))))
                                         ;lookup fn in map
                   (. gen (invokeStatic rt-type (. Method (getMethod "Object get(Object, Object)"))))
@@ -105,34 +105,34 @@
                                         ;box args
                   (dotimes [i (count ptypes)]
                       (. gen (loadArg i))
-                    (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
+                    (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i) "")))
                                         ;call fn
-                  (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
-                                                        (into-array (cons obj-type 
+                  (. gen (invokeInterface ifn-type (new Method "invoke" obj-type
+                                                        (into-array (cons obj-type
                                                                           (replicate (count ptypes) obj-type))))))
                                         ;unbox return
                   (. gen (unbox rtype))
                   (when (= (. rtype (getSort)) (. Type VOID))
                     (. gen (pop)))
                   (. gen (goTo end-label))
-                  
+
                                         ;else call supplied alternative generator
                   (. gen (mark else-label))
                   (. gen (pop))
-                  
+
                   (else-gen gen m)
-                  
+
                   (. gen (mark end-label))))
               (. gen (returnValue))
               (. gen (endMethod))))]
-    
+
                                         ;start class definition
     (. cv (visit (. Opcodes V1_5) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
-                 cname nil (iname super) 
+                 cname nil (iname super)
                  (into-array (map iname (cons IProxy interfaces)))))
                                         ;add field for fn mappings
     (. cv (visitField (+ (. Opcodes ACC_PRIVATE) (. Opcodes ACC_VOLATILE))
-                      fmap (. imap-type (getDescriptor)) nil nil))          
+                      fmap (. imap-type (getDescriptor)) nil nil))
                                         ;add ctors matching/calling super's
     (doseq [^Constructor ctor (. super (getDeclaredConstructors))]
         (when-not (. Modifier (isPrivate (. ctor (getModifiers))))
@@ -145,7 +145,7 @@
             (. gen (dup))
             (. gen (loadArgs))
             (. gen (invokeConstructor super-type m))
-            
+
             (. gen (returnValue))
             (. gen (endMethod)))))
                                         ;add IProxy methods
@@ -155,7 +155,7 @@
       (. gen (loadThis))
       (. gen (loadArgs))
       (. gen (putField ctype fmap imap-type))
-      
+
       (. gen (returnValue))
       (. gen (endMethod)))
     (let [m (. Method (getMethod "void __updateClojureFnMappings(clojure.lang.IPersistentMap)"))
@@ -170,7 +170,7 @@
                               (. Method (getMethod "clojure.lang.IPersistentCollection cons(Object)"))))
       (. gen (checkCast imap-type))
       (. gen (putField ctype fmap imap-type))
-      
+
       (. gen (returnValue))
       (. gen (endMethod)))
     (let [m (. Method (getMethod "clojure.lang.IPersistentMap __getClojureFnMappings()"))
@@ -180,15 +180,15 @@
       (. gen (getField ctype fmap imap-type))
       (. gen (returnValue))
       (. gen (endMethod)))
-    
+
                                         ;calc set of supers' non-private instance methods
     (let [[mm considered]
             (loop [mm {} considered #{} c super]
               (if c
                 (let [[mm considered]
-                      (loop [mm mm 
-                             considered considered 
-                             meths (concat 
+                      (loop [mm mm
+                             considered considered
+                             meths (concat
                                     (seq (. c (getDeclaredMethods)))
                                     (seq (. c (getMethods))))]
                         (if (seq meths)
@@ -197,7 +197,7 @@
                                 mk (method-sig meth)]
                             (if (or (considered mk)
                                     (not (or (Modifier/isPublic mods) (Modifier/isProtected mods)))
-                                    ;(. Modifier (isPrivate mods)) 
+                                    ;(. Modifier (isPrivate mods))
                                     (. Modifier (isStatic mods))
                                     (. Modifier (isFinal mods))
                                     (= "finalize" (.getName meth)))
@@ -206,7 +206,7 @@
                           [mm considered]))]
                   (recur mm considered (. c (getSuperclass))))
                 [mm considered]))
-          ifaces-meths (into1 {} 
+          ifaces-meths (into1 {}
                          (for [^Class iface interfaces meth (. iface (getMethods))
                                :let [msig (method-sig meth)] :when (not (considered msig))]
                            {msig meth}))
@@ -221,23 +221,23 @@
               ^java.lang.reflect.Method meth bridges]
           (gen-bridge meth dest))
       (doseq [^java.lang.reflect.Method meth mm]
-          (gen-method meth 
+          (gen-method meth
                       (fn [^GeneratorAdapter gen ^Method m]
                           (. gen (loadThis))
                                         ;push args
                         (. gen (loadArgs))
                                         ;call super
-                        (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL) 
+                        (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL)
                                                 (. super-type (getInternalName))
                                                 (. m (getName))
                                                 (. m (getDescriptor)))))))
-      
+
                                         ;add methods matching interfaces', if no mapping -> throw
       (doseq [^java.lang.reflect.Method meth ifaces-meths]
-                (gen-method meth 
+                (gen-method meth
                             (fn [^GeneratorAdapter gen ^Method m]
                                 (. gen (throwException ex-type (. m (getName))))))))
-    
+
                                         ;finish class def
     (. cv (visitEnd))
     [cname (. cv toByteArray)]))
@@ -247,7 +247,7 @@
     [Object bases]
     [(first bases) (next bases)]))
 
-(defn get-proxy-class 
+(defn get-proxy-class
   "Takes an optional single class followed by zero or more
   interfaces. If not supplied class defaults to Object.  Creates an
   returns an instance of a proxy class derived from the supplied
@@ -326,7 +326,7 @@
   proxied."
   {:added "1.0"}
   [class-and-interfaces args & fs]
-   (let [bases (map #(or (resolve %) (throw (Exception. (str "Can't resolve: " %)))) 
+   (let [bases (map #(or (resolve %) (throw (Exception. (str "Can't resolve: " %))))
                     class-and-interfaces)
          [super interfaces] (get-super-and-interfaces bases)
          compile-effect (when *compile-files*
@@ -337,7 +337,7 @@
      ;remember the class to prevent it from disappearing before use
      (intern *ns* (symbol pname) pc-effect)
      `(let [;pc# (get-proxy-class ~@class-and-interfaces)
-            p# (new ~(symbol pname) ~@args)] ;(construct-proxy pc# ~@args)]   
+            p# (new ~(symbol pname) ~@args)] ;(construct-proxy pc# ~@args)]
         (init-proxy p#
          ~(loop [fmap {} fs fs]
             (if fs
@@ -348,7 +348,7 @@
                     meths (map (fn [[params & body]]
                                    (cons (apply vector 'this params) body))
                                meths)]
-                (if-not (contains? fmap (name sym))		  
+                (if-not (contains? fmap (name sym))
                 (recur (assoc fmap (name sym) (cons `fn meths)) (next fs))
 		           (throw (IllegalArgumentException.
 			              (str "Method '" (name sym) "' redefined")))))
@@ -362,8 +362,8 @@
       (update-proxy this m)
       ret)))
 
-(defmacro proxy-super 
-  "Use to call a superclass method in the body of a proxy method. 
+(defmacro proxy-super
+  "Use to call a superclass method in the body of a proxy method.
   Note, expansion captures 'this"
   {:added "1.0"}
   [meth & args]

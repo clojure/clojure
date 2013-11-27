@@ -887,7 +887,7 @@ public class Compiler implements Opcodes {
 
     // *
     public static String emitBoxReturn(ObjExpr objx, GeneratorAdapter gen,
-        Class returnType) {
+        Class returnType, String val) {
       if (returnType.isPrimitive()) {
         if (returnType == boolean.class) {
           Label falseLabel = gen.newLabel();
@@ -899,38 +899,47 @@ public class Compiler implements Opcodes {
           gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
           // NIL_EXPR.emit(C.EXPRESSION, fn, gen);
           gen.mark(endLabel);
+          return "(" + val + " ? Boolean.TRUE : Boolean.FALSE)";
         } else if (returnType == void.class) {
           NIL_EXPR.emit(C.EXPRESSION, objx, gen);
+          return "null";
         } else if (returnType == char.class) {
           gen.invokeStatic(CHAR_TYPE, charValueOfMethod);
+          return "Character.valueOf(" + val + ")";
         } else {
           if (returnType == int.class) {
             gen.invokeStatic(INTEGER_TYPE, intValueOfMethod);
             // gen.visitInsn(I2L);
             // gen.invokeStatic(NUMBERS_TYPE,
             // Method.getMethod("Number num(long)"));
+            return "Integer.valueOf(" + val + ")";
           } else if (returnType == float.class) {
             gen.invokeStatic(FLOAT_TYPE, floatValueOfMethod);
 
             // gen.visitInsn(F2D);
             // gen.invokeStatic(DOUBLE_TYPE, doubleValueOfMethod);
-          } else if (returnType == double.class)
+            return "Float.valueOf(" + val + ")";
+          } else if (returnType == double.class) {
             gen.invokeStatic(DOUBLE_TYPE, doubleValueOfMethod);
-          else if (returnType == long.class)
+            return "Double.valueOf(" + val + ")";
+          } else if (returnType == long.class) {
             gen.invokeStatic(NUMBERS_TYPE, Method.getMethod("Number num(long)"));
-          else if (returnType == byte.class)
+            return "Numbers.num(" + val + ")";
+          } else if (returnType == byte.class) {
             gen.invokeStatic(BYTE_TYPE, byteValueOfMethod);
-          else if (returnType == short.class)
+            return "Byte.valueOf(" + val + ")";
+          } else if (returnType == short.class) {
             gen.invokeStatic(SHORT_TYPE, shortValueOfMethod);
+            return "Short.valueOf(" + val + ")";
+          }
         }
       }
-
-      return null; // TODOCLJ
+      return "((" + returnType.getCanonicalName() + ")" + val + ")";
     }
 
     // */
     public static String emitUnboxArg(ObjExpr objx, GeneratorAdapter gen,
-        Class paramType) {
+        Class paramType, String val) {
       if (paramType.isPrimitive()) {
         if (paramType == boolean.class) {
           gen.checkCast(BOOLEAN_TYPE);
@@ -943,9 +952,11 @@ public class Compiler implements Opcodes {
           // gen.mark(falseLabel);
           // gen.push(0);
           // gen.mark(endLabel);
+          return "((Boolean)" + val + ").booleanValue()";
         } else if (paramType == char.class) {
           gen.checkCast(CHAR_TYPE);
           gen.invokeVirtual(CHAR_TYPE, charValueMethod);
+          return "((Character)" + val + ").charValue()";
         } else {
           Method m = null;
           gen.checkCast(NUMBER_TYPE);
@@ -977,11 +988,12 @@ public class Compiler implements Opcodes {
               m = Method.getMethod("short shortCast(Object)");
           }
           gen.invokeStatic(RT_TYPE, m);
+          return "RT." + m.getName() + "(" + val + ")";
         }
       } else {
         gen.checkCast(Type.getType(paramType));
+        return "((" + paramType.getCanonicalName() + ")" + val + ")";
       }
-      return null; // TODOCLJ
     }
 
     static class Parser implements IParser {
@@ -1192,7 +1204,8 @@ public class Compiler implements Opcodes {
         gen.checkCast(getType(targetClass));
         gen.getField(getType(targetClass), fieldName,
             Type.getType(field.getType()));
-        return ret(context) + value + "." + fieldName + statement(context);
+        return ret(context) + "((" + targetClass.getCanonicalName() + ")"
+            + value + ")." + fieldName + statement(context);
       } else
         throw new UnsupportedOperationException(
             "Unboxed emit of unknown member");
@@ -1206,11 +1219,13 @@ public class Compiler implements Opcodes {
         gen.getField(getType(targetClass), fieldName,
             Type.getType(field.getType()));
         // if(context != C.STATEMENT)
-        HostExpr.emitBoxReturn(objx, gen, field.getType());
+        String v = "((" + targetClass.getCanonicalName() + ")" + value + ")."
+            + fieldName;
+        v = HostExpr.emitBoxReturn(objx, gen, field.getType(), v);
         if (context == C.STATEMENT) {
           gen.pop();
         }
-        return ret(context) + value + "." + fieldName + statement(context);
+        return ret(context) + v + statement(context);
       } else {
         String t = target.emit(C.EXPRESSION, objx, gen);
         gen.push(fieldName);
@@ -1218,7 +1233,8 @@ public class Compiler implements Opcodes {
         if (context == C.STATEMENT)
           gen.pop();
 
-        return ret(context) + "Reflector.invokeNoArgInstanceMember(" + t + ", \"" + fieldName + "\")" + statement(context);
+        return ret(context) + "Reflector.invokeNoArgInstanceMember(" + t
+            + ", \"" + fieldName + "\")" + statement(context);
       }
     }
 
@@ -1243,11 +1259,11 @@ public class Compiler implements Opcodes {
         gen.checkCast(Type.getType(targetClass));
         String value = val.emit(C.EXPRESSION, objx, gen);
         gen.dupX1();
-        HostExpr.emitUnboxArg(objx, gen, field.getType());
+        String v = t + "." + fieldName + " = " + value;
+        v = HostExpr.emitUnboxArg(objx, gen, field.getType(), v);
         gen.putField(Type.getType(targetClass), fieldName,
             Type.getType(field.getType()));
-        ret = ret(context) + t + "." + fieldName + " = " + value
-            + statement(context);
+        ret = ret(context) + v + statement(context);
       } else {
         target.emit(C.EXPRESSION, objx, gen);
         gen.push(fieldName);
@@ -1311,7 +1327,8 @@ public class Compiler implements Opcodes {
 
       gen.getStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
       // if(context != C.STATEMENT)
-      HostExpr.emitBoxReturn(objx, gen, field.getType());
+      String v = c.getCanonicalName() + "." + fieldName;
+      v = HostExpr.emitBoxReturn(objx, gen, field.getType(), v);
       if (context == C.STATEMENT) {
         gen.pop();
       }
@@ -1319,7 +1336,7 @@ public class Compiler implements Opcodes {
       // gen.push(fieldName);
       // gen.invokeStatic(REFLECTOR_TYPE, getStaticFieldMethod);
 
-      return c.getCanonicalName() + "." + fieldName;
+      return ret(context) + v + statement(context);
     }
 
     public boolean hasJavaClass() {
@@ -1341,13 +1358,13 @@ public class Compiler implements Opcodes {
       gen.visitLineNumber(line, gen.mark());
       String value = val.emit(C.EXPRESSION, objx, gen);
       gen.dup();
-      HostExpr.emitUnboxArg(objx, gen, field.getType());
+      String v = c.getCanonicalName() + "." + fieldName + " = " + value;
+      v = HostExpr.emitUnboxArg(objx, gen, field.getType(), v);
       gen.putStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
       if (context == C.STATEMENT)
         gen.pop();
 
-      return ret(context) + c.getCanonicalName() + "." + fieldName + " = "
-          + value + statement(context);
+      return ret(context) + v + statement(context);
     }
 
   }
@@ -1445,8 +1462,9 @@ public class Compiler implements Opcodes {
             sb.append(pe.emitUnboxed(C.EXPRESSION, objx, gen));
             gen.visitInsn(D2F);
           } else {
-            sb.append(e.emit(C.EXPRESSION, objx, gen));
-            HostExpr.emitUnboxArg(objx, gen, parameterTypes[i]);
+            String v = e.emit(C.EXPRESSION, objx, gen);
+            v = HostExpr.emitUnboxArg(objx, gen, parameterTypes[i], v);
+            sb.append(v);
           }
         } catch (Exception e1) {
           e1.printStackTrace(RT.errPrintWriter());
@@ -1589,8 +1607,9 @@ public class Compiler implements Opcodes {
         else
           gen.invokeVirtual(type, m);
         // if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
-        HostExpr.emitBoxReturn(objx, gen, method.getReturnType());
-        ret = val + "." + methodName + "(" + argsList + ")";
+        ret = "((" + type.getJavaClassName() + ")" + val + ")." + methodName
+            + "(" + argsList + ")";
+        ret = HostExpr.emitBoxReturn(objx, gen, method.getReturnType(), ret);
       } else {
         String t = target.emit(C.EXPRESSION, objx, gen);
         gen.push(methodName);
@@ -1600,7 +1619,8 @@ public class Compiler implements Opcodes {
           method.emitClearLocals(gen);
         }
         gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
-        ret = "Reflector.invokeInstanceMethod(" + t + ", \"" + methodName + "\", new Object[]{" + argsList + "})";
+        ret = "Reflector.invokeInstanceMethod(" + t + ", \"" + methodName
+            + "\", new Object[]{" + argsList + "})";
       }
       if (context == C.STATEMENT)
         gen.pop();
@@ -1767,17 +1787,18 @@ public class Compiler implements Opcodes {
         gen.invokeStatic(type, m);
         // if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
         Class retClass = method.getReturnType();
+        String v = type.getJavaClassName() + "." + method.getName() + "("
+            + argsList + ")";
         if (context == C.STATEMENT) {
           if (retClass == long.class || retClass == double.class)
             gen.pop2();
           else if (retClass != void.class)
             gen.pop();
         } else {
-          HostExpr.emitBoxReturn(objx, gen, method.getReturnType());
+          v = HostExpr.emitBoxReturn(objx, gen, method.getReturnType(), v);
         }
 
-        return ret(context) + type.getClassName() + "." + method.getName()
-            + "(" + argsList + ")" + statement(context);
+        return ret(context) + v + statement(context);
       } else {
         gen.push(c.getName());
         gen.invokeStatic(CLASS_TYPE, forNameMethod);
@@ -1790,8 +1811,10 @@ public class Compiler implements Opcodes {
         gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
         if (context == C.STATEMENT)
           gen.pop();
-        
-        return ret(context) + "Reflector.invokeStaticMethod(" + c.getCanonicalName() + ", \"" + methodName + "\", new Object[]{" + argsList + "})"  + statement(context);
+
+        return ret(context) + "Reflector.invokeStaticMethod("
+            + c.getCanonicalName() + ".class, \"" + methodName
+            + "\", new Object[]{" + argsList + "})" + statement(context);
       }
     }
 
@@ -1970,9 +1993,10 @@ public class Compiler implements Opcodes {
 
     public String emit(C context, ObjExpr objx, GeneratorAdapter gen) {
       gen.visitInsn(Opcodes.ACONST_NULL);
-      if (context == C.STATEMENT)
+      if (context == C.STATEMENT) {
         gen.pop();
-
+        return "";
+      }
       return ret(context) + "null" + statement(context);
     }
 
@@ -2037,7 +2061,7 @@ public class Compiler implements Opcodes {
       if (context != C.STATEMENT)
         gen.push(str);
 
-      return ret(context) + "\"" + str + "\"" + statement(context);
+      return ret(context) + "\"" + flatString(str) + "\"" + statement(context);
     }
 
     public boolean hasJavaClass() {
@@ -2440,6 +2464,29 @@ public class Compiler implements Opcodes {
     return better;
   }
 
+  public static String flatString(String s) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < s.length(); i++)
+      switch (s.charAt(i)) {
+      case '\n':
+        sb.append("\\n");
+        break;
+      case '"':
+        sb.append("\\\"");
+        break;
+      case '\t':
+        sb.append("\\t");
+        break;
+      case '\\':
+        sb.append("\\");
+        break;
+      // ... rest of escape characters
+      default:
+        sb.append(s.charAt(i));
+      }
+    return sb.toString();
+  }
+
   static int getMatchingParams(String methodName,
       ArrayList<Class[]> paramlists, IPersistentVector argexprs,
       List<Class> rets) {
@@ -2561,7 +2608,7 @@ public class Compiler implements Opcodes {
         }
         gen.invokeConstructor(type,
             new Method("<init>", Type.getConstructorDescriptor(ctor)));
-        val = "new " + type.getClassName() + "(" + argsList + ")";
+        val = "new " + type.getJavaClassName() + "(" + argsList + ")";
       } else {
         gen.push(destubClassName(c.getName()));
         gen.invokeStatic(CLASS_TYPE, forNameMethod);
@@ -2700,8 +2747,9 @@ public class Compiler implements Opcodes {
           sb.append(((StaticMethodExpr) testExpr).emitIntrinsicPredicate(
               C.EXPRESSION, objx, gen, falseLabel));
         } else if (maybePrimitiveType(testExpr) == boolean.class) {
-          sb.append(((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION,
-              objx, gen));
+          sb.append("(Boolean)"
+              + ((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION, objx,
+                  gen));
           gen.ifZCmp(GeneratorAdapter.EQ, falseLabel);
         } else {
           String val = testExpr.emit(C.EXPRESSION, objx, gen);
@@ -2709,7 +2757,9 @@ public class Compiler implements Opcodes {
           gen.ifNull(nullLabel);
           gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
           gen.visitJumpInsn(IF_ACMPEQ, falseLabel);
-          sb.append(val + " != null && " + val + " != Boolean.FALSE");
+          String temp = registerTemp();
+          emitSource("Object " + temp + " = " + val + ";");
+          sb.append(temp + " != null && " + temp + ".equals(Boolean.FALSE)");
         }
       } catch (Exception e) {
         throw Util.sneakyThrow(e);
@@ -3292,10 +3342,10 @@ public class Compiler implements Opcodes {
       tab();
       emitSource(objx.thunkNameStatic(siteIndex) + " = "
           + objx.siteNameStatic(siteIndex) + ".fault(" + val + ");");
-      emitSource(objx.thunkNameStatic(siteIndex) + ".get(" + val + ");");
       untab();
       emitSource("}");
-      return ""; // TODOCLJ
+      return ret(context) + objx.thunkNameStatic(siteIndex) + ".get(" + val
+          + ")" + statement(context);
     }
 
     public boolean hasJavaClass() {
@@ -3392,7 +3442,7 @@ public class Compiler implements Opcodes {
 
     public String emit(C context, ObjExpr objx, GeneratorAdapter gen) {
       String val = emitUnboxed(context, objx, gen);
-      HostExpr.emitBoxReturn(objx, gen, Boolean.TYPE);
+      val = HostExpr.emitBoxReturn(objx, gen, Boolean.TYPE, val);
       if (context == C.STATEMENT)
         gen.pop();
       return ret(context) + val + statement(context);
@@ -3435,7 +3485,7 @@ public class Compiler implements Opcodes {
     public String emit(C context, ObjExpr objx, GeneratorAdapter gen) {
       String val = emitUnboxed(context, objx, gen);
       if (context != C.STATEMENT)
-        val = HostExpr.emitBoxReturn(objx, gen, retClass);
+        val = HostExpr.emitBoxReturn(objx, gen, retClass, val);
       if (context == C.STATEMENT) {
         if (retClass == long.class || retClass == double.class)
           gen.pop2();
@@ -3466,8 +3516,8 @@ public class Compiler implements Opcodes {
             if (maybePrimitiveType(e) == paramclasses[i]) {
               ((MaybePrimitiveExpr) e).emitUnboxed(C.EXPRESSION, objx, gen);
             } else {
-              e.emit(C.EXPRESSION, objx, gen);
-              HostExpr.emitUnboxArg(objx, gen, paramclasses[i]);
+              String v = e.emit(C.EXPRESSION, objx, gen);
+              v = HostExpr.emitUnboxArg(objx, gen, paramclasses[i], v);
             }
           } catch (Exception ex) {
             throw Util.sneakyThrow(ex);
@@ -3707,7 +3757,7 @@ public class Compiler implements Opcodes {
         Method m = new Method(onMethod.getName(), Type.getReturnType(onMethod),
             Type.getArgumentTypes(onMethod));
         gen.invokeInterface(Type.getType(protocolOn), m);
-        HostExpr.emitBoxReturn(objx, gen, onMethod.getReturnType());
+        HostExpr.emitBoxReturn(objx, gen, onMethod.getReturnType(), "");
       }
       gen.mark(endLabel);
       return null; // TODOCLJ
@@ -4248,7 +4298,7 @@ public class Compiler implements Opcodes {
       addAnnotation(cv, classMeta);
       // static fields for constants
       for (int i = 0; i < constants.count(); i++) {
-        emitSource("public static final " + constantType(i).getClassName()
+        emitSource("public static final " + constantType(i).getJavaClassName()
             + " " + constantName(i) + ";");
         cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, constantName(i),
             constantType(i).getDescriptor(), null, null);
@@ -4257,9 +4307,9 @@ public class Compiler implements Opcodes {
       // static fields for lookup sites
       for (int i = 0; i < keywordCallsites.count(); i++) {
         emitSource("public static final "
-            + KEYWORD_LOOKUPSITE_TYPE.getClassName() + " " + siteNameStatic(i)
-            + ";");
-        emitSource("public static final " + ILOOKUP_THUNK_TYPE.getClassName()
+            + KEYWORD_LOOKUPSITE_TYPE.getJavaClassName() + " "
+            + siteNameStatic(i) + ";");
+        emitSource("public static " + ILOOKUP_THUNK_TYPE.getJavaClassName()
             + " " + thunkNameStatic(i) + ";");
         cv.visitField(ACC_FINAL + ACC_STATIC, siteNameStatic(i),
             KEYWORD_LOOKUPSITE_TYPE.getDescriptor(), null, null);
@@ -4559,10 +4609,11 @@ public class Compiler implements Opcodes {
       emitSource("}");
 
       bytecode = cw.toByteArray();
-      //System.out.println(SOURCE_WRITER.deref());
-      Var.popThreadBindings();
-      if (RT.booleanCast(COMPILE_FILES.deref()))
+      if (RT.booleanCast(COMPILE_FILES.deref())) {
         writeClassFile(internalName, bytecode);
+        writeSourceFile(internalName, SOURCE_WRITER.deref().toString());
+      }
+      Var.popThreadBindings();
       // else
       // getCompiledClass();
     }
@@ -4618,7 +4669,7 @@ public class Compiler implements Opcodes {
         str = "null";
       } else if (value instanceof String) {
         gen.push((String) value);
-        str = "\"" + value + "\"";
+        str = "\"" + flatString((String) value) + "\"";
       } else if (value instanceof Boolean) {
         if (((Boolean) value).booleanValue()) {
           gen.getStatic(BOOLEAN_OBJECT_TYPE, "TRUE", BOOLEAN_OBJECT_TYPE);
@@ -4636,7 +4687,7 @@ public class Compiler implements Opcodes {
         gen.push(((Long) value).longValue());
         gen.invokeStatic(Type.getType(Long.class),
             Method.getMethod("Long valueOf(long)"));
-        str = value + "L";
+        str = (((Long)value).longValue() < 0 ? "(" + value + "L)" : value + "L");
       } else if (value instanceof Double) {
         gen.push(((Double) value).doubleValue());
         gen.invokeStatic(Type.getType(Double.class),
@@ -4646,7 +4697,8 @@ public class Compiler implements Opcodes {
         gen.push(((Character) value).charValue());
         gen.invokeStatic(Type.getType(Character.class),
             Method.getMethod("Character valueOf(char)"));
-        str = "Character.valueOf(" + value + ")";
+        str = "Character.valueOf((char)"
+            + (int) ((Character) value).charValue() + ")";
       } else if (value instanceof Class) {
         Class cc = (Class) value;
         if (cc.isPrimitive()) {
@@ -4831,8 +4883,8 @@ public class Compiler implements Opcodes {
           String val = emitValue(constants.nth(i), clinitgen);
           clinitgen.checkCast(constantType(i));
           clinitgen.putStatic(objtype, constantName(i), constantType(i));
-          emitSource(constantName(i) + " = (" + constantType(i).getClassName()
-              + ")" + val + ";");
+          emitSource(constantName(i) + " = ("
+              + constantType(i).getJavaClassName() + ")" + val + ";");
         }
       } finally {
         Var.popThreadBindings();
@@ -4939,18 +4991,22 @@ public class Compiler implements Opcodes {
         gen.dup();
         if (supportsMeta())
           gen.visitInsn(Opcodes.ACONST_NULL);
+        StringBuilder argsList = new StringBuilder();
         for (ISeq s = RT.seq(closesExprs); s != null; s = s.next()) {
+          if (argsList.length() > 0) {
+            argsList.append(", ");
+          }
           LocalBindingExpr lbe = (LocalBindingExpr) s.first();
           LocalBinding lb = lbe.b;
           if (lb.getPrimitiveType() != null)
-            objx.emitUnboxedLocal(gen, lb);
+            argsList.append(objx.emitUnboxedLocal(gen, lb));
           else
-            objx.emitLocal(gen, lb, lbe.shouldClear);
+            argsList.append(objx.emitLocal(gen, lb, lbe.shouldClear));
         }
         gen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE,
             ctorTypes()));
 
-        val = "new " + objtype.getClassName() + "()";
+        val = "new " + objtype.getJavaClassName() + "(" + argsList + ")";
       }
       if (context == C.STATEMENT)
         gen.pop();
@@ -4995,7 +5051,7 @@ public class Compiler implements Opcodes {
         gen.loadThis();
         if (primc != null) {
           gen.getField(objtype, lb.name, Type.getType(primc));
-          HostExpr.emitBoxReturn(this, gen, primc);
+          return HostExpr.emitBoxReturn(this, gen, primc, lb.name + lb.idx);
         } else {
           gen.getField(objtype, lb.name, OBJECT_TYPE);
           if (onceOnly && clear && lb.canBeCleared) {
@@ -5003,6 +5059,7 @@ public class Compiler implements Opcodes {
             gen.visitInsn(Opcodes.ACONST_NULL);
             gen.putField(objtype, lb.name, OBJECT_TYPE);
           }
+          return lb.name + lb.idx;
         }
       } else {
         int argoff = isStatic ? 0 : 1;
@@ -5012,7 +5069,7 @@ public class Compiler implements Opcodes {
         if (lb.isArg) {
           gen.loadArg(lb.idx - argoff);
           if (primc != null)
-            HostExpr.emitBoxReturn(this, gen, primc);
+            return HostExpr.emitBoxReturn(this, gen, primc, lb.name + lb.idx);
           else {
             if (clear && lb.canBeCleared) {
               // System.out.println("clear: " + rep);
@@ -5021,12 +5078,13 @@ public class Compiler implements Opcodes {
             } else {
               // System.out.println("use: " + rep);
             }
+            return lb.name + lb.idx;
           }
         } else {
           if (primc != null) {
             gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD),
                 lb.idx);
-            HostExpr.emitBoxReturn(this, gen, primc);
+            return HostExpr.emitBoxReturn(this, gen, primc, lb.name + lb.idx);
           } else {
             gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
             if (clear && lb.canBeCleared) {
@@ -5036,10 +5094,10 @@ public class Compiler implements Opcodes {
             } else {
               // System.out.println("use: " + rep);
             }
+            return lb.name + lb.idx;
           }
         }
       }
-      return lb.name + lb.idx;
     }
 
     private String emitUnboxedLocal(GeneratorAdapter gen, LocalBinding lb) {
@@ -5048,7 +5106,7 @@ public class Compiler implements Opcodes {
       if (closes.containsKey(lb)) {
         gen.loadThis();
         gen.getField(objtype, lb.name, Type.getType(primc));
-        return objtype.getClassName() + "." + lb.name;
+        return objtype.getJavaClassName() + "." + lb.name;
       } else if (lb.isArg) {
         gen.loadArg(lb.idx - argoff);
       } else {
@@ -5386,7 +5444,7 @@ public class Compiler implements Opcodes {
       gen.visitCode();
       for (int i = 0; i < argtypes.length; i++) {
         gen.loadArg(i);
-        HostExpr.emitUnboxArg(fn, gen, argclasses[i]);
+        HostExpr.emitUnboxArg(fn, gen, argclasses[i], "");
       }
       gen.invokeStatic(objx.objtype, ms);
       gen.box(getReturnType());
@@ -5394,7 +5452,7 @@ public class Compiler implements Opcodes {
       gen.returnValue();
       // gen.visitMaxs(1, 1);
       gen.endMethod();
-
+      // TODOCLJ
     }
 
     public void doEmitPrim(ObjExpr fn, ClassVisitor cv) {
@@ -5445,7 +5503,7 @@ public class Compiler implements Opcodes {
       gen.loadThis();
       for (int i = 0; i < argtypes.length; i++) {
         gen.loadArg(i);
-        HostExpr.emitUnboxArg(fn, gen, argclasses[i]);
+        HostExpr.emitUnboxArg(fn, gen, argclasses[i], "");
       }
       gen.invokeInterface(Type.getType("L" + prim + ";"), ms);
       gen.box(getReturnType());
@@ -5453,7 +5511,7 @@ public class Compiler implements Opcodes {
       gen.returnValue();
       // gen.visitMaxs(1, 1);
       gen.endMethod();
-
+      // TODOCLJ
     }
 
     public void doEmit(ObjExpr fn, ClassVisitor cv) {
@@ -5465,9 +5523,9 @@ public class Compiler implements Opcodes {
           sb.append(", ");
         }
         LocalBinding b = (LocalBinding) argLocals.get(i);
-        sb.append(getArgTypes()[i].getClassName() + " " + b.name + b.idx);
+        sb.append(getArgTypes()[i].getJavaClassName() + " " + b.name + b.idx);
       }
-      emitSource("public " + getReturnType().getClassName() + " "
+      emitSource("public " + getReturnType().getJavaClassName() + " "
           + getMethodName() + "(" + sb.toString() + ") {");
       tab();
 
@@ -5672,11 +5730,11 @@ public class Compiler implements Opcodes {
         if (params.length() > 0) {
           params.append(", ");
         }
-        params.append(getArgTypes()[pos].getClassName() + " " + lb.name
+        params.append(getArgTypes()[pos].getJavaClassName() + " " + lb.name
             + lb.idx);
         pos++;
       }
-      emitSource("public " + getReturnType().getClassName() + " "
+      emitSource("public " + getReturnType().getJavaClassName() + " "
           + getMethodName() + "(" + params + ") {");
       tab();
       GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC, m, null,
@@ -7225,6 +7283,31 @@ public class Compiler implements Opcodes {
     }
   }
 
+  static public void writeSourceFile(String internalName, String source)
+      throws IOException {
+    String genPath = (String) COMPILE_PATH.deref();
+    if (genPath == null)
+      throw Util.runtimeException("*compile-path* not set");
+    String[] dirs = internalName.split("/");
+    String p = genPath;
+    for (int i = 0; i < dirs.length - 1; i++) {
+      p += File.separator + dirs[i];
+      (new File(p)).mkdir();
+    }
+    String path = genPath + File.separator + internalName + ".java";
+    File cf = new File(path);
+    System.out.println(path);
+    cf.createNewFile();
+    FileOutputStream cfs = new FileOutputStream(cf);
+    try {
+      cfs.write(source.getBytes());
+      cfs.flush();
+      cfs.getFD().sync();
+    } finally {
+      cfs.close();
+    }
+  }
+
   public static void pushNS() {
     Var.pushThreadBindings(PersistentHashMap.create(
         Var.intern(Symbol.intern("clojure.core"), Symbol.intern("*ns*"))
@@ -7322,7 +7405,7 @@ public class Compiler implements Opcodes {
       cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, objx.internalName, null,
           "java/lang/Object", null);
 
-      emitSource("public static void load() {");
+      emitSource("public static void load() throws Exception {");
       // static load method
       GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
           Method.getMethod("void load ()"), null, null, cv);
@@ -7347,8 +7430,9 @@ public class Compiler implements Opcodes {
 
       // static fields for constants
       for (int i = 0; i < objx.constants.count(); i++) {
-        emitSource("public static final " + objx.constantType(i).getClassName()
-            + " " + objx.constantName(i) + ";");
+        emitSource("public static final "
+            + objx.constantType(i).getJavaClassName() + " "
+            + objx.constantName(i) + ";");
 
         cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC,
             objx.constantName(i), objx.constantType(i).getDescriptor(), null,
@@ -7377,7 +7461,8 @@ public class Compiler implements Opcodes {
             clinitgen.checkCast(objx.constantType(i));
             clinitgen.putStatic(objx.objtype, objx.constantName(i),
                 objx.constantType(i));
-            emitSource(objx.constantName(i) + " = " + val + ";");
+            emitSource(objx.constantName(i) + " = ("
+                + objx.constantType(i).getJavaClassName() + ")" + val + ";");
           }
         } finally {
           Var.popThreadBindings();
@@ -7434,14 +7519,15 @@ public class Compiler implements Opcodes {
       // end of class
       cv.visitEnd();
 
-      emitSource("Compiler.pushNSandLoader(Class.forName(\"" + iname
-          + "\").getClassLoader());");
+      emitSource("clojure.lang.Compiler.pushNSandLoader(" + iname
+          + ".class.getClassLoader());");
       emitSource("try {");
       tab();
       emitSource("load();");
       untab();
-      emitSource("}");
-      emitSource("finally {");
+      emitSource("} catch (Exception e) {");
+      emitSource("throw new RuntimeException();");
+      emitSource("} finally {");
       tab();
       emitSource("Var.popThreadBindings();");
       untab();
@@ -7453,8 +7539,8 @@ public class Compiler implements Opcodes {
       emitSource("}");
 
       Var.popThreadBindings();
-      //System.out.println(source);
       writeClassFile(objx.internalName, cw.toByteArray());
+      writeSourceFile(objx.internalName, source.toString());
     } catch (LispReader.ReaderException e) {
       throw new CompilerException(sourcePath, e.line, e.column, e.getCause());
     } finally {
@@ -8087,11 +8173,11 @@ public class Compiler implements Opcodes {
         if (params.length() > 0) {
           params.append(", ");
         }
-        params.append(getArgTypes()[pos].getClassName() + " " + lb.name
+        params.append(getArgTypes()[pos].getJavaClassName() + " " + lb.name
             + lb.idx);
         pos++;
       }
-      emitSource("public " + getReturnType().getClassName() + " "
+      emitSource("public " + getReturnType().getJavaClassName() + " "
           + getMethodName() + "(" + params + ") {");
       tab();
       Type[] extypes = null;

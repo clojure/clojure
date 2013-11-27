@@ -436,7 +436,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 	URL cljURL = getResource(baseLoader(), cljfile);
 	boolean loaded = false;
 
-	if(!scriptbase.equals("clojure/gal") && (classURL != null &&
+	if((classURL != null &&
 	    (cljURL == null
 	     || lastModified(classURL, classfile) > lastModified(cljURL, cljfile)))
 	   || classURL == null) {

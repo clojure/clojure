@@ -869,4 +869,8 @@ public int hashCode(){
 public String toString(){
 	return getDescriptor();
 }
+
+public String getJavaClassName() {
+  return getClassName();//.replaceAll("\\$", ".");
+}
 }

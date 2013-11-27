@@ -62,12 +62,12 @@
     (apply vector (. ctor (getParameterTypes)))))
 
 (defn- escape-class-name [^Class c]
-  (.. (.getSimpleName c) 
+  (.. (.getSimpleName c)
       (replace "[]" "<>")))
 
 (defn- overload-name [mname pclasses]
   (if (seq pclasses)
-    (apply str mname (interleave (repeat \-) 
+    (apply str mname (interleave (repeat \-)
                                  (map escape-class-name pclasses)))
     (str mname "-void")))
 
@@ -101,12 +101,12 @@
       'char Character/TYPE
       'chars (Class/forName "[C")})
 
-(defn- ^Class the-class [x] 
-  (cond 
+(defn- ^Class the-class [x]
+  (cond
    (class? x) x
    (contains? prim->class x) (prim->class x)
    :else (let [strx (str x)]
-           (clojure.lang.RT/classForName 
+           (clojure.lang.RT/classForName
             (if (some #{\. \[} strx)
               strx
               (str "java.lang." strx))))))
@@ -124,8 +124,8 @@
 (defn- generate-class [options-map]
   (validate-generate-class-options options-map)
   (let [default-options {:prefix "-" :load-impl-ns true :impl-ns (ns-name *ns*)}
-        {:keys [name extends implements constructors methods main factory state init exposes 
-                exposes-methods prefix load-impl-ns impl-ns post-init]} 
+        {:keys [name extends implements constructors methods main factory state init exposes
+                exposes-methods prefix load-impl-ns impl-ns post-init]}
           (merge default-options options-map)
         name-meta (meta name)
         name (str name)
@@ -165,7 +165,7 @@
                                    (map (fn [[m p]] {(str m) [p]}) methods)))
         sigs-by-name (apply merge-with concat {} all-sigs)
         overloads (into1 {} (filter (fn [[m s]] (next s)) sigs-by-name))
-        var-fields (concat (when init [init-name]) 
+        var-fields (concat (when init [init-name])
                            (when post-init [post-init-name])
                            (when main [main-name])
                            ;(when exposes-methods (map str (vals exposes-methods)))
@@ -199,7 +199,7 @@
                 rtype ^Type (totype rclass)
                 m (new Method mname rtype ptypes)
                 is-overload (seq (overloads mname))
-                gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (if as-static (. Opcodes ACC_STATIC) 0)) 
+                gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (if as-static (. Opcodes ACC_STATIC) 0))
                          m nil nil cv)
                 found-label (. gen (newLabel))
                 else-label (. gen (newLabel))
@@ -228,26 +228,26 @@
                                         ;box args
                 (dotimes [i (count ptypes)]
                   (. gen (loadArg i))
-                  (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
+                  (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i) "")))
                                         ;call fn
-                (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
+                (. gen (invokeInterface ifn-type (new Method "invoke" obj-type
                                                       (to-types (replicate (+ (count ptypes)
-                                                                              (if as-static 0 1)) 
+                                                                              (if as-static 0 1))
                                                                            Object)))))
-                                        ;(into-array (cons obj-type 
+                                        ;(into-array (cons obj-type
                                         ;                 (replicate (count ptypes) obj-type))))))
                                         ;unbox return
                 (. gen (unbox rtype))
                 (when (= (. rtype (getSort)) (. Type VOID))
                   (. gen (pop)))
                 (. gen (goTo end-label))
-                
+
                                         ;else call supplied alternative generator
                 (. gen (mark else-label))
                 (. gen (pop))
-                
+
                 (else-gen gen m)
-            
+
                 (. gen (mark end-label))))
             (. gen (returnValue))
             (. gen (endMethod))))
@@ -260,23 +260,23 @@
 
                                         ; class annotations
     (add-annotations cv name-meta)
-    
+
                                         ;static fields for vars
     (doseq [v var-fields]
       (. cv (visitField (+ (. Opcodes ACC_PRIVATE) (. Opcodes ACC_FINAL) (. Opcodes ACC_STATIC))
-                        (var-name v) 
+                        (var-name v)
                         (. var-type getDescriptor)
                         nil nil)))
-    
+
                                         ;instance field for state
     (when state
       (. cv (visitField (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_FINAL))
-                        state-name 
+                        state-name
                         (. obj-type getDescriptor)
                         nil nil)))
-    
+
                                         ;static init to set up var fields and load init
-    (let [gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_STATIC)) 
+    (let [gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_STATIC))
                    (. Method getMethod "void <clinit> ()")
                    nil nil cv)]
       (. gen (visitCode))
@@ -285,7 +285,7 @@
         (. gen push (str prefix v))
         (. gen (invokeStatic var-type (. Method (getMethod "clojure.lang.Var internPrivate(String,String)"))))
         (. gen putStatic ctype (var-name v) var-type))
-      
+
       (when load-impl-ns
         (. gen push "clojure.core")
         (. gen push "load")
@@ -298,7 +298,7 @@
 
       (. gen (returnValue))
       (. gen (endMethod)))
-    
+
                                         ;ctors
     (doseq [[pclasses super-pclasses] ctor-sig-map]
       (let [constructor-annotations (meta pclasses)
@@ -317,7 +317,7 @@
             nth-method (. Method (getMethod "Object nth(Object,int)"))
             local (. gen newLocal obj-type)]
         (. gen (visitCode))
-        
+
         (if init
           (do
             (emit-get-var gen init-name)
@@ -327,32 +327,32 @@
                                         ;box init args
             (dotimes [i (count pclasses)]
               (. gen (loadArg i))
-              (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
+              (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i) "")))
                                         ;call init fn
-            (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
+            (. gen (invokeInterface ifn-type (new Method "invoke" obj-type
                                                   (arg-types (count ptypes)))))
                                         ;expecting [[super-ctor-args] state] returned
             (. gen dup)
             (. gen push (int 0))
             (. gen (invokeStatic rt-type nth-method))
             (. gen storeLocal local)
-            
+
             (. gen (loadThis))
             (. gen dupX1)
             (dotimes [i (count super-pclasses)]
               (. gen loadLocal local)
               (. gen push (int i))
               (. gen (invokeStatic rt-type nth-method))
-              (. clojure.lang.Compiler$HostExpr (emitUnboxArg nil gen (nth super-pclasses i))))
+              (. clojure.lang.Compiler$HostExpr (emitUnboxArg nil gen (nth super-pclasses i) ""))) ; TODOCLJ
             (. gen (invokeConstructor super-type super-m))
-            
+
             (if state
               (do
                 (. gen push (int 1))
                 (. gen (invokeStatic rt-type nth-method))
                 (. gen (putField ctype state-name obj-type)))
               (. gen pop))
-            
+
             (. gen goTo end-label)
                                         ;no init found
             (. gen mark no-init-label)
@@ -374,9 +374,9 @@
                                        ;box init args
           (dotimes [i (count pclasses)]
             (. gen (loadArg i))
-            (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i))))
+            (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i) "")))
                                        ;call init fn
-          (. gen (invokeInterface ifn-type (new Method "invoke" obj-type 
+          (. gen (invokeInterface ifn-type (new Method "invoke" obj-type
                                                 (arg-types (inc (count ptypes))))))
           (. gen pop)
           (. gen goTo end-post-init-label)
@@ -390,16 +390,16 @@
                                         ;factory
         (when factory
           (let [fm (new Method factory-name ctype ptypes)
-                gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_STATIC)) 
+                gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_STATIC))
                          fm nil nil cv)]
             (. gen (visitCode))
             (. gen newInstance ctype)
             (. gen dup)
             (. gen (loadArgs))
-            (. gen (invokeConstructor ctype m))            
+            (. gen (invokeConstructor ctype m))
             (. gen (returnValue))
             (. gen (endMethod))))))
-    
+
                                         ;add methods matching supers', if no fn -> call super
     (let [mm (non-private-methods super)]
       (doseq [^java.lang.reflect.Method meth (vals mm)]
@@ -409,7 +409,7 @@
                                         ;push args
                                        (. gen (loadArgs))
                                         ;call super
-                                       (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL) 
+                                       (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL)
                                                                (. super-type (getInternalName))
                                                                (. m (getName))
                                                                (. m (getDescriptor)))))))
@@ -439,7 +439,7 @@
                gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) exposer-m nil nil cv)]
            (. gen (loadThis))
            (. gen (loadArgs))
-           (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL) 
+           (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL)
                                    (. super-type (getInternalName))
                                    (. target-m (getName))
                                    (. target-m (getDescriptor))))
@@ -448,7 +448,7 @@
                                         ;main
     (when main
       (let [m (. Method getMethod "void main (String[])")
-            gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_STATIC)) 
+            gen (new GeneratorAdapter (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_STATIC))
                      m nil nil cv)
             no-main-label (. gen newLabel)
             end-label (. gen newLabel)]
@@ -460,7 +460,7 @@
         (.checkCast gen ifn-type)
         (. gen loadArgs)
         (. gen (invokeStatic rt-type (. Method (getMethod "clojure.lang.ISeq seq(Object)"))))
-        (. gen (invokeInterface ifn-type (new Method "applyTo" obj-type 
+        (. gen (invokeInterface ifn-type (new Method "applyTo" obj-type
                                               (into-array [iseq-type]))))
         (. gen pop)
         (. gen goTo end-label)
@@ -505,7 +505,7 @@
     (. cv (visitEnd))
     [cname (. cv (toByteArray))]))
 
-(defmacro gen-class 
+(defmacro gen-class
   "When compiling, generates compiled bytecode for a class with the
   given package-qualified :name (which, as all names in these
   parameters, can be a string or symbol), and writes the .class file
@@ -514,7 +514,7 @@
   implementation will be dynamically sought by the generated class in
   functions in an implementing Clojure namespace. Given a generated
   class org.mydomain.MyClass with a method named mymethod, gen-class
-  will generate an implementation that looks for a function named by 
+  will generate an implementation that looks for a function named by
   (str prefix mymethod) (default prefix: \"-\") in a
   Clojure namespace specified by :impl-ns
   (defaults to the current namespace). All inherited methods,
@@ -550,7 +550,7 @@
   :init name
 
   If supplied, names a function that will be called with the arguments
-  to the constructor. Must return [ [superclass-constructor-args] state] 
+  to the constructor. Must return [ [superclass-constructor-args] state]
   If not supplied, the constructor args are passed directly to
   the superclass constructor and the state will be nil
 
@@ -561,7 +561,7 @@
   parameter may be used to explicitly specify constructors, each entry
   providing a mapping from a constructor signature to a superclass
   constructor signature. When you supply this, you must supply an :init
-  specifier. 
+  specifier.
 
   :post-init name
 
@@ -591,7 +591,7 @@
   If supplied, a (set of) public static factory function(s) will be
   created with the given name, and the same signature(s) as the
   constructor(s).
-  
+
   :state name
 
   If supplied, a public final instance field with the given name will be
@@ -611,7 +611,7 @@
   :exposes-methods {super-method-name exposed-name, ...}
 
   It is sometimes necessary to call the superclass' implementation of an
-  overridden method.  Those methods may be exposed and referred in 
+  overridden method.  Those methods may be exposed and referred in
   the new method implementation by a local name.
 
   :prefix string
@@ -621,7 +621,7 @@
 
   :impl-ns name
 
-  Default: the name of the current ns. Implementations of methods will be 
+  Default: the name of the current ns. Implementations of methods will be
   looked up in this namespace.
 
   :load-impl-ns boolean
@@ -631,7 +631,7 @@
   true when implementing-ns is the default, false if you intend to
   load the code via some other method."
   {:added "1.0"}
-  
+
   [& options]
     (when *compile-files*
       (let [options-map (into1 {} (map vec (partition 2 options)))
@@ -650,10 +650,10 @@
   (if (or (instance? Class c) (prim->class c))
     (Type/getType (the-class c))
     (let [strx (str c)]
-      (Type/getObjectType 
+      (Type/getObjectType
        (.replace (if (some #{\. \[} strx)
                    strx
-                   (str "java.lang." strx)) 
+                   (str "java.lang." strx))
                  "." "/")))))
 
 (defn- generate-interface
@@ -663,7 +663,7 @@
       (IllegalArgumentException. "Interface methods must not contain '-'")))
   (let [iname (.replace (str name) "." "/")
         cv (ClassWriter. ClassWriter/COMPUTE_MAXS)]
-    (. cv visit Opcodes/V1_5 (+ Opcodes/ACC_PUBLIC 
+    (. cv visit Opcodes/V1_5 (+ Opcodes/ACC_PUBLIC
                                 Opcodes/ACC_ABSTRACT
                                 Opcodes/ACC_INTERFACE)
        iname nil "java/lang/Object"
@@ -673,7 +673,7 @@
     (doseq [[mname pclasses rclass pmetas] methods]
       (let [mv (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
                   (str mname)
-                  (Type/getMethodDescriptor (asm-type rclass) 
+                  (Type/getMethodDescriptor (asm-type rclass)
                                             (if pclasses
                                               (into-array Type (map asm-type pclasses))
                                               (make-array Type 0)))
@@ -690,12 +690,12 @@
   the given package-qualified :name (which, as all names in these
   parameters, can be a string or symbol), and writes the .class file
   to the *compile-path* directory.  When not compiling, does nothing.
- 
+
   In all subsequent sections taking types, the primitive types can be
   referred to by their Java names (int, float etc), and classes in the
   java.lang package can be used without a package qualifier. All other
   classes must be fully qualified.
- 
+
   Options should be a set of key/value pairs, all except for :name are
   optional:
 
@@ -719,12 +719,12 @@
           [cname bytecode] (generate-interface options-map)]
       (if *compile-files*
         (clojure.lang.Compiler/writeClassFile cname bytecode)
-        (.defineClass ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) 
-                      (str (:name options-map)) bytecode options)))) 
+        (.defineClass ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER)
+                      (str (:name options-map)) bytecode options))))
 
 (comment
 
-(defn gen-and-load-class 
+(defn gen-and-load-class
   "Generates and immediately loads the bytecode for the specified
   class. Note that a class generated this way can be loaded only once
   - the JVM supports only one class with a given name per
