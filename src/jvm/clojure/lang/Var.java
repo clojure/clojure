@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Var extends ARef implements IFn, IRef, Settable{
 
-static class TBox{
+public static class TBox{
 
 volatile Object val;
 final Thread thread;
