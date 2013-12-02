@@ -14,9 +14,6 @@ package clojure.lang;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Map;
 
 // Compiles libs and generates class files stored within the directory
 // named by the Java System property "clojure.compile.path". Arguments are
@@ -33,7 +30,6 @@ private static final Var compile_path = RT.var("clojure.core", "*compile-path*")
 private static final Var compile = RT.var("clojure.core", "compile");
 private static final Var warn_on_reflection = RT.var("clojure.core", "*warn-on-reflection*");
 private static final Var unchecked_math = RT.var("clojure.core", "*unchecked-math*");
-private static final Var compiler_options = RT.var("clojure.core", "*compiler-options*");
 
 public static void main(String[] args) throws IOException{
 
@@ -53,26 +49,11 @@ public static void main(String[] args) throws IOException{
     boolean warnOnReflection = System.getProperty(REFLECTION_WARNING_PROP, "false").equals("true");
     boolean uncheckedMath = System.getProperty(UNCHECKED_MATH_PROP, "false").equals("true");
 
-	Object compilerOptions = null;
-
-	for(Map.Entry e : System.getProperties().entrySet())
-		{
-		String name = (String) e.getKey();
-		String v = (String) e.getValue();
-		if(name.startsWith("clojure.compiler."))
-			{
-			compilerOptions = RT.assoc(compilerOptions
-										,RT.keyword(null,name.substring(1 + name.lastIndexOf('.')))
-										,RT.readString(v));
-			}
-		}
-
 	try
 		{
                Var.pushThreadBindings(RT.map(compile_path, path,
                        warn_on_reflection, warnOnReflection,
-                       unchecked_math, uncheckedMath,
-                       compiler_options, compilerOptions));
+                       unchecked_math, uncheckedMath));
 
 		for(String lib : args)
         {

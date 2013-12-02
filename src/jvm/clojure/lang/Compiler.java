@@ -244,14 +244,33 @@ static final public Var ADD_ANNOTATIONS = Var.intern(Namespace.findOrCreate(Symb
 static final public Keyword disableLocalsClearingKey = Keyword.intern("disable-locals-clearing");
 static final public Keyword elideMetaKey = Keyword.intern("elide-meta");
 
-static final public Var COMPILER_OPTIONS = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                                      Symbol.intern("*compiler-options*"), null).setDynamic();
+static final public Var COMPILER_OPTIONS;
 
 static public Object getCompilerOption(Keyword k){
 	return RT.get(COMPILER_OPTIONS.deref(),k);
 }
 
-static Object elideMeta(Object m){
+    static
+    {
+        Object compilerOptions = null;
+
+        for (Map.Entry e : System.getProperties().entrySet())
+        {
+            String name = (String) e.getKey();
+            String v = (String) e.getValue();
+            if (name.startsWith("clojure.compiler."))
+            {
+                compilerOptions = RT.assoc(compilerOptions,
+                        RT.keyword(null, name.substring(1 + name.lastIndexOf('.'))),
+                        RT.readString(v));
+            }
+        }
+
+        COMPILER_OPTIONS = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                Symbol.intern("*compiler-options*"), compilerOptions).setDynamic();
+    }
+
+    static Object elideMeta(Object m){
         Collection<Object> elides = (Collection<Object>) getCompilerOption(elideMetaKey);
         if(elides != null)
             {
