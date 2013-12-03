@@ -67,14 +67,17 @@
 
 (deftest t-triml
   (is (= "foo " (s/triml " foo ")))
-  (is (= "" (s/triml "   "))))
+  (is (= "" (s/triml "   ")))
+  (is (= "bar" (s/triml "\u2002 \tbar"))))
 
 (deftest t-trimr
   (is (= " foo" (s/trimr " foo ")))
-  (is (= "" (s/trimr "   "))))
+  (is (= "" (s/trimr "   ")))
+  (is (= "bar" (s/trimr "bar\t \u2002"))))
 
 (deftest t-trim
-  (is (= "foo" (s/trim "  foo  \r\n"))))
+  (is (= "foo" (s/trim "  foo  \r\n")))
+  (is (= "bar" (s/trim "\u2000bar\t \u2002"))))
 
 (deftest t-upper-case
   (is (= "FOOBAR" (s/upper-case "Foobar"))))
