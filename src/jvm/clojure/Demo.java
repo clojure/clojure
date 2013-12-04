@@ -12,6 +12,18 @@ public class Demo {
     Var.pushThreadBindings(RT
         .mapUniqueKeys(clojure.lang.Compiler.COMPILE_PATH, "target/gen", clojure.lang.Compiler.COMPILE_FILES, Boolean.TRUE));
     RT.load("clojure/core");
+    RT.load("clojure/set");
+    RT.load("clojure/string");
+    RT.load("clojure/uuid");
+    RT.load("clojure/zip");
+    RT.load("clojure/test");
+    RT.load("clojure/instant");
+    RT.load("clojure/repl");
+    RT.load("clojure/template");
+    RT.load("clojure/stacktrace");
+    RT.load("clojure/pprint");
+    RT.load("clojure/edn");
+    RT.load("clojure/xml");
     Var.popThreadBindings();
     
     

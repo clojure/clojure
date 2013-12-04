@@ -2081,11 +2081,13 @@ public class Compiler implements Opcodes {
     }
 
     public String emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-      if (context != C.STATEMENT)
+      if (context != C.STATEMENT) {
         gen.push(str);
-
-      return ret(context) + "\"" + escapeString(str) + "\""
-          + statement(context);
+        return ret(context) + "\"" + escapeString(str) + "\""
+        + statement(context);
+      } else {
+        return "";
+      }
     }
 
     public boolean hasJavaClass() {
@@ -5304,6 +5306,8 @@ public class Compiler implements Opcodes {
           return Type.getType(IPersistentVector.class);
         else if (IPersistentList.class.isAssignableFrom(c))
           return Type.getType(IPersistentList.class);
+        else if (Symbol.class.isAssignableFrom(c))
+          return Type.getType(Symbol.class);
         else if (AFn.class.isAssignableFrom(c))
           return Type.getType(AFn.class);
         else if (c == Var.class)
@@ -6427,6 +6431,8 @@ public class Compiler implements Opcodes {
         r = registerTemp();
         emitSource("Object " + r + " = null;");
       }
+      emitSource("{");
+      tab();
 
       HashMap<BindingInit, Label> bindingLabels = new HashMap();
       for (int i = 0; i < bindingInits.count(); i++) {
@@ -6501,6 +6507,9 @@ public class Compiler implements Opcodes {
         untab();
         emitSource("}");
       }
+      untab();
+      emitSource("}");
+
       return (context == C.EXPRESSION ? r : "");
     }
 

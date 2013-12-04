@@ -10,8 +10,14 @@
 
 package clojure.lang;
 
-import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 public class PersistentList extends ASeq implements IPersistentList, IReduce, List, Counted {
 
@@ -126,7 +132,7 @@ public Object reduce(IFn f, Object start) {
 }
 
 
-    static class EmptyList extends Obj implements IPersistentList, List, ISeq, Counted{
+    public static class EmptyList extends Obj implements IPersistentList, List, ISeq, Counted{
 
 	public int hashCode(){
 		return 1;

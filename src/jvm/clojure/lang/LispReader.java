@@ -764,10 +764,11 @@ public static class SyntaxQuoteReader extends AFn{
 				if(gmap == null)
 					throw new IllegalStateException("Gensym literal not in syntax-quote");
 				Symbol gs = (Symbol) gmap.valAt(sym);
-				if(gs == null)
+				if(gs == null) {
 					GENSYM_ENV.set(gmap.assoc(sym, gs = Symbol.intern(null,
 					                                                  sym.name.substring(0, sym.name.length() - 1)
 					                                                  + "__" + RT.nextID() + "__auto__")));
+				}
 				sym = gs;
 				}
 			else if(sym.ns == null && sym.name.endsWith("."))
