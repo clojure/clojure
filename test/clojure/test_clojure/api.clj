@@ -10,45 +10,45 @@
   (:require [clojure.test.generative :refer (defspec)]
             [clojure.test-clojure.generators :as cgen])
   (:import clojure.lang.IFn
-           clojure.api.API
+           clojure.java.api.Clojure
            clojure.lang.Var))
 
 (set! *warn-on-reflection* true)
 
 (defn roundtrip
-  "Print an object and read it back with API/read"
+  "Print an object and read it back with Clojure/read"
   [o]
   (binding [*print-length* nil
             *print-dup* nil
             *print-level* nil]
-    (API/read (pr-str o))))
+    (Clojure/read (pr-str o))))
 
 (defn api-var-str
   [^Var v]
-  (API/var (str (.name (.ns v)))
-           (str (.sym v))))
+  (Clojure/var (str (.name (.ns v)))
+               (str (.sym v))))
 
 (defn api-var
   [^Var v]
-  (API/var (.name (.ns v))
-           (.sym v)))
+  (Clojure/var (.name (.ns v))
+               (.sym v)))
 
 (defspec api-can-read
   roundtrip
   [^{:tag cgen/ednable} o]
   (when-not (= o %)
-    (throw (ex-info "Value cannot roundtrip with API/read" {:printed o :read %}))))
+    (throw (ex-info "Value cannot roundtrip with Clojure/read" {:printed o :read %}))))
 
 (defspec api-can-find-var
   api-var
   [^{:tag cgen/var} v]
   (when-not (= v %)
-    (throw (ex-info "Var cannot roundtrip through API/var" {:from v :to %}))))
+    (throw (ex-info "Var cannot roundtrip through Clojure/var" {:from v :to %}))))
 
 (defspec api-can-find-var-str
   api-var-str
   [^{:tag cgen/var} v]
   (when-not (= v %)
-    (throw (ex-info "Var cannot roundtrip strings through API/var" {:from v :to %}))))
+    (throw (ex-info "Var cannot roundtrip strings through Clojure/var" {:from v :to %}))))
 
 

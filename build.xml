@@ -130,7 +130,26 @@
     </jar>
     <copy file="${clojure_jar}" tofile="${clojure_noversion_jar}"/>
   </target>
-  
+
+  <target name="javadoc"
+	  description="Creates javadoc for Clojure API.">
+    <copy file="src/jvm/clojure/lang/IFn.java" tofile="target/tmpjd/IFn.java"/>
+    <copy file="src/jvm/clojure/lang/package.html" tofile="target/tmpjd/package.html"/>
+    <replaceregexp file="target/tmpjd/IFn.java" match="(static public interface .*})" replace="" byline="true"/>
+    <javadoc destdir="target/javadoc"
+	    nodeprecatedlist="true" nohelp="true" nonavbar="true" notree="true"
+	    link="http://docs.oracle.com/javase/7/docs/api/"
+	    windowtitle="Clojure API">
+      <classpath>
+        <path location="${build}"/>
+      </classpath>
+      <fileset dir="${basedir}">
+	<include name="src/jvm/clojure/java/api/Clojure.java"/>
+	<include name="target/tmpjd/IFn.java"/>
+      </fileset>
+    </javadoc>
+  </target>
+
   <target name="all" depends="build,test,jar"/>
 
   <target name="clean"
