@@ -2624,6 +2624,11 @@ public class Compiler implements Opcodes {
 
     public String emit(C context, ObjExpr objx, GeneratorAdapter gen) {
       String val;
+      String canonicalName = c.getCanonicalName();
+      if (canonicalName.startsWith("compile__stub.")){
+        canonicalName = canonicalName.substring(14); // TODO?
+      }
+      
       if (this.ctor != null) {
         Type type = getType(c);
         gen.newInstance(type);
@@ -2636,7 +2641,7 @@ public class Compiler implements Opcodes {
         }
         gen.invokeConstructor(type,
             new Method("<init>", Type.getConstructorDescriptor(ctor)));
-        val = "new " + c.getCanonicalName() + "(" + argsList + ")";
+        val = "new " + canonicalName + "(" + argsList + ")";
       } else {
         gen.push(destubClassName(c.getName()));
         gen.invokeStatic(CLASS_TYPE, forNameMethod);
@@ -2647,7 +2652,7 @@ public class Compiler implements Opcodes {
         }
         gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
         System.err.println("Reflection not allowed for new "
-            + c.getCanonicalName());
+            + canonicalName);
         val = "";
       }
       if (context == C.STATEMENT)
@@ -5167,14 +5172,12 @@ public class Compiler implements Opcodes {
 
     private String emitLocal(GeneratorAdapter gen, LocalBinding lb,
         boolean clear) {
-      String nn = (lb.idx == 0 ? "this" : lb.print());
       if (closes.containsKey(lb)) {
         Class primc = lb.getPrimitiveType();
         gen.loadThis();
         if (primc != null) {
           gen.getField(objtype, lb.name, Type.getType(primc));
-          return (nn.equals("this") ? "" : "this.")
-              + HostExpr.emitBoxReturn(this, gen, primc, nn);
+          return HostExpr.emitBoxReturn(this, gen, primc, "this." + lb.print());
         } else {
           gen.getField(objtype, lb.name, OBJECT_TYPE);
           if (onceOnly && clear && lb.canBeCleared) {
@@ -5182,7 +5185,7 @@ public class Compiler implements Opcodes {
             gen.visitInsn(Opcodes.ACONST_NULL);
             gen.putField(objtype, lb.name, OBJECT_TYPE);
           }
-          return (nn.equals("this") ? "" : "this.") + nn;
+          return "this." + lb.print();
         }
       } else {
         int argoff = isStatic ? 0 : 1;
@@ -5192,7 +5195,7 @@ public class Compiler implements Opcodes {
         if (lb.isArg) {
           gen.loadArg(lb.idx - argoff);
           if (primc != null)
-            return HostExpr.emitBoxReturn(this, gen, primc, nn);
+            return HostExpr.emitBoxReturn(this, gen, primc, lb.print());
           else {
             if (clear && lb.canBeCleared) {
               // System.out.println("clear: " + rep);
@@ -5201,13 +5204,13 @@ public class Compiler implements Opcodes {
             } else {
               // System.out.println("use: " + rep);
             }
-            return nn;
+            return lb.print();
           }
         } else {
           if (primc != null) {
             gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ILOAD),
                 lb.idx);
-            return HostExpr.emitBoxReturn(this, gen, primc, nn);
+            return HostExpr.emitBoxReturn(this, gen, primc, lb.print());
           } else {
             gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ILOAD), lb.idx);
             if (clear && lb.canBeCleared) {
@@ -5217,7 +5220,11 @@ public class Compiler implements Opcodes {
             } else {
               // System.out.println("use: " + rep);
             }
-            return nn;
+            if (lb.name.equals(thisName)) {
+              return "this";
+            } else {
+              return lb.print();
+            }
           }
         }
       }

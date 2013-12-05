@@ -24,6 +24,7 @@ public class Demo {
     RT.load("clojure/pprint");
     RT.load("clojure/edn");
     RT.load("clojure/xml");
+//    RT.load("clojure/test_clojure/keywords");
     Var.popThreadBindings();
     
     
