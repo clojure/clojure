@@ -6190,7 +6190,7 @@
 (load "genclass")
 (load "core_deftype")
 (load "core/protocols")
-(load "gvec")
+;(load "gvec")
 (load "instant")
 (load "uuid")
 

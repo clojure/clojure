@@ -11,7 +11,7 @@
 (import '(java.lang.reflect Modifier Constructor)
         '(clojure.asm ClassWriter ClassVisitor Opcodes Type)
         '(clojure.asm.commons Method GeneratorAdapter)
-        '(clojure.lang IPersistentMap))
+        '(clojure.lang IPersistentMap Compiler))
 
 ;(defn method-sig [^java.lang.reflect.Method meth]
 ;  [(. meth (getName)) (seq (. meth (getParameterTypes)))])
@@ -661,29 +661,46 @@
   (when (some #(-> % first clojure.core/name (.contains "-")) methods)
     (throw
       (IllegalArgumentException. "Interface methods must not contain '-'")))
-  (let [iname (.replace (str name) "." "/")
-        cv (ClassWriter. ClassWriter/COMPUTE_MAXS)]
-    (. cv visit Opcodes/V1_5 (+ Opcodes/ACC_PUBLIC
-                                Opcodes/ACC_ABSTRACT
-                                Opcodes/ACC_INTERFACE)
-       iname nil "java/lang/Object"
-       (when (seq extends)
-         (into-array (map #(.getInternalName (asm-type %)) extends))))
-    (add-annotations cv (meta name))
-    (doseq [[mname pclasses rclass pmetas] methods]
-      (let [mv (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
-                  (str mname)
-                  (Type/getMethodDescriptor (asm-type rclass)
-                                            (if pclasses
-                                              (into-array Type (map asm-type pclasses))
-                                              (make-array Type 0)))
-                  nil nil)]
-        (add-annotations mv (meta mname))
-        (dotimes [i (count pmetas)]
-          (add-annotations mv (nth pmetas i) i))
-        (. mv visitEnd)))
-    (. cv visitEnd)
-    [iname (. cv toByteArray)]))
+  (let [sname (str name)
+        iname (.replace sname "." "/")
+        cv (ClassWriter. ClassWriter/COMPUTE_MAXS)
+        lastdot (.lastIndexOf sname ".")
+        classname (subs sname (inc lastdot))
+        packagename (subs sname 0 lastdot)]
+    (binding [*source-writer* (.getSc cv)]
+      (Compiler/emitSource (str "package " packagename ";"))
+      (Compiler/emitSource)
+      (Compiler/emitSource (str "public interface " classname " {"))
+      (Compiler/tab)
+      (. cv visit Opcodes/V1_5 (+ Opcodes/ACC_PUBLIC
+                                  Opcodes/ACC_ABSTRACT
+                                  Opcodes/ACC_INTERFACE)
+         iname nil "java/lang/Object"
+         (when (seq extends)
+           (into-array (map #(.getInternalName (asm-type %)) extends))))
+      (add-annotations cv (meta name))
+      (doseq [[mname pclasses rclass pmetas] methods]
+        (Compiler/emitSource (str (if (symbol? rclass) (str rclass) (.getCanonicalName rclass)) " " (str mname) "("
+                                  (let [names (map #(str (nth pclasses %) " p" %) (range (count pclasses)))]
+                                    (apply str (interpose ", " names)))
+                                  ");"))
+        (let [mv (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
+                    (str mname)
+                    (Type/getMethodDescriptor (asm-type rclass)
+                                              (if pclasses
+                                                (into-array Type (map asm-type pclasses))
+                                                (make-array Type 0)))
+                    nil nil)]
+          (add-annotations mv (meta mname))
+          (dotimes [i (count pmetas)]
+            (add-annotations mv (nth pmetas i) i))
+          (. mv visitEnd)))
+      (. cv visitEnd)
+      (Compiler/untab)
+      (Compiler/emitSource "}")
+      (when *compile-files*
+        (Compiler/writeSourceFile iname (str *source-writer*)))
+      [iname (. cv toByteArray)])))
 
 (defmacro gen-interface
   "When compiling, generates compiled bytecode for an interface with
@@ -718,7 +735,7 @@
     (let [options-map (apply hash-map options)
           [cname bytecode] (generate-interface options-map)]
       (if *compile-files*
-        (clojure.lang.Compiler/writeClassFile cname bytecode)
+        (Compiler/writeClassFile cname bytecode)
         (.defineClass ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER)
                       (str (:name options-map)) bytecode options))))
 

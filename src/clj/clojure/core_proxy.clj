@@ -14,7 +14,7 @@
  '(clojure.asm ClassWriter ClassVisitor Opcodes Type)
  '(java.lang.reflect Modifier Constructor)
  '(clojure.asm.commons Method GeneratorAdapter)
- '(clojure.lang IProxy Reflector DynamicClassLoader IPersistentMap PersistentHashMap RT))
+ '(clojure.lang Var IProxy Reflector DynamicClassLoader Compiler IPersistentMap PersistentHashMap RT))
 
 (defn method-sig [^java.lang.reflect.Method meth]
   [(. meth (getName)) (seq (. meth (getParameterTypes))) (. meth getReturnType)])
@@ -44,204 +44,288 @@
           [(Integer/toHexString (hash inames))])))))
 
 (defn- generate-proxy [^Class super interfaces]
-  (let [cv (new ClassWriter (. ClassWriter COMPUTE_MAXS))
-        cname (.replace (proxy-name super interfaces) \. \/) ;(str "clojure/lang/" (gensym "Proxy__"))
-        ctype (. Type (getObjectType cname))
-        iname (fn [^Class c] (.. Type (getType c) (getInternalName)))
-        fmap "__clojureFnMap"
-        totype (fn [^Class c] (. Type (getType c)))
-        to-types (fn [cs] (if (pos? (count cs))
-                            (into-array (map totype cs))
-                            (make-array Type 0)))
-        super-type ^Type (totype super)
-        imap-type ^Type (totype IPersistentMap)
-        ifn-type (totype clojure.lang.IFn)
-        obj-type (totype Object)
-        sym-type (totype clojure.lang.Symbol)
-        rt-type  (totype clojure.lang.RT)
-        ex-type  (totype java.lang.UnsupportedOperationException)
-        gen-bridge
-        (fn [^java.lang.reflect.Method meth ^java.lang.reflect.Method dest]
-            (let [pclasses (. meth (getParameterTypes))
-                  ptypes (to-types pclasses)
-                  rtype ^Type (totype (. meth (getReturnType)))
-                  m (new Method (. meth (getName)) rtype ptypes)
-                  dtype (totype (.getDeclaringClass dest))
-                  dm (new Method (. dest (getName)) (totype (. dest (getReturnType))) (to-types (. dest (getParameterTypes))))
-                  gen (new GeneratorAdapter (bit-or (. Opcodes ACC_PUBLIC) (. Opcodes ACC_BRIDGE)) m nil nil cv)]
-              (. gen (visitCode))
-              (. gen (loadThis))
-              (dotimes [i (count ptypes)]
+  (let [cv (new ClassWriter (. ClassWriter COMPUTE_MAXS))]
+    (binding [*source-writer* (.getSc cv)]
+      (let [sname (proxy-name super interfaces)
+            cname (.replace sname \. \/) ;(str "clojure/lang/" (gensym "Proxy__"))
+            ctype (. Type (getObjectType cname))
+            lastdot (.lastIndexOf sname ".")
+            classname (subs sname (inc lastdot))
+            packagename (subs sname 0 lastdot)
+            iname (fn [^Class c] (.. Type (getType c) (getInternalName)))
+            fmap "__clojureFnMap"
+            totype (fn [^Class c] (. Type (getType c)))
+            to-types (fn [cs] (if (pos? (count cs))
+                                (into-array (map totype cs))
+                                (make-array Type 0)))
+            super-type ^Type (totype super)
+            imap-type ^Type (totype IPersistentMap)
+            ifn-type (totype clojure.lang.IFn)
+            obj-type (totype Object)
+            sym-type (totype clojure.lang.Symbol)
+            rt-type  (totype clojure.lang.RT)
+            ex-type  (totype java.lang.UnsupportedOperationException)
+            gen-bridge
+            (fn [^java.lang.reflect.Method meth ^java.lang.reflect.Method dest]
+              (let [pclasses (. meth (getParameterTypes))
+                    ptypes (to-types pclasses)
+                    rclass (. meth (getReturnType))
+                    rtype ^Type (totype rclass)
+                    mname (. meth (getName))
+                    m (new Method mname rtype ptypes)
+                    dtype (totype (.getDeclaringClass dest))
+                    dm (new Method (. dest (getName)) (totype (. dest (getReturnType))) (to-types (. dest (getParameterTypes))))
+                    gen (new GeneratorAdapter (bit-or (. Opcodes ACC_PUBLIC) (. Opcodes ACC_BRIDGE)) m nil nil cv)]
+                (comment (Compiler/emitSource (str "public " (.getCanonicalName rclass) " " mname "("              
+                                                   (apply str (interpose ", " (map #(str (.getCanonicalName (nth pclasses %)) " p" %) (range (count pclasses))))) ") {"))
+                         (Compiler/tab))
+                (. gen (visitCode))
+                (. gen (loadThis))
+                (dotimes [i (count ptypes)]
                   (. gen (loadArg i)))
-              (if (-> dest .getDeclaringClass .isInterface)
-                (. gen (invokeInterface dtype dm))
-                (. gen (invokeVirtual dtype dm)))
-              (. gen (returnValue))
-              (. gen (endMethod))))
-        gen-method
-        (fn [^java.lang.reflect.Method meth else-gen]
-            (let [pclasses (. meth (getParameterTypes))
-                  ptypes (to-types pclasses)
-                  rtype ^Type (totype (. meth (getReturnType)))
-                  m (new Method (. meth (getName)) rtype ptypes)
-                  gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
-                  else-label (. gen (newLabel))
-                  end-label (. gen (newLabel))
-                  decl-type (. Type (getType (. meth (getDeclaringClass))))]
-              (. gen (visitCode))
-              (if (> (count pclasses) 18)
-                (else-gen gen m)
-                (do
-                  (. gen (loadThis))
-                  (. gen (getField ctype fmap imap-type))
+                (if (-> dest .getDeclaringClass .isInterface)
+                  (. gen (invokeInterface dtype dm))
+                  (. gen (invokeVirtual dtype dm)))
+                (comment (Compiler/emitSource (str (if (= (.getCanonicalName rclass) "void") "" "return ")
+                                                   "super." mname "(" (apply str (interpose ", " (map #(str "p" %) (range (count pclasses))))) ");"))
+                         (Compiler/untab)
+                         (Compiler/emitSource "}"))
+                (. gen (returnValue))
+                (. gen (endMethod))))
+            gen-method
+            (fn [^java.lang.reflect.Method meth else-gen]
+              (let [pclasses (. meth (getParameterTypes))
+                    abstract? (Modifier/isAbstract (.getModifiers meth))
+                    ptypes (to-types pclasses)
+                    rclass (. meth (getReturnType))
+                    extypes (. meth (getExceptionTypes))
+                    exdecl (reduce1 str (interpose ", " (map #(.getCanonicalName %) extypes)))
+                    rcanonical (.getCanonicalName rclass)
+                    rtype ^Type (totype rclass)
+                    mname (. meth (getName))
+                    m (new Method mname rtype ptypes)
+                    gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
+                    else-label (. gen (newLabel))
+                    end-label (. gen (newLabel))
+                    decl-type (. Type (getType (. meth (getDeclaringClass))))]
+                (. gen (visitCode))
+                (Compiler/emitSource (str "public " (.getCanonicalName rclass) " " mname  "("
+                                          (apply str (interpose ", " (map #(str (.getCanonicalName (nth pclasses %)) " p" %) (range (count pclasses))))) ")"
+                                          (if (empty? exdecl) "" (str " throws " exdecl " ")) " {"))
+                (Compiler/tab)
+                (if (> (count pclasses) 18)
+                  (else-gen gen m)
+                  (do
+                    (. gen (loadThis))
+                    (. gen (getField ctype fmap imap-type))
 
-                  (. gen (push (. meth (getName))))
+                    (. gen (push mname))
                                         ;lookup fn in map
-                  (. gen (invokeStatic rt-type (. Method (getMethod "Object get(Object, Object)"))))
-                  (. gen (dup))
-                  (. gen (ifNull else-label))
+                    (Compiler/emitSource (str "final Object value = RT.get(this.__clojureFnMap, \"" mname "\");"))
+                    (. gen (invokeStatic rt-type (. Method (getMethod "Object get(Object, Object)"))))
+                    (. gen (dup))
+                    (. gen (ifNull else-label))
                                         ;if found
-                  (.checkCast gen ifn-type)
-                  (. gen (loadThis))
+                    (.checkCast gen ifn-type)
+                    (. gen (loadThis))
                                         ;box args
-                  (dotimes [i (count ptypes)]
+                    (dotimes [i (count ptypes)]
                       (. gen (loadArg i))
-                    (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i) "")))
+                      (. clojure.lang.Compiler$HostExpr (emitBoxReturn nil gen (nth pclasses i) "")))
                                         ;call fn
-                  (. gen (invokeInterface ifn-type (new Method "invoke" obj-type
-                                                        (into-array (cons obj-type
-                                                                          (replicate (count ptypes) obj-type))))))
+                    (. gen (invokeInterface ifn-type (new Method "invoke" obj-type
+                                                          (into-array (cons obj-type
+                                                                            (replicate (count ptypes) obj-type))))))
                                         ;unbox return
-                  (. gen (unbox rtype))
-                  (when (= (. rtype (getSort)) (. Type VOID))
-                    (. gen (pop)))
-                  (. gen (goTo end-label))
+                    ;return (value != null) ? ((IMapEntry)((IFn)value).invoke(this, o)) : super.entryAt(o);
+                    (let [param-list (apply str (interpose ", " (map #(str "p" %) (range (count pclasses)))))]
+                      (if (= rcanonical "void")
+                        (Compiler/emitSource (str "if (value != null) {" "((IFn)value).invoke(this"
+                                                  (if (empty? param-list) "" ", ") param-list "); } " (if abstract? "" (str "else { super." mname "(" param-list "); }"))))
+                        (Compiler/emitSource (str "return (value != null) ? "  "(" rcanonical ")"
+                                                  (. gen (unbox rtype (str "((IFn)value).invoke(this" (if (empty? param-list) "" ", ") param-list ")")))
+                                                  " : " (if abstract? "null;" (str "super." mname "(" param-list ");"))))))
+                    (. gen (unbox rtype))
+                    (when (= (. rtype (getSort)) (. Type VOID))
+                      (. gen (pop)))
+                    (. gen (goTo end-label))
 
                                         ;else call supplied alternative generator
-                  (. gen (mark else-label))
-                  (. gen (pop))
+                    (Var/pushThreadBindings {Compiler/STOP_EMIT_SOURCE true})
+                    (. gen (mark else-label))
+                    
+                    (. gen (pop))
 
-                  (else-gen gen m)
+                    (else-gen gen m)
+                    (Var/popThreadBindings)
 
-                  (. gen (mark end-label))))
-              (. gen (returnValue))
-              (. gen (endMethod))))]
+                    (. gen (mark end-label))))
+                (Compiler/untab)
+                (Compiler/emitSource "}")
+                (. gen (returnValue))
+                (. gen (endMethod))))]
+        
+        (Compiler/emitSource (str "package " packagename ";"))
+        (Compiler/emitSource)
+        (Compiler/emitSource "import java.util.*;")
+        (Compiler/emitSource "import clojure.lang.*;")
+        (Compiler/emitSource)
+        (Compiler/emitSource (str "public class " classname " extends " (.getCanonicalName super)  " implements "
+                                  (apply str (interpose ", " (cons "IProxy" (map #(.getCanonicalName %) interfaces)))) " {"))
+        (Compiler/tab)
 
+        (Compiler/emitSource)
+        (Compiler/emitSource "private volatile IPersistentMap __clojureFnMap;")
+        (Compiler/emitSource)
                                         ;start class definition
-    (. cv (visit (. Opcodes V1_5) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
-                 cname nil (iname super)
-                 (into-array (map iname (cons IProxy interfaces)))))
+        (. cv (visit (. Opcodes V1_5) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
+                     cname nil (iname super)
+                     (into-array (map iname (cons IProxy interfaces)))))
                                         ;add field for fn mappings
-    (. cv (visitField (+ (. Opcodes ACC_PRIVATE) (. Opcodes ACC_VOLATILE))
-                      fmap (. imap-type (getDescriptor)) nil nil))
+        (. cv (visitField (+ (. Opcodes ACC_PRIVATE) (. Opcodes ACC_VOLATILE))
+                          fmap (. imap-type (getDescriptor)) nil nil))
                                         ;add ctors matching/calling super's
-    (doseq [^Constructor ctor (. super (getDeclaredConstructors))]
-        (when-not (. Modifier (isPrivate (. ctor (getModifiers))))
-          (let [ptypes (to-types (. ctor (getParameterTypes)))
-                m (new Method "<init>" (. Type VOID_TYPE) ptypes)
-                gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
-            (. gen (visitCode))
+        (doseq [^Constructor ctor (. super (getDeclaredConstructors))]
+          (when-not (. Modifier (isPrivate (. ctor (getModifiers))))
+            (let [pclasses (. ctor (getParameterTypes))
+                  ptypes (to-types pclasses)
+                  m (new Method "<init>" (. Type VOID_TYPE) ptypes)
+                  gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
+              (. gen (visitCode))
+              (Compiler/emitSource (str "public " classname "("
+                                        (apply str (interpose ", " (map #(str (.getCanonicalName (nth pclasses %)) " p" %) (range (count pclasses))))) ") {"))
+              (Compiler/tab)
                                         ;call super ctor
-            (. gen (loadThis))
-            (. gen (dup))
-            (. gen (loadArgs))
-            (. gen (invokeConstructor super-type m))
+              (. gen (loadThis))
+              (. gen (dup))
+              (. gen (loadArgs))
+              (. gen (invokeConstructor super-type m))
+              (Compiler/emitSource (str "super(" (apply str (interpose ", " (map #(str "p" %) (range (count pclasses))))) ");"))
+              
+              (Compiler/untab)
+              (Compiler/emitSource "}")
 
-            (. gen (returnValue))
-            (. gen (endMethod)))))
+              (. gen (returnValue))
+              (. gen (endMethod)))))
                                         ;add IProxy methods
-    (let [m (. Method (getMethod "void __initClojureFnMappings(clojure.lang.IPersistentMap)"))
-          gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
-      (. gen (visitCode))
-      (. gen (loadThis))
-      (. gen (loadArgs))
-      (. gen (putField ctype fmap imap-type))
+        (let [m (. Method (getMethod "void __initClojureFnMappings(clojure.lang.IPersistentMap)"))
+              gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
+          (. gen (visitCode))
+          (. gen (loadThis))
+          (. gen (loadArgs))
+          (. gen (putField ctype fmap imap-type))
 
-      (. gen (returnValue))
-      (. gen (endMethod)))
-    (let [m (. Method (getMethod "void __updateClojureFnMappings(clojure.lang.IPersistentMap)"))
-          gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
-      (. gen (visitCode))
-      (. gen (loadThis))
-      (. gen (dup))
-      (. gen (getField ctype fmap imap-type))
-      (.checkCast gen (totype clojure.lang.IPersistentCollection))
-      (. gen (loadArgs))
-      (. gen (invokeInterface (totype clojure.lang.IPersistentCollection)
-                              (. Method (getMethod "clojure.lang.IPersistentCollection cons(Object)"))))
-      (. gen (checkCast imap-type))
-      (. gen (putField ctype fmap imap-type))
+          (. gen (returnValue))
+          (. gen (endMethod)))
 
-      (. gen (returnValue))
-      (. gen (endMethod)))
-    (let [m (. Method (getMethod "clojure.lang.IPersistentMap __getClojureFnMappings()"))
-          gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
-      (. gen (visitCode))
-      (. gen (loadThis))
-      (. gen (getField ctype fmap imap-type))
-      (. gen (returnValue))
-      (. gen (endMethod)))
+        (Compiler/emitSource (str "public void __initClojureFnMappings(final IPersistentMap _clojureFnMap) {"))
+        (Compiler/tab)
+        (Compiler/emitSource "this.__clojureFnMap = _clojureFnMap;")
+        (Compiler/untab)
+        (Compiler/emitSource (str "}"))
+
+        (let [m (. Method (getMethod "void __updateClojureFnMappings(clojure.lang.IPersistentMap)"))
+              gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
+          (. gen (visitCode))
+          (. gen (loadThis))
+          (. gen (dup))
+          (. gen (getField ctype fmap imap-type))
+          (.checkCast gen (totype clojure.lang.IPersistentCollection))
+          (. gen (loadArgs))
+          (. gen (invokeInterface (totype clojure.lang.IPersistentCollection)
+                                  (. Method (getMethod "clojure.lang.IPersistentCollection cons(Object)"))))
+          (. gen (checkCast imap-type))
+          (. gen (putField ctype fmap imap-type))
+
+          (. gen (returnValue))
+          (. gen (endMethod)))
+
+        (Compiler/emitSource (str "public void __updateClojureFnMappings(final IPersistentMap persistentMap) {"))
+        (Compiler/tab)
+        (Compiler/emitSource "this.__clojureFnMap = (IPersistentMap)((IPersistentCollection)this.__clojureFnMap).cons(persistentMap);")
+        (Compiler/untab)
+        (Compiler/emitSource (str "}"))
+
+        (let [m (. Method (getMethod "clojure.lang.IPersistentMap __getClojureFnMappings()"))
+              gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]
+          (. gen (visitCode))
+          (. gen (loadThis))
+          (. gen (getField ctype fmap imap-type))
+          (. gen (returnValue))
+          (. gen (endMethod)))
+
+        (Compiler/emitSource (str "public IPersistentMap __getClojureFnMappings() {"))
+        (Compiler/tab)
+        (Compiler/emitSource "return this.__clojureFnMap;")
+        (Compiler/untab)
+        (Compiler/emitSource (str "}"))
 
                                         ;calc set of supers' non-private instance methods
-    (let [[mm considered]
-            (loop [mm {} considered #{} c super]
-              (if c
-                (let [[mm considered]
-                      (loop [mm mm
-                             considered considered
-                             meths (concat
-                                    (seq (. c (getDeclaredMethods)))
-                                    (seq (. c (getMethods))))]
-                        (if (seq meths)
-                          (let [^java.lang.reflect.Method meth (first meths)
-                                mods (. meth (getModifiers))
-                                mk (method-sig meth)]
-                            (if (or (considered mk)
-                                    (not (or (Modifier/isPublic mods) (Modifier/isProtected mods)))
-                                    ;(. Modifier (isPrivate mods))
-                                    (. Modifier (isStatic mods))
-                                    (. Modifier (isFinal mods))
-                                    (= "finalize" (.getName meth)))
-                              (recur mm (conj considered mk) (next meths))
-                              (recur (assoc mm mk meth) (conj considered mk) (next meths))))
-                          [mm considered]))]
-                  (recur mm considered (. c (getSuperclass))))
-                [mm considered]))
-          ifaces-meths (into1 {}
-                         (for [^Class iface interfaces meth (. iface (getMethods))
-                               :let [msig (method-sig meth)] :when (not (considered msig))]
-                           {msig meth}))
-          mgroups (group-by-sig (concat mm ifaces-meths))
-          rtypes (map #(most-specific (keys %)) mgroups)
-          mb (map #(vector (%1 %2) (vals (dissoc %1 %2))) mgroups rtypes)
-          bridge? (reduce1 into1 #{} (map second mb))
-          ifaces-meths (remove bridge? (vals ifaces-meths))
-          mm (remove bridge? (vals mm))]
+        (let [[mm considered]
+              (loop [mm {} considered #{} c super]
+                (if c
+                  (let [[mm considered]
+                        (loop [mm mm
+                               considered considered
+                               meths (concat
+                                      (seq (. c (getDeclaredMethods)))
+                                      (seq (. c (getMethods))))]
+                          (if (seq meths)
+                            (let [^java.lang.reflect.Method meth (first meths)
+                                  mods (. meth (getModifiers))
+                                  mk (method-sig meth)]
+                              (if (or (considered mk)
+                                      (not (or (Modifier/isPublic mods) (Modifier/isProtected mods)))
+                                        ;(. Modifier (isPrivate mods))
+                                      (. Modifier (isStatic mods))
+                                      (. Modifier (isFinal mods))
+                                      (= "finalize" (.getName meth)))
+                                (recur mm (conj considered mk) (next meths))
+                                (recur (assoc mm mk meth) (conj considered mk) (next meths))))
+                            [mm considered]))]
+                    (recur mm considered (. c (getSuperclass))))
+                  [mm considered]))
+              ifaces-meths (into1 {}
+                                  (for [^Class iface interfaces meth (. iface (getMethods))
+                                        :let [msig (method-sig meth)] :when (not (considered msig))]
+                                    {msig meth}))
+              mgroups (group-by-sig (concat mm ifaces-meths))
+              rtypes (map #(most-specific (keys %)) mgroups)
+              mb (map #(vector (%1 %2) (vals (dissoc %1 %2))) mgroups rtypes)
+              bridge? (reduce1 into1 #{} (map second mb))
+              ifaces-meths (remove bridge? (vals ifaces-meths))
+              mm (remove bridge? (vals mm))]
                                         ;add methods matching supers', if no mapping -> call super
-      (doseq [[^java.lang.reflect.Method dest bridges] mb
-              ^java.lang.reflect.Method meth bridges]
-          (gen-bridge meth dest))
-      (doseq [^java.lang.reflect.Method meth mm]
-          (gen-method meth
-                      (fn [^GeneratorAdapter gen ^Method m]
+          (doseq [[^java.lang.reflect.Method dest bridges] mb
+                  ^java.lang.reflect.Method meth bridges]
+            (gen-bridge meth dest))
+          (doseq [^java.lang.reflect.Method meth mm]
+            (gen-method meth
+                        (fn [^GeneratorAdapter gen ^Method m]
                           (. gen (loadThis))
                                         ;push args
-                        (. gen (loadArgs))
+                          (. gen (loadArgs))
                                         ;call super
-                        (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL)
-                                                (. super-type (getInternalName))
-                                                (. m (getName))
-                                                (. m (getDescriptor)))))))
+                          (Compiler/emitSource (str "return " "super." (. meth (getName)) "("
+                                                    (apply str (interpose ", " (map #(str "p" %) (range (count (. meth (getParameterTypes)))))))  ");"))
+                          (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL)
+                                                  (. super-type (getInternalName))
+                                                  (. m (getName))
+                                                  (. m (getDescriptor)))))))
 
                                         ;add methods matching interfaces', if no mapping -> throw
-      (doseq [^java.lang.reflect.Method meth ifaces-meths]
-                (gen-method meth
-                            (fn [^GeneratorAdapter gen ^Method m]
-                                (. gen (throwException ex-type (. m (getName))))))))
+          (doseq [^java.lang.reflect.Method meth ifaces-meths]
+            (gen-method meth
+                        (fn [^GeneratorAdapter gen ^Method m]
+                          (. gen (throwException ex-type (. m (getName))))))))
 
                                         ;finish class def
-    (. cv (visitEnd))
-    [cname (. cv toByteArray)]))
+        (. cv (visitEnd))
+        (Compiler/untab)
+        (Compiler/emitSource "}")
+        (when *compile-files*
+          (Compiler/writeSourceFile cname (str *source-writer*)))
+        [cname (. cv toByteArray)]))))
 
 (defn- get-super-and-interfaces [bases]
   (if (. ^Class (first bases) (isInterface))
