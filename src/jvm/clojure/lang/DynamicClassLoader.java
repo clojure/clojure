@@ -13,13 +13,11 @@
 package clojure.lang;
 
 import java.lang.ref.Reference;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.net.URLClassLoader;
-import java.net.URL;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamicClassLoader extends URLClassLoader{
 HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();

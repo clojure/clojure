@@ -28,7 +28,6 @@ import java.io.Writer;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -386,6 +385,7 @@ public class RT {
 
   public static void loadResourceScript(String name, boolean failIfNotFound)
       throws IOException {
+    ClassLoader cl = new clojure.lang.DynamicClassLoader(null);
     loadResourceScript(RT.class, name, failIfNotFound);
   }
 
@@ -417,10 +417,15 @@ public class RT {
 
   static public long lastModified(URL url, String libfile) throws IOException {
     if (url.getProtocol().equals("jar")) {
-      return ((JarURLConnection) url.openConnection()).getJarFile()
-          .getEntry(libfile).getTime();
+      return (Long) Reflector.invokeInstanceMethod(Reflector
+          .invokeInstanceMethod(Reflector.invokeInstanceMethod(Reflector
+              .invokeInstanceMethod(url, "openConnection", new Object[0]),
+              "getJarFile", new Object[0]), "getEntry",
+              new Object[] { libfile }), "getTime", new Object[0]);
     } else {
-      return url.openConnection().getLastModified();
+      return (Long) Reflector.invokeInstanceMethod(
+          Reflector.invokeInstanceMethod(url, "openConnection", new Object[0]),
+          "getLastModified", new Object[0]);
     }
   }
 
@@ -505,7 +510,7 @@ public class RT {
 
   // Load a library in the System ClassLoader instead of Clojure's own.
   public static void loadLibrary(String libname) {
-    System.loadLibrary(libname);
+    Reflector.invokeStaticMethod(System.class, "loadLibrary", new Object[] {libname});
   }
 
   // //////////// Collections support /////////////////////////////////
@@ -2252,5 +2257,9 @@ public class RT {
   static public Object[] aclone(Object[] xs) {
     return xs.clone();
   }
+
+  public static native Object NSClassFromString(String s) /*-[
+                                                          return NSClassFromString(s);
+                                                          ]-*/;
 
 }
