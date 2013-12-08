@@ -302,6 +302,7 @@ public class Compiler implements Opcodes {
 
     SourceWriter sc = (SourceWriter) SOURCE_WRITER.deref();
     if (sc != null) {
+      source = source.replaceAll(COMPILE_STUB_PREFIX + ".", ""); // TODO ?
       sc.println(source);
     }
   }
@@ -1951,7 +1952,7 @@ public class Compiler implements Opcodes {
             + statement(context);
       } else if (n instanceof Long) {
         gen.push(n.longValue());
-        return ret(context) + String.valueOf(n.longValue())
+        return ret(context) + String.valueOf(n.longValue()) + "L"
             + statement(context);
       }
       throw new RuntimeException();
@@ -4874,7 +4875,8 @@ public class Compiler implements Opcodes {
         gen.push(((Integer) value).intValue());
         gen.invokeStatic(Type.getType(Integer.class),
             Method.getMethod("Integer valueOf(int)"));
-        str = "(" + String.valueOf(value) + ")";
+        str = ((Integer) value).intValue() < 0 ? "(" + String.valueOf(value)
+            + ")" : String.valueOf(value);
       } else if (value instanceof Long) {
         gen.push(((Long) value).longValue());
         gen.invokeStatic(Type.getType(Long.class),
@@ -4885,7 +4887,8 @@ public class Compiler implements Opcodes {
         gen.push(((Double) value).doubleValue());
         gen.invokeStatic(Type.getType(Double.class),
             Method.getMethod("Double valueOf(double)"));
-        str = String.valueOf(value);
+        str = ((Double) value).intValue() < 0 ? "(" + String.valueOf(value)
+            + ")" : String.valueOf(value);
       } else if (value instanceof Character) {
         gen.push(((Character) value).charValue());
         gen.invokeStatic(Type.getType(Character.class),
@@ -5847,9 +5850,9 @@ public class Compiler implements Opcodes {
       untab();
       emitSource("}");
       untab();
-      emitSource("} catch (Exception e) {");
+      emitSource("} catch (Exception ___e) {");
       tab();
-      emitSource("throw Util.sneakyThrow(e);");
+      emitSource("throw Util.sneakyThrow(___e);");
       untab();
       emitSource("}");
       untab();
@@ -6058,9 +6061,9 @@ public class Compiler implements Opcodes {
       gen.endMethod();
 
       untab();
-      emitSource("} catch (Exception e) {");
+      emitSource("} catch (Exception ___e) {");
       tab();
-      emitSource("throw Util.sneakyThrow(e);");
+      emitSource("throw Util.sneakyThrow(___e);");
       untab();
       emitSource("}");
 
@@ -6416,8 +6419,7 @@ public class Compiler implements Opcodes {
         lbset = (IPersistentSet) lbset.cons(bi.binding);
         String val = bi.init.emit(C.EXPRESSION, objx, gen);
         gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
-        emitSource("IFn " + bi.binding.name + bi.binding.idx + " = " + val
-            + ";");
+        emitSource("IFn " + bi.binding.print() + " = " + val + ";");
       }
 
       for (int i = 0; i < bindingInits.count(); i++) {
@@ -6614,18 +6616,20 @@ public class Compiler implements Opcodes {
         BindingInit bi = (BindingInit) bindingInits.nth(i);
         Class primc = maybePrimitiveType(bi.init);
         String val;
+        boolean typed = true;
         if (primc != null) {
           val = ((MaybePrimitiveExpr) bi.init).emitUnboxed(C.EXPRESSION, objx,
               gen);
           gen.visitVarInsn(Type.getType(primc).getOpcode(Opcodes.ISTORE),
               bi.binding.idx);
-          emitSource(primc.getCanonicalName() + " " + bi.binding.name
-              + bi.binding.idx + " = " + val + ";");
+          emitSource((typed ? primc.getCanonicalName() + " " : "")
+              + bi.binding.print() + " = " + val + ";");
         } else {
           val = bi.init.emit(C.EXPRESSION, objx, gen);
           gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE),
               bi.binding.idx);
-          emitSource("Object " + bi.binding.print() + " = " + val + ";");
+          emitSource((typed ? "Object " : "") + bi.binding.print() + " = "
+              + val + ";");
         }
         bindingLabels.put(bi, gen.mark());
       }
@@ -7851,8 +7855,8 @@ public class Compiler implements Opcodes {
       tab();
       emitSource("load();");
       untab();
-      emitSource("} catch (Exception e) {");
-      emitSource("throw new RuntimeException(e);");
+      emitSource("} catch (Exception ___e) {");
+      emitSource("throw new RuntimeException(___e);");
       emitSource("} finally {");
       tab();
       emitSource("Var.popThreadBindings();");
@@ -8941,9 +8945,16 @@ public class Compiler implements Opcodes {
         } else if (RT.contains(skipCheck, i) == RT.T) {
           emitSource("if (true) {");
           tab();
-          emitSource((context == C.EXPRESSION ? r + " = " : "") + ret(context)
-              + emitExpr(objx, gen, thens.get(i), emitUnboxed)
-              + statement(context) + (context == C.EXPRESSION ? ";" : ""));
+          String e = emitExpr(objx, gen, thens.get(i), emitUnboxed);
+          if (e != null) {
+            if (thens.get(i) instanceof LiteralExpr && context == C.STATEMENT) {
+              // IGNORE Literals with no assignment
+            } else {
+              emitSource((context == C.EXPRESSION ? r + " = " : "")
+                  + ret(context) + e + statement(context)
+                  + (context == C.EXPRESSION ? ";" : ""));
+            }
+          }
           untab();
           emitSource("}");
         } else {
@@ -8961,8 +8972,12 @@ public class Compiler implements Opcodes {
       gen.mark(defaultLabel);
       String e = emitExpr(objx, gen, defaultExpr, emitUnboxed);
       if (e != null) {
-        emitSource((context == C.EXPRESSION ? r + " = " : "") + ret(context)
-            + e + statement(context) + (context == C.EXPRESSION ? ";" : ""));
+        if (defaultExpr instanceof LiteralExpr && context == C.STATEMENT) {
+          // IGNORE Literals with no assignment
+        } else {
+          emitSource((context == C.EXPRESSION ? r + " = " : "") + ret(context)
+              + e + statement(context) + (context == C.EXPRESSION ? ";" : ""));
+        }
       }
       gen.mark(endLabel);
       if (context == C.STATEMENT)
@@ -9024,23 +9039,36 @@ public class Compiler implements Opcodes {
         String tval = test.emit(C.EXPRESSION, objx, gen);
         gen.invokeStatic(UTIL_TYPE, equivMethod);
         gen.ifZCmp(GeneratorAdapter.EQ, defaultLabel);
-        String body = emitExpr(objx, gen, then, emitUnboxed);
-
         emitSource("if (Util.equiv(" + val + ", " + tval + ")) {");
         tab();
-        emitSource((context == C.EXPRESSION ? r + " = " : "") + ret(context)
-            + body + statement(context) + (context == C.EXPRESSION ? ";" : ""));
+        String body = emitExpr(objx, gen, then, emitUnboxed);
+        if (body != null) {
+          if (then instanceof LiteralExpr && context == C.STATEMENT) {
+            // IGNORE
+          } else {
+            emitSource((context == C.EXPRESSION ? r + " = " : "")
+                + ret(context) + body + statement(context)
+                + (context == C.EXPRESSION ? ";" : ""));
+          }
+        }
         untab();
         emitSource("}");
       } else if (exprType == Type.LONG_TYPE) {
         String val = ((NumberExpr) test).emitUnboxed(C.EXPRESSION, objx, gen);
         String tval = expr.emitUnboxed(C.EXPRESSION, objx, gen);
         gen.ifCmp(Type.LONG_TYPE, GeneratorAdapter.NE, defaultLabel);
-        String body = emitExpr(objx, gen, then, emitUnboxed);
         emitSource("if (" + val + " == " + tval + ") {");
         tab();
-        emitSource((context == C.EXPRESSION ? r + " = " : "") + ret(context)
-            + body + statement(context) + (context == C.EXPRESSION ? ";" : ""));
+        String body = emitExpr(objx, gen, then, emitUnboxed);
+        if (body != null) {
+          if (then instanceof LiteralExpr && context == C.STATEMENT) {
+            // IGNORE
+          } else {
+            emitSource((context == C.EXPRESSION ? r + " = " : "")
+                + ret(context) + body + statement(context)
+                + (context == C.EXPRESSION ? ";" : ""));
+          }
+        }
         untab();
         emitSource("}");
       } else if (exprType == Type.INT_TYPE || exprType == Type.SHORT_TYPE
@@ -9053,13 +9081,22 @@ public class Compiler implements Opcodes {
         }
         String val = ((NumberExpr) test).n.toString();
         String tval = expr.b.print();
-        // else direct match
-        String body = emitExpr(objx, gen, then, emitUnboxed);
 
         emitSource("if (" + val + " == " + tval + ") {");
         tab();
-        emitSource((context == C.EXPRESSION ? r + " = " : "") + ret(context)
-            + body + statement(context) + (context == C.EXPRESSION ? ";" : ""));
+
+        // else direct match
+        String body = emitExpr(objx, gen, then, emitUnboxed);
+
+        if (body != null) {
+          if (then instanceof LiteralExpr && context == C.STATEMENT) {
+            // IGNORE
+          } else {
+            emitSource((context == C.EXPRESSION ? r + " = " : "")
+                + ret(context) + body + statement(context)
+                + (context == C.EXPRESSION ? ";" : ""));
+          }
+        }
         untab();
         emitSource("}");
       } else {
@@ -9090,9 +9127,15 @@ public class Compiler implements Opcodes {
         gen.ifZCmp(GeneratorAdapter.EQ, defaultLabel);
       }
       tab();
-      emitSource((context == C.EXPRESSION ? r + " = " : "") + ret(context)
-          + emitExpr(objx, gen, then, emitUnboxed) + statement(context)
-          + (context == C.EXPRESSION ? ";" : ""));
+      String e = emitExpr(objx, gen, then, emitUnboxed);
+      if (e != null) {
+        if (then instanceof LiteralExpr && context == C.STATEMENT) {
+          // IGNORE
+        } else {
+          emitSource((context == C.EXPRESSION ? r + " = " : "") + ret(context)
+              + e + statement(context) + (context == C.EXPRESSION ? ";" : ""));
+        }
+      }
       untab();
       emitSource("}");
     }

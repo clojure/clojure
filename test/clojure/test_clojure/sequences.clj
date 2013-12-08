@@ -20,7 +20,7 @@
 
 (deftest test-reduce-from-chunked-into-unchunked
   (= [1 2 \a \b] (into [] (concat [1 2] "ab"))))
- 
+
 (deftest test-reduce
   (let [int+ (fn [a b] (+ (int a) (int b)))
         arange (range 100) ;; enough to cross nodes
@@ -33,13 +33,14 @@
         char-array (into-array Character/TYPE (map char arange))
         double-array (into-array Double/TYPE arange)
         byte-array (into-array Byte/TYPE (map byte arange))
-        int-vec (into (vector-of :int) arange)
-        long-vec (into (vector-of :long) arange)
-        float-vec (into (vector-of :float) arange)
-        char-vec (into (vector-of :char) (map char arange))
-        double-vec (into (vector-of :double) arange)
-        byte-vec (into (vector-of :byte) (map byte arange))
-        all-true (into-array Boolean/TYPE (repeat 10 true))]
+        ;int-vec (into (vector-of :int) arange)
+        ;long-vec (into (vector-of :long) arange)
+        ;float-vec (into (vector-of :float) arange)
+        ;char-vec (into (vector-of :char) (map char arange))
+        ;double-vec (into (vector-of :double) arange)
+        ;byte-vec (into (vector-of :byte) (map byte arange))
+        all-true (into-array Boolean/TYPE (repeat 10 true))
+        ]
     (is (== 4950
            (reduce + arange)
            (reduce + avec)
@@ -51,12 +52,13 @@
            (reduce int+ char-array)
            (reduce + double-array)
            (reduce int+ byte-array)
-           (reduce + int-vec)
-           (reduce + long-vec)
-           (reduce + float-vec)
-           (reduce int+ char-vec)
-           (reduce + double-vec)
-           (reduce int+ byte-vec)))
+           ;(reduce + int-vec)
+           ;(reduce + long-vec)
+           ;(reduce + float-vec)
+           ;(reduce int+ char-vec)
+           ;(reduce + double-vec)
+           ;(reduce int+ byte-vec)
+            ))
     (is (== 4951
            (reduce + 1 arange)
            (reduce + 1 avec)
@@ -68,12 +70,13 @@
            (reduce int+ 1 char-array)
            (reduce + 1 double-array)
            (reduce int+ 1 byte-array)
-           (reduce + 1 int-vec)
-           (reduce + 1 long-vec)
-           (reduce + 1 float-vec)
-           (reduce int+ 1 char-vec)
-           (reduce + 1 double-vec)
-           (reduce int+ 1 byte-vec)))
+           ;(reduce + 1 int-vec)
+           ;(reduce + 1 long-vec)
+           ;(reduce + 1 float-vec)
+           ;(reduce int+ 1 char-vec)
+           ;(reduce + 1 double-vec)
+           ;(reduce int+ 1 byte-vec)
+            ))
     (is (= true
            (reduce #(and %1 %2) all-true)
            (reduce #(and %1 %2) true all-true)))))
@@ -118,7 +121,7 @@
 (deftest test-seq
   (is (not (seq? (seq []))))
   (is (seq? (seq [1 2])))
-  
+
   (are [x y] (= x y)
     (seq nil) nil
     (seq [nil]) '(nil)
@@ -208,7 +211,7 @@
 ;The first element should be the same in each set if preserved.
 (deftest test-empty-sorted
   (let [inv-compare (comp - compare)]
-    (are [x y] (= (first (into (empty x) x)) 
+    (are [x y] (= (first (into (empty x) x))
 		  (first y))
 	 (sorted-set 1 2 3) (sorted-set 1 2 3)
 	 (sorted-set-by inv-compare 1 2 3) (sorted-set-by inv-compare 1 2 3)
@@ -648,7 +651,7 @@
       (distinct "aaab") '(\a \b)
       (distinct "abab") '(\a \b) )
 
-  (are [x] (= (distinct [x x]) [x])   
+  (are [x] (= (distinct [x x]) [x])
       nil
       false true
       0 42
@@ -1069,22 +1072,22 @@
        () [] {} #{}
        (lazy-seq [])
        (into-array []))
-  
+
   (are [x y] (= x y)
        nil (some nil nil)
-       
+
        true (some pos? [1])
        true (some pos? [1 2])
-       
+
        nil (some pos? [-1])
        nil (some pos? [-1 -2])
        true (some pos? [-1 2])
        true (some pos? [1 -2])
-       
+
        :a (some #{:a} [:a :a])
        :a (some #{:a} [:b :a])
        nil (some #{:a} [:b :b])
-       
+
        :a (some #{:a} '(:a :b))
        :a (some #{:a} #{:a :b})
        ))
@@ -1126,7 +1129,7 @@
        [count even? odd?] [count even? odd?]))
 
 (deftest test-group-by
-  (is (= (group-by even? [1 2 3 4 5]) 
+  (is (= (group-by even? [1 2 3 4 5])
 	 {false [1 3 5], true [2 4]})))
 
 (deftest test-partition-by
