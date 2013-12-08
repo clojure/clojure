@@ -13,12 +13,7 @@ public class Demo {
       // RT.forceClass = true;
       RT.doInit();
 
-      RT.load("clojure/test_clojure/reducers");
-//      RT.load("clojure/test_clojure/sequences");
-      RT.load("clojure/test_clojure/special");
-      RT.load("clojure/test_clojure/vars");
-      RT.load("clojure/test_clojure/refs");
-      RT.load("clojure/test_clojure/transients");
+      RT.load("clojure/test_clojure/agents");
 
       RT.var("clojure.test", "run-all-tests").invoke();
 
@@ -53,7 +48,8 @@ public class Demo {
       RT.load("clojure/test");
       RT.load("clojure/java/io");
 
-//      RT.load("clojure/test_clojure/agents");
+      RT.load("clojure/test_clojure/agents");
+      
 //      RT.load("clojure/test_clojure/api");
 //      RT.load("clojure/test_clojure/atoms");
 //      RT.load("clojure/test_clojure/clojure_set");
@@ -74,12 +70,12 @@ public class Demo {
 //      RT.load("clojure/test_clojure/numbers");
 //      RT.load("clojure/test_clojure/other_functions");
       
-      RT.load("clojure/test_clojure/reducers");
-      RT.load("clojure/test_clojure/sequences");
-      RT.load("clojure/test_clojure/special");
-      RT.load("clojure/test_clojure/vars");
-      RT.load("clojure/test_clojure/refs");
-      RT.load("clojure/test_clojure/transients");
+//      RT.load("clojure/test_clojure/reducers");
+//      RT.load("clojure/test_clojure/sequences");
+//      RT.load("clojure/test_clojure/special");
+//      RT.load("clojure/test_clojure/vars");
+//      RT.load("clojure/test_clojure/refs");
+//      RT.load("clojure/test_clojure/transients");
 
       //RT.load("clojure/test_clojure/vectors");
       // RT.load("clojure/test_clojure/def");

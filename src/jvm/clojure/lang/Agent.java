@@ -13,7 +13,6 @@
 package clojure.lang;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Agent extends ARef {
@@ -39,28 +38,28 @@ volatile Object state;
     volatile Keyword errorMode = CONTINUE;
     volatile IFn errorHandler = null;
 
-final private static AtomicLong sendThreadPoolCounter = new AtomicLong(0);
+//final private static AtomicLong sendThreadPoolCounter = new AtomicLong(0);
 
-final private static AtomicLong sendOffThreadPoolCounter = new AtomicLong(0);
+//final private static AtomicLong sendOffThreadPoolCounter = new AtomicLong(0);
 
-volatile public static java.util.concurrent.ExecutorService pooledExecutor =
-	Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors(), 
-		createThreadFactory("clojure-agent-send-pool-%d", sendThreadPoolCounter));
+volatile public static clojure.lang.ExecutorService pooledExecutor =
+	Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
+//,createThreadFactory("clojure-agent-send-pool-%d", sendThreadPoolCounter)
 
-volatile public static java.util.concurrent.ExecutorService soloExecutor = Executors.newCachedThreadPool(
-	createThreadFactory("clojure-agent-send-off-pool-%d", sendOffThreadPoolCounter));
+volatile public static clojure.lang.ExecutorService soloExecutor = Executors.newCachedThreadPool();
+//createThreadFactory("clojure-agent-send-off-pool-%d", sendOffThreadPoolCounter)
 
 final static ThreadLocal<IPersistentVector> nested = new ThreadLocal<IPersistentVector>();
 
-private static java.util.concurrent.ThreadFactory createThreadFactory(final String format, final AtomicLong threadPoolCounter) {
-	return new java.util.concurrent.ThreadFactory() {
-		public Thread newThread(Runnable runnable) {
-			Thread thread = new Thread(runnable);
-			thread.setName(String.format(format, threadPoolCounter.getAndIncrement()));
-			return thread;
-		}
-	};
-}
+//private static java.util.concurrent.ThreadFactory createThreadFactory(final String format, final AtomicLong threadPoolCounter) {
+//	return new java.util.concurrent.ThreadFactory() {
+//		public Thread newThread(Runnable runnable) {
+//			Thread thread = new Thread(runnable);
+//			thread.setName(String.format(format, threadPoolCounter.getAndIncrement()));
+//			return thread;
+//		}
+//	};
+//}
 
 public static void shutdown(){
 	soloExecutor.shutdown();

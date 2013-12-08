@@ -1,7 +1,5 @@
 package clojure.lang;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -9,36 +7,76 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public interface ExecutorService extends Executor {
+public class ExecutorService implements Executor {
 
-  void shutdown();
+  public ExecutorService() {
+  }
 
-  List<Runnable> shutdownNow();
+  public ExecutorService(int i) {
+  }
 
-  boolean isShutdown();
+  public void shutdown() {
+  }
 
-  boolean isTerminated();
+  public Future submit(final Callable callable) {
+    return new Future() {
+      Object r = null;
+      
+      boolean done = false;
+      boolean cancelled = false;
+      
+      Thread t = new Thread() {
+        public void run() {
+          try {
+            r = callable.call();
+            done = true;
+          } catch (Exception e) {
+            throw Util.sneakyThrow(e);
+          }
+        }
+      };
 
-  boolean awaitTermination(long timeout, TimeUnit unit)
-      throws InterruptedException;
+      @Override
+      public boolean cancel(boolean mayInterruptIfRunning) {
+        cancelled = true;
+        // TODO ?
+        return true;
+      }
 
-  <T> Future<T> submit(Callable<T> task);
+      @Override
+      public Object get() throws InterruptedException, ExecutionException {
+        return r;
+      }
 
-  <T> Future<T> submit(Runnable task, T result);
+      @Override
+      public Object get(long timeout, TimeUnit unit)
+          throws InterruptedException, ExecutionException, TimeoutException {
+        long millis = unit.toMillis(timeout);
+        long start = System.currentTimeMillis();
+        while (true) {
+          Thread.sleep(50);
+          if (done) { 
+            return r;
+          } else if (System.currentTimeMillis() - start > millis) {
+            throw new TimeoutException();
+          }
+        }
+      }
 
-  Future<?> submit(Runnable task);
+      @Override
+      public boolean isCancelled() {
+        return cancelled;
+      }
 
-  <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
-      throws InterruptedException;
+      @Override
+      public boolean isDone() {
+        return done;
+      }
+    };
+  }
 
-  <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
-                                long timeout, TimeUnit unit)
-      throws InterruptedException;
-
-  <T> T invokeAny(Collection<? extends Callable<T>> tasks)
-      throws InterruptedException, ExecutionException;
-
-  <T> T invokeAny(Collection<? extends Callable<T>> tasks,
-                  long timeout, TimeUnit unit)
-      throws InterruptedException, ExecutionException, TimeoutException;
+  @Override
+  public void execute(Runnable arg0) {
+    new Thread(arg0).start();
+  }
 }
