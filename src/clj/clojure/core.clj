@@ -4930,6 +4930,25 @@
 (defn- descriptor [^Class c] (clojure.asm.Type/getDescriptor c))
 
 (declare process-annotation)
+(declare process-print-annotation)
+
+(defn- print-annotation-value [v]
+  (cond
+   (vector? v) (str "{" (apply str (interpose ", " (map print-annotation-value v))) "}")
+   (symbol? v) (let [ev (eval v)]
+                 (cond
+                  (instance? java.lang.Enum ev) (str (.getCanonicalName (class ev)) "." (str ev))
+                  (class? ev) (str (.getCanonicalName ev) ".class")
+                  :else (throw (IllegalArgumentException.
+                                (str "Unsupported annotation value: " v " of class " (class ev))))))
+   (seq? v) (let [[nested nv] v
+                  c (resolve nested)]
+              (str "@" (.getCanonicalName c) "("
+                   (process-print-annotation nv) ")"))
+   (string? v) (str "\"" (clojure.lang.Compiler/escapeString ^String v) "\"")
+   (nil? v) ""
+   :else v))
+
 (defn- add-annotation [^clojure.asm.AnnotationVisitor av name v]
   (cond
    (vector? v) (let [avec (.visitArray av name)]
@@ -4948,13 +4967,19 @@
                   nav (.visitAnnotation av name (descriptor c))]
               (process-annotation nav nv)
               (.visitEnd nav))
-   :else (.visit av name v)))
+   :else
+   (.visit av name v)))
 
 (defn- process-annotation [av v]
   (if (map? v)
     (doseq [[k v] v]
       (add-annotation av (name k) v))
     (add-annotation av "value" v)))
+
+(defn- process-print-annotation [v]
+  (if (map? v)
+    (apply str (interpose ", " (map (fn [[k v]] (str (name k) "=" (print-annotation-value v))) v)))
+    (print-annotation-value v)))
 
 (defn- add-annotations
   ([visitor m] (add-annotations visitor m nil))
@@ -4969,6 +4994,10 @@
                                                    (is-runtime-annotation? c))
                         (.visitAnnotation visitor (descriptor c)
                                           (is-runtime-annotation? c)))]
+               (clojure.lang.Compiler/emitSource (str "@" (.getCanonicalName c)
+                                                      (if (= 0 (count (.getDeclaredMethods c)))
+                                                        ""
+                                                        (str "(" (process-print-annotation v) ")"))))
                (process-annotation av v)
                (.visitEnd av))))))))
 

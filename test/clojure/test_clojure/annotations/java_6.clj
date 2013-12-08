@@ -6,7 +6,7 @@
 (definterface Foo (foo []))
 
 (deftype #^{Deprecated true
-            Retention RetentionPolicy/RUNTIME
+            ;Retention RetentionPolicy/RUNTIME
             javax.annotation.processing.SupportedOptions ["foo" "bar" "baz"]
             javax.xml.ws.soap.Addressing {:enabled false :required true}
             WebServiceRefs [(WebServiceRef {:name "fred" :type String})
@@ -14,18 +14,20 @@
   Bar [#^int a
        #^{:tag int
           Deprecated true
-          Retention RetentionPolicy/RUNTIME
-          javax.annotation.processing.SupportedOptions ["foo" "bar" "baz"]
-            javax.xml.ws.soap.Addressing {:enabled false :required true}
-          WebServiceRefs [(WebServiceRef {:name "fred" :type String})
-                            (WebServiceRef {:name "ethel" :mappedName "lucy"})]}
+          ;Retention RetentionPolicy/RUNTIME
+          ;javax.annotation.processing.SupportedOptions ["foo" "bar" "baz"]
+          ;javax.xml.ws.soap.Addressing {:enabled false :required true}
+          ;WebServiceRefs [(WebServiceRef {:name "fred" :type String})
+          ;                  (WebServiceRef {:name "ethel" :mappedName "lucy"})]
+          }
        b]
   Foo (#^{Deprecated true
-          Retention RetentionPolicy/RUNTIME
-          javax.annotation.processing.SupportedOptions ["foo" "bar" "baz"]
-          javax.xml.ws.soap.Addressing {:enabled false :required true}
-          WebServiceRefs [(WebServiceRef {:name "fred" :type String})
-                          (WebServiceRef {:name "ethel" :mappedName "lucy"})]}
+          ;Retention RetentionPolicy/RUNTIME
+          ;javax.annotation.processing.SupportedOptions ["foo" "bar" "baz"]
+          ;javax.xml.ws.soap.Addressing {:enabled false :required true}
+          ;WebServiceRefs [(WebServiceRef {:name "fred" :type String})
+          ;                (WebServiceRef {:name "ethel" :mappedName "lucy"})]
+          }
        foo [this] 42))
 
 (defn annotation->map

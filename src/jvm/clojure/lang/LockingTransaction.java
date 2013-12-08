@@ -12,14 +12,18 @@
 
 package clojure.lang;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.CountDownLatch;
 
-@SuppressWarnings({"SynchronizeOnNonFinalField"})
+//@SuppressWarnings({"SynchronizeOnNonFinalField"})
 public class LockingTransaction{
 
 public static final int RETRY_LIMIT = 10000;

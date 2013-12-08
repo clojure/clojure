@@ -8,15 +8,19 @@ import clojure.lang.Var;
 public class Demo {
 
   public static void main(String[] args) throws Exception {
-    if (true) {
+    if (false) {
       long d = System.currentTimeMillis();
       //RT.forceClass = true;
       RT.doInit();
       
       RT.load("clojure/test_clojure/agents");
-      RT.load("clojure/test_clojure/annotations");
       RT.load("clojure/test_clojure/api");
       RT.load("clojure/test_clojure/atoms");
+      RT.load("clojure/test_clojure/clojure_set");
+      RT.load("clojure/test_clojure/clojure_walk");
+      RT.load("clojure/test_clojure/clojure_xml");
+      RT.load("clojure/test_clojure/clojure_zip");
+      RT.load("clojure/test_clojure/control");
       
       RT.var("clojure.test", "run-all-tests").invoke();
       
@@ -50,15 +54,15 @@ public class Demo {
       RT.load("clojure/java/io");
       
       RT.load("clojure/test_clojure/agents");
-      RT.load("clojure/test_clojure/annotations");
       RT.load("clojure/test_clojure/api");
       RT.load("clojure/test_clojure/atoms");
-//      RT.load("clojure/test_clojure/clojure_set");
-//      RT.load("clojure/test_clojure/clojure_walk");
-//      RT.load("clojure/test_clojure/clojure_xml");
-//      RT.load("clojure/test_clojure/clojure_zip");
-//      RT.load("clojure/test_clojure/control");
+      RT.load("clojure/test_clojure/clojure_set");
+      RT.load("clojure/test_clojure/clojure_walk");
+      RT.load("clojure/test_clojure/clojure_xml");
+      RT.load("clojure/test_clojure/clojure_zip");
+      RT.load("clojure/test_clojure/control");
       
+    //RT.load("clojure/test_clojure/annotations");
 //      RT.load("clojure/test_clojure/def");
 //      RT.load("clojure/test_clojure/delays");
 //      RT.load("clojure/test_clojure/for");

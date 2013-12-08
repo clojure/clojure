@@ -34,11 +34,11 @@ private static Throwable getCauseOrElse(Exception e) {
 	return e;
 }
 
-private static RuntimeException throwCauseOrElseException(Exception e) {
-	if (e.getCause() != null)
-		throw Util.sneakyThrow(e.getCause());
-	throw Util.sneakyThrow(e);
-}
+//private static RuntimeException throwCauseOrElseException(Exception e) {
+//	if (e.getCause() != null)
+//		throw Util.sneakyThrow(e.getCause());
+//	throw Util.sneakyThrow(e);
+//}
 
 private static String noMethodReport(String methodName, Object target){
 	 return "No matching method found: " + methodName
