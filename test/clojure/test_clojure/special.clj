@@ -73,3 +73,12 @@
   (let [{:keys [::s/x ::s/y]} {:clojure.string/x 1 :clojure.string/y 2}]
     (is (= x 1))
     (is (= y 2))))
+
+(deftest quote-with-multiple-args
+  (let [ex (is (thrown? clojure.lang.Compiler$CompilerException
+                        (eval '(quote 1 2 3))))]
+    (is (= '(quote 1 2 3)
+           (-> ex
+               (.getCause)
+               (ex-data)
+               (:form))))))

@@ -1959,7 +1959,17 @@ static class ConstantExpr extends LiteralExpr{
 	}
 
 	static class Parser implements IParser{
+		static Keyword formKey = Keyword.intern("form");
+
 		public Expr parse(C context, Object form){
+			int argCount = RT.count(form) - 1;
+			if(argCount != 1){
+				IPersistentMap exData = new PersistentArrayMap(new Object[]{formKey, form});
+				throw new ExceptionInfo("Wrong number of args (" +
+				                        argCount +
+				                        ") passed to quote",
+				                        exData);
+			}
 			Object v = RT.second(form);
 
 			if(v == null)
