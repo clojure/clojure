@@ -8,7 +8,7 @@ import clojure.lang.Var;
 public class Demo {
 
   public static void main(String[] args) throws Exception {
-    if (true) {
+    if (false) {
       long d = System.currentTimeMillis();
       // RT.forceClass = true;
       RT.doInit();

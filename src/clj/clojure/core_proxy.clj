@@ -76,7 +76,7 @@
                     dtype (totype (.getDeclaringClass dest))
                     dm (new Method (. dest (getName)) (totype (. dest (getReturnType))) (to-types (. dest (getParameterTypes))))
                     gen (new GeneratorAdapter (bit-or (. Opcodes ACC_PUBLIC) (. Opcodes ACC_BRIDGE)) m nil nil cv)]
-                (comment (Compiler/emitSource (str "public " (.getCanonicalName rclass) " " mname "("              
+                (comment (Compiler/emitSource (str "public " (.getCanonicalName rclass) " " mname "("
                                                    (apply str (interpose ", " (map #(str (.getCanonicalName (nth pclasses %)) " p" %) (range (count pclasses))))) ") {"))
                          (Compiler/tab))
                 (. gen (visitCode))
@@ -153,7 +153,7 @@
                                         ;else call supplied alternative generator
                     (Var/pushThreadBindings {Compiler/STOP_EMIT_SOURCE true})
                     (. gen (mark else-label))
-                    
+
                     (. gen (pop))
 
                     (else-gen gen m)
@@ -164,7 +164,7 @@
                 (Compiler/emitSource "}")
                 (. gen (returnValue))
                 (. gen (endMethod))))]
-        
+
         (Compiler/emitSource (str "package " packagename ";"))
         (Compiler/emitSource)
         (Compiler/emitSource "import java.util.*;")
@@ -201,7 +201,7 @@
               (. gen (loadArgs))
               (. gen (invokeConstructor super-type m))
               (Compiler/emitSource (str "super(" (apply str (interpose ", " (map #(str "p" %) (range (count pclasses))))) ");"))
-              
+
               (Compiler/untab)
               (Compiler/emitSource "}")
 
@@ -454,42 +454,40 @@
   [meth & args]
  `(proxy-call-with-super (fn [] (. ~'this ~meth ~@args))  ~'this ~(name meth)))
 
-(defn bean
-  "Takes a Java object and returns a read-only implementation of the
-  map abstraction based upon its JavaBean properties."
-  {:added "1.0"}
-  [^Object x]
-  (let [c (. x (getClass))
-	pmap (reduce1 (fn [m ^java.beans.PropertyDescriptor pd]
-			 (let [name (. pd (getName))
-			       method (. pd (getReadMethod))]
-			   (if (and method (zero? (alength (. method (getParameterTypes)))))
-			     (assoc m (keyword name) (fn [] (clojure.lang.Reflector/prepRet (.getPropertyType pd) (. method (invoke x nil)))))
-			     m)))
-		     {}
-		     (seq (.. java.beans.Introspector
-			      (getBeanInfo c)
-			      (getPropertyDescriptors))))
-	v (fn [k] ((pmap k)))
-        snapshot (fn []
-                   (reduce1 (fn [m e]
-                             (assoc m (key e) ((val e))))
-                           {} (seq pmap)))]
-    (proxy [clojure.lang.APersistentMap]
-           []
-      (containsKey [k] (contains? pmap k))
-      (entryAt [k] (when (contains? pmap k) (new clojure.lang.MapEntry k (v k))))
-      (valAt ([k] (when (contains? pmap k) (v k)))
-	     ([k default] (if (contains? pmap k) (v k) default)))
-      (cons [m] (conj (snapshot) m))
-      (count [] (count pmap))
-      (assoc [k v] (assoc (snapshot) k v))
-      (without [k] (dissoc (snapshot) k))
-      (seq [] ((fn thisfn [plseq]
-		  (lazy-seq
-                   (when-let [pseq (seq plseq)]
-                     (cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
-                           (thisfn (rest pseq)))))) (keys pmap))))))
-
-
-
+(comment
+  (defn bean
+    "Takes a Java object and returns a read-only implementation of the
+    map abstraction based upon its JavaBean properties."
+    {:added "1.0"}
+    [^Object x]
+    (let [c (. x (getClass))
+          pmap (reduce1 (fn [m ^java.beans.PropertyDescriptor pd]
+                          (let [name (. pd (getName))
+                                method (. pd (getReadMethod))]
+                            (if (and method (zero? (alength (. method (getParameterTypes)))))
+                              (assoc m (keyword name) (fn [] (clojure.lang.Reflector/prepRet (.getPropertyType pd) (. method (invoke x nil)))))
+                              m)))
+                        {}
+                        (seq (.. java.beans.Introspector
+                                 (getBeanInfo c)
+                                 (getPropertyDescriptors))))
+          v (fn [k] ((pmap k)))
+          snapshot (fn []
+                     (reduce1 (fn [m e]
+                                (assoc m (key e) ((val e))))
+                              {} (seq pmap)))]
+      (proxy [clojure.lang.APersistentMap]
+        []
+        (containsKey [k] (contains? pmap k))
+        (entryAt [k] (when (contains? pmap k) (new clojure.lang.MapEntry k (v k))))
+        (valAt ([k] (when (contains? pmap k) (v k)))
+               ([k default] (if (contains? pmap k) (v k) default)))
+        (cons [m] (conj (snapshot) m))
+        (count [] (count pmap))
+        (assoc [k v] (assoc (snapshot) k v))
+        (without [k] (dissoc (snapshot) k))
+        (seq [] ((fn thisfn [plseq]
+                   (lazy-seq
+                    (when-let [pseq (seq plseq)]
+                      (cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
+                            (thisfn (rest pseq)))))) (keys pmap)))))))
