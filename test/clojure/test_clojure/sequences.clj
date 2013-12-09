@@ -204,7 +204,7 @@
       1.2 nil
       "abc" nil ))
 
-;Tests that the comparator is preservered
+;Tests that the comparator is preserved
 ;The first element should be the same in each set if preserved.
 (deftest test-empty-sorted
   (let [inv-compare (comp - compare)]
