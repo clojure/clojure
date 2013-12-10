@@ -4899,7 +4899,7 @@
          NIL (Object.) ;nil sentinel since LBQ doesn't support nils
          agt (agent (lazy-seq s)) ; never start with nil; that signifies we've already put eos
          log-error (fn [q e]
-                     (if (.offer q q)
+                     (if (.offer ^BlockingQueue q q)
                        (throw e)
                        e))
          fill (fn [s]

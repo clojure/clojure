@@ -12,7 +12,7 @@ import clojure.lang.Var;
 public class Demo {
 
   public static void main(String[] args) throws Exception {
-    if (false) {
+    if (true) {
       // RT.forceClass = true;
       RT.doInit();
       RT.load("clojure/test_clojure/agents");
