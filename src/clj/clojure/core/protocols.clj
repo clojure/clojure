@@ -58,7 +58,7 @@
   (coll-reduce
    ([coll f] (seq-reduce coll f))
    ([coll f val] (seq-reduce coll f val)))
-  
+
   Iterable
   (coll-reduce
    ([coll f]
@@ -88,7 +88,7 @@
   (internal-reduce
    [s f val]
    val)
-  
+
   ;; handles vectors and ranges
   clojure.lang.IChunkedSeq
   (internal-reduce
@@ -103,7 +103,7 @@
                   ret)))
        (internal-reduce s f val))
      val))
- 
+
   clojure.lang.StringSeq
   (internal-reduce
    [str-seq f val]
@@ -116,7 +116,7 @@
                   @ret
                   (recur (inc i) ret)))
          val))))
-  
+
   clojure.lang.ArraySeq
   (internal-reduce
        [a-seq f val]
@@ -129,7 +129,7 @@
                   @ret
                   (recur (inc i) ret)))
              val))))
-  
+
   java.lang.Object
   (internal-reduce
    [s f val]
@@ -147,35 +147,36 @@
          (internal-reduce s f val))
        val))))
 
-(def arr-impl
-  '(internal-reduce
-       [a-seq f val]
-       (let [arr (.array a-seq)]
-         (loop [i (.index a-seq)
-                val val]
-           (if (< i (alength arr))
-             (let [ret (f val (aget arr i))]
-                (if (reduced? ret)
-                  @ret
-                  (recur (inc i) ret)))
-             val)))))
+(compile-time!
+ (def arr-impl
+   '(internal-reduce
+     [a-seq f val]
+     (let [arr (.array a-seq)]
+       (loop [i (.index a-seq)
+              val val]
+         (if (< i (alength arr))
+           (let [ret (f val (aget arr i))]
+             (if (reduced? ret)
+               @ret
+               (recur (inc i) ret)))
+           val)))))
 
-(defn- emit-array-impls*
-  [syms]
-  (apply
-   concat
-   (map
-    (fn [s]
-      [(symbol (str "clojure.lang.ArraySeq$ArraySeq_" s))
-       arr-impl])
-    syms)))
+ (defn- emit-array-impls*
+   [syms]
+   (apply
+    concat
+    (map
+     (fn [s]
+       [(symbol (str "clojure.lang.ArraySeq$ArraySeq_" s))
+        arr-impl])
+     syms)))
 
-(defmacro emit-array-impls
-  [& syms]
-  `(extend-protocol InternalReduce
-     ~@(emit-array-impls* syms)))
+ (defmacro emit-array-impls
+   [& syms]
+   `(extend-protocol InternalReduce
+      ~@(emit-array-impls* syms)))
 
-(emit-array-impls int long float double byte char boolean)
+ (emit-array-impls int long float double byte char boolean))
 
 (defprotocol IKVReduce
   "Protocol for concrete associative types that can reduce themselves

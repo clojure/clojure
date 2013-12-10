@@ -247,7 +247,7 @@ public void setMeta(IPersistentMap m) {
     resetMeta(m.assoc(nameKey, sym).assoc(nsKey, ns));
 }
 
-public void setMacro() {
+public Var setMacro() {
     try
         {
         alterMeta(assoc, RT.list(macroKey, RT.T));
@@ -256,6 +256,7 @@ public void setMacro() {
         {
         throw Util.sneakyThrow(e);
         }
+    return this;
 }
 
 public boolean isMacro(){

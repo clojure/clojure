@@ -97,7 +97,7 @@ Design notes for clojure.string:
   {:added "1.2"}
   [^CharSequence s match replacement]
   (let [s (.toString s)]
-    (cond 
+    (cond
      (instance? Character match) (.replace s ^Character match ^Character replacement)
      (instance? CharSequence match) (.replace s ^CharSequence match ^CharSequence replacement)
      (instance? Pattern match) (if (instance? CharSequence replacement)
@@ -286,7 +286,7 @@ Design notes for clojure.string:
 (defn ^String escape
   "Return a new string, using cmap to escape each character ch
    from s as follows:
-   
+
    If (cmap ch) is nil, append ch to the new string.
    If (cmap ch) is non-nil, append (str (cmap ch)) instead."
   {:added "1.2"}

@@ -70,10 +70,17 @@ public class RT {
       // Symbol.intern("IPersistentMap"), "clojure.lang.IPersistentMap",
       // Symbol.intern("IPersistentList"), "clojure.lang.IPersistentList",
       // Symbol.intern("IPersistentVector"), "clojure.lang.IPersistentVector",
-      Symbol.intern("Boolean"), Boolean.class, Symbol.intern("Byte"),
-      Byte.class, Symbol.intern("Character"), Character.class,
-      Symbol.intern("Class"), Class.class, Symbol.intern("ClassLoader"),
-      ClassLoader.class, Symbol.intern("Compiler"), Compiler.class,
+      Symbol.intern("Boolean"),
+      Boolean.class,
+      Symbol.intern("Byte"),
+      Byte.class,
+      Symbol.intern("Character"),
+      Character.class,
+      Symbol.intern("Class"),
+      Class.class,
+      Symbol.intern("ClassLoader"),
+      ClassLoader.class,
+      // Symbol.intern("Compiler"), Compiler.class,
       Symbol.intern("Double"), Double.class, Symbol.intern("Enum"), Enum.class,
       Symbol.intern("Float"), Float.class, Symbol.intern("Integer"),
       Integer.class, Symbol.intern("Long"), Long.class, Symbol.intern("Math"),
@@ -242,7 +249,7 @@ public class RT {
       Symbol.intern("*print-readably*"), T).setDynamic();
   final static Var PRINT_DUP = Var.intern(CLOJURE_NS,
       Symbol.intern("*print-dup*"), F).setDynamic();
-  final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS,
+  public final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS,
       Symbol.intern("*warn-on-reflection*"), F).setDynamic();
   final static Var ALLOW_UNRESOLVED_VARS = Var.intern(CLOJURE_NS,
       Symbol.intern("*allow-unresolved-vars*"), F).setDynamic();
@@ -451,6 +458,17 @@ public class RT {
 
   static public void load(String scriptbase, boolean failIfNotFound)
       throws IOException, ClassNotFoundException {
+    /*-[
+    IOSObjectArray *parts = [scriptbase split:@"/"];
+    NSString *classname = @"";
+    for (int n = 0; n < parts.count - 1; n++) {
+        classname = [classname stringByAppendingString:[(NSString*)[parts objectAtIndex:n] capitalizedString]];
+    }
+    classname = [classname stringByAppendingString:[parts objectAtIndex:parts.count-1]];
+    classname = [classname stringByAppendingString:@"__init"];
+    NSLog(@"%@", NSClassFromString(classname));
+    return;
+    ]-*/
     String classfile = scriptbase + LOADER_SUFFIX + ".class";
     String cljfile = scriptbase + ".clj";
     URL classURL = getResource(baseLoader(), classfile);
@@ -473,12 +491,14 @@ public class RT {
         Var.popThreadBindings();
       }
     }
-    if (!loaded && cljURL != null) {
-      System.out.println("Loading script " + scriptbase);
+    if (Boolean.TRUE.equals(Compiler.RUNTIME.deref())
+        || (!loaded && cljURL != null)) {
       if (booleanCast(Compiler.COMPILE_FILES.deref()))
         compile(cljfile);
       else
         loadResourceScript(RT.class, cljfile);
+
+      System.out.println("Loading script " + scriptbase);
     } else if (!loaded && failIfNotFound)
       throw new FileNotFoundException(String.format(
           "Could not locate %s or %s on classpath: ", classfile, cljfile));
@@ -498,7 +518,7 @@ public class RT {
       Var refer = var("clojure.core", "refer");
       in_ns.invoke(USER);
       refer.invoke(CLOJURE);
-      maybeLoadResourceScript("user.clj");
+      //maybeLoadResourceScript("user.clj");
     } finally {
       Var.popThreadBindings();
     }
@@ -510,7 +530,8 @@ public class RT {
 
   // Load a library in the System ClassLoader instead of Clojure's own.
   public static void loadLibrary(String libname) {
-    Reflector.invokeStaticMethod(System.class, "loadLibrary", new Object[] {libname});
+    Reflector.invokeStaticMethod(System.class, "loadLibrary",
+        new Object[] { libname });
   }
 
   // //////////// Collections support /////////////////////////////////

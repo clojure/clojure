@@ -6,12 +6,12 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns 
+(ns
   ^{:author "Stuart Sierra, Chas Emerick, Stuart Halloway",
      :doc "This file defines polymorphic I/O utility functions for Clojure."}
     clojure.java.io
     (:require clojure.string)
-    (:import 
+    (:import
      (java.io Reader InputStream InputStreamReader PushbackReader
               BufferedReader File OutputStream
               OutputStreamWriter BufferedWriter Writer
@@ -19,7 +19,7 @@
               StringReader ByteArrayInputStream
               BufferedInputStream BufferedOutputStream
               CharArrayReader Closeable)
-     (java.net URI URL MalformedURLException Socket URLDecoder URLEncoder)))
+     (java.net URI URL MalformedURLException)))
 
 (def
     ^{:doc "Type object for a Java primitive byte array."
@@ -37,33 +37,36 @@
   (^{:tag java.io.File, :added "1.2"} as-file [x] "Coerce argument to a file.")
   (^{:tag java.net.URL, :added "1.2"} as-url [x] "Coerce argument to a URL."))
 
-(defn- escaped-utf8-urlstring->str [s]
-  (-> (clojure.string/replace s "+" (URLEncoder/encode "+" "UTF-8"))
-      (URLDecoder/decode "UTF-8")))
+;(defn- escaped-utf8-urlstring->str [s]
+;  (-> (clojure.string/replace s "+" (URLEncoder/encode "+" "UTF-8"))
+;      (URLDecoder/decode "UTF-8")))
 
 (extend-protocol Coercions
   nil
   (as-file [_] nil)
   (as-url [_] nil)
-  
+
   String
   (as-file [s] (File. s))
-  (as-url [s] (URL. s))  
-  
+  (as-url [s] (URL. s))
+
   File
   (as-file [f] f)
-  (as-url [f] (.toURL (.toURI f)))
+  (as-url [f] ;(.toURL (.toURI f))
+          )
 
   URL
   (as-url [u] u)
   (as-file [u]
-    (if (= "file" (.getProtocol u))
-      (as-file (escaped-utf8-urlstring->str
-                (.replace (.getFile u) \/ File/separatorChar)))
-      (throw (IllegalArgumentException. (str "Not a file: " u)))))
+;    (if (= "file" (.getProtocol u))
+;      (as-file (escaped-utf8-urlstring->str
+;                (.replace (.getFile u) \/ File/separatorChar)))
+;      (throw (IllegalArgumentException. (str "Not a file: " u))))
+           )
 
   URI
-  (as-url [u] (.toURL u))
+  (as-url [u] ;(.toURL u)
+          )
   (as-file [u] (as-file (as-url u))))
 
 (defprotocol ^{:added "1.2"} IOFactory
@@ -72,7 +75,7 @@
    be unequivocally converted to the requested kind of stream.
 
    Common options include
-   
+
      :append    true to open stream in append mode
      :encoding  string name of encoding to use, e.g. \"UTF-8\".
 
@@ -242,11 +245,11 @@
                             (make-output-stream (as-file x) opts)
                             (throw (IllegalArgumentException. (str "Can not write to non-file URL <" x ">")))))))
 
-(extend URI
-  IOFactory
-  (assoc default-streams-impl
-    :make-input-stream (fn [^URI x opts] (make-input-stream (.toURL x) opts))
-    :make-output-stream (fn [^URI x opts] (make-output-stream (.toURL x) opts))))
+;(extend URI
+;  IOFactory
+;  (assoc default-streams-impl
+;    :make-input-stream (fn [^URI x opts] (make-input-stream (.toURL x) opts))
+;    :make-output-stream (fn [^URI x opts] (make-output-stream (.toURL x) opts))))
 
 (extend String
   IOFactory
@@ -262,11 +265,11 @@
                            (catch MalformedURLException err
                              (make-output-stream (File. x) opts))))))
 
-(extend Socket
-  IOFactory
-  (assoc default-streams-impl
-    :make-input-stream (fn [^Socket x opts] (make-input-stream (.getInputStream x) opts))
-    :make-output-stream (fn [^Socket x opts] (make-output-stream (.getOutputStream x) opts))))
+;(extend Socket
+;  IOFactory
+;  (assoc default-streams-impl
+;    :make-input-stream (fn [^Socket x opts] (make-input-stream (.getInputStream x) opts))
+;    :make-output-stream (fn [^Socket x opts] (make-output-stream (.getOutputStream x) opts))))
 
 (extend byte-array-type
   IOFactory
@@ -382,9 +385,9 @@
 
     :buffer-size  buffer size to use, default is 1024.
     :encoding     encoding to use if converting between
-                  byte and char streams.   
+                  byte and char streams.
 
-  Does not close any streams except those it opens itself 
+  Does not close any streams except those it opens itself
   (on a File)."
   {:added "1.2"}
   [input output & opts]
@@ -405,9 +408,9 @@
    versions treat the first argument as parent and subsequent args as
    children relative to the parent."
   {:added "1.2"}
-  ([arg]                      
+  ([arg]
      (as-file arg))
-  ([parent child]             
+  ([parent child]
      (File. ^File (as-file parent) ^String (as-relative-path child)))
   ([parent child & more]
      (reduce file (file parent child) more)))
