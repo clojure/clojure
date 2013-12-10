@@ -581,8 +581,8 @@
 
 (defn- assert-same-protocol [protocol-var method-syms]
   (doseq [m method-syms]
-    (let [v (resolve m)
-          p (:protocol (meta v))]
+    (let [^clojure.lang.Var v (resolve m)
+          ^clojure.lang.Var p (:protocol (meta v))]
       (when (and v (bound? v) (not= protocol-var p))
         (binding [*out* *err*]
           (println "Warning: protocol" protocol-var "is overwriting"

@@ -6473,7 +6473,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
 
-(let [properties (with-open [version-stream (.getResourceAsStream
+(let [^java.util.Properties
+      properties (with-open [version-stream (.getResourceAsStream
                                              (clojure.lang.RT/baseLoader)
                                              "clojure/version.properties")]
                    (doto (new java.util.Properties)
@@ -6488,7 +6489,7 @@
                        :incremental (Integer/valueOf ^String incremental)
                        :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
   (def ^:dynamic *clojure-version*
-    (if (.contains version-string "SNAPSHOT")
+    (if (.contains ^String version-string "SNAPSHOT")
       (clojure.lang.RT/assoc clojure-version :interim true)
       clojure-version)))
 
