@@ -5096,6 +5096,22 @@
                 ret
                 (recur (isa? h (child i) (parent i)) (inc i))))))))
 
+(defn memoize
+  "Returns a memoized version of a referentially transparent function. The
+  memoized version of the function keeps a cache of the mapping from arguments
+  to results and, when calls with the same arguments are repeated often, has
+  higher performance at the expense of higher memory use."
+  {:added "1.0"
+   :static true}
+  [f]
+  (let [mem (atom {})]
+    (fn [& args]
+      (if-let [e (find @mem args)]
+        (val e)
+        (let [ret (apply f args)]
+          (swap! mem assoc args ret)
+          ret)))))
+
 (defn parents
   "Returns the immediate parents of tag, either via a Java type
   inheritance relationship or a relationship established via derive. h
@@ -5108,6 +5124,8 @@
               (if (class? tag)
                 (into1 (set (bases tag)) tp)
                 tp)))))
+
+(def parents (memoize parents))
 
 (defn ancestors
   "Returns the immediate and indirect parents of tag, either via a Java type
@@ -5319,16 +5337,24 @@
         references (remove #(= :gen-class (first %)) references)
         ;ns-effect (clojure.core/in-ns name)
         ]
-    `(do
-       (clojure.core/in-ns '~name)
-       (with-loading-context
-         ~@(when gen-class-call (list gen-class-call))
-         ~@(when (and (not= name 'clojure.core) (not-any? #(= :refer-clojure (first %)) references))
-             `((clojure.core/refer '~'clojure.core)))
-         ~@(map process-reference references))
-       (if (.equals '~name 'clojure.core)
-         nil
-         (do (dosync (commute @#'*loaded-libs* conj '~name)) nil)))))
+    (if *runtime*
+      `(do
+         (clojure.core/in-ns '~name)
+         (with-loading-context
+           ~@(map process-reference references))
+         (if (.equals '~name 'clojure.core)
+           nil
+           (do (dosync (commute @#'*loaded-libs* conj '~name)) nil)))
+      `(do
+         (clojure.core/in-ns '~name)
+         (with-loading-context
+           ~@(when gen-class-call (list gen-class-call))
+           ~@(when (and (not= name 'clojure.core) (not-any? #(= :refer-clojure (first %)) references))
+               `((clojure.core/refer '~'clojure.core)))
+           ~@(map process-reference references))
+         (if (.equals '~name 'clojure.core)
+           nil
+           (do (dosync (commute @#'*loaded-libs* conj '~name)) nil))))))
 
 (defmacro refer-clojure
   "Same as (refer 'clojure.core <filters>)"
@@ -5798,22 +5824,6 @@
      (when ~test
        ~@body
        (recur))))
-
-(defn memoize
-  "Returns a memoized version of a referentially transparent function. The
-  memoized version of the function keeps a cache of the mapping from arguments
-  to results and, when calls with the same arguments are repeated often, has
-  higher performance at the expense of higher memory use."
-  {:added "1.0"
-   :static true}
-  [f]
-  (let [mem (atom {})]
-    (fn [& args]
-      (if-let [e (find @mem args)]
-        (val e)
-        (let [ret (apply f args)]
-          (swap! mem assoc args ret)
-          ret)))))
 
 (defmacro condp
   "Takes a binary predicate, an expression, and a set of clauses.

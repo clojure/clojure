@@ -157,7 +157,8 @@ with invalid arguments."
 ;;; ------------------------------------------------------------------------
 ;;; print integration
 
-(def ^:private thread-local-utc-date-format
+(def ^{:private true
+       :tag ThreadLocal} thread-local-utc-date-format
   ;; SimpleDateFormat is not thread-safe, so we use a ThreadLocal proxy for access.
   ;; http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4228335
   (proxy [ThreadLocal] []
@@ -169,7 +170,7 @@ with invalid arguments."
 (defn- print-date
   "Print a java.util.Date as RFC3339 timestamp, always in UTC."
   [^java.util.Date d, ^java.io.Writer w]
-  (let [utc-format (.get thread-local-utc-date-format)]
+  (let [^java.text.SimpleDateFormat utc-format (.get thread-local-utc-date-format)]
     (.write w "#inst \"")
     (.write w (.format utc-format d))
     (.write w "\"")))
@@ -203,7 +204,8 @@ with invalid arguments."
   (print-calendar c w))
 
 
-(def ^:private thread-local-utc-timestamp-format
+(def ^{:private true
+       :tag ThreadLocal} thread-local-utc-timestamp-format
   ;; SimpleDateFormat is not thread-safe, so we use a ThreadLocal proxy for access.
   ;; http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4228335
   (proxy [ThreadLocal] []
@@ -214,7 +216,7 @@ with invalid arguments."
 (defn- print-timestamp
   "Print a java.sql.Timestamp as RFC3339 timestamp, always in UTC."
   [^java.sql.Timestamp ts, ^java.io.Writer w]
-  (let [utc-format (.get thread-local-utc-timestamp-format)]
+  (let [^java.text.SimpleDateFormat utc-format (.get thread-local-utc-timestamp-format)]
     (.write w "#inst \"")
     (.write w (.format utc-format ts))
     ;; add on nanos and offset

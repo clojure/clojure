@@ -18,7 +18,7 @@
 (defn root-cause
   "Returns the last 'cause' Throwable in a chain of Throwables."
   {:added "1.1"}
-  [tr]
+  [^Throwable tr]
   (if-let [cause (.getCause tr)]
     (recur cause)
     tr))
@@ -26,9 +26,9 @@
 (defn print-trace-element
   "Prints a Clojure-oriented view of one element in a stack trace."
   {:added "1.1"}
-  [e]
+  [^StackTraceElement e]
   (let [class (.getClassName e)
-	method (.getMethodName e)] 
+	method (.getMethodName e)]
     (let [match (re-matches #"^([A-Za-z0-9_.-]+)\$(\w+)__\d+$" (str class))]
       (if (and match (= "invoke" method))
 	(apply printf "%s/%s" (rest match))
@@ -38,7 +38,7 @@
 (defn print-throwable
   "Prints the class and message of a Throwable."
   {:added "1.1"}
-  [tr]
+  [^Throwable tr]
   (printf "%s: %s" (.getName (class tr)) (.getMessage tr)))
 
 (defn print-stack-trace
@@ -48,10 +48,10 @@
   {:added "1.1"}
   ([tr] (print-stack-trace tr nil))
   ([^Throwable tr n]
-     (let [st (.getStackTrace tr)]
+     (let [^StackTraceElement st (.getStackTrace tr)]
        (print-throwable tr)
        (newline)
-       (print " at ") 
+       (print " at ")
        (if-let [e (first st)]
          (print-trace-element e)
          (print "[empty stack trace]"))
@@ -66,8 +66,8 @@
 (defn print-cause-trace
   "Like print-stack-trace but prints chained exceptions (causes)."
   {:added "1.1"}
-  ([tr] (print-cause-trace tr nil))
-  ([tr n]
+  ([^Throwable tr] (print-cause-trace tr nil))
+  ([^Throwable tr n]
      (print-stack-trace tr n)
      (when-let [cause (.getCause tr)]
        (print "Caused by: " )
