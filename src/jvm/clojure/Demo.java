@@ -15,7 +15,6 @@ public class Demo {
     if (false) {
       // RT.forceClass = true;
       RT.doInit();
-
       RT.load("clojure/test_clojure/agents");
 
       long d = System.currentTimeMillis();

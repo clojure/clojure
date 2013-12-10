@@ -3590,13 +3590,15 @@
 (defmacro
   ^{:private true}
   def-aset [name method coerce]
-  `(defn ~name
-     {:arglists '([~'array ~'idx ~'val] [~'array ~'idx ~'idx2 & ~'idxv])}
-     ([array# idx# val#]
-      (. Array (~method array# idx# (~coerce val#)))
-      val#)
-     ([array# idx# idx2# & idxv#]
-      (apply ~name (aget array# idx#) idx2# idxv#))))
+
+  (let [get-meth (symbol (str "get" (.substring ^String (clojure.core/name method) 3)))]
+    `(defn ~name
+       {:arglists '([~'array ~'idx ~'val] [~'array ~'idx ~'idx2 & ~'idxv])}
+       ([array# idx# val#]
+        (. Array (~method array# idx# (~coerce val#)))
+        val#)
+       ([array# idx# idx2# & idxv#]
+        (apply ~name (. Array (~get-meth array# idx#)) idx2# idxv#)))))
 
 (def-aset
   ^{:doc "Sets the value at the index/indices. Works on arrays of int. Returns val."
@@ -4931,90 +4933,91 @@
    :static true}
   [x] (instance? Class x))
 
-(defn- is-annotation? [c]
-  (and (class? c)
-       (.isAssignableFrom java.lang.annotation.Annotation c)))
+(compile-time!
+ (defn- is-annotation? [c]
+   (and (class? c)
+        (.isAssignableFrom java.lang.annotation.Annotation c)))
 
-(defn- is-runtime-annotation? [^Class c]
-  (boolean
-   (and (is-annotation? c)
-        (when-let [^java.lang.annotation.Retention r
-                   (.getAnnotation c java.lang.annotation.Retention)]
-          (= (.value r) java.lang.annotation.RetentionPolicy/RUNTIME)))))
+ (defn- is-runtime-annotation? [^Class c]
+   (boolean
+    (and (is-annotation? c)
+         (when-let [^java.lang.annotation.Retention r
+                    (.getAnnotation c java.lang.annotation.Retention)]
+           (= (.value r) java.lang.annotation.RetentionPolicy/RUNTIME)))))
 
-(defn- descriptor [^Class c] (clojure.asm.Type/getDescriptor c))
+ (defn- descriptor [^Class c] (clojure.asm.Type/getDescriptor c))
 
-(declare process-annotation)
-(declare process-print-annotation)
+ (declare process-annotation)
+ (declare process-print-annotation)
 
-(defn- print-annotation-value [v]
-  (cond
-   (vector? v) (str "{" (apply str (interpose ", " (map print-annotation-value v))) "}")
-   (symbol? v) (let [ev (eval v)]
-                 (cond
-                  (instance? java.lang.Enum ev) (str (.getCanonicalName (class ev)) "." (str ev))
-                  (class? ev) (str (.getCanonicalName ev) ".class")
-                  :else (throw (IllegalArgumentException.
-                                (str "Unsupported annotation value: " v " of class " (class ev))))))
-   (seq? v) (let [[nested nv] v
-                  c (resolve nested)]
-              (str "@" (.getCanonicalName c) "("
-                   (process-print-annotation nv) ")"))
-   (string? v) (str "\"" (clojure.lang.Compiler/escapeString ^String v) "\"")
-   (nil? v) ""
-   :else v))
+ (defn- print-annotation-value [v]
+   (cond
+    (vector? v) (str "{" (apply str (interpose ", " (map print-annotation-value v))) "}")
+    (symbol? v) (let [ev (eval v)]
+                  (cond
+                   (instance? java.lang.Enum ev) (str (.getCanonicalName (class ev)) "." (str ev))
+                   (class? ev) (str (.getCanonicalName ev) ".class")
+                   :else (throw (IllegalArgumentException.
+                                 (str "Unsupported annotation value: " v " of class " (class ev))))))
+    (seq? v) (let [[nested nv] v
+                   c (resolve nested)]
+               (str "@" (.getCanonicalName c) "("
+                    (process-print-annotation nv) ")"))
+    (string? v) (str "\"" (clojure.lang.Compiler/escapeString ^String v) "\"")
+    (nil? v) ""
+    :else v))
 
-(defn- add-annotation [^clojure.asm.AnnotationVisitor av name v]
-  (cond
-   (vector? v) (let [avec (.visitArray av name)]
-                 (doseq [vval v]
-                   (add-annotation avec "value" vval))
-                 (.visitEnd avec))
-   (symbol? v) (let [ev (eval v)]
-                 (cond
-                  (instance? java.lang.Enum ev)
-                  (.visitEnum av name (descriptor (class ev)) (str ev))
-                  (class? ev) (.visit av name (clojure.asm.Type/getType ev))
-                  :else (throw (IllegalArgumentException.
-                                (str "Unsupported annotation value: " v " of class " (class ev))))))
-   (seq? v) (let [[nested nv] v
-                  c (resolve nested)
-                  nav (.visitAnnotation av name (descriptor c))]
-              (process-annotation nav nv)
-              (.visitEnd nav))
-   :else
-   (.visit av name v)))
+ (defn- add-annotation [^clojure.asm.AnnotationVisitor av name v]
+   (cond
+    (vector? v) (let [avec (.visitArray av name)]
+                  (doseq [vval v]
+                    (add-annotation avec "value" vval))
+                  (.visitEnd avec))
+    (symbol? v) (let [ev (eval v)]
+                  (cond
+                   (instance? java.lang.Enum ev)
+                   (.visitEnum av name (descriptor (class ev)) (str ev))
+                   (class? ev) (.visit av name (clojure.asm.Type/getType ev))
+                   :else (throw (IllegalArgumentException.
+                                 (str "Unsupported annotation value: " v " of class " (class ev))))))
+    (seq? v) (let [[nested nv] v
+                   c (resolve nested)
+                   nav (.visitAnnotation av name (descriptor c))]
+               (process-annotation nav nv)
+               (.visitEnd nav))
+    :else
+    (.visit av name v)))
 
-(defn- process-annotation [av v]
-  (if (map? v)
-    (doseq [[k v] v]
-      (add-annotation av (name k) v))
-    (add-annotation av "value" v)))
+ (defn- process-annotation [av v]
+   (if (map? v)
+     (doseq [[k v] v]
+       (add-annotation av (name k) v))
+     (add-annotation av "value" v)))
 
-(defn- process-print-annotation [v]
-  (if (map? v)
-    (apply str (interpose ", " (map (fn [[k v]] (str (name k) "=" (print-annotation-value v))) v)))
-    (print-annotation-value v)))
+ (defn- process-print-annotation [v]
+   (if (map? v)
+     (apply str (interpose ", " (map (fn [[k v]] (str (name k) "=" (print-annotation-value v))) v)))
+     (print-annotation-value v)))
 
-(defn- add-annotations
-  ([visitor m] (add-annotations visitor m nil))
-  ([visitor m i]
-   (doseq [[k v] m]
-     (when (symbol? k)
-       (when-let [c (resolve k)]
-         (when (is-annotation? c)
-           ;this is known duck/reflective as no common base of ASM Visitors
-           (let [av (if i
-                      (.visitParameterAnnotation visitor i (descriptor c)
-                                                 (is-runtime-annotation? c))
-                      (.visitAnnotation visitor (descriptor c)
-                                        (is-runtime-annotation? c)))]
-             (clojure.lang.Compiler/emitSource (str "@" (.getCanonicalName c)
-                                                    (if (= 0 (count (.getDeclaredMethods c)))
-                                                      ""
-                                                      (str "(" (process-print-annotation v) ")"))))
-             (process-annotation av v)
-             (.visitEnd av))))))))
+ (defn- add-annotations
+   ([visitor m] (add-annotations visitor m nil))
+   ([visitor m i]
+    (doseq [[k v] m]
+      (when (symbol? k)
+        (when-let [c (resolve k)]
+          (when (is-annotation? c)
+            ;this is known duck/reflective as no common base of ASM Visitors
+            (let [av (if i
+                       (.visitParameterAnnotation visitor i (descriptor c)
+                                                  (is-runtime-annotation? c))
+                       (.visitAnnotation visitor (descriptor c)
+                                         (is-runtime-annotation? c)))]
+              (clojure.lang.Compiler/emitSource (str "@" (.getCanonicalName c)
+                                                     (if (= 0 (count (.getDeclaredMethods c)))
+                                                       ""
+                                                       (str "(" (process-print-annotation v) ")"))))
+              (process-annotation av v)
+              (.visitEnd av)))))))))
 
 (defn alter-var-root
   "Atomically alters the root binding of var v by applying f to its
