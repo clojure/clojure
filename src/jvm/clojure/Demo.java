@@ -12,7 +12,7 @@ import clojure.lang.Var;
 public class Demo {
 
   public static void main(String[] args) throws Exception {
-    if (false) {
+    if (true) {
       // RT.forceClass = true;
       RT.doInit();
 
@@ -48,7 +48,7 @@ public class Demo {
         RT.WARN_ON_REFLECTION.bindRoot(RT.T);
         Compiler.COMPILER_OPTIONS.bindRoot(RT.assoc(options,
             Compiler.elideMetaKey,
-            RT.readString("[:doc :file :line :added :static :column :arglists]")));
+            RT.readString("[:doc :file :line :added :static :column :arglists :dynamic :private]")));
         RT.doInit();
 
         IPersistentSet loaded = (IPersistentSet) RT.var("clojure.core",

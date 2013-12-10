@@ -2804,8 +2804,7 @@ public class Compiler implements Opcodes {
           sb.append(((StaticMethodExpr) testExpr).emitIntrinsicPredicate(
               C.EXPRESSION, objx, gen, falseLabel));
         } else if (maybePrimitiveType(testExpr) == boolean.class) {
-          sb.append("(Boolean)"
-              + ((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION, objx,
+          sb.append(((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION, objx,
                   gen));
           gen.ifZCmp(GeneratorAdapter.EQ, falseLabel);
         } else {
@@ -7758,7 +7757,7 @@ public class Compiler implements Opcodes {
 
       // static fields for constants
       for (int i = 0; i < objx.constants.count(); i++) {
-        emitSource("public static "
+        emitSource("private static "
             + objx.constantRealType(i).getCanonicalName() + " "
             + objx.constantName(i) + ";");
 
