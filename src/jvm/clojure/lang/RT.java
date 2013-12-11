@@ -506,22 +506,6 @@ public class RT {
 
   public static void doInit() throws ClassNotFoundException, IOException {
     load("clojure/core");
-
-    Var.pushThreadBindings(RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
-        WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref(), RT.UNCHECKED_MATH,
-        RT.UNCHECKED_MATH.deref()));
-    try {
-      Symbol USER = Symbol.intern("user");
-      Symbol CLOJURE = Symbol.intern("clojure.core");
-
-      Var in_ns = var("clojure.core", "in-ns");
-      Var refer = var("clojure.core", "refer");
-      in_ns.invoke(USER);
-      refer.invoke(CLOJURE);
-      //maybeLoadResourceScript("user.clj");
-    } finally {
-      Var.popThreadBindings();
-    }
   }
 
   static public int nextID() {
