@@ -716,7 +716,7 @@ public static class KeywordExpr extends LiteralExpr{
 
 public static class ImportExpr implements Expr{
 	public final String c;
-	final static Method forNameMethod = Method.getMethod("Class forName(String)");
+	final static Method forNameMethod = Method.getMethod("Class classForNameNonLoading(String)");
 	final static Method importClassMethod = Method.getMethod("Class importClass(Class)");
 	final static Method derefMethod = Method.getMethod("Object deref()");
 
@@ -726,7 +726,7 @@ public static class ImportExpr implements Expr{
 
 	public Object eval() {
 		Namespace ns = (Namespace) RT.CURRENT_NS.deref();
-		ns.importClass(RT.classForName(c));
+		ns.importClass(RT.classForNameNonLoading(c));
 		return null;
 	}
 
@@ -735,7 +735,7 @@ public static class ImportExpr implements Expr{
 		gen.invokeVirtual(VAR_TYPE, derefMethod);
 		gen.checkCast(NS_TYPE);
 		gen.push(c);
-		gen.invokeStatic(CLASS_TYPE, forNameMethod);
+		gen.invokeStatic(RT_TYPE, forNameMethod);
 		gen.invokeVirtual(NS_TYPE, importClassMethod);
 		if(context == C.STATEMENT)
 			gen.pop();

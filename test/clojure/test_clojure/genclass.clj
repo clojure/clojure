@@ -10,6 +10,7 @@
       :author "Stuart Halloway, Daniel Solano Gómez"}
   clojure.test-clojure.genclass
   (:use clojure.test clojure.test-helper)
+  (:require clojure.test_clojure.genclass.examples)
   (:import [clojure.test_clojure.genclass.examples
             ExampleClass
             ExampleAnnotationClass

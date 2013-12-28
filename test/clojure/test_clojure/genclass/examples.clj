@@ -29,6 +29,8 @@
   [_ o i]
   "foo with o, i")
 
+(declare -toString)
+
 (gen-class :name ^{Deprecated {}
                    SuppressWarnings ["Warning1"] ; discarded
                    java.lang.annotation.Target []}

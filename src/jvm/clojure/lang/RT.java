@@ -2115,7 +2115,7 @@ static public Class classForName(String name) {
 		}
 }
 
-static Class classForNameNonLoading(String name) {
+static public Class classForNameNonLoading(String name) {
 	try
 		{
 		return Class.forName(name, false, baseLoader());
