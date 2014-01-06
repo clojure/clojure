@@ -358,9 +358,9 @@
 (defn proxy-call-with-super [call this meth]
  (let [m (proxy-mappings this)]
     (update-proxy this (assoc m meth nil))
-    (let [ret (call)]
-      (update-proxy this m)
-      ret)))
+    (try
+      (call)
+      (finally (update-proxy this m)))))
 
 (defmacro proxy-super 
   "Use to call a superclass method in the body of a proxy method. 
