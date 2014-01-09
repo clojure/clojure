@@ -19,7 +19,7 @@
 (deftest test-dot
   ; (.instanceMember instance args*)
   (are [x] (= x "FRED")
-      (.toUpperCase "fred") 
+      (.toUpperCase "fred")
       (. "fred" toUpperCase)
       (. "fred" (toUpperCase)) )
 
@@ -49,7 +49,7 @@
        2 (. p -y)
        1 (. (java.awt.Point. 1 2) -x)
        2 (. (java.awt.Point. 1 2) -y)))
-  
+
   ; Classname/staticField
   (are [x] (= x 2147483647)
       Integer/MAX_VALUE
@@ -113,25 +113,26 @@
 ; memfn
 
 
-(deftest test-bean
-  (let [b (bean java.awt.Color/black)]
-    (are [x y] (= x y)
-        (map? b) true
+(comment
+  (deftest test-bean
+    (let [b (bean java.awt.Color/black)]
+      (are [x y] (= x y)
+           (map? b) true
 
-        (:red b) 0
-        (:green b) 0
-        (:blue b) 0
-        (:RGB b) -16777216
+           (:red b) 0
+           (:green b) 0
+           (:blue b) 0
+           (:RGB b) -16777216
 
-        (:alpha b) 255
-        (:transparency b) 1
+           (:alpha b) 255
+           (:transparency b) 1
 
-        (:missing b) nil
-        (:missing b :default) :default
-        (get b :missing) nil
-        (get b :missing :default) :default
+           (:missing b) nil
+           (:missing b :default) :default
+           (get b :missing) nil
+           (get b :missing :default) :default
 
-        (:class b) java.awt.Color )))
+           (:class b) java.awt.Color ))))
 
 
 ; proxy, proxy-super
@@ -139,15 +140,15 @@
 (deftest test-proxy-chain
   (testing "That the proxy functions can chain"
     (are [x y] (= x y)
-        (-> (get-proxy-class Object) 
+        (-> (get-proxy-class Object)
             construct-proxy
-            (init-proxy {}) 
-            (update-proxy {"toString" (fn [_] "chain chain chain")}) 
+            (init-proxy {})
+            (update-proxy {"toString" (fn [_] "chain chain chain")})
             str)
         "chain chain chain"
 
-        (-> (proxy [Object] [] (toString [] "superfuzz bigmuff")) 
-            (update-proxy {"toString" (fn [_] "chain chain chain")}) 
+        (-> (proxy [Object] [] (toString [] "superfuzz bigmuff"))
+            (update-proxy {"toString" (fn [_] "chain chain chain")})
             str)
         "chain chain chain")))
 
@@ -243,7 +244,7 @@
     (are [x y] (= x y)
         (aget a 3) 42
         (class (aget a 3)) Long ))
-      
+
   ; multi-dimensional
   (let [a (make-array Long 3 2 4)]
     (aset a 0 1 2 987)
@@ -280,7 +281,7 @@
       [1 2]
       (sorted-set)
       (sorted-set 1 2)
-      
+
       (int-array 0)
       (int-array [1 2 3])
 
@@ -317,7 +318,7 @@
   (is (thrown? IllegalArgumentException (into-array [1.2 4])))
   (is (thrown? IllegalArgumentException (into-array [(byte 2) (short 3)])))
   (is (thrown? IllegalArgumentException (into-array Byte/TYPE [100000000000000])))
-  
+
   ; simple case
   (let [v [1 2 3 4 5]
         a (into-array v)]
@@ -327,7 +328,7 @@
         (class (first a)) (class (first v)) ))
 
   (is (= \a (aget (into-array Character/TYPE [\a \b \c]) 0)))
-  
+
   (let [types [Integer/TYPE
                Byte/TYPE
                Float/TYPE
@@ -341,7 +342,7 @@
         (is (== (aget a 1) 3))
         (is (== (aget a 2) 4))
         (is (== (aget a 3) 5)))))
-  
+
   ; different kinds of collections
   (are [x] (and (= (alength (into-array x)) (count x))
                 (= (vec (into-array x)) (vec x))

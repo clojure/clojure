@@ -346,7 +346,7 @@
   )
 
 (deftest reading-keywords
-  (are [x y] (= x (binding [*ns* (the-ns 'user)] (read-string y)))
+  (are [x y] (= x (binding [*ns* (the-ns 'clojure.core)] (read-string y)))
        :foo ":foo"
        :foo/bar ":foo/bar"
        :user/foo "::foo")
@@ -538,7 +538,7 @@
     (binding [*data-readers* {'inst read-instant-calendar}]
       (testing "read-instant-calendar should preserve timezone"
         (is (not= (read-string s) (read-string s2)))))))
-      
+
 ;; UUID Literals
 ;; #uuid "550e8400-e29b-41d4-a716-446655440000"
 

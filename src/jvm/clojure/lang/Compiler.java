@@ -4898,207 +4898,216 @@ public class Compiler implements Opcodes {
           gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
           str = "Boolean.FALSE";
         }
-      } else if (value instanceof Integer) {
-        gen.push(((Integer) value).intValue());
-        gen.invokeStatic(Type.getType(Integer.class),
-            Method.getMethod("Integer valueOf(int)"));
-        str = ((Integer) value).intValue() < 0 ? "(" + String.valueOf(value)
-            + ")" : String.valueOf(value);
-      } else if (value instanceof Long) {
-        gen.push(((Long) value).longValue());
-        gen.invokeStatic(Type.getType(Long.class),
-            Method.getMethod("Long valueOf(long)"));
-        str = (((Long) value).longValue() < 0 ? "(" + value + "L)" : value
-            + "L");
-      } else if (value instanceof Double) {
-        gen.push(((Double) value).doubleValue());
-        gen.invokeStatic(Type.getType(Double.class),
-            Method.getMethod("Double valueOf(double)"));
-        str = ((Double) value).intValue() < 0 ? "(" + String.valueOf(value)
-            + ")" : String.valueOf(value);
-      } else if (value instanceof Character) {
-        gen.push(((Character) value).charValue());
-        gen.invokeStatic(Type.getType(Character.class),
-            Method.getMethod("Character valueOf(char)"));
-        str = "Character.valueOf((char)"
-            + (int) ((Character) value).charValue() + ")";
-      } else if (value instanceof Class) {
-        Class cc = (Class) value;
-        if (cc.isPrimitive()) {
-          Type bt;
-          if (cc == boolean.class)
-            bt = Type.getType(Boolean.class);
-          else if (cc == byte.class)
-            bt = Type.getType(Byte.class);
-          else if (cc == char.class)
-            bt = Type.getType(Character.class);
-          else if (cc == double.class)
-            bt = Type.getType(Double.class);
-          else if (cc == float.class)
-            bt = Type.getType(Float.class);
-          else if (cc == int.class)
-            bt = Type.getType(Integer.class);
-          else if (cc == long.class)
-            bt = Type.getType(Long.class);
-          else if (cc == short.class)
-            bt = Type.getType(Short.class);
-          else
-            throw Util
-                .runtimeException("Can't embed unknown primitive in code: "
-                    + value);
-          gen.getStatic(bt, "TYPE", Type.getType(Class.class));
-        } else {
-          gen.push(destubClassName(cc.getName()));
-          gen.invokeStatic(Type.getType(Class.class),
-              Method.getMethod("Class forName(String)"));
-        }
-        str = cc.getCanonicalName() + ".class";
-      } else if (value instanceof Symbol) {
-        String ns_ = ((Symbol) value).ns;
-        gen.push(ns_);
-        String name_ = ((Symbol) value).name;
-        gen.push(name_);
-        gen.invokeStatic(Type.getType(Symbol.class),
-            Method.getMethod("clojure.lang.Symbol intern(String,String)"));
-        str = "Symbol.intern(" + (ns_ == null ? "null" : "\"" + ns_ + "\"")
-            + ", " + (name_ == null ? "null" : "\"" + name_ + "\"") + ")";
-      } else if (value instanceof Keyword) {
-        String ns_ = ((Keyword) value).sym.ns;
-        gen.push(ns_);
-        String name_ = ((Keyword) value).sym.name;
-        gen.push(name_);
-        gen.invokeStatic(RT_TYPE,
-            Method.getMethod("clojure.lang.Keyword keyword(String,String)"));
-        str = "Keyword.intern(" + (ns_ == null ? "null" : "\"" + ns_ + "\"")
-            + ", " + (name_ == null ? "null" : "\"" + name_ + "\"") + ")";
-      }
-      // else if(value instanceof KeywordCallSite)
-      // {
-      // emitValue(((KeywordCallSite) value).k.sym, gen);
-      // gen.invokeStatic(Type.getType(KeywordCallSite.class),
-      // Method.getMethod("clojure.lang.KeywordCallSite create(clojure.lang.Symbol)"));
-      // }
-      else if (value instanceof Var) {
-        Var var = (Var) value;
-        String ns_ = var.ns.name.toString();
-        gen.push(ns_);
-        String name_ = var.sym.toString();
-        gen.push(name_);
-        gen.invokeStatic(RT_TYPE,
-            Method.getMethod("clojure.lang.Var var(String,String)"));
-        str = "RT.var(" + (ns_ == null ? "null" : "\"" + ns_ + "\"") + ", "
-            + (name_ == null ? "null" : "\"" + name_ + "\"") + ")";
-      } else if (value instanceof IType) {
-        Method ctor = new Method("<init>", Type.getConstructorDescriptor(value
-            .getClass().getConstructors()[0]));
-        gen.newInstance(Type.getType(value.getClass()));
-        gen.dup();
-        IPersistentVector fields = (IPersistentVector) Reflector
-            .invokeStaticMethod(value.getClass(), "getBasis", new Object[] {});
-        StringBuilder sb = new StringBuilder();
-        for (ISeq s = RT.seq(fields); s != null; s = s.next()) {
-          Symbol field = (Symbol) s.first();
-          Class k = tagClass(tagOf(field));
-          Object val = Reflector.getInstanceField(value, field.name);
-          String f = emitValue(val, gen);
-
-          if (k.isPrimitive()) {
-            Type b = Type.getType(boxClass(k));
-            String p = Type.getType(k).getDescriptor();
-            String n = k.getName();
-
-            gen.invokeVirtual(b, new Method(n + "Value", "()" + p));
-            f = f + "." + n + "Value()";
-          }
-          if (sb.length() > 0) {
-            sb.append(", ");
-          }
-          sb.append(f);
-        }
-        gen.invokeConstructor(Type.getType(value.getClass()), ctor);
-        return "new " + value.getClass().getCanonicalName() + "("
-            + sb.toString() + ")";
-      } else if (value instanceof IRecord) {
-        Method createMethod = Method.getMethod(value.getClass().getName()
-            + " create(clojure.lang.IPersistentMap)");
-        String val = emitValue(
-            PersistentArrayMap.create((java.util.Map) value), gen);
-        gen.invokeStatic(getType(value.getClass()), createMethod);
-        str = value.getClass().getCanonicalName() + ".create(" + val + ")";
-      } else if (value instanceof IPersistentMap) {
-        List entries = new ArrayList();
-        for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
-          entries.add(entry.getKey());
-          entries.add(entry.getValue());
-        }
-        String val = emitListAsObjectArray(entries, gen);
-        gen.invokeStatic(RT_TYPE,
-            Method.getMethod("clojure.lang.IPersistentMap map(Object[])"));
-        str = "RT.map(" + val + ")";
-      } else if (value instanceof IPersistentVector) {
-        String val = emitListAsObjectArray(value, gen);
-        gen.invokeStatic(RT_TYPE,
-            Method.getMethod("clojure.lang.IPersistentVector vector(Object[])"));
-        if (val.equals("null")) {
-          str = "RT.vector().cons(null)";
-        } else {
-          str = "RT.vector(" + val + ")";
-        }
-      } else if (value instanceof PersistentHashSet) {
-        ISeq vs = RT.seq(value);
-        if (vs == null) {
-          gen.getStatic(Type.getType(PersistentHashSet.class), "EMPTY",
-              Type.getType(PersistentHashSet.class));
-          str = "PersistentHashSet.EMPTY";
-        } else {
-          String val = emitListAsObjectArray(vs, gen);
-          gen.invokeStatic(Type.getType(PersistentHashSet.class), Method
-              .getMethod("clojure.lang.PersistentHashSet create(Object[])"));
-          if (val.equals("null")) {
-            str = "PersistentHashSet.create().cons(null)";
-          } else {
-            str = "PersistentHashSet.create(" + val + ")";
-          }
-        }
-      } else if (value instanceof ISeq || value instanceof IPersistentList) {
-        String val = emitListAsObjectArray(value, gen);
-        gen.invokeStatic(Type.getType(java.util.Arrays.class),
-            Method.getMethod("java.util.List asList(Object[])"));
-        gen.invokeStatic(Type.getType(PersistentList.class), Method
-            .getMethod("clojure.lang.IPersistentList create(java.util.List)"));
-        if (val.equals("null")) {
-          str = "PersistentList.EMPTY.cons(null)";
-        } else {
-          str = "PersistentList.create(java.util.Arrays.asList(" + val + "))";
-        }
-      } else if (value instanceof Pattern) {
-        String v = emitValue(value.toString(), gen);
-        gen.invokeStatic(Type.getType(Pattern.class),
-            Method.getMethod("java.util.regex.Pattern compile(String)"));
-        str = "java.util.regex.Pattern.compile(" + v + ")";
       } else {
-        String cs = null;
-        try {
-          cs = RT.printString(value);
-          // System.out.println("WARNING SLOW CODE: " + Util.classOf(value) +
-          // " -> " + cs);
-        } catch (Exception e) {
-          throw Util
-              .runtimeException("Can't embed object in code, maybe print-dup not defined: "
-                  + value);
+        String valueStr = String.valueOf(value);
+        boolean isNeg = valueStr.startsWith("-");
+        if (value instanceof Integer) {
+          gen.push(((Integer) value).intValue());
+          gen.invokeStatic(Type.getType(Integer.class),
+              Method.getMethod("Integer valueOf(int)"));
+          str = isNeg ? "(" + valueStr + ")" : valueStr;
+        } else if (value instanceof Long) {
+          gen.push(((Long) value).longValue());
+          gen.invokeStatic(Type.getType(Long.class),
+              Method.getMethod("Long valueOf(long)"));
+          str = isNeg ? "(" + value + "L)" : value + "L";
+        } else if (value instanceof Double) {
+          gen.push(((Double) value).doubleValue());
+          gen.invokeStatic(Type.getType(Double.class),
+              Method.getMethod("Double valueOf(double)"));
+          str = isNeg ? "(" + valueStr + ")" : valueStr;
+        } else if (value instanceof Float) {
+          gen.push(((Float) value).floatValue());
+          gen.invokeStatic(Type.getType(Float.class),
+              Method.getMethod("Float valueOf(float)"));
+          str = isNeg ? "(" + valueStr + ")" : valueStr;
+        } else if (value instanceof Character) {
+          gen.push(((Character) value).charValue());
+          gen.invokeStatic(Type.getType(Character.class),
+              Method.getMethod("Character valueOf(char)"));
+          str = "Character.valueOf((char)"
+              + (int) ((Character) value).charValue() + ")";
+        } else if (value instanceof Class) {
+          Class cc = (Class) value;
+          if (cc.isPrimitive()) {
+            Type bt;
+            if (cc == boolean.class)
+              bt = Type.getType(Boolean.class);
+            else if (cc == byte.class)
+              bt = Type.getType(Byte.class);
+            else if (cc == char.class)
+              bt = Type.getType(Character.class);
+            else if (cc == double.class)
+              bt = Type.getType(Double.class);
+            else if (cc == float.class)
+              bt = Type.getType(Float.class);
+            else if (cc == int.class)
+              bt = Type.getType(Integer.class);
+            else if (cc == long.class)
+              bt = Type.getType(Long.class);
+            else if (cc == short.class)
+              bt = Type.getType(Short.class);
+            else
+              throw Util
+                  .runtimeException("Can't embed unknown primitive in code: "
+                      + value);
+            gen.getStatic(bt, "TYPE", Type.getType(Class.class));
+          } else {
+            gen.push(destubClassName(cc.getName()));
+            gen.invokeStatic(Type.getType(Class.class),
+                Method.getMethod("Class forName(String)"));
+          }
+          str = cc.getCanonicalName() + ".class";
+        } else if (value instanceof Symbol) {
+          String ns_ = ((Symbol) value).ns;
+          gen.push(ns_);
+          String name_ = ((Symbol) value).name;
+          gen.push(name_);
+          gen.invokeStatic(Type.getType(Symbol.class),
+              Method.getMethod("clojure.lang.Symbol intern(String,String)"));
+          str = "Symbol.intern(" + (ns_ == null ? "null" : "\"" + ns_ + "\"")
+              + ", " + (name_ == null ? "null" : "\"" + name_ + "\"") + ")";
+        } else if (value instanceof Keyword) {
+          String ns_ = ((Keyword) value).sym.ns;
+          gen.push(ns_);
+          String name_ = ((Keyword) value).sym.name;
+          gen.push(name_);
+          gen.invokeStatic(RT_TYPE,
+              Method.getMethod("clojure.lang.Keyword keyword(String,String)"));
+          str = "Keyword.intern(" + (ns_ == null ? "null" : "\"" + ns_ + "\"")
+              + ", " + (name_ == null ? "null" : "\"" + name_ + "\"") + ")";
         }
-        if (cs.length() == 0)
-          throw Util.runtimeException("Can't embed unreadable object in code: "
-              + value);
+        // else if(value instanceof KeywordCallSite)
+        // {
+        // emitValue(((KeywordCallSite) value).k.sym, gen);
+        // gen.invokeStatic(Type.getType(KeywordCallSite.class),
+        // Method.getMethod("clojure.lang.KeywordCallSite create(clojure.lang.Symbol)"));
+        // }
+        else if (value instanceof Var) {
+          Var var = (Var) value;
+          String ns_ = var.ns.name.toString();
+          gen.push(ns_);
+          String name_ = var.sym.toString();
+          gen.push(name_);
+          gen.invokeStatic(RT_TYPE,
+              Method.getMethod("clojure.lang.Var var(String,String)"));
+          str = "RT.var(" + (ns_ == null ? "null" : "\"" + ns_ + "\"") + ", "
+              + (name_ == null ? "null" : "\"" + name_ + "\"") + ")";
+        } else if (value instanceof IType) {
+          Method ctor = new Method(
+              "<init>",
+              Type.getConstructorDescriptor(value.getClass().getConstructors()[0]));
+          gen.newInstance(Type.getType(value.getClass()));
+          gen.dup();
+          IPersistentVector fields = (IPersistentVector) Reflector
+              .invokeStaticMethod(value.getClass(), "getBasis", new Object[] {});
+          StringBuilder sb = new StringBuilder();
+          for (ISeq s = RT.seq(fields); s != null; s = s.next()) {
+            Symbol field = (Symbol) s.first();
+            Class k = tagClass(tagOf(field));
+            Object val = Reflector.getInstanceField(value, field.name);
+            String f = emitValue(val, gen);
 
-        if (cs.startsWith("#<"))
-          throw Util.runtimeException("Can't embed unreadable object in code: "
-              + cs);
+            if (k.isPrimitive()) {
+              Type b = Type.getType(boxClass(k));
+              String p = Type.getType(k).getDescriptor();
+              String n = k.getName();
 
-        gen.push(cs);
-        gen.invokeStatic(RT_TYPE, readStringMethod);
-        partial = false;
-        str = "RT.readString(\"" + escapeString(cs) + "\")";
+              gen.invokeVirtual(b, new Method(n + "Value", "()" + p));
+              f = f + "." + n + "Value()";
+            }
+            if (sb.length() > 0) {
+              sb.append(", ");
+            }
+            sb.append(f);
+          }
+          gen.invokeConstructor(Type.getType(value.getClass()), ctor);
+          return "new " + value.getClass().getCanonicalName() + "("
+              + sb.toString() + ")";
+        } else if (value instanceof IRecord) {
+          Method createMethod = Method.getMethod(value.getClass().getName()
+              + " create(clojure.lang.IPersistentMap)");
+          String val = emitValue(
+              PersistentArrayMap.create((java.util.Map) value), gen);
+          gen.invokeStatic(getType(value.getClass()), createMethod);
+          str = value.getClass().getCanonicalName() + ".create(" + val + ")";
+        } else if (value instanceof IPersistentMap) {
+          List entries = new ArrayList();
+          for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
+            entries.add(entry.getKey());
+            entries.add(entry.getValue());
+          }
+          String val = emitListAsObjectArray(entries, gen);
+          gen.invokeStatic(RT_TYPE,
+              Method.getMethod("clojure.lang.IPersistentMap map(Object[])"));
+          str = "RT.map(" + val + ")";
+        } else if (value instanceof IPersistentVector) {
+          String val = emitListAsObjectArray(value, gen);
+          gen.invokeStatic(RT_TYPE, Method
+              .getMethod("clojure.lang.IPersistentVector vector(Object[])"));
+          if (val.equals("null")) {
+            str = "RT.vector().cons(null)";
+          } else {
+            str = "RT.vector(" + val + ")";
+          }
+        } else if (value instanceof PersistentHashSet) {
+          ISeq vs = RT.seq(value);
+          if (vs == null) {
+            gen.getStatic(Type.getType(PersistentHashSet.class), "EMPTY",
+                Type.getType(PersistentHashSet.class));
+            str = "PersistentHashSet.EMPTY";
+          } else {
+            String val = emitListAsObjectArray(vs, gen);
+            gen.invokeStatic(Type.getType(PersistentHashSet.class), Method
+                .getMethod("clojure.lang.PersistentHashSet create(Object[])"));
+            if (val.equals("null")) {
+              str = "PersistentHashSet.create().cons(null)";
+            } else {
+              str = "PersistentHashSet.create(" + val + ")";
+            }
+          }
+        } else if (value instanceof ISeq || value instanceof IPersistentList) {
+          String val = emitListAsObjectArray(value, gen);
+          gen.invokeStatic(Type.getType(java.util.Arrays.class),
+              Method.getMethod("java.util.List asList(Object[])"));
+          gen.invokeStatic(Type.getType(PersistentList.class), Method
+              .getMethod("clojure.lang.IPersistentList create(java.util.List)"));
+          if (val.equals("null")) {
+            str = "PersistentList.EMPTY.cons(null)";
+          } else {
+            str = "PersistentList.create(java.util.Arrays.asList(" + val + "))";
+          }
+        } else if (value instanceof Pattern) {
+          String v = emitValue(value.toString(), gen);
+          gen.invokeStatic(Type.getType(Pattern.class),
+              Method.getMethod("java.util.regex.Pattern compile(String)"));
+          str = "java.util.regex.Pattern.compile(" + v + ")";
+        } else {
+          String cs = null;
+          try {
+            cs = RT.printString(value);
+            // System.out.println("WARNING SLOW CODE: " + Util.classOf(value) +
+            // " -> " + cs);
+          } catch (Exception e) {
+            throw Util
+                .runtimeException("Can't embed object in code, maybe print-dup not defined: "
+                    + value);
+          }
+          if (cs.length() == 0)
+            throw Util
+                .runtimeException("Can't embed unreadable object in code: "
+                    + value);
+
+          if (cs.startsWith("#<"))
+            throw Util
+                .runtimeException("Can't embed unreadable object in code: "
+                    + cs);
+
+          gen.push(cs);
+          gen.invokeStatic(RT_TYPE, readStringMethod);
+          partial = false;
+          str = "RT.readString(\"" + escapeString(cs) + "\")";
+        }
       }
 
       if (partial) {
@@ -6053,7 +6062,7 @@ public class Compiler implements Opcodes {
           gen.pop();
         } else {
           gen.unbox(Type.getType(retClass));
-          if (!ret.isEmpty()) {
+          if (ret != null && !ret.isEmpty()) { // TODO: ret == null ?
             String rlong = ret.substring(7);
             rlong = rlong.substring(0, rlong.length() - 1);
             switch (Type.getType(retClass).getSort()) {
@@ -9102,7 +9111,7 @@ public class Compiler implements Opcodes {
         gen.visitInsn(ISHR);
         gen.push(mask);
         gen.visitInsn(IAND);
-        
+
         return v + " >> " + shift + " & " + mask;
       }
       return v;
