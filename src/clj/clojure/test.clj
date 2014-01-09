@@ -234,8 +234,8 @@
   clojure.test
   (:require [clojure.stacktrace :as stack]))
 
-(compile-time!
- (require '[clojure.template :as temp]))
+
+(require '[clojure.template :as temp])
 
 ;; Nothing is marked "private" here, so you can rebind things to plug
 ;; in your own testing or reporting frameworks.
@@ -523,130 +523,126 @@
                          :expected '~form, :actual e#})))
          e#))))
 
-(compile-time!
-
- (defmacro try-expr
-   "Used by the 'is' macro to catch unexpected exceptions.
-   You don't call this."
-   {:added "1.1"}
-   [msg form]
-   `(try ~(assert-expr msg form)
-      (catch Throwable t#
-        (do-report {:type :error, :message ~msg,
-                    :expected '~form, :actual t#}))))
+(defmacro try-expr
+  "Used by the 'is' macro to catch unexpected exceptions.
+  You don't call this."
+  {:added "1.1"}
+  [msg form]
+  `(try ~(assert-expr msg form)
+     (catch Throwable t#
+       (do-report {:type :error, :message ~msg,
+                   :expected '~form, :actual t#}))))
 
 
 
- ;;; ASSERTION MACROS
+;;; ASSERTION MACROS
 
- ;; You use these in your tests.
+;; You use these in your tests.
 
- (defmacro is
-   "Generic assertion macro.  'form' is any predicate test.
-   'msg' is an optional message to attach to the assertion.
+(defmacro is
+  "Generic assertion macro.  'form' is any predicate test.
+  'msg' is an optional message to attach to the assertion.
 
-   Example: (is (= 4 (+ 2 2)) \"Two plus two should be 4\")
+  Example: (is (= 4 (+ 2 2)) \"Two plus two should be 4\")
 
-   Special forms:
+  Special forms:
 
-   (is (thrown? c body)) checks that an instance of c is thrown from
-   body, fails if not; then returns the thing thrown.
+  (is (thrown? c body)) checks that an instance of c is thrown from
+  body, fails if not; then returns the thing thrown.
 
-   (is (thrown-with-msg? c re body)) checks that an instance of c is
-   thrown AND that the message on the exception matches (with
-   re-find) the regular expression re."
-   {:added "1.1"}
-   ([form] `(is ~form nil))
-   ([form msg] `(try-expr ~msg ~form)))
+  (is (thrown-with-msg? c re body)) checks that an instance of c is
+  thrown AND that the message on the exception matches (with
+  re-find) the regular expression re."
+  {:added "1.1"}
+  ([form] `(is ~form nil))
+  ([form msg] `(try-expr ~msg ~form)))
 
- (defmacro are
-   "Checks multiple assertions with a template expression.
-   See clojure.template/do-template for an explanation of
-   templates.
+(defmacro are
+  "Checks multiple assertions with a template expression.
+  See clojure.template/do-template for an explanation of
+  templates.
 
-   Example: (are [x y] (= x y)
-   2 (+ 1 1)
-   4 (* 2 2))
-   Expands to:
-   (do (is (= 2 (+ 1 1)))
-   (is (= 4 (* 2 2))))
+  Example: (are [x y] (= x y)
+  2 (+ 1 1)
+  4 (* 2 2))
+  Expands to:
+  (do (is (= 2 (+ 1 1)))
+  (is (= 4 (* 2 2))))
 
-   Note: This breaks some reporting features, such as line numbers."
-   {:added "1.1"}
-   [argv expr & args]
-   (if (or
-        ;; (are [] true) is meaningless but ok
-        (and (empty? argv) (empty? args))
-        ;; Catch wrong number of args
-        (and (pos? (count argv))
-             (pos? (count args))
-             (zero? (mod (count args) (count argv)))))
-     `(temp/do-template ~argv (is ~expr) ~@args)
-     (throw (IllegalArgumentException. "The number of args doesn't match are's argv."))))
+  Note: This breaks some reporting features, such as line numbers."
+  {:added "1.1"}
+  [argv expr & args]
+  (if (or
+       ;; (are [] true) is meaningless but ok
+       (and (empty? argv) (empty? args))
+       ;; Catch wrong number of args
+       (and (pos? (count argv))
+            (pos? (count args))
+            (zero? (mod (count args) (count argv)))))
+    `(temp/do-template ~argv (is ~expr) ~@args)
+    (throw (IllegalArgumentException. "The number of args doesn't match are's argv."))))
 
- (defmacro testing
-   "Adds a new string to the list of testing contexts.  May be nested,
-   but must occur inside a test function (deftest)."
-   {:added "1.1"}
-   [string & body]
-   `(binding [*testing-contexts* (conj *testing-contexts* ~string)]
-      ~@body))
-
-
-
- ;;; DEFINING TESTS
-
- (defmacro with-test
-   "Takes any definition form (that returns a Var) as the first argument.
-   Remaining body goes in the :test metadata function for that Var.
-
-   When *load-tests* is false, only evaluates the definition, ignoring
-   the tests."
-   {:added "1.1"}
-   [definition & body]
-   (if *load-tests*
-     `(doto ~definition (alter-meta! assoc :test (fn [] ~@body)))
-     definition))
+(defmacro testing
+  "Adds a new string to the list of testing contexts.  May be nested,
+  but must occur inside a test function (deftest)."
+  {:added "1.1"}
+  [string & body]
+  `(binding [*testing-contexts* (conj *testing-contexts* ~string)]
+     ~@body))
 
 
- (defmacro deftest
-   "Defines a test function with no arguments.  Test functions may call
-   other tests, so tests may be composed.  If you compose tests, you
-   should also define a function named test-ns-hook; run-tests will
-   call test-ns-hook instead of testing all vars.
 
-   Note: Actually, the test body goes in the :test metadata on the var,
-   and the real function (the value of the var) calls test-var on
-   itself.
+;;; DEFINING TESTS
 
-   When *load-tests* is false, deftest is ignored."
-   {:added "1.1"}
-   [name & body]
-   (when *load-tests*
-     `(def ~(vary-meta name assoc :test `(fn [] ~@body))
-        (fn [] (test-var (var ~name))))))
+(defmacro with-test
+  "Takes any definition form (that returns a Var) as the first argument.
+  Remaining body goes in the :test metadata function for that Var.
 
- (defmacro deftest-
-   "Like deftest but creates a private var."
-   {:added "1.1"}
-   [name & body]
-   (when *load-tests*
-     `(def ~(vary-meta name assoc :test `(fn [] ~@body) :private true)
-        (fn [] (test-var (var ~name))))))
+  When *load-tests* is false, only evaluates the definition, ignoring
+  the tests."
+  {:added "1.1"}
+  [definition & body]
+  (if *load-tests*
+    `(doto ~definition (alter-meta! assoc :test (fn [] ~@body)))
+    definition))
 
 
- (defmacro set-test
-   "Experimental.
-   Sets :test metadata of the named var to a fn with the given body.
-   The var must already exist.  Does not modify the value of the var.
+(defmacro deftest
+  "Defines a test function with no arguments.  Test functions may call
+  other tests, so tests may be composed.  If you compose tests, you
+  should also define a function named test-ns-hook; run-tests will
+  call test-ns-hook instead of testing all vars.
 
-   When *load-tests* is false, set-test is ignored."
-   {:added "1.1"}
-   [name & body]
-   (when *load-tests*
-     `(alter-meta! (var ~name) assoc :test (fn [] ~@body))))
+  Note: Actually, the test body goes in the :test metadata on the var,
+  and the real function (the value of the var) calls test-var on
+  itself.
 
- )
+  When *load-tests* is false, deftest is ignored."
+  {:added "1.1"}
+  [name & body]
+  (when *load-tests*
+    `(def ~(vary-meta name assoc :test `(fn [] ~@body))
+       (fn [] (test-var (var ~name))))))
+
+(defmacro deftest-
+  "Like deftest but creates a private var."
+  {:added "1.1"}
+  [name & body]
+  (when *load-tests*
+    `(def ~(vary-meta name assoc :test `(fn [] ~@body) :private true)
+       (fn [] (test-var (var ~name))))))
+
+
+(defmacro set-test
+  "Experimental.
+  Sets :test metadata of the named var to a fn with the given body.
+  The var must already exist.  Does not modify the value of the var.
+
+  When *load-tests* is false, set-test is ignored."
+  {:added "1.1"}
+  [name & body]
+  (when *load-tests*
+    `(alter-meta! (var ~name) assoc :test (fn [] ~@body))))
 
 ;;; DEFINING FIXTURES
 

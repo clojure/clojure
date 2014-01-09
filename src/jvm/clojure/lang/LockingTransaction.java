@@ -106,7 +106,15 @@ Info info;
 long readPoint;
 long startPoint;
 long startTime;
-final RetryEx retryex = new RetryEx();
+static RetryEx retryex_ = new RetryEx();
+
+static RetryEx retryex() {
+  if (retryex_ == null) {
+    retryex_ = new RetryEx();
+  }
+  return retryex_;
+}
+
 final ArrayList<Agent.Action> actions = new ArrayList<Agent.Action>();
 final HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
 final HashSet<Ref> sets = new HashSet<Ref>();
@@ -119,11 +127,11 @@ void tryWriteLock(Ref ref){
 	try
 		{
 		if(!ref.lock.writeLock().tryLock(LOCK_WAIT_MSECS, TimeUnit.MILLISECONDS))
-			throw retryex;
+			throw retryex();
 		}
 	catch(InterruptedException e)
 		{
-		throw retryex;
+		throw retryex();
 		}
 }
 
@@ -139,7 +147,7 @@ Object lock(Ref ref){
 		unlocked = false;
 
 		if(ref.tvals != null && ref.tvals.point > readPoint)
-			throw retryex;
+			throw retryex();
 		Info refinfo = ref.tinfo;
 
 		//write lock conflict
@@ -173,7 +181,7 @@ private Object blockAndBail(Info refinfo){
 		{
 		//ignore
 		}
-	throw retryex;
+	throw retryex();
 }
 
 private void releaseIfEnsured(Ref ref){
@@ -289,13 +297,13 @@ Object run(Callable fn) throws Exception{
 					tryWriteLock(ref);
 					locked.add(ref);
 					if(wasEnsured && ref.tvals != null && ref.tvals.point > readPoint)
-						throw retryex;
+						throw retryex();
 
 					Info refinfo = ref.tinfo;
 					if(refinfo != null && refinfo != info && refinfo.running())
 						{
 						if(!barge(refinfo))
-							throw retryex;
+							throw retryex();
 						}
 					Object val = ref.tvals == null ? null : ref.tvals.val;
 					vals.put(ref, val);
@@ -402,7 +410,7 @@ public void enqueue(Agent.Action action){
 
 Object doGet(Ref ref){
 	if(!info.running())
-		throw retryex;
+		throw retryex();
 	if(vals.containsKey(ref))
 		return vals.get(ref);
 	try
@@ -423,13 +431,13 @@ Object doGet(Ref ref){
 		}
 	//no version of val precedes the read point
 	ref.faults.incrementAndGet();
-	throw retryex;
+	throw retryex();
 
 }
 
 Object doSet(Ref ref, Object val){
 	if(!info.running())
-		throw retryex;
+		throw retryex();
 	if(commutes.containsKey(ref))
 		throw new IllegalStateException("Can't set after commute");
 	if(!sets.contains(ref))
@@ -443,7 +451,7 @@ Object doSet(Ref ref, Object val){
 
 void doEnsure(Ref ref){
 	if(!info.running())
-		throw retryex;
+		throw retryex();
 	if(ensures.contains(ref))
 		return;
 	ref.lock.readLock().lock();
@@ -451,7 +459,7 @@ void doEnsure(Ref ref){
 	//someone completed a write after our snapshot
 	if(ref.tvals != null && ref.tvals.point > readPoint) {
         ref.lock.readLock().unlock();
-        throw retryex;
+        throw retryex();
     }
 
 	Info refinfo = ref.tinfo;
@@ -472,7 +480,7 @@ void doEnsure(Ref ref){
 
 Object doCommute(Ref ref, IFn fn, ISeq args) {
 	if(!info.running())
-		throw retryex;
+		throw retryex();
 	if(!vals.containsKey(ref))
 		{
 		Object val = null;

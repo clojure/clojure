@@ -456,56 +456,61 @@ public class RT {
     load(scriptbase, true);
   }
 
+  public static native void loadiOS(String scriptbase) /*-[
+                                                       IOSObjectArray *parts = [scriptbase split:@"/"];
+                                                       NSString *classname = @"";
+                                                       for (int n = 0; n < parts.count - 1; n++) {
+                                                       NSString *s = (NSString*)[parts objectAtIndex:n];
+                                                       s = [[[s substringToIndex:1] uppercaseString] stringByAppendingString:[s substringFromIndex:1]];
+                                                       classname = [classname stringByAppendingString:s];
+                                                       }
+                                                       classname = [classname stringByAppendingString:[parts objectAtIndex:parts.count-1]];
+                                                       classname = [classname stringByAppendingString:@"__init"];
+                                                       NSLog(@"%@", NSClassFromString(classname));
+                                                       return;
+                                                       ]-*/;
+
   static public void load(String scriptbase, boolean failIfNotFound)
       throws IOException, ClassNotFoundException {
-    /*-[
-    IOSObjectArray *parts = [scriptbase split:@"/"];
-    NSString *classname = @"";
-    for (int n = 0; n < parts.count - 1; n++) {
-        classname = [classname stringByAppendingString:[(NSString*)[parts objectAtIndex:n] capitalizedString]];
-    }
-    classname = [classname stringByAppendingString:[parts objectAtIndex:parts.count-1]];
-    classname = [classname stringByAppendingString:@"__init"];
-    NSLog(@"%@", NSClassFromString(classname));
-    return;
-    ]-*/
-    String classfile = scriptbase + LOADER_SUFFIX + ".class";
-    String cljfile = scriptbase + ".clj";
-    URL classURL = getResource(baseLoader(), classfile);
-    URL cljURL = getResource(baseLoader(), cljfile);
-    boolean loaded = false;
+    if (!RT.class.getName().equals("clojure.lang.RT")) { // in iOS is = "ClojureLangRT"
+      loadiOS(scriptbase);
+    } else {
+      String classfile = scriptbase + LOADER_SUFFIX + ".class";
+      String cljfile = scriptbase + ".clj";
+      URL classURL = getResource(baseLoader(), classfile);
+      URL cljURL = getResource(baseLoader(), cljfile);
+      boolean loaded = false;
 
-    if (forceClass
-        || (classURL != null && (cljURL == null || lastModified(classURL,
-            classfile) >= lastModified(cljURL, cljfile)))) { // || classURL ==
-                                                             // null ?
-      try {
-        Var.pushThreadBindings(RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
-            WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref(), RT.UNCHECKED_MATH,
-            RT.UNCHECKED_MATH.deref()));
-        System.out.println("Loading class " + classURL);
-        loaded = (loadClassForName(scriptbase.replace('/', '.') + LOADER_SUFFIX) != null);
-      } catch (Exception e) {
-        throw new RuntimeException("Error loading class " + classURL, e);
-      } finally {
-        Var.popThreadBindings();
+      if (forceClass
+          || (classURL != null && (cljURL == null || lastModified(classURL,
+              classfile) >= lastModified(cljURL, cljfile)))) { // || classURL ==
+                                                               // null ?
+        try {
+          Var.pushThreadBindings(RT.mapUniqueKeys(CURRENT_NS,
+              CURRENT_NS.deref(), WARN_ON_REFLECTION,
+              WARN_ON_REFLECTION.deref(), RT.UNCHECKED_MATH,
+              RT.UNCHECKED_MATH.deref()));
+          System.out.println("Loading class " + classURL);
+          loaded = (loadClassForName(scriptbase.replace('/', '.')
+              + LOADER_SUFFIX) != null);
+        } catch (Exception e) {
+          throw new RuntimeException("Error loading class " + classURL, e);
+        } finally {
+          Var.popThreadBindings();
+        }
       }
+      boolean runtime = Boolean.TRUE.equals(Compiler.RUNTIME.deref());
+      if (runtime || (!loaded && cljURL != null)) {
+        if (booleanCast(Compiler.COMPILE_FILES.deref()))
+          compile(cljfile);
+        else
+          loadResourceScript(RT.class, cljfile);
+
+        System.out.println("Loading script " + scriptbase);
+      } else if (!loaded && failIfNotFound)
+        throw new FileNotFoundException(String.format(
+            "Could not locate %s or %s on classpath: ", classfile, cljfile));
     }
-    if (Boolean.TRUE.equals(Compiler.RUNTIME.deref())
-        || (!loaded && cljURL != null)) {
-      if (booleanCast(Compiler.COMPILE_FILES.deref()))
-        compile(cljfile);
-      else
-        loadResourceScript(RT.class, cljfile);
-
-      System.out.println("Loading script " + scriptbase);
-    } else if (!loaded && failIfNotFound)
-      throw new FileNotFoundException(String.format(
-          "Could not locate %s or %s on classpath: ", classfile, cljfile));
-  }
-
-  public static void doInit() throws ClassNotFoundException, IOException {
-    load("clojure/core");
   }
 
   static public int nextID() {

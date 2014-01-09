@@ -126,8 +126,8 @@
       [1] #{1} )
 
   ; sorted-map, hash-map and array-map - classes differ, but content is equal
-  
-;; TODO: reimplement all-are with new do-template?  
+
+;; TODO: reimplement all-are with new do-template?
 ;;   (all-are (not= (class _1) (class _2))
 ;;       (sorted-map :a 1)
 ;;       (hash-map   :a 1)
@@ -169,10 +169,10 @@
 (deftest test-count
   (let [EMPTY clojure.lang.PersistentQueue/EMPTY]
     (are [x y] (= (count x) y)
-         EMPTY 0 
+         EMPTY 0
          (into EMPTY [:a :b]) 2
          (-> (into EMPTY [:a :b]) pop pop) 0
-         
+
          nil 0
 
          () 0
@@ -199,13 +199,13 @@
          (into-array [1]) 1
          (into-array [1 2 3]) 3
 
-         (java.util.ArrayList. []) 0
-         (java.util.ArrayList. [1]) 1
-         (java.util.ArrayList. [1 2 3]) 3
+         (java.util.ArrayList. ^clojure.lang.IPersistentVector []) 0
+         (java.util.ArrayList. ^clojure.lang.IPersistentVector [1]) 1
+         (java.util.ArrayList. ^clojure.lang.IPersistentVector [1 2 3]) 3
 
-         (java.util.HashMap. {}) 0
-         (java.util.HashMap. {:a 1}) 1
-         (java.util.HashMap. {:a 1 :b 2 :c 3}) 3 ))
+         (java.util.HashMap. ^clojure.lang.IPersistentMap {}) 0
+         (java.util.HashMap. ^clojure.lang.IPersistentMap {:a 1}) 1
+         (java.util.HashMap. ^clojure.lang.IPersistentMap {:a 1 :b 2 :c 3}) 3 ))
 
   ; different types
   (are [x]  (= (count [x]) 1)

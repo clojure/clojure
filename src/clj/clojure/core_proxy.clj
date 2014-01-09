@@ -10,7 +10,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; proxy ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(compile-time!
 (import
  '(clojure.asm ClassWriter ClassVisitor Opcodes Type)
  '(java.lang.reflect Modifier Constructor)
@@ -332,7 +331,6 @@
   (if (. ^Class (first bases) (isInterface))
     [Object bases]
     [(first bases) (next bases)]))
-)
 
 (defn get-proxy-class
   "Takes an optional single class followed by zero or more
