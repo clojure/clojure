@@ -5815,7 +5815,7 @@ public class Compiler implements Opcodes {
       gen = new GeneratorAdapter(ACC_PUBLIC, m, null,
       // todo don't hardwire this
           EXCEPTION_TYPES, cv);
-      
+
       gen.visitCode();
       gen.loadThis();
       sb = new StringBuilder();
@@ -5832,9 +5832,10 @@ public class Compiler implements Opcodes {
       }
       emitSource("public Object invoke(" + sb.toString() + ") {");
       tab();
-      
+
       gen.invokeInterface(Type.getType("L" + prim + ";"), ms);
-      emitSource("return " + gen.box(getReturnType(), "invokePrim(" + args + ")") + ";");
+      emitSource("return "
+          + gen.box(getReturnType(), "invokePrim(" + args + ")") + ";");
 
       untab();
       emitSource("}");
@@ -9018,10 +9019,14 @@ public class Compiler implements Opcodes {
       Type primExprType = primExprClass == null ? null : Type
           .getType(primExprClass);
 
+      String cond;
       if (testType == intKey)
-        emitExprForInts(objx, gen, primExprType, defaultLabel);
+        cond = emitExprForInts(objx, gen, primExprType, defaultLabel);
       else
-        emitExprForHashes(objx, gen);
+        cond = emitExprForHashes(objx, gen);
+
+      emitSource("switch (" + cond + ") {");
+      tab();
 
       if (switchType == sparseKey) {
         Label[] la = new Label[labels.size()];
@@ -9036,18 +9041,14 @@ public class Compiler implements Opcodes {
         gen.visitTableSwitchInsn(low, high, defaultLabel, la);
       }
 
-      boolean addElse = false;
       for (Integer i : labels.keySet()) {
-        if (addElse) {
-          emitSource("else");
-        }
+        emitSource("case " + i + ":");
+        tab();
         gen.mark(labels.get(i));
         if (testType == intKey) {
           emitThenForInts(context, r, objx, gen, primExprType, tests.get(i),
               thens.get(i), defaultLabel, emitUnboxed);
         } else if (RT.contains(skipCheck, i) == RT.T) {
-          emitSource("if (true) {");
-          tab();
           String e = emitExpr(objx, gen, thens.get(i), emitUnboxed);
           if (e != null) {
             if (thens.get(i) instanceof LiteralExpr && context == C.STATEMENT) {
@@ -9058,21 +9059,16 @@ public class Compiler implements Opcodes {
                   + (context == C.EXPRESSION ? ";" : ""));
             }
           }
-          untab();
-          emitSource("}");
         } else {
           emitThenForHashes(context, r, objx, gen, tests.get(i), thens.get(i),
               defaultLabel, emitUnboxed);
         }
         gen.goTo(endLabel);
-
-        addElse = true;
-      }
-      if (addElse) {
-        emitSource("else {");
-        tab();
+        untab();
       }
       gen.mark(defaultLabel);
+      emitSource("default:");
+      tab();
       String e = emitExpr(objx, gen, defaultExpr, emitUnboxed);
       if (e != null) {
         if (defaultExpr instanceof LiteralExpr && context == C.STATEMENT) {
@@ -9082,13 +9078,12 @@ public class Compiler implements Opcodes {
               + e + statement(context) + (context == C.EXPRESSION ? ";" : ""));
         }
       }
+      untab();
+      untab();
+      emitSource("}");
       gen.mark(endLabel);
       if (context == C.STATEMENT)
         gen.pop();
-      if (addElse) {
-        untab();
-        emitSource("}");
-      }
       return context == C.EXPRESSION ? r : "";
     }
 
@@ -9130,7 +9125,7 @@ public class Compiler implements Opcodes {
         return "(int)" + val;
       } else {
         gen.goTo(defaultLabel);
-        return "";
+        return "-666123"; // Magic number to jump to default TODO proper impl
       }
     }
 
@@ -9154,6 +9149,9 @@ public class Compiler implements Opcodes {
                 + (context == C.EXPRESSION ? ";" : ""));
           }
         }
+        if (context != C.RETURN) {
+          emitSource("break;");
+        }
         untab();
         emitSource("}");
       } else if (exprType == Type.LONG_TYPE) {
@@ -9171,6 +9169,9 @@ public class Compiler implements Opcodes {
                 + ret(context) + body + statement(context)
                 + (context == C.EXPRESSION ? ";" : ""));
           }
+        }
+        if (context != C.RETURN) {
+          emitSource("break;");
         }
         untab();
         emitSource("}");
@@ -9200,11 +9201,12 @@ public class Compiler implements Opcodes {
                 + (context == C.EXPRESSION ? ";" : ""));
           }
         }
+        if (context != C.RETURN) {
+          emitSource("break;");
+        }
         untab();
         emitSource("}");
       } else {
-        emitSource("if (false) {");
-        emitSource("}");
         gen.goTo(defaultLabel);
       }
     }
@@ -9213,7 +9215,12 @@ public class Compiler implements Opcodes {
       String val = expr.emit(C.EXPRESSION, objx, gen);
       gen.invokeStatic(UTIL_TYPE, hashMethod);
       emitShiftMask(gen);
-      return "Util.hash(" + val + ") >> 1 & 3";
+      String r = "Util.hash(" + val + ")";
+      if (isShiftMasked()) {
+        return r + " >> " + shift + " & " + mask;
+      } else {
+        return r;
+      }
     }
 
     private void emitThenForHashes(C context, String r, ObjExpr objx,
@@ -9238,6 +9245,9 @@ public class Compiler implements Opcodes {
           emitSource((context == C.EXPRESSION ? r + " = " : "") + ret(context)
               + e + statement(context) + (context == C.EXPRESSION ? ";" : ""));
         }
+      }
+      if (context != C.RETURN) {
+        emitSource("break;");
       }
       untab();
       emitSource("}");
