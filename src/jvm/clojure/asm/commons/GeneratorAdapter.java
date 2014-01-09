@@ -515,7 +515,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
       dup();
       push(i);
       loadArg(i);
-      box(argumentTypes[i]);
+      box(argumentTypes[i], "");
       arrayStore(OBJECT_TYPE);
     }
   }
@@ -827,12 +827,13 @@ public class GeneratorAdapter extends LocalVariablesSorter {
    * @param type
    *          the type of the top stack value.
    */
-  public void box(final Type type) {
+  public String box(final Type type, String val) {
     if (type.getSort() == Type.OBJECT || type.getSort() == Type.ARRAY) {
-      return;
+      return val;
     }
     if (type == Type.VOID_TYPE) {
       push((String) null);
+      return val;
     } else {
       Type boxed = type;
       switch (type.getSort()) {
@@ -874,6 +875,8 @@ public class GeneratorAdapter extends LocalVariablesSorter {
       }
       invokeConstructor(boxed, new Method("<init>", Type.VOID_TYPE,
           new Type[] { type }));
+      return "new " + boxed.getClassName() + "((" + type.getClassName() + ")"
+          + val + ")";
     }
   }
 
@@ -915,7 +918,8 @@ public class GeneratorAdapter extends LocalVariablesSorter {
     if (sig == null) {
       return value;
     } else {
-      return "((" + t.getClassName() + ")" + value + ")." + sig.getName() + "()";
+      return "((" + t.getClassName() + ")" + value + ")." + sig.getName()
+          + "()";
     }
   }
 

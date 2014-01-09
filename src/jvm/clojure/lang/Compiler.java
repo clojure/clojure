@@ -3991,11 +3991,12 @@ public class Compiler implements Opcodes {
           IPersistentVector args = (IPersistentVector) s.first();
           if (args.count() == arity) {
             String primc = FnMethod.primInterface(args);
-            if (primc != null)
+            if (primc != null) {
               return analyze(context, RT.listStar(
                   Symbol.intern(".invokePrim"),
                   ((Symbol) form.first()).withMeta(RT.map(RT.TAG_KEY,
                       Symbol.intern(primc))), form.next()));
+            }
             break;
           }
         }
@@ -5701,7 +5702,9 @@ public class Compiler implements Opcodes {
         doEmit(fn, cv);
     }
 
+    // TODO: is this required?
     public void doEmitStatic(ObjExpr fn, ClassVisitor cv) {
+      new RuntimeException().printStackTrace();
       Method ms = new Method("invokeStatic", getReturnType(), argtypes);
 
       GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC, ms,
@@ -5743,7 +5746,7 @@ public class Compiler implements Opcodes {
         HostExpr.emitUnboxArg(fn, gen, argclasses[i], "");
       }
       gen.invokeStatic(objx.objtype, ms);
-      gen.box(getReturnType());
+      gen.box(getReturnType(), "");
 
       gen.returnValue();
       // gen.visitMaxs(1, 1);
@@ -5812,15 +5815,29 @@ public class Compiler implements Opcodes {
       gen = new GeneratorAdapter(ACC_PUBLIC, m, null,
       // todo don't hardwire this
           EXCEPTION_TYPES, cv);
+      
       gen.visitCode();
       gen.loadThis();
+      sb = new StringBuilder();
+      StringBuilder args = new StringBuilder();
       for (int i = 0; i < argtypes.length; i++) {
+        if (sb.length() > 0) {
+          sb.append(", ");
+          args.append(", ");
+        }
         gen.loadArg(i);
-        HostExpr.emitUnboxArg(fn, gen, argclasses[i], "");
+        String argname = ((LocalBinding) argLocals.nth(i)).print();
+        sb.append("Object " + argname);
+        args.append(HostExpr.emitUnboxArg(fn, gen, argclasses[i], argname));
       }
+      emitSource("public Object invoke(" + sb.toString() + ") {");
+      tab();
+      
       gen.invokeInterface(Type.getType("L" + prim + ";"), ms);
-      gen.box(getReturnType());
+      emitSource("return " + gen.box(getReturnType(), "invokePrim(" + args + ")") + ";");
 
+      untab();
+      emitSource("}");
       gen.returnValue();
       // gen.visitMaxs(1, 1);
       gen.endMethod();
@@ -6769,7 +6786,8 @@ public class Compiler implements Opcodes {
         emitSource("}");
       }
 
-      return (context == C.EXPRESSION || emitUnboxed ? r : (v == null ? null : ""));
+      return (context == C.EXPRESSION || emitUnboxed ? r : (v == null ? null
+          : ""));
     }
 
     public boolean hasJavaClass() {
@@ -8746,7 +8764,7 @@ public class Compiler implements Opcodes {
 
       emitSource("try {");
       tab();
-      
+
       for (int i = 0; i < parms.count(); i++) {
         IPersistentMap meta = RT.meta(parms.nth(i));
         addParameterAnnotation(gen, meta, i);
