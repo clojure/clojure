@@ -43,7 +43,7 @@ public class Demo {
             clojure.lang.Compiler.COMPILE_FILES, Boolean.TRUE));
         IPersistentMap options = (IPersistentMap) Compiler.COMPILER_OPTIONS
             .deref();
-        RT.WARN_ON_REFLECTION.bindRoot(RT.T);
+//        RT.WARN_ON_REFLECTION.bindRoot(RT.T);
         IPersistentSet loaded = (IPersistentSet) RT.var("clojure.core",
             "loaded-libs").invoke();
         Compiler.RUNTIME.bindRoot(Boolean.TRUE);
@@ -64,11 +64,12 @@ public class Demo {
   }
 
   private static void loadAll() throws IOException, ClassNotFoundException {
-//    RT.load("clojure/core");
-//    RT.load("clojure/gal");
-//    if (true) {
-//      return;
-//    }
+    RT.load("clojure/core");
+    RT.load("clojure/main");
+    RT.load("clojure/test_clojure/control");
+    if (true) {
+      return;
+    }
     RT.load("clojure/core");
     RT.load("clojure/main");
     // RT.load("clojure/test_clojure/vectors");

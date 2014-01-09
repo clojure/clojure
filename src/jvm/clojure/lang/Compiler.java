@@ -9041,8 +9041,10 @@ public class Compiler implements Opcodes {
         gen.visitTableSwitchInsn(low, high, defaultLabel, la);
       }
 
+      int pos = 0;
       for (Integer i : labels.keySet()) {
         emitSource("case " + i + ":");
+        pos++;
         tab();
         gen.mark(labels.get(i));
         if (testType == intKey) {
@@ -9058,6 +9060,9 @@ public class Compiler implements Opcodes {
                   + ret(context) + e + statement(context)
                   + (context == C.EXPRESSION ? ";" : ""));
             }
+          }
+          if (context != C.RETURN) {
+            emitSource("break;");
           }
         } else {
           emitThenForHashes(context, r, objx, gen, tests.get(i), thens.get(i),
@@ -9091,13 +9096,16 @@ public class Compiler implements Opcodes {
       return mask != 0;
     }
 
-    private void emitShiftMask(GeneratorAdapter gen) {
+    private String emitShiftMask(GeneratorAdapter gen, String v) {
       if (isShiftMasked()) {
         gen.push(shift);
         gen.visitInsn(ISHR);
         gen.push(mask);
         gen.visitInsn(IAND);
+        
+        return v + " >> " + shift + " & " + mask;
       }
+      return v;
     }
 
     private String emitExprForInts(ObjExpr objx, GeneratorAdapter gen,
@@ -9115,14 +9123,12 @@ public class Compiler implements Opcodes {
         expr.emit(C.EXPRESSION, objx, gen);
         gen.checkCast(NUMBER_TYPE);
         gen.invokeVirtual(NUMBER_TYPE, intValueMethod);
-        emitShiftMask(gen);
-        return "((Number)" + val + ").intValue()";
+        return emitShiftMask(gen, "RT.uncheckedIntCast(" + val + ")");
       } else if (exprType == Type.LONG_TYPE || exprType == Type.INT_TYPE
           || exprType == Type.SHORT_TYPE || exprType == Type.BYTE_TYPE) {
         String val = expr.emitUnboxed(C.EXPRESSION, objx, gen);
         gen.cast(exprType, Type.INT_TYPE);
-        emitShiftMask(gen);
-        return "(int)" + val;
+        return emitShiftMask(gen, "(int)" + val);
       } else {
         gen.goTo(defaultLabel);
         return "-666123"; // Magic number to jump to default TODO proper impl
@@ -9214,13 +9220,7 @@ public class Compiler implements Opcodes {
     private String emitExprForHashes(ObjExpr objx, GeneratorAdapter gen) {
       String val = expr.emit(C.EXPRESSION, objx, gen);
       gen.invokeStatic(UTIL_TYPE, hashMethod);
-      emitShiftMask(gen);
-      String r = "Util.hash(" + val + ")";
-      if (isShiftMasked()) {
-        return r + " >> " + shift + " & " + mask;
-      } else {
-        return r;
-      }
+      return emitShiftMask(gen, "Util.hash(" + val + ")");
     }
 
     private void emitThenForHashes(C context, String r, ObjExpr objx,

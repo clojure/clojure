@@ -1126,7 +1126,7 @@ public class RT {
     }
     return ((Character) x).charValue();
   }
-
+  
   static public int intCast(char x) {
     return x;
   }
