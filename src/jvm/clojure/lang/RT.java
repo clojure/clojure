@@ -36,6 +36,7 @@ import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
@@ -470,8 +471,11 @@ public class RT {
                                                        return;
                                                        ]-*/;
 
+  public static final HashSet<String> loaded = new HashSet<String>();
+  
   static public void load(String scriptbase, boolean failIfNotFound)
       throws IOException, ClassNotFoundException {
+    loaded.add(scriptbase);
     if (!RT.class.getName().equals("clojure.lang.RT")) { // in iOS is = "ClojureLangRT"
       loadiOS(scriptbase);
     } else {

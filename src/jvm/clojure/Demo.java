@@ -5,8 +5,6 @@ import java.io.IOException;
 
 import clojure.lang.Compiler;
 import clojure.lang.IPersistentMap;
-import clojure.lang.IPersistentSet;
-import clojure.lang.ISeq;
 import clojure.lang.RT;
 import clojure.lang.Var;
 
@@ -14,22 +12,11 @@ public class Demo {
 
   public static void main(String[] args) throws Exception {
     if (true) {
-      // RT.forceClass = true;
       long d = System.currentTimeMillis();
 
       loadAll();
 
       RT.var("clojure.test", "run-all-tests").invoke();
-
-      // IFn p = (IFn) RT.var("clojure.core", "println").getRawRoot();
-      // p.invoke("Hello world");
-
-      // IFn reduce = (IFn) RT.var("clojure.core", "reduce").getRawRoot();
-      // IFn map = (IFn) RT.var("clojure.core", "map").getRawRoot();
-      // IFn plus = (IFn) RT.var("clojure.core", "+").getRawRoot();
-      // IFn inc = (IFn) RT.var("clojure.core", "inc").getRawRoot();
-      // System.out.println(reduce.invoke(plus, map.invoke(inc, RT.vector(1, 2,
-      // 3))));
 
       System.out.println(System.currentTimeMillis() - d);
     } else {
@@ -44,12 +31,9 @@ public class Demo {
         IPersistentMap options = (IPersistentMap) Compiler.COMPILER_OPTIONS
             .deref();
         // RT.WARN_ON_REFLECTION.bindRoot(RT.T);
-        IPersistentSet loaded = (IPersistentSet) RT.var("clojure.core",
-            "loaded-libs").invoke();
         Compiler.RUNTIME.bindRoot(Boolean.TRUE);
-        for (ISeq i = loaded.seq(); i != null; i = i.next()) {
-          RT.load(i.first().toString().replaceAll("[.]", "/")
-              .replaceAll("-", "_"));
+        for (String f : RT.loaded) {
+          RT.load(f.replaceAll("[.]", "/").replaceAll("-", "_"));
         }
 
         Var.popThreadBindings();
@@ -72,47 +56,49 @@ public class Demo {
     // }
     RT.load("clojure/core");
     RT.load("clojure/main");
-    RT.load("clojure/test_clojure/agents");
-    RT.load("clojure/test_clojure/api");
+    // RT.load("clojure/test_clojure/agents");
     RT.load("clojure/test_clojure/atoms");
     RT.load("clojure/test_clojure/clojure_set");
     RT.load("clojure/test_clojure/clojure_walk");
-    RT.load("clojure/test_clojure/clojure_xml");
-    RT.load("clojure/test_clojure/clojure_zip");
-    RT.load("clojure/test_clojure/control");
+    // RT.load("clojure/test_clojure/control");
     RT.load("clojure/test_clojure/delays");
     RT.load("clojure/test_clojure/for");
     RT.load("clojure/test_clojure/keywords");
-    RT.load("clojure/test_clojure/edn");
-    RT.load("clojure/test_clojure/errors");
-    RT.load("clojure/test_clojure/logic");
-    RT.load("clojure/test_clojure/generators");
-    RT.load("clojure/test_clojure/macros");
-    RT.load("clojure/test_clojure/main");
-    RT.load("clojure/test_clojure/metadata");
-    RT.load("clojure/test_clojure/java_interop");
-    RT.load("clojure/test_clojure/parallel");
-    RT.load("clojure/test_clojure/multimethods");
-    RT.load("clojure/test_clojure/reader");
-    RT.load("clojure/test_clojure/predicates");
-    RT.load("clojure/test_clojure/string");
-    RT.load("clojure/test_clojure/printer");
-    RT.load("clojure/test_clojure/fn");
-    RT.load("clojure/test_clojure/data_structures");
-    RT.load("clojure/test_clojure/data");
-    RT.load("clojure/test_clojure/numbers");
-    RT.load("clojure/test_clojure/other_functions");
-    RT.load("clojure/test_clojure/sequences");
-    RT.load("clojure/test_clojure/special");
-    RT.load("clojure/test_clojure/vars");
-    RT.load("clojure/test_clojure/repl");
-    RT.load("clojure/test_clojure/test_fixtures");
-    RT.load("clojure/test_clojure/rt");
-    RT.load("clojure/test_clojure/test");
-    RT.load("clojure/test_clojure/refs");
-    RT.load("clojure/test_clojure/transients");
-    RT.load("clojure/test_clojure/reducers");
+    // RT.load("clojure/test_clojure/vars");
+    // RT.load("clojure/test_clojure/sequences");
+    // RT.load("clojure/test_clojure/errors");
+    // RT.load("clojure/test_clojure/logic");
+    // RT.load("clojure/test_clojure/macros");
+    // RT.load("clojure/test_clojure/string");
+    // RT.load("clojure/test_clojure/fn");
+    // RT.load("clojure/test_clojure/transients");
 
+    // RT.load("clojure/test_clojure/api");
+    // RT.load("clojure/test_clojure/clojure_xml");
+    // RT.load("clojure/test_clojure/clojure_zip");
+
+    // RT.load("clojure/test_clojure/edn");
+    // RT.load("clojure/test_clojure/generators");
+    // RT.load("clojure/test_clojure/main");
+    // RT.load("clojure/test_clojure/metadata");
+    // RT.load("clojure/test_clojure/java_interop");
+    // RT.load("clojure/test_clojure/parallel");
+    // RT.load("clojure/test_clojure/multimethods");
+    // RT.load("clojure/test_clojure/reader");
+    // RT.load("clojure/test_clojure/predicates");
+    // RT.load("clojure/test_clojure/printer");
+    // RT.load("clojure/test_clojure/data_structures");
+    // RT.load("clojure/test_clojure/data");
+    // RT.load("clojure/test_clojure/numbers");
+    // RT.load("clojure/test_clojure/other_functions");
+    // RT.load("clojure/test_clojure/special");
+    // RT.load("clojure/test_clojure/repl");
+    // RT.load("clojure/test_clojure/test_fixtures");
+    // RT.load("clojure/test_clojure/rt");
+    // RT.load("clojure/test_clojure/test");
+    // RT.load("clojure/test_clojure/refs");
+
+    // RT.load("clojure/test_clojure/reducers");
     // RT.load("clojure/test_clojure/serialization");
     // RT.load("clojure/test_clojure/pprint");
     // RT.load("clojure/test_clojure/reflect");

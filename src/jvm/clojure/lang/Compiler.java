@@ -2839,7 +2839,7 @@ public class Compiler implements Opcodes {
           gen.visitJumpInsn(IF_ACMPEQ, falseLabel);
           String temp = registerTemp();
           emitSource("Object " + temp + " = " + val + ";");
-          sb.append(temp + " != null && !" + temp + ".equals(Boolean.FALSE)");
+          sb.append(temp + " != null && !(" + temp + " == Boolean.FALSE)");
         }
       } catch (Exception e) {
         throw Util.sneakyThrow(e);
