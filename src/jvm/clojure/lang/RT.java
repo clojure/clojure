@@ -503,8 +503,9 @@ public class RT {
           Var.popThreadBindings();
         }
       }
-      boolean runtime = Boolean.TRUE.equals(Compiler.RUNTIME.deref());
-      if (runtime || (!loaded && cljURL != null)) {
+//      boolean runtime = Boolean.TRUE.equals(Compiler.RUNTIME.deref());
+      //runtime ||
+      if ((!loaded && cljURL != null)) {
         if (booleanCast(Compiler.COMPILE_FILES.deref()))
           compile(cljfile);
         else

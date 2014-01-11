@@ -680,8 +680,11 @@
            (into-array (map #(.getInternalName (asm-type %)) extends))))
       (add-annotations cv (meta name))
       (doseq [[mname pclasses rclass pmetas] methods]
-        (Compiler/emitSource (str (if (symbol? rclass) (str rclass) (.getCanonicalName rclass)) " " (str mname) "("
-                                  (let [names (map #(str (nth pclasses %) " p" %) (range (count pclasses)))]
+        (Compiler/emitSource (str (if (symbol? rclass) (str rclass)
+                                    (.getCanonicalName rclass)) " " (str mname) "("
+                                  (let [names (map #(str (let [c (nth pclasses %)]
+                                                           (if (symbol? c) (str c)
+                                                             (.getCanonicalName c))) " p" %) (range (count pclasses)))]
                                     (apply str (interpose ", " names)))
                                   ");"))
         (let [mv (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)

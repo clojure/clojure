@@ -196,9 +196,9 @@ public class Compiler implements Opcodes {
 
   }
 
-  static final public Var RUNTIME = Var.intern(
-      Namespace.findOrCreate(Symbol.intern("clojure.core")),
-      Symbol.intern("*runtime*"), Boolean.FALSE).setDynamic();
+  // static final public Var RUNTIME = Var.intern(
+  // Namespace.findOrCreate(Symbol.intern("clojure.core")),
+  // Symbol.intern("*runtime*"), Boolean.FALSE).setDynamic();
 
   static final public Var STOP_EMIT_SOURCE = Var.create(false).setDynamic();
 
@@ -6236,7 +6236,11 @@ public class Compiler implements Opcodes {
     }
 
     public String print() {
-      return (name + idx).replaceAll("-", "_");
+      if (idx == -1) {
+        return name;
+      } else {
+        return name + idx;
+      }
     }
   }
 

@@ -11,7 +11,7 @@ import clojure.lang.Var;
 public class Demo {
 
   public static void main(String[] args) throws Exception {
-    if (true) {
+    if (false) {
       long d = System.currentTimeMillis();
 
       loadAll();
@@ -31,7 +31,7 @@ public class Demo {
         IPersistentMap options = (IPersistentMap) Compiler.COMPILER_OPTIONS
             .deref();
         // RT.WARN_ON_REFLECTION.bindRoot(RT.T);
-        Compiler.RUNTIME.bindRoot(Boolean.TRUE);
+//        Compiler.RUNTIME.bindRoot(Boolean.TRUE);
         for (String f : RT.loaded) {
           RT.load(f.replaceAll("[.]", "/").replaceAll("-", "_"));
         }
@@ -56,6 +56,7 @@ public class Demo {
     // }
     RT.load("clojure/core");
     RT.load("clojure/main");
+    RT.load("clojure/test_clojure/vectors");
     RT.load("clojure/test_clojure/agents");
     RT.load("clojure/test_clojure/atoms");
     RT.load("clojure/test_clojure/clojure_set");
@@ -104,7 +105,6 @@ public class Demo {
     // RT.load("clojure/test_clojure/reflect");
     // RT.load("clojure/test_clojure/evaluation");
     // RT.load("clojure/test_clojure/def");
-    // RT.load("clojure/test_clojure/vectors");
     // RT.load("clojure/test_clojure/annotations");
     // RT.load("clojure/test_clojure/genclass");
     // RT.load("clojure/test_clojure/try_catch");
