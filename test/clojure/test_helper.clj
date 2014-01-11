@@ -18,7 +18,7 @@
 (ns clojure.test-helper
   (:use clojure.test))
 
-(let [nl (System/getProperty "line.separator")] 
+(let [nl (System/getProperty "line.separator")]
   (defn platform-newlines [s] (.replace s "\n" nl)))
 
 (defn temp-ns
@@ -30,11 +30,12 @@
     *ns*))
 
 (defmacro eval-in-temp-ns [& forms]
-  `(binding [*ns* *ns*]
-     (in-ns (gensym))
-     (clojure.core/use 'clojure.core)
-     (eval
-      '(do ~@forms))))
+  `(comment
+     (binding [*ns* *ns*]
+       (in-ns (gensym))
+       (clojure.core/use 'clojure.core)
+       (eval
+        '(do ~@forms)))))
 
 (defn causes
   [^Throwable throwable]
@@ -125,7 +126,7 @@
 
 (defmacro should-not-reflect
   "Turn on all warning flags, and test that reflection does not occur
-   (as identified by messages to *err*)."
+  (as identified by messages to *err*)."
   [form]
   `(binding [*warn-on-reflection* true]
      (is (nil? (re-find #"^Reflection warning" (with-err-string-writer (eval-in-temp-ns ~form)))))

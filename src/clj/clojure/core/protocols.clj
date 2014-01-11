@@ -8,7 +8,7 @@
 
 (ns clojure.core.protocols)
 
-(set! *warn-on-reflection* true)
+;(set! *warn-on-reflection* true)
 
 (defprotocol CollReduce
   "Protocol for collection types that can implement reduce faster than
