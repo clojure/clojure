@@ -6046,8 +6046,7 @@ public class Compiler implements Opcodes {
           ret = be.emitUnboxed(C.RETURN, objx, gen);
           gen.visitInsn(F2D);
         } else if (retClass == int.class && bc == long.class) {
-          String rlong = be.emitUnboxed(C.RETURN, objx, gen).substring(7);
-          rlong = rlong.substring(0, rlong.length() - 1);
+          String rlong = be.emitUnboxed(C.EXPRESSION, objx, gen);
           ret = "return RT.intCast(" + rlong + ");";
           gen.invokeStatic(RT_TYPE, Method.getMethod("int intCast(long)"));
         } else if (retClass == float.class && bc == double.class) {
@@ -6058,37 +6057,36 @@ public class Compiler implements Opcodes {
               "Mismatched primitive return, expected: " + retClass + ", had: "
                   + be.getJavaClass());
       } else {
-        ret = body.emit(C.RETURN, objx, gen);
+        ret = body.emit(C.EXPRESSION, objx, gen);
         if (retClass == void.class) {
           gen.pop();
         } else {
           gen.unbox(Type.getType(retClass));
-          if (ret != null && !ret.isEmpty()) { // TODO: ret == null ?
-            String rlong = ret.substring(7);
-            rlong = rlong.substring(0, rlong.length() - 1);
+          gen.returnValue();
+          if (ret != null) {
             switch (Type.getType(retClass).getSort()) {
             case Type.CHAR:
-              ret = "return RT.charCast(" + rlong + ");";
+              ret = "return RT.charCast(" + ret + ");";
               break;
             case Type.BOOLEAN:
-              ret = "return RT.booleanCast(" + rlong + ");";
+              ret = "return RT.booleanCast(" + ret + ");";
               break;
             case Type.DOUBLE:
-              ret = "return RT.doubleCast(" + rlong + ");";
+              ret = "return RT.doubleCast(" + ret + ");";
               break;
             case Type.FLOAT:
-              ret = "return RT.floatCast(" + rlong + ");";
+              ret = "return RT.floatCast(" + ret + ");";
               break;
             case Type.LONG:
-              ret = "return RT.longCast(" + rlong + ");";
+              ret = "return RT.longCast(" + ret + ");";
               break;
             case Type.INT:
             case Type.SHORT:
             case Type.BYTE:
-              ret = "return RT.intCast(" + rlong + ");";
+              ret = "return RT.intCast(" + ret + ");";
               break;
             default:
-              ret = "return " + rlong + ";";
+              ret = "return (" + retClass.getCanonicalName() + ")" + ret + ";";
               break;
             }
           }
@@ -6915,7 +6913,6 @@ public class Compiler implements Opcodes {
       }
 
       gen.goTo(loopLabel);
-
       return "continue;";
     }
 

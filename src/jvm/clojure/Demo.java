@@ -55,16 +55,16 @@ public class Demo {
     // return;
     // }
     RT.load("clojure/core");
-//    RT.load("clojure/main");
-//    RT.load("clojure/test_clojure/vectors");
-//    RT.load("clojure/test_clojure/agents");
-//    RT.load("clojure/test_clojure/atoms");
-//    RT.load("clojure/test_clojure/clojure_set");
-//    RT.load("clojure/test_clojure/clojure_walk");
-//    RT.load("clojure/test_clojure/control");
-//    RT.load("clojure/test_clojure/delays");
-//    RT.load("clojure/test_clojure/for");
-//    RT.load("clojure/test_clojure/keywords");
+    RT.load("clojure/main");
+    RT.load("clojure/test_clojure/vectors");
+    RT.load("clojure/test_clojure/agents");
+    RT.load("clojure/test_clojure/atoms");
+    RT.load("clojure/test_clojure/clojure_set");
+    RT.load("clojure/test_clojure/clojure_walk");
+    RT.load("clojure/test_clojure/control");
+    RT.load("clojure/test_clojure/delays");
+    RT.load("clojure/test_clojure/for");
+    RT.load("clojure/test_clojure/keywords");
     
     // RT.load("clojure/test_clojure/vars");
     // RT.load("clojure/test_clojure/sequences");
