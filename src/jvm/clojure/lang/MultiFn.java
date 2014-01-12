@@ -120,6 +120,10 @@ private boolean prefers(Object x, Object y) {
 }
 
 private boolean isA(Object x, Object y) {
+    // in objc not all classes extend java.lang.Object
+    if (x instanceof Class && y == Object.class) {
+      return true;
+    }
     return RT.booleanCast(isa.invoke(hierarchy.deref(), x, y));
 }
 
