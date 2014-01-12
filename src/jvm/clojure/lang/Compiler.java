@@ -64,6 +64,8 @@ import clojure.asm.commons.Method;
 
 public class Compiler implements Opcodes {
 
+  private static final String DOLLAR = "_";
+
   static final Symbol DEF = Symbol.intern("def");
   static final Symbol LOOP = Symbol.intern("loop*");
   static final Symbol RECUR = Symbol.intern("recur");
@@ -2983,8 +2985,8 @@ public class Compiler implements Opcodes {
 
   static {
     // DEMUNGE_MAP maps strings to characters in the opposite
-    // direction that CHAR_MAP does, plus it maps "$" to '/'
-    IPersistentMap m = RT.map("$", '/');
+    // direction that CHAR_MAP does, plus it maps DOLLAR to '/'
+    IPersistentMap m = RT.map(DOLLAR, '/');
     for (ISeq s = RT.seq(CHAR_MAP); s != null; s = s.next()) {
       IMapEntry e = (IMapEntry) s.first();
       Character origCh = (Character) e.key();
@@ -3714,8 +3716,8 @@ public class Compiler implements Opcodes {
         }
       }
 
-      String cname = v.ns.name.name.replace('.', '/').replace('-', '_') + "$"
-          + munge(v.sym.name);
+      String cname = v.ns.name.name.replace('.', '/').replace('-', '_')
+          + DOLLAR + munge(v.sym.name);
       Type target = Type.getObjectType(cname);
 
       PersistentVector argv = PersistentVector.EMPTY;
@@ -4095,9 +4097,9 @@ public class Compiler implements Opcodes {
         // Keyword.intern(null, "super-name"));
       }
       // fn.thisName = name;
-      String basename = enclosingMethod != null ? (enclosingMethod.objx.name + "$")
+      String basename = enclosingMethod != null ? (enclosingMethod.objx.name + DOLLAR)
           : // "clojure.fns." +
-          (munge(currentNS().name.name) + "$");
+          (munge(currentNS().name.name) + DOLLAR);
       if (RT.second(form) instanceof Symbol)
         name = ((Symbol) RT.second(form)).name;
       String simpleName = name != null ? (munge(name).replace(".", "_DOT_") + (enclosingMethod != null ? "__"
@@ -5500,7 +5502,6 @@ public class Compiler implements Opcodes {
           return Type.getType(Var.class);
         else if (c == String.class)
           return Type.getType(String.class);
-
         // return Type.getType(c);
       }
       return OBJECT_TYPE;
@@ -8029,8 +8030,8 @@ public class Compiler implements Opcodes {
         // (reify this-name? [interfaces] (method-name [args] body)*)
         ISeq form = (ISeq) frm;
         ObjMethod enclosingMethod = (ObjMethod) METHOD.deref();
-        String basename = enclosingMethod != null ? (trimGenID(enclosingMethod.objx.name) + "$")
-            : (munge(currentNS().name.name) + "$");
+        String basename = enclosingMethod != null ? (trimGenID(enclosingMethod.objx.name) + DOLLAR)
+            : (munge(currentNS().name.name) + DOLLAR);
         String simpleName = "reify__" + RT.nextID();
         String classname = basename + simpleName;
 
