@@ -472,11 +472,12 @@ public class RT {
                                                        ]-*/;
 
   public static final HashSet<String> loaded = new HashSet<String>();
-  
+
   static public void load(String scriptbase, boolean failIfNotFound)
       throws IOException, ClassNotFoundException {
     loaded.add(scriptbase);
-    if (!RT.class.getName().equals("clojure.lang.RT")) { // in iOS is = "ClojureLangRT"
+    if (!RT.class.getName().equals("clojure.lang.RT")) { // in iOS is =
+                                                         // "ClojureLangRT"
       loadiOS(scriptbase);
     } else {
       String classfile = scriptbase + LOADER_SUFFIX + ".class";
@@ -503,8 +504,8 @@ public class RT {
           Var.popThreadBindings();
         }
       }
-//      boolean runtime = Boolean.TRUE.equals(Compiler.RUNTIME.deref());
-      //runtime ||
+      // boolean runtime = Boolean.TRUE.equals(Compiler.RUNTIME.deref());
+      // runtime ||
       if ((!loaded && cljURL != null)) {
         if (booleanCast(Compiler.COMPILE_FILES.deref()))
           compile(cljfile);
@@ -1123,15 +1124,21 @@ public class RT {
   }
 
   static public int intCast(Object x) {
+    if (x == null) {
+      throw Util.sneakyThrow(new NullPointerException());
+    }
     if (x instanceof Integer)
       return ((Integer) x).intValue();
     if (x instanceof Number) {
       long n = longCast(x);
       return intCast(n);
     }
-    return ((Character) x).charValue();
+    if (x instanceof Character) {
+      return ((Character) x).charValue();
+    }
+    throw Util.sneakyThrow(new ClassCastException());
   }
-  
+
   static public int intCast(char x) {
     return x;
   }

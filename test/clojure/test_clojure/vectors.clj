@@ -282,7 +282,7 @@
       (are [x] (.containsKey v x)
            0 1 2 3 4)
       (are [x] (not (.containsKey v x))
-           -1 -100 nil [] "" #"" #{} 5 100)
+           -1 -100 nil [] "" #"a" #{} 5 100)
       (are [x] (not (.containsKey empty-v x))
            0 1))
     (testing "contains?"
