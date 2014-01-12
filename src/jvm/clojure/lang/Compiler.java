@@ -2801,6 +2801,10 @@ public class Compiler implements Opcodes {
 
     public String doEmit(C context, ObjExpr objx, GeneratorAdapter gen,
         boolean emitUnboxed) {
+      if (testExpr instanceof NilExpr) {
+        return elseExpr.emit(context, objx, gen);
+      }
+      
       Label nullLabel = gen.newLabel();
       Label falseLabel = gen.newLabel();
       Label endLabel = gen.newLabel();
@@ -2831,6 +2835,7 @@ public class Compiler implements Opcodes {
           gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
           gen.visitJumpInsn(IF_ACMPEQ, falseLabel);
           String temp = registerTemp();
+          
           emitSource("Object " + temp + " = " + val + ";");
           sb.append(temp + " != null && !(" + temp + " == Boolean.FALSE)");
         }
