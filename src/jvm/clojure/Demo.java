@@ -11,7 +11,7 @@ import clojure.lang.Var;
 public class Demo {
 
   public static void main(String[] args) throws Exception {
-    if (false) {
+    if (true) {
       long d = System.currentTimeMillis();
 
       loadAll();
