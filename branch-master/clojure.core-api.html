@@ -1315,6 +1315,9 @@ namespace.
       <a class="toc-entry-anchor" href="#clojure.core/realized?">realized?</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core/record?">record?</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core/recur">recur</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
@@ -4079,7 +4082,7 @@ defaulting to Object if omitted.
   (^Bar method2 [^Baz b ^Quux q]))</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L20" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L20" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4233,7 +4236,7 @@ reify, as they support the protocol directly:
 =&gt; 17</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L646" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L653" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4307,7 +4310,7 @@ defined: -&gt;TypeName, taking positional parameters for the fields,
 and map-&gt;TypeName, taking a map of keywords to field values.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L285" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L285" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4388,7 +4391,7 @@ Given (deftype TypeName ...), a factory function called -&gt;TypeName
 will be defined, taking positional parameters for the fields</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L381" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L388" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4930,7 +4933,7 @@ that carries a map of additional data.</pre>
  extends?, satisfies?, extenders</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L700" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L707" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4974,7 +4977,7 @@ expands into:
    (bar [x y] ...)))</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L800" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L807" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5004,7 +5007,7 @@ expands into:
     :bar (fn [x y] ...)})</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L768" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L775" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5015,7 +5018,7 @@ expands into:
     <pre id="var-docstr">Returns a collection of the types explicitly extending protocol</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L517" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L524" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5026,7 +5029,7 @@ expands into:
     <pre id="var-docstr">Returns true if atype extends protocol</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L510" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L517" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -6698,7 +6701,7 @@ Please see <a href="http://clojure.org/special_forms#monitor-exit">http://clojur
     <pre id="var-docstr">Convert a Clojure namespace name to a legal Java package name.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L13" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L13" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -7753,6 +7756,17 @@ For data structure interop use clojure.edn/read-string</pre>
   </div><div id="var-entry">
     <br />
     <hr />
+    <h2 id="clojure.core/record?">record?</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (record? x)
+</pre>
+    <pre id="var-docstr">Returns true if x is a record</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.6</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L372" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
     <h2 id="clojure.core/recur">recur</h2>
     <span id="var-type">special form</span><br />
     <pre id="var-usage">Usage: (recur exprs*)
@@ -8010,7 +8024,7 @@ clashes. Use :use in the ns macro in preference to calling this directly.</pre>
  == {:k :v}</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L70" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L70" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -8350,7 +8364,7 @@ which (test (.. sc comparator (compare ek key)) 0) is true</pre>
     <pre id="var-docstr">Returns true if x satisfies the protocol</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/93d13d0c0671130b329863570080c72799563ac7/src/clj/clojure/core_deftype.clj#L523" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/f7215fdb8ca7d23faa7b47865d5acab1af8437a3/src/clj/clojure/core_deftype.clj#L530" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
