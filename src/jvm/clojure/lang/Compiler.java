@@ -4923,7 +4923,7 @@ public class Compiler implements Opcodes {
           str = "Boolean.FALSE";
         }
       } else {
-        String valueStr = String.valueOf(value);
+        String valueStr = value instanceof Number ? String.valueOf(value) : "";
         boolean isNeg = valueStr.startsWith("-");
         if (value instanceof Integer) {
           gen.push(((Integer) value).intValue());
@@ -8218,8 +8218,8 @@ public class Compiler implements Opcodes {
         int access = ACC_PUBLIC
             + (ret.isVolatile(lb) ? ACC_VOLATILE : ret.isMutable(lb) ? 0
                 : ACC_FINAL);
-        String modif = ret.isVolatile(lb) ? "volatile " : ret.isMutable(lb) ? ""
-            : "final ";
+        String modif = ret.isVolatile(lb) ? "volatile "
+            : ret.isMutable(lb) ? "" : "final ";
         if (lb.getPrimitiveType() != null) {
           cv.visitField(access, lb.name, Type.getType(lb.getPrimitiveType())
               .getDescriptor(), null, null);
@@ -8374,7 +8374,7 @@ public class Compiler implements Opcodes {
             String bName = ((Symbol) s.first()).name;
             Class k = tagClass(tagOf(s.first()));
 
-            others.append(".without(Keyword.intern(\"" + bName  + "\"))");
+            others.append(".without(Keyword.intern(\"" + bName + "\"))");
             sb.append((k.isPrimitive() ? "(" + k.getCanonicalName() + ")" : "")
                 + "map.valAt(Keyword.intern(\"" + bName + "\"), null)");
 
@@ -8418,8 +8418,10 @@ public class Compiler implements Opcodes {
               }
             }
           }
-          
-          emitSource("return new " + name + "(" + sb.toString() + ", null, RT.seqOrElse(map" + others + "));");
+
+          emitSource("return new " + name + "(" + sb
+              + (sb.length() > 0 ? ", " : "") + "null, RT.seqOrElse(map"
+              + others + "));");
 
           mv.visitInsn(ACONST_NULL);
           mv.visitVarInsn(ALOAD, 0);
