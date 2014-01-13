@@ -7967,7 +7967,6 @@ public class Compiler implements Opcodes {
 
       Var.popThreadBindings();
       writeClassFile(objx.internalName, cw.toByteArray());
-      System.out.println("========" + objx.internalName);
       writeSourceFile(objx.internalName, source.toString());
     } catch (LispReader.ReaderException e) {
       throw new CompilerException(sourcePath, e.line, e.column, e.getCause());
