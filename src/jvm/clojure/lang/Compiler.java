@@ -306,7 +306,7 @@ public class Compiler implements Opcodes {
       return; // TODO Handle error
     }
 
-    if (source != null && source.isEmpty()) {
+    if (source != null && (source.isEmpty() || "null;".equals(source))) {
       return;
     }
 
@@ -1195,6 +1195,14 @@ public class Compiler implements Opcodes {
       if (c != null)
         return c;
       throw new IllegalArgumentException("Unable to resolve classname: " + tag);
+    }
+
+    public static String tagToCanonical(Object tag) {
+      try {
+        return tagToClass(tag).getCanonicalName();
+      } catch (Exception e) {
+        return String.valueOf(tag);
+      }
     }
   }
 
@@ -2804,7 +2812,7 @@ public class Compiler implements Opcodes {
       if (testExpr instanceof NilExpr) {
         return elseExpr.emit(context, objx, gen);
       }
-      
+
       Label nullLabel = gen.newLabel();
       Label falseLabel = gen.newLabel();
       Label endLabel = gen.newLabel();
@@ -2835,7 +2843,7 @@ public class Compiler implements Opcodes {
           gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
           gen.visitJumpInsn(IF_ACMPEQ, falseLabel);
           String temp = registerTemp();
-          
+
           emitSource("Object " + temp + " = " + val + ";");
           sb.append(temp + " != null && !(" + temp + " == Boolean.FALSE)");
         }
@@ -4669,14 +4677,22 @@ public class Compiler implements Opcodes {
         // ctor that takes closed-overs and inits base + fields
         Type[] ctorTypes = ctorTypes();
         Type[] altCtorTypes = new Type[ctorTypes.length - altCtorDrops];
-        for (int i = 0; i < altCtorTypes.length; i++)
+        StringBuilder params = new StringBuilder();
+        StringBuilder args = new StringBuilder();
+        for (int i = 0; i < altCtorTypes.length; i++) {
+          if (params.length() > 0) {
+            params.append(", ");
+            args.append(", ");
+          }
+          params.append("o" + i);
+          args.append(ctorTypes[i].getClassName() + " o" + i);
           altCtorTypes[i] = ctorTypes[i];
+        }
         Method alt = new Method("<init>", Type.VOID_TYPE, altCtorTypes);
         ctorgen = new GeneratorAdapter(ACC_PUBLIC, alt, null, null, cv);
         ctorgen.visitCode();
         ctorgen.loadThis();
         ctorgen.loadArgs();
-        StringBuilder params = new StringBuilder();
         for (int i = 0; i < altCtorDrops; i++) {
           if (params.length() > 0) {
             params.append(", ");
@@ -4687,7 +4703,7 @@ public class Compiler implements Opcodes {
         ctorgen.invokeConstructor(objtype, new Method("<init>", Type.VOID_TYPE,
             ctorTypes));
 
-        emitSource("public " + className + "() {");
+        emitSource("public " + className + "(" + args + ") {");
         tab();
         emitSource("this(" + params + ");");
         untab();
@@ -7693,7 +7709,7 @@ public class Compiler implements Opcodes {
       throws IOException {
     String genPath = (String) Compiler.SOURCE_GEN_PATH.deref();
     if (genPath == null)
-      throw Util.runtimeException("*compile-path* not set");
+      throw Util.runtimeException("*source-path* not set");
     String[] dirs = internalName.split("/");
     String p = genPath;
     for (int i = 0; i < dirs.length - 1; i++) {
@@ -7702,7 +7718,6 @@ public class Compiler implements Opcodes {
     }
     String path = genPath + File.separator + internalName + ".java";
     File cf = new File(path);
-    // System.out.println(path);
     cf.createNewFile();
     FileOutputStream cfs = new FileOutputStream(cf);
     try {
@@ -8203,17 +8218,19 @@ public class Compiler implements Opcodes {
         int access = ACC_PUBLIC
             + (ret.isVolatile(lb) ? ACC_VOLATILE : ret.isMutable(lb) ? 0
                 : ACC_FINAL);
+        String modif = ret.isVolatile(lb) ? "volatile " : ret.isMutable(lb) ? ""
+            : "final ";
         if (lb.getPrimitiveType() != null) {
           cv.visitField(access, lb.name, Type.getType(lb.getPrimitiveType())
               .getDescriptor(), null, null);
-          emitSource(lb.getPrimitiveType().getCanonicalName() + " "
+          emitSource(modif + lb.getPrimitiveType().getCanonicalName() + " "
               + lb.print() + ";");
         } else {
           // todo - when closed-overs are fields, use more specific types here
           // and in ctor and emitLocal?
           cv.visitField(access, lb.name, OBJECT_TYPE.getDescriptor(), null,
               null);
-          emitSource("Object " + lb.print() + ";");
+          emitSource(modif + "Object " + lb.print() + ";");
         }
       }
 
@@ -8328,11 +8345,15 @@ public class Compiler implements Opcodes {
             .getMethod("clojure.lang.IPersistentVector getBasis()");
         GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
             meth, null, null, cv);
-        emitValue(hintedFields, gen);
+        emitSource("public static clojure.lang.IPersistentVector getBasis() {");
+        tab();
+        emitSource("return " + emitValue(hintedFields, gen) + ";");
+        untab();
+        emitSource("}");
         gen.returnValue();
         gen.endMethod();
 
-        if (this.isDeftype() && this.fields.count() > this.hintedFields.count()) {
+        if (this.fields.count() > this.hintedFields.count()) {
           // create(IPersistentMap)
           String className = name.replace('.', '/');
           int i = 1;
@@ -8341,10 +8362,21 @@ public class Compiler implements Opcodes {
           MethodVisitor mv = cv.visitMethod(ACC_PUBLIC + ACC_STATIC, "create",
               "(Lclojure/lang/IPersistentMap;)L" + className + ";", null, null);
           mv.visitCode();
+          emitSource("public static " + name + " create(IPersistentMap map) {");
+          tab();
 
+          StringBuilder sb = new StringBuilder();
+          StringBuilder others = new StringBuilder();
           for (ISeq s = RT.seq(hintedFields); s != null; s = s.next(), i++) {
+            if (sb.length() > 0) {
+              sb.append(", ");
+            }
             String bName = ((Symbol) s.first()).name;
             Class k = tagClass(tagOf(s.first()));
+
+            others.append(".without(Keyword.intern(\"" + bName  + "\"))");
+            sb.append((k.isPrimitive() ? "(" + k.getCanonicalName() + ")" : "")
+                + "map.valAt(Keyword.intern(\"" + bName + "\"), null)");
 
             mv.visitVarInsn(ALOAD, 0);
             mv.visitLdcInsn(bName);
@@ -8373,7 +8405,7 @@ public class Compiler implements Opcodes {
 
           Method ctor = new Method("<init>", Type.VOID_TYPE, ctorTypes());
 
-          if (hintedFields.count() > 0)
+          if (hintedFields.count() > 0) {
             for (i = 1; i <= fieldCount; i++) {
               mv.visitVarInsn(ALOAD, i);
               Class k = tagClass(tagOf(hintedFields.nth(i - 1)));
@@ -8385,6 +8417,9 @@ public class Compiler implements Opcodes {
                 mv.visitMethodInsn(INVOKEVIRTUAL, b, n + "Value", "()" + p);
               }
             }
+          }
+          
+          emitSource("return new " + name + "(" + sb.toString() + ", null, RT.seqOrElse(map" + others + "));");
 
           mv.visitInsn(ACONST_NULL);
           mv.visitVarInsn(ALOAD, 0);
@@ -8395,6 +8430,8 @@ public class Compiler implements Opcodes {
           mv.visitInsn(ARETURN);
           mv.visitMaxs(4 + fieldCount, 1 + fieldCount);
           mv.visitEnd();
+          untab();
+          emitSource("}");
         }
       }
     }

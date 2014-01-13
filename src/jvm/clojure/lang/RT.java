@@ -36,7 +36,6 @@ import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
@@ -437,7 +436,7 @@ public class RT {
     }
   }
 
-  static void compile(String cljfile) throws IOException {
+  public static void compile(String cljfile) throws IOException {
     InputStream ins = resourceAsStream(baseLoader(), cljfile);
     if (ins != null) {
       try {
@@ -471,13 +470,9 @@ public class RT {
                                                        return;
                                                        ]-*/;
 
-  public static final HashSet<String> loaded = new HashSet<String>();
-
   static public void load(String scriptbase, boolean failIfNotFound)
       throws IOException, ClassNotFoundException {
-    loaded.add(scriptbase);
-    if (!RT.class.getName().equals("clojure.lang.RT")) { // in iOS is =
-                                                         // "ClojureLangRT"
+    if (!RT.class.getName().equals("clojure.lang.RT")) { // TODO detect iOS
       loadiOS(scriptbase);
     } else {
       String classfile = scriptbase + LOADER_SUFFIX + ".class";

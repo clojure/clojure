@@ -11,7 +11,7 @@
 (import '(java.lang.reflect Modifier Constructor)
         '(clojure.asm ClassWriter ClassVisitor Opcodes Type)
         '(clojure.asm.commons Method GeneratorAdapter)
-        '(clojure.lang IPersistentMap Compiler))
+        '(clojure.lang IPersistentMap Compiler Compiler$HostExpr))
 
 ;(defn method-sig [^java.lang.reflect.Method meth]
 ;  [(. meth (getName)) (seq (. meth (getParameterTypes)))])
@@ -680,11 +680,11 @@
            (into-array (map #(.getInternalName (asm-type %)) extends))))
       (add-annotations cv (meta name))
       (doseq [[mname pclasses rclass pmetas] methods]
-        (Compiler/emitSource (str (if (symbol? rclass) (str rclass)
-                                    (.getCanonicalName rclass)) " " (str mname) "("
-                                  (let [names (map #(str (let [c (nth pclasses %)]
-                                                           (if (symbol? c) (str c)
-                                                             (.getCanonicalName c))) " p" %) (range (count pclasses)))]
+        (Compiler/emitSource (str
+                              (Compiler$HostExpr/tagToCanonical rclass)
+                              " " (str mname) "("
+                              (let [names (map #(str (let [c (nth pclasses %)]
+                                                       (Compiler$HostExpr/tagToCanonical c)) " p" %) (range (count pclasses)))]
                                     (apply str (interpose ", " names)))
                                   ");"))
         (let [mv (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
