@@ -36,6 +36,7 @@ public class Compile {
       "*unchecked-math*");
   private static final Var compiler_options = RT.var("clojure.core",
       "*compiler-options*");
+  private static Keyword sourceOutputKey = Keyword.intern("clojure.compiler.source-output");
 
   public static void main(String[] args) throws Exception {
     RT.load("clojure/core");
@@ -56,19 +57,21 @@ public class Compile {
     boolean uncheckedMath = System.getProperty(UNCHECKED_MATH_PROP, "false")
         .equals("true");
 
-    Object compilerOptions = null;
+    IPersistentMap compilerOptions = null;
 
     for (Map.Entry e : System.getProperties().entrySet()) {
       String name = (String) e.getKey();
       String v = (String) e.getValue();
       if (name.startsWith("clojure.compiler.")) {
-        compilerOptions = RT.assoc(compilerOptions,
+        compilerOptions = compilerOptions.assoc(
             RT.keyword(null, name.substring(1 + name.lastIndexOf('.'))),
             RT.readString(v));
       }
     }
-
-    new File("target/src").mkdirs();
+    
+    String sourceOutput = (String) (compilerOptions.containsKey(sourceOutputKey) ? compilerOptions.valAt(sourceOutputKey ) : "xcode/gen");
+    new File(sourceOutput).mkdirs();
+    
     try {
       Var.pushThreadBindings(RT.map(clojure.lang.Compiler.SOURCE_GEN_PATH,
           "target/src", compile_path, path, warn_on_reflection,
