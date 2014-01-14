@@ -848,8 +848,8 @@ public class Compiler implements Opcodes {
         }
       } catch (Exception e) {
       }
-      emitSource("((Namespace)RT.CURRENT_NS.deref()).importClass(" + printClass(className)
-          + ".class);");
+      emitSource("((Namespace)RT.CURRENT_NS.deref()).importClass("
+          + printClass(className) + ".class);");
       if (context == C.STATEMENT) {
         gen.pop();
         return "";
@@ -1288,8 +1288,10 @@ public class Compiler implements Opcodes {
         v = HostExpr.emitBoxReturn(objx, gen, field.getType(), v);
         if (context == C.STATEMENT) {
           gen.pop();
+          return "";
+        } else {
+          return wrap(context, v);
         }
-        return wrap(context, v);
       } else {
         String t = target.emit(C.EXPRESSION, objx, gen);
         gen.push(fieldName);
@@ -2109,6 +2111,7 @@ public class Compiler implements Opcodes {
         gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
       if (context == C.STATEMENT) {
         gen.pop();
+        return "";
       }
       return wrap(context, (val ? "Boolean.TRUE" : "Boolean.FALSE"));
     }
@@ -2771,6 +2774,7 @@ public class Compiler implements Opcodes {
       gen.invokeInterface(IOBJ_TYPE, withMetaMethod);
       if (context == C.STATEMENT) {
         gen.pop();
+        return "";
       }
       return wrap(context, "((IObj)" + val + ").withMeta(" + m + ")");
     }
@@ -3112,9 +3116,10 @@ public class Compiler implements Opcodes {
       }
       if (context == C.STATEMENT) {
         gen.pop();
+        return "";
+      } else {
+        return wrap(context, ret);
       }
-
-      return wrap(context, ret);
     }
 
     public boolean hasJavaClass() {
@@ -3213,9 +3218,10 @@ public class Compiler implements Opcodes {
 
       if (context == C.STATEMENT) {
         gen.pop();
+        return "";
+      } else {
+        return wrap(context, val);
       }
-
-      return wrap(context, val);
     }
 
     public boolean hasJavaClass() {
@@ -4485,8 +4491,8 @@ public class Compiler implements Opcodes {
 
       // static fields for constants
       for (int i = 0; i < constants.count(); i++) {
-        emitSource("public static final " + printClass(constantType(i))
-            + " " + constantName(i) + ";");
+        emitSource("public static final " + printClass(constantType(i)) + " "
+            + constantName(i) + ";");
         cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, constantName(i),
             constantType(i).getDescriptor(), null, null);
       }
@@ -6116,8 +6122,7 @@ public class Compiler implements Opcodes {
         if (params.length() > 0) {
           params.append(", ");
         }
-        params.append(printClass(getArgTypes()[pos]) + " " + lb.name
-            + lb.idx);
+        params.append(printClass(getArgTypes()[pos]) + " " + lb.name + lb.idx);
         pos++;
       }
       emitSource("public " + printClass(getReturnType()) + " "
@@ -8067,7 +8072,8 @@ public class Compiler implements Opcodes {
         for (int i = 0; i < fieldSyms.count(); i++) {
           Symbol sym = (Symbol) fieldSyms.nth(i);
           if (sym.name.equals("this")) {
-            throw new RuntimeException("A deftype/defrecord field cannot be named 'this'");
+            throw new RuntimeException(
+                "A deftype/defrecord field cannot be named 'this'");
           }
           LocalBinding lb = new LocalBinding(-1, sym, null,
               new MethodParamExpr(tagClass(tagOf(sym))), false, null);
@@ -8371,7 +8377,8 @@ public class Compiler implements Opcodes {
           MethodVisitor mv = cv.visitMethod(ACC_PUBLIC + ACC_STATIC, "create",
               "(Lclojure/lang/IPersistentMap;)L" + className + ";", null, null);
           mv.visitCode();
-          emitSource("public static " + printClass(name) + " create(IPersistentMap map) {");
+          emitSource("public static " + printClass(name)
+              + " create(IPersistentMap map) {");
           tab();
 
           StringBuilder sb = new StringBuilder();
