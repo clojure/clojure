@@ -15,6 +15,12 @@
   (is (= (platform-newlines "(defn foo [])\n") (with-out-str (source clojure.test-clojure.repl.example/foo))))
   (is (nil? (source-fn 'non-existent-fn))))
 
+(deftest test-source-read-eval-unknown
+  (is (thrown? IllegalStateException (binding [*read-eval* :unknown] (source reduce)))))
+
+(deftest test-source-read-eval-false
+  (is (binding [*read-eval* false] (with-out-str (source reduce)))))
+
 (deftest test-dir
   (is (thrown? Exception (dir-fn 'non-existent-ns)))
   (is (= '[bar foo] (dir-fn 'clojure.test-clojure.repl.example)))
