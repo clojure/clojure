@@ -17,9 +17,12 @@ public class Demo {
 
   public static void main(String[] args) throws Exception {
     init();
-    if (false) {
+    if (true) {
       long d = System.currentTimeMillis();
 
+      for (String f : libs) {
+        RT.load(f);
+      }
       init();
 
       RT.var("clojure.test", "run-all-tests").invoke();
@@ -55,68 +58,62 @@ public class Demo {
   }
 
   private static void init() throws IOException, ClassNotFoundException {
-    // RT.load("clojure/core");
-    // RT.load("clojure/main");
-    // RT.load("clojure/test_clojure/control");
-    // if (true) {
-    // return;
-    // }
     libs.add("clojure/core");
     libs.add("clojure/main");
-    libs.add("clojure/test_clojure/vectors");
-    libs.add("clojure/test_clojure/agents");
-    libs.add("clojure/test_clojure/atoms");
-    libs.add("clojure/test_clojure/clojure_set");
-    libs.add("clojure/test_clojure/clojure_walk");
-    libs.add("clojure/test_clojure/control");
-    libs.add("clojure/test_clojure/delays");
-    libs.add("clojure/test_clojure/for");
-    libs.add("clojure/test_clojure/keywords");
-    libs.add("clojure/test_clojure/refs");
-    libs.add("clojure/test_clojure/vars");
-    libs.add("clojure/test_clojure/sequences");
-    libs.add("clojure/test_clojure/errors");
-    libs.add("clojure/test_clojure/logic");
-    libs.add("clojure/test_clojure/macros");
-    libs.add("clojure/test_clojure/string");
-    libs.add("clojure/test_clojure/fn");
-    libs.add("clojure/test_clojure/transients");
-    libs.add("clojure/test_clojure/clojure_xml");
-    libs.add("clojure/test_clojure/clojure_zip");
-    libs.add("clojure/test_clojure/edn");
-    libs.add("clojure/test_clojure/numbers");
-    libs.add("clojure/test_clojure/metadata");
-    libs.add("clojure/test_clojure/multimethods");
-    libs.add("clojure/test_clojure/other_functions");
-
-    // libs.add("clojure/test_clojure/api");
-
-    // libs.add("clojure/test_clojure/generators");
-    // libs.add("clojure/test_clojure/main");
-    // libs.add("clojure/test_clojure/java_interop");
-    // libs.add("clojure/test_clojure/parallel");
-    // libs.add("clojure/test_clojure/reader");
-    // libs.add("clojure/test_clojure/predicates");
-    // libs.add("clojure/test_clojure/printer");
-    // libs.add("clojure/test_clojure/data_structures");
-    // libs.add("clojure/test_clojure/data");
-    // libs.add("clojure/test_clojure/special");
-    // libs.add("clojure/test_clojure/repl");
-    // libs.add("clojure/test_clojure/test_fixtures");
-    // libs.add("clojure/test_clojure/rt");
-    // libs.add("clojure/test_clojure/test");
-
-    // libs.add("clojure/test_clojure/reducers");
-    // libs.add("clojure/test_clojure/serialization");
-    // libs.add("clojure/test_clojure/pprint");
-    // libs.add("clojure/test_clojure/reflect");
-    // libs.add("clojure/test_clojure/evaluation");
-    // libs.add("clojure/test_clojure/def");
-    // libs.add("clojure/test_clojure/annotations");
-    // libs.add("clojure/test_clojure/genclass");
-    // libs.add("clojure/test_clojure/try_catch");
-    // libs.add("clojure/test_clojure/protocols");
-    // libs.add("clojure/test_clojure/ns_libs");
+    libs.add("clojure.test-clojure.protocols.examples");
+    libs.add("clojure.test-clojure.genclass.examples");
+    libs.add("clojure.test-clojure.annotations");
+    libs.add("clojure.test-clojure.agents");
+    libs.add("clojure.test-clojure.control");
+    libs.add("clojure.test-clojure.multimethods");
+    libs.add("clojure.test-clojure.protocols");
+    libs.add("clojure.test-clojure.special");
+    libs.add("clojure.test-clojure.data");
+    libs.add("clojure.test-clojure.genclass");
+    libs.add("clojure.test-clojure.ns-libs");
+    libs.add("clojure.test-clojure.reader");
+    libs.add("clojure.test-clojure.string");
+    libs.add("clojure.test-clojure.annotations");
+    libs.add("clojure.test-clojure.data-structures");
+    libs.add("clojure.test-clojure.generators");
+    libs.add("clojure.test-clojure.numbers");
+    libs.add("clojure.test-clojure.test");
+    libs.add("clojure.test-clojure.api");
+    libs.add("clojure.test-clojure.def");
+    libs.add("clojure.test-clojure.other-functions");
+    libs.add("clojure.test-clojure.reflect");
+    libs.add("clojure.test-clojure.test-fixtures");
+    libs.add("clojure.test-clojure.atoms");
+    libs.add("clojure.test-clojure.delays");
+    libs.add("clojure.test-clojure.java-interop");
+    libs.add("clojure.test-clojure.parallel");
+    libs.add("clojure.test-clojure.refs");
+    libs.add("clojure.test-clojure.transients");
+    libs.add("clojure.test-clojure.clojure-set");
+    libs.add("clojure.test-clojure.edn");
+    libs.add("clojure.test-clojure.keywords");
+    libs.add("clojure.test-clojure.try-catch");
+    libs.add("clojure.test-clojure.clojure-walk");
+    libs.add("clojure.test-clojure.errors");
+    libs.add("clojure.test-clojure.logic");
+    libs.add("clojure.test-clojure.pprint");
+    libs.add("clojure.test-clojure.repl");
+    libs.add("clojure.test-clojure.vars");
+    libs.add("clojure.test-clojure.clojure-xml");
+    libs.add("clojure.test-clojure.evaluation");
+    libs.add("clojure.test-clojure.macros");
+    libs.add("clojure.test-clojure.predicates");
+    libs.add("clojure.test-clojure.rt");
+    libs.add("clojure.test-clojure.vectors");
+    libs.add("clojure.test-clojure.clojure-zip");
+    libs.add("clojure.test-clojure.fn");
+    libs.add("clojure.test-clojure.main");
+    libs.add("clojure.test-clojure.printer");
+    libs.add("clojure.test-clojure.sequences");
+    libs.add("clojure.test-clojure.compilation");
+    libs.add("clojure.test-clojure.for");
+    libs.add("clojure.test-clojure.metadata");
+    libs.add("clojure.test-clojure.serialization");
   }
 
   public static boolean deleteDirectory(File directory) {

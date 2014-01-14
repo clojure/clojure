@@ -242,7 +242,7 @@
       (is (= #{:a :b} (.keySet rec)))
       (is (= #{1 2} (set (.values rec))))
       (is (= #{[:a 1] [:b 2]} (.entrySet rec)))
-      
+
       ))
   (testing "IPersistentCollection"
     (testing ".cons"
@@ -253,14 +253,14 @@
         (is (= (r 1 4) (.cons rec [:b 4])))
         (is (= (r 1 5) (.cons rec (MapEntry. :b 5))))))))
 
-(defrecord RecordWithSpecificFieldNames [this that k m o])
+(defrecord RecordWithSpecificFieldNames [this_ that k m o])
 (deftest defrecord-with-specific-field-names
   (let [rec (new RecordWithSpecificFieldNames 1 2 3 4 5)]
     (is (= rec rec))
-    (is (= 1 (:this (with-meta rec {:foo :bar}))))
+    (is (= 1 (:this_ (with-meta rec {:foo :bar}))))
     (is (= 3 (get rec :k)))
-    (is (= (seq rec) '([:this 1] [:that 2] [:k 3] [:m 4] [:o 5])))
-    (is (= (dissoc rec :k) {:this 1, :that 2, :m 4, :o 5}))))
+    (is (= (seq rec) '([:this_ 1] [:that 2] [:k 3] [:m 4] [:o 5])))
+    (is (= (dissoc rec :k) {:this_ 1, :that 2, :m 4, :o 5}))))
 
 (defrecord RecordToTestStatics1 [a])
 (defrecord RecordToTestStatics2 [a b])
@@ -327,7 +327,7 @@
       (testing "that a literal record equals one by the positional factory fn"
         (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a 1 :b 2 :c 3} (->RecordToTestFactories 1 2 3)))
         (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a 1 :b nil :c nil} (->RecordToTestFactories 1 nil nil)))
-        (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a [] :b {} :c ()} (->RecordToTestFactories [] {} ()))))      
+        (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a [] :b {} :c ()} (->RecordToTestFactories [] {} ()))))
       (testing "that a literal record equals one by the map-> factory fn"
         (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a 1 :b 2 :c 3} (map->RecordToTestFactories {:a 1 :b 2 :c 3})))
         (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a 1 :b nil :c nil} (map->RecordToTestFactories {:a 1})))
@@ -439,12 +439,12 @@
     (is (= (RecordToTestLiterals. (RecordToTestLiterals. 42))
            (eval #clojure.test_clojure.protocols.RecordToTestLiterals{:a #clojure.test_clojure.protocols.RecordToTestLiterals[42]})))
     (is (= 42 (.a (eval #clojure.test_clojure.protocols.TypeToTestLiterals[42])))))
-  
+
   (testing "that ctor literals only work with constants or statics"
     (is (thrown? Exception (read-string "#java.util.Locale[(str 'en)]")))
     (is (thrown? Exception (read-string "(let [s \"en\"] #java.util.Locale[(str 'en)])")))
     (is (thrown? Exception (read-string "#clojure.test_clojure.protocols.RecordToTestLiterals{(keyword \"a\") 42}"))))
-  
+
   (testing "that ctors can have whitespace after class name but before {"
     (is (= (RecordToTestLiterals. 42)
            (read-string "#clojure.test_clojure.protocols.RecordToTestLiterals   {:a 42}"))))

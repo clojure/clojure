@@ -490,7 +490,7 @@ public class RT {
               CURRENT_NS.deref(), WARN_ON_REFLECTION,
               WARN_ON_REFLECTION.deref(), RT.UNCHECKED_MATH,
               RT.UNCHECKED_MATH.deref()));
-//          System.out.println("Loading class " + classURL);
+          System.out.println("Loading class " + classURL);
           loaded = (loadClassForName(scriptbase.replace('/', '.')
               + LOADER_SUFFIX) != null);
         } catch (Exception e) {
@@ -502,12 +502,11 @@ public class RT {
       // boolean runtime = Boolean.TRUE.equals(Compiler.RUNTIME.deref());
       // runtime ||
       if ((!loaded && cljURL != null)) {
+        System.out.println("Loading script " + scriptbase);
         if (booleanCast(Compiler.COMPILE_FILES.deref()))
           compile(cljfile);
         else
           loadResourceScript(RT.class, cljfile);
-
-//        System.out.println("Loading script " + scriptbase);
       } else if (!loaded && failIfNotFound)
         throw new FileNotFoundException(String.format(
             "Could not locate %s or %s on classpath: ", classfile, cljfile));
