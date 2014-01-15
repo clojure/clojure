@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import clojure.lang.Compiler;
-import clojure.lang.IFn;
-import clojure.lang.IPersistentMap;
 import clojure.lang.Namespace;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
@@ -19,61 +16,30 @@ public class Demo {
   public static void main(String[] args) throws Exception {
     Demo.class.getClassLoader();
     init();
-    if (true) {
-      long d = System.currentTimeMillis();
+    long d = System.currentTimeMillis();
 
-      for (String f : libs) {
-        RT.load(f.replaceAll("\\.", "/").replaceAll("-", "_"));
-      }
-      init();
-
-      Var.pushThreadBindings(RT.map(RT.CURRENT_NS,
-          Namespace.find(Symbol.intern("clojure.core"))));
-      RT.var("clojure.test", "run-all-tests").invoke();
-      Var.popThreadBindings();
-
-      System.out.println(System.currentTimeMillis() - d);
-    } else {
-      try {
-        deleteDirectory(new File("target/src"));
-        new File("target/src").mkdir();
-        RT.load("clojure/core");
-        IFn compile = RT.var("clojure.core", "compile");
-        Var.pushThreadBindings(RT.mapUniqueKeys(
-            clojure.lang.Compiler.COMPILE_PATH, "target/gen",
-            clojure.lang.Compiler.SOURCE_GEN_PATH, "target/src",
-            clojure.lang.Compiler.COMPILE_FILES, Boolean.TRUE));
-        IPersistentMap options = (IPersistentMap) Compiler.COMPILER_OPTIONS
-            .deref();
-        for (String f : libs) {
-
-          compile.invoke(Symbol.intern(f));
-        }
-        init();
-
-        Var.popThreadBindings();
-      } catch (Exception e) {
-        e.printStackTrace();
-      } finally {
-        deleteDirectory(new File("target/gen"));
-        new File("target/gen").mkdir();
-        System.exit(0);
-      }
+    for (String f : libs) {
+      RT.load(f.replaceAll("\\.", "/").replaceAll("-", "_"));
     }
+    init();
+
+    Var.pushThreadBindings(RT.map(RT.CURRENT_NS,
+        Namespace.find(Symbol.intern("clojure.core"))));
+    RT.var("clojure.test", "run-all-tests").invoke();
+    Var.popThreadBindings();
+
+    System.out.println(System.currentTimeMillis() - d);
   }
 
   private static void init() throws IOException, ClassNotFoundException {
     libs.add("clojure/core");
     libs.add("clojure/main");
-//    libs.add("clojure.test_clojure.annotations");
     libs.add("clojure.test-clojure.agents");
     libs.add("clojure.test-clojure.control");
     libs.add("clojure.test-clojure.multimethods");
     libs.add("clojure.test-clojure.protocols");
     libs.add("clojure.test-clojure.special");
     libs.add("clojure.test-clojure.data");
-//    libs.add("clojure.test-clojure.genclass");
-    // libs.add("clojure.test-clojure.ns-libs");
     libs.add("clojure.test-clojure.reader");
     libs.add("clojure.test-clojure.string");
     libs.add("clojure.test-clojure.data-structures");
@@ -81,13 +47,10 @@ public class Demo {
     libs.add("clojure.test-clojure.numbers");
     libs.add("clojure.test-clojure.test");
     libs.add("clojure.test-clojure.api");
-    // libs.add("clojure.test-clojure.def");
     libs.add("clojure.test-clojure.other-functions");
-    libs.add("clojure.test-clojure.reflect");
     libs.add("clojure.test-clojure.test-fixtures");
     libs.add("clojure.test-clojure.atoms");
     libs.add("clojure.test-clojure.delays");
-//    libs.add("clojure.test-clojure.java-interop");
     libs.add("clojure.test-clojure.parallel");
     libs.add("clojure.test-clojure.refs");
     libs.add("clojure.test-clojure.transients");
@@ -96,26 +59,32 @@ public class Demo {
     libs.add("clojure.test-clojure.keywords");
     libs.add("clojure.test-clojure.try-catch");
     libs.add("clojure.test-clojure.clojure-walk");
-//    libs.add("clojure.test-clojure.errors");
     libs.add("clojure.test-clojure.logic");
-    // libs.add("clojure.test-clojure.pprint");
-    libs.add("clojure.test-clojure.repl");
     libs.add("clojure.test-clojure.vars");
     libs.add("clojure.test-clojure.clojure-xml");
     libs.add("clojure.test-clojure.evaluation");
     libs.add("clojure.test-clojure.macros");
     libs.add("clojure.test-clojure.predicates");
-    // libs.add("clojure.test-clojure.rt");
     libs.add("clojure.test-clojure.vectors");
     libs.add("clojure.test-clojure.clojure-zip");
     libs.add("clojure.test-clojure.fn");
     libs.add("clojure.test-clojure.main");
     libs.add("clojure.test-clojure.printer");
     libs.add("clojure.test-clojure.sequences");
-    // libs.add("clojure.test-clojure.compilation");
     libs.add("clojure.test-clojure.for");
-    // libs.add("clojure.test-clojure.metadata");
     libs.add("clojure.test-clojure.serialization");
+    // libs.add("clojure.test-clojure.def");
+    // libs.add("clojure.test-clojure.reflect");
+    // libs.add("clojure.test-clojure.java-interop");
+    // libs.add("clojure.test-clojure.errors");
+    // libs.add("clojure.test-clojure.pprint");
+    // libs.add("clojure.test-clojure.repl");
+    // libs.add("clojure.test-clojure.rt");
+    // libs.add("clojure.test-clojure.compilation");
+    // libs.add("clojure.test-clojure.metadata");
+    // libs.add("clojure.test_clojure.annotations");
+    // libs.add("clojure.test-clojure.genclass");
+    // libs.add("clojure.test-clojure.ns-libs");
   }
 
   public static boolean deleteDirectory(File directory) {

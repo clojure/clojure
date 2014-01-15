@@ -2914,7 +2914,7 @@ public class Compiler implements Opcodes {
       try {
         Class thenClass = thenExpr.getJavaClass();
         Class elseClass = elseExpr.getJavaClass();
-        cast = thenClass == elseClass ? thenClass : null;
+        cast =  thenClass.isPrimitive() && thenClass == elseClass ? thenClass : null;
       } catch (Exception e2) {
         cast = null;
       }

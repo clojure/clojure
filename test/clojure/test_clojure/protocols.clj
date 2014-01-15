@@ -70,7 +70,7 @@
     (let [obj (reify ExampleProtocol
                      (baz [a b] "two-arg baz!"))]
       (is (= "two-arg baz!" (baz obj nil)))
-      (is (thrown? AbstractMethodError (baz obj)))))
+      (is (thrown? RuntimeException (baz obj)))))
   (testing "error conditions checked when defining protocols"
     (is (thrown-with-msg?
          Exception
@@ -542,7 +542,7 @@
         (is (true? (.contains r :foo)))
         (is (false? (.contains r :bar))))
       (testing "unimplemented methods"
-        (is (thrown? AbstractMethodError (.add r :baz))))))
+        (is (thrown? RuntimeException (.add r :baz))))))
   (testing "of two interfaces"
     (let [r (reify
              java.util.List

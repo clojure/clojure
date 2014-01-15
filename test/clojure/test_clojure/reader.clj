@@ -349,7 +349,7 @@
   (are [x y] (= x (binding [*ns* (the-ns 'clojure.core)] (read-string y)))
        :foo ":foo"
        :foo/bar ":foo/bar"
-       :user/foo "::foo")
+       :clojure.core/foo "::foo")
   (are [err msg form] (thrown-with-msg? err msg (read-string form))
        Exception #"Invalid token: foo:" "foo:"
        Exception #"Invalid token: :bar/" ":bar/"
