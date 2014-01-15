@@ -30,22 +30,25 @@
   "foo with o, i")
 
 (gen-class :name ^{Deprecated {}
-                   SuppressWarnings ["Warning1"] ; discarded
-                   java.lang.annotation.Target []}
+                   ;SuppressWarnings ["Warning1"] ; discarded
+                   ;java.lang.annotation.Target []
+                   }
                  clojure.test_clojure.genclass.examples.ExampleAnnotationClass
            :prefix "annot-"
-           :methods [[^{Deprecated {}
-                        Override {}} ;discarded
-                      foo [^{java.lang.annotation.Retention java.lang.annotation.RetentionPolicy/SOURCE
-                             java.lang.annotation.Target    [java.lang.annotation.ElementType/TYPE
-                                                             java.lang.annotation.ElementType/PARAMETER]}
+           :methods [[;^{Deprecated {}
+                      ;  Override {}} ;discarded
+                      foo [;^{java.lang.annotation.Retention java.lang.annotation.RetentionPolicy/SOURCE
+                           ;  java.lang.annotation.Target    [java.lang.annotation.ElementType/TYPE
+                           ;                                  java.lang.annotation.ElementType/PARAMETER]}
                            String] void]])
 
-(gen-class :name clojure.test_clojure.genclass.examples.ProtectedFinalTester
-           :extends java.lang.ClassLoader
-           :main false
-           :prefix "pf-"
-           :exposes-methods {findSystemClass superFindSystemClass})
+(comment (gen-class :name clojure.test_clojure.genclass.examples.ProtectedFinalTester
+                    :extends java.lang.ClassLoader
+                    :main false
+                    :prefix "pf-"
+                    ; Cannot do this with java sources
+                    ;:exposes-methods {findSystemClass superFindSystemClass}
+                    ))
 
 (defn pf-findSystemClass
   "This function should never be called."

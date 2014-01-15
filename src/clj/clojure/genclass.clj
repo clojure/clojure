@@ -250,7 +250,7 @@
                 ;box args
                 (Compiler/emitSource (str (if rvoid "" "return ")
                                           (Compiler/unboxVal
-                                           rclass (str "((IFn)value).invoke(" 
+                                           rclass (str "((IFn)value).invoke("
                                                        (reduce1
                                                         str (interpose
                                                              ", "
@@ -283,7 +283,7 @@
 
                 (Compiler/untab)
                 (Compiler/emitSource "}")
-               
+
                 (. gen (mark end-label))))
             (Compiler/untab)
             (Compiler/emitSource "}")
@@ -303,7 +303,7 @@
 
                                         ; class annotations
       (add-annotations cv name-meta)
-      (Compiler/emitSource (str "public class " class-name " extends " (Compiler/printClass super) 
+      (Compiler/emitSource (str "public class " class-name " extends " (Compiler/printClass super)
                                 (if (empty? interfaces) "" (str " implements " (apply str (interpose ", " (map #(Compiler/printClass %) interfaces))))) " {"))
       (Compiler/tab)
 
@@ -374,8 +374,9 @@
           (Compiler/emitSource (str "public " class-name "("
                                     (reduce1 str (interpose ", " (map #(str (Compiler/printClass
                                                                              (nth pclasses %)) " p" %) (range (count pclasses))))) ") {"))
-          (Compiler/tab)
-          (Compiler/emitSource "Object value = null;")
+          ; TODO init and post-init
+          (comment (Compiler/tab)
+            (Compiler/emitSource "Object value = null;"))
           (if init
             (do
               (Compiler/emitSource "{")
@@ -416,8 +417,8 @@
                                             (. gen push (int %))
                                             (. gen (invokeStatic rt-type nth-method))
                                             (. clojure.lang.Compiler$HostExpr (emitUnboxArg nil gen (nth super-pclasses %)
-                                                                                            (str "RT.nth(" "found" ", " % ")")))) 
-                                         (range (count super-pclasses))))) ");")) 
+                                                                                            (str "RT.nth(" "found" ", " % ")"))))
+                                         (range (count super-pclasses))))) ");"))
               (. gen (invokeConstructor super-type super-m))
 
               (if state
@@ -604,7 +605,7 @@
           (. gen goTo end-label)
                                         ;no main found
           (. gen mark no-main-label)
-          (let [msg (str impl-pkg-name "/" prefix main-name " not defined")]            
+          (let [msg (str impl-pkg-name "/" prefix main-name " not defined")]
             (Compiler/emitSource (str "throw new " (Compiler/printClass ex-type) "(\"" msg "\");"))
             (. gen (throwException ex-type msg)))
           (. gen mark end-label)

@@ -13,12 +13,11 @@
 package clojure.lang;
 
 import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.lang.ref.SoftReference;
-import java.lang.ref.ReferenceQueue;
 
 public class Util{
 static public boolean equiv(Object k1, Object k2){
@@ -240,6 +239,10 @@ static public RuntimeException sneakyThrow(Throwable t) {
 @SuppressWarnings("unchecked")
 static private <T extends Throwable> void sneakyThrow0(Throwable t) throws T {
 	throw (T) t;
+}
+
+public static void trow(Throwable sneakyThrow) {
+  Util.sneakyThrow(sneakyThrow);
 }
 
 }

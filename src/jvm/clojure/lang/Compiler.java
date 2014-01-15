@@ -2563,8 +2563,8 @@ public class Compiler implements Opcodes {
       String val = excExpr.emit(C.EXPRESSION, objx, gen);
       gen.checkCast(THROWABLE_TYPE);
       gen.throwException();
-      emitSource("throw Util.sneakyThrow((Throwable)" + val + ");");
-      return null;
+      emitSource("Util.trow((Throwable)" + val + ");");
+      return wrap(context, "null");
     }
 
     static class Parser implements IParser {
@@ -3875,12 +3875,14 @@ public class Compiler implements Opcodes {
       } else {
         String val = fexpr.emit(C.EXPRESSION, objx, gen);
         gen.checkCast(IFN_TYPE);
-        ret = "((IFn)" + val + ").invoke("
-            + emitArgsAndCall(0, context, objx, gen) + ")";
+        ret = wrap(
+            context,
+            "((IFn)" + val + ").invoke("
+                + emitArgsAndCall(0, context, objx, gen) + ")");
       }
       if (context == C.STATEMENT)
         gen.pop();
-      return wrap(context, ret);
+      return ret;
     }
 
     public String emitProto(C context, ObjExpr objx, GeneratorAdapter gen) {
@@ -3929,8 +3931,14 @@ public class Compiler implements Opcodes {
       String argse = emitArgsAndCall(1, context, objx, gen);
       gen.goTo(endLabel);
 
-      emitSource(eetemp + " =  ((IFn)" + vare + ".getRawRoot()).invoke(" + ee
-          + (argse.length() > 0 ? ", " + argse : "") + ");");
+      String body = "((IFn)" + vare + ".getRawRoot()).invoke(" + ee
+          + (argse.length() > 0 ? ", " + argse : "") + ")";
+      body = wrap(context, body);
+      if (context == C.EXPRESSION) {
+        emitAssigRet(context, eetemp, body);
+      } else {
+        emitSource(body);
+      }
 
       untab();
       emitSource("} else {");
@@ -3948,14 +3956,16 @@ public class Compiler implements Opcodes {
         Method m = new Method(onMethod.getName(), Type.getReturnType(onMethod),
             Type.getArgumentTypes(onMethod));
         gen.invokeInterface(Type.getType(protocolOn), m);
-        String b = HostExpr.emitBoxReturn(
-            objx,
-            gen,
-            onMethod.getReturnType(),
-            "((" + printClass(protocolOn) + ") " + ee + ")."
-                + onMethod.getName() + "(" + argList + ")");
-
-        emitSource(eetemp + " = " + b + ";");
+        String b = "((" + printClass(protocolOn) + ") " + ee + ")."
+            + onMethod.getName() + "(" + argList + ")";
+        String boxed = HostExpr.emitBoxReturn(objx, gen,
+            onMethod.getReturnType(), b);
+        if (context == C.EXPRESSION) {
+          emitAssigRet(context, eetemp, wrap(context, boxed));
+        } else {
+          emitSource(wrap(context, b));
+        }
+        emitSource("//" + context);
 
         untab();
         emitSource("}");
@@ -3964,7 +3974,7 @@ public class Compiler implements Opcodes {
       // untab();
       // emitSource("}");
       gen.mark(endLabel);
-      return eetemp;
+      return context != C.EXPRESSION ? "" : eetemp;
     }
 
     String emitArgsAndCall(int firstArgToEmit, C context, ObjExpr objx,
@@ -6146,6 +6156,8 @@ public class Compiler implements Opcodes {
       tab();
       emitSource("try {");
       tab();
+      emitSource("while(true) {");
+      tab();
       GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC, m, null,
       // todo don't hardwire this
           EXCEPTION_TYPES, cv);
@@ -6173,6 +6185,8 @@ public class Compiler implements Opcodes {
       // gen.visitMaxs(1, 1);
       gen.endMethod();
 
+      untab();
+      emitSource("}");
       untab();
       emitSource("} catch (Exception ___e) {");
       tab();
@@ -7985,8 +7999,8 @@ public class Compiler implements Opcodes {
       tab();
       emitSource("load();");
       untab();
-      emitSource("} catch (Exception ___e) {");
-      emitSource("throw new RuntimeException(___e);");
+      emitSource("} catch (Exception ___x) {");
+      emitSource("throw new RuntimeException(___x);");
       emitSource("} finally {");
       tab();
       emitSource("Var.popThreadBindings();");
@@ -8833,6 +8847,8 @@ public class Compiler implements Opcodes {
 
       emitSource("try {");
       tab();
+      emitSource("while(true) {");
+      tab();
 
       for (int i = 0; i < parms.count(); i++) {
         IPersistentMap meta = RT.meta(parms.nth(i));
@@ -8868,6 +8884,8 @@ public class Compiler implements Opcodes {
       // gen.visitMaxs(1, 1);
       gen.endMethod();
 
+      untab();
+      emitSource("}");
       untab();
       emitSource("} catch (Exception ___e) {");
       tab();

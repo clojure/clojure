@@ -13,7 +13,6 @@
   (:import [clojure.test_clojure.genclass.examples
             ExampleClass
             ExampleAnnotationClass
-            ProtectedFinalTester
             ArrayDefInterface
             ArrayGenInterface]
 
@@ -69,13 +68,6 @@
 (deftest genclass-option-validation
   (is (fails-with-cause? IllegalArgumentException #"Not a valid method name: has-hyphen"
         (@#'clojure.core/validate-generate-class-options {:methods '[[fine [] void] [has-hyphen [] void]]}))))
-
-(deftest protected-final-access
-  (let [obj (ProtectedFinalTester.)]
-    (testing "Protected final method visibility"
-      (is (thrown? IllegalArgumentException (.findSystemClass obj "java.lang.String"))))
-    (testing "Allow exposition of protected final method."
-      (is (= String (.superFindSystemClass obj "java.lang.String"))))))
 
 (deftest interface-array-type-hints
   (let [array-types       {:ints     (class (int-array 0))
