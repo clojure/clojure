@@ -16,12 +16,13 @@ public class Demo {
   static ArrayList<String> libs = new ArrayList<String>();
 
   public static void main(String[] args) throws Exception {
+    Demo.class.getClassLoader();
     init();
     if (true) {
       long d = System.currentTimeMillis();
 
       for (String f : libs) {
-        RT.load(f);
+        RT.load(f.replaceAll("\\.", "/").replaceAll("-", "_"));
       }
       init();
 
@@ -41,7 +42,7 @@ public class Demo {
         IPersistentMap options = (IPersistentMap) Compiler.COMPILER_OPTIONS
             .deref();
         for (String f : libs) {
-          
+
           compile.invoke(Symbol.intern(f));
         }
         init();
@@ -60,9 +61,7 @@ public class Demo {
   private static void init() throws IOException, ClassNotFoundException {
     libs.add("clojure/core");
     libs.add("clojure/main");
-    libs.add("clojure.test-clojure.protocols.examples");
-    libs.add("clojure.test-clojure.genclass.examples");
-    libs.add("clojure.test-clojure.annotations");
+    libs.add("clojure.test_clojure.annotations");
     libs.add("clojure.test-clojure.agents");
     libs.add("clojure.test-clojure.control");
     libs.add("clojure.test-clojure.multimethods");

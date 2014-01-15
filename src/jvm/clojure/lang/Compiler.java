@@ -2301,40 +2301,56 @@ public class Compiler implements Opcodes {
       emitSource("}");
       gen.goTo(ret);
 
-      for (int i = 0; i < catchExprs.count(); i++) {
-        CatchClause clause = (CatchClause) catchExprs.nth(i);
-        gen.mark(clause.label);
-        // exception should be on stack
-        // put in clause local
-        emitSource("catch (" + printClass(clause.c) + " " + clause.lb.print()
-            + ") {");
+      if (catchExprs.count() > 0) {
+        emitSource("catch (Throwable ex___) {");
         tab();
-        if (finallyExpr != null) {
-          emitSource("try {");
-          tab();
-        }
-        gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), clause.lb.idx);
-        String h = clause.handler.emit(context, objx, gen);
-        if (h != null) {
-          emitAssigRet(context, r, h);
-        }
-        if (context != C.STATEMENT)
-          gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), retLocal);
-        gen.mark(clause.endLabel);
 
-        if (finallyExpr != null) {
-          untab();
-          emitSource("} finally {");
+        for (int i = 0; i < catchExprs.count(); i++) {
+          CatchClause clause = (CatchClause) catchExprs.nth(i);
+          gen.mark(clause.label);
+          // exception should be on stack
+          // put in clause local
+          String clazz = printClass(clause.c);
+          emitSource((i > 0 ? "else " : "") + "if (ex___ instanceof " + clazz
+              + ") {");
           tab();
-          emitSource(finallyExpr.emit(C.STATEMENT, objx, gen));
+          emitSource(clazz + " " + clause.lb.print() + " = (" + clazz
+              + ") ex___;");
+          if (finallyExpr != null) {
+            emitSource("try {");
+            tab();
+          }
+          gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), clause.lb.idx);
+          String h = clause.handler.emit(context, objx, gen);
+          if (h != null) {
+            emitAssigRet(context, r, h);
+          }
+          if (context != C.STATEMENT)
+            gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), retLocal);
+          gen.mark(clause.endLabel);
+
+          if (finallyExpr != null) {
+            untab();
+            emitSource("} finally {");
+            tab();
+            emitSource(finallyExpr.emit(C.STATEMENT, objx, gen));
+            untab();
+            emitSource("}");
+          }
+
           untab();
           emitSource("}");
+          gen.goTo(ret);
         }
-
+        emitSource("else {");
+        tab();
+        emitSource("throw Util.sneakyThrow(ex___);");
         untab();
         emitSource("}");
-        gen.goTo(ret);
+        untab();
+        emitSource("}");
       }
+
       if (finallyExpr != null) {
         gen.mark(finallyLabel);
         // exception should be on stack
@@ -7724,13 +7740,9 @@ public class Compiler implements Opcodes {
     if (genPath == null)
       throw Util.runtimeException("*source-path* not set");
     String[] dirs = internalName.split("/");
-    String p = genPath;
-    for (int i = 0; i < dirs.length - 1; i++) {
-      p += File.separator + dirs[i];
-      (new File(p)).mkdir();
-    }
     String path = genPath + File.separator + internalName + ".java";
     File cf = new File(path);
+    cf.getParentFile().mkdirs();
     cf.createNewFile();
     FileOutputStream cfs = new FileOutputStream(cf);
     try {

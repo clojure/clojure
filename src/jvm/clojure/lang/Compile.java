@@ -57,7 +57,7 @@ public class Compile {
     boolean uncheckedMath = System.getProperty(UNCHECKED_MATH_PROP, "false")
         .equals("true");
 
-    IPersistentMap compilerOptions = null;
+    IPersistentMap compilerOptions = RT.map();
 
     for (Map.Entry e : System.getProperties().entrySet()) {
       String name = (String) e.getKey();
