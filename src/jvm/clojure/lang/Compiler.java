@@ -6866,6 +6866,7 @@ public class Compiler implements Opcodes {
         throw new IllegalStateException();
 
       Expr last = null;
+      ArrayList<String> auxs = new ArrayList<String>();
       for (int i = 0; i < loopLocals.count(); i++) {
         LocalBinding lb = (LocalBinding) loopLocals.nth(i);
         Expr arg = (Expr) args.nth(i);
@@ -6915,12 +6916,20 @@ public class Compiler implements Opcodes {
           val = arg.emit(C.EXPRESSION, objx, gen);
         }
         if (!lb.print().equals(val)) {
-          emitSource(lb.print() + " = " + val + ";");
+          Class type = lb.getPrimitiveType();
+          emitSource(printClass(type == null ? Object.class : type) + " "
+              + lb.print() + "___aux = " + val + ";");
+          auxs.add(lb.print());
         }
+      }
+
+      for (String a : auxs) {
+        emitSource(a + " = " + a + "___aux;");
       }
 
       for (int i = loopLocals.count() - 1; i >= 0; i--) {
         LocalBinding lb = (LocalBinding) loopLocals.nth(i);
+
         Class primc = lb.getPrimitiveType();
         if (lb.isArg)
           gen.storeArg(lb.idx - (objx.isStatic ? 0 : 1));

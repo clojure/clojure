@@ -74,7 +74,7 @@ public class Compile {
     
     try {
       Var.pushThreadBindings(RT.map(clojure.lang.Compiler.SOURCE_GEN_PATH,
-          "target/src", compile_path, path, warn_on_reflection,
+          sourceOutput, compile_path, path, warn_on_reflection,
           warnOnReflection, unchecked_math, uncheckedMath, compiler_options,
           compilerOptions));
 

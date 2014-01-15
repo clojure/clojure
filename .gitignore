@@ -10,3 +10,5 @@ coclojure/*
 .classpath
 
 .project
+
+xcode
