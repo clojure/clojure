@@ -6135,7 +6135,7 @@
                          (into1 #{} (map #(shift-mask shift mask %) skip-check)))]
         [shift mask case-map switch-type skip-check]))))
 
-
+(comment
 (defmacro case
   "Takes an expression, and a set of clauses.
 
@@ -6197,7 +6197,11 @@
           :identity
           (let [[shift mask imap switch-type skip-check] (prep-hashes ge default tests thens)]
             `(let [~ge ~e] (case* ~ge ~shift ~mask ~default ~imap ~switch-type :hash-identity ~skip-check))))))))
+)
 
+;TODO case: in objc hash != java's hashCode
+(defmacro case [e & clauses]
+  `(condp = ~e ~@clauses))
 
 ;; redefine reduce with internal-reduce
 (defn reduced
@@ -6448,46 +6452,46 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
 
-(let [properties (with-open [version-stream (.getResourceAsStream
-                                             (clojure.lang.RT/baseLoader)
-                                             "clojure/version.properties")]
-                   (doto (new java.util.Properties)
-                     (.load version-stream)))
-      version-string (.getProperty properties "version")
-      [_ major minor incremental qualifier snapshot]
-      (re-matches
-       #"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9_]+))?(?:-(SNAPSHOT))?"
-       version-string)
-      clojure-version {:major       (Integer/valueOf ^String major)
-                       :minor       (Integer/valueOf ^String minor)
-                       :incremental (Integer/valueOf ^String incremental)
-                       :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
-  (def ^:dynamic *clojure-version*
-    (if (.contains version-string "SNAPSHOT")
-      (clojure.lang.RT/assoc clojure-version :interim true)
-      clojure-version)))
+;(let [properties (with-open [version-stream (.getResourceAsStream
+;                                             (ClassLoader/getSystemClassLoader)
+;                                             "clojure/version.properties")]
+;                   (doto (new java.util.Properties)
+;                     (.load version-stream)))
+;      version-string (.getProperty properties "version")
+;      [_ major minor incremental qualifier snapshot]
+;      (re-matches
+;       #"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9_]+))?(?:-(SNAPSHOT))?"
+;       version-string)
+;      clojure-version {:major       (Integer/valueOf ^String major)
+;                       :minor       (Integer/valueOf ^String minor)
+;                       :incremental (Integer/valueOf ^String incremental)
+;                       :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
+;  (def ^:dynamic *clojure-version*
+;    (if (.contains version-string "SNAPSHOT")
+;      (clojure.lang.RT/assoc clojure-version :interim true)
+;      clojure-version)))
 
-(add-doc-and-meta *clojure-version*
-  "The version info for Clojure core, as a map containing :major :minor
-  :incremental and :qualifier keys. Feature releases may increment
-  :minor and/or :major, bugfix releases will increment :incremental.
-  Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
-  {:added "1.0"})
+;(add-doc-and-meta *clojure-version*
+;  "The version info for Clojure core, as a map containing :major :minor
+;  :incremental and :qualifier keys. Feature releases may increment
+;  :minor and/or :major, bugfix releases will increment :incremental.
+;  Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
+;  {:added "1.0"})
 
-(defn
-  clojure-version
-  "Returns clojure version as a printable string."
-  {:added "1.0"}
-  []
-  (str (:major *clojure-version*)
-       "."
-       (:minor *clojure-version*)
-       (when-let [i (:incremental *clojure-version*)]
-         (str "." i))
-       (when-let [q (:qualifier *clojure-version*)]
-         (when (pos? (count q)) (str "-" q)))
-       (when (:interim *clojure-version*)
-         "-SNAPSHOT")))
+;(defn
+;  clojure-version
+;  "Returns clojure version as a printable string."
+;  {:added "1.0"}
+;  []
+;  (str (:major *clojure-version*)
+;       "."
+;       (:minor *clojure-version*)
+;       (when-let [i (:incremental *clojure-version*)]
+;         (str "." i))
+;       (when-let [q (:qualifier *clojure-version*)]
+;         (when (pos? (count q)) (str "-" q)))
+;       (when (:interim *clojure-version*)
+;         "-SNAPSHOT")))
 
 (defn promise
   "Alpha - subject to change.
@@ -6941,49 +6945,48 @@
   default), an exception will be thrown for the unknown tag."
   nil)
 
-(defn- data-reader-urls []
-  (enumeration-seq
-   (.. Thread currentThread getContextClassLoader
-       (getResources "data_readers.clj"))))
+;(defn- data-reader-urls []
+;  (enumeration-seq
+;   (.getResources (ClassLoader/getSystemClassLoader) "data_readers.clj")))
 
-(defn- data-reader-var [sym]
-  (intern (create-ns (symbol (namespace sym)))
-          (symbol (name sym))))
+;(defn- data-reader-var [sym]
+;  (intern (create-ns (symbol (namespace sym)))
+;          (symbol (name sym))))
 
-(defn- load-data-reader-file [mappings ^java.net.URL url]
-  (with-open [rdr (clojure.lang.LineNumberingPushbackReader.
-                   (java.io.InputStreamReader.
-                    (.openStream url) "UTF-8"))]
-    (binding [*file* (.getFile url)]
-      (let [new-mappings (read rdr false nil)]
-        (when (not (map? new-mappings))
-          (throw (ex-info (str "Not a valid data-reader map")
-                          {:url url})))
-        (reduce
-         (fn [m [k v]]
-           (when (not (symbol? k))
-             (throw (ex-info (str "Invalid form in data-reader file")
-                             {:url url
-                              :form k})))
-           (let [v-var (data-reader-var v)]
-             (when (and (contains? mappings k)
-                        (not= (mappings k) v-var))
-               (throw (ex-info "Conflicting data-reader mapping"
-                               {:url url
-                                :conflict k
-                                :mappings m})))
-             (assoc m k v-var)))
-         mappings
-         new-mappings)))))
+;(defn- load-data-reader-file [mappings ^java.net.URL url]
+;  (with-open [rdr (clojure.lang.LineNumberingPushbackReader.
+;                   (java.io.InputStreamReader.
+;                    (.openStream url) "UTF-8"))]
+;    (binding [*file* (.getFile url)]
+;      (let [new-mappings (read rdr false nil)]
+;        (when (not (map? new-mappings))
+;          (throw (ex-info (str "Not a valid data-reader map")
+;                          {:url url})))
+;        (reduce
+;         (fn [m [k v]]
+;           (when (not (symbol? k))
+;             (throw (ex-info (str "Invalid form in data-reader file")
+;                             {:url url
+;                              :form k})))
+;           (let [v-var (data-reader-var v)]
+;             (when (and (contains? mappings k)
+;                        (not= (mappings k) v-var))
+;               (throw (ex-info "Conflicting data-reader mapping"
+;                               {:url url
+;                                :conflict k
+;                                :mappings m})))
+;             (assoc m k v-var)))
+;         mappings
+;         new-mappings)))))
 
-(defn- load-data-readers []
-  (alter-var-root #'*data-readers*
-                  (fn [mappings]
-                    (reduce load-data-reader-file
-                            mappings (data-reader-urls)))))
+;(defn- load-data-readers []
+;  (alter-var-root #'*data-readers*
+;                  (fn [mappings]
+;                    (reduce load-data-reader-file
+;                            mappings (data-reader-urls)))))
 
-(try
- (load-data-readers)
- (catch Throwable t
-   (.printStackTrace t)
-   (throw t)))
+;(try
+; (load-data-readers)
+; (catch Throwable t
+;   (.printStackTrace t)
+;   (throw t)))

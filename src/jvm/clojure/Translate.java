@@ -33,8 +33,9 @@ public class Translate extends J2ObjC {
       if (args.length > 0) {
         translate(args[0], files);
       } else {
-        translate(new File("./src/jvm").getAbsolutePath(), files);
-        translate(new File("./target/src").getAbsolutePath(), files);
+        translate(new File("src/jvm").getAbsolutePath(), files);
+//        translate(new File("test/java").getAbsolutePath(), files);
+        translate(new File("target/gen").getAbsolutePath(), files);
       }
       Options.load(new String[] { "-d", "coclojure", "-classpath",
           "target/classes", (String) files.get(0) });

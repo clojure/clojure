@@ -69,7 +69,7 @@ public class Compile {
       }
     }
     
-    String sourceOutput = (String) (compilerOptions.containsKey(sourceOutputKey) ? compilerOptions.valAt(sourceOutputKey ) : "xcode/gen");
+    String sourceOutput = (String) (compilerOptions.containsKey(sourceOutputKey) ? compilerOptions.valAt(sourceOutputKey ) : "target/gen");
     new File(sourceOutput).mkdirs();
     
     try {

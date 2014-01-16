@@ -1,6 +1,5 @@
 package clojure;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -14,7 +13,13 @@ public class Demo {
   static ArrayList<String> libs = new ArrayList<String>();
 
   public static void main(String[] args) throws Exception {
-    Demo.class.getClassLoader();
+    long i = System.currentTimeMillis();
+    RT.load("clojure/core");
+    System.out.println(System.currentTimeMillis() - i);
+    if (true) {
+      return;
+    }
+    
     init();
     long d = System.currentTimeMillis();
 
@@ -62,17 +67,17 @@ public class Demo {
     libs.add("clojure.test-clojure.logic");
     libs.add("clojure.test-clojure.vars");
     libs.add("clojure.test-clojure.clojure-xml");
-    libs.add("clojure.test-clojure.evaluation");
     libs.add("clojure.test-clojure.macros");
     libs.add("clojure.test-clojure.predicates");
     libs.add("clojure.test-clojure.vectors");
     libs.add("clojure.test-clojure.clojure-zip");
     libs.add("clojure.test-clojure.fn");
-    libs.add("clojure.test-clojure.main");
     libs.add("clojure.test-clojure.printer");
     libs.add("clojure.test-clojure.sequences");
     libs.add("clojure.test-clojure.for");
-    libs.add("clojure.test-clojure.serialization");
+    //libs.add("clojure.test-clojure.evaluation");
+    // libs.add("clojure.test-clojure.serialization");
+    // libs.add("clojure.test-clojure.main");
     // libs.add("clojure.test-clojure.def");
     // libs.add("clojure.test-clojure.reflect");
     // libs.add("clojure.test-clojure.java-interop");
@@ -85,21 +90,5 @@ public class Demo {
     // libs.add("clojure.test_clojure.annotations");
     // libs.add("clojure.test-clojure.genclass");
     // libs.add("clojure.test-clojure.ns-libs");
-  }
-
-  public static boolean deleteDirectory(File directory) {
-    if (directory.exists()) {
-      File[] files = directory.listFiles();
-      if (null != files) {
-        for (int i = 0; i < files.length; i++) {
-          if (files[i].isDirectory()) {
-            deleteDirectory(files[i]);
-          } else {
-            files[i].delete();
-          }
-        }
-      }
-    }
-    return (directory.delete());
   }
 }

@@ -11,7 +11,10 @@
 package clojure.lang;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -298,13 +301,16 @@ static final class TransientHashMap extends ATransientMap {
 	}
 
 	Object doValAt(Object key, Object notFound) {
-		if (key == null)
-			if (hasNull)
+		if (key == null) {
+			if (hasNull) {
 				return nullValue;
-			else
+			} else {
 				return notFound;
-		if (root == null)
+			}
+		}
+		if (root == null) {
 			return notFound;
+		}
 		return root.find(0, hash(key), key, notFound);
 	}
 

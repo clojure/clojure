@@ -15,36 +15,38 @@ package clojure.lang;
 import java.io.Serializable;
 import java.util.Comparator;
 
-public abstract class AFunction extends AFn implements IObj, Comparator, Fn, Serializable {
+public abstract class AFunction extends AFn implements IObj, Comparator, Fn,
+    Serializable {
 
-public volatile MethodImplCache __methodImplCache;
+  public volatile MethodImplCache __methodImplCache;
 
-public IPersistentMap meta(){
-	return null;
-}
+  public IPersistentMap meta() {
+    return null;
+  }
 
-public IObj withMeta(final IPersistentMap meta){
-  return new RestFnWithMeta(this, meta);
-}
+  public IObj withMeta(final IPersistentMap meta) {
+    return new RestFnWithMeta(this, meta);
+  }
 
-public int compare(Object o1, Object o2){
-	try
-		{
-		Object o = invoke(o1, o2);
+  public int compare(Object o1, Object o2) {
+    try {
+      Object o = invoke(o1, o2);
 
-		if(o instanceof Boolean)
-			{
-			if(RT.booleanCast(o))
-				return -1;
-			return RT.booleanCast(invoke(o2,o1))? 1 : 0;
-			}
+      if (o instanceof Boolean) {
+        if (RT.booleanCast(o))
+          return -1;
+        return RT.booleanCast(invoke(o2, o1)) ? 1 : 0;
+      }
 
-		Number n = (Number) o;
-		return n.intValue();
-		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(e);
-		}
-}
+      Number n = (Number) o;
+      return n.intValue();
+    } catch (Exception e) {
+      throw Util.sneakyThrow(e);
+    }
+  }
+
+  @Override
+  public boolean equals(Object f) {
+    return this == f;
+  }
 }
