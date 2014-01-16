@@ -304,6 +304,10 @@ public class RT {
 
   static public final Object[] EMPTY_ARRAY = new Object[] {};
   static public final Comparator DEFAULT_COMPARATOR = new DefaultComparator();
+  public static boolean ios = false;
+  public static void setiOS() {
+    ios = true;
+  }
 
   private static final class DefaultComparator implements Comparator,
       Serializable {
@@ -472,7 +476,7 @@ public class RT {
 
   static public void load(String scriptbase, boolean failIfNotFound)
       throws IOException, ClassNotFoundException {
-    if (!RT.class.getName().equals("clojure.lang.RT")) { // TODO detect iOS
+    if (ios) {
       loadiOS(scriptbase);
     } else {
       String classfile = scriptbase + LOADER_SUFFIX + ".class";

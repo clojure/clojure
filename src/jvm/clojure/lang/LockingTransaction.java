@@ -106,7 +106,7 @@ Info info;
 long readPoint;
 long startPoint;
 long startTime;
-static RetryEx retryex_ = new RetryEx();
+static RetryEx retryex_;
 
 static RetryEx retryex() {
   if (retryex_ == null) {

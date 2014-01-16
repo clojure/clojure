@@ -3859,6 +3859,7 @@
   clashes. Use :use in the ns macro in preference to calling this directly."
   {:added "1.0"}
   [ns-sym & filters]
+  (when-not clojure.lang.RT/ios
     (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))
           fs (apply hash-map filters)
           nspublics (ns-publics ns)
@@ -3877,7 +3878,7 @@
                           (if (get (ns-interns ns) sym)
                             (str sym " is not public")
                             (str sym " does not exist")))))
-            (. *ns* (refer (or (rename sym) sym) v)))))))
+            (. *ns* (refer (or (rename sym) sym) v))))))))
 
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."
@@ -5799,6 +5800,11 @@
         (let [ret (apply f args)]
           (swap! mem assoc args ret)
           ret)))))
+
+; Notable speed increase on objc runtime
+; TODO ?
+(def parents (memoize parents))
+(def bases (memoize bases))
 
 (defmacro condp
   "Takes a binary predicate, an expression, and a set of clauses.
