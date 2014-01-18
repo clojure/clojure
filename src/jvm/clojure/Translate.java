@@ -28,17 +28,23 @@ public class Translate extends J2ObjC {
   }
 
   public static void main(String args[]) {
+    translate(args, "coclojure", "target/classes");
+  }
+
+  public static void translate(String[] args, String out, String cp) {
     try {
       ArrayList<String> files = new ArrayList<String>();
       if (args.length > 0) {
-        translate(args[0], files);
+        for (String arg : args) {
+          translate(arg, files);          
+        }
       } else {
         translate(new File("src/jvm").getAbsolutePath(), files);
 //        translate(new File("test/java").getAbsolutePath(), files);
         translate(new File("target/gen").getAbsolutePath(), files);
       }
-      Options.load(new String[] { "-d", "coclojure", "-classpath",
-          "target/classes", (String) files.get(0) });
+      Options.load(new String[] { "-d", out, "-classpath",
+          cp, (String) files.get(0) });
 
       try {
         initPlugins(Options.getPluginPathEntries(),

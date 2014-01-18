@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.clojure</groupId>
-	<artifactId>clojure</artifactId>
+	<groupId>galdolber</groupId>
+	<artifactId>clojure-objc</artifactId>
 	<name>clojure</name>
 	<packaging>jar</packaging>
-	<version>1.6.0-master-SNAPSHOT</version>
+	<version>1.5.1</version>
 
 	<url>http://clojure.org/</url>
 	<description>Clojure core environment and runtime library.</description>

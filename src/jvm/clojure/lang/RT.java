@@ -305,6 +305,7 @@ public class RT {
   static public final Object[] EMPTY_ARRAY = new Object[] {};
   static public final Comparator DEFAULT_COMPARATOR = new DefaultComparator();
   public static boolean ios = false;
+
   public static void setiOS() {
     ios = true;
   }
@@ -366,7 +367,7 @@ public class RT {
         "Sequentially read and evaluate the set of forms contained in the file.",
         arglistskw, list(vector(namesym))));
     try {
-      // doInit();
+      doInit();
     } catch (Exception e) {
       throw Util.sneakyThrow(e);
     }
@@ -375,6 +376,35 @@ public class RT {
   static public Keyword keyword(String ns, String name) {
     return Keyword.intern((Symbol.intern(ns, name)));
   }
+
+  private static void doInit() {
+    try {
+      if (!ios) {
+        RT.load("clojure/core");
+        Var.pushThreadBindings(RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
+            WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref(), RT.UNCHECKED_MATH,
+            RT.UNCHECKED_MATH.deref()));
+        try {
+          Symbol USER = Symbol.intern("user");
+          Symbol CLOJURE = Symbol.intern("clojure.core");
+
+          Var in_ns = var("clojure.core", "in-ns");
+          Var refer = var("clojure.core", "refer");
+          in_ns.invoke(USER);
+          refer.invoke(CLOJURE);
+          maybeLoadResourceScript("user.clj");
+        } finally {
+          Var.popThreadBindings();
+        }
+      }
+    } catch (Exception e) {
+      throw Util.sneakyThrow(e);
+    }
+  }
+
+  static public native Object objcClass(String name) /*-[
+                                                     return NSClassFromString(name);
+                                                     ]-*/;
 
   static public Var var(String ns, String name) {
     return Var.intern(Namespace.findOrCreate(Symbol.intern(null, ns)),
@@ -494,7 +524,7 @@ public class RT {
               CURRENT_NS.deref(), WARN_ON_REFLECTION,
               WARN_ON_REFLECTION.deref(), RT.UNCHECKED_MATH,
               RT.UNCHECKED_MATH.deref()));
-//          System.out.println("Loading class " + classURL);
+          // System.out.println("Loading class " + classURL);
           loaded = (loadClassForName(scriptbase.replace('/', '.')
               + LOADER_SUFFIX) != null);
         } catch (Exception e) {
@@ -506,7 +536,7 @@ public class RT {
       // boolean runtime = Boolean.TRUE.equals(Compiler.RUNTIME.deref());
       // runtime ||
       if ((!loaded && cljURL != null)) {
-//        System.out.println("Loading script " + scriptbase);
+        // System.out.println("Loading script " + scriptbase);
         if (booleanCast(Compiler.COMPILE_FILES.deref()))
           compile(cljfile);
         else

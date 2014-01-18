@@ -19,7 +19,7 @@
               StringReader ByteArrayInputStream
               BufferedInputStream BufferedOutputStream
               CharArrayReader Closeable)
-     (java.net URI URL MalformedURLException)))
+     (java.net URI URL MalformedURLException Socket URLDecoder URLEncoder)))
 
 (def
     ^{:doc "Type object for a Java primitive byte array."
@@ -37,9 +37,10 @@
   (^{:tag java.io.File, :added "1.2"} as-file [x] "Coerce argument to a file.")
   (^{:tag java.net.URL, :added "1.2"} as-url [x] "Coerce argument to a URL."))
 
-;(defn- escaped-utf8-urlstring->str [s]
-;  (-> (clojure.string/replace s "+" (URLEncoder/encode "+" "UTF-8"))
-;      (URLDecoder/decode "UTF-8")))
+; objc?
+(defn- escaped-utf8-urlstring->str [s]
+  (-> (clojure.string/replace s "+" (URLEncoder/encode "+" "UTF-8"))
+      (URLDecoder/decode "UTF-8")))
 
 (extend-protocol Coercions
   nil
@@ -58,14 +59,14 @@
   URL
   (as-url [u] u)
   (as-file [u]
-;    (if (= "file" (.getProtocol u))
-;      (as-file (escaped-utf8-urlstring->str
-;                (.replace (.getFile u) \/ File/separatorChar)))
-;      (throw (IllegalArgumentException. (str "Not a file: " u))))
+    (if (= "file" (.getProtocol u))
+      (as-file (escaped-utf8-urlstring->str
+                (.replace (.getFile u) \/ File/separatorChar)))
+      (throw (IllegalArgumentException. (str "Not a file: " u))))
            )
 
   URI
-  (as-url [u] ;(.toURL u)
+  (as-url [u] (.toURL u)
           )
   (as-file [u] (as-file (as-url u))))
 
@@ -245,11 +246,11 @@
                             (make-output-stream (as-file x) opts)
                             (throw (IllegalArgumentException. (str "Can not write to non-file URL <" x ">")))))))
 
-;(extend URI
-;  IOFactory
-;  (assoc default-streams-impl
-;    :make-input-stream (fn [^URI x opts] (make-input-stream (.toURL x) opts))
-;    :make-output-stream (fn [^URI x opts] (make-output-stream (.toURL x) opts))))
+(extend URI
+  IOFactory
+  (assoc default-streams-impl
+    :make-input-stream (fn [^URI x opts] (make-input-stream (.toURL x) opts))
+    :make-output-stream (fn [^URI x opts] (make-output-stream (.toURL x) opts))))
 
 (extend String
   IOFactory
@@ -265,11 +266,11 @@
                            (catch MalformedURLException err
                              (make-output-stream (File. x) opts))))))
 
-;(extend Socket
-;  IOFactory
-;  (assoc default-streams-impl
-;    :make-input-stream (fn [^Socket x opts] (make-input-stream (.getInputStream x) opts))
-;    :make-output-stream (fn [^Socket x opts] (make-output-stream (.getOutputStream x) opts))))
+(extend Socket
+  IOFactory
+  (assoc default-streams-impl
+    :make-input-stream (fn [^Socket x opts] (make-input-stream (.getInputStream x) opts))
+    :make-output-stream (fn [^Socket x opts] (make-output-stream (.getOutputStream x) opts))))
 
 (extend byte-array-type
   IOFactory

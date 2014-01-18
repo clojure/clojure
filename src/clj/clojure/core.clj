@@ -6477,6 +6477,8 @@
 ;      (clojure.lang.RT/assoc clojure-version :interim true)
 ;      clojure-version)))
 
+(def ^:dynamic *clojure-version* {:major 1, :minor 5, :incremental 1, :qualifier nil})
+
 ;(add-doc-and-meta *clojure-version*
 ;  "The version info for Clojure core, as a map containing :major :minor
 ;  :incremental and :qualifier keys. Feature releases may increment
@@ -6484,20 +6486,20 @@
 ;  Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
 ;  {:added "1.0"})
 
-;(defn
-;  clojure-version
-;  "Returns clojure version as a printable string."
-;  {:added "1.0"}
-;  []
-;  (str (:major *clojure-version*)
-;       "."
-;       (:minor *clojure-version*)
-;       (when-let [i (:incremental *clojure-version*)]
-;         (str "." i))
-;       (when-let [q (:qualifier *clojure-version*)]
-;         (when (pos? (count q)) (str "-" q)))
-;       (when (:interim *clojure-version*)
-;         "-SNAPSHOT")))
+(defn
+  clojure-version
+  "Returns clojure version as a printable string."
+  {:added "1.0"}
+  []
+  (str (:major *clojure-version*)
+       "."
+       (:minor *clojure-version*)
+       (when-let [i (:incremental *clojure-version*)]
+         (str "." i))
+       (when-let [q (:qualifier *clojure-version*)]
+         (when (pos? (count q)) (str "-" q)))
+       (when (:interim *clojure-version*)
+         "-SNAPSHOT")))
 
 (defn promise
   "Alpha - subject to change.
@@ -6996,3 +6998,23 @@
 ; (catch Throwable t
 ;   (.printStackTrace t)
 ;   (throw t)))
+
+(defn sel [s]
+  (clojure.lang.Selector. s))
+
+(defn objc-class [s]
+  (RT/objcClass (name s)))
+
+(defmacro $ [& args]
+  (let [is-class (= 1 (count args))
+        t (first args)]
+    (if is-class
+      `(objc-class '~t)
+      (let [args (vec (next args))
+            has-params (even? (count args))
+            args (partition 2 (if has-params args (conj args nil)))
+            params (map second args)
+            selector (str (subs (apply str (map first args)) 1) (if has-params ":" ""))]
+        (if has-params
+          `((clojure.lang.Selector. ~selector) ~t ~@params)
+          `((clojure.lang.Selector. ~selector) ~t))))))

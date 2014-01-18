@@ -39,7 +39,6 @@ public class Compile {
   private static Keyword sourceOutputKey = Keyword.intern("clojure.compiler.source-output");
 
   public static void main(String[] args) throws Exception {
-    RT.load("clojure/core");
     OutputStreamWriter out = (OutputStreamWriter) RT.OUT.deref();
     PrintWriter err = RT.errPrintWriter();
     String path = System.getProperty(PATH_PROP);

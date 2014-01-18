@@ -3015,6 +3015,7 @@ public class Compiler implements Opcodes {
   static final public IPersistentMap CHAR_MAP = PersistentHashMap.create(
       '-',
       "_",
+      '©', "_OBJC_",
       // '.', "_DOT_",
       ':', "_COLON_", '+', "_PLUS_", '>', "_GT_", '<', "_LT_", '=', "_EQ_",
       '~', "_TILDE_", '!', "_BANG_", '@', "_CIRCA_", '#', "_SHARP_", '\'',
@@ -7760,8 +7761,10 @@ public class Compiler implements Opcodes {
       throws IOException {
     internalName = internalName.replaceAll("-", "_");
     String genPath = (String) Compiler.SOURCE_GEN_PATH.deref();
-    if (genPath == null)
-      throw Util.runtimeException("*source-path* not set");
+    if (genPath == null) {
+      genPath = "target/gen";
+      //throw Util.runtimeException("*source-path* not set");
+    }
     String[] dirs = internalName.split("/");
     String path = genPath + File.separator + internalName + ".java";
     File cf = new File(path);
