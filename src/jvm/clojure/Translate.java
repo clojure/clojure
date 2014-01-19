@@ -28,7 +28,7 @@ public class Translate extends J2ObjC {
   }
 
   public static void main(String args[]) {
-    translate(args, "coclojure", "target/classes");
+    translate(args, "target/objc", "target/classes");
   }
 
   public static void translate(String[] args, String out, String cp) {
@@ -36,15 +36,15 @@ public class Translate extends J2ObjC {
       ArrayList<String> files = new ArrayList<String>();
       if (args.length > 0) {
         for (String arg : args) {
-          translate(arg, files);          
+          translate(arg, files);
         }
       } else {
         translate(new File("src/jvm").getAbsolutePath(), files);
-//        translate(new File("test/java").getAbsolutePath(), files);
         translate(new File("target/gen").getAbsolutePath(), files);
+        // translate(new File("test/java").getAbsolutePath(), files);
       }
-      Options.load(new String[] { "-d", out, "-classpath",
-          cp, (String) files.get(0) });
+      Options.load(new String[] { "-d", out, "-classpath", cp,
+          (String) files.get(0) });
 
       try {
         initPlugins(Options.getPluginPathEntries(),

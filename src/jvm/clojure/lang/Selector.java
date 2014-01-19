@@ -33,7 +33,8 @@ public class Selector extends RestFn implements Named {
   @Override
   protected Object doInvoke(Object o, Object args) {
     if (!RT.ios) {
-      throw new RuntimeException("Cannot use selector on jvm");
+      System.out.println("Warning! objc selectors always return nil on the jvm");
+      return null;
     } else {
       String sel = this.sel;
       if (args != null && !sel.endsWith(":")) {

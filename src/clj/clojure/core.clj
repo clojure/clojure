@@ -7003,7 +7003,9 @@
   (clojure.lang.Selector. s))
 
 (defn objc-class [s]
-  (RT/objcClass (name s)))
+  (if RT/ios
+    (RT/objcClass (name s))
+    (println "Warning. objc-class always returns nil on the jvm")))
 
 (defmacro $ [& args]
   (let [is-class (= 1 (count args))
