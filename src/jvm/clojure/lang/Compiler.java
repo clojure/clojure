@@ -1592,6 +1592,18 @@ public class Compiler implements Opcodes {
           }
           java.lang.reflect.Method m = (java.lang.reflect.Method) (methodidx >= 0 ? methods
               .get(methodidx) : null);
+          
+          if (m != null) {
+            ObjMethod objm = (ObjMethod) METHOD.get();
+            if (objm != null && !objm.hasException) {
+              for (Class ex : m.getExceptionTypes()) {
+                if (!RuntimeException.class.isAssignableFrom(ex)) {
+                  objm.hasException = true;
+                  break;
+                }
+              }
+            }
+          }
           if (m != null
               && !Modifier.isPublic(m.getDeclaringClass().getModifiers())) {
             // public method of non-public class, try to find it in hierarchy
@@ -1767,6 +1779,19 @@ public class Compiler implements Opcodes {
       }
       method = (java.lang.reflect.Method) (methodidx >= 0 ? methods
           .get(methodidx) : null);
+
+      if (method != null) {
+        ObjMethod m = (ObjMethod) METHOD.get();
+        if (m != null && !m.hasException) {
+          for (Class ex : method.getExceptionTypes()) {
+            if (!RuntimeException.class.isAssignableFrom(ex)) {
+              m.hasException = true;
+              break;
+            }
+          }
+        }
+      }
+
       if (method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref())) {
         RT.errPrintWriter().format(
             "Reflection warning, %s:%d:%d - call to %s can't be resolved.\n",
@@ -2678,6 +2703,18 @@ public class Compiler implements Opcodes {
       }
 
       this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
+      if (this.ctor != null) {
+        ObjMethod objm = (ObjMethod) METHOD.get();
+        if (objm != null && !objm.hasException) {
+          for (Class ex : this.ctor.getExceptionTypes()) {
+            if (!RuntimeException.class.isAssignableFrom(ex)) {
+              objm.hasException = true;
+              break;
+            }
+          }
+        }
+      }
+      
       if (ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref())) {
         RT.errPrintWriter()
             .format(
@@ -2914,7 +2951,8 @@ public class Compiler implements Opcodes {
       try {
         Class thenClass = thenExpr.getJavaClass();
         Class elseClass = elseExpr.getJavaClass();
-        cast =  thenClass.isPrimitive() && thenClass == elseClass ? thenClass : null;
+        cast = thenClass.isPrimitive() && thenClass == elseClass ? thenClass
+            : null;
       } catch (Exception e2) {
         cast = null;
       }
@@ -3015,7 +3053,8 @@ public class Compiler implements Opcodes {
   static final public IPersistentMap CHAR_MAP = PersistentHashMap.create(
       '-',
       "_",
-      '©', "_OBJC_",
+      '©',
+      "_OBJC_",
       // '.', "_DOT_",
       ':', "_COLON_", '+', "_PLUS_", '>', "_GT_", '<', "_LT_", '=', "_EQ_",
       '~', "_TILDE_", '!', "_BANG_", '@', "_CIRCA_", '#', "_SHARP_", '\'',
@@ -3966,8 +4005,6 @@ public class Compiler implements Opcodes {
         } else {
           emitSource(wrap(context, b));
         }
-        emitSource("//" + context);
-
         untab();
         emitSource("}");
       }
@@ -5937,10 +5974,15 @@ public class Compiler implements Opcodes {
           EXCEPTION_TYPES, cv);
       gen.visitCode();
 
-      emitSource("try {");
-      tab();
-      emitSource("while(true) {");
-      tab();
+      if (hasException) {
+        emitSource("try {");
+        tab();
+      }
+
+      if (hasRecur) {
+        emitSource("while(true) {");
+        tab();
+      }
 
       Label loopLabel = gen.mark();
       gen.visitLineNumber(line, loopLabel);
@@ -5967,14 +6009,18 @@ public class Compiler implements Opcodes {
       gen.returnValue();
       // gen.visitMaxs(1, 1);
       gen.endMethod();
-      untab();
-      emitSource("}");
-      untab();
-      emitSource("} catch (Exception ___e) {");
-      tab();
-      emitSource("throw Util.sneakyThrow(___e);");
-      untab();
-      emitSource("}");
+      if (hasRecur) {
+        untab();
+        emitSource("}");
+      }
+      if (hasException) {
+        untab();
+        emitSource("} catch (Exception ___e) {");
+        tab();
+        emitSource("throw Util.sneakyThrow(___e);");
+        untab();
+        emitSource("}");
+      }
       untab();
       emitSource("}");
     }
@@ -6047,6 +6093,8 @@ public class Compiler implements Opcodes {
     // when closures are defined inside other closures,
     // the closed over locals need to be propagated to the enclosing objx
     public final ObjMethod parent;
+    boolean hasRecur;
+    boolean hasException;
     // localbinding->localbinding
     IPersistentMap locals = null;
     // num->localbinding
@@ -6155,10 +6203,14 @@ public class Compiler implements Opcodes {
       emitSource("public " + printClass(getReturnType()) + " "
           + getMethodName() + "(" + params + ") {");
       tab();
-      emitSource("try {");
-      tab();
-      emitSource("while(true) {");
-      tab();
+      if (hasException) {
+        emitSource("try {");
+        tab();
+      }
+      if (hasRecur) {
+        emitSource("while(true) {");
+        tab();
+      }
       GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC, m, null,
       // todo don't hardwire this
           EXCEPTION_TYPES, cv);
@@ -6186,14 +6238,18 @@ public class Compiler implements Opcodes {
       // gen.visitMaxs(1, 1);
       gen.endMethod();
 
-      untab();
-      emitSource("}");
-      untab();
-      emitSource("} catch (Exception ___e) {");
-      tab();
-      emitSource("throw Util.sneakyThrow(___e);");
-      untab();
-      emitSource("}");
+      if (hasRecur) {
+        untab();
+        emitSource("}");
+      }
+      if (hasException) {
+        untab();
+        emitSource("} catch (Exception ___e) {");
+        tab();
+        emitSource("throw Util.sneakyThrow(___e);");
+        untab();
+        emitSource("}");
+      }
 
       untab();
       emitSource("}");
@@ -6634,6 +6690,7 @@ public class Compiler implements Opcodes {
               RT.list(RT.list(FNONCE, PersistentVector.EMPTY, form)));
 
         ObjMethod method = (ObjMethod) METHOD.deref();
+        boolean methodHasRecur = method.hasRecur;
         IPersistentMap backupMethodLocals = method.locals;
         IPersistentMap backupMethodIndexLocals = method.indexlocals;
         IPersistentVector recurMismatches = PersistentVector.EMPTY;
@@ -6719,6 +6776,10 @@ public class Compiler implements Opcodes {
             if (!moreMismatches)
               return new LetExpr(bindingInits, bodyExpr, isLoop);
           } finally {
+            if (isLoop) {
+              // Loop doesn't affect hasRecur
+              method.hasRecur = methodHasRecur;
+            }
             Var.popThreadBindings();
           }
         }
@@ -6982,6 +7043,10 @@ public class Compiler implements Opcodes {
               "Can only recur from tail position");
         if (NO_RECUR.deref() != null)
           throw new UnsupportedOperationException("Cannot recur across try");
+
+        ObjMethod objmethod = (ObjMethod) METHOD.deref();
+        objmethod.hasRecur = true;
+
         PersistentVector args = PersistentVector.EMPTY;
         for (ISeq s = RT.seq(form.next()); s != null; s = s.next()) {
           args = args.cons(analyze(C.EXPRESSION, s.first()));
@@ -7763,7 +7828,7 @@ public class Compiler implements Opcodes {
     String genPath = (String) Compiler.SOURCE_GEN_PATH.deref();
     if (genPath == null) {
       genPath = "target/gen";
-      //throw Util.runtimeException("*source-path* not set");
+      // throw Util.runtimeException("*source-path* not set");
     }
     String[] dirs = internalName.split("/");
     String path = genPath + File.separator + internalName + ".java";
@@ -8848,10 +8913,14 @@ public class Compiler implements Opcodes {
           + (exclasses.length > 0 ? "throws " + exs.toString() : "") + " {");
       tab();
 
-      emitSource("try {");
-      tab();
-      emitSource("while(true) {");
-      tab();
+      if (hasException) {
+        emitSource("try {");
+        tab();
+      }
+      if (hasRecur) {
+        emitSource("while(true) {");
+        tab();
+      }
 
       for (int i = 0; i < parms.count(); i++) {
         IPersistentMap meta = RT.meta(parms.nth(i));
@@ -8887,14 +8956,18 @@ public class Compiler implements Opcodes {
       // gen.visitMaxs(1, 1);
       gen.endMethod();
 
-      untab();
-      emitSource("}");
-      untab();
-      emitSource("} catch (Exception ___e) {");
-      tab();
-      emitSource("throw Util.sneakyThrow(___e);");
-      untab();
-      emitSource("}");
+      if (hasRecur) {
+        untab();
+        emitSource("}");
+      }
+      if (hasException) {
+        untab();
+        emitSource("} catch (Exception ___e) {");
+        tab();
+        emitSource("throw Util.sneakyThrow(___e);");
+        untab();
+        emitSource("}");
+      }
       untab();
       emitSource("}");
     }
