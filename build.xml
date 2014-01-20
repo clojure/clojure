@@ -46,6 +46,7 @@
 			<!-- <sysproperty key="clojure.compile.warn-on-reflection" value="true"/> -->
 			<arg value="clojure.core" />
 			<arg value="clojure.core.protocols" />
+			<arg value="clojure.core.reducers"/>
 			<arg value="clojure.main" />
 			<arg value="clojure.set" />
 			<arg value="clojure.edn" />

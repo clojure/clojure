@@ -48,12 +48,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.codehaus.jsr166-mirror</groupId>
-			<artifactId>jsr166y</artifactId>
-			<version>1.7.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.clojure</groupId>
 			<artifactId>test.generative</artifactId>
 			<version>0.5.0</version>
@@ -64,16 +58,6 @@
 					<artifactId>clojure</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>galdolber</groupId>
-			<artifactId>j2objc</artifactId>
-			<version>0.8.9</version>
-		</dependency>
-		<dependency>
-			<groupId>galdolber</groupId>
-			<artifactId>j2objc_annotations</artifactId>
-			<version>0.8</version>
 		</dependency>
 	</dependencies>
 
