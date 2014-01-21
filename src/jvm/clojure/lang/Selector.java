@@ -6,6 +6,7 @@ package clojure.lang;
 #import "java/lang/Boolean.h"
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
  ]-*/
 
 public class Selector extends RestFn implements Named {
