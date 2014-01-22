@@ -304,11 +304,6 @@ public class RT {
 
   static public final Object[] EMPTY_ARRAY = new Object[] {};
   static public final Comparator DEFAULT_COMPARATOR = new DefaultComparator();
-  public static boolean ios = false;
-
-  public static void setiOS() {
-    ios = true;
-  }
 
   private static final class DefaultComparator implements Comparator,
       Serializable {
@@ -379,7 +374,7 @@ public class RT {
 
   private static void doInit() {
     try {
-      if (!ios) {
+      if (!ObjC.objc) {
         RT.load("clojure/core");
         Var.pushThreadBindings(RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
             WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref(), RT.UNCHECKED_MATH,
@@ -506,7 +501,7 @@ public class RT {
 
   static public void load(String scriptbase, boolean failIfNotFound)
       throws IOException, ClassNotFoundException {
-    if (ios) {
+    if (ObjC.objc) {
       loadiOS(scriptbase);
     } else {
       String classfile = scriptbase + LOADER_SUFFIX + ".class";

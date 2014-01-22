@@ -82,7 +82,7 @@ public class MultiFn extends AFn {
     try {
       // TODO: allow this in ios? 
       // This is very slow in objc runtime
-      if (!RT.ios && prefers(dispatchValY, dispatchValX))
+      if (!ObjC.objc && prefers(dispatchValY, dispatchValX))
         throw new IllegalStateException(
             String
                 .format(

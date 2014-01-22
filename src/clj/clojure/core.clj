@@ -3859,7 +3859,7 @@
   clashes. Use :use in the ns macro in preference to calling this directly."
   {:added "1.0"}
   [ns-sym & filters]
-  (when-not clojure.lang.RT/ios
+  (when-not clojure.lang.ObjC/objc
     (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))
           fs (apply hash-map filters)
           nspublics (ns-publics ns)
@@ -7003,7 +7003,7 @@
   (clojure.lang.Selector. s))
 
 (defn objc-class [s]
-  (if RT/ios
+  (if clojure.lang.ObjC/objc
     (RT/objcClass (name s))
     (println "Warning. objc-class always returns nil on the jvm")))
 
