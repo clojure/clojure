@@ -3844,17 +3844,25 @@ static public class FnExpr extends ObjExpr{
 //			fn.superName = (String) RT.get(RT.meta(form.first()), Keyword.intern(null, "super-name"));
 			}
 		//fn.thisName = name;
-		String basename = enclosingMethod != null ?
-		                  (enclosingMethod.objx.name + "$")
-		                                          : //"clojure.fns." +
-		                  (munge(currentNS().name.name) + "$");
-		if(RT.second(form) instanceof Symbol)
-			name = ((Symbol) RT.second(form)).name;
-		String simpleName = name != null ?
-		                    (munge(name).replace(".", "_DOT_")
-		                    + (enclosingMethod != null ? "__" + RT.nextID() : ""))
-		                    : ("fn"
-		                      + "__" + RT.nextID());
+
+		String basename = (enclosingMethod != null ?
+		                  enclosingMethod.objx.name
+		                  : (munge(currentNS().name.name))) + "$";
+
+		Symbol nm = null;
+
+		if(RT.second(form) instanceof Symbol) {
+			nm = (Symbol) RT.second(form);
+			name = nm.name + "__" + RT.nextID();
+		} else {
+			if(name == null)
+				name = "fn__" + RT.nextID();
+			else if (enclosingMethod != null)
+				name += "__" + RT.nextID();
+		}
+
+		String simpleName = munge(name).replace(".", "_DOT_");
+
 		fn.name = basename + simpleName;
 		fn.internalName = fn.name.replace('.', '/');
 		fn.objtype = Type.getObjectType(fn.internalName);
@@ -3873,9 +3881,8 @@ static public class FnExpr extends ObjExpr{
 					));
 
 			//arglist might be preceded by symbol naming this fn
-			if(RT.second(form) instanceof Symbol)
+			if(nm != null)
 				{
-				Symbol nm = (Symbol) RT.second(form);
 				fn.thisName = nm.name;
 				fn.isStatic = false; //RT.booleanCast(RT.get(nm.meta(), staticKey));
 				form = RT.cons(FN, RT.next(RT.next(form)));
