@@ -1,3 +1,4 @@
+#mvn package -Dmaven.test.skip=true
 #rm -Rf target/objc
 #zip -r target/objc.jar target/gen
 #zip -r target/clj.jar src/jvm
@@ -16,13 +17,13 @@ cd ..
 echo building static lib...
 
 J2OBJC=/Users/admin/projects/j2objc
+OBJC=$(pwd)/objc
 IPHONEOS_SDK="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk"
 IPHONESIMULATOR_SDK="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk"
 FRAMEWORKS="-framework UIKit -framework Foundation"
 INCLUDES="-I$J2OBJC/dist/include -I$(pwd)/objc"
-OPTS="-fmodules -g -miphoneos-version-min=5.0 -DDEBUG=1 -fmessage-length=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -std=gnu99 -fpascal-strings -fobjc-abi-version=2 -fexceptions -fasm-blocks -fstrict-aliasing -fobjc-legacy-dispatch -MMD -MT dependencies -Wno-unsequenced"
-ALL_M_FILES=$(find $(pwd)/objc -name "*.m" | tr "\\n" " ")
-
+#-fmodules -fmodules-cache-path=/Users/admin/Library/Developer/Xcode/DerivedData/ModuleCache -fdiagnostics-show-note-include-stack -MMD
+OPTS="-miphoneos-version-min=5.0 -fmessage-length=0 -fmacro-backtrace-limit=0 -std=gnu99 -fpascal-strings -O0 -DDEBUG=1 -fstrict-aliasing -Wno-unsequenced -MT dependencies"
 function build {
 	NAME=$1
 	ARCH=$2
@@ -31,10 +32,10 @@ function build {
 	rm -Rf $NAME
 	mkdir $NAME
 	cd $NAME
-	clang -x objective-c $ARCH $OPTS $INCLUDES -c $ALL_M_FILES -isysroot $SDK -O0
-	find $(pwd) -name "*.o" | tr "\\n" "\n" > all.FileList 
+	find $OBJC -name "*.m" | while read file; do echo $NAME $(basename $file);clang -x objective-c $ARCH $OPTS -isysroot $SDK $INCLUDES -c $file -o $(uuidgen).o; done 
+	find $(pwd) -name "*.o" | tr "\\n" "\n" > $NAME.LinkFileList 
 	echo "linking $NAME..."
-	libtool -static -syslibroot $SDK -filelist all.FileList $FRAMEWORKS -o libclojure-objc.a
+	libtool -static -syslibroot $SDK -filelist $NAME.LinkFileList $FRAMEWORKS -o libclojure-objc.a
 	cd .. 
 }
 
