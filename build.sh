@@ -1,9 +1,9 @@
-#mvn package -Dmaven.test.skip=true
-#rm -Rf target/objc
-#zip -r target/objc.jar target/gen
-#zip -r target/clj.jar src/jvm
-#j2objc -d target/objc -classpath target/classes:target/test-classes target/objc.jar test/java/java/net/*
-#j2objc -d target/objc -classpath target/classes target/clj.jar
+mvn package -Dmaven.test.skip=true
+rm -Rf target/objc
+zip -r target/objc.jar target/gen
+j2objc -d target/objc -classpath target/classes:target/test-classes target/objc.jar test/java/java/net/*
+zip -r target/clj.jar src/jvm
+j2objc -d target/objc -classpath target/classes target/clj.jar
 
 if [ ! -d "target/headers" ]; then
 	mkdir target/headers
