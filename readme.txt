@@ -7,6 +7,40 @@
  * 	 the terms of this license.
  *   You must not remove this notice, or any other, from this software.
 
+--------------------------------------------------------------------------
+==clojure-objc==
+
+WARNING! THIS IS AN ALPHA RELEASE
+
+clojure-objc is a hacked version of clojure-jvm that generates java code on top of the jvm bytecode.
+The generated java sources are intended to be translated to objc using j2objc(https://code.google.com/p/j2objc/).
+The runtime sourcebase is also modified to use only j2objc's jre emulated classes(https://code.google.com/p/j2objc/wiki/JreEmulation).
+
+clojure.core and the runtime have a few tweaks to work faster on the objc runtime. But everything works with no modifications.
+
+Goals
+ * Write iOS and MacOS apps in clojure
+ * Future proof: new features on clojure should be easy to add 
+ * Distribute clojure-objc libs using maven
+ * Pure clojure libs should 'just work' (if they only use the jre emulated classes)
+ * ObjC dynamic interop
+ * Run tests in the jvm (with no ObjC interop)
+ 
+ What doesn't work (yet)
+ * no repl in the objc runtime
+ * no objc subclassing
+ * no c interop
+ * clojure.core/bean: missing the emulated jre support
+ * clojure.core/case: hashCode in java and hash in objc are different, you can use case but condp will be used instead
+ * all java.net (slurp, reader from url, etc.): https://code.google.com/p/j2objc/issues/detail?id=28 (you can always use objc interop for this)
+ * many tests fail because NullPointerException is emulated in objc by j2objc, and not perfectly. Don't rely on NullPointerException
+ * same applies for ClassCastException
+ 
+ Dependency
+ [galdolber/clojure-objc "1.5.1"]
+
+--------------------------------------------------------------------------
+
 Docs: http://clojure.org
 Feedback: http://groups.google.com/group/clojure
 Getting Started: http://dev.clojure.org/display/doc/Getting+Started
