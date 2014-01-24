@@ -46,6 +46,9 @@ Goals
  
  Where to start
  https://github.com/galdolber/lein-objcbuild
+ 
+ How to build clojure-objc fat static lib
+ ./build.sh # (this takes a lot of time)
 
 --------------------------------------------------------------------------
 
