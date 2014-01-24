@@ -22,7 +22,6 @@ IPHONEOS_SDK="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.plat
 IPHONESIMULATOR_SDK="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk"
 FRAMEWORKS="-framework UIKit -framework Foundation"
 INCLUDES="-I$J2OBJC/dist/include -I$(pwd)/objc"
-#-fmodules -fmodules-cache-path=/Users/admin/Library/Developer/Xcode/DerivedData/ModuleCache -fdiagnostics-show-note-include-stack -MMD
 OPTS="-miphoneos-version-min=5.0 -fmessage-length=0 -fmacro-backtrace-limit=0 -std=gnu99 -fpascal-strings -O0 -DDEBUG=1 -fstrict-aliasing -Wno-unsequenced -MT dependencies"
 function build {
 	NAME=$1
