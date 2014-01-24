@@ -18,6 +18,9 @@ The runtime sourcebase is also modified to use only j2objc's jre emulated classe
 
 clojure.core and the runtime have a few tweaks to work faster on the objc runtime. But everything works with no modifications.
 
+Download version 1.5.1
+  https://docs.google.com/file/d/0B34oZK3UpQoleG93Q0JvS2oybXc/edit
+
 Goals
  * Write iOS and MacOS apps in clojure
  * Future proof: new features on clojure should be easy to add 
@@ -36,10 +39,13 @@ Goals
  * many tests fail because NullPointerException is emulated in objc by j2objc, and not perfectly. Don't rely on NullPointerException
  * same applies for ClassCastException
  
+ Discuss
+ https://groups.google.com/d/forum/clojure-objc-discuss
+ 
  Dependency
  [galdolber/clojure-objc "1.5.1"]
  
- Where to start:
+ Where to start
  https://github.com/galdolber/lein-objcbuild
 
 --------------------------------------------------------------------------
