@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>galdolber</groupId>
 	<artifactId>clojure-objc</artifactId>
-	<name>clojure</name>
+	<name>clojure-objc</name>
 	<packaging>jar</packaging>
 	<version>1.5.1</version>
 
@@ -32,12 +32,6 @@
 		<artifactId>oss-parent</artifactId>
 		<version>7</version>
 	</parent>
-
-	<scm>
-		<connection>scm:git:git@github.com:clojure/clojure.git</connection>
-		<developerConnection>scm:git:git@github.com:clojure/clojure.git</developerConnection>
-		<url>git@github.com:clojure/clojure.git</url>
-	</scm>
 
 	<repositories>
 		<repository>
