@@ -38,6 +38,9 @@ Goals
  
  Dependency
  [galdolber/clojure-objc "1.5.1"]
+ 
+ Where to start:
+ https://github.com/galdolber/lein-objcbuild
 
 --------------------------------------------------------------------------
 
