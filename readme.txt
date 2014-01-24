@@ -29,7 +29,7 @@ Goals
  * Run tests in the jvm (with no ObjC interop)
  
  Memory management
- All generated code managed memory automagically, but if you alloc with interop you need to release!
+ All generated code manage memory automagically, but if you alloc with interop you need to release!
  
  What doesn't work (yet)
  * no repl in the objc runtime
