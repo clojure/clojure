@@ -19,11 +19,11 @@ Download version 1.5.1
  * ObjC dynamic interop
  * Run tests in the jvm (with no ObjC interop)
  
- ## Memory management
+## Memory management
  
  All generated code manage memory automagically, but if you alloc with interop you need to release!
  
- ## What doesn't work (yet)
+## What doesn't work (yet)
  
  * no repl in the objc runtime
  * no objc subclassing
@@ -34,19 +34,19 @@ Download version 1.5.1
  * many tests fail because NullPointerException is emulated in objc by j2objc, and not perfectly. Don't rely on NullPointerException
  * same applies for ClassCastException
  
- ## Discuss
+## Discuss
  
  https://groups.google.com/d/forum/clojure-objc-discuss
  
- ## Dependency
+## Dependency
  
 [galdolber/clojure-objc "1.5.1"]
  
- ## Where to start
+## Where to start
  
  https://github.com/galdolber/lein-objcbuild
  
- ## How to build dist
+## How to build dist
  
  ./build.sh # (this takes a lot of time)
 
