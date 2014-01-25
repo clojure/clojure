@@ -7,11 +7,13 @@ The runtime sourcebase is also modified to use only j2objc's jre emulated classe
 
 clojure.core and the runtime have a few tweaks to work faster on the objc runtime. But everything works with no modifications.
 
-## Download clojure-objc 1.5.1
+## Download
+
+### Download clojure-objc 1.5.1
   
   https://docs.google.com/file/d/0B34oZK3UpQoleG93Q0JvS2oybXc/edit
   
-## Download j2objc 0.8.8 with arm64 support (not available in official site)
+### Download j2objc 0.8.8 with arm64 support (not available in official site)
 
   https://docs.google.com/file/d/0B34oZK3UpQolb1UzcGt5cFcxbXM/edit
 
