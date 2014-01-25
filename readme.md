@@ -31,11 +31,11 @@ clojure.core and the runtime have a few tweaks to work faster on the objc runtim
 
     (defn say-hi [name]
       ($ ($ ($ ($ UIAlertView) :alloc)
-        :initWithTitle (str "Hello " name)
-        :message "Hi! from clojure"
-        :delegate nil
-        :cancelButtonTitle "Cancelar"
-        :otherButtonTitles nil) :show))
+            :initWithTitle (str "Hello " name)
+            :message "Hi! from clojure"
+            :delegate nil
+            :cancelButtonTitle "Cancelar"
+            :otherButtonTitles nil) :show))
 
 ## What doesn't work (yet)
  
