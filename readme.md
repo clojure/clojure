@@ -2,13 +2,13 @@
 
 WARNING! THIS IS AN ALPHA RELEASE
 
-## Download version 1.5.1
-  https://docs.google.com/file/d/0B34oZK3UpQoleG93Q0JvS2oybXc/edit
-
 clojure-objc is a clojure compiler that generates java(instead of bytecode) and uses j2objc(https://code.google.com/p/j2objc/) to translate it to objc.
 The runtime sourcebase is also modified to use only j2objc's jre emulated classes(https://code.google.com/p/j2objc/wiki/JreEmulation).
 
 clojure.core and the runtime have a few tweaks to work faster on the objc runtime. But everything works with no modifications.
+
+## Download version 1.5.1
+  https://docs.google.com/file/d/0B34oZK3UpQoleG93Q0JvS2oybXc/edit
 
 ## Where to start
  
