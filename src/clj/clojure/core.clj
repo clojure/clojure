@@ -6083,17 +6083,18 @@
   post-switch equivalence checking must not be done (occurs with hash
   collisions)."
   [expr-sym default tests thens]
-  (let [hashes (into1 #{} (map hash tests))]
+  (let [hashcode #(clojure.lang.Util/hash %)
+        hashes (into1 #{} (map hashcode tests))]
     (if (== (count tests) (count hashes))
       (if (fits-table? hashes)
         ; compact case ints, no shift-mask
-        [0 0 (case-map hash identity tests thens) :compact]
+        [0 0 (case-map hashcode identity tests thens) :compact]
         (let [[shift mask] (or (maybe-min-hash hashes) [0 0])]
           (if (zero? mask)
             ; sparse case ints, no shift-mask
-            [0 0 (case-map hash identity tests thens) :sparse]
+            [0 0 (case-map hashcode identity tests thens) :sparse]
             ; compact case ints, with shift-mask
-            [shift mask (case-map #(shift-mask shift mask (hash %)) identity tests thens) :compact])))
+            [shift mask (case-map #(shift-mask shift mask (hashcode %)) identity tests thens) :compact])))
       ; resolve hash collisions and try again
       (let [[tests thens skip-check] (merge-hash-collisions expr-sym default tests thens)
             [shift mask case-map switch-type] (prep-hashes expr-sym default tests thens)
