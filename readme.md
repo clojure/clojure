@@ -9,9 +9,9 @@ clojure.core and the runtime have a few tweaks to work faster on the objc runtim
 
 ## Download
 
-### Download clojure-objc 1.5.1
+### Download clojure-objc 1.5.1.1
   
-  https://docs.google.com/file/d/0B34oZK3UpQoleG93Q0JvS2oybXc/edit
+  https://www.dropbox.com/s/0p352y3ccw7m43i/clojure-objc-1.5.1.1.zip
   
 ### Download j2objc 0.8.8 with arm64 support (not available in official site)
 
