@@ -5,13 +5,13 @@ j2objc -d target/objc -classpath target/classes:target/test-classes target/objc.
 zip -r target/clj.jar src/jvm
 j2objc -d target/objc -classpath target/classes target/clj.jar
 
-if [ ! -d "target/headers" ]; then
-	mkdir target/headers
+if [ ! -d "target/include" ]; then
+	mkdir target/include
 fi
 
 echo exporting headers...
 cd target/objc
-rsync -avm --delete --include='*.h' -f 'hide,! */' . ../headers > /dev/null
+rsync -avm --delete --include='*.h' -f 'hide,! */' . ../include > /dev/null
 cd ..
 
 echo building static lib...
