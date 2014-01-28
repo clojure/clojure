@@ -48,7 +48,7 @@ clojure.core and the runtime have a few tweaks to work faster on the objc runtim
             :cancelButtonTitle "Cancelar"
             :otherButtonTitles nil) :show))
             
-## nsproxy <EXPERIMENTAL>
+## nsproxy EXPERIMENTAL!
     
     nsproxy doesn't require a base class.
     
