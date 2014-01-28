@@ -50,7 +50,7 @@ clojure.core and the runtime have a few tweaks to work faster on the objc runtim
             
 ## nsproxy <EXPERIMENTAL>
     
-    nsproxy doesn't require a base class. But you specify to signature for each method.
+    nsproxy doesn't require a base class.
     
     ; If you need a UITextFieldDelegate
     (nsproxy
