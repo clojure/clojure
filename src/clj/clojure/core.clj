@@ -7003,9 +7003,7 @@
   (clojure.lang.Selector. s))
 
 (defn objc-class [s]
-  (if clojure.lang.ObjC/objc
-    (RT/objcClass (name s))
-    (println "Warning. objc-class always returns nil on the jvm")))
+  (RT/objcClass (name s)))
 
 (defmacro $ [& args]
   (let [is-class (= 1 (count args))
@@ -7020,3 +7018,21 @@
         (if has-params
           `((clojure.lang.Selector. ~selector) ~t ~@params)
           `((clojure.lang.Selector. ~selector) ~t))))))
+
+(defmacro nsproxy [& methods]
+  (let [has-class (not (list? (first methods)))
+        clazz (when has-class (name (first methods)))
+        methods (if has-class (next methods) methods)
+        i (map (fn [[[ret & args] & body]]
+                 (let [ret (.replaceAll (name ret) "-" " ")
+                       types (map #(.replaceAll (name %) "-" " ") (take-nth 3 (next args)))
+                       sel (take-nth 3 args)
+                       fields (take-nth 3 (next (next args)))
+                       sel (if (pos? (count fields))
+                             (reduce str (map #(str (name %) ":") sel))
+                             (reduce str (map name sel)))]
+                   `[~sel [[~ret ~@types] (fn [~@fields] ~@body)]]))
+               methods)
+        i (into {} i)]
+    `($ ($ ($ NSProxyImpl) :alloc) :initWithClass ~clazz :map
+        ~i)))

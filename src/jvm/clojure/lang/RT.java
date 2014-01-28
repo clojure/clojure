@@ -397,7 +397,15 @@ public class RT {
     }
   }
 
-  static public native Object objcClass(String name) /*-[
+  static public Object objcClass(String name) {
+    if (ObjC.objc) {
+      return nativeObjcClass(name);
+    } else {
+      return null;
+    }
+  }
+  
+  static public native Object nativeObjcClass(String name) /*-[
                                                      return NSClassFromString(name);
                                                      ]-*/;
 

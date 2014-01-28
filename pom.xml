@@ -6,7 +6,7 @@
 	<artifactId>clojure-objc</artifactId>
 	<name>clojure-objc</name>
 	<packaging>jar</packaging>
-	<version>1.5.1</version>
+	<version>1.5.1-1</version>
 
 	<url>http://clojure.org/</url>
 	<description>Clojure core environment and runtime library.</description>

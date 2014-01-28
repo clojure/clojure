@@ -37,7 +37,7 @@ public class Selector extends RestFn implements Named {
   @Override
   protected Object doInvoke(Object o, Object args) {
     if (!ObjC.objc) {
-      System.out.println("Warning! objc selectors always return nil on the jvm");
+      // System.out.println("Warning! objc selectors always return nil on the jvm");
       return null;
     } else {
       String sel = this.sel;
@@ -51,8 +51,7 @@ public class Selector extends RestFn implements Named {
   public native Object invokeObjc(Object object, String selector,
       ISeq arguments) /*-[
     SEL selector_ = NSSelectorFromString(selector);
-    BOOL isClass = class_isMetaClass(object_getClass(object));
-    NSMethodSignature *methodSignature_ = isClass ? [object methodSignatureForSelector:selector_] : [[object class] instanceMethodSignatureForSelector:selector_];
+    NSMethodSignature *methodSignature_ = [object methodSignatureForSelector:selector_];
     if (methodSignature_ == nil) {
         @throw([NSException exceptionWithName:@"Error invoking objc method. Selector not found" reason:selector userInfo:nil]);
     }
@@ -95,8 +94,12 @@ skipArgModifiers:
                         break;
                     }
                     case 'c': {
-                        
-                        char i = [((JavaLangCharacter*) val) charValue];
+                        char i;
+                        if ([val isKindOfClass: [JavaLangBoolean class]]) {
+                            i = [(JavaLangBoolean*) val booleanValue];
+                        } else {
+                            i = [((JavaLangCharacter*) val) charValue];
+                        }
                         [invocation setArgument:&i atIndex:n];
                         break;
                     }
