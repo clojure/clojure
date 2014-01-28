@@ -15,7 +15,7 @@ clojure.core and the runtime have a few tweaks to work faster on the objc runtim
   
 ## Dependency
  
-[galdolber/clojure-objc "1.5.1-1"]
+    [galdolber/clojure-objc "1.5.1-1"]
   
 ### Download j2objc 0.8.8 with arm64 support (not available in official site)
 
