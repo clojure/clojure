@@ -17,131 +17,131 @@ import java.io.Serializable;
 
 public class Symbol extends AFn implements IObj, Comparable, Named,
     Serializable, IHashEq {
-  // these must be interned strings!
-  final String ns;
-  final String name;
-  final int hash;
-  final IPersistentMap _meta;
-  String _str;
+// these must be interned strings!
+final String ns;
+final String name;
+final int hash;
+final IPersistentMap _meta;
+String _str;
 
-  public String toString() {
-    if (_str == null) {
-      if (ns != null)
-        _str = (ns + "/" + name).intern();
-      else
-        _str = name;
-    }
-    return _str;
-  }
-
-  public String getNamespace() {
-    return ns;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  // the create thunks preserve binary compatibility with code compiled
-  // against earlier version of Clojure and can be removed (at some point).
-  static public Symbol create(String ns, String name) {
-    return Symbol.intern(ns, name);
-  }
-
-  static public Symbol create(String nsname) {
-    return Symbol.intern(nsname);
-  }
-
-  static public Symbol intern(String ns, String name) {
-    return new Symbol(ns == null ? null : ns.intern(), name.intern());
-  }
-
-  static public Symbol intern(String nsname) {
-    int i = nsname.indexOf('/');
-    if (i == -1 || nsname.equals("/"))
-      return new Symbol(null, nsname.intern());
+public String toString() {
+  if (_str == null) {
+    if (ns != null)
+      _str = (ns + "/" + name).intern();
     else
-      return new Symbol(nsname.substring(0, i).intern(), nsname
-          .substring(i + 1).intern());
+      _str = name;
   }
+  return _str;
+}
 
-  private Symbol(String ns_interned, String name_interned) {
-    this.name = name_interned;
-    this.ns = ns_interned;
-    this.hash = Util.hashCombine(name.hashCode(), Util.hash(ns));
-    this._meta = null;
-  }
+public String getNamespace() {
+  return ns;
+}
 
-  public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (!(o instanceof Symbol))
-      return false;
+public String getName() {
+  return name;
+}
 
-    Symbol symbol = (Symbol) o;
+// the create thunks preserve binary compatibility with code compiled
+// against earlier version of Clojure and can be removed (at some point).
+static public Symbol create(String ns, String name) {
+  return Symbol.intern(ns, name);
+}
 
-    // identity compares intended, names are interned
-    boolean r = name == symbol.name && ns == symbol.ns;
-    // fix for objc
-    if (!r) {
-      if (ns == null) {
-        return name.equals(symbol.name);
-      }else {
-        return name.equals(symbol.name) && ns.equals(symbol.name);
-      }
+static public Symbol create(String nsname) {
+  return Symbol.intern(nsname);
+}
+
+static public Symbol intern(String ns, String name){
+	return new Symbol(ns == null ? null : ns.intern(), name.intern());
+}
+
+static public Symbol intern(String nsname){
+	int i = nsname.indexOf('/');
+	if(i == -1 || nsname.equals("/"))
+		return new Symbol(null, nsname.intern());
+	else
+		return new Symbol(nsname.substring(0, i).intern(), nsname.substring(i + 1).intern());
+}
+
+private Symbol(String ns_interned, String name_interned){
+	this.name = name_interned;
+	this.ns = ns_interned;
+	this.hash = Util.hashCombine(Util.hasheq(name),Util.hasheq(ns));
+	this._meta = null;
+}
+
+public boolean equals(Object o) {
+  if (this == o)
+    return true;
+  if (!(o instanceof Symbol))
+    return false;
+
+  Symbol symbol = (Symbol) o;
+
+  // identity compares intended, names are interned
+  boolean r = name == symbol.name && ns == symbol.ns;
+  // fix for objc
+  if (!r) {
+    if (ns == null) {
+      return name.equals(symbol.name);
     } else {
-      return r;
+      return name.equals(symbol.name) && ns.equals(symbol.name);
     }
+  } else {
+    return r;
   }
+}
 
-  public int hashCode() {
-    return hash;
-  }
+public int hashCode(){
+	return hash;
+}
 
-  public int hasheq() {
-    return hash;
-  }
+public int hasheq() {
+	return hash;
+}
 
-  public IObj withMeta(IPersistentMap meta) {
-    return new Symbol(meta, ns, name);
-  }
+public IObj withMeta(IPersistentMap meta){
+	return new Symbol(meta, ns, name);
+}
 
-  private Symbol(IPersistentMap meta, String ns, String name) {
-    this.name = name;
-    this.ns = ns;
-    this._meta = meta;
-    this.hash = Util.hashCombine(name.hashCode(), Util.hash(ns));
-  }
+private Symbol(IPersistentMap meta, String ns, String name){
+	this.name = name;
+	this.ns = ns;
+	this._meta = meta;
+	this.hash = Util.hashCombine(Util.hasheq(name),Util.hasheq(ns));
+}
 
-  public int compareTo(Object o) {
-    Symbol s = (Symbol) o;
-    if (this.equals(o))
-      return 0;
-    if (this.ns == null && s.ns != null)
-      return -1;
-    if (this.ns != null) {
-      if (s.ns == null)
-        return 1;
-      int nsc = this.ns.compareTo(s.ns);
-      if (nsc != 0)
-        return nsc;
-    }
-    return this.name.compareTo(s.name);
-  }
+public int compareTo(Object o){
+	Symbol s = (Symbol) o;
+	if(this.equals(o))
+		return 0;
+	if(this.ns == null && s.ns != null)
+		return -1;
+	if(this.ns != null)
+		{
+		if(s.ns == null)
+			return 1;
+		int nsc = this.ns.compareTo(s.ns);
+		if(nsc != 0)
+			return nsc;
+		}
+	return this.name.compareTo(s.name);
+}
 
-  private Object readResolve() throws ObjectStreamException {
-    return intern(ns, name);
-  }
+private Object readResolve() throws ObjectStreamException{
+	return intern(ns, name);
+}
 
-  public Object invoke(Object obj) {
-    return RT.get(obj, this);
-  }
+public Object invoke(Object obj) {
+	return RT.get(obj, this);
+}
 
-  public Object invoke(Object obj, Object notFound) {
-    return RT.get(obj, this, notFound);
-  }
+public Object invoke(Object obj, Object notFound) {
+	return RT.get(obj, this, notFound);
+}
 
-  public IPersistentMap meta() {
-    return _meta;
-  }
+public IPersistentMap meta(){
+	return _meta;
+}
 }

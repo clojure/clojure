@@ -27,49 +27,84 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package clojure.asm;
 
 /**
- * An edge in the control flow graph of a method body. See {@link Label Label}.
+ * Information about a class being parsed in a {@link ClassReader}.
  *
  * @author Eric Bruneton
  */
-class Edge {
+class Context {
 
     /**
-     * Denotes a normal control flow graph edge.
+     * Prototypes of the attributes that must be parsed for this class.
      */
-    static final int NORMAL = 0;
+    Attribute[] attrs;
 
     /**
-     * Denotes a control flow graph edge corresponding to an exception handler.
-     * More precisely any {@link Edge} whose {@link #info} is strictly positive
-     * corresponds to an exception handler. The actual value of {@link #info} is
-     * the index, in the {@link ClassWriter} type table, of the exception that
-     * is catched.
+     * The {@link ClassReader} option flags for the parsing of this class.
      */
-    static final int EXCEPTION = 0x7FFFFFFF;
+    int flags;
 
     /**
-     * Information about this control flow graph edge. If
-     * {@link ClassWriter#COMPUTE_MAXS} is used this field is the (relative)
-     * stack size in the basic block from which this edge originates. This size
-     * is equal to the stack size at the "jump" instruction to which this edge
-     * corresponds, relatively to the stack size at the beginning of the
-     * originating basic block. If {@link ClassWriter#COMPUTE_FRAMES} is used,
-     * this field is the kind of this control flow graph edge (i.e. NORMAL or
-     * EXCEPTION).
+     * The buffer used to read strings.
      */
-    int info;
+    char[] buffer;
 
     /**
-     * The successor block of the basic block from which this edge originates.
+     * The start index of each bootstrap method.
      */
-    Label successor;
+    int[] bootstrapMethods;
 
     /**
-     * The next edge in the list of successors of the originating basic block.
-     * See {@link Label#successors successors}.
+     * The access flags of the method currently being parsed.
      */
-    Edge next;
+    int access;
+
+    /**
+     * The name of the method currently being parsed.
+     */
+    String name;
+
+    /**
+     * The descriptor of the method currently being parsed.
+     */
+    String desc;
+
+    /**
+     * The offset of the latest stack map frame that has been parsed.
+     */
+    int offset;
+
+    /**
+     * The encoding of the latest stack map frame that has been parsed.
+     */
+    int mode;
+
+    /**
+     * The number of locals in the latest stack map frame that has been parsed.
+     */
+    int localCount;
+
+    /**
+     * The number locals in the latest stack map frame that has been parsed,
+     * minus the number of locals in the previous frame.
+     */
+    int localDiff;
+
+    /**
+     * The local values of the latest stack map frame that has been parsed.
+     */
+    Object[] local;
+
+    /**
+     * The stack size of the latest stack map frame that has been parsed.
+     */
+    int stackCount;
+
+    /**
+     * The stack values of the latest stack map frame that has been parsed.
+     */
+    Object[] stack;
 }

@@ -27,3 +27,14 @@
   ;; regression fixed in r1218; was OutOfMemoryError
   (is (= '(1) (pmap inc [0]))))
 
+
+(def ^:dynamic *test-value* 1)
+
+(deftest future-fn-properly-retains-conveyed-bindings
+  (let [a (atom [])]
+    (binding [*test-value* 2]
+      @(future (dotimes [_ 3]
+                 ;; we need some binding to trigger binding pop
+                 (binding [*print-dup* false]
+                   (swap! a conj *test-value*))))
+      (is (= [2 2 2] @a)))))

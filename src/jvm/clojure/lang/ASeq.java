@@ -77,12 +77,13 @@ public int hashCode(){
 public int hasheq(){
 	if(_hasheq == -1)
 		{
-		int hash = 1;
-		for(ISeq s = seq(); s != null; s = s.next())
-			{
-			hash = 31 * hash + Util.hasheq(s.first());
-			}
-		this._hasheq = hash;
+//		int hash = 1;
+//		for(ISeq s = seq(); s != null; s = s.next())
+//			{
+//			hash = 31 * hash + Util.hasheq(s.first());
+//			}
+//		this._hasheq = hash;
+		_hasheq  = Murmur3.hashOrdered(this);
 		}
 	return _hasheq;
 }

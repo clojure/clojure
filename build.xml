@@ -46,7 +46,7 @@
 			<!-- <sysproperty key="clojure.compile.warn-on-reflection" value="true"/> -->
 			<arg value="clojure.core" />
 			<arg value="clojure.core.protocols" />
-			<arg value="clojure.core.reducers"/>
+			<arg value="clojure.core.reducers" />
 			<arg value="clojure.main" />
 			<arg value="clojure.set" />
 			<arg value="clojure.edn" />
@@ -79,9 +79,7 @@
 			<sysproperty key="clojure.compile.path" value="${test-classes}" />
 			<!--<sysproperty key="clojure.compiler.elide-meta" value="[:doc]"/>-->
 			<!--<sysproperty key="clojure.compiler.disable-locals-clearing" value="true"/>-->
-			<!--arg value="clojure.main" /-->
-			<!-- No ForkJoin emulation yet -->
-			<!--arg value="clojure.test-clojure.reducers" /-->
+			<arg value="clojure.main" />
 
 			<!--arg value="clojure.test-clojure.reflect" /-->
 			<!--arg value="clojure.test-clojure.genclass" /-->
@@ -94,8 +92,9 @@
 			<!--arg value="clojure.test-clojure.errors" /-->
 			<!--arg value="clojure.test-clojure.evaluation" /-->
 			<!--arg value="clojure.test-clojure.main" /-->
-			
-			<!--arg value="clojure.test-clojure.protocols.examples" />
+
+			<arg value="clojure.test-clojure.reducers" />
+			<arg value="clojure.test-clojure.protocols.examples" />
 			<arg value="clojure.test-clojure.genclass.examples" />
 			<arg value="clojure.test-clojure.annotations" />
 			<arg value="clojure.test-clojure.agents" />
@@ -137,7 +136,7 @@
 			<arg value="clojure.test-clojure.fn" />
 			<arg value="clojure.test-clojure.printer" />
 			<arg value="clojure.test-clojure.sequences" />
-			<arg value="clojure.test-clojure.for" /-->
+			<arg value="clojure.test-clojure.for" />
 		</java>
 	</target>
 
@@ -167,6 +166,21 @@
 			</manifest>
 		</jar>
 		<copy file="${clojure_jar}" tofile="${clojure_noversion_jar}" />
+	</target>
+
+	<target name="javadoc" description="Creates javadoc for Clojure API.">
+		<copy file="src/jvm/clojure/lang/IFn.java" tofile="target/tmpjd/IFn.java" />
+		<copy file="src/jvm/clojure/lang/package.html" tofile="target/tmpjd/package.html" />
+		<replaceregexp file="target/tmpjd/IFn.java" match="(static public interface .*})" replace="" byline="true" />
+		<javadoc destdir="target/javadoc" nodeprecatedlist="true" nohelp="true" nonavbar="true" notree="true" link="http://docs.oracle.com/javase/7/docs/api/" windowtitle="Clojure API">
+			<classpath>
+				<path location="${build}" />
+			</classpath>
+			<fileset dir="${basedir}">
+				<include name="src/jvm/clojure/java/api/Clojure.java" />
+				<include name="target/tmpjd/IFn.java" />
+			</fileset>
+		</javadoc>
 	</target>
 
 	<target name="all" depends="build,test,jar" />

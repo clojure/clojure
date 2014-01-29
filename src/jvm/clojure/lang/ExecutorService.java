@@ -54,7 +54,11 @@ public class ExecutorService implements Executor {
       if (done) {
         return r;          
       } else {
-        throw new InterruptedException();
+        try {
+          return get(1, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+          throw new InterruptedException();
+        }
       }
     }
 

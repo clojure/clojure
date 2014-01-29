@@ -8,14 +8,47 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-package clojure.api;
+package clojure.java.api;
 
 import clojure.lang.IFn;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 
-public class API {
-    private API() {}
+/**
+ * <p>The Clojure class provides a minimal interface to bootstrap Clojure access
+ * from other JVM languages. It provides:</p>
+ *
+ * <ol>
+ * <li>The ability to use Clojure's namespaces to locate an arbitrary
+ * <a href="http://clojure.org/vars">var</a>, returning the
+ * var's {@link clojure.lang.IFn} interface.</li>
+ * <li>A convenience method <code>read</code> for reading data using
+ * Clojure's edn reader</li>
+ * </ol>
+ *
+ * <p>To lookup and call a Clojure function:</p>
+ *
+ * <pre>
+ * IFn plus = Clojure.var("clojure.core", "+");
+ * plus.invoke(1, 2);</pre>
+ *
+ * <p>Functions in <code>clojure.core</code> are automatically loaded. Other
+ * namespaces can be loaded via <code>require</code>:</p>
+ *
+ * <pre>
+ * IFn require = Clojure.var("clojure.core", "require");
+ * require.invoke(Clojure.read("clojure.set"));</pre>
+ *
+ * <p><code>IFn</code>s can be passed to higher order functions, e.g. the
+ * example below passes <code>plus</code> to <code>read</code>:</p>
+ *
+ * <pre>
+ * IFn map = Clojure.var("clojure.core", "map");
+ * IFn inc = Clojure.var("clojure.core", "inc");
+ * map.invoke(inc, Clojure.read("[1 2 3]"));</pre>
+ */
+public class Clojure {
+    private Clojure() {}
 
     private static Symbol asSym(Object o) {
         Symbol s;
@@ -52,7 +85,7 @@ public class API {
     /**
      * Read one object from the String s.  Reads data in the
      * <a href="http://edn-format.org">edn format</a>.
-     * @param     s
+     * @param s   a String
      * @return    an Object, or nil.
      */
     public static Object read(String s) {

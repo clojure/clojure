@@ -231,4 +231,4 @@
     (= (:a ((get-method simple :a) 1)))
     (is (fn? (get-method simple :b)))
     (= (:b ((get-method simple :b) 1)))
-    (is (nil? (get-method simple :c)))))
+    (is (nil? (get-method simple :xyz)))))

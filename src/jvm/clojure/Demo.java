@@ -13,14 +13,8 @@ public class Demo {
   static ArrayList<String> libs = new ArrayList<String>();
 
   public static void main(String[] args) throws Exception {
-    long i = System.currentTimeMillis();
-    RT.load("clojure/core");
-    System.out.println(System.currentTimeMillis() - i);
-    if (true) {
-      return;
-    }
-    
     init();
+    RT.forceClass = true;
     long d = System.currentTimeMillis();
 
     for (String f : libs) {

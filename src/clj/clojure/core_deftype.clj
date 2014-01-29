@@ -282,9 +282,7 @@
       (throw (AssertionError. (str "The names in " specials " cannot be used as field names for types or records."))))))
 
 (defmacro defrecord
-  "Alpha - subject to change
-
-  (defrecord name [fields*]  options* specs*)
+  "(defrecord name [fields*]  options* specs*)
 
   Currently there are no options.
 
@@ -370,6 +368,13 @@
          ([m#] (~(symbol (str classname "/create")) m#)))
        ~classname)))
 
+(defn record?
+  "Returns true if x is a record"
+  {:added "1.6"
+   :static true}
+  [x]
+  (instance? clojure.lang.IRecord x))
+
 (defn- emit-deftype*
   "Do not use this directly - use deftype"
   [tagname name fields interfaces methods]
@@ -380,9 +385,7 @@
        ~@methods)))
 
 (defmacro deftype
-  "Alpha - subject to change
-
-  (deftype name [fields*]  options* specs*)
+  "(deftype name [fields*]  options* specs*)
 
   Currently there are no options.
 

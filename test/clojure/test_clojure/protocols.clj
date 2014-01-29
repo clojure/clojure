@@ -129,6 +129,11 @@
      {:foo (fn [this] (str "widget " (.name this)))})
     (is (= "widget z" (foo (ExtendTestWidget. "z"))))))
 
+(deftest record-marker-interfaces
+  (testing "record? and type? return expected result for IRecord and IType"
+    (let [r (TestRecord. 1 2)]
+      (is (record? r)))))
+
 (deftest illegal-extending
   (testing "you cannot extend a protocol to a type that implements the protocol inline"
     (is (fails-with-cause? IllegalArgumentException #".*HasProtocolInline already directly implements interface"

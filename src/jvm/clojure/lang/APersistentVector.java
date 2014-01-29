@@ -155,14 +155,15 @@ public int hashCode(){
 
 public int hasheq(){
 	if(_hasheq == -1) {
-	int hash = 1;
-	Iterator i = iterator();
-	while(i.hasNext())
-		{
-		Object obj = i.next();
-		hash = 31 * hash + Util.hasheq(obj);
-		}
-	_hasheq = hash;
+//	int hash = 1;
+//	Iterator i = iterator();
+//	while(i.hasNext())
+//		{
+//		Object obj = i.next();
+//		hash = 31 * hash + Util.hasheq(obj);
+//		}
+//	_hasheq = hash;
+	_hasheq  = Murmur3.hashOrdered(this);
 	}
 	return _hasheq;
 }
@@ -236,6 +237,24 @@ public ListIterator listIterator(final int index){
 		}
 
 		public void add(Object o){
+			throw new UnsupportedOperationException();
+		}
+	};
+}
+
+Iterator rangedIterator(final int start, final int end){
+	return new Iterator(){
+		int i = start;
+
+		public boolean hasNext(){
+			return i < end;
+		}
+
+		public Object next(){
+			return nth(i++);
+		}
+
+		public void remove(){
 			throw new UnsupportedOperationException();
 		}
 	};
@@ -524,7 +543,12 @@ static class SubVector extends APersistentVector implements IObj{
 		this.end = end;
 	}
 
-	public Iterator iterator(){return ((PersistentVector)v).rangedIterator(start,end);}
+	public Iterator iterator(){
+		if (v instanceof APersistentVector) {
+			return ((APersistentVector)v).rangedIterator(start,end);
+		}
+		return super.iterator();
+	}
 
 	public Object nth(int i){
 		if((start + i >= end) || (i < 0))

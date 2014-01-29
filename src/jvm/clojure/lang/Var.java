@@ -45,16 +45,12 @@ static public class Unbound extends AFn{
 }
 
 static class Frame{
+	final static Frame TOP = new Frame(PersistentHashMap.EMPTY, null);
 	//Var->TBox
 	Associative bindings;
 	//Var->val
 //	Associative frameBindings;
 	Frame prev;
-
-
-	public Frame(){
-		this(PersistentHashMap.EMPTY, null);
-	}
 
 	public Frame(Associative bindings, Frame prev){
 //		this.frameBindings = frameBindings;
@@ -63,9 +59,7 @@ static class Frame{
 	}
 
     	protected Object clone() {
-		Frame f = new Frame();
-		f.bindings = this.bindings;
-		return f;
+		return new Frame(this.bindings, null);
     	}
 
 }
@@ -73,7 +67,7 @@ static class Frame{
 static final ThreadLocal<Frame> dvals = new ThreadLocal<Frame>(){
 
 	protected Frame initialValue(){
-		return new Frame();
+		return Frame.TOP;
 	}
 };
 
@@ -96,17 +90,11 @@ public final Namespace ns;
 //IPersistentMap _meta;
 
 public static Object getThreadBindingFrame(){
-	Frame f = dvals.get();
-	if(f != null)
-		return f;
-	return new Frame();
+	return dvals.get();
 }
 
 public static Object cloneThreadBindingFrame(){
-	Frame f = dvals.get();
-	if(f != null)
-		return f.clone();
-	return new Frame();
+	return dvals.get().clone();
 }
 
 public static void resetThreadBindingFrame(Object frame){
@@ -247,16 +235,8 @@ public void setMeta(IPersistentMap m) {
     resetMeta(m.assoc(nameKey, sym).assoc(nsKey, ns));
 }
 
-public Var setMacro() {
-    try
-        {
-        alterMeta(assoc, RT.list(macroKey, RT.T));
-        }
-    catch (Exception e)
-        {
-        throw Util.sneakyThrow(e);
-        }
-    return this;
+public void setMacro() {
+    alterMeta(assoc, RT.list(macroKey, RT.T));
 }
 
 public boolean isMacro(){
@@ -280,14 +260,7 @@ public Object getTag(){
 }
 
 public void setTag(Symbol tag) {
-    try
-        {
-        alterMeta(assoc, RT.list(RT.TAG_KEY, tag));
-        }
-    catch (Exception e)
-        {
-        throw Util.sneakyThrow(e);
-        }
+    alterMeta(assoc, RT.list(RT.TAG_KEY, tag));
 }
 
 final public boolean hasRoot(){
@@ -300,14 +273,7 @@ synchronized public void bindRoot(Object root){
 	Object oldroot = this.root;
 	this.root = root;
 	++rev;
-    try
-        {
         alterMeta(dissoc, RT.list(macroKey));
-        }
-    catch (Exception e)
-        {
-        throw Util.sneakyThrow(e);
-        }
     notifyWatches(oldroot,this.root);
 }
 
@@ -360,11 +326,10 @@ public static void pushThreadBindings(Associative bindings){
 }
 
 public static void popThreadBindings(){
-    Frame f = dvals.get();
-    if(f.prev == null)
+    Frame f = dvals.get().prev;
+    if (f == null) {
         throw new IllegalStateException("Pop without matching push");
-    f = f.prev;
-    if (f.prev == null) {
+    } else if (f == Frame.TOP) {
         dvals.remove();
     } else {
         dvals.set(f);
@@ -403,14 +368,7 @@ public Object call() {
 }
 
 public void run(){
-	try
-		{
-		invoke();
-		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(e);
-		}
+        invoke();
 }
 
 public Object invoke() {
@@ -751,14 +709,7 @@ static IFn assoc = new AFn(){
 static IFn dissoc = new AFn() {
     @Override
     public Object invoke(Object c, Object k)  {
-	    try
-		    {
-		    return RT.dissoc(c, k);
-		    }
-	    catch(Exception e)
-		    {
-            throw Util.sneakyThrow(e);
-		    }
+            return RT.dissoc(c, k);
     }
 };
 }

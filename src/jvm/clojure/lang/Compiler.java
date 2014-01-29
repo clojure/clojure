@@ -1445,15 +1445,11 @@ public class Compiler implements Opcodes {
   }
 
   static Class maybePrimitiveType(Expr e) {
-    try {
-      if (e instanceof MaybePrimitiveExpr && e.hasJavaClass()
-          && ((MaybePrimitiveExpr) e).canEmitPrimitive()) {
-        Class c = e.getJavaClass();
-        if (Util.isPrimitive(c))
-          return c;
-      }
-    } catch (Exception ex) {
-      throw Util.sneakyThrow(ex);
+    if (e instanceof MaybePrimitiveExpr && e.hasJavaClass()
+        && ((MaybePrimitiveExpr) e).canEmitPrimitive()) {
+      Class c = e.getJavaClass();
+      if (Util.isPrimitive(c))
+        return c;
     }
     return null;
   }
@@ -1592,7 +1588,7 @@ public class Compiler implements Opcodes {
           }
           java.lang.reflect.Method m = (java.lang.reflect.Method) (methodidx >= 0 ? methods
               .get(methodidx) : null);
-          
+
           if (m != null) {
             ObjMethod objm = (ObjMethod) METHOD.get();
             if (objm != null && !objm.hasException) {
@@ -2714,7 +2710,7 @@ public class Compiler implements Opcodes {
           }
         }
       }
-      
+
       if (ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref())) {
         RT.errPrintWriter()
             .format(
@@ -2892,28 +2888,23 @@ public class Compiler implements Opcodes {
       }
 
       sb.append("if (");
-      try {
-        if (testExpr instanceof StaticMethodExpr
-            && ((StaticMethodExpr) testExpr).canEmitIntrinsicPredicate()) {
-          sb.append(((StaticMethodExpr) testExpr).emitIntrinsicPredicate(
-              C.EXPRESSION, objx, gen, falseLabel));
-        } else if (maybePrimitiveType(testExpr) == boolean.class) {
-          sb.append(((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION,
-              objx, gen));
-          gen.ifZCmp(GeneratorAdapter.EQ, falseLabel);
-        } else {
-          String val = testExpr.emit(C.EXPRESSION, objx, gen);
-          gen.dup();
-          gen.ifNull(nullLabel);
-          gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
-          gen.visitJumpInsn(IF_ACMPEQ, falseLabel);
-          String temp = registerTemp();
-
-          emitSource("Object " + temp + " = " + val + ";");
-          sb.append(temp + " != null && !(" + temp + " == Boolean.FALSE)");
-        }
-      } catch (Exception e) {
-        throw Util.sneakyThrow(e);
+      if (testExpr instanceof StaticMethodExpr
+          && ((StaticMethodExpr) testExpr).canEmitIntrinsicPredicate()) {
+        sb.append(((StaticMethodExpr) testExpr).emitIntrinsicPredicate(
+            C.EXPRESSION, objx, gen, falseLabel));
+      } else if (maybePrimitiveType(testExpr) == boolean.class) {
+        sb.append(((MaybePrimitiveExpr) testExpr).emitUnboxed(C.EXPRESSION,
+            objx, gen));
+        gen.ifZCmp(GeneratorAdapter.EQ, falseLabel);
+      } else {
+        String val = testExpr.emit(C.EXPRESSION, objx, gen);
+        gen.dup();
+        gen.ifNull(nullLabel);
+        gen.getStatic(BOOLEAN_OBJECT_TYPE, "FALSE", BOOLEAN_OBJECT_TYPE);
+        gen.visitJumpInsn(IF_ACMPEQ, falseLabel);
+        String temp = registerTemp();
+        emitSource("Object " + temp + " = " + val + ";");
+        sb.append(temp + " != null && !(" + temp + " == Boolean.FALSE)");
       }
       sb.append(") {");
       emitSource(sb.toString());
@@ -3721,15 +3712,19 @@ public class Compiler implements Opcodes {
       if (variadic) {
         for (int i = 0; i < paramclasses.length - 1; i++) {
           Expr e = (Expr) args.nth(i);
-          try {
-            if (maybePrimitiveType(e) == paramclasses[i]) {
-              ((MaybePrimitiveExpr) e).emitUnboxed(C.EXPRESSION, objx, gen);
-            } else {
-              String v = e.emit(C.EXPRESSION, objx, gen);
-              v = HostExpr.emitUnboxArg(objx, gen, paramclasses[i], v);
-            }
-          } catch (Exception ex) {
-            throw Util.sneakyThrow(ex);
+          if (maybePrimitiveType(e) == paramclasses[i]) {
+            // if (maybePrimitiveType(e) == paramclasses[i]) {
+            // ((MaybePrimitiveExpr) e).emitUnboxed(C.EXPRESSION, objx, gen);
+            // } else {
+            // String v = e.emit(C.EXPRESSION, objx, gen);
+            // v = HostExpr.emitUnboxArg(objx, gen, paramclasses[i], v);
+            // }
+            // } catch (Exception ex) {
+            // throw Util.sneakyThrow(ex);
+            // }
+          } else {
+            HostExpr.emitUnboxArg(objx, gen, paramclasses[i],
+                e.emit(C.EXPRESSION, objx, gen));
           }
         }
         IPersistentVector restArgs = RT.subvec(args, paramclasses.length - 1,
@@ -5281,19 +5276,14 @@ public class Compiler implements Opcodes {
     }
 
     synchronized Class getCompiledClass() {
-      if (compiledClass == null)
-        try {
-          // if(RT.booleanCast(COMPILE_FILES.deref()))
-          // compiledClass = RT.classForName(name);//loader.defineClass(name,
-          // bytecode);
-          // else
-          {
-            loader = (DynamicClassLoader) LOADER.deref();
-            compiledClass = loader.defineClass(name, bytecode, src);
-          }
-        } catch (Exception e) {
-          throw Util.sneakyThrow(e);
-        }
+      if (compiledClass == null) {
+        // if(RT.booleanCast(COMPILE_FILES.deref()))
+        // compiledClass = RT.classForName(name);//loader.defineClass(name,
+        // bytecode);
+        // else
+        loader = (DynamicClassLoader) LOADER.deref();
+        compiledClass = loader.defineClass(name, bytecode, src);
+      }
       return compiledClass;
     }
 
@@ -5833,8 +5823,6 @@ public class Compiler implements Opcodes {
           gen.visitLocalVariable(lb.name, argtypes[lb.idx].getDescriptor(),
               null, loopLabel, end, lb.idx);
         }
-      } catch (Exception e) {
-        throw Util.sneakyThrow(e);
       } finally {
         Var.popThreadBindings();
       }
@@ -5906,8 +5894,6 @@ public class Compiler implements Opcodes {
           gen.visitLocalVariable(lb.name, argtypes[lb.idx - 1].getDescriptor(),
               null, loopLabel, end, lb.idx);
         }
-      } catch (Exception e) {
-        throw Util.sneakyThrow(e);
       } finally {
         Var.popThreadBindings();
       }
@@ -6949,44 +6935,32 @@ public class Compiler implements Opcodes {
         last = arg;
         if (lb.getPrimitiveType() != null) {
           Class primc = lb.getPrimitiveType();
-          try {
-            final Class pc = maybePrimitiveType(arg);
-            if (pc == primc)
-              val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
-                  gen);
-            else if (primc == long.class && pc == int.class) {
-              val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
-                  gen);
-              gen.visitInsn(I2L);
-            } else if (primc == double.class && pc == float.class) {
-              val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
-                  gen);
-              gen.visitInsn(F2D);
-            } else if (primc == int.class && pc == long.class) {
-              val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
-                  gen);
-              gen.invokeStatic(RT_TYPE, Method.getMethod("int intCast(long)"));
-              val = "RT.intCast(" + val + ")";
-            } else if (primc == float.class && pc == double.class) {
-              val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
-                  gen);
-              gen.visitInsn(D2F);
-            } else {
-              // if(true)//RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-              throw new IllegalArgumentException
-              // RT.errPrintWriter().println
-              (// source + ":" + line +
-                  " recur arg for primitive local: "
-                      + lb.name
-                      + " is not matching primitive, had: "
-                      + (arg.hasJavaClass() ? arg.getJavaClass().getName()
-                          : "Object") + ", needed: " + primc.getName());
-              // arg.emit(C.EXPRESSION, objx, gen);
-              // HostExpr.emitUnboxArg(objx,gen,primc);
-            }
-
-          } catch (Exception e) {
-            throw Util.sneakyThrow(e);
+          final Class pc = maybePrimitiveType(arg);
+          if (pc == primc)
+            val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx, gen);
+          else if (primc == long.class && pc == int.class) {
+            val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
+                gen);
+            gen.visitInsn(I2L);
+          } else if (primc == double.class && pc == float.class) {
+            val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
+                gen);
+            gen.visitInsn(F2D);
+          } else if (primc == int.class && pc == long.class) {
+            val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
+                gen);
+            gen.invokeStatic(RT_TYPE, Method.getMethod("int intCast(long)"));
+          } else if (primc == float.class && pc == double.class) {
+            val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
+                gen);
+            gen.visitInsn(D2F);
+          } else {
+            throw new IllegalArgumentException(
+                " recur arg for primitive local: "
+                    + lb.name
+                    + " is not matching primitive, had: "
+                    + (arg.hasJavaClass() ? arg.getJavaClass().getName()
+                        : "Object") + ", needed: " + primc.getName());
           }
         } else {
           val = arg.emit(C.EXPRESSION, objx, gen);
@@ -7398,10 +7372,6 @@ public class Compiler implements Opcodes {
           Expr expr = analyze(C.EVAL, form);
           return expr.eval();
         }
-      } catch (Throwable e) {
-        if (!(e instanceof RuntimeException))
-          throw Util.sneakyThrow(e);
-        throw (RuntimeException) e;
       } finally {
         Var.popThreadBindings();
       }
@@ -7500,21 +7470,13 @@ public class Compiler implements Opcodes {
   }
 
   static void addAnnotation(Object visitor, IPersistentMap meta) {
-    try {
-      if (meta != null && ADD_ANNOTATIONS.isBound())
-        ADD_ANNOTATIONS.invoke(visitor, meta);
-    } catch (Exception e) {
-      throw Util.sneakyThrow(e);
-    }
+    if (meta != null && ADD_ANNOTATIONS.isBound())
+      ADD_ANNOTATIONS.invoke(visitor, meta);
   }
 
   static void addParameterAnnotation(Object visitor, IPersistentMap meta, int i) {
-    try {
-      if (meta != null && ADD_ANNOTATIONS.isBound())
-        ADD_ANNOTATIONS.invoke(visitor, meta, i);
-    } catch (Exception e) {
-      throw Util.sneakyThrow(e);
-    }
+    if (meta != null && ADD_ANNOTATIONS.isBound())
+      ADD_ANNOTATIONS.invoke(visitor, meta, i);
   }
 
   private static Expr analyzeSymbol(Symbol sym) {
@@ -8946,8 +8908,6 @@ public class Compiler implements Opcodes {
           gen.visitLocalVariable(lb.name, argTypes[lb.idx - 1].getDescriptor(),
               null, loopLabel, end, lb.idx);
         }
-      } catch (Exception e) {
-        throw Util.sneakyThrow(e);
       } finally {
         Var.popThreadBindings();
       }

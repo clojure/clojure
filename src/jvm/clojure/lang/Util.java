@@ -167,6 +167,8 @@ public static int hasheq(Object o){
 		return dohasheq((IHashEq) o);	
 	if(o instanceof Number)
 		return Numbers.hasheq((Number)o);
+	if(o instanceof String)
+		return Murmur3.hashUnencodedChars((CharSequence) o);
 	return o.hashCode();
 }
 

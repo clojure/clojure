@@ -91,7 +91,7 @@
 							<target>
 								<property name="maven.compile.classpath" refid="maven.compile.classpath" />
 								<ant target="compile-clojure" />
-								<!--  ant target="compile-tests" /-->
+								<ant target="compile-tests" />
 							</target>
 						</configuration>
 					</execution>

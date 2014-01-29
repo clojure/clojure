@@ -269,7 +269,6 @@
 ; locking, monitor-enter, monitor-exit
 
 ; case
-(comment
 (deftest test-case
   (testing "can match many kinds of things"
     (let [two 2
@@ -369,7 +368,8 @@
           ^Object y (Long. -1)]
       (is (= :diff (case x -1 :oops :diff)))
       (is (= :same (case y -1 :same :oops)))))
-  (testing "test correct behavior on hash collision"
+  ;;FIXME - these are no longer collisions
+  #_(testing "test correct behavior on hash collision"
     (is (== (hash 1) (hash 9223372039002259457N)))
     (are [result input] (= result (case input
                                     1 :long
@@ -420,4 +420,4 @@
       (are [result input] (= result (test-fn input))
            :piece-of-throw-expr 'throw
            :piece-of-throw-expr '[RuntimeException. "boom"]
-           :no-match nil)))))
+           :no-match nil))))

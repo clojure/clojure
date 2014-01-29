@@ -108,13 +108,14 @@ public int hashCode(){
 
 public int hasheq(){
 	if(_hasheq == -1){
-		int hash = 0;
-		for(ISeq s = seq(); s != null; s = s.next())
-			{
-			Object e = s.first();
-			hash +=  Util.hasheq(e);
-			}
-		this._hasheq = hash;		
+//		int hash = 0;
+//		for(ISeq s = seq(); s != null; s = s.next())
+//			{
+//			Object e = s.first();
+//			hash +=  Util.hasheq(e);
+//			}
+//		this._hasheq = hash;
+		_hasheq = Murmur3.hashUnordered(this);
 	}
 	return _hasheq;		
 }

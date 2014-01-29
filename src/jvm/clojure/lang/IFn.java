@@ -14,6 +14,12 @@ package clojure.lang;
 
 import java.util.concurrent.Callable;
 
+/**
+ * <p><code>IFn</code> provides complete access to invoking
+ * any of Clojure's <a href="http://clojure.github.io/clojure/">API</a>s.
+ * You can also access any other library written in Clojure, after adding
+ * either its source or compiled form to the classpath.</p>
+ */
 public interface IFn extends Callable, Runnable{
 
 public Object invoke() ;

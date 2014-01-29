@@ -24,13 +24,12 @@ public class EdnReader{
 
 static IFn[] macros = new IFn[256];
 static IFn[] dispatchMacros = new IFn[256];
-static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?([\\D&&[^/]][^/]*)");
+static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
 static Pattern intPat =
 		Pattern.compile(
 				"([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?");
-static final Symbol SLASH = Symbol.intern("/");
 
 static IFn taggedReader = new TaggedReader();
 
@@ -62,12 +61,7 @@ static boolean nonConstituent(int ch){
 
 static public Object readString(String s, IPersistentMap opts){
 	PushbackReader r = new PushbackReader(new java.io.StringReader(s));
-	try {
 	return read(r, opts);
-	}
-	catch(Exception e) {
-	throw Util.sneakyThrow(e);
-	}
 }
 
 static boolean isWhitespace(int ch){
@@ -277,10 +271,6 @@ static private Object interpretToken(String s) {
 	else if(s.equals("false"))
 		{
 		return RT.F;
-		}
-	else if(s.equals("/"))
-		{
-		return SLASH;
 		}
 
 	Object ret = null;

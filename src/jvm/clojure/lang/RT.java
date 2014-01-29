@@ -494,18 +494,21 @@ public class RT {
   }
 
   public static native void loadiOS(String scriptbase) /*-[
-                                                       IOSObjectArray *parts = [scriptbase split:@"/"];
-                                                       NSString *classname = @"";
-                                                       for (int n = 0; n < parts.count - 1; n++) {
-                                                       NSString *s = (NSString*)[parts objectAtIndex:n];
-                                                       s = [[[s substringToIndex:1] uppercaseString] stringByAppendingString:[s substringFromIndex:1]];
-                                                       classname = [classname stringByAppendingString:s];
-                                                       }
-                                                       classname = [classname stringByAppendingString:[parts objectAtIndex:parts.count-1]];
-                                                       classname = [classname stringByAppendingString:@"__init"];
-                                                       NSLog(@"%@", NSClassFromString(classname));
-                                                       return;
-                                                       ]-*/;
+     IOSObjectArray *parts = [scriptbase split:@"/"];
+     NSString *classname = @"";
+     for (int n = 0; n < parts.count - 1; n++) {
+     NSString *s = (NSString*)[parts objectAtIndex:n];
+     s = [[[s substringToIndex:1] uppercaseString] stringByAppendingString:[s substringFromIndex:1]];
+     classname = [classname stringByAppendingString:s];
+     }
+     classname = [classname stringByAppendingString:[parts objectAtIndex:parts.count-1]];
+     classname = [classname stringByAppendingString:@"__init"];
+     Class c = NSClassFromString(classname);
+     if (c == nil) {
+       NSLog(@"Error loading %@", scriptbase);
+     }
+     return;
+  ]-*/;
 
   static public void load(String scriptbase, boolean failIfNotFound)
       throws IOException, ClassNotFoundException {
@@ -1723,399 +1726,408 @@ public class RT {
     return ret;
   }
 
-  static public int length(ISeq list) {
-    int i = 0;
-    for (ISeq c = list; c != null; c = c.next()) {
-      i++;
-    }
-    return i;
-  }
+static public int length(ISeq list){
+	int i = 0;
+	for(ISeq c = list; c != null; c = c.next()) {
+		i++;
+	}
+	return i;
+}
 
-  static public int boundedLength(ISeq list, int limit) {
-    int i = 0;
-    for (ISeq c = list; c != null && i <= limit; c = c.next()) {
-      i++;
-    }
-    return i;
-  }
+static public int boundedLength(ISeq list, int limit) {
+	int i = 0;
+	for(ISeq c = list; c != null && i <= limit; c = c.next()) {
+		i++;
+	}
+	return i;
+}
 
-  // /////////////////////////////// reader support
-  // ////////////////////////////////
+///////////////////////////////// reader support ////////////////////////////////
 
-  static Character readRet(int ret) {
-    if (ret == -1)
-      return null;
-    return box((char) ret);
-  }
+static Character readRet(int ret){
+	if(ret == -1)
+		return null;
+	return box((char) ret);
+}
 
-  static public Character readChar(Reader r) throws IOException {
-    int ret = r.read();
-    return readRet(ret);
-  }
+static public Character readChar(Reader r) throws IOException{
+	int ret = r.read();
+	return readRet(ret);
+}
 
-  static public Character peekChar(Reader r) throws IOException {
-    int ret;
-    if (r instanceof PushbackReader) {
-      ret = r.read();
-      ((PushbackReader) r).unread(ret);
-    } else {
-      r.mark(1);
-      ret = r.read();
-      r.reset();
-    }
+static public Character peekChar(Reader r) throws IOException{
+	int ret;
+	if(r instanceof PushbackReader) {
+		ret = r.read();
+		((PushbackReader) r).unread(ret);
+	}
+	else {
+		r.mark(1);
+		ret = r.read();
+		r.reset();
+	}
 
-    return readRet(ret);
-  }
+	return readRet(ret);
+}
 
-  static public int getLineNumber(Reader r) {
-    if (r instanceof LineNumberingPushbackReader)
-      return ((LineNumberingPushbackReader) r).getLineNumber();
-    return 0;
-  }
+static public int getLineNumber(Reader r){
+	if(r instanceof LineNumberingPushbackReader)
+		return ((LineNumberingPushbackReader) r).getLineNumber();
+	return 0;
+}
 
-  static public int getColumnNumber(Reader r) {
-    if (r instanceof LineNumberingPushbackReader)
-      return ((LineNumberingPushbackReader) r).getColumnNumber();
-    return 0;
-  }
+static public int getColumnNumber(Reader r){
+	if(r instanceof LineNumberingPushbackReader)
+		return ((LineNumberingPushbackReader) r).getColumnNumber();
+	return 0;
+}
 
-  static public LineNumberingPushbackReader getLineNumberingReader(Reader r) {
-    if (isLineNumberingReader(r))
-      return (LineNumberingPushbackReader) r;
-    return new LineNumberingPushbackReader(r);
-  }
+static public LineNumberingPushbackReader getLineNumberingReader(Reader r){
+	if(isLineNumberingReader(r))
+		return (LineNumberingPushbackReader) r;
+	return new LineNumberingPushbackReader(r);
+}
 
-  static public boolean isLineNumberingReader(Reader r) {
-    return r instanceof LineNumberingPushbackReader;
-  }
+static public boolean isLineNumberingReader(Reader r){
+	return r instanceof LineNumberingPushbackReader;
+}
 
-  static public boolean isReduced(Object r) {
-    return r instanceof Reduced;
-  }
+static public boolean isReduced(Object r){
+	return r instanceof Reduced;
+}
 
-  static public String resolveClassNameInContext(String className) {
-    // todo - look up in context var
-    return className;
-  }
+static public String resolveClassNameInContext(String className){
+	//todo - look up in context var
+	return className;
+}
 
-  static public boolean suppressRead() {
-    // todo - look up in suppress-read var
-    return false;
-  }
+static public boolean suppressRead(){
+	//todo - look up in suppress-read var
+	return false;
+}
 
-  static public String printString(Object x) {
-    try {
-      StringWriter sw = new StringWriter();
-      print(x, sw);
-      return sw.toString();
-    } catch (Exception e) {
-      throw Util.sneakyThrow(e);
-    }
-  }
+static public String printString(Object x){
+	try {
+		StringWriter sw = new StringWriter();
+		print(x, sw);
+		return sw.toString();
+	}
+	catch(Exception e) {
+		throw Util.sneakyThrow(e);
+	}
+}
 
-  static public Object readString(String s) {
-    PushbackReader r = new PushbackReader(new StringReader(s));
-    try {
-      return LispReader.read(r, true, null, false);
-    } catch (Exception e) {
-      throw Util.sneakyThrow(e);
-    }
-  }
+static public Object readString(String s){
+	PushbackReader r = new PushbackReader(new StringReader(s));
+	return LispReader.read(r, true, null, false);
+}
 
-  static public void print(Object x, Writer w) throws IOException {
-    // call multimethod
-    if (PRINT_INITIALIZED.isBound()
-        && RT.booleanCast(PRINT_INITIALIZED.deref()))
-      PR_ON.invoke(x, w);
-    // *
-    else {
-      boolean readably = booleanCast(PRINT_READABLY.deref());
-      if (x instanceof Obj) {
-        Obj o = (Obj) x;
-        if (RT.count(o.meta()) > 0
-            && ((readably && booleanCast(PRINT_META.deref())) || booleanCast(PRINT_DUP
-                .deref()))) {
-          IPersistentMap meta = o.meta();
-          w.write("#^");
-          if (meta.count() == 1 && meta.containsKey(TAG_KEY))
-            print(meta.valAt(TAG_KEY), w);
-          else
-            print(meta, w);
-          w.write(' ');
-        }
-      }
-      if (x == null)
-        w.write("nil");
-      else if (x instanceof ISeq || x instanceof IPersistentList) {
-        w.write('(');
-        printInnerSeq(seq(x), w);
-        w.write(')');
-      } else if (x instanceof String) {
-        String s = (String) x;
-        if (!readably)
-          w.write(s);
-        else {
-          w.write('"');
-          // w.write(x.toString());
-          for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            switch (c) {
-            case '\n':
-              w.write("\\n");
-              break;
-            case '\t':
-              w.write("\\t");
-              break;
-            case '\r':
-              w.write("\\r");
-              break;
-            case '"':
-              w.write("\\\"");
-              break;
-            case '\\':
-              w.write("\\\\");
-              break;
-            case '\f':
-              w.write("\\f");
-              break;
-            case '\b':
-              w.write("\\b");
-              break;
-            default:
-              w.write(c);
+static public void print(Object x, Writer w) throws IOException{
+	//call multimethod
+	if(PRINT_INITIALIZED.isBound() && RT.booleanCast(PRINT_INITIALIZED.deref()))
+		PR_ON.invoke(x, w);
+//*
+	else {
+		boolean readably = booleanCast(PRINT_READABLY.deref());
+		if(x instanceof Obj) {
+			Obj o = (Obj) x;
+			if(RT.count(o.meta()) > 0 &&
+			   ((readably && booleanCast(PRINT_META.deref()))
+			    || booleanCast(PRINT_DUP.deref()))) {
+				IPersistentMap meta = o.meta();
+				w.write("#^");
+				if(meta.count() == 1 && meta.containsKey(TAG_KEY))
+					print(meta.valAt(TAG_KEY), w);
+				else
+					print(meta, w);
+				w.write(' ');
+			}
+		}
+		if(x == null)
+			w.write("nil");
+		else if(x instanceof ISeq || x instanceof IPersistentList) {
+			w.write('(');
+			printInnerSeq(seq(x), w);
+			w.write(')');
+		}
+		else if(x instanceof String) {
+			String s = (String) x;
+			if(!readably)
+				w.write(s);
+			else {
+				w.write('"');
+				//w.write(x.toString());
+				for(int i = 0; i < s.length(); i++) {
+					char c = s.charAt(i);
+					switch(c) {
+						case '\n':
+							w.write("\\n");
+							break;
+						case '\t':
+							w.write("\\t");
+							break;
+						case '\r':
+							w.write("\\r");
+							break;
+						case '"':
+							w.write("\\\"");
+							break;
+						case '\\':
+							w.write("\\\\");
+							break;
+						case '\f':
+							w.write("\\f");
+							break;
+						case '\b':
+							w.write("\\b");
+							break;
+						default:
+							w.write(c);
+					}
+				}
+				w.write('"');
+			}
+		}
+		else if(x instanceof IPersistentMap) {
+			w.write('{');
+			for(ISeq s = seq(x); s != null; s = s.next()) {
+				IMapEntry e = (IMapEntry) s.first();
+				print(e.key(), w);
+				w.write(' ');
+				print(e.val(), w);
+				if(s.next() != null)
+					w.write(", ");
+			}
+			w.write('}');
+		}
+		else if(x instanceof IPersistentVector) {
+			IPersistentVector a = (IPersistentVector) x;
+			w.write('[');
+			for(int i = 0; i < a.count(); i++) {
+				print(a.nth(i), w);
+				if(i < a.count() - 1)
+					w.write(' ');
+			}
+			w.write(']');
+		}
+		else if(x instanceof IPersistentSet) {
+			w.write("#{");
+			for(ISeq s = seq(x); s != null; s = s.next()) {
+				print(s.first(), w);
+				if(s.next() != null)
+					w.write(" ");
+			}
+			w.write('}');
+		}
+		else if(x instanceof Character) {
+			char c = ((Character) x).charValue();
+			if(!readably)
+				w.write(c);
+			else {
+				w.write('\\');
+				switch(c) {
+					case '\n':
+						w.write("newline");
+						break;
+					case '\t':
+						w.write("tab");
+						break;
+					case ' ':
+						w.write("space");
+						break;
+					case '\b':
+						w.write("backspace");
+						break;
+					case '\f':
+						w.write("formfeed");
+						break;
+					case '\r':
+						w.write("return");
+						break;
+					default:
+						w.write(c);
+				}
+			}
+		}
+		else if(x instanceof Class) {
+			w.write("#=");
+			w.write(((Class) x).getName());
+		}
+		else if(x instanceof BigDecimal && readably) {
+			w.write(x.toString());
+			w.write('M');
+		}
+		else if(x instanceof BigInt && readably) {
+			w.write(x.toString());
+			w.write('N');
+		}
+		else if(x instanceof BigInteger && readably) {
+			w.write(x.toString());
+			w.write("BIGINT");
+		}
+		else if(x instanceof Var) {
+			Var v = (Var) x;
+			w.write("#=(var " + v.ns.name + "/" + v.sym + ")");
+		}
+		else if(x instanceof Pattern) {
+			Pattern p = (Pattern) x;
+			w.write("#\"" + p.pattern() + "\"");
+		}
+		else w.write(x.toString());
+	}
+	//*/
+}
+
+private static void printInnerSeq(ISeq x, Writer w) throws IOException{
+	for(ISeq s = x; s != null; s = s.next()) {
+		print(s.first(), w);
+		if(s.next() != null)
+			w.write(' ');
+	}
+}
+
+static public void formatAesthetic(Writer w, Object obj) throws IOException{
+	if(obj == null)
+		w.write("null");
+	else
+		w.write(obj.toString());
+}
+
+static public void formatStandard(Writer w, Object obj) throws IOException{
+	if(obj == null)
+		w.write("null");
+	else if(obj instanceof String) {
+		w.write('"');
+		w.write((String) obj);
+		w.write('"');
+	}
+	else if(obj instanceof Character) {
+		w.write('\\');
+		char c = ((Character) obj).charValue();
+		switch(c) {
+			case '\n':
+				w.write("newline");
+				break;
+			case '\t':
+				w.write("tab");
+				break;
+			case ' ':
+				w.write("space");
+				break;
+			case '\b':
+				w.write("backspace");
+				break;
+			case '\f':
+				w.write("formfeed");
+				break;
+			default:
+				w.write(c);
+		}
+	}
+	else
+		w.write(obj.toString());
+}
+
+static public Object format(Object o, String s, Object... args) throws IOException{
+	Writer w;
+	if(o == null)
+		w = new StringWriter();
+	else if(Util.equals(o, T))
+		w = (Writer) OUT.deref();
+	else
+		w = (Writer) o;
+	doFormat(w, s, ArraySeq.create(args));
+	if(o == null)
+		return w.toString();
+	return null;
+}
+
+static public ISeq doFormat(Writer w, String s, ISeq args) throws IOException{
+	for(int i = 0; i < s.length();) {
+		char c = s.charAt(i++);
+		switch(Character.toLowerCase(c)) {
+			case '~':
+				char d = s.charAt(i++);
+				switch(Character.toLowerCase(d)) {
+					case '%':
+						w.write('\n');
+						break;
+					case 't':
+						w.write('\t');
+						break;
+					case 'a':
+						if(args == null)
+							throw new IllegalArgumentException("Missing argument");
+						RT.formatAesthetic(w, RT.first(args));
+						args = RT.next(args);
+						break;
+					case 's':
+						if(args == null)
+							throw new IllegalArgumentException("Missing argument");
+						RT.formatStandard(w, RT.first(args));
+						args = RT.next(args);
+						break;
+					case '{':
+						int j = s.indexOf("~}", i);    //note - does not nest
+						if(j == -1)
+							throw new IllegalArgumentException("Missing ~}");
+						String subs = s.substring(i, j);
+						for(ISeq sargs = RT.seq(RT.first(args)); sargs != null;)
+							sargs = doFormat(w, subs, sargs);
+						args = RT.next(args);
+						i = j + 2; //skip ~}
+						break;
+					case '^':
+						if(args == null)
+							return null;
+						break;
+					case '~':
+						w.write('~');
+						break;
+					default:
+						throw new IllegalArgumentException("Unsupported ~ directive: " + d);
+				}
+				break;
+			default:
+				w.write(c);
+		}
+	}
+	return args;
+}
+///////////////////////////////// values //////////////////////////
+
+static public Object[] setValues(Object... vals){
+	//ThreadLocalData.setValues(vals);
+	if(vals.length > 0)
+		return vals;//[0];
+	return null;
+}
+
+
+static public ClassLoader makeClassLoader(){
+	return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction(){
+		public Object run(){
+            try{
+            Var.pushThreadBindings(RT.map(USE_CONTEXT_CLASSLOADER, RT.T));
+//			getRootClassLoader();
+			return new DynamicClassLoader(baseLoader());
             }
-          }
-          w.write('"');
-        }
-      } else if (x instanceof IPersistentMap) {
-        w.write('{');
-        for (ISeq s = seq(x); s != null; s = s.next()) {
-          IMapEntry e = (IMapEntry) s.first();
-          print(e.key(), w);
-          w.write(' ');
-          print(e.val(), w);
-          if (s.next() != null)
-            w.write(", ");
-        }
-        w.write('}');
-      } else if (x instanceof IPersistentVector) {
-        IPersistentVector a = (IPersistentVector) x;
-        w.write('[');
-        for (int i = 0; i < a.count(); i++) {
-          print(a.nth(i), w);
-          if (i < a.count() - 1)
-            w.write(' ');
-        }
-        w.write(']');
-      } else if (x instanceof IPersistentSet) {
-        w.write("#{");
-        for (ISeq s = seq(x); s != null; s = s.next()) {
-          print(s.first(), w);
-          if (s.next() != null)
-            w.write(" ");
-        }
-        w.write('}');
-      } else if (x instanceof Character) {
-        char c = ((Character) x).charValue();
-        if (!readably)
-          w.write(c);
-        else {
-          w.write('\\');
-          switch (c) {
-          case '\n':
-            w.write("newline");
-            break;
-          case '\t':
-            w.write("tab");
-            break;
-          case ' ':
-            w.write("space");
-            break;
-          case '\b':
-            w.write("backspace");
-            break;
-          case '\f':
-            w.write("formfeed");
-            break;
-          case '\r':
-            w.write("return");
-            break;
-          default:
-            w.write(c);
-          }
-        }
-      } else if (x instanceof Class) {
-        w.write("#=");
-        w.write(((Class) x).getName());
-      } else if (x instanceof BigDecimal && readably) {
-        w.write(x.toString());
-        w.write('M');
-      } else if (x instanceof BigInt && readably) {
-        w.write(x.toString());
-        w.write('N');
-      } else if (x instanceof BigInteger && readably) {
-        w.write(x.toString());
-        w.write("BIGINT");
-      } else if (x instanceof Var) {
-        Var v = (Var) x;
-        w.write("#=(var " + v.ns.name + "/" + v.sym + ")");
-      } else if (x instanceof Pattern) {
-        Pattern p = (Pattern) x;
-        w.write("#\"" + p.pattern() + "\"");
-      } else
-        w.write(x.toString());
-    }
-    // */
-  }
+                finally{
+            Var.popThreadBindings();
+            }
+		}
+	});
+}
 
-  private static void printInnerSeq(ISeq x, Writer w) throws IOException {
-    for (ISeq s = x; s != null; s = s.next()) {
-      print(s.first(), w);
-      if (s.next() != null)
-        w.write(' ');
-    }
-  }
+static public ClassLoader baseLoader(){
+	if(Compiler.LOADER.isBound())
+		return (ClassLoader) Compiler.LOADER.deref();
+	else if(booleanCast(USE_CONTEXT_CLASSLOADER.deref()))
+		return Thread.currentThread().getContextClassLoader();
+	return Compiler.class.getClassLoader();
+}
 
-  static public void formatAesthetic(Writer w, Object obj) throws IOException {
-    if (obj == null)
-      w.write("null");
-    else
-      w.write(obj.toString());
-  }
-
-  static public void formatStandard(Writer w, Object obj) throws IOException {
-    if (obj == null)
-      w.write("null");
-    else if (obj instanceof String) {
-      w.write('"');
-      w.write((String) obj);
-      w.write('"');
-    } else if (obj instanceof Character) {
-      w.write('\\');
-      char c = ((Character) obj).charValue();
-      switch (c) {
-      case '\n':
-        w.write("newline");
-        break;
-      case '\t':
-        w.write("tab");
-        break;
-      case ' ':
-        w.write("space");
-        break;
-      case '\b':
-        w.write("backspace");
-        break;
-      case '\f':
-        w.write("formfeed");
-        break;
-      default:
-        w.write(c);
-      }
-    } else
-      w.write(obj.toString());
-  }
-
-  static public Object format(Object o, String s, Object... args)
-      throws IOException {
-    Writer w;
-    if (o == null)
-      w = new StringWriter();
-    else if (Util.equals(o, T))
-      w = (Writer) OUT.deref();
-    else
-      w = (Writer) o;
-    doFormat(w, s, ArraySeq.create(args));
-    if (o == null)
-      return w.toString();
-    return null;
-  }
-
-  static public ISeq doFormat(Writer w, String s, ISeq args) throws IOException {
-    for (int i = 0; i < s.length();) {
-      char c = s.charAt(i++);
-      switch (Character.toLowerCase(c)) {
-      case '~':
-        char d = s.charAt(i++);
-        switch (Character.toLowerCase(d)) {
-        case '%':
-          w.write('\n');
-          break;
-        case 't':
-          w.write('\t');
-          break;
-        case 'a':
-          if (args == null)
-            throw new IllegalArgumentException("Missing argument");
-          RT.formatAesthetic(w, RT.first(args));
-          args = RT.next(args);
-          break;
-        case 's':
-          if (args == null)
-            throw new IllegalArgumentException("Missing argument");
-          RT.formatStandard(w, RT.first(args));
-          args = RT.next(args);
-          break;
-        case '{':
-          int j = s.indexOf("~}", i); // note - does not nest
-          if (j == -1)
-            throw new IllegalArgumentException("Missing ~}");
-          String subs = s.substring(i, j);
-          for (ISeq sargs = RT.seq(RT.first(args)); sargs != null;)
-            sargs = doFormat(w, subs, sargs);
-          args = RT.next(args);
-          i = j + 2; // skip ~}
-          break;
-        case '^':
-          if (args == null)
-            return null;
-          break;
-        case '~':
-          w.write('~');
-          break;
-        default:
-          throw new IllegalArgumentException("Unsupported ~ directive: " + d);
-        }
-        break;
-      default:
-        w.write(c);
-      }
-    }
-    return args;
-  }
-
-  // /////////////////////////////// values //////////////////////////
-
-  static public Object[] setValues(Object... vals) {
-    // ThreadLocalData.setValues(vals);
-    if (vals.length > 0)
-      return vals;// [0];
-    return null;
-  }
-
-  static public ClassLoader makeClassLoader() {
-    return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-      public Object run() {
-        try {
-          Var.pushThreadBindings(RT.map(USE_CONTEXT_CLASSLOADER, RT.T));
-          // getRootClassLoader();
-          return new DynamicClassLoader(baseLoader());
-        } finally {
-          Var.popThreadBindings();
-        }
-      }
-    });
-  }
-
-  static public ClassLoader baseLoader() {
-    if (Compiler.LOADER.isBound())
-      return (ClassLoader) Compiler.LOADER.deref();
-    else if (booleanCast(USE_CONTEXT_CLASSLOADER.deref()))
-      return Thread.currentThread().getContextClassLoader();
-    return Compiler.class.getClassLoader();
-  }
-
-  static public InputStream resourceAsStream(ClassLoader loader, String name) {
+static public InputStream resourceAsStream(ClassLoader loader, String name){
     if (loader == null) {
       return ClassLoader.getSystemResourceAsStream(name);
     } else {
