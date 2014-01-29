@@ -986,7 +986,8 @@ static int hasheq(Number x){
 	if(xc == Long.class
 		|| xc == Integer.class
 		|| xc == Short.class
-		|| xc == Byte.class)
+		|| xc == Byte.class
+		|| (xc == BigInteger.class && lte(x, Long.MAX_VALUE) && gte(x,Long.MIN_VALUE)))
 		{
 		long lpart = x.longValue();
 		return Murmur3.hashLong(lpart);
