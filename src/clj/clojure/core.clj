@@ -6056,7 +6056,7 @@
   (let [buckets (loop [m {} ks tests vs thens]
                   (if (and ks vs)
                     (recur
-                      (update-in m [(hash (first ks))] (fnil conj []) [(first ks) (first vs)])
+                      (update-in m [(clojure.lang.Util/hash (first ks))] (fnil conj []) [(first ks) (first vs)])
                       (next ks) (next vs))
                     m))
         assoc-multi (fn [m h bucket]

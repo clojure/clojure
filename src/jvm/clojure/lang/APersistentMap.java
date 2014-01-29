@@ -114,7 +114,8 @@ static public int mapHash(IPersistentMap m){
 public int hasheq(){
 	if(_hasheq == -1)
 		{
-		this._hasheq = mapHasheq(this);
+		//this._hasheq = mapHasheq(this);
+		_hasheq = Murmur3.hashUnordered(this);
 		}
 	return _hasheq;
 }

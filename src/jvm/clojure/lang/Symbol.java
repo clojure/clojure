@@ -67,7 +67,7 @@ static public Symbol intern(String nsname){
 private Symbol(String ns_interned, String name_interned){
 	this.name = name_interned;
 	this.ns = ns_interned;
-	this.hash = Util.hashCombine(name.hashCode(), Util.hash(ns));
+	this.hash = Util.hashCombine(Util.hasheq(name),Util.hasheq(ns));
 	this._meta = null;
 }
 
@@ -99,7 +99,7 @@ private Symbol(IPersistentMap meta, String ns, String name){
 	this.name = name;
 	this.ns = ns;
 	this._meta = meta;
-	this.hash = Util.hashCombine(name.hashCode(), Util.hash(ns));
+	this.hash = Util.hashCombine(Util.hasheq(name),Util.hasheq(ns));
 }
 
 public int compareTo(Object o){

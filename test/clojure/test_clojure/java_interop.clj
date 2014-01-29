@@ -308,7 +308,7 @@
 
 (test-to-passed-array-for vector)
 (test-to-passed-array-for list)
-(test-to-passed-array-for hash-set)
+;;(test-to-passed-array-for hash-set)
 (test-to-passed-array-for queue)
 
 (deftest test-into-array

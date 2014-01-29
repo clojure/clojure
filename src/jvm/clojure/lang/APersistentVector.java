@@ -155,14 +155,15 @@ public int hashCode(){
 
 public int hasheq(){
 	if(_hasheq == -1) {
-	int hash = 1;
-	Iterator i = iterator();
-	while(i.hasNext())
-		{
-		Object obj = i.next();
-		hash = 31 * hash + Util.hasheq(obj);
-		}
-	_hasheq = hash;
+//	int hash = 1;
+//	Iterator i = iterator();
+//	while(i.hasNext())
+//		{
+//		Object obj = i.next();
+//		hash = 31 * hash + Util.hasheq(obj);
+//		}
+//	_hasheq = hash;
+	_hasheq  = Murmur3.hashOrdered(this);
 	}
 	return _hasheq;
 }

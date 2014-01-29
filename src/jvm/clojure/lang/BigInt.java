@@ -15,7 +15,7 @@ package clojure.lang;
 import java.math.BigInteger;
 import java.math.BigDecimal;
 
-public final class BigInt extends Number{
+public final class BigInt extends Number implements IHashEq{
 
 final public long lpart;
 final public BigInteger bipart;
@@ -29,6 +29,13 @@ public int hashCode(){
 	if(bipart == null)
 		return (int) (this.lpart ^ (this.lpart >>> 32));
 	return bipart.hashCode();
+}
+
+public int hasheq(){
+	if(bipart == null)
+		return Murmur3.hashLong(lpart);
+	return bipart.hashCode();
+
 }
 
 public boolean equals(Object obj){
