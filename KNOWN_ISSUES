@@ -1,0 +1,4 @@
+- Dividing by zero doesn't throw an exception in objc, it fails with EXC_ARITHMETIC
+- NullPointerException and ClassCastException are not reliable, as they are emulated by j2objc
+- Empty regular expressions throw an exception
+- pr-str a date have a bad Timezone format: https://code.google.com/p/j2objc/issues/detail?id=321

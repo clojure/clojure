@@ -269,6 +269,7 @@
 ; locking, monitor-enter, monitor-exit
 
 ; case
+(comment
 (deftest test-case
   (testing "can match many kinds of things"
     (let [two 2
@@ -421,3 +422,4 @@
            :piece-of-throw-expr 'throw
            :piece-of-throw-expr '[RuntimeException. "boom"]
            :no-match nil))))
+)

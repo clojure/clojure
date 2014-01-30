@@ -13,6 +13,10 @@ public class Demo {
   static ArrayList<String> libs = new ArrayList<String>();
 
   public static void main(String[] args) throws Exception {
+    runTests();
+  }
+
+  public static void runTests() throws IOException, ClassNotFoundException {
     init();
     RT.forceClass = true;
     long d = System.currentTimeMillis();

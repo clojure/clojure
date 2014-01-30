@@ -1076,7 +1076,8 @@ public class Compiler implements Opcodes {
               RT.second(form));
 
         boolean maybeField = RT.length(form) == 3
-            && (RT.third(form) instanceof Symbol);
+            && (RT.third(form) instanceof Symbol && !RT.third(form).equals(
+                Symbol.intern("getClass")));
 
         if (maybeField && !(((Symbol) RT.third(form)).name.charAt(0) == '-')) {
           Symbol sym = (Symbol) RT.third(form);
@@ -1567,12 +1568,10 @@ public class Compiler implements Opcodes {
       this.methodName = methodName;
       this.target = target;
       this.tag = tag;
-      if (target.hasJavaClass() && target.getJavaClass() != null) {
-        List methods = Reflector.getMethods(target.getJavaClass(),
+        List methods = Reflector.getMethods(target.hasJavaClass() && target.getJavaClass() != null ? target.getJavaClass() : Object.class,
             args.count(), methodName, false);
         if (methods.isEmpty())
           method = null;
-        // throw new IllegalArgumentException("No matching method found");
         else {
           int methodidx = 0;
           if (methods.size() > 1) {
@@ -1607,8 +1606,6 @@ public class Compiler implements Opcodes {
           }
           method = m;
         }
-      } else
-        method = null;
 
       if (method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref())) {
         RT.errPrintWriter().format(
@@ -6937,7 +6934,8 @@ public class Compiler implements Opcodes {
           Class primc = lb.getPrimitiveType();
           final Class pc = maybePrimitiveType(arg);
           if (pc == primc)
-            val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx, gen);
+            val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
+                gen);
           else if (primc == long.class && pc == int.class) {
             val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
                 gen);
@@ -6950,6 +6948,7 @@ public class Compiler implements Opcodes {
             val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
                 gen);
             gen.invokeStatic(RT_TYPE, Method.getMethod("int intCast(long)"));
+            val = "RT.intCast(" + val + ")";
           } else if (primc == float.class && pc == double.class) {
             val = ((MaybePrimitiveExpr) arg).emitUnboxed(C.EXPRESSION, objx,
                 gen);

@@ -1,7 +1,7 @@
 mvn package -Dmaven.test.skip=true
 rm -Rf target/objc
-zip -r target/objc.jar target/gen src/jvm
-j2objc -d target/objc -classpath target/classes:target/test-classes target/objc.jar test/java/java/net/*
+zip -r target/objc.jar target/gen src/jvm test/java
+j2objc -d target/objc -classpath target/classes:target/test-classes target/objc.jar #test/java/java/net/*
 cp -R src/objc/. target/objc
 
 if [ ! -d "target/include" ]; then

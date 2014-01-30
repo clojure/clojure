@@ -494,20 +494,23 @@ public class RT {
   }
 
   public static native void loadiOS(String scriptbase) /*-[
-     IOSObjectArray *parts = [scriptbase split:@"/"];
-     NSString *classname = @"";
-     for (int n = 0; n < parts.count - 1; n++) {
-     NSString *s = (NSString*)[parts objectAtIndex:n];
-     s = [[[s substringToIndex:1] uppercaseString] stringByAppendingString:[s substringFromIndex:1]];
-     classname = [classname stringByAppendingString:s];
-     }
-     classname = [classname stringByAppendingString:[parts objectAtIndex:parts.count-1]];
-     classname = [classname stringByAppendingString:@"__init"];
-     Class c = NSClassFromString(classname);
-     if (c == nil) {
-       NSLog(@"Error loading %@", scriptbase);
-     }
-     return;
+    IOSObjectArray *parts = [[scriptbase replaceAll:@"-" withReplacement:@"_"] split:@"/"];
+    NSString *classname = @"";
+    for (int n = 0; n < parts.count - 1; n++) {
+      NSString *s = (NSString*)[parts objectAtIndex:n];
+      s = [[[s substringToIndex:1] uppercaseString] stringByAppendingString:[s substringFromIndex:1]];
+      classname = [classname stringByAppendingString:s];
+    }
+    classname = [classname stringByAppendingString:[parts objectAtIndex:parts.count-1]];
+    classname = [classname stringByAppendingString:@"__init"];
+    Class c = NSClassFromString(classname);
+    if (c == nil) {
+      NSLog(@"Error loading %@", scriptbase);
+    } else {
+      [c description]; // Force initialize
+      NSLog(@"Loaded %@", scriptbase);
+    }
+    return;
   ]-*/;
 
   static public void load(String scriptbase, boolean failIfNotFound)
@@ -2144,9 +2147,8 @@ static public InputStream resourceAsStream(ClassLoader loader, String name){
   }
 
   static public Class classForName(String name) {
-
     try {
-      return Class.forName(name, true, baseLoader());
+      return Class.forName(ObjC.objc ? objcClassName(name) : name, true, baseLoader());
     } catch (ClassNotFoundException e) {
       throw Util.sneakyThrow(e);
     }
@@ -2154,14 +2156,25 @@ static public InputStream resourceAsStream(ClassLoader loader, String name){
 
   static Class classForNameNonLoading(String name) {
     try {
-      return Class.forName(name, false, baseLoader());
+      return Class.forName(ObjC.objc ? objcClassName(name) : name, false, baseLoader());
     } catch (ClassNotFoundException e) {
       throw Util.sneakyThrow(e);
     }
   }
-
+  
+  static String objcClassName(String name) {
+    String[] parts = name.split("[.]");
+    String classname = "";
+    for (int n = 0; n < parts.length - 1; n++) {
+      String s = parts[n];
+      classname += s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+    return classname + parts[parts.length - 1];
+  }
+  
   static public Class loadClassForName(String name)
       throws ClassNotFoundException {
+    name = ObjC.objc ? objcClassName(name) : name;
     try {
       Class.forName(name, false, baseLoader());
     } catch (ClassNotFoundException e) {
