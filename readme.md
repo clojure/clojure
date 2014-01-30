@@ -7,11 +7,15 @@ The runtime sourcebase is also modified to use only j2objc's jre emulated classe
 
 clojure.core and the runtime have a few tweaks to work faster on the objc runtime. But everything works with no modifications.
 
-## Download
+## Downloads
 
-### Download clojure-objc 1.5.1.1
+### Download clojure-objc 1.5.1-1 static lib and headers
   
-  https://www.dropbox.com/s/0p352y3ccw7m43i/clojure-objc-1.5.1.1.zip
+  https://www.dropbox.com/s/19r4n24lu8t4utv/clojure-objc-1.5.1-1.zip
+  
+## Dependency
+ 
+    [galdolber/clojure-objc "1.5.1-1"]
   
 ### Download j2objc 0.8.8 with arm64 support (not available in official site)
 
@@ -34,7 +38,7 @@ clojure.core and the runtime have a few tweaks to work faster on the objc runtim
  
  All generated code manage memory automagically, but if you alloc with interop you need to release!
  
-## Objc interop
+## ObjC interop
 
     (defn say-hi [name]
       ($ ($ ($ ($ UIAlertView) :alloc)
@@ -43,6 +47,53 @@ clojure.core and the runtime have a few tweaks to work faster on the objc runtim
             :delegate nil
             :cancelButtonTitle "Cancelar"
             :otherButtonTitles nil) :show))
+            
+## nsproxy EXPERIMENTAL!
+    
+    nsproxy doesn't require a base class.
+    
+    ; If you need a UITextFieldDelegate
+    (nsproxy
+      ([:bool :textFieldShouldReturn :id field]
+        ($ field :resignFirstResponder) 
+        true))
+        
+    ; nsproxy with a base class
+    (nsproxy UIView
+      ([:void :dealloc]
+        (println "dealloc!"))
+        
+### Gotchas
+  
+  Do not proxy a class containing a struct, like UIViewController. 
+  More information:
+  http://stackoverflow.com/questions/17927639/adding-a-root-view-controller-ocmockobjectuiviewcontroller-as-a-child-view-con
+        
+### nsproxy supported types
+
+    :float
+    :long-long
+    :long
+    :char
+    :short
+    :int
+    :double
+    :unsigned-long-long
+    :unsigned-long
+    :unsigned-char
+    :unsigned-short
+    :unsigned-int
+    :bool
+    :CGPoint
+    :NSRange
+    :UIEdgeInsets
+    :CGSize
+    :CGAffineTransform
+    :CATransform3D
+    :UIOffset
+    :CGRect
+    :id
+    :void
 
 ## What doesn't work (yet)
  
@@ -58,10 +109,6 @@ clojure.core and the runtime have a few tweaks to work faster on the objc runtim
 ## Discuss
  
  https://groups.google.com/d/forum/clojure-objc-discuss
- 
-## Dependency
- 
-[galdolber/clojure-objc "1.5.1"]
  
 ## How to build dist
  
