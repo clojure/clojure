@@ -91,39 +91,36 @@ public static int hashUnencodedChars(CharSequence input){
 	return fmix(h1, 2 * input.length());
 }
 
-public static int hashOrdered(Iterable xs){
+public static int fixCollHash(int hash, int count){
 	int h1 = seed;
+	int k1 = mixK1(hash);
+	h1 = mixH1(h1, k1);
+	return fmix(h1, count);
+}
+
+public static int hashOrdered(Iterable xs){
 	int n = 0;
+	int hash = 1;
+
 	for(Object x : xs)
 		{
-		int k1 = Util.hasheq(x);
-		k1 = mixK1(k1);
-		h1 = mixH1(h1, k1);
+		hash = 31 * hash + Util.hasheq(x);
 		++n;
 		}
-	return fmix(h1, n);
+
+	return fixCollHash(hash, n);
 }
 
 public static int hashUnordered(Iterable xs){
-	int sum = 0, xor = 0, n = 0;
-	int prod = 1;
+	int hash = 0;
+	int n = 0;
 	for(Object x : xs)
 		{
-		int h = Util.hasheq(x);
-		sum += h;
-		xor ^= h;
-		if(h != 0)
-			prod *= h;
+		hash += Util.hasheq(x);
 		++n;
-		}
-	int h1 = seed;
-	int k1 = mixK1(sum);
-	h1 = mixH1(h1, k1);
-	k1 = mixK1(xor);
-	h1 = mixH1(h1, k1);
-	k1 = mixK1(prod);
-	h1 = mixH1(h1, k1);
-	return fmix(h1, n);
+		}	
+
+	return fixCollHash(hash, n);
 }
 
 private static int mixK1(int k1){
