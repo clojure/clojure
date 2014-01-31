@@ -1285,6 +1285,12 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 			}
 		catch(NoSuchFieldException e)
 			{
+            for (java.lang.reflect.Method m: c.getMethods())
+                if (fieldName.equals(m.getName()) && (Modifier.isStatic(m.getModifiers())))
+                    throw new IllegalArgumentException("No matching method " +
+                            fieldName +
+                            " found taking 0 args for " +
+                            c);
 			throw Util.sneakyThrow(e);
 			}
 		this.tag = tag;
@@ -1667,7 +1673,8 @@ static class StaticMethodExpr extends MethodExpr{
 
 		List methods = Reflector.getMethods(c, args.count(), methodName, true);
 		if(methods.isEmpty())
-			throw new IllegalArgumentException("No matching method: " + methodName);
+			throw new IllegalArgumentException("No matching method " + methodName + " found taking "
+			                                   + args.count() + " args for " + c);
 
 		int methodidx = 0;
 		if(methods.size() > 1)
