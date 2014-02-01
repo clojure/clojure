@@ -90,19 +90,25 @@
 (defn- print-object [o, ^Writer w]
   (when (instance? clojure.lang.IMeta o)
     (print-meta o w))
-  (.write w "#<")
-  (let [name (.getSimpleName (class o))]
-    (when (seq name) ;; anonymous classes have a simple name of ""
-      (.write w name)
-      (.write w " ")))
-  (.write w (str o))
-  (.write w ">"))
+  (if clojure.lang.RemoteRepl/connected
+    (.write w (str "#remote-ref \"" (clojure.lang.RemoteRef/register o) "\""))
+    (do
+      (.write w "#<")
+      (let [name (.getSimpleName (class o))]
+        (when (seq name) ;; anonymous classes have a simple name of ""
+          (.write w name)
+          (.write w " ")))
+      (.write w (str o))
+      (.write w ">"))))
 
 (defmethod print-method Object [o, ^Writer w]
   (print-object o w))
 
 (defmethod print-method clojure.lang.Keyword [o, ^Writer w]
   (.write w (str o)))
+
+(defmethod print-method clojure.lang.Selector [^clojure.lang.Selector o, ^Writer w]
+  (.write w (str "#sel \"" (. o sel) "\"")))
 
 (defmethod print-dup clojure.lang.Keyword [o w] (print-method o w))
 
@@ -168,7 +174,7 @@
 
 (prefer-method print-dup clojure.lang.IPersistentCollection java.util.Collection)
 
-(def ^{:tag String 
+(def ^{:tag String
        :doc "Returns escape string for char or nil if none"
        :added "1.0"}
   char-escape-string
@@ -198,7 +204,7 @@
   (print-sequential "[" pr-on " " "]" v w))
 
 (defn- print-map [m print-one w]
-  (print-sequential 
+  (print-sequential
    "{"
    (fn [e  ^Writer w]
      (do (print-one (key e) w) (.append w \space) (print-one (val e) w)))
@@ -284,7 +290,7 @@
 
 (def ^{:tag String
        :doc "Returns name string for char or nil if none"
-       :added "1.0"} 
+       :added "1.0"}
  char-name-string
    {\newline "newline"
     \tab "tab"
@@ -377,16 +383,18 @@
   (.write w ")"))
 
 (defmethod print-method clojure.lang.IDeref [o ^Writer w]
-  (print-sequential (format "#<%s@%x%s: "
-                            (.getSimpleName (class o))
-                            (System/identityHashCode o)
-                            (if (and (instance? clojure.lang.Agent o)
-                                     (agent-error o))
-                              " FAILED"
-                              ""))
-                    pr-on, "", ">", (list (if (and (instance? clojure.lang.IPending o)
-                                                   (not (.isRealized ^clojure.lang.IPending o)))
-                                            :pending
-                                            @o)), w))
+  (if clojure.lang.RemoteRepl/connected
+    (print-object o w)
+    (print-sequential (format "#<%s@%x%s: "
+                              (.getSimpleName (class o))
+                              (System/identityHashCode o)
+                              (if (and (instance? clojure.lang.Agent o)
+                                       (agent-error o))
+                                " FAILED"
+                                ""))
+                      pr-on, "", ">", (list (if (and (instance? clojure.lang.IPending o)
+                                                     (not (.isRealized ^clojure.lang.IPending o)))
+                                              :pending
+                                              @o)), w)))
 
 (def ^{:private true} print-initialized true)

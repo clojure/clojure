@@ -7035,3 +7035,21 @@
         i (into {} i)]
     `($ ($ ($ NSProxyImpl) :alloc) :initWithClass ~clazz :map
         ~i)))
+
+(defmethod print-method clojure.lang.RemoteRef
+  [^clojure.lang.RemoteRef r, ^java.io.Writer w]
+  (.write w (str "#remote-ref \"" (.getId r) "\"")))
+
+(defmethod print-method clojure.lang.ObjCClass
+  [^clojure.lang.ObjCClass r, ^java.io.Writer w]
+  (.write w (str "#objc-class \"" (.getName r) "\"")))
+
+(defn read-remote-ref [id]
+  (.get (clojure.lang.RemoteRef. id)))
+
+(defn read-sel [name]
+  (clojure.lang.Selector. name))
+
+(alter-var-root #'*data-readers* (fn [m] (merge m {'sel #'read-sel
+                                                   'remote-ref #'read-remote-ref
+                                                   'objc-class #'objc-class})))

@@ -3,8 +3,12 @@ package clojure;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import clojure.lang.RemoteRef;
 import clojure.lang.Namespace;
+import clojure.lang.ObjCClass;
 import clojure.lang.RT;
+import clojure.lang.RemoteRepl;
+import clojure.lang.Selector;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
 
@@ -13,7 +17,9 @@ public class Demo {
   static ArrayList<String> libs = new ArrayList<String>();
 
   public static void main(String[] args) throws Exception {
-    runTests();
+    RT.load("clojure/core");
+    RemoteRepl.listen();
+    //runTests();
   }
 
   public static void runTests() throws IOException, ClassNotFoundException {

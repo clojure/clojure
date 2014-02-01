@@ -62,6 +62,7 @@
 			<arg value="clojure.java.io" />
 			<arg value="clojure.string" />
 			<arg value="clojure.data" />
+			<arg value="clojure.remoterepl" />
 			<!--arg value="clojure.inspector"/-->
 			<!--arg value="clojure.repl"/-->
 			<!--arg value="clojure.java.browse"/-->

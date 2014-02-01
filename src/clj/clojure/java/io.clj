@@ -345,6 +345,7 @@
   (with-open [in (FileInputStream. input)]
     (do-copy in output opts)))
 
+(comment
 (defmethod do-copy [File File] [^File input ^File output opts]
   (with-open [in (-> input FileInputStream. .getChannel)
               out (-> output FileOutputStream. .getChannel)]
@@ -354,6 +355,7 @@
               pos (+ pos bytes-xferred)]
           (when (< pos sz)
             (recur pos)))))))
+)
 
 (defmethod do-copy [String OutputStream] [^String input ^OutputStream output opts]
   (do-copy (StringReader. input) output opts))

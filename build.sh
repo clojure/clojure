@@ -1,7 +1,8 @@
-mvn package -Dmaven.test.skip=true
+#mvn clean
+#mvn install -Dmaven.test.skip=true
 rm -Rf target/objc
 zip -r target/objc.jar target/gen src/jvm test/java
-j2objc -d target/objc -classpath target/classes:target/test-classes target/objc.jar #test/java/java/net/*
+j2objc -d target/objc -classpath target/classes:target/test-classes target/objc.jar
 cp -R src/objc/. target/objc
 
 if [ ! -d "target/include" ]; then
@@ -37,8 +38,9 @@ function build {
 	cd .. 
 }
 
-build "iphoneos" "-arch armv7 -arch armv7s -arch arm64" $IPHONEOS_SDK
-build "iphonesimulator" "-arch i386 -arch x86_64" $IPHONESIMULATOR_SDK
+#build "iphoneos" "-arch armv7 -arch armv7s -arch arm64" $IPHONEOS_SDK
+#build "iphonesimulator" "-arch i386 -arch x86_64" $IPHONESIMULATOR_SDK
+build "iphonesimulator" "-arch i386" $IPHONESIMULATOR_SDK
 
 if [ -f libclojure-objc.a ]; then
 	rm libclojure-objc.a

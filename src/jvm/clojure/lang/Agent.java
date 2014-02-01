@@ -13,6 +13,7 @@
 package clojure.lang;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Agent extends ARef {
@@ -42,11 +43,11 @@ volatile Object state;
 
 //final private static AtomicLong sendOffThreadPoolCounter = new AtomicLong(0);
 
-volatile public static clojure.lang.ExecutorService pooledExecutor =
+volatile public static java.util.concurrent.ExecutorService pooledExecutor =
 	Executors.newFixedThreadPool(2 + Runtime.getRuntime().availableProcessors());
 //,createThreadFactory("clojure-agent-send-pool-%d", sendThreadPoolCounter)
 
-volatile public static clojure.lang.ExecutorService soloExecutor = Executors.newCachedThreadPool();
+volatile public static java.util.concurrent.ExecutorService soloExecutor = Executors.newCachedThreadPool();
 //createThreadFactory("clojure-agent-send-off-pool-%d", sendOffThreadPoolCounter)
 
 final static ThreadLocal<IPersistentVector> nested = new ThreadLocal<IPersistentVector>();

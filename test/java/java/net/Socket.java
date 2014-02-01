@@ -12,4 +12,12 @@ public class Socket {
   public OutputStream getOutputStream() {
     throw new RuntimeException("not implemented");
   }
+
+  public void close() {
+    throw new RuntimeException("not implemented");
+  }
+
+  public void setSoTimeout(int i) {
+    throw new RuntimeException("not implemented");
+  }
 }

@@ -292,6 +292,12 @@ public class RT {
     return arglist;
   }
 
+  public static native void dispatchInMain(final AFn fn) /*-[
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [fn invoke];
+    });
+  ]-*/;
+  
   // duck typing stderr plays nice with e.g. swank
   public static PrintWriter errPrintWriter() {
     Writer w = (Writer) ERR.deref();
@@ -401,7 +407,7 @@ public class RT {
     if (ObjC.objc) {
       return nativeObjcClass(name);
     } else {
-      return null;
+      return new ObjCClass(name);
     }
   }
   
@@ -2148,7 +2154,7 @@ static public InputStream resourceAsStream(ClassLoader loader, String name){
 
   static public Class classForName(String name) {
     try {
-      return Class.forName(ObjC.objc ? objcClassName(name) : name, true, baseLoader());
+      return Class.forName(name, true, baseLoader());
     } catch (ClassNotFoundException e) {
       throw Util.sneakyThrow(e);
     }
@@ -2156,25 +2162,14 @@ static public InputStream resourceAsStream(ClassLoader loader, String name){
 
   static Class classForNameNonLoading(String name) {
     try {
-      return Class.forName(ObjC.objc ? objcClassName(name) : name, false, baseLoader());
+      return Class.forName(name, false, baseLoader());
     } catch (ClassNotFoundException e) {
       throw Util.sneakyThrow(e);
     }
   }
   
-  static String objcClassName(String name) {
-    String[] parts = name.split("[.]");
-    String classname = "";
-    for (int n = 0; n < parts.length - 1; n++) {
-      String s = parts[n];
-      classname += s.substring(0, 1).toUpperCase() + s.substring(1);
-    }
-    return classname + parts[parts.length - 1];
-  }
-  
   static public Class loadClassForName(String name)
       throws ClassNotFoundException {
-    name = ObjC.objc ? objcClassName(name) : name;
     try {
       Class.forName(name, false, baseLoader());
     } catch (ClassNotFoundException e) {
