@@ -9427,10 +9427,10 @@
    :name "code-dispatch",
    :namespace "clojure.pprint",
    :source-url
-   "https://github.com/clojure/clojure/blob/4ca0f7ea17888ba7ed56d2fde0bc2d6397e8e1c0/src/clj/clojure/pprint/dispatch.clj#L448",
+   "https://github.com/clojure/clojure/blob/e8ecfaa1174b91d0f5be0dd8ad2a98bbe9cfdb12/src/clj/clojure/pprint/dispatch.clj#L448",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4ca0f7ea17888ba7ed56d2fde0bc2d6397e8e1c0/src/clj/clojure/pprint/dispatch.clj",
+   "https://github.com/clojure/clojure/raw/e8ecfaa1174b91d0f5be0dd8ad2a98bbe9cfdb12/src/clj/clojure/pprint/dispatch.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.pprint-api.html#clojure.pprint/code-dispatch",
    :doc
@@ -9637,10 +9637,10 @@
    :name "simple-dispatch",
    :namespace "clojure.pprint",
    :source-url
-   "https://github.com/clojure/clojure/blob/4ca0f7ea17888ba7ed56d2fde0bc2d6397e8e1c0/src/clj/clojure/pprint/dispatch.clj#L147",
+   "https://github.com/clojure/clojure/blob/e8ecfaa1174b91d0f5be0dd8ad2a98bbe9cfdb12/src/clj/clojure/pprint/dispatch.clj#L147",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/4ca0f7ea17888ba7ed56d2fde0bc2d6397e8e1c0/src/clj/clojure/pprint/dispatch.clj",
+   "https://github.com/clojure/clojure/raw/e8ecfaa1174b91d0f5be0dd8ad2a98bbe9cfdb12/src/clj/clojure/pprint/dispatch.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.pprint-api.html#clojure.pprint/simple-dispatch",
    :doc
