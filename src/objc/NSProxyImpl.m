@@ -377,14 +377,6 @@
     [super release];
 }
 
--(Class)class {
-    id r = [map valAtWithId:@"class"];
-    if (r != nil) {
-        [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invoke];
-    }
-    return clazz;
-}
-
 -(NSUInteger)retainCount {
     id r = [map valAtWithId:@"retainCount"];
     if (r != nil) {

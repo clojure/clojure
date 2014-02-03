@@ -6998,6 +6998,12 @@
 ;   (.printStackTrace t)
 ;   (throw t)))
 
+(defn objc? [] clojure.lang.ObjC/objc)
+
+(defmacro dispatch-main [& body]
+  `(clojure.lang.RT/dispatchInMain
+    (fn [] ~@body)))
+
 (defn sel [s]
   (clojure.lang.Selector. s))
 
@@ -7053,3 +7059,6 @@
 (alter-var-root #'*data-readers* (fn [m] (merge m {'sel #'read-sel
                                                    'remote-ref #'read-remote-ref
                                                    'objc-class #'objc-class})))
+
+(defn remote-repl []
+  (clojure.lang.RemoteRepl/listen))

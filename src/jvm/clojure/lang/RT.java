@@ -293,7 +293,7 @@ public class RT {
   }
 
   public static native void dispatchInMain(final AFn fn) /*-[
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_sync(dispatch_get_main_queue(), ^{
       [fn invoke];
     });
   ]-*/;
