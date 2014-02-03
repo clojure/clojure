@@ -10,7 +10,11 @@ public class RemoteRepl {
   static Var lister = RT.var("clojure.remoterepl", "listen");
   
   public static Object callRemote(Object o, Object seq) {
-    return callRemoteSel.invoke(o, RT.seq(seq));
+    if (RemoteRepl.connected) {
+      return callRemoteSel.invoke(o, RT.seq(seq));
+    } else {
+      throw new RuntimeException("RemoteRepl not connected");
+    }
   }
 
   public static void setConnected(boolean connected) {

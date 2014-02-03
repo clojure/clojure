@@ -37,11 +37,7 @@ public class Selector extends RestFn implements Named {
   @Override
   protected Object doInvoke(Object o, Object args) {
     if (!ObjC.objc) {
-      if (RemoteRepl.connected) { 
-        return RemoteRepl.callRemote(this, RT.cons(o, args));
-      } else {
-        return null;
-      }
+      return RemoteRepl.callRemote(this, RT.cons(o, args));
     } else {
       String sel = this.sel;
       if (args != null && !sel.endsWith(":")) {

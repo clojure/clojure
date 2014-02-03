@@ -49,11 +49,7 @@ public class RemoteRef extends RestFn {
   
   @Override
   protected Object doInvoke(Object args) {
-    if (ObjC.objc) {
-      return RemoteRepl.callRemote(this, args);
-    } else {
-      throw new RuntimeException("Can only be called from objc");      
-    }
+    return RemoteRepl.callRemote(this, args);
   }
 
   @Override
