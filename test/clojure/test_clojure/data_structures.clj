@@ -13,7 +13,8 @@
   (:use clojure.test
         [clojure.test.generative :exclude (is)])
   (:require [clojure.test-clojure.generators :as cgen]
-            [clojure.data.generators :as gen]))
+            [clojure.data.generators :as gen]
+            [clojure.string :as string]))
 
 
 ;; *** Helper functions ***
@@ -1009,3 +1010,67 @@
        {:a 2 :b -2} (assoc {} :b -2 :a 2))
   (is (thrown? IllegalArgumentException (assoc [] 0 5 1)))
   (is (thrown? IllegalArgumentException (assoc {} :b -2 :a))))
+
+(defn is-same-collection [a b]
+  (let [msg (format "(class a)=%s (class b)=%s a=%s b=%s"
+                    (.getName (class a)) (.getName (class b)) a b)]
+    (is (= (count a) (count b) (.size a) (.size b)) msg)
+    (is (= a b) msg)
+    (is (= b a) msg)
+    (is (.equals ^Object a b) msg)
+    (is (.equals ^Object b a) msg)
+    (is (= (hash a) (hash b)) msg)
+    (is (= (.hashCode ^Object a) (.hashCode ^Object b)) msg)))
+
+(deftest ordered-collection-equality-test
+  (let [empty-colls [ []
+                      '()
+                      (lazy-seq)
+                      clojure.lang.PersistentQueue/EMPTY
+                      (vector-of :long) ]]
+    (doseq [c1 empty-colls, c2 empty-colls]
+      (is-same-collection c1 c2)))
+  (let [colls1 [ [-3 :a "7th"]
+                 '(-3 :a "7th")
+                 (lazy-seq (cons -3
+                   (lazy-seq (cons :a
+                     (lazy-seq (cons "7th" nil))))))
+                 (into clojure.lang.PersistentQueue/EMPTY
+                       [-3 :a "7th"]) ]]
+    (doseq [c1 colls1, c2 colls1]
+      (is-same-collection c1 c2)))
+  (is-same-collection [-3 1 7] (vector-of :long -3 1 7)))
+
+(defn case-indendent-string-cmp [s1 s2]
+  (compare (string/lower-case s1) (string/lower-case s2)))
+
+(deftest set-equality-test
+  (let [empty-sets [ #{}
+                     (hash-set)
+                     (sorted-set)
+                     (sorted-set-by case-indendent-string-cmp) ]]
+    (doseq [s1 empty-sets, s2 empty-sets]
+      (is-same-collection s1 s2)))
+  (let [sets1 [ #{"Banana" "apple" "7th"}
+                (hash-set "Banana" "apple" "7th")
+                (sorted-set "Banana" "apple" "7th")
+                (sorted-set-by case-indendent-string-cmp "Banana" "apple" "7th") ]]
+    (doseq [s1 sets1, s2 sets1]
+      (is-same-collection s1 s2))))
+
+(deftest map-equality-test
+  (let [empty-maps [ {}
+                     (hash-map)
+                     (array-map)
+                     (sorted-map)
+                     (sorted-map-by case-indendent-string-cmp) ]]
+    (doseq [m1 empty-maps, m2 empty-maps]
+      (is-same-collection m1 m2)))
+  (let [maps1 [ {"Banana" "like", "apple" "love", "7th" "indifferent"}
+                (hash-map "Banana" "like", "apple" "love", "7th" "indifferent")
+                (array-map "Banana" "like", "apple" "love", "7th" "indifferent")
+                (sorted-map "Banana" "like", "apple" "love", "7th" "indifferent")
+                (sorted-map-by case-indendent-string-cmp
+                               "Banana" "like", "apple" "love", "7th" "indifferent") ]]
+    (doseq [m1 maps1, m2 maps1]
+      (is-same-collection m1 m2))))

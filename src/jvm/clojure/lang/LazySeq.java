@@ -108,10 +108,6 @@ public int hashCode(){
 }
 
 public int hasheq(){
-	ISeq s = seq();
-	if(s == null)
-		return 1;
-//	return Util.hasheq(seq());
 	return Murmur3.hashOrdered(this);
 }
 

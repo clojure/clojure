@@ -126,10 +126,15 @@ public Object reduce(IFn f, Object start) {
 }
 
 
-    static class EmptyList extends Obj implements IPersistentList, List, ISeq, Counted{
+    static class EmptyList extends Obj implements IPersistentList, List, ISeq, Counted, IHashEq{
+	static final int hasheq = Murmur3.hashOrdered(Collections.EMPTY_LIST);
 
 	public int hashCode(){
 		return 1;
+	}
+
+	public int hasheq(){
+		return hasheq;
 	}
 
     public boolean equals(Object o) {
