@@ -28,7 +28,7 @@ clojure.core and the runtime have a few tweaks to work faster on the objc runtim
 ## Goals
 
  * Write iOS and MacOS apps in clojure
- * Future proof: new features on clojure should be easy to add 
+ * Future proof: changes on clojure should be easy to add 
  * Distribute clojure-objc libs using maven
  * Pure clojure libs should 'just work' (if they only use the jre emulated classes)
  * ObjC dynamic interop
@@ -103,8 +103,6 @@ clojure.core and the runtime have a few tweaks to work faster on the objc runtim
  * clojure.core/bean: missing the emulated jre support
  * clojure.core/case: hashCode in java and hash in objc are different, you can use case but condp will be used instead
  * all java.net (slurp, reader from url, etc.): https://code.google.com/p/j2objc/issues/detail?id=28 (you can always use objc interop for this)
- * many tests fail because NullPointerException is emulated in objc by j2objc, and not perfectly. Don't rely on NullPointerException
- * same applies for ClassCastException
  
 ## Discuss
  
