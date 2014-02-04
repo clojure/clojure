@@ -360,6 +360,12 @@
            (vector-of :int 1 2 "3")
            (vector-of :int "1" "2" "3")))))
 
+(deftest empty-vector-equality
+  (let [colls [[] (vector-of :long) '()]]
+    (doseq [c1 colls, c2 colls]
+      (is (= c1 c2))
+      (is (.equals c1 c2)))))
+
 (defn =vec
   [expected v] (and (vector? v) (= expected v)))
 

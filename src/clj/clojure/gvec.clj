@@ -134,7 +134,9 @@
                (.equals (.nth this i) (nth o i)) (recur (inc i))
                :else false)))
      (or (instance? clojure.lang.Sequential o) (instance? java.util.List o))
-       (.equals (seq this) (seq o))
+       (if-let [st (seq this)]
+         (.equals st (seq o))
+         (nil? (seq o)))
      :else false))
 
   ;todo - cache
