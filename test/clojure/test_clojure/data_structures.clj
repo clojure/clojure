@@ -1074,3 +1074,38 @@
                                "Banana" "like", "apple" "love", "7th" "indifferent") ]]
     (doseq [m1 maps1, m2 maps1]
       (is-same-collection m1 m2))))
+
+;; *** Collection hashes ***
+;; See: http://clojure.org/data_structures#hash
+
+(defn hash-ordered [collection]
+  (-> (reduce (fn [acc e] (unchecked-add-int (unchecked-multiply-int 31 acc) (hash e)))
+              1
+              collection)
+      (mix-collection-hash (count collection))))
+
+(defn hash-unordered [collection]
+  (-> (reduce unchecked-add-int 0 (map hash collection))
+      (mix-collection-hash (count collection))))
+
+(defn gen-elements
+  []
+  (gen/vec gen/anything))
+
+(defspec ordered-collection-hashes-match
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-elements} elem]
+  (let [v (vec elem)
+        l (apply list elem)]
+    (is (= (hash v)
+           (hash l)
+           (hash (map identity elem))
+           (hash-ordered elem)))))
+
+(defspec unordered-set-hashes-match
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-elements} elem]
+  (let [unique-elem (distinct elem)
+        s (into #{} unique-elem)]
+    (is (= (hash s)
+           (hash-unordered unique-elem)))))

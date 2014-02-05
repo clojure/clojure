@@ -91,7 +91,7 @@ public static int hashUnencodedChars(CharSequence input){
 	return fmix(h1, 2 * input.length());
 }
 
-public static int fixCollHash(int hash, int count){
+public static int mixCollHash(int hash, int count){
 	int h1 = seed;
 	int k1 = mixK1(hash);
 	h1 = mixH1(h1, k1);
@@ -108,7 +108,7 @@ public static int hashOrdered(Iterable xs){
 		++n;
 		}
 
-	return fixCollHash(hash, n);
+	return mixCollHash(hash, n);
 }
 
 public static int hashUnordered(Iterable xs){
@@ -120,7 +120,7 @@ public static int hashUnordered(Iterable xs){
 		++n;
 		}	
 
-	return fixCollHash(hash, n);
+	return mixCollHash(hash, n);
 }
 
 private static int mixK1(int k1){
