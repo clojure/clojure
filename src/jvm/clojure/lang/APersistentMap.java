@@ -121,14 +121,15 @@ public int hasheq(){
 }
 
 static public int mapHasheq(IPersistentMap m) {
-	int hash = 0;
-	for(ISeq s = m.seq(); s != null; s = s.next())
-		{
-		Map.Entry e = (Map.Entry) s.first();
-		hash += Util.hasheq(e.getKey()) ^
-				Util.hasheq(e.getValue());
-		}
-	return hash;
+	return Murmur3.hashUnordered(m);
+//	int hash = 0;
+//	for(ISeq s = m.seq(); s != null; s = s.next())
+//		{
+//		Map.Entry e = (Map.Entry) s.first();
+//		hash += Util.hasheq(e.getKey()) ^
+//				Util.hasheq(e.getValue());
+//		}
+//	return hash;
 }
 
 static public class KeySeq extends ASeq{
