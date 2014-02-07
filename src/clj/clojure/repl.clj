@@ -150,7 +150,9 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
                       (read [] (let [i (proxy-super read)]
                                  (.append text (char i))
                                  i)))]
-            (read (PushbackReader. pbr))
+            (if (= :unknown *read-eval*)
+              (throw (IllegalStateException. "Unable to read source while *read-eval* is :unknown."))
+              (read (PushbackReader. pbr)))
             (str text)))))))
 
 (defmacro source

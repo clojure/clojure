@@ -174,6 +174,19 @@
         #{java.lang.Number java.lang.Object
           java.lang.Comparable java.io.Serializable} ))
 
+(deftest test-proxy-super
+  (let [d (proxy [java.util.BitSet] []
+            (flip [bitIndex]
+              (try
+                (proxy-super flip bitIndex)
+                (catch IndexOutOfBoundsException e
+                  (throw (IllegalArgumentException. "replaced"))))))]
+    ;; normal call
+    (is (nil? (.flip d 0)))
+    ;; exception should use proxied form and return IllegalArg
+    (is (thrown? IllegalArgumentException (.flip d -1)))
+    ;; same behavior on second call
+    (is (thrown? IllegalArgumentException (.flip d -1)))))
 
 ; Arrays: [alength] aget aset [make-array to-array into-array to-array-2d aclone]
 ;   [float-array, int-array, etc]

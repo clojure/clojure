@@ -61,3 +61,13 @@
 (deftest test-nil
   (is (= {:k :v} (reduce-kv assoc {:k :v} nil)))
   (is (= 0 (r/fold + nil))))
+
+(deftest test-fold-runtime-exception
+  (is (thrown? IndexOutOfBoundsException
+               (let [test-map-count 1234
+                     k-fail (rand-int test-map-count)]
+                 (r/fold (fn ([])
+                           ([ret [k v]])
+                           ([ret k v] (when (= k k-fail)
+                                        (throw (IndexOutOfBoundsException.)))))
+                         (zipmap (range test-map-count) (repeat :dummy)))))))

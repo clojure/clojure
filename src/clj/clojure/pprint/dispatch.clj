@@ -29,7 +29,7 @@
 ;;; Handle forms that can be "back-translated" to reader macros
 ;;; Not all reader macros can be dealt with this way or at all. 
 ;;; Macros that we can't deal with at all are:
-;;; ;  - The comment character is aborbed by the reader and never is part of the form
+;;; ;  - The comment character is absorbed by the reader and never is part of the form
 ;;; `  - Is fully processed at read time into a lisp expression (which will contain concats
 ;;;      and regular quotes).
 ;;; ~@ - Also fully eaten by the processing of ` and can't be used outside.
