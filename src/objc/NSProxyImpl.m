@@ -60,7 +60,7 @@
     return self;
 }
 
-- (void) forwardInvocation:(NSInvocation *)invocation;
+- (void) forwardInvocation:(NSInvocation *)invocation
 {
     id r = [map valAtWithId:NSStringFromSelector([invocation selector])];
     if (r == nil) {
@@ -70,7 +70,8 @@
         NSString *retType = [ClojureLangRT firstWithId: types];
         types = [ClojureLangRT nextWithId:types];
         id args = [ClojureLangPersistentVector EMPTY];
-        for (int n = 0; n < [ClojureLangRT countFromWithId:types]; n++) {
+        int n = 0;
+        while (types != nil) {
             NSString *f = [ClojureLangRT firstWithId:types];
             id val = nil;
             if ([f isEqualToString:@"float"]) {
@@ -164,7 +165,9 @@
             } else {
                 [invocation getArgument:&val atIndex: 2 + n];
             }
+            n++;
             args = [ClojureLangRT conjWithClojureLangIPersistentCollection:args withId:val];
+            types = [ClojureLangRT nextWithId:types];
         }
         
         id v = [[ClojureLangRT secondWithId:r] applyToWithClojureLangISeq:[ClojureLangRT seqWithId:args]];
@@ -271,88 +274,56 @@
     return NO;
 }
 
--(const char*) makeSignature:(id) types {
+-(const char*) makeSignature:(id)types {
     BOOL first = YES;
     NSString *s = @"";
     for (; types != nil; types = [ClojureLangRT nextWithId:types]) {
         NSString *f = [ClojureLangRT firstWithId:types];
-        NSString *a = @"@";
+        char *a = "@";
         if ([f isEqualToString:@"float"]) {
-            a = @"f";
+            a = @encode(float);
         } else if ([f isEqualToString:@"long long"]) {
-            a = @"q";
+            a = @encode(long long);
         } else if ([f isEqualToString:@"long"]) {
-            a = @"l";
+            a = @encode(long);
         } else if ([f isEqualToString:@"char"]) {
-            a = @"c";
+            a = @encode(char);
         } else if ([f isEqualToString:@"short"]) {
-            a = @"s";
+            a = @encode(short);
         } else if ([f isEqualToString:@"int"]) {
-            a = @"i";
+            a = @encode(int);
         } else if ([f isEqualToString:@"double"]) {
-            a = @"d";
+            a = @encode(double);
         } else if ([f isEqualToString:@"unsigned long long"]) {
-            a = @"Q";
+            a = @encode(unsigned long long);
         } else if ([f isEqualToString:@"unsigned long"]) {
-            a = @"L";
+            a = @encode(unsigned long);
         } else if ([f isEqualToString:@"unsigned char"]) {
-            a = @"C";
+            a = @encode(unsigned char);
         } else if ([f isEqualToString:@"unsigned short"]) {
-            a = @"S";
+            a = @encode(unsigned short);
         } else if ([f isEqualToString:@"unsigned int"]) {
-            a = @"I";
+            a = @encode(unsigned int);
         } else if ([f isEqualToString:@"bool"]) {
-            a = @"c";
+            a = @encode(BOOL);
         } else if ([f isEqualToString:@"CGPoint"]) {
-#ifdef __x86_64__
-            a = @"{CGPoint=dd}";
-#else
-            a = @"{CGPoint=ff}";
-#endif
+            a = @encode(CGPoint);
         } else if ([f isEqualToString:@"NSRange"]) {
-#ifdef __x86_64__
-            a = @"{_NSRange=QQ}";
-#else
-            a = @"{_NSRange=II}";
-#endif
+            a = @encode(NSRange);
         } else if ([f isEqualToString:@"UIEdgeInsets"]) {
-#ifdef __x86_64__
-            a = @"{UIEdgeInsets=dddd}";
-#else
-            a = @"{UIEdgeInsets=ffff}";
-#endif
+            a = @encode(UIEdgeInsets);
         } else if ([f isEqualToString:@"CGSize"]) {
-#ifdef __x86_64__
-            a = @"{CGSize=dd}";
-#else
-            a = @"{CGSize=ff}";
-#endif
+            a = @encode(CGSize);
         } else if ([f isEqualToString:@"CGAffineTransform"]) {
-#ifdef __x86_64__
-            a = @"{CGAffineTransform=dddddd}";
-#else
-            a = @"{CGAffineTransform=ffffff}";
-#endif
+            a = @encode(CGAffineTransform);
         } else if ([f isEqualToString:@"CATransform3D"]) {
-#ifdef __x86_64__
-            a = @"{CATransform3D=dddddddddddddddd}";
-#else
-            a = @"{CATransform3D=ffffffffffffffff}";
-#endif
+            a = @encode(CATransform3D);
         } else if ([f isEqualToString:@"UIOffset"]) {
-#ifdef __x86_64__
-            a = @"{UIOffset=dd}";
-#else
-            a = @"{UIOffset=ff}";
-#endif
+            a = @encode(UIOffset);
         } else if ([f isEqualToString:@"CGRect"]) {
-#ifdef __x86_64__
-            a = @"{CGRect={CGPoint=dd}{CGSize=dd}}";
-#else
-            a = @"{CGRect={CGPoint=ff}{CGSize=ff}}";
-#endif
+            a = @encode(CGRect);
         }
-        s = [s stringByAppendingString:a];
+        s = [s stringByAppendingString:[[NSString alloc] initWithUTF8String:a]];
         if (first) {
             s = [s stringByAppendingString:@"@:"];
             first = NO;

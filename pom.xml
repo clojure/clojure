@@ -45,7 +45,7 @@
 			<groupId>org.clojure</groupId>
 			<artifactId>test.generative</artifactId>
 			<version>0.5.0</version>
-			<!-- <scope>test</scope> -->
+			<scope>test</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.clojure</groupId>
@@ -91,7 +91,6 @@
 							<target>
 								<property name="maven.compile.classpath" refid="maven.compile.classpath" />
 								<ant target="compile-clojure" />
-								<!--  ant target="compile-tests" /-->
 							</target>
 						</configuration>
 					</execution>

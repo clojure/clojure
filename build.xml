@@ -76,12 +76,13 @@
 	
 	<path id="master-classpath">
 	  <pathelement path="${build}"/>
+	  <pathelement path="${maven.test.classpath}" />
 	</path>
 
 	<target name="compile-tests" description="Compile the subset of tests that require compilation." unless="maven.test.skip">
 		<mkdir dir="${test-classes}" />
 		<javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes" fork="yes" debug="true" source="1.6" target="1.6" includeantruntime="no" />
-		<java classname="clojure.lang.Compile" classpath="${maven.compile.classpath}:${test-classes}:${test}:${build}:${cljsrc}" failonerror="true">
+		<java classname="clojure.lang.Compile" classpath="${maven.test.classpath}:${test-classes}:${test}:${build}:${cljsrc}" failonerror="true">
 			<sysproperty key="clojure.compile.path" value="${test-classes}" />
 			<!--<sysproperty key="clojure.compiler.elide-meta" value="[:doc]"/>-->
 			<!--<sysproperty key="clojure.compiler.disable-locals-clearing" value="true"/>-->
