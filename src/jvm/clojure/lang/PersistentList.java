@@ -33,7 +33,7 @@ public static IFn creator = new RestFn(){
 	final protected Object doInvoke(Object args) {
 		if(args instanceof ArraySeq)
 			{
-			Object[] argsarray = (Object[]) ((ArraySeq) args).array;
+			Object[] argsarray = ((ArraySeq) args).array;
 			IPersistentList ret = EMPTY;
 			for(int i = argsarray.length - 1; i >= 0; --i)
 				ret = (IPersistentList) ret.cons(argsarray[i]);

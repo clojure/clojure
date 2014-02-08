@@ -294,6 +294,25 @@ It is implemented with a number of custom enlive templates.\"
   (binding [*print-length* 8] (with-out-str (pprint [1 2 3 4 5 6])))
   "[1 2 3 4 5 6]\n"
 
+  (binding [*print-length* 1] (with-out-str (pprint (sorted-set 1 2 3 4 5 6))))
+  "#{1 ...}\n"
+  (binding [*print-length* 2] (with-out-str (pprint (sorted-set 1 2 3 4 5 6))))
+  "#{1 2 ...}\n"
+  (binding [*print-length* 6] (with-out-str (pprint (sorted-set 1 2 3 4 5 6))))
+  "#{1 2 3 4 5 6}\n"
+  (binding [*print-length* 8] (with-out-str (pprint (sorted-set 1 2 3 4 5 6))))
+  "#{1 2 3 4 5 6}\n"
+
+  (binding [*print-length* 1] (with-out-str (pprint (sorted-map 1 2, 3 4, 5 6, 7 8, 9 10, 11 12))))
+  "{1 2, ...}\n"
+  (binding [*print-length* 2] (with-out-str (pprint (sorted-map 1 2, 3 4, 5 6, 7 8, 9 10, 11 12))))
+  "{1 2, 3 4, ...}\n"
+  (binding [*print-length* 6] (with-out-str (pprint (sorted-map 1 2, 3 4, 5 6, 7 8, 9 10, 11 12))))
+  "{1 2, 3 4, 5 6, 7 8, 9 10, 11 12}\n"
+  (binding [*print-length* 8] (with-out-str (pprint (sorted-map 1 2, 3 4, 5 6, 7 8, 9 10, 11 12))))
+  "{1 2, 3 4, 5 6, 7 8, 9 10, 11 12}\n"
+
+
   (binding [*print-length* 1] (with-out-str (pprint (int-array [1 2 3 4 5 6]))))
   "[1, ...]\n"
   (binding [*print-length* 2] (with-out-str (pprint (int-array [1 2 3 4 5 6]))))

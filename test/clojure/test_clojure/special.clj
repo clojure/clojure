@@ -31,3 +31,35 @@
 (deftest empty-list-with-:as-destructuring
   (let [{:as x} '()]
     (is (= {} x))))
+
+(deftest keywords-in-destructuring
+  (let [{:keys [:a :b]} {:a 1 :b 2}]
+    (is (= 1 a))
+    (is (= 2 b))))
+
+(deftest namespaced-keywords-in-destructuring
+  (let [{:keys [:a/b :c/d]} {:a/b 1 :c/d 2}]
+    (is (= 1 b))
+    (is (= 2 d))))
+
+(deftest namespaced-keys-in-destructuring
+  (let [{:keys [a/b c/d]} {:a/b 1 :c/d 2}]
+    (is (= 1 b))
+    (is (= 2 d))))
+
+(deftest namespaced-syms-in-destructuring
+  (let [{:syms [a/b c/d]} {'a/b 1 'c/d 2}]
+    (is (= 1 b))
+    (is (= 2 d))))
+
+(deftest keywords-not-allowed-in-let-bindings
+  (is (thrown-with-msg? Exception #"Unsupported binding key: :a"
+                        (eval '(let [:a 1] a))))
+  (is (thrown-with-msg? Exception #"Unsupported binding key: :a/b"
+                        (eval '(let [:a/b 1] b)))))
+
+(require '[clojure.string :as s])
+(deftest resolve-keyword-ns-alias-in-destructuring
+  (let [{:keys [::s/x ::s/y]} {:clojure.string/x 1 :clojure.string/y 2}]
+    (is (= x 1))
+    (is (= y 2))))

@@ -89,6 +89,7 @@ public class Compile {
       } catch (IOException e) {
         e.printStackTrace(err);
       }
+      System.exit(0);
     }
   }
 }

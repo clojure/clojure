@@ -207,7 +207,7 @@
       1.2 nil
       "abc" nil ))
 
-;Tests that the comparator is preservered
+;Tests that the comparator is preserved
 ;The first element should be the same in each set if preserved.
 (deftest test-empty-sorted
   (let [inv-compare (comp - compare)]
@@ -1117,10 +1117,10 @@
        [1 2 3 4 5] `(1 2 3 4 5)
        ;maps
        [] {:a 1 :b 2}
-       ;;[:a 1 :b 2] (seq {:a 1 :b 2})
+       [:a 1 :b 2] (sort-by key {:a 1 :b 2})
        [] {[:a :b] 1 :c 2}
-       ;;[:a :b 1 :c 2] (seq {[:a :b] 1 :c 2})
-       ;;[:a 1 2 :b 3] (seq {:a [1 2] :b 3})
+       [:a :b 1 :c 2] (sort-by val {[:a :b] 1 :c 2})
+       [:a 1 2 :b 3] (sort-by key {:a [1 2] :b 3})
        ;Strings
        [] "12345"
        [\1 \2 \3 \4 \5] (seq "12345")

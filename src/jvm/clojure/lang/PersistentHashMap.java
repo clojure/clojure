@@ -447,7 +447,7 @@ final static class ArrayNode implements INode{
 				}
 			catch(Exception e)
 				{
-				//aargh
+				throw Util.sneakyThrow(e);
 				}
 			}
 

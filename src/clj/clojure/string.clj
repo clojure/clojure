@@ -233,18 +233,30 @@ Design notes for clojure.string:
   "Removes whitespace from both ends of string."
   {:added "1.2"}
   [^CharSequence s]
-  (.. s toString trim))
+  (let [len (.length s)]
+    (loop [rindex len]
+      (if (zero? rindex)
+        ""
+        (if (Character/isWhitespace (.charAt s (dec rindex)))
+          (recur (dec rindex))
+          ;; there is at least one non-whitespace char in the string,
+          ;; so no need to check for lindex reaching len.
+          (loop [lindex 0]
+            (if (Character/isWhitespace (.charAt s lindex))
+              (recur (inc lindex))
+              (.. s (subSequence lindex rindex) toString))))))))
 
 (defn ^String triml
   "Removes whitespace from the left side of string."
   {:added "1.2"}
   [^CharSequence s]
-  (loop [index (int 0)]
-    (if (= (.length s) index)
-      ""
-      (if (Character/isWhitespace (.charAt s index))
-        (recur (inc index))
-        (.. s (subSequence index (.length s)) toString)))))
+  (let [len (.length s)]
+    (loop [index 0]
+      (if (= len index)
+        ""
+        (if (Character/isWhitespace (.charAt s index))
+          (recur (unchecked-inc index))
+          (.. s (subSequence index len) toString))))))
 
 (defn ^String trimr
   "Removes whitespace from the right side of string."
@@ -253,8 +265,8 @@ Design notes for clojure.string:
   (loop [index (.length s)]
     (if (zero? index)
       ""
-      (if (Character/isWhitespace (.charAt s (dec index)))
-        (recur (dec index))
+      (if (Character/isWhitespace (.charAt s (unchecked-dec index)))
+        (recur (unchecked-dec index))
         (.. s (subSequence 0 index) toString)))))
 
 (defn ^String trim-newline
