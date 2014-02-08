@@ -6,6 +6,7 @@
   </description>
 
 	<property name="src" location="src" />
+	<property name="gen" location="target/gen" />
 	<property name="test" location="test" />
 	<property name="jsrc" location="${src}/jvm" />
 	<property name="jtestsrc" location="${test}/java" />
@@ -71,11 +72,15 @@
 			<!--arg value="clojure.reflect" /-->
 		</java>
 	</target>
+	
+	<path id="master-classpath">
+	  <pathelement path="${build}"/>
+	</path>
 
 	<target name="compile-tests" description="Compile the subset of tests that require compilation." unless="maven.test.skip">
 		<mkdir dir="${test-classes}" />
 		<javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes" fork="yes" debug="true" source="1.6" target="1.6" includeantruntime="no" />
-		<java classname="clojure.lang.Compile" classpath="${maven.compile.classpath}:${test-classes}:${test}:${build}:${cljsrc}" failonerror="true" fork="true">
+		<java classname="clojure.lang.Compile" classpath="${maven.compile.classpath}:${test-classes}:${test}:${build}:${cljsrc}" failonerror="true">
 			<sysproperty key="clojure.compile.path" value="${test-classes}" />
 			<!--<sysproperty key="clojure.compiler.elide-meta" value="[:doc]"/>-->
 			<!--<sysproperty key="clojure.compiler.disable-locals-clearing" value="true"/>-->
@@ -138,6 +143,9 @@
 			<arg value="clojure.test-clojure.sequences" />
 			<arg value="clojure.test-clojure.for" />
 		</java>
+		<javac srcdir="${gen}" destdir="${test-classes}" includeJavaRuntime="yes" fork="yes" debug="true" source="1.6" target="1.6" includeantruntime="no">
+			<classpath refid="master-classpath"/>	
+		</javac>
 	</target>
 
 	<target name="test" description="Run clojure tests without recompiling clojure." depends="compile-tests" unless="maven.test.skip">
@@ -146,6 +154,7 @@
 				<pathelement path="${maven.test.classpath}" />
 				<path location="${test-classes}" />
 				<path location="${test}" />
+				<path location="${gen}" />
 				<path location="${build}" />
 				<path location="${cljsrc}" />
 			</classpath>
