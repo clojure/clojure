@@ -135,7 +135,7 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
   {:added "1.0"}
   [name]
   (if-let [special-name ('{& fn catch try finally try} name)]
-    (#'print-doc (#'special-doc special-name))
+    `(#'print-doc (#'special-doc '~special-name))
     (cond
       (special-doc-map name) `(#'print-doc (#'special-doc '~name))
       (keyword? name) `(#'print-doc {:spec '~name :doc '~(spec/describe name)})

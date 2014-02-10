@@ -8,7 +8,9 @@
 (deftest test-doc
   (testing "with namespaces"
     (is (= "clojure.pprint"
-           (second (str/split-lines (with-out-str (doc clojure.pprint))))))))
+           (second (str/split-lines (with-out-str (doc clojure.pprint)))))))
+  (testing "with special cases"
+    (is (= (with-out-str (doc catch)) (with-out-str (doc try))))))
 
 (deftest test-source
   (is (= "(defn foo [])" (source-fn 'clojure.test-clojure.repl.example/foo)))
