@@ -192,6 +192,9 @@ static int r0_size = sizeof(unsigned long long);
 BOOL use_stret(id object, NSString* selector) {
     SEL sel = NSSelectorFromString(selector);
     Method method = class_getInstanceMethod([object class], sel);
+    if (method == nil) {
+        method = class_getClassMethod([object class], sel);
+    }
     char ret[256];
     method_getReturnType(method, ret, 256);
     char t = [NSCommon signatureToType:ret];
@@ -731,6 +734,7 @@ BOOL use_stret(id object, NSString* selector) {
         case _C_UCHR: return uchar_type;
         case _C_USHT: return ushort_type;
         case _C_UINT: return uint_type;
+        case _C_VOID: return void_type;
         case _C_CHARPTR:
         case _C_SEL:
         case _C_PTR:

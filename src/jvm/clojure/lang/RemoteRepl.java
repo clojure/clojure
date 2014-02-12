@@ -13,7 +13,8 @@ public class RemoteRepl {
     if (RemoteRepl.connected) {
       return callRemoteSel.invoke(o, RT.seq(seq));
     } else {
-      throw new RuntimeException("RemoteRepl not connected");
+      //throw new RuntimeException("RemoteRepl not connected");
+      return null;
     }
   }
 
