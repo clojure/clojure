@@ -35,17 +35,33 @@
     (should-print-err-message
      #"Reflection warning, .*:\d+:\d+ - reference to field blah can't be resolved\.\r?\n"
      (defn foo [x] (.blah x))))
-  (testing "reflection cannot resolve instance method"
+  (testing "reflection cannot resolve field on known class"
     (should-print-err-message
-     #"Reflection warning, .*:\d+:\d+ - call to zap can't be resolved\.\r?\n"
+     #"Reflection warning, .*:\d+:\d+ - reference to field blah on java\.lang\.String can't be resolved\.\r?\n"
+     (defn foo [^String x] (.blah x))))
+  (testing "reflection cannot resolve instance method because it is missing"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+:\d+ - call to method zap on java\.lang\.String can't be resolved \(no such method\)\.\r?\n"
+     (defn foo [^String x] (.zap x 1))))
+  (testing "reflection cannot resolve instance method because it has incompatible argument types"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+:\d+ - call to method getBytes on java\.lang\.String can't be resolved \(argument types: java\.util\.regex\.Pattern\)\.\r?\n"
+     (defn foo [^String x] (.getBytes x #"boom"))))
+  (testing "reflection cannot resolve instance method because it has unknown argument types"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+:\d+ - call to method getBytes on java\.lang\.String can't be resolved \(argument types: unknown\)\.\r?\n"
+     (defn foo [^String x y] (.getBytes x y))))
+  (testing "reflection cannot resolve instance method because target class is unknown"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+:\d+ - call to method zap can't be resolved \(target class is unknown\)\.\r?\n"
      (defn foo [x] (.zap x 1))))
   (testing "reflection cannot resolve static method"
     (should-print-err-message
-     #"Reflection warning, .*:\d+:\d+ - call to valueOf can't be resolved\.\r?\n"
+     #"Reflection warning, .*:\d+:\d+ - call to static method valueOf on java\.lang\.Integer can't be resolved \(argument types: java\.util\.regex\.Pattern\)\.\r?\n"
      (defn foo [] (Integer/valueOf #"boom"))))
   (testing "reflection cannot resolve constructor"
     (should-print-err-message
-     #"Reflection warning, .*:\d+:\d+ - call to java.lang.String ctor can't be resolved\.\r?\n"
+     #"Reflection warning, .*:\d+:\d+ - call to java\.lang\.String ctor can't be resolved\.\r?\n"
      (defn foo [] (String. 1 2 3)))))
 
 (def example-var)
