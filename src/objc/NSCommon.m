@@ -216,7 +216,7 @@ BOOL use_stret(id object, NSString* selector) {
     
     // Register main functions
     reg_c(objc_msgSend);
-#if !(__LP64__)
+#ifndef __arm64__
     reg_c(objc_msgSend_stret);
     reg_c(objc_msgSendSuper_stret);
 #endif
@@ -763,10 +763,10 @@ BOOL use_stret(id object, NSString* selector) {
 }
 
 + (id) invokeSel:(id)object withSelector:(NSString*)selector withArgs:(id<ClojureLangISeq>)arguments {
-#if __LP64__
-    NSString *s = @"objc_msgSend";
-#else
+#ifndef __arm64__
     NSString *s = (use_stret(object, selector) ? @"objc_msgSend_stret" : @"objc_msgSend");
+#else
+    NSString *s = @"objc_msgSend";
 #endif
     return [NSCommon invokeFun:s withSelf:object withSelector:selector withArgs:arguments];
 }
@@ -781,10 +781,10 @@ BOOL use_stret(id object, NSString* selector) {
     id types = [assoc invokeWithId:[NSCommon signaturesToTypes:sig] withId:[[JavaLangInteger alloc] initWithInt:1] withId:[[JavaLangCharacter alloc] initWithChar:pointer_type]];
     id args = [cons invokeWithId:[NSValue valueWithPointer:NSSelectorFromString(selector)] withId:arguments];
     args = [cons invokeWithId:[NSValue valueWithPointer:(void*)&superData] withId:args];
-#if __LP64__
-    NSString *s = @"objc_msgSendSuper";
-#else
+#ifndef __arm64__
     NSString *s = (use_stret(object, selector) ? @"objc_msgSendSuper_stret" : @"objc_msgSendSuper");
+#else
+    NSString *s = @"objc_msgSendSuper";
 #endif
     return [NSCommon ccall:s types:types args:args];
 }

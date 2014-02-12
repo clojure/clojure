@@ -2,9 +2,11 @@ mvn clean
 mvn compile
 mvn test-compile
 rm -Rf target/objc
+mkdir target/objc
+cp -R src/objc/. target/objc
+cp -R src/ffi/. target/objc
 zip -r target/objc.jar target/gen src/jvm test/java
 j2objc -d target/objc -classpath target/classes:target/test-classes target/objc.jar
-cp -R src/objc/. target/objc
 
 if [ ! -d "target/include" ]; then
 	mkdir target/include
