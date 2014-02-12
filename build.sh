@@ -1,5 +1,6 @@
-#mvn clean
-#mvn install -Dmaven.test.skip=true
+mvn clean
+mvn compile
+mvn test-compile
 rm -Rf target/objc
 zip -r target/objc.jar target/gen src/jvm test/java
 j2objc -d target/objc -classpath target/classes:target/test-classes target/objc.jar
@@ -16,12 +17,11 @@ cd ..
 
 echo building static lib...
 
-J2OBJC=/Users/admin/projects/j2objc
 OBJC=$(pwd)/objc
 IPHONEOS_SDK="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk"
 IPHONESIMULATOR_SDK="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk"
 FRAMEWORKS="-framework UIKit -framework Foundation"
-INCLUDES="-I$J2OBJC/dist/include -I$(pwd)/objc"
+INCLUDES="-I$J2OBJC_HOME/include -I$(pwd)/objc -I$(pwd)/../src/ffi"
 OPTS="-miphoneos-version-min=5.0 -fmessage-length=0 -fmacro-backtrace-limit=0 -std=gnu99 -fpascal-strings -O0 -DDEBUG=1 -fstrict-aliasing -Wno-unsequenced -MT dependencies"
 function build {
 	NAME=$1
