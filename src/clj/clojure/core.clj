@@ -4694,6 +4694,7 @@
    :static true}
   [x] (. clojure.lang.Util (hasheq x)))
 
+
 (defn mix-collection-hash
   "Mix final collection hash for ordered or unordered collections.
    hash-basis is the combined collection hash, count is the number
@@ -4703,6 +4704,24 @@
   {:added "1.6"
    :static true}
   [^long hash-basis count] (clojure.lang.Murmur3/mixCollHash hash-basis count))
+
+(defn hash-ordered-coll
+  "Returns the hash code, consistent with =, for an external ordered
+   collection implementing Iterable.
+   See http://clojure.org/data_structures#hash for full algorithms."
+  {:added "1.6"
+   :static true}
+  [coll] (clojure.lang.Murmur3/hashOrdered coll))
+
+(defn hash-unordered-coll
+  "Returns the hash code, consistent with =, for an external unordered
+   collection implementing Iterable. For maps, the iterator should
+   return map entries whose hash is computed as
+     (hash-ordered-coll [k v]).
+   See http://clojure.org/data_structures#hash for full algorithms."
+  {:added "1.6"
+   :static true}
+  [coll] (clojure.lang.Murmur3/hashUnordered coll))
 
 (defn interpose
   "Returns a lazy seq of the elements of coll separated by sep"
