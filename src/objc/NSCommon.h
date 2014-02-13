@@ -31,7 +31,6 @@
 // CGRect
 // id
 // void
-// pointer
 
 #import <Foundation/Foundation.h>
 #import "clojure/lang/AFn.h"
@@ -77,7 +76,7 @@ static const char pointer_type = 'Y';
 
 +(const char*)makeSignature:(id)types;
 
-+(void)callWithInvocation:(NSInvocation *)invocation withTypes:(id)types withFn:(ClojureLangAFn*)fn;
++(void)callWithInvocation:(NSInvocation *)invocation withSelf:(id)sself withTypes:(id)types withFn:(ClojureLangAFn*)fn;
 
 +(char)signatureToType:(const char*)c;
 
@@ -85,8 +84,8 @@ static const char pointer_type = 'Y';
 
 +(id)invokeFun:(NSString*)fun withSelf:(id)object withSelector:(NSString*)selector withArgs:(id<ClojureLangISeq>)arguments;
 
-+ (id) invokeSel:(id)object withSelector:(NSString*)selector withArgs:(id<ClojureLangISeq>)arguments;
++(id)invokeSel:(id)object withSelector:(NSString*)selector withArgs:(id<ClojureLangISeq>)arguments;
 
-+ (id) invokeSuperSel:(id)object withSelector:(NSString*)selector withArgs:(id<ClojureLangISeq>)arguments;
++(id)invokeSuperSel:(id)object withSelector:(NSString*)selector withArgs:(id<ClojureLangISeq>)arguments;
 
 @end

@@ -34,7 +34,7 @@
     if (r == nil) {
         [invocation invokeWithTarget:instance];
     } else {
-        [NSCommon callWithInvocation:invocation withTypes:[ClojureLangRT firstWithId:r] withFn:[ClojureLangRT secondWithId:r]];
+        [NSCommon callWithInvocation:invocation withSelf:nil withTypes:[ClojureLangRT firstWithId:r] withFn:[ClojureLangRT secondWithId:r]];
     }
 }
 

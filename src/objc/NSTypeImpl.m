@@ -10,152 +10,67 @@
 #import "objc/runtime.h"
 #import "objc/message.h"
 #import "clojure/lang/Atom.h"
-#import "clojure/lang/APersistentMap.h"
-#import "clojure/lang/PersistentVector.h"
-#import "clojure/lang/PersistentHashMap.h"
+#import "java/lang/RuntimeException.h"
+#import "java/lang/Character.h"
 #import "clojure/lang/RT.h"
 #import "NSCommon.h"
 #import <UIKit/UIKit.h>
 
 static ClojureLangAtom *dynamicClasses;
 
+#define va_arg_p(type)\
+    {\
+    type v = va_arg(ap, type); \
+    [i setArgument:&v atIndex:n];\
+    break;\
+    }\
+
 #define dispatch_args(self, sel) \
-va_list ap; \
-va_start(ap, sel); \
-id o = [ClojureLangRT getWithId:[dynamicClasses deref] withId:NSStringFromClass([self class])]; \
-id s = [ClojureLangRT getWithId:o withId:NSStringFromSelector(sel)]; \
-id fn = [ClojureLangRT firstWithId:s]; \
-id types = [NSCommon signaturesToTypes:[[self class] methodSignatureForSelector:sel]]; \
-types = [ClojureLangRT nextWithId:types]; \
-NSInvocation *i = [NSInvocation new]; \
-[i setSelector:sel]; \
-[i setArgument:&self atIndex:0]; \
-int n = 1; \
-while (types != nil) { \
-    void * p; \
-    switch (to_char([ClojureLangRT firstWithId:types])) { \
-        case float_type: { \
-            float v = va_arg(ap, double); \
-            p = &v; \
-            break; \
-        } \
-        case longlong_type: { \
-            long long v = va_arg(ap, long long); \
-            p = &v; \
-            break; \
-        } \
-        case long_type: { \
-            long v = va_arg(ap, long); \
-            p = &v; \
-            break; \
-        } \
-        case char_type: { \
-            char v = va_arg(ap, int); \
-            p = &v; \
-            break; \
-        } \
-        case short_type: { \
-            short v = va_arg(ap, int); \
-            p = &v; \
-            break; \
-        } \
-        case int_type: { \
-            int v = va_arg(ap, int); \
-            p = &v; \
-            break; \
-        } \
-        case double_type: { \
-            double v = va_arg(ap, double); \
-            p = &v; \
-            break; \
-        } \
-        case ulong_type: { \
-            unsigned long v = va_arg(ap, unsigned long); \
-            p = &v; \
-            break; \
-        } \
-        case ulonglong_type: { \
-            unsigned long long v = va_arg(ap, unsigned long long); \
-            p = &v; \
-            break; \
-        } \
-        case uchar_type: { \
-            unsigned char v = va_arg(ap, unsigned int); \
-            p = &v; \
-            break; \
-        } \
-        case ushort_type: { \
-            unsigned short v = va_arg(ap, unsigned int); \
-            p = &v; \
-            break; \
-        } \
-        case uint_type: { \
-            unsigned int v = va_arg(ap, unsigned int); \
-            p = &v; \
-            break; \
-        } \
-        case bool_type: { \
-            BOOL v = va_arg(ap, int) == 1 ? YES : NO; \
-            p = &v; \
-            break; \
-        } \
-        case id_type: { \
-            void * v = va_arg(ap, void *); \
-            p = &v; \
-            break; \
-        } \
-        case cgpoint_type: { \
-            CGPoint v = va_arg(ap, CGPoint); \
-            p = &v; \
-            break; \
-        } \
-        case nsrange_type: { \
-            NSRange v = va_arg(ap, NSRange); \
-            p = &v; \
-            break; \
-        } \
-        case uiedge_type: { \
-            UIEdgeInsets v = va_arg(ap, UIEdgeInsets); \
-            p = &v; \
-            break; \
-        } \
-        case cgsize_type: { \
-            CGSize v = va_arg(ap, CGSize); \
-            p = &v; \
-            break; \
-        } \
-        case cgafflinetransform_type: { \
-            CGAffineTransform v = va_arg(ap, CGAffineTransform); \
-            p = &v; \
-            break; \
-        } \
-        case catransform3d_type: { \
-            CATransform3D v = va_arg(ap, CATransform3D); \
-            p = &v; \
-            break; \
-        } \
-        case uioffset_type: { \
-            UIOffset v = va_arg(ap, UIOffset); \
-            p = &v; \
-            break; \
-        } \
-        case cgrect_type: { \
-            CGRect v = va_arg(ap, CGRect); \
-            p = &v; \
-            break; \
-        } \
-        case pointer_type: { \
-            void* v = va_arg(ap, void*); \
-            p = &v; \
-            break; \
-        } \
-    } \
-    [i setArgument:&p atIndex:n]; \
-    n++; \
+    va_list ap; \
+    va_start(ap, sel); \
+    id o = [ClojureLangRT getWithId:[dynamicClasses deref] withId:NSStringFromClass([self class])]; \
+    id fn = [ClojureLangRT getWithId:o withId:NSStringFromSelector(sel)]; \
+    id sig = [self methodSignatureForSelector:sel]; \
+    id types = [NSCommon signaturesToTypes:sig]; \
+    id retType = [ClojureLangRT firstWithId:types]; \
     types = [ClojureLangRT nextWithId:types]; \
-} \
-va_end(ap); \
-[NSCommon callWithInvocation:i withTypes:types withFn:fn]; \
+    types = [ClojureLangRT nextWithId:types]; \
+    types = [ClojureLangRT nextWithId:types]; \
+    id ttypes = types; \
+    NSInvocation *i = [NSInvocation invocationWithMethodSignature:sig]; \
+    [i setSelector:sel]; \
+    int n = 2; \
+    while (types != nil) { \
+        switch (to_char([ClojureLangRT firstWithId:types])) { \
+            case float_type: va_arg_p(double)\
+            case longlong_type: va_arg_p(long long)\
+            case long_type: va_arg_p(long)\
+            case char_type: va_arg_p(int)\
+            case short_type: va_arg_p(int)\
+            case int_type: va_arg_p(int)\
+            case double_type: va_arg_p(double)\
+            case ulong_type: va_arg_p(unsigned long)\
+            case ulonglong_type: va_arg_p(unsigned long long)\
+            case uchar_type: va_arg_p(int)\
+            case ushort_type: va_arg_p(int)\
+            case uint_type: va_arg_p(unsigned int)\
+            case bool_type: va_arg_p(int)\
+            case id_type: va_arg_p(id)\
+            case cgpoint_type: va_arg_p(CGPoint)\
+            case nsrange_type: va_arg_p(NSRange)\
+            case uiedge_type: va_arg_p(UIEdgeInsets)\
+            case cgsize_type: va_arg_p(CGSize)\
+            case cgafflinetransform_type: va_arg_p(CGAffineTransform)\
+            case catransform3d_type: va_arg_p(CATransform3D)\
+            case uioffset_type: va_arg_p(UIOffset)\
+            case cgrect_type: va_arg_p(CGRect)\
+            case pointer_type: va_arg_p(void*)\
+        } \
+        n++; \
+        types = [ClojureLangRT nextWithId:types]; \
+    } \
+    va_end(ap); \
+    [NSCommon callWithInvocation:i withSelf:self withTypes:[ClojureLangRT consWithId:retType withId:ttypes] withFn:fn]; \
 
 #define dispatch_args_r(self, sel, type)\
     dispatch_args(self, sel);\
@@ -295,18 +210,23 @@ IMP getDispatch(char c) {
 }
 
 +(Class) makeClassWithName:(NSString*)name superclass:(NSString*)s map:(ClojureLangAPersistentMap*)m {
-    [dynamicClasses swapWithClojureLangIFn:[[ClojureLangRT varWithNSString:@"clojure.core" withNSString:@"assoc"] deref] withId:name withId:m];
+    [dynamicClasses swapWithClojureLangIFn:[[ClojureLangRT varWithNSString:@"clojure.core" withNSString:@"assoc"] deref]
+                                    withId:name withId:m];
     Class superc = NSClassFromString(s);
     Class clazz = objc_allocateClassPair(superc, [name UTF8String], 0);
-    
+    if (clazz == nil) {
+        @throw [[JavaLangRuntimeException alloc] initWithNSString:[@"Class already exists: " stringByAppendingString:name]];
+    }
     id seq = [m seq];
     while (seq != nil) {
         id f = [ClojureLangRT firstWithId:seq];
         SEL sel = NSSelectorFromString([ClojureLangRT firstWithId:f]);
-        Method method = class_getInstanceMethod(superc, sel);
+        Method method = class_getClassMethod(superc, sel);
+        if (method == nil) {
+            method = class_getInstanceMethod(superc, sel);
+        }
         char ret[256];
         method_getReturnType(method, ret, 256);
-        
         class_addMethod(clazz, sel, getDispatch([NSCommon signatureToType:ret]), method_getTypeEncoding(method));
         seq = [ClojureLangRT nextWithId:seq];
     }

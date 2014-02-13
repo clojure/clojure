@@ -120,5 +120,22 @@
       `(defn ~n [& args#] (ccall ~nn (apply conj ~types (types-for-vals (drop (dec (count ~types)) args#))) args#))
       `(defn ~n [& args#] (ccall ~nn ~types args#)))))
 
+(defmacro nstype [na super & methods]
+  (let [na (name na)
+        super (name super)
+        i (map (fn [[args & body]]
+                 (let [self-sym (first args)
+                       args (next args)
+                       sel (take-nth 2 args)
+                       fields (take-nth 2 (next args))
+                       sel (if (pos? (count fields))
+                             (reduce str (map #(str (name %) ":") sel))
+                             (reduce str (map name sel)))]
+                   `[~sel (fn [~self-sym ~@fields] ~@body)]))
+               methods)
+        i (into {} i)]
+    `($ ($ NSTypeImpl) :makeClassWithName ~na :superclass ~super :map
+        ~i)))
+
 (defn remote-repl []
   (clojure.lang.RemoteRepl/listen))
