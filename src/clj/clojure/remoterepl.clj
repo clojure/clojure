@@ -38,7 +38,7 @@
     (let [[id r] f]
       (swap! responses assoc id r))
     (let [[id f args] f]
-      (if (objc?)
+      (if objc?
         ($ @repl :println (pr-str [id (apply f args)]))
         (future (.println @repl (pr-str [id (apply f args)])))))))
 
@@ -53,7 +53,7 @@
   (let [args (vec args)
         id (keyword (uuid))
         msg (pr-str [id sel args])]
-    (if (objc?)
+    (if objc?
       ($ @repl :println msg)
       (.println @repl msg))
     (loop []
@@ -64,7 +64,7 @@
           r)
         (do
           (Thread/sleep 10)
-          (when (objc?)
+          (when objc?
             (do-pendings))
           (recur))))))
 
@@ -90,6 +90,6 @@
 (defn listen []
   (clojure.lang.RemoteRepl/setConnected true)
   (future
-    (if (objc?)
+    (if objc?
       (listen-objc)
       (listen-jvm))))
