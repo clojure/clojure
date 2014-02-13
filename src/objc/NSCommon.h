@@ -31,6 +31,7 @@
 // CGRect
 // id
 // void
+// pointer
 
 #import <Foundation/Foundation.h>
 #import "clojure/lang/AFn.h"

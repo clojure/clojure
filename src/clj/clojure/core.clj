@@ -7028,13 +7028,40 @@
           `((clojure.lang.Selector. ~selector) ~t ~@params)
           `((clojure.lang.Selector. ~selector) ~t))))))
 
+(def objc-types
+  {:void \v
+   :float \f
+   :longlong \q
+   :long \l
+   :char \c
+   :short \s
+   :int \i
+   :double \d
+   :ulonglong \Q
+   :ulong \L
+   :uchar \C
+   :ushort \S
+   :uint \I
+   :bool \b
+   :cgpoint \P
+   :nsrange \N
+   :uiedge \E
+   :cgsize \Z
+   :cgafflinetransform \A
+   :catransform3d \T
+   :uioffset \O
+   :cgrect \R
+   :id \p
+   :pointer \Y
+   :cgfloat (if ($ ($ NSCommon) :cgfloatIsDouble) \d \f)})
+
 (defmacro nsproxy [& methods]
   (let [has-class (not (list? (first methods)))
         clazz (when has-class (name (first methods)))
         methods (if has-class (next methods) methods)
         i (map (fn [[[ret & args] & body]]
-                 (let [ret (.replaceAll (name ret) "-" " ")
-                       types (map #(.replaceAll (name %) "-" " ") (take-nth 3 (next args)))
+                 (let [ret (objc-types ret)
+                       types (map objc-types (map keyword (take-nth 3 (next args))))
                        sel (take-nth 3 args)
                        fields (take-nth 3 (next (next args)))
                        sel (if (pos? (count fields))
