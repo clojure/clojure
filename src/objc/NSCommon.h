@@ -80,7 +80,7 @@ static const char pointer_type = 'Y';
 
 +(char)signatureToType:(const char*)c;
 
-+(id)signaturesToTypes:(NSMethodSignature*)sig;
++(id)signaturesToTypes:(NSMethodSignature*)sig skipSel:(BOOL)skip;
 
 +(id)invokeFun:(NSString*)fun withSelf:(id)object withSelector:(NSString*)selector withArgs:(id<ClojureLangISeq>)arguments;
 

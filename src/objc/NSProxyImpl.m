@@ -34,7 +34,7 @@
     if (r == nil) {
         [invocation invokeWithTarget:instance];
     } else {
-        [NSCommon callWithInvocation:invocation withSelf:nil withTypes:[ClojureLangRT firstWithId:r] withFn:[ClojureLangRT secondWithId:r]];
+        [NSCommon callWithInvocation:invocation withSelf:self withTypes:[ClojureLangRT firstWithId:r] withFn:[ClojureLangRT secondWithId:r]];
     }
 }
 
@@ -67,7 +67,7 @@
 -(id)retain {
     id r = [map valAtWithId:@"retain"];
     if (r != nil) {
-        [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invoke];
+        [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invokeWithId:self];
     }
     return [super retain];
 }
@@ -75,7 +75,7 @@
 -(oneway void)release {
     id r = [map valAtWithId:@"release"];
     if (r != nil) {
-        [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invoke];
+        [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invokeWithId:self];
     }
     [super release];
 }
@@ -83,7 +83,7 @@
 -(NSUInteger)retainCount {
     id r = [map valAtWithId:@"retainCount"];
     if (r != nil) {
-        [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invoke];
+        [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invokeWithId:self];
     }
     return [super retainCount];
 }
@@ -91,7 +91,7 @@
 -(void)dealloc {
     id r = [map valAtWithId:@"dealloc"];
     if (r != nil) {
-        [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invoke];
+        [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invokeWithId:self];
     }
     [instance release];
     [map release];
@@ -101,7 +101,7 @@
 -(NSString*)description {
     id r = [map valAtWithId:@"description"];
     if (r != nil) {
-        return [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invoke];
+        return [(ClojureLangAFn*)[ClojureLangRT secondWithId:r] invokeWithId:self];
     } else {
         return [instance description];
     }

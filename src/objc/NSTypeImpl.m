@@ -29,12 +29,17 @@ static ClojureLangAtom *dynamicClasses;
     va_list ap; \
     va_start(ap, sel); \
     id o = [ClojureLangRT getWithId:[dynamicClasses deref] withId:NSStringFromClass([self class])]; \
-    id fn = [ClojureLangRT getWithId:o withId:NSStringFromSelector(sel)]; \
-    id sig = [self methodSignatureForSelector:sel]; \
-    id types = [NSCommon signaturesToTypes:sig]; \
+    id pair = [ClojureLangRT getWithId:o withId:NSStringFromSelector(sel)]; \
+    id fn =  [ClojureLangRT secondWithId:pair];\
+    id types = [ClojureLangRT firstWithId:pair];\
+    id sig;\
+    if (types == nil) { \
+        sig = [self methodSignatureForSelector:sel]; \
+        types = [NSCommon signaturesToTypes:sig skipSel:YES]; \
+    } else {\
+        sig = [NSMethodSignature signatureWithObjCTypes:[NSCommon makeSignature:types]];\
+    }\
     id retType = [ClojureLangRT firstWithId:types]; \
-    types = [ClojureLangRT nextWithId:types]; \
-    types = [ClojureLangRT nextWithId:types]; \
     types = [ClojureLangRT nextWithId:types]; \
     id ttypes = types; \
     NSInvocation *i = [NSInvocation invocationWithMethodSignature:sig]; \
@@ -221,21 +226,26 @@ IMP getDispatch(char c) {
     while (seq != nil) {
         id f = [ClojureLangRT firstWithId:seq];
         SEL sel = NSSelectorFromString([ClojureLangRT firstWithId:f]);
-        Method method = class_getClassMethod(superc, sel);
-        if (method == nil) {
-            method = class_getInstanceMethod(superc, sel);
+        id types = [ClojureLangRT firstWithId:[ClojureLangRT secondWithId:f]];
+        void * d;
+        const char * enc;
+        if (types == nil) {
+            Method method = class_getClassMethod(superc, sel);
+            if (method == nil) {
+                method = class_getInstanceMethod(superc, sel);
+            }
+            char ret[256];
+            method_getReturnType(method, ret, 256);
+            d = getDispatch([NSCommon signatureToType:ret]);
+            enc = method_getTypeEncoding(method);
+        } else {
+            id r = [ClojureLangRT firstWithId:types];
+            d = getDispatch(to_char(r));
+            enc = [NSCommon makeSignature:types];
         }
-        char ret[256];
-        method_getReturnType(method, ret, 256);
-        class_addMethod(clazz, sel, getDispatch([NSCommon signatureToType:ret]), method_getTypeEncoding(method));
+        class_addMethod(clazz, sel, d, enc);
         seq = [ClojureLangRT nextWithId:seq];
     }
-    
-    // Add state ivar
-    /*char *enc = @encode(id);
-    NSUInteger pos, align;
-    NSGetSizeAndAlignment(enc, &pos, &align);
-    class_addIvar(clazz, "state", align, align, enc);*/
     
     objc_registerClassPair(clazz);
     return clazz;

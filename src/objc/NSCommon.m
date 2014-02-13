@@ -219,11 +219,11 @@ BOOL use_stret(id object, NSString* selector) {
     
     // Register main functions
     reg_c(objc_msgSend);
+    reg_c(objc_msgSendSuper);
 #ifndef __arm64__
     reg_c(objc_msgSend_stret);
     reg_c(objc_msgSendSuper_stret);
 #endif
-    reg_c(objc_msgSendSuper);
     reg_c(NSStringFromClass);
     reg_c(NSSelectorFromString);
     reg_c(NSClassFromString);
@@ -232,6 +232,8 @@ BOOL use_stret(id object, NSString* selector) {
     reg_c(CGRectMake);
     reg_c(CGSizeMake);
     reg_c(CGPointMake);
+    reg_c(objc_getAssociatedObject);
+    reg_c(objc_setAssociatedObject);
 }
 
 +(void)registerCFunction:(NSString*)name fn:(void*)fn {
@@ -403,7 +405,6 @@ BOOL use_stret(id object, NSString* selector) {
         case ushort_type: return [[JavaLangShort alloc] initWithShort:*(unsigned short*)result_value];
         case uint_type: return [[JavaLangInteger alloc] initWithInt:*(unsigned int*)result_value];
         case bool_type: return *(char*)result_value == YES ? [JavaLangBoolean getTRUE] : [JavaLangBoolean getFALSE];
-        case id_type: return *(void**)result_value;
         case cgpoint_type: return [NSValue valueWithCGPoint:*(CGPoint*)result_value];
         case nsrange_type: return [NSValue valueWithRange:*(NSRange*)result_value];
         case uiedge_type: return [NSValue valueWithUIEdgeInsets:*(UIEdgeInsets*)result_value];
@@ -414,7 +415,7 @@ BOOL use_stret(id object, NSString* selector) {
         case cgrect_type: return [NSValue valueWithCGRect:*(CGRect*)result_value];
         case pointer_type: return [NSValue valueWithPointer:*(void**)result_value];
     }
-    return result_value;
+    return *(void**)result_value;
 }
 
 +(void)callWithInvocation:(NSInvocation *)invocation withSelf:(id)sself withTypes:(id)types withFn: (ClojureLangAFn*) fn
@@ -422,9 +423,7 @@ BOOL use_stret(id object, NSString* selector) {
     id retType = [ClojureLangRT firstWithId: types];
     types = [ClojureLangRT nextWithId:types];
     id args = [ClojureLangPersistentVector EMPTY];
-    if (sself != nil) {
-        args = [conj invokeWithId:args withId:sself];
-    }
+    args = [conj invokeWithId:args withId:sself];
     for (int n = 0; n < [ClojureLangRT countFromWithId:types]; n++) {
         id val = nil;
         int j = n + 2;
@@ -587,8 +586,7 @@ BOOL use_stret(id object, NSString* selector) {
     
     switch (to_char(retType)) {
         case void_type: {
-            ret = &v;
-            break;
+            return;
         }
         case float_type: {
             float o = [ClojureLangRT floatCastWithId:v];
@@ -795,7 +793,7 @@ BOOL use_stret(id object, NSString* selector) {
     if (sig == nil) {
         @throw([NSException exceptionWithName:@"Error invoking superclass objc method. Selector not found" reason:selector userInfo:nil]);
     }
-    id types = [assoc invokeWithId:[NSCommon signaturesToTypes:sig] withId:[[JavaLangInteger alloc] initWithInt:1] withId:[[JavaLangCharacter alloc] initWithChar:pointer_type]];
+    id types = [assoc invokeWithId:[NSCommon signaturesToTypes:sig skipSel:NO] withId:[[JavaLangInteger alloc] initWithInt:1] withId:[[JavaLangCharacter alloc] initWithChar:pointer_type]];
     id args = [cons invokeWithId:[NSValue valueWithPointer:NSSelectorFromString(selector)] withId:arguments];
     args = [cons invokeWithId:[NSValue valueWithPointer:(void*)&superData] withId:args];
 #ifndef __arm64__
@@ -806,11 +804,13 @@ BOOL use_stret(id object, NSString* selector) {
     return [NSCommon ccall:s types:types args:args];
 }
 
-+ (id) signaturesToTypes:(NSMethodSignature*)sig {
++ (id) signaturesToTypes:(NSMethodSignature*)sig skipSel:(BOOL)skip {
     id types = [ClojureLangPersistentVector EMPTY];
     types = [conj invokeWithId:types withId:[[JavaLangCharacter alloc] initWithChar:[NSCommon signatureToType:[sig methodReturnType]]]];
     for (int n = 0; n < [sig numberOfArguments]; n++) {
-        types = [conj invokeWithId:types withId:[[JavaLangCharacter alloc] initWithChar:[NSCommon signatureToType:[sig getArgumentTypeAtIndex:n]]]];
+        if (!skip || (n != 1 && n != 2)) {
+            types = [conj invokeWithId:types withId:[[JavaLangCharacter alloc] initWithChar:[NSCommon signatureToType:[sig getArgumentTypeAtIndex:n]]]];
+        }
     }
     return types;
 }
@@ -830,7 +830,7 @@ BOOL use_stret(id object, NSString* selector) {
         withArgs:(id<ClojureLangISeq>)arguments {
     id args = [cons invokeWithId:[NSValue valueWithPointer:NSSelectorFromString(selector)] withId:arguments];
     args = [cons invokeWithId:object withId:args];
-    return [NSCommon ccall:fun types:[NSCommon signaturesToTypes:sig] args:args];
+    return [NSCommon ccall:fun types:[NSCommon signaturesToTypes:sig skipSel:NO] args:args];
 }
 
 @end
