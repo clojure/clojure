@@ -253,7 +253,7 @@ BOOL use_stret(id object, NSString* selector) {
 
 +(id)ccall:(id)name types:(id)types args:(id)args {
     char retType = to_char([ClojureLangRT firstWithId:types]);
-    void *result_value = malloc_ret(retType); // missing free()
+    void *result_value = malloc_ret(retType);
 
     int count = [ClojureLangRT countFromWithId:args];
     ffim_type **argument_types = (ffim_type **) malloc (count * sizeof(ffim_type *));
@@ -384,41 +384,136 @@ BOOL use_stret(id object, NSString* selector) {
 
     for (int n=0; n < count; n++) {
         free(argument_values[n]);
-    } 
+    }
+    free(argument_types);
+    free(argument_values);
     
+    id result;
     switch (retType) {
-        case void_type: return [NSNull null];
-        case float_type: return [[JavaLangFloat alloc] initWithFloat:*(float*)result_value];
-        case long_type: return [[JavaLangLong alloc] initWithLong:(long)*(long long*)result_value];
-        case longlong_type: return [[JavaLangLong alloc] initWithLong:*(long long*)result_value];
+        case void_type: {
+            result = [NSNull null];
+            break;
+        }
+        case float_type: {
+            float v = *(float*)result_value;
+            result = [[[JavaLangFloat alloc] initWithFloat:v] autorelease];
+            break;
+        }
+        case long_type: {
+            long v = (long)*(long*)result_value;
+            result = [[[JavaLangLong alloc] initWithLong:v] autorelease];
+            break;
+        }
+        case longlong_type: {
+            long long v = *(long long*)result_value;
+            result = [[[JavaLangLong alloc] initWithLong:v] autorelease];
+            break;
+        }
         case char_type: {
             if (*(char*)result_value == YES) {
-                return [JavaLangBoolean getTRUE];
+                result = [JavaLangBoolean getTRUE];
             } else if (*(char*)result_value == NO) {
-                return [JavaLangBoolean getFALSE];
+                result = [JavaLangBoolean getFALSE];
+            } else {
+                result = [[[JavaLangCharacter alloc] initWithChar:*(char*)result_value] autorelease];
             }
-            return [[JavaLangCharacter alloc] initWithChar:*(char*)result_value];
+            break;
         }
-        case short_type: return [[JavaLangShort alloc] initWithShort:*(short*)result_value];
-        case int_type: return [[JavaLangInteger alloc] initWithInt:*(int*)result_value];
-        case double_type: return [[JavaLangDouble alloc] initWithDouble:*(double*)result_value];
-        case ulong_type: return [[JavaLangLong alloc] initWithLong:(unsigned long)*(unsigned long long*)result_value];
-        case ulonglong_type: return [[JavaLangLong alloc] initWithLong:*(unsigned long long*)result_value];
-        case uchar_type: return [[JavaLangCharacter alloc] initWithChar:*(unsigned char*)result_value];
-        case ushort_type: return [[JavaLangShort alloc] initWithShort:*(unsigned short*)result_value];
-        case uint_type: return [[JavaLangInteger alloc] initWithInt:*(unsigned int*)result_value];
-        case bool_type: return *(char*)result_value == YES ? [JavaLangBoolean getTRUE] : [JavaLangBoolean getFALSE];
-        case cgpoint_type: return [NSValue valueWithCGPoint:*(CGPoint*)result_value];
-        case nsrange_type: return [NSValue valueWithRange:*(NSRange*)result_value];
-        case uiedge_type: return [NSValue valueWithUIEdgeInsets:*(UIEdgeInsets*)result_value];
-        case cgsize_type: return [NSValue valueWithCGSize:*(CGSize*)result_value];
-        case cgafflinetransform_type: return [NSValue valueWithCGAffineTransform:*(CGAffineTransform*)result_value];
-        case catransform3d_type: return [NSValue valueWithCATransform3D:*(CATransform3D*)result_value];
-        case uioffset_type: return [NSValue valueWithUIOffset:*(UIOffset*)result_value];
-        case cgrect_type: return [NSValue valueWithCGRect:*(CGRect*)result_value];
-        case pointer_type: return [NSValue valueWithPointer:*(void**)result_value];
+        case short_type: {
+            short v = *(short*)result_value;
+            result = [[[JavaLangShort alloc] initWithShort:v] autorelease];
+            break;
+        }
+        case int_type: {
+            int v = *(int*)result_value;
+            result = [[[JavaLangInteger alloc] initWithInt:v] autorelease];
+            break;
+        }
+        case double_type: {
+            double v = *(double*)result_value;
+            result = [[[JavaLangDouble alloc] initWithDouble:v] autorelease];
+            break;
+        }
+        case ulong_type: {
+            unsigned long v = (unsigned long)*(unsigned long long*)result_value;
+            result = [[[JavaLangLong alloc] initWithLong:v] autorelease];
+            break;
+        }
+        case ulonglong_type: {
+            unsigned long long v = *(unsigned long long*)result_value;
+            result = [[[JavaLangLong alloc] initWithLong:v] autorelease];
+            break;
+        }
+        case uchar_type: {
+            unsigned char v = *(unsigned char*)result_value;
+            result = [[[JavaLangCharacter alloc] initWithChar:v] autorelease];
+            break;
+        }
+        case ushort_type: {
+            unsigned short v = *(unsigned short*)result_value;
+            result = [[[JavaLangShort alloc] initWithShort:v] autorelease];
+            break;
+        }
+        case uint_type: {
+            unsigned int v = *(unsigned int*)result_value;
+            result = [[[JavaLangInteger alloc] initWithInt:v] autorelease];
+            break;
+        }
+        case bool_type: {
+            result = *(char*)result_value == YES ? [JavaLangBoolean getTRUE] : [JavaLangBoolean getFALSE];
+            break;
+        }
+        case cgpoint_type: {
+            CGPoint v = *(CGPoint*)result_value;
+            result = [NSValue valueWithCGPoint:v];
+            break;
+        }
+        case nsrange_type: {
+            NSRange v = *(NSRange*)result_value;
+            result = [NSValue valueWithRange:v];
+            break;
+        }
+        case uiedge_type: {
+            UIEdgeInsets v = *(UIEdgeInsets*)result_value;
+            result = [NSValue valueWithUIEdgeInsets:v];
+            break;
+        }
+        case cgsize_type: {
+            CGSize v = *(CGSize*)result_value;
+            result = [NSValue valueWithCGSize:v];
+            break;
+        }
+        case cgafflinetransform_type: {
+            CGAffineTransform v = *(CGAffineTransform*)result_value;
+            result = [NSValue valueWithCGAffineTransform:v];
+            break;
+        }
+        case catransform3d_type: {
+            CATransform3D v = *(CATransform3D*)result_value;
+            result = [NSValue valueWithCATransform3D:v];
+            break;
+        }
+        case uioffset_type: {
+            UIOffset v = *(UIOffset*)result_value;
+            result = [NSValue valueWithUIOffset:v];
+            break;
+        }
+        case cgrect_type: {
+            CGRect v = *(CGRect*)result_value;
+            result = [NSValue valueWithCGRect:v];
+            break;
+        }
+        case pointer_type: {
+            void * v = *(void**)result_value;
+            result = [NSValue valueWithPointer:v];
+            break;
+        }
+        default: {
+            result = *(void**)result_value;
+        }
     }
-    return *(void**)result_value;
+    free(result_value);
+    return result;
 }
 
 +(void)callWithInvocation:(NSInvocation *)invocation withSelf:(id)sself withTypes:(id)types withFn: (ClojureLangAFn*) fn
@@ -426,7 +521,7 @@ BOOL use_stret(id object, NSString* selector) {
     id retType = [ClojureLangRT firstWithId: types];
     types = [ClojureLangRT nextWithId:types];
     id args = [ClojureLangPersistentVector EMPTY];
-    args = [conj invokeWithId:args withId:[[WeakRef alloc] initWith:sself]];
+    args = [conj invokeWithId:args withId:[[[WeakRef alloc] initWith:sself] autorelease]];
     for (int n = 0; n < [ClojureLangRT countFromWithId:types]; n++) {
         id val = nil;
         int j = n + 2;
@@ -437,73 +532,73 @@ BOOL use_stret(id object, NSString* selector) {
             case float_type: {
                 float v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangFloat alloc] initWithFloat:v];
+                val = [[[JavaLangFloat alloc] initWithFloat:v] autorelease];
                 break;
             }
             case longlong_type: {
                 long long v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangLong alloc] initWithLong:v];
+                val = [[[JavaLangLong alloc] initWithLong:v] autorelease];
                 break;
             }
             case long_type: {
                 long v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangLong alloc] initWithLong:v];
+                val = [[[JavaLangLong alloc] initWithLong:v] autorelease];
                 break;
             }
             case char_type: {
                 char v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangCharacter alloc] initWithChar:v];
+                val = [[[JavaLangCharacter alloc] initWithChar:v] autorelease];
                 break;
             }
             case short_type: {
                 short v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangShort alloc] initWithShort:v];
+                val = [[[JavaLangShort alloc] initWithShort:v] autorelease];
                 break;
             }
             case int_type: {
                 int v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangInteger alloc] initWithInt:v];
+                val = [[[JavaLangInteger alloc] initWithInt:v] autorelease];
                 break;
             }
             case double_type: {
                 double v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangDouble alloc] initWithDouble:v];
+                val = [[[JavaLangDouble alloc] initWithDouble:v] autorelease];
                 break;
             }
             case ulong_type: {
                 unsigned long v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangLong alloc] initWithLong:v];
+                val = [[[JavaLangLong alloc] initWithLong:v] autorelease];
                 break;
             }
             case ulonglong_type: {
                 unsigned long long v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangLong alloc] initWithLong:v];
+                val = [[[JavaLangLong alloc] initWithLong:v] autorelease];
                 break;
             }
             case uchar_type: {
                 unsigned char v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangCharacter alloc] initWithChar:v];
+                val = [[[JavaLangCharacter alloc] initWithChar:v] autorelease];
                 break;
             }
             case ushort_type: {
                 unsigned short v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangShort alloc] initWithShort:v];
+                val = [[[JavaLangShort alloc] initWithShort:v] autorelease];
                 break;
             }
             case uint_type: {
                 unsigned int v;
                 [invocation getArgument:&v atIndex: j];
-                val = [[JavaLangInteger alloc] initWithInt:v];
+                val = [[[JavaLangInteger alloc] initWithInt:v] autorelease];
                 break;
             }
             case bool_type: {
@@ -713,7 +808,7 @@ BOOL use_stret(id object, NSString* selector) {
     BOOL first = YES;
     NSString *s = @"";
     while (types != nil) {
-        s = [s stringByAppendingString:[[NSString alloc] initWithUTF8String:encode_type(to_char([ClojureLangRT firstWithId:types]))]];
+        s = [s stringByAppendingString:[[[NSString alloc] initWithUTF8String:encode_type(to_char([ClojureLangRT firstWithId:types]))] autorelease]];
         if (first) {
             s = [s stringByAppendingString:@"@:"];
             first = NO;
@@ -796,7 +891,7 @@ BOOL use_stret(id object, NSString* selector) {
     if (sig == nil) {
         @throw([NSException exceptionWithName:@"Error invoking superclass objc method. Selector not found" reason:selector userInfo:nil]);
     }
-    id types = [assoc invokeWithId:[NSCommon signaturesToTypes:sig skipSel:NO] withId:[[JavaLangInteger alloc] initWithInt:1] withId:[[JavaLangCharacter alloc] initWithChar:pointer_type]];
+    id types = [assoc invokeWithId:[NSCommon signaturesToTypes:sig skipSel:NO] withId:[[[JavaLangInteger alloc] initWithInt:1] autorelease] withId:[[[JavaLangCharacter alloc] initWithChar:pointer_type] autorelease]];
     id args = [cons invokeWithId:[NSValue valueWithPointer:NSSelectorFromString(selector)] withId:arguments];
     args = [cons invokeWithId:[NSValue valueWithPointer:(void*)&superData] withId:args];
 #ifndef __arm64__
@@ -809,10 +904,10 @@ BOOL use_stret(id object, NSString* selector) {
 
 + (id) signaturesToTypes:(NSMethodSignature*)sig skipSel:(BOOL)skip {
     id types = [ClojureLangPersistentVector EMPTY];
-    types = [conj invokeWithId:types withId:[[JavaLangCharacter alloc] initWithChar:[NSCommon signatureToType:[sig methodReturnType]]]];
+    types = [conj invokeWithId:types withId:[[[JavaLangCharacter alloc] initWithChar:[NSCommon signatureToType:[sig methodReturnType]]] autorelease]];
     for (int n = 0; n < [sig numberOfArguments]; n++) {
         if (!skip || (n != 0 && n != 1)) {
-            types = [conj invokeWithId:types withId:[[JavaLangCharacter alloc] initWithChar:[NSCommon signatureToType:[sig getArgumentTypeAtIndex:n]]]];
+            types = [conj invokeWithId:types withId:[[[JavaLangCharacter alloc] initWithChar:[NSCommon signatureToType:[sig getArgumentTypeAtIndex:n]]] autorelease]];
         }
     }
     return types;
