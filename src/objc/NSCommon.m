@@ -25,6 +25,7 @@
 #import "objc/runtime.h"
 #import "objc/message.h"
 #import <UIKit/UIKit.h>
+#import "WeakRef.h"
 
 static ClojureLangAtom *publiccfunctions;
 
@@ -191,9 +192,11 @@ static int r0_size = sizeof(unsigned long long);
 // https://developer.apple.com/library/ios/documentation/Xcode/Conceptual/iPhoneOSABIReference/iPhoneOSABIReference.pdf
 BOOL use_stret(id object, NSString* selector) {
     SEL sel = NSSelectorFromString(selector);
-    Method method = class_getInstanceMethod([object class], sel);
+    Method method = class_getInstanceMethod([([object isKindOfClass:[WeakRef class]] ?
+                                              [(WeakRef*)object deref] : object) class], sel);
     if (method == nil) {
-        method = class_getClassMethod([object class], sel);
+        method = class_getClassMethod([([object isKindOfClass:[WeakRef class]] ?
+                                        [(WeakRef*)object deref] : object) class], sel);
     }
     char ret[256];
     method_getReturnType(method, ret, 256);
@@ -322,7 +325,7 @@ BOOL use_stret(id object, NSString* selector) {
                 break;
             }
             case id_type: {
-                make_pointer(v, id);
+                make_pointer([v isKindOfClass:[WeakRef class]] ? [(WeakRef*)v deref] : v, id);
                 break;
             }
             case cgpoint_type: {
@@ -423,7 +426,7 @@ BOOL use_stret(id object, NSString* selector) {
     id retType = [ClojureLangRT firstWithId: types];
     types = [ClojureLangRT nextWithId:types];
     id args = [ClojureLangPersistentVector EMPTY];
-    args = [conj invokeWithId:args withId:sself];
+    args = [conj invokeWithId:args withId:[[WeakRef alloc] initWith:sself]];
     for (int n = 0; n < [ClojureLangRT countFromWithId:types]; n++) {
         id val = nil;
         int j = n + 2;
@@ -808,7 +811,7 @@ BOOL use_stret(id object, NSString* selector) {
     id types = [ClojureLangPersistentVector EMPTY];
     types = [conj invokeWithId:types withId:[[JavaLangCharacter alloc] initWithChar:[NSCommon signatureToType:[sig methodReturnType]]]];
     for (int n = 0; n < [sig numberOfArguments]; n++) {
-        if (!skip || (n != 1 && n != 2)) {
+        if (!skip || (n != 0 && n != 1)) {
             types = [conj invokeWithId:types withId:[[JavaLangCharacter alloc] initWithChar:[NSCommon signatureToType:[sig getArgumentTypeAtIndex:n]]]];
         }
     }
@@ -817,7 +820,7 @@ BOOL use_stret(id object, NSString* selector) {
 
 + (id) invokeFun:(NSString*)fun withSelf:(id)object withSelector:(NSString*)selector withArgs:(id<ClojureLangISeq>)arguments {
     SEL sel = NSSelectorFromString(selector);
-    NSMethodSignature *sig = [object methodSignatureForSelector:sel];
+    NSMethodSignature *sig = [([object isKindOfClass:[WeakRef class]] ? [(WeakRef*)object deref] : object) methodSignatureForSelector:sel];
     if (sig == nil) {
         @throw([NSException exceptionWithName:@"Error invoking objc method. Selector not found" reason:selector userInfo:nil]);
     }

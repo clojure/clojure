@@ -243,18 +243,23 @@
                  (let [self-sym (first args)
                        args (next args)
                        sel (take-nth 2 args)
-                       fields (take-nth 2 (next args))
+                       fields-vec (take-nth 2 (next args))
+                       fields (take (count fields-vec) (repeatedly gensym))
+                       fields-let (interleave fields-vec fields)
                        types (map objc-meta-type
-                                  (cons self-sym fields))
+                                  (cons self-sym fields-vec))
                        types (if (nil? (first types)) nil (vec types))
                        sel (if (pos? (count fields))
                              (reduce str (map #(str (name %) ":") sel))
                              (reduce str (map name sel)))]
-                   `[~sel [~types (fn [~self-sym ~@fields] ~@body)]]))
+                   `[~sel [~types (fn [~self-sym ~@fields]
+                                    (let [~@fields-let] ~@body))]]))
                methods)
         i (into {} i)]
-    `($ ($ NSTypeImpl) :makeClassWithName ~na :superclass ~super :map
-        ~i)))
+    `($ ($ NSTypeImpl)
+        :makeClassWithName ~na
+        :superclass ~super
+        :map ~i)))
 
 (defn remote-repl
   "Starts a remote repl"
