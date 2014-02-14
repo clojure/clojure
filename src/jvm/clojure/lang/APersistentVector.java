@@ -520,7 +520,7 @@ public static class RSeq extends ASeq implements IndexedSeq, Counted{
 	}
 }
 
-static class SubVector extends APersistentVector implements IObj{
+public static class SubVector extends APersistentVector implements IObj{
 	public final IPersistentVector v;
 	public final int start;
 	public final int end;
