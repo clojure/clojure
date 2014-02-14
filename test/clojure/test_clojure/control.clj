@@ -152,6 +152,21 @@
              (exception))
        ))
 
+(deftest test-if-some
+  (are [x y] (= x y)
+       1 (if-some [a 1] a)
+       false (if-some [a false] a)
+       nil (if-some [a nil] (exception))
+       3 (if-some [[a b] [1 2]] (+ a b))
+       1 (if-some [[a b] nil] b 1)
+       1 (if-some [a nil] (exception) 1)))
+
+(deftest test-when-some
+  (are [x y] (= x y)
+       1 (when-some [a 1] a)
+       2 (when-some [[a b] [1 2]] b)
+       false (when-some [a false] a)
+       nil (when-some [a nil] (exception))))
 
 (deftest test-cond
   (are [x y] (= x y)

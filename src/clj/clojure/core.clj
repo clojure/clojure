@@ -501,6 +501,13 @@
    :static true}
   [x] (if x false true))
 
+(defn some?
+  "Returns true if x is not nil, false otherwise."
+  {:tag Boolean
+   :added "1.6"
+   :static true}
+  [x] (not (nil? x)))
+
 (defn str
   "With no args, returns the empty string. With one arg x, returns
   x.toString().  (str nil) returns the empty string. With more than
@@ -1743,6 +1750,43 @@
    (let [form (bindings 0) tst (bindings 1)]
     `(let [temp# ~tst]
        (when temp#
+         (let [~form temp#]
+           ~@body)))))
+
+(defmacro if-some
+  "bindings => binding-form test
+
+   If test is not nil, evaluates then with binding-form bound to the
+   value of test, if not, yields else"
+  {:added "1.6"}
+  ([bindings then]
+   `(if-some ~bindings ~then nil))
+  ([bindings then else & oldform]
+   (assert-args
+     (vector? bindings) "a vector for its binding"
+     (nil? oldform) "1 or 2 forms after binding vector"
+     (= 2 (count bindings)) "exactly 2 forms in binding vector")
+   (let [form (bindings 0) tst (bindings 1)]
+     `(let [temp# ~tst]
+        (if (nil? temp#)
+          ~else
+          (let [~form temp#]
+            ~then))))))
+
+(defmacro when-some
+  "bindings => binding-form test
+
+   When test is not nil, evaluates body with binding-form bound to the
+   value of test"
+  {:added "1.6"}
+  [bindings & body]
+  (assert-args
+     (vector? bindings) "a vector for its binding"
+     (= 2 (count bindings)) "exactly 2 forms in binding vector")
+   (let [form (bindings 0) tst (bindings 1)]
+    `(let [temp# ~tst]
+       (if (nil? temp#)
+         nil
          (let [~form temp#]
            ~@body)))))
 
