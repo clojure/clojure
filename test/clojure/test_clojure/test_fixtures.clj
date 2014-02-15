@@ -59,9 +59,15 @@
   ;; running, in order to distinguish fixtures run because of our call to
   ;; test-vars below from the same fixtures running prior to this test
   (let [side-effects-so-far @side-effects
-
         reported (atom [])]
     (binding [report (fn [m] (swap! reported conj (:type m)))]
       (test-vars [#'can-use-each-fixtures]))
     (is (= [:begin-test-var :pass :pass :end-test-var] @reported))
     (is (= (inc side-effects-so-far) @side-effects))))
+
+(defn should-not-trigger-fixtures [])
+
+(deftest a-var-lacking-test-meta-should-not-trigger-fixtures
+  (let [side-effects-so-far @side-effects]
+    (test-vars [#'should-not-trigger-fixtures])
+    (is (= side-effects-so-far @side-effects))))
