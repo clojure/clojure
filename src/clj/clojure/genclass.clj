@@ -569,7 +569,7 @@
   the first argument, followed by the arguments to the constructor.
   It will be called every time an object of this class is created,
   immediately after all the inherited constructors have completed.
-  It's return value is ignored.
+  Its return value is ignored.
 
   :methods [ [name [param-types] return-type], ...]
 
