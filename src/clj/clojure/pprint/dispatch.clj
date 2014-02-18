@@ -211,7 +211,7 @@
                   (when (next args)
                     ((formatter-out "~:_"))))))
             (recur (next args))))))
-    (write-out reference)))
+    (when reference (write-out reference))))
 
 (defn- pprint-ns
   "The pretty print dispatch chunk for the ns macro"

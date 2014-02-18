@@ -178,6 +178,7 @@ Usage: *hello*
     (pprint-simple-code-list writer alis)))")
 
 (code-block ns-macro-test
+  "(ns foobarbaz)"
   "(ns slam.hound.stitch
   (:use [slam.hound.prettify :only [prettify]]))"
   
