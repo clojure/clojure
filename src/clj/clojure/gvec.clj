@@ -60,7 +60,7 @@
   (internal-reduce
    [_ f val]
    (loop [result val
-          aidx offset]
+          aidx (+ i offset)]
      (if (< aidx (count vec))
        (let [node (.arrayFor vec aidx)
              result (loop [result result

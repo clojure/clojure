@@ -77,7 +77,9 @@
            vs-1 vs
            vs vs-32
            vs-32 vs
-           vs nil))))
+           vs nil))
+    (testing "internal-reduce"
+      (is (= [99] (into [] (drop 99 vs)))))))
 
 (deftest test-primitive-subvector-reduce
   ;; regression test for CLJ-1082
