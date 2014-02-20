@@ -234,7 +234,7 @@ runs them *with their fixtures*.
 ## 4 Bug Fixes
 
 * [CLJ-1018](http://dev.clojure.org/jira/browse/CLJ-1018)
-  Make range consistently return () with a step of 0.
+  Make range consistently return infinite sequence of start with a step of 0.
 * [CLJ-863](http://dev.clojure.org/jira/browse/CLJ-863)
   Make interleave return () on 0 args and identity on 1 args.
 * [CLJ-1072](http://dev.clojure.org/jira/browse/CLJ-1072)
@@ -293,13 +293,13 @@ runs them *with their fixtures*.
 * [CLJ-935](http://dev.clojure.org/jira/browse/CLJ-935)
   clojure.string/trim uses different definition of whitespace than
   triml and trimr
-* [CLJ-935](http://dev.clojure.org/jira/browse/CLJ-935)
+* [CLJ-1058](http://dev.clojure.org/jira/browse/CLJ-1058)
   StackOverflowError on exception in reducef for PersistentHashMap
   fold
 * [CLJ-1328](http://dev.clojure.org/jira/browse/CLJ-1328)
   Fix some tests in the Clojure test suite to make their names unique
   and independent of hashing order
-* [CLJ-1328](http://dev.clojure.org/jira/browse/CLJ-1328)
+* [CLJ-1339](http://dev.clojure.org/jira/browse/CLJ-1339)
   Empty primitive vectors throw NPE on .equals with non-vector
   sequential types
 
