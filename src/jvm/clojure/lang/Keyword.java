@@ -26,7 +26,7 @@ public class Keyword implements IFn, Comparable, Named, Serializable, IHashEq {
 private static ConcurrentHashMap<Symbol, Reference<Keyword>> table = new ConcurrentHashMap();
 static final ReferenceQueue rq = new ReferenceQueue();
 public final Symbol sym;
-final int hash;
+final int hasheq;
 String _str;
 
 public static Keyword intern(Symbol sym){
@@ -55,7 +55,7 @@ public static Keyword intern(String nsname){
 
 private Keyword(Symbol sym){
 	this.sym = sym;
-	hash = sym.hashCode() + 0x9e3779b9;
+	hasheq = sym.hasheq() + 0x9e3779b9;
 }
 
 public static Keyword find(Symbol sym){
@@ -75,11 +75,11 @@ public static Keyword find(String nsname){
 }
 
 public final int hashCode(){
-	return hash;
+	return sym.hashCode() + 0x9e3779b9;
 }
 
 public int hasheq() {
-	return hash;
+	return hasheq;
 }
 
 public String toString(){
