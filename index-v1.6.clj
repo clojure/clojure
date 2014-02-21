@@ -110,7 +110,7 @@
    :doc
    "Macros that expand to repeated copies of a template expression."}
   {:source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url "http://clojure.github.com/clojure/clojure.test-api.html",
    :name "clojure.test",
    :author
@@ -10766,11 +10766,11 @@
   {:name "*load-tests*",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L244",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L244",
    :dynamic true,
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/*load-tests*",
    :doc
@@ -10781,11 +10781,11 @@
   {:name "*stack-trace-depth*",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L251",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L251",
    :dynamic true,
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/*stack-trace-depth*",
    :doc
@@ -10797,10 +10797,10 @@
    :name "are",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L559",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L559",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/are",
    :doc
@@ -10812,10 +10812,10 @@
    :name "assert-any",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L442",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L442",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/assert-any",
    :doc
@@ -10827,10 +10827,10 @@
    :name "assert-predicate",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L423",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L423",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/assert-predicate",
    :doc
@@ -10842,10 +10842,10 @@
    :name "compose-fixtures",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L676",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L676",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/compose-fixtures",
    :doc
@@ -10857,10 +10857,10 @@
    :name "deftest",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L609",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L609",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/deftest",
    :doc
@@ -10872,10 +10872,10 @@
    :name "deftest-",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L626",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L626",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/deftest-",
    :doc "Like deftest but creates a private var.",
@@ -10886,10 +10886,10 @@
    :name "do-report",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L343",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L343",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/do-report",
    :doc
@@ -10901,11 +10901,11 @@
    :name "file-position",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L281",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L281",
    :deprecated "1.2",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/file-position",
    :doc
@@ -10917,10 +10917,10 @@
    :name "function?",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L411",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L411",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/function?",
    :doc
@@ -10932,10 +10932,10 @@
    :name "get-possibly-unbound-var",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L403",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L403",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/get-possibly-unbound-var",
    :doc "Like var-get but returns nil if the var is unbound.",
@@ -10946,10 +10946,10 @@
    :name "inc-report-counter",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L313",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L313",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/inc-report-counter",
    :doc
@@ -10961,10 +10961,10 @@
    :name "is",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L541",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L541",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/is",
    :doc
@@ -10976,10 +10976,10 @@
    :name "join-fixtures",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L683",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L683",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/join-fixtures",
    :doc
@@ -10990,11 +10990,11 @@
   {:name "report",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L324",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L324",
    :dynamic true,
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/report",
    :doc
@@ -11006,40 +11006,40 @@
    :name "run-all-tests",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L766",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L767",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/run-all-tests",
    :doc
    "Runs all tests in all namespaces; prints results.\nOptional argument is a regular expression; only namespaces with\nnames matching the regular expression (with re-matches) will be\ntested.",
    :var-type "function",
-   :line 766,
+   :line 767,
    :file "src/clj/clojure/test.clj"}
   {:arglists ([] [& namespaces]),
    :name "run-tests",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L754",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L755",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/run-tests",
    :doc
    "Runs all tests in the given namespaces; prints results.\nDefaults to current namespace if none given.  Returns a map\nsummarizing test results.",
    :var-type "function",
-   :line 754,
+   :line 755,
    :file "src/clj/clojure/test.clj"}
   {:arglists ([name & body]),
    :name "set-test",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L635",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L635",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/set-test",
    :doc
@@ -11051,56 +11051,56 @@
    :name "successful?",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L775",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L776",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/successful?",
    :doc
    "Returns true if the given test summary indicates all tests\nwere successful, false otherwise.",
    :var-type "function",
-   :line 775,
+   :line 776,
    :file "src/clj/clojure/test.clj"}
   {:arglists ([ns]),
    :name "test-all-vars",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L723",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L724",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/test-all-vars",
    :doc
    "Calls test-vars on every var interned in the namespace, with fixtures.",
    :var-type "function",
-   :line 723,
+   :line 724,
    :file "src/clj/clojure/test.clj"}
   {:arglists ([ns]),
    :name "test-ns",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L729",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L730",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/test-ns",
    :doc
    "If the namespace defines a function named test-ns-hook, calls that.\nOtherwise, calls test-all-vars on the namespace.  'ns' is a\nnamespace object or a symbol.\n\nInternally binds *report-counters* to a ref initialized to\n*initial-report-counters*.  Returns the final, dereferenced state of\n*report-counters*.",
    :var-type "function",
-   :line 729,
+   :line 730,
    :file "src/clj/clojure/test.clj"}
   {:arglists ([v]),
    :name "test-var",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L695",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L695",
    :dynamic true,
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/test-var",
    :doc
@@ -11112,10 +11112,10 @@
    :name "test-vars",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L710",
-   :added "1.5",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L710",
+   :added "1.6",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/test-vars",
    :doc
@@ -11127,10 +11127,10 @@
    :name "testing",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L584",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L584",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/testing",
    :doc
@@ -11142,10 +11142,10 @@
    :name "testing-contexts-str",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L306",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L306",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/testing-contexts-str",
    :doc
@@ -11157,10 +11157,10 @@
    :name "testing-vars-str",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L293",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L293",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/testing-vars-str",
    :doc
@@ -11172,10 +11172,10 @@
    :name "try-expr",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L525",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L525",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/try-expr",
    :doc
@@ -11186,10 +11186,10 @@
   {:name "use-fixtures",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L657",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L657",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/use-fixtures",
    :doc
@@ -11201,10 +11201,10 @@
    :name "with-test",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L596",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L596",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/with-test",
    :doc
@@ -11216,10 +11216,10 @@
    :name "with-test-out",
    :namespace "clojure.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj#L272",
+   "https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L272",
    :added "1.1",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fa5483aa69fb0315026b191cde65b63760a400ce/src/clj/clojure/test.clj",
+   "https://github.com/clojure/clojure/raw/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.test-api.html#clojure.test/with-test-out",
    :doc "Runs body with *out* bound to the value of *test-out*.",
