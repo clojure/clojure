@@ -6017,6 +6017,9 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 				method.locals = backupMethodLocals;
 				method.indexlocals = backupMethodIndexLocals;
 
+				PathNode looproot = new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
+				PathNode clearroot = new PathNode(PATHTYPE.PATH,looproot);
+				PathNode clearpath = new PathNode(PATHTYPE.PATH,looproot);
 				if(isLoop)
 					dynamicBindings = dynamicBindings.assoc(LOOP_LOCALS, null);
 
@@ -6049,12 +6052,27 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 								init = new StaticMethodExpr("", 0, 0, null, RT.class, "doubleCast", RT.vector(init));
 							}
 						//sequential enhancement of env (like Lisp let*)
-						LocalBinding lb = registerLocal(sym, tagOf(sym), init,false);
-						BindingInit bi = new BindingInit(lb, init);
-						bindingInits = bindingInits.cons(bi);
+						try
+							{
+							if(isLoop)
+								{
+	                            Var.pushThreadBindings(
+									RT.map(CLEAR_PATH, clearpath,
+	                                       CLEAR_ROOT, clearroot,
+	                                       NO_RECUR, null));
 
-						if(isLoop)
-							loopLocals = loopLocals.cons(lb);
+								}
+							LocalBinding lb = registerLocal(sym, tagOf(sym), init,false);
+							BindingInit bi = new BindingInit(lb, init);
+							bindingInits = bindingInits.cons(bi);
+							if(isLoop)
+								loopLocals = loopLocals.cons(lb);
+							}
+						finally
+							{
+							if(isLoop)
+							    Var.popThreadBindings();
+							}
 						}
 					if(isLoop)
 						LOOP_LOCALS.set(loopLocals);
@@ -6063,11 +6081,10 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 					try {
 						if(isLoop)
 							{
-							PathNode root = new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
-                                                        Var.pushThreadBindings(
-								RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,root),
-                                                                       CLEAR_ROOT, new PathNode(PATHTYPE.PATH,root),
-                                                                       NO_RECUR, null));
+                            Var.pushThreadBindings(
+								RT.map(CLEAR_PATH, clearpath,
+                                       CLEAR_ROOT, clearroot,
+                                       NO_RECUR, null));
                                                        
 							}
 						bodyExpr = (new BodyExpr.Parser()).parse(isLoop ? C.RETURN : context, body);
