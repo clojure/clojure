@@ -51,6 +51,7 @@
          <!--<sysproperty key="clojure.compiler.elide-meta" value="[:doc :file :line :added]"/>-->
          <!--<sysproperty key="clojure.compiler.disable-locals-clearing" value="true"/>-->
       <!-- <sysproperty key="clojure.compile.warn-on-reflection" value="true"/> -->
+      <sysproperty key="java.awt.headless" value="true"/>
       <arg value="clojure.core"/>
       <arg value="clojure.core.protocols"/>
       <arg value="clojure.main"/>
