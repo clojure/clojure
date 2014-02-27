@@ -943,7 +943,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(c != null) {
 					return new StaticFieldExpr(line, column, c, munge(sym.name), tag);
 				} else
-					return new InstanceFieldExpr(line, column, instance, munge(sym.name), tag);
+					return new InstanceFieldExpr(line, column, instance, munge(sym.name), tag, (((Symbol)RT.third(form)).name.charAt(0) == '-'));
 				}
 			else
 				{
@@ -1081,11 +1081,12 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	public final int line;
 	public final int column;
 	public final Symbol tag;
-	final static Method invokeNoArgInstanceMember = Method.getMethod("Object invokeNoArgInstanceMember(Object,String)");
+	public final boolean requireField;
+	final static Method invokeNoArgInstanceMember = Method.getMethod("Object invokeNoArgInstanceMember(Object,String,boolean)");
 	final static Method setInstanceFieldMethod = Method.getMethod("Object setInstanceField(Object,String,Object)");
 
 
-	public InstanceFieldExpr(int line, int column, Expr target, String fieldName, Symbol tag) {
+	public InstanceFieldExpr(int line, int column, Expr target, String fieldName, Symbol tag, boolean requireField) {
 		this.target = target;
 		this.targetClass = target.hasJavaClass() ? target.getJavaClass() : null;
 		this.field = targetClass != null ? Reflector.getField(targetClass, fieldName, false) : null;
@@ -1093,6 +1094,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		this.line = line;
 		this.column = column;
 		this.tag = tag;
+		this.requireField = requireField;
 		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
 			if(targetClass == null)
@@ -1111,7 +1113,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public Object eval() {
-		return Reflector.invokeNoArgInstanceMember(target.eval(), fieldName);
+		return Reflector.invokeNoArgInstanceMember(target.eval(), fieldName, requireField);
 	}
 
 	public boolean canEmitPrimitive(){
@@ -1149,6 +1151,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			{
 			target.emit(C.EXPRESSION, objx, gen);
 			gen.push(fieldName);
+			gen.push(requireField);
 			gen.invokeStatic(REFLECTOR_TYPE, invokeNoArgInstanceMember);
 			if(context == C.STATEMENT)
 				gen.pop();

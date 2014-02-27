@@ -55,6 +55,16 @@
       Integer/MAX_VALUE
       (. Integer MAX_VALUE) ))
 
+(definterface I (a []))
+(deftype T [a] I (a [_] "method"))
+
+(deftest test-reflective-field-name-ambiguous
+  (let [t (->T "field")]
+    (is (= "method" (. ^T t a)))
+    (is (= "field" (. ^T t -a)))
+    (is (= "method" (. t a)))
+    (is (= "field" (. t -a)))
+    (is (thrown? IllegalArgumentException (. t -BOGUS)))))
 
 (deftest test-double-dot
   (is (= (.. System (getProperties) (get "os.name"))

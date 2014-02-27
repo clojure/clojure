@@ -291,13 +291,29 @@ public static Object setInstanceField(Object target, String fieldName, Object va
 		+ " for " + target.getClass());
 }
 
+// not used as of Clojure 1.6, but left for runtime compatibility with
+// compiled bytecode from older versions
 public static Object invokeNoArgInstanceMember(Object target, String name) {
-	//favor method over field
-	List meths = getMethods(target.getClass(), 0, name, false);
-	if(meths.size() > 0)
-		return invokeMatchingMethod(name, meths, target, RT.EMPTY_ARRAY);
-	else
-		return getInstanceField(target, name);
+	return invokeNoArgInstanceMember(target, name, false);
+}
+
+public static Object invokeNoArgInstanceMember(Object target, String name, boolean requireField) {
+	Class c = target.getClass();
+
+	if(requireField) {
+		Field f = getField(c, name, false);
+		if(f != null)
+			return getInstanceField(target, name);
+		else
+			throw new IllegalArgumentException("No matching field found: " + name
+					+ " for " + target.getClass());
+	} else {
+		List meths = getMethods(c, 0, name, false);
+		if(meths.size() > 0)
+			return invokeMatchingMethod(name, meths, target, RT.EMPTY_ARRAY);
+		else
+			return getInstanceField(target, name);
+	}
 }
 
 public static Object invokeInstanceMember(Object target, String name) {
