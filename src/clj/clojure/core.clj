@@ -4747,7 +4747,8 @@
    See http://clojure.org/data_structures#hash for full algorithms."
   {:added "1.6"
    :static true}
-  [^long hash-basis count] (clojure.lang.Murmur3/mixCollHash hash-basis count))
+  ^long
+  [^long hash-basis ^long count] (clojure.lang.Murmur3/mixCollHash hash-basis count))
 
 (defn hash-ordered-coll
   "Returns the hash code, consistent with =, for an external ordered
@@ -4755,6 +4756,7 @@
    See http://clojure.org/data_structures#hash for full algorithms."
   {:added "1.6"
    :static true}
+  ^long
   [coll] (clojure.lang.Murmur3/hashOrdered coll))
 
 (defn hash-unordered-coll
@@ -4765,6 +4767,7 @@
    See http://clojure.org/data_structures#hash for full algorithms."
   {:added "1.6"
    :static true}
+  ^long
   [coll] (clojure.lang.Murmur3/hashUnordered coll))
 
 (defn interpose
