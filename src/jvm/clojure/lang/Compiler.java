@@ -1872,7 +1872,14 @@ static class ConstantExpr extends LiteralExpr{
 	}
 
 	public Class getJavaClass() {
-		return v.getClass();
+		if(v instanceof APersistentMap)
+			return APersistentMap.class;
+		else if (v instanceof APersistentSet)
+			return APersistentSet.class;
+		else if (v instanceof APersistentVector)
+			return APersistentVector.class;
+		else
+			return v.getClass();
 		//throw new IllegalArgumentException("Has no Java class");
 	}
 
