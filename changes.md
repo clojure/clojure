@@ -131,9 +131,33 @@ as appropriate.
 Any collections implementing IHashEq or wishing to interoperate with
 Clojure collections should conform to the hashing algorithms specified
 in http://clojure.org/data_structures#hash and use the new function
-`mix-collection-hash` for the final mixing operation. Any details of
-the current hashing algorithm not specified on that page should be
-considered subject to future change.
+`mix-collection-hash` for the final mixing operation. Alternatively,
+you may call the helper functions `hash-ordered-coll` and
+`hash-unordered-coll`.
+
+Any details of the current hashing algorithm not specified on that
+page should be considered subject to future change.
+
+Related tickets for dev and regressions:
+
+* [CLJ-1328](http://dev.clojure.org/jira/browse/CLJ-1328)
+  Make several Clojure tests independent of ordering
+* [CLJ-1331](http://dev.clojure.org/jira/browse/CLJ-1331)
+  Update primitive vectors to use Murmur3 hash
+* [CLJ-1335](http://dev.clojure.org/jira/browse/CLJ-1335)
+  Update hash for empty PersistentList and LazySeq
+* [CLJ-1336](http://dev.clojure.org/jira/browse/CLJ-1336)
+  Make hashing mixing functions available in Clojure
+* [CLJ-1338](http://dev.clojure.org/jira/browse/CLJ-1338)
+  Make Murmur3 class public
+* [CLJ-1344](http://dev.clojure.org/jira/browse/CLJ-1344)
+  Update mapHasheq to call Murmur3 algorithm
+* [CLJ-1348](http://dev.clojure.org/jira/browse/CLJ-1348)
+  Add hash-ordered-coll and hash-unordered-coll
+* [CLJ-1355](http://dev.clojure.org/jira/browse/CLJ-1355)
+  Restore cached hashCode for Symbol and (uncached) hashCode for Keyword
+* [CLJ-1365](http://dev.clojure.org/jira/browse/CLJ-1365)
+  Add type hints for new collection hash functions
 
 ### 2.5 bitops
 
@@ -151,6 +175,8 @@ Examples:
 ### 2.6 clojure.test
 
 * [CLJ-866](http://dev.clojure.org/jira/browse/CLJ-866) - test-vars
+* [CLJ-1352](http://dev.clojure.org/jira/browse/CLJ-1352) - fix
+  regression in CLJ-866
 
 Added a new clojure.test/test-vars function that takes a list of vars, groups them by namespace, and
 runs them *with their fixtures*.
@@ -166,8 +192,11 @@ runs them *with their fixtures*.
 
 ### 3.2 Error messages
 
+* [CLJ-1248](http://dev.clojure.org/jira/browse/CLJ-1248)
+  Include type information in reflection warning messages
 * [CLJ-1099](http://dev.clojure.org/jira/browse/CLJ-1099)
-  If non-seq passed where seq is needed, error message now is an ExceptionInfo with the instance value, retrievable via ex-data.
+  If non-seq passed where seq is needed, error message now is an
+  ExceptionInfo with the instance value, retrievable via ex-data.
 * [CLJ-1083](http://dev.clojure.org/jira/browse/CLJ-1083)
   Fix error message reporting for "munged" function names (like a->b).
 * [CLJ-1056](http://dev.clojure.org/jira/browse/CLJ-1056)
@@ -230,6 +259,10 @@ runs them *with their fixtures*.
   ArraySeq dead code cleanup, ArraySeq_short support added.
 * [CLJ-1331](http://dev.clojure.org/jira/browse/CLJ-1331)
   Primitive vectors should implement hasheq and use new hash algorithm
+* [CLJ-1354](http://dev.clojure.org/jira/browse/CLJ-1354)
+  Make APersistentVector.SubVector public so other collections can access
+* [CLJ-1353](http://dev.clojure.org/jira/browse/CLJ-1353)
+  Make awt run headless during the build process
 
 ## 4 Bug Fixes
 
@@ -302,6 +335,11 @@ runs them *with their fixtures*.
 * [CLJ-1339](http://dev.clojure.org/jira/browse/CLJ-1339)
   Empty primitive vectors throw NPE on .equals with non-vector
   sequential types
+* [CLJ-1363](http://dev.clojure.org/jira/browse/CLJ-1363)
+  Field access via .- in reflective case does not work
+* [CLJ-944](http://dev.clojure.org/jira/browse/CLJ-944)
+  Compiler gives constant collections types which mismatch their
+  runtime values
 
 # Changes to Clojure in Version 1.5.1
 
@@ -644,7 +682,7 @@ for details.
 
     -Dclojure.read.eval=false
 
-## 3 Performance Enhancements
+## 3 Performance and Memory Enhancements
 
 * [CLJ-988](http://dev.clojure.org/jira/browse/CLJ-988)
   Multimethod tables are now protected by a read/write lock instead of a synchronized method. This should result in a performance boost for multithreaded code using multimethods.
@@ -659,6 +697,7 @@ for details.
 * (no ticket) array-map perf tweaks
 * [CLJ-1111](http://dev.clojure.org/jira/browse/CLJ-1111)
   Allows loop to evaluate to primitive values
+* (no ticket) Move loop locals into same clearing context as loop body
 
 
 ## 4 Improved error messages
