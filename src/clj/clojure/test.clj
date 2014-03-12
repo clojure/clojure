@@ -447,7 +447,7 @@
            result# (apply ~pred values#)]
        (if result#
          (do-report {:type :pass, :message ~msg,
-                  :expected '~form, :actual (cons ~pred values#)})
+                  :expected '~form, :actual (cons '~pred values#)})
          (do-report {:type :fail, :message ~msg,
                   :expected '~form, :actual (list '~'not (cons '~pred values#))}))
        result#)))
