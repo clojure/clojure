@@ -21,30 +21,30 @@ static public final PersistentHashSet EMPTY = new PersistentHashSet(null, Persis
 final IPersistentMap _meta;
 
 public static PersistentHashSet create(Object... init){
-	PersistentHashSet ret = EMPTY;
+	ITransientSet ret = (ITransientSet)EMPTY.asTransient();
 	for(int i = 0; i < init.length; i++)
 		{
-		ret = (PersistentHashSet) ret.cons(init[i]);
+		ret = (ITransientSet)ret.conj(init[i]);
 		}
-	return ret;
+	return (PersistentHashSet)ret.persistent();
 }
 
 public static PersistentHashSet create(List init){
-	PersistentHashSet ret = EMPTY;
+	ITransientSet ret = (ITransientSet)EMPTY.asTransient();
 	for(Object key : init)
 		{
-		ret = (PersistentHashSet) ret.cons(key);
+		ret = (ITransientSet) ret.conj(key);
 		}
-	return ret;
+	return (PersistentHashSet)ret.persistent();
 }
 
 static public PersistentHashSet create(ISeq items){
-	PersistentHashSet ret = EMPTY;
+	ITransientSet ret = (ITransientSet)EMPTY.asTransient();
 	for(; items != null; items = items.next())
 		{
-		ret = (PersistentHashSet) ret.cons(items.first());
+		ret = (ITransientSet) ret.conj(items.first());
 		}
-	return ret;
+	return (PersistentHashSet)ret.persistent();
 }
 
 public static PersistentHashSet createWithCheck(Object... init){
