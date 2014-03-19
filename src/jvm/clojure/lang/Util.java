@@ -169,7 +169,7 @@ public static int hasheq(Object o){
 	if(o instanceof Number)
 		return Numbers.hasheq((Number)o);
 	if(o instanceof String)
-		return Murmur3.hashUnencodedChars((CharSequence) o);
+		return Murmur3.hashInt(o.hashCode());
 	return o.hashCode();
 }
 
