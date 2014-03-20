@@ -69,7 +69,7 @@ private Symbol(String ns_interned, String name_interned){
 	this.name = name_interned;
 	this.ns = ns_interned;
 	this.hash = Util.hashCombine(name.hashCode(), Util.hash(ns));
-	this.hasheq = Util.hashCombine(Util.hasheq(name),Util.hasheq(ns));
+	this.hasheq = Util.hashCombine(Murmur3.hashUnencodedChars(name), ns==null?0:Murmur3.hashUnencodedChars(ns));
 	this._meta = null;
 }
 
@@ -102,7 +102,7 @@ private Symbol(IPersistentMap meta, String ns, String name){
 	this.ns = ns;
 	this._meta = meta;
 	this.hash = Util.hashCombine(name.hashCode(), Util.hash(ns));
-	this.hasheq = Util.hashCombine(Util.hasheq(name),Util.hasheq(ns));
+	this.hasheq = Util.hashCombine(Murmur3.hashUnencodedChars(name), ns==null?0:Murmur3.hashUnencodedChars(ns));
 }
 
 public int compareTo(Object o){
