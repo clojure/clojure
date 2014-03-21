@@ -182,9 +182,13 @@ public Object kvreduce(IFn f, Object init){
 	if(RT.isReduced(init))
 		return ((IDeref)init).deref();
 	if(root != null){
-        return root.kvreduce(f,init);
-    }
-    return init;
+		init = root.kvreduce(f,init);
+		if(RT.isReduced(init))
+			return ((IDeref)init).deref();
+		else
+			return init;
+	}
+	return init;
 }
 
 public Object fold(long n, final IFn combinef, final IFn reducef,
@@ -405,7 +409,7 @@ final static class ArrayNode implements INode{
             if(node != null){
                 init = node.kvreduce(f,init);
 	            if(RT.isReduced(init))
-		            return ((IDeref)init).deref();
+		            return init;
 	            }
 	        }
         return init;
@@ -1132,7 +1136,7 @@ static final class NodeSeq extends ASeq {
                      init = node.kvreduce(f,init);
                  }
              if(RT.isReduced(init))
-	             return ((IDeref)init).deref();
+	             return init;
              }
         return init;
     }
