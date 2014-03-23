@@ -20,7 +20,7 @@ public class Symbol extends AFn implements IObj, Comparable, Named, Serializable
 //these must be interned strings!
 final String ns;
 final String name;
-private int _hasheq = -1;
+private int _hasheq;
 final IPersistentMap _meta;
 String _str;
 
@@ -87,7 +87,7 @@ public int hashCode(){
 }
 
 public int hasheq() {
-	if(_hasheq == -1){
+	if(_hasheq == 0){
 		_hasheq = Util.hashCombine(Murmur3.hashUnencodedChars(name), Util.hash(ns));
 	}
 	return _hasheq;
