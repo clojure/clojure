@@ -340,6 +340,8 @@ runs them *with their fixtures*.
 * [CLJ-944](http://dev.clojure.org/jira/browse/CLJ-944)
   Compiler gives constant collections types which mismatch their
   runtime values
+* [CLJ-1387](http://dev.clojure.org/jira/browse/CLJ-1387)
+  reduce-kv on large hash maps ignores reduced result
 
 # Changes to Clojure in Version 1.5.1
 
