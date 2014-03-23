@@ -10,7 +10,7 @@
                                        :y-only y-only
                                        :common common}))))))
 
-(deftest compare-reflect-and-asm
+#_(deftest compare-reflect-and-asm
   (let [cl (.getContextClassLoader (Thread/currentThread))
         asm-reflector (AsmReflector. cl)
         java-reflector (JavaReflector. cl)]
