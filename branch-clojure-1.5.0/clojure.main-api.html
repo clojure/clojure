@@ -1,0 +1,415 @@
+<html>
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <title>clojure.main - Clojure v1.5 API documentation</title>
+    <link href="../static/favicon.png" rel="icon" />
+    <link href="../static/favicon.png" rel="shortcut icon" />
+    <link media="all" type="text/css" href="../static/clojure.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="../static/wiki.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="../static/internal.css" rel="stylesheet" />
+    <style>.menuWrapper{height: 36px;}</style>
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="../static/clojure-icon.gif" /></a>
+	<h1><a title="page header title" id="page-header" href="index.html">Clojure Core API Reference</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.5</span> API</span><br />
+    <ul>
+      <li><a class="wiki_link" href="index.html">Overview</a></li>
+      <li><a class="wiki_link" href="api-index.html">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.data-api.html" class="wiki_link">clojure.data</a></li><li><a href="clojure.edn-api.html" class="wiki_link">clojure.edn</a></li><li><a href="clojure.inspector-api.html" class="wiki_link">clojure.inspector</a></li><li><a href="clojure.instant-api.html" class="wiki_link">clojure.instant</a></li><li><a href="clojure.java.browse-api.html" class="wiki_link">clojure.java.browse</a></li><li><a href="clojure.java.io-api.html" class="wiki_link">clojure.java.io</a></li><li><a href="clojure.java.javadoc-api.html" class="wiki_link">clojure.java.javadoc</a></li><li><a href="clojure.java.shell-api.html" class="wiki_link">clojure.java.shell</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.pprint-api.html" class="wiki_link">clojure.pprint</a></li><li><a href="clojure.reflect-api.html" class="wiki_link">clojure.reflect</a></li><li><a href="clojure.repl-api.html" class="wiki_link">clojure.repl</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.stacktrace-api.html" class="wiki_link">clojure.stacktrace</a></li><li><a href="clojure.string-api.html" class="wiki_link">clojure.string</a></li><li><a href="clojure.template-api.html" class="wiki_link">clojure.template</a></li><li><a href="clojure.test-api.html" class="wiki_link">clojure.test</a></li><li><a href="clojure.walk-api.html" class="wiki_link">clojure.walk</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
+      </ul>
+    </div>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a href="../index.html" class="wiki_link">v1.6 (stable)</a></li><li><a href="../branch-master/index.html" class="wiki_link">v1.7 (in development)</a></li><li><a href="../branch-clojure-1.4.0/index.html" class="wiki_link">v1.4 (legacy)</a></li><li><a href="../branch-1.3.x/index.html" class="wiki_link">v1.3 (legacy)</a></li><li><a href="../branch-1.2.x/index.html" class="wiki_link">v1.2 (legacy)</a></li><li><a href="../branch-1.1.x/index.html" class="wiki_link">v1.1 (legacy)</a></li>
+      </ul>
+    </div>
+    <a href="http://clojure.org" class="wiki_link">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div id="content_view" class="wiki wikiPage">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div style="margin-left: 1em;" class="toc-section">
+    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
+    <div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/demunge">demunge</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/load-script">load-script</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/main">main</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/repl">repl</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/repl-caught">repl-caught</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/repl-exception">repl-exception</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/repl-prompt">repl-prompt</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/repl-read">repl-read</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/repl-requires">repl-requires</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/root-cause">root-cause</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/skip-if-eol">skip-if-eol</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/skip-whitespace">skip-whitespace</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/stack-element-str">stack-element-str</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/with-bindings">with-bindings</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.main/with-read-known">with-read-known</a>
+      
+    </div>
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.main">clojure.main</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.5</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
+  </h1>
+
+<br />Full namespace name: <span id="long-name">clojure.main</span>
+<p></p>
+<h2>Overview</h2>
+
+<pre id="namespace-docstr"></pre>
+
+
+<br />
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/demunge">demunge</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (demunge fn-name)
+</pre>
+    <pre id="var-docstr">Given a string representation of a fn class,
+as in a stack trace element, returns a readable version.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L51" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/load-script">load-script</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (load-script path)
+</pre>
+    <pre id="var-docstr">Loads Clojure source from a file or resource given its path. Paths
+beginning with @ or @/ are considered relative to classpath.</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L287" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/main">main</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (main &amp; args)
+</pre>
+    <pre id="var-docstr">Usage: java -cp clojure.jar clojure.main [init-opt*] [main-opt] [arg*]
+
+With no options or args, runs an interactive Read-Eval-Print Loop
+
+init options:
+  -i, --init path     Load a file or resource
+  -e, --eval string   Evaluate expressions in string; print non-nil values
+
+main options:
+  -m, --main ns-name  Call the -main function from a namespace with args
+  -r, --repl          Run a repl
+  path                Run a script from from a file or resource
+  -                   Run a script from standard input
+  -h, -?, --help      Print this help message and exit
+
+operation:
+
+  - Establishes thread-local bindings for commonly set!-able vars
+  - Enters the user namespace
+  - Binds *command-line-args* to a seq of strings containing command line
+    args that appear after any main option
+  - Runs all init options in order
+  - Calls a -main function or runs a repl or script if requested
+
+The init options may be repeated and mixed freely, but must appear before
+any main option. The appearance of any eval option before running a repl
+suppresses the usual repl greeting message: "Clojure ~(clojure-version)".
+
+Paths may be absolute or relative in the filesystem or relative to
+classpath. Classpath-relative paths have prefix of @ or @/</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L403" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/repl">repl</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (repl &amp; options)
+</pre>
+    <pre id="var-docstr">Generic, reusable, read-eval-print loop. By default, reads from *in*,
+writes to *out*, and prints exception summaries to *err*. If you use the
+default :read hook, *in* must either be an instance of
+LineNumberingPushbackReader or duplicate its behavior of both supporting
+.unread and collapsing CR, LF, and CRLF into a single \newline. Options
+are sequential keyword-value pairs. Available options and their defaults:
+
+   - :init, function of no arguments, initialization hook called with
+     bindings for set!-able vars in place.
+     default: #()
+
+   - :need-prompt, function of no arguments, called before each
+     read-eval-print except the first, the user will be prompted if it
+     returns true.
+     default: (if (instance? LineNumberingPushbackReader *in*)
+                #(.atLineStart *in*)
+                #(identity true))
+
+   - :prompt, function of no arguments, prompts for more input.
+     default: repl-prompt
+
+   - :flush, function of no arguments, flushes output
+     default: flush
+
+   - :read, function of two arguments, reads from *in*:
+       - returns its first argument to request a fresh prompt
+         - depending on need-prompt, this may cause the repl to prompt
+           before reading again
+       - returns its second argument to request an exit from the repl
+       - else returns the next object read from the input stream
+     default: repl-read
+
+   - :eval, funtion of one argument, returns the evaluation of its
+     argument
+     default: eval
+
+   - :print, function of one argument, prints its argument to the output
+     default: prn
+
+   - :caught, function of one argument, a throwable, called when
+     read, eval, or print throws an exception or error
+     default: repl-caught</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L193" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/repl-caught">repl-caught</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (repl-caught e)
+</pre>
+    <pre id="var-docstr">Default :caught hook for repl</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L168" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/repl-exception">repl-exception</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (repl-exception throwable)
+</pre>
+    <pre id="var-docstr">Returns the root cause of throwables</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L163" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/repl-prompt">repl-prompt</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (repl-prompt)
+</pre>
+    <pre id="var-docstr">Default :prompt hook for repl</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L108" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/repl-read">repl-read</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (repl-read request-prompt request-exit)
+</pre>
+    <pre id="var-docstr">Default :read hook for repl. Reads from *in* which must either be an
+instance of LineNumberingPushbackReader or duplicate its behavior of both
+supporting .unread and collapsing all of CR, LF, and CRLF into a single
+\newline. repl-read:
+  - skips whitespace, then
+    - returns request-prompt on start of line, or
+    - returns request-exit on end of stream, or
+    - reads an object from the input stream, then
+      - skips the next input character if it's end of line, then
+      - returns the object.</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L145" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/repl-requires">repl-requires</h2>
+    <span id="var-type">var</span><br />
+    <pre id="var-usage"></pre>
+    <pre id="var-docstr">A sequence of lib specs that are applied to `require`
+by default when a new command-line REPL is started.</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L180" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/root-cause">root-cause</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (root-cause t)
+</pre>
+    <pre id="var-docstr">Returns the initial cause of an exception or error by peeling off all of
+its wrappers</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L58" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/skip-if-eol">skip-if-eol</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (skip-if-eol s)
+</pre>
+    <pre id="var-docstr">If the next character on stream s is a newline, skips it, otherwise
+leaves the stream untouched. Returns :line-start, :stream-end, or :body
+to indicate the relative location of the next character on s. The stream
+must either be an instance of LineNumberingPushbackReader or duplicate
+its behavior of both supporting .unread and collapsing all of CR, LF, and
+CRLF to a single \newline.</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L113" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/skip-whitespace">skip-whitespace</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (skip-whitespace s)
+</pre>
+    <pre id="var-docstr">Skips whitespace characters on stream s. Returns :line-start, :stream-end,
+or :body to indicate the relative location of the next character on s.
+Interprets comma as whitespace and semicolon as comment to end of line.
+Does not interpret #! as comment to end of line because only one
+character of lookahead is available. The stream must either be an
+instance of LineNumberingPushbackReader or duplicate its behavior of both
+supporting .unread and collapsing all of CR, LF, and CRLF to a single
+\newline.</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L127" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/stack-element-str">stack-element-str</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (stack-element-str el)
+</pre>
+    <pre id="var-docstr">Returns a (possibly unmunged) string representation of a StackTraceElement</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L71" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/with-bindings">with-bindings</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-bindings &amp; body)
+</pre>
+    <pre id="var-docstr">Executes body in the context of thread-local bindings for several vars
+that often need to be set!: *ns* *warn-on-reflection* *math-context*
+*print-meta* *print-length* *print-level* *compile-path*
+*command-line-args* *1 *2 *3 *e</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L85" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/with-read-known">with-read-known</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-read-known &amp; body)
+</pre>
+    <pre id="var-docstr">Evaluates body with *read-eval* set to a "known" value,
+i.e. substituting true for :unknown if necessary.</pre>
+    
+    
+    <a href="https://github.com/clojure/clojure/blob/4526952c9548f0d4983caedbb82c4741f461acd5/src/clj/clojure/main.clj#L186" id="var-source">Source</a>
+  </div>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div style="text-align: center;" id="copyright">Copyright 2007-2014 by Rich Hickey</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>

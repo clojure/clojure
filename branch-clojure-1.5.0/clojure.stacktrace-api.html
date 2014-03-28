@@ -1,0 +1,196 @@
+<html>
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <title>clojure.stacktrace - Clojure v1.5 API documentation</title>
+    <link href="../static/favicon.png" rel="icon" />
+    <link href="../static/favicon.png" rel="shortcut icon" />
+    <link media="all" type="text/css" href="../static/clojure.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="../static/wiki.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="../static/internal.css" rel="stylesheet" />
+    <style>.menuWrapper{height: 36px;}</style>
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="../static/clojure-icon.gif" /></a>
+	<h1><a title="page header title" id="page-header" href="index.html">Clojure Core API Reference</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.5</span> API</span><br />
+    <ul>
+      <li><a class="wiki_link" href="index.html">Overview</a></li>
+      <li><a class="wiki_link" href="api-index.html">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.data-api.html" class="wiki_link">clojure.data</a></li><li><a href="clojure.edn-api.html" class="wiki_link">clojure.edn</a></li><li><a href="clojure.inspector-api.html" class="wiki_link">clojure.inspector</a></li><li><a href="clojure.instant-api.html" class="wiki_link">clojure.instant</a></li><li><a href="clojure.java.browse-api.html" class="wiki_link">clojure.java.browse</a></li><li><a href="clojure.java.io-api.html" class="wiki_link">clojure.java.io</a></li><li><a href="clojure.java.javadoc-api.html" class="wiki_link">clojure.java.javadoc</a></li><li><a href="clojure.java.shell-api.html" class="wiki_link">clojure.java.shell</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.pprint-api.html" class="wiki_link">clojure.pprint</a></li><li><a href="clojure.reflect-api.html" class="wiki_link">clojure.reflect</a></li><li><a href="clojure.repl-api.html" class="wiki_link">clojure.repl</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.stacktrace-api.html" class="wiki_link">clojure.stacktrace</a></li><li><a href="clojure.string-api.html" class="wiki_link">clojure.string</a></li><li><a href="clojure.template-api.html" class="wiki_link">clojure.template</a></li><li><a href="clojure.test-api.html" class="wiki_link">clojure.test</a></li><li><a href="clojure.walk-api.html" class="wiki_link">clojure.walk</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
+      </ul>
+    </div>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a href="../index.html" class="wiki_link">v1.6 (stable)</a></li><li><a href="../branch-master/index.html" class="wiki_link">v1.7 (in development)</a></li><li><a href="../branch-clojure-1.4.0/index.html" class="wiki_link">v1.4 (legacy)</a></li><li><a href="../branch-1.3.x/index.html" class="wiki_link">v1.3 (legacy)</a></li><li><a href="../branch-1.2.x/index.html" class="wiki_link">v1.2 (legacy)</a></li><li><a href="../branch-1.1.x/index.html" class="wiki_link">v1.1 (legacy)</a></li>
+      </ul>
+    </div>
+    <a href="http://clojure.org" class="wiki_link">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div id="content_view" class="wiki wikiPage">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div style="margin-left: 1em;" class="toc-section">
+    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
+    <div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/e">e</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/print-cause-trace">print-cause-trace</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/print-stack-trace">print-stack-trace</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/print-throwable">print-throwable</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/print-trace-element">print-trace-element</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.stacktrace/root-cause">root-cause</a>
+      
+    </div>
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.stacktrace">clojure.stacktrace</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.5</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
+  </h1>
+<span id="author-line">by <span id="author-name">Stuart Sierra</span><br /></span>
+<br />Full namespace name: <span id="long-name">clojure.stacktrace</span>
+<p></p>
+<h2>Overview</h2>
+
+<pre id="namespace-docstr">Print stack traces oriented towards Clojure, not Java.</pre>
+
+
+<br />
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/e">e</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (e)
+</pre>
+    <pre id="var-docstr">REPL utility.  Prints a brief stack trace for the root cause of the
+most recent exception.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L74" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/print-cause-trace">print-cause-trace</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-cause-trace tr)
+       (print-cause-trace tr n)
+</pre>
+    <pre id="var-docstr">Like print-stack-trace but prints chained exceptions (causes).</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L64" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/print-stack-trace">print-stack-trace</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-stack-trace tr)
+       (print-stack-trace tr n)
+</pre>
+    <pre id="var-docstr">Prints a Clojure-oriented stack trace of tr, a Throwable.
+Prints a maximum of n stack frames (default: unlimited).
+Does not print chained exceptions (causes).</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L44" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/print-throwable">print-throwable</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-throwable tr)
+</pre>
+    <pre id="var-docstr">Prints the class and message of a Throwable.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L38" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/print-trace-element">print-trace-element</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-trace-element e)
+</pre>
+    <pre id="var-docstr">Prints a Clojure-oriented view of one element in a stack trace.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L26" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.stacktrace/root-cause">root-cause</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (root-cause tr)
+</pre>
+    <pre id="var-docstr">Returns the last 'cause' Throwable in a chain of Throwables.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/49b05680354271062cfcaf4b5001b35296f3a94b/src/clj/clojure/stacktrace.clj#L18" id="var-source">Source</a>
+  </div>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div style="text-align: center;" id="copyright">Copyright 2007-2014 by Rich Hickey</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>
