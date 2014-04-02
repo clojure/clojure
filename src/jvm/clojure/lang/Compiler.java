@@ -4687,7 +4687,7 @@ static public class ObjExpr implements Expr{
 				{
 				Symbol field = (Symbol) s.first();
 				Class k = tagClass(tagOf(field));
-				Object val = Reflector.getInstanceField(value, field.name);
+				Object val = Reflector.getInstanceField(value, munge(field.name));
 				emitValue(val, gen);
 
 				if(k.isPrimitive())

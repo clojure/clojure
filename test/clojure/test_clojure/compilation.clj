@@ -329,3 +329,9 @@
 
 
                    (/ 1 0)"))))
+
+(deftype CLJ1399 [munged-field-name])
+
+(deftest clj-1399
+  ;; throws an exception on failure
+  (is (eval `(fn [] ~(CLJ1399. 1)))))
