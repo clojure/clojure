@@ -4257,7 +4257,7 @@
   (if (every? symbol? params)
     (cons params body)
     (loop [params params
-           new-params []
+           new-params (with-meta [] (meta params))
            lets []]
       (if params
         (if (symbol? (first params))
