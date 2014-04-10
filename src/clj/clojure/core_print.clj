@@ -72,8 +72,14 @@
           (pr-on m w))
       (.write w " "))))
 
+(defn print-simple [o, ^Writer w]
+  (print-meta o w)
+  (.write w (str o)))
+
 (defmethod print-method :default [o, ^Writer w]
-  (print-method (vary-meta o #(dissoc % :type)) w))
+  (if (instance? clojure.lang.IObj o)
+    (print-method (vary-meta o #(dissoc % :type)) w)
+    (print-simple o w)))
 
 (defmethod print-method nil [o, ^Writer w]
   (.write w "nil"))
@@ -126,10 +132,6 @@
   (.write w (str o)))
 
 (defmethod print-dup Boolean [o w] (print-method o w))
-
-(defn print-simple [o, ^Writer w]
-  (print-meta o w)
-  (.write w (str o)))
 
 (defmethod print-method clojure.lang.Symbol [o, ^Writer w]
   (print-simple o w))

@@ -99,3 +99,23 @@
        1N
        1M
        "hi"))
+
+(def ^{:foo :anything} var-with-meta 42)
+(def ^{:type :anything} var-with-type 666)
+
+(deftest print-var
+  (are [x s] (= s (pr-str x))
+       #'pr-str  "#'clojure.core/pr-str"
+       #'var-with-meta "#'clojure.test-clojure.printer/var-with-meta"
+       #'var-with-type "#'clojure.test-clojure.printer/var-with-type"))
+
+(deftest print-meta
+  (are [x s] (binding [*print-meta* true] 
+               (let [pstr (pr-str x)]
+                 (and (.endsWith pstr s)
+                      (.startsWith pstr "^")
+                      (.contains pstr (pr-str (meta x))))))
+       #'pr-str  "#'clojure.core/pr-str"
+       #'var-with-meta "#'clojure.test-clojure.printer/var-with-meta"
+       #'var-with-type "#'clojure.test-clojure.printer/var-with-type"))
+
