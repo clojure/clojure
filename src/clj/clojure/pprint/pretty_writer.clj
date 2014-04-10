@@ -406,7 +406,9 @@
             Integer
             (p-write-char this x)
             Long
-            (p-write-char this x))))
+            (p-write-char this x)))
+        ([x off len]
+           (.write this (subs (str x) off (+ off len)))))
 
       (ppflush []
              (if (= (getf :mode) :buffering)
