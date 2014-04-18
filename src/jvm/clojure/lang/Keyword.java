@@ -27,7 +27,7 @@ private static ConcurrentHashMap<Symbol, Reference<Keyword>> table = new Concurr
 static final ReferenceQueue rq = new ReferenceQueue();
 public final Symbol sym;
 final int hasheq;
-String _str;
+private transient String _str;
 
 public static Keyword intern(Symbol sym){
 	if(sym.meta() != null)
