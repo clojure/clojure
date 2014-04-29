@@ -312,19 +312,59 @@
         (is (nil? (:tag (meta (tbh 2)))))))))
 
 (defrecord RecordToTestFactories [a b c])
+(defrecord RecordToTestA [a])
+(defrecord RecordToTestB [b])
 (defrecord RecordToTestHugeFactories [a b c d e f g h i j k l m n o p q r s t u v w x y z])
+(defrecord RecordToTestDegenerateFactories [])
 
 (deftest test-record-factory-fns
   (testing "if the definition of a defrecord generates the appropriate factory functions"
     (let [r    (RecordToTestFactories. 1 2 3)
           r-n  (RecordToTestFactories. nil nil nil)
-          huge (RecordToTestHugeFactories. 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26)]
+          huge (RecordToTestHugeFactories. 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26)
+          r-a  (map->RecordToTestA {:a 1 :b 2})
+          r-b  (map->RecordToTestB {:a 1 :b 2})
+          r-d  (RecordToTestDegenerateFactories.)]
       (testing "that a record created with the ctor equals one by the positional factory fn"
         (is (= r    (->RecordToTestFactories 1 2 3)))
         (is (= huge (->RecordToTestHugeFactories 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26))))
       (testing "that a record created with the ctor equals one by the map-> factory fn"
         (is (= r    (map->RecordToTestFactories {:a 1 :b 2 :c 3})))
-        (is (= r-n  (map->RecordToTestFactories {}))))
+        (is (= r-n  (map->RecordToTestFactories {})))
+        (is (= r    (map->RecordToTestFactories (map->RecordToTestFactories {:a 1 :b 2 :c 3}))))
+        (is (= r-n  (map->RecordToTestFactories (map->RecordToTestFactories {}))))
+        (is (= r-d  (map->RecordToTestDegenerateFactories {})))
+        (is (= r-d  (map->RecordToTestDegenerateFactories
+                     (map->RecordToTestDegenerateFactories {})))))
+      (testing "that ext maps work correctly"
+        (is (= (assoc r :xxx 42)  (map->RecordToTestFactories {:a 1 :b 2 :c 3 :xxx 42})))
+        (is (= (assoc r :xxx 42)  (map->RecordToTestFactories (map->RecordToTestFactories
+                                                               {:a 1 :b 2 :c 3 :xxx 42}))))
+        (is (= (assoc r-n :xxx 42) (map->RecordToTestFactories {:xxx 42})))
+        (is (= (assoc r-n :xxx 42) (map->RecordToTestFactories (map->RecordToTestFactories
+  {:xxx 42}))))
+        (is (= (assoc r-d :xxx 42) (map->RecordToTestDegenerateFactories {:xxx 42})))
+        (is (= (assoc r-d :xxx 42) (map->RecordToTestDegenerateFactories
+                                    (map->RecordToTestDegenerateFactories {:xxx 42})))))
+      (testing "record equality"
+        (is (not= r-a r-b))
+        (is (= (into {} r-a) (into {} r-b)))
+        (is (not= (into {} r-a) r-b))
+        (is (= (map->RecordToTestA {:a 1 :b 2})
+               (map->RecordToTestA (map->RecordToTestB {:a 1 :b 2}))))
+        (is (= (map->RecordToTestA {:a 1 :b 2 :c 3})
+               (map->RecordToTestA (map->RecordToTestB {:a 1 :b 2 :c 3}))))
+        (is (= (map->RecordToTestA {:a 1 :d 4})
+               (map->RecordToTestA (map->RecordToTestDegenerateFactories {:a 1 :d 4}))))
+        (is (= r-n (map->RecordToTestFactories (java.util.HashMap.))))
+        (is (= r-a (map->RecordToTestA (into {} r-b))))
+        (is (= r-a (map->RecordToTestA r-b)))
+        (is (not= r-a (map->RecordToTestB r-a)))
+        (is (= r (assoc r-n :a 1 :b 2 :c 3)))
+        (is (not= r-a (assoc r-n :a 1 :b 2)))
+        (is (not= (assoc r-b :c 3 :d 4) (assoc r-n :a 1 :b 2 :c 3 :d 4)))
+        (is (= (into {} (assoc r-b :c 3 :d 4)) (into {} (assoc r-n :a 1 :b 2 :c 3 :d 4))))
+        (is (= (assoc r :d 4) (assoc r-n :a 1 :b 2 :c 3 :d 4))))
       (testing "that factory functions have docstrings"
         ;; just test non-nil to avoid overspecifiying what's in the docstring
         (is (false? (-> ->RecordToTestFactories var meta :doc nil?)))
