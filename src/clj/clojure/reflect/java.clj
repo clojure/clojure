@@ -224,7 +224,7 @@ the kinds of objects to which they can apply."}
           (visitSource [name debug])
           (visitInnerClass [name outerName innerName access])
           (visitField [access name desc signature value]
-                      (swap! result update-in [:members] (fnil conj #{})
+                      (swap! result update :members (fnil conj #{})
                              (Field. (symbol name)
                                      (field-descriptor->class-symbol desc)
                                      class-symbol
@@ -233,7 +233,7 @@ the kinds of objects to which they can apply."}
           (visitMethod [access name desc signature exceptions]
                        (when-not (= name "<clinit>")
                          (let [constructor? (= name "<init>")]
-                           (swap! result update-in [:members] (fnil conj #{})
+                           (swap! result update :members (fnil conj #{})
                                   (let [{:keys [parameter-types return-type]} (parse-method-descriptor desc)
                                         flags (parse-flags access :method)]
                                     (if constructor?

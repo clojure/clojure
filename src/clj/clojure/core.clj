@@ -5830,6 +5830,23 @@
      (assoc m k (apply update-in (get m k) ks f args))
      (assoc m k (apply f (get m k) args)))))
 
+(defn update
+  "'Updates' a value in an associative structure, where k is a
+  key and f is a function that will take the old value
+  and any supplied args and return the new value, and returns a new
+  structure.  If the key does not exist, nil is passed as the old value."
+  {:added "1.7"
+   :static true}
+  ([m k f]
+   (assoc m k (f (get m k))))
+  ([m k f x]
+   (assoc m k (f (get m k) x)))
+  ([m k f x y]
+   (assoc m k (f (get m k) x y)))
+  ([m k f x y z]
+   (assoc m k (f (get m k) x y z)))
+  ([m k f x y z & more]
+   (assoc m k (apply f (get m k) x y z more))))
 
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
@@ -6269,7 +6286,7 @@
   (let [buckets (loop [m {} ks tests vs thens]
                   (if (and ks vs)
                     (recur
-                      (update-in m [(clojure.lang.Util/hash (first ks))] (fnil conj []) [(first ks) (first vs)])
+                      (update m (clojure.lang.Util/hash (first ks)) (fnil conj []) [(first ks) (first vs)])
                       (next ks) (next vs))
                     m))
         assoc-multi (fn [m h bucket]
