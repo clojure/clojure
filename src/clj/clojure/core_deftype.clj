@@ -275,12 +275,22 @@
 
 (defn- validate-fields
   ""
-  [fields]
+  [fields name]
   (when-not (vector? fields)
     (throw (AssertionError. "No fields vector given.")))
   (let [specials #{'__meta '__extmap}]
     (when (some specials fields)
-      (throw (AssertionError. (str "The names in " specials " cannot be used as field names for types or records."))))))
+      (throw (AssertionError. (str "The names in " specials " cannot be used as field names for types or records.")))))
+  (let [non-syms (remove symbol? fields)]
+    (when (seq non-syms)
+      (throw (clojure.lang.Compiler$CompilerException.
+              *file*
+              (.deref clojure.lang.Compiler/LINE)
+              (.deref clojure.lang.Compiler/COLUMN)
+              (AssertionError.
+               (str "defrecord and deftype fields must be symbols, "
+                    *ns* "." name " had: "
+                    (apply str (interpose ", " non-syms)))))))))
 
 (defmacro defrecord
   "(defrecord name [fields*]  options* specs*)
@@ -351,7 +361,7 @@
    :arglists '([name [& fields] & opts+specs])}
 
   [name fields & opts+specs]
-  (validate-fields fields)
+  (validate-fields fields name)
   (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
         ns-part (namespace-munge *ns*)
@@ -451,7 +461,7 @@
    :arglists '([name [& fields] & opts+specs])}
 
   [name fields & opts+specs]
-  (validate-fields fields)
+  (validate-fields fields name)
   (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
         ns-part (namespace-munge *ns*)
