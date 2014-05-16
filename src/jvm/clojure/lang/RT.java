@@ -408,7 +408,10 @@ static void compile(String cljfile) throws IOException{
 }
 
 static public void load(String scriptbase) throws IOException, ClassNotFoundException{
+//	long start = System.nanoTime();
 	load(scriptbase, true);
+//	long ns = System.nanoTime() - start;
+//	System.out.println("loaded script: " + scriptbase + ", in: " + ns/1000000 + "ms");
 }
 
 static public void load(String scriptbase, boolean failIfNotFound) throws IOException, ClassNotFoundException{

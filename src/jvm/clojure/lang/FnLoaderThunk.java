@@ -51,7 +51,10 @@ private void load() {
 		{
 		try
 			{
+//			long start = System.nanoTime();
 			fn = (IFn) Class.forName(fnClassName,true,loader).newInstance();
+//			long ns = System.nanoTime() - start;
+//			System.out.println("Lazily loaded: " + fnClassName + ", in: " + ns/1000 + "μs");
 			}
 		catch(Exception e)
 			{

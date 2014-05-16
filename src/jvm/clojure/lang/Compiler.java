@@ -3745,6 +3745,7 @@ static public class FnExpr extends ObjExpr{
 	IPersistentCollection methods;
 	private boolean hasPrimSigs;
 	private boolean hasMeta;
+	private boolean hasEnclosingMethod;
 	//	String superName = null;
 
 	public FnExpr(Object tag){
@@ -3790,6 +3791,7 @@ static public class FnExpr extends ObjExpr{
 		FnExpr fn = new FnExpr(tagOf(form));
 		fn.src = form;
 		ObjMethod enclosingMethod = (ObjMethod) METHOD.deref();
+		fn.hasEnclosingMethod = enclosingMethod != null;
 		if(((IMeta) form.first()).meta() != null)
 			{
 			fn.onceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), Keyword.intern(null, "once")));
@@ -3936,18 +3938,20 @@ static public class FnExpr extends ObjExpr{
 	}
 
 	public void emitForDefn(ObjExpr objx, GeneratorAdapter gen){
-//		if(!hasPrimSigs && closes.count() == 0)
-//			{
-//			Type thunkType = Type.getType(FnLoaderThunk.class);
-////			presumes var on stack
-//			gen.dup();
-//			gen.newInstance(thunkType);
-//			gen.dupX1();
-//			gen.swap();
-//			gen.push(internalName.replace('/','.'));
-//			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(clojure.lang.Var,String)"));
-//			}
-//		else
+		if(!hasEnclosingMethod && !hasPrimSigs && closes.count() == 0)
+			{
+			String iname = internalName.replace('/','.');
+//			System.out.println("emit var for defn: " + name + ", iname: " + iname);
+			Type thunkType = Type.getType(FnLoaderThunk.class);
+//			presumes var on stack
+			gen.dup();
+			gen.newInstance(thunkType);
+			gen.dupX1();
+			gen.swap();
+			gen.push(iname);
+			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(clojure.lang.Var,String)"));
+			}
+		else
 			emit(C.EXPRESSION,objx,gen);
 	}
 }
