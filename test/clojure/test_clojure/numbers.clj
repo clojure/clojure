@@ -15,7 +15,8 @@
   (:use clojure.test
         [clojure.test.generative :exclude (is)]
         clojure.template)
-  (:require [clojure.data.generators :as gen]))
+  (:require [clojure.data.generators :as gen]
+            [clojure.test-helper :as helper]))
 
 
 ; TODO:
@@ -722,3 +723,18 @@ Math/pow overflows to Infinity."
       (assert (= a
                  (+ (* q d) r)
                  (unchecked-add (unchecked-multiply q d) r))))))
+
+(defmacro check-warn-on-box [warn? form]
+  `(binding [*unchecked-math* true]
+    (is (= ~warn?
+           (boolean
+             (re-find #"^Boxed math warning"
+                      (helper/with-err-string-writer
+                        (helper/eval-in-temp-ns ~form))))))))
+
+(deftest warn-on-boxed
+  (check-warn-on-box true (#(inc %) 2))
+  (check-warn-on-box false (#(inc ^long %) 2))
+  (check-warn-on-box false (long-array 5))
+  (check-warn-on-box true (> (first (range 3)) 0))
+  (check-warn-on-box false (> ^long (first (range 3)) 0)))

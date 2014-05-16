@@ -240,6 +240,7 @@ static public int compare(Number x, Number y){
 	return 0;
 }
 
+@WarnBoxedMath(false)
 static BigInt toBigInt(Object x){
 	if(x instanceof BigInt)
 		return (BigInt) x;
@@ -249,6 +250,7 @@ static BigInt toBigInt(Object x){
 		return BigInt.fromLong(((Number) x).longValue());
 }
 
+@WarnBoxedMath(false)
 static BigInteger toBigInteger(Object x){
 	if(x instanceof BigInteger)
 		return (BigInteger) x;
@@ -258,6 +260,7 @@ static BigInteger toBigInteger(Object x){
 		return BigInteger.valueOf(((Number) x).longValue());
 }
 
+@WarnBoxedMath(false)
 static BigDecimal toBigDecimal(Object x){
 	if(x instanceof BigDecimal)
 		return (BigDecimal) x;
@@ -284,6 +287,7 @@ static BigDecimal toBigDecimal(Object x){
 		return BigDecimal.valueOf(((Number) x).longValue());
 }
 
+@WarnBoxedMath(false)
 static public Ratio toRatio(Object x){
 	if(x instanceof Ratio)
 		return (Ratio) x;
@@ -300,6 +304,7 @@ static public Ratio toRatio(Object x){
 	return new Ratio(toBigInteger(x), BigInteger.ONE);
 }
 
+@WarnBoxedMath(false)
 static public Number rationalize(Number x){
 	if(x instanceof Float || x instanceof Double)
 		return rationalize(BigDecimal.valueOf(x.doubleValue()));
@@ -332,6 +337,7 @@ static public Number rationalize(Number x){
 //		return Double.valueOf((double) val);
 //}
 
+@WarnBoxedMath(false)
 static public Number reduceBigInt(BigInt val){
 	if(val.bipart == null)
 		return num(val.lpart);
@@ -980,6 +986,7 @@ static Ops ops(Object x){
 		return LONG_OPS;
 }
 
+@WarnBoxedMath(false)
 static int hasheq(Number x){
 	Class xc = x.getClass();
 
@@ -1044,6 +1051,7 @@ static long bitOpsCast(Object x){
 	throw new IllegalArgumentException("bit operation not supported for: " + xc);
 }
 
+	@WarnBoxedMath(false)
 	static public float[] float_array(int size, Object init){
 		float[] ret = new float[size];
 		if(init instanceof Number)
@@ -1061,6 +1069,7 @@ static long bitOpsCast(Object x){
 		return ret;
 	}
 
+	@WarnBoxedMath(false)
 	static public float[] float_array(Object sizeOrSeq){
 		if(sizeOrSeq instanceof Number)
 			return new float[((Number) sizeOrSeq).intValue()];
@@ -1075,6 +1084,7 @@ static long bitOpsCast(Object x){
 			}
 	}
 
+@WarnBoxedMath(false)
 static public double[] double_array(int size, Object init){
 	double[] ret = new double[size];
 	if(init instanceof Number)
@@ -1092,6 +1102,7 @@ static public double[] double_array(int size, Object init){
 	return ret;
 }
 
+@WarnBoxedMath(false)
 static public double[] double_array(Object sizeOrSeq){
 	if(sizeOrSeq instanceof Number)
 		return new double[((Number) sizeOrSeq).intValue()];
@@ -1106,6 +1117,7 @@ static public double[] double_array(Object sizeOrSeq){
 		}
 }
 
+@WarnBoxedMath(false)
 static public int[] int_array(int size, Object init){
 	int[] ret = new int[size];
 	if(init instanceof Number)
@@ -1123,6 +1135,7 @@ static public int[] int_array(int size, Object init){
 	return ret;
 }
 
+@WarnBoxedMath(false)
 static public int[] int_array(Object sizeOrSeq){
 	if(sizeOrSeq instanceof Number)
 		return new int[((Number) sizeOrSeq).intValue()];
@@ -1137,6 +1150,7 @@ static public int[] int_array(Object sizeOrSeq){
 		}
 }
 
+@WarnBoxedMath(false)
 static public long[] long_array(int size, Object init){
 	long[] ret = new long[size];
 	if(init instanceof Number)
@@ -1154,6 +1168,7 @@ static public long[] long_array(int size, Object init){
 	return ret;
 }
 
+@WarnBoxedMath(false)
 static public long[] long_array(Object sizeOrSeq){
 	if(sizeOrSeq instanceof Number)
 		return new long[((Number) sizeOrSeq).intValue()];
@@ -1168,6 +1183,7 @@ static public long[] long_array(Object sizeOrSeq){
 		}
 }
 
+@WarnBoxedMath(false)
 static public short[] short_array(int size, Object init){
 	short[] ret = new short[size];
 	if(init instanceof Short)
@@ -1185,6 +1201,7 @@ static public short[] short_array(int size, Object init){
 	return ret;
 }
 
+@WarnBoxedMath(false)
 static public short[] short_array(Object sizeOrSeq){
 	if(sizeOrSeq instanceof Number)
 		return new short[((Number) sizeOrSeq).intValue()];
@@ -1199,6 +1216,7 @@ static public short[] short_array(Object sizeOrSeq){
 		}
 }
 
+@WarnBoxedMath(false)
 static public char[] char_array(int size, Object init){
 	char[] ret = new char[size];
 	if(init instanceof Character)
@@ -1216,6 +1234,7 @@ static public char[] char_array(int size, Object init){
 	return ret;
 }
 
+@WarnBoxedMath(false)
 static public char[] char_array(Object sizeOrSeq){
 	if(sizeOrSeq instanceof Number)
 		return new char[((Number) sizeOrSeq).intValue()];
@@ -1230,6 +1249,7 @@ static public char[] char_array(Object sizeOrSeq){
 		}
 }
 
+@WarnBoxedMath(false)
 static public byte[] byte_array(int size, Object init){
 	byte[] ret = new byte[size];
 	if(init instanceof Byte)
@@ -1247,6 +1267,7 @@ static public byte[] byte_array(int size, Object init){
 	return ret;
 }
 
+@WarnBoxedMath(false)
 static public byte[] byte_array(Object sizeOrSeq){
 	if(sizeOrSeq instanceof Number)
 		return new byte[((Number) sizeOrSeq).intValue()];
@@ -1261,6 +1282,7 @@ static public byte[] byte_array(Object sizeOrSeq){
 		}
 }
 
+@WarnBoxedMath(false)
 static public boolean[] boolean_array(int size, Object init){
 	boolean[] ret = new boolean[size];
 	if(init instanceof Boolean)
@@ -1278,6 +1300,7 @@ static public boolean[] boolean_array(int size, Object init){
 	return ret;
 }
 
+@WarnBoxedMath(false)
 static public boolean[] boolean_array(Object sizeOrSeq){
 	if(sizeOrSeq instanceof Number)
 		return new boolean[((Number) sizeOrSeq).intValue()];
@@ -1292,34 +1315,42 @@ static public boolean[] boolean_array(Object sizeOrSeq){
 		}
 }
 
+@WarnBoxedMath(false)
 static public boolean[] booleans(Object array){
 	return (boolean[]) array;
 }
 
+@WarnBoxedMath(false)
 static public byte[] bytes(Object array){
 	return (byte[]) array;
 }
 
+@WarnBoxedMath(false)
 static public char[] chars(Object array){
 	return (char[]) array;
 }
 
+@WarnBoxedMath(false)
 static public short[] shorts(Object array){
 	return (short[]) array;
 }
 
+@WarnBoxedMath(false)
 static public float[] floats(Object array){
 	return (float[]) array;
 }
 
+@WarnBoxedMath(false)
 static public double[] doubles(Object array){
 	return (double[]) array;
 }
 
+@WarnBoxedMath(false)
 static public int[] ints(Object array){
 	return (int[]) array;
 }
 
+@WarnBoxedMath(false)
 static public long[] longs(Object array){
 	return (long[]) array;
 }

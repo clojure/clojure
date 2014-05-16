@@ -1628,6 +1628,28 @@ static class StaticMethodExpr extends MethodExpr{
 				.format("Reflection warning, %s:%d:%d - call to static method %s on %s can't be resolved (argument types: %s).\n",
 					SOURCE_PATH.deref(), line, column, methodName, c.getName(), getTypeStringForArgs(args));
 			}
+		if(method != null && RT.booleanCast(RT.UNCHECKED_MATH.deref()) && isBoxedMath(method))
+			{
+			RT.errPrintWriter()
+				.format("Boxed math warning, %s:%d:%d - call: %s.\n",
+						SOURCE_PATH.deref(), line, column, method.toString());
+			}
+	}
+
+	public static boolean isBoxedMath(java.lang.reflect.Method m) {
+		Class c = m.getDeclaringClass();
+		if(c.equals(Numbers.class))
+			{
+			WarnBoxedMath boxedMath = m.getAnnotation(WarnBoxedMath.class);
+			if(boxedMath != null)
+				return boxedMath.value();
+
+			Class[] argTypes = m.getParameterTypes();
+			for(Class argType : argTypes)
+				if(argType.equals(Object.class) || argType.equals(Number.class))
+					return true;
+			}
+		return false;
 	}
 
 	public Object eval() {
