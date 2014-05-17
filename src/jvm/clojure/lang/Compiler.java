@@ -377,6 +377,7 @@ static class DefExpr implements Expr{
 	public final int line;
 	public final int column;
 	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
+	final static Method initRootMethod = Method.getMethod("void initRoot(Object)");
 	final static Method setTagMethod = Method.getMethod("void setTag(clojure.lang.Symbol)");
 	final static Method setMetaMethod = Method.getMethod("void setMeta(clojure.lang.IPersistentMap)");
 	final static Method setDynamicMethod = Method.getMethod("clojure.lang.Var setDynamic(boolean)");
@@ -459,7 +460,7 @@ static class DefExpr implements Expr{
 				}
 			else
 				init.emit(C.EXPRESSION, objx, gen);
-			gen.invokeVirtual(VAR_TYPE, bindRootMethod);
+			gen.invokeVirtual(VAR_TYPE, initRootMethod);
 			}
 
 		if(context == C.STATEMENT)
@@ -3937,11 +3938,28 @@ static public class FnExpr extends ObjExpr{
 		return methods;
 	}
 
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		if(!hasEnclosingMethod && !hasPrimSigs && closes.count() == 0)
+			{
+			String iname = internalName.replace('/','.');
+//			System.out.println("emit lazy thunk for fn: " + name + ", iname: " + iname);
+			Type thunkType = Type.getType(FnLoaderThunk.class);
+			gen.visitInsn(Opcodes.ACONST_NULL);
+			gen.newInstance(thunkType);
+			gen.dupX1();
+			gen.swap();
+			gen.push(iname);
+			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(clojure.lang.Var,String)"));
+			}
+		else
+			super.emit(context,objx,gen);
+	}
+
 	public void emitForDefn(ObjExpr objx, GeneratorAdapter gen){
 		if(!hasEnclosingMethod && !hasPrimSigs && closes.count() == 0)
 			{
 			String iname = internalName.replace('/','.');
-//			System.out.println("emit var for defn: " + name + ", iname: " + iname);
+//			System.out.println("emit lazy thunk for defn: " + name + ", iname: " + iname);
 			Type thunkType = Type.getType(FnLoaderThunk.class);
 //			presumes var on stack
 			gen.dup();
@@ -3952,7 +3970,10 @@ static public class FnExpr extends ObjExpr{
 			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(clojure.lang.Var,String)"));
 			}
 		else
-			emit(C.EXPRESSION,objx,gen);
+			{
+//			System.out.println("Not emit lazy thunk for defn: " + name);
+			emit(C.EXPRESSION, objx, gen);
+			}
 	}
 }
 
@@ -4620,7 +4641,7 @@ static public class ObjExpr implements Expr{
 				}
 			emitListAsObjectArray(entries, gen);
 			gen.invokeStatic(RT_TYPE,
-							 Method.getMethod("clojure.lang.IPersistentMap map(Object[])"));
+							 Method.getMethod("clojure.lang.IPersistentMap mapUniqueKeys(Object[])"));
 			}
 		else if(value instanceof IPersistentVector)
 			{
@@ -4705,7 +4726,10 @@ static public class ObjExpr implements Expr{
 			for(int i = 0; i < constants.count(); i++)
 				{
 				emitValue(constants.nth(i), clinitgen);
-				clinitgen.checkCast(constantType(i));
+				if(!constantType(i).equals(Type.getType(Var.class)))
+					{
+					clinitgen.checkCast(constantType(i));
+					}
 				clinitgen.putStatic(objtype, constantName(i), constantType(i));
 				}
 			}
@@ -5023,12 +5047,14 @@ static public class ObjExpr implements Expr{
 //				return Type.getType(KeywordCallSite.class);
 			else if(RestFn.class.isAssignableFrom(c))
 				return Type.getType(RestFn.class);
-			else if(AFn.class.isAssignableFrom(c))
+			else if(IPersistentMap.class.isAssignableFrom(c))
+					return Type.getType(IPersistentMap.class);
+			else if(AFn.class.isAssignableFrom(c) && !IPersistentCollection.class.isAssignableFrom(c))
 					return Type.getType(AFn.class);
-				else if(c == Var.class)
-						return Type.getType(Var.class);
-					else if(c == String.class)
-							return Type.getType(String.class);
+			else if(c == Var.class)
+				return Type.getType(Var.class);
+			else if(c == String.class)
+				return Type.getType(String.class);
 
 //			return Type.getType(c);
 			}
@@ -7195,6 +7221,13 @@ public static void pushNSandLoader(ClassLoader loader){
 	                              ));
 }
 
+static long lastpr = System.nanoTime();
+public static void prtime(String s){
+//	long t = System.nanoTime();
+//	System.out.println(s + ": " + ((t-lastpr)/100000)/10.0);
+//	lastpr = t;
+}
+
 public static ILookupThunk getLookupThunk(Object target, Keyword k){
 	return null;  //To change body of created methods use File | Settings | File Templates.
 }
@@ -7287,6 +7320,8 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		                                            null,
 		                                            cv);
 		gen.visitCode();
+//		gen.push(objx.internalName.replace('/','.') + " load enter");
+//		gen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void prtime(String)"));
 
 		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
 		    r = LispReader.read(pushbackReader, false, EOF, false))
@@ -7297,6 +7332,10 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 				LINE_BEFORE.set(pushbackReader.getLineNumber());
 				COLUMN_BEFORE.set(pushbackReader.getColumnNumber());
 			}
+
+//		gen.push(objx.internalName.replace('/','.') + " load exit");
+//		gen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void prtime(String)"));
+
 		//end of load
 		gen.returnValue();
 		gen.endMethod();
@@ -7309,6 +7348,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			}
 
 		final int INITS_PER = 100;
+//		System.out.println("Compiling constants for " + objx.internalName + ": " + objx.constants.count());
 		int numInits =  objx.constants.count() / INITS_PER;
 		if(objx.constants.count() % INITS_PER != 0)
 			++numInits;
@@ -7327,8 +7367,18 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 
 				for(int i = n*INITS_PER; i < objx.constants.count() && i < (n+1)*INITS_PER; i++)
 					{
+//					System.out.println("constant: " + objx.constants.nth(i));
 					objx.emitValue(objx.constants.nth(i), clinitgen);
-					clinitgen.checkCast(objx.constantType(i));
+					if(objx.constantType(i).equals(Type.getType(Var.class)))
+						{
+//						System.out.println("omit checkcast: " + objx.constantName(i));
+						}
+					else
+						{
+//						System.out.println("checkcast: " + objx.constantType(i));
+						clinitgen.checkCast(objx.constantType(i));
+						}
+
 					clinitgen.putStatic(objx.objtype, objx.constantName(i), objx.constantType(i));
 					}
 				}
@@ -7356,15 +7406,28 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 //			{
 //			objx.emitConstants(clinitgen);
 //			}
+		clinitgen.push(objx.internalName.replace('/','.') + " enter");
+		clinitgen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void prtime(String)"));
 		for(int n = 0;n<numInits;n++)
 			clinitgen.invokeStatic(objx.objtype, Method.getMethod("void __init" + n + "()"));
+
+		clinitgen.push(objx.internalName.replace('/','.') + " init");
+		clinitgen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void prtime(String)"));
 
 		clinitgen.push(objx.internalName.replace('/','.'));
 		clinitgen.invokeStatic(CLASS_TYPE, Method.getMethod("Class forName(String)"));
 		clinitgen.invokeVirtual(CLASS_TYPE,Method.getMethod("ClassLoader getClassLoader()"));
 		clinitgen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void pushNSandLoader(ClassLoader)"));
 		clinitgen.mark(startTry);
+
+		clinitgen.push(objx.internalName.replace('/','.') + " class");
+		clinitgen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void prtime(String)"));
+
 		clinitgen.invokeStatic(objx.objtype, Method.getMethod("void load()"));
+
+		clinitgen.push(objx.internalName.replace('/','.') + " load");
+		clinitgen.invokeStatic(Type.getType(Compiler.class), Method.getMethod("void prtime(String)"));
+
 		clinitgen.mark(endTry);
 		clinitgen.invokeStatic(VAR_TYPE, Method.getMethod("void popThreadBindings()"));
 		clinitgen.goTo(end);

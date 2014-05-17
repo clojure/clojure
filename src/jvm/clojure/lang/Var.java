@@ -277,6 +277,12 @@ synchronized public void bindRoot(Object root){
     notifyWatches(oldroot,this.root);
 }
 
+//do not call this
+public void initRoot(Object root){
+	this.root = root;
+	rev = 1;
+}
+
 synchronized void swapRoot(Object root){
 	validate(getValidator(), root);
 	Object oldroot = this.root;

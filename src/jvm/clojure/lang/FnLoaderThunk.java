@@ -36,6 +36,16 @@ public Object invoke(Object arg1, Object arg2) {
 	return fn.invoke(arg1,arg2);
 }
 
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) {
+	load();
+	return fn.invoke(arg1,arg2,arg3,arg4);
+}
+
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+	load();
+	return fn.invoke(arg1,arg2,arg3,arg4,arg5);
+}
+
 public Object invoke(Object arg1, Object arg2, Object arg3) {
 	load();
 	return fn.invoke(arg1,arg2,arg3);
@@ -60,7 +70,8 @@ private void load() {
 			{
 			throw Util.sneakyThrow(e);
 			}
-		v.root = fn;
+		if(v != null)
+			v.root = fn;
 		}
 }
 

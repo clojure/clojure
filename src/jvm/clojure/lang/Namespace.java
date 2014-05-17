@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,6 +24,9 @@ transient final AtomicReference<IPersistentMap> mappings = new AtomicReference<I
 transient final AtomicReference<IPersistentMap> aliases = new AtomicReference<IPersistentMap>();
 
 final static ConcurrentHashMap<Symbol, Namespace> namespaces = new ConcurrentHashMap<Symbol, Namespace>();
+final static Object lock = new Object();
+static IPersistentMap lastCore = null;
+static IPersistentMap lastMerge = null;
 
 public String toString(){
 	return name.toString();
@@ -167,6 +171,42 @@ public Class importClass(Class c){
 public Var refer(Symbol sym, Var var){
 	return (Var) reference(sym, var);
 
+}
+
+public boolean initWith(Namespace ns){
+//	System.out.println("initWith: " + name + ", " + ns.name);
+	synchronized(lock){
+		IPersistentMap ms = ns.mappings.get();
+		if(ms == lastCore)
+			{
+//			System.out.println("initWith reuse: " + name + ", " + ns.name);
+			return mappings.compareAndSet(RT.DEFAULT_IMPORTS,lastMerge);
+			}
+//		System.out.println("initWith no reuse: " + name + ", " + ns.name);
+		IPersistentMap tm = mappings.get();
+		if(mappings.get() == RT.DEFAULT_IMPORTS)
+			{
+			for(Object o : ms)
+				{
+				Map.Entry<Object,Object> e = (Map.Entry<Object, Object>) o;
+
+				Symbol s = (Symbol) e.getKey();
+				Var v = (e.getValue() instanceof Var) ? (Var) e.getValue() :null;
+				if(v != null && v.ns == ns && v.isPublic())
+					{
+	//				System.out.println("refer: " + s);
+					tm = tm.assoc(s, v);
+					}
+	//			else
+	//				System.out.println("not refer: " + s);
+				}
+			IPersistentMap m = tm;
+			lastCore = ms;
+			lastMerge = m;
+			return mappings.compareAndSet(RT.DEFAULT_IMPORTS,m);
+			}
+		return false;
+	}
 }
 
 public static Namespace findOrCreate(Symbol name){

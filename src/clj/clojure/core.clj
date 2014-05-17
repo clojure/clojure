@@ -10,6 +10,8 @@
        :author "Rich Hickey"}
   clojure.core)
 
+;;(set! *warn-on-reflection* true)
+
 (def unquote)
 (def unquote-splicing)
 
@@ -3899,25 +3901,29 @@
   clashes. Use :use in the ns macro in preference to calling this directly."
   {:added "1.0"}
   [ns-sym & filters]
-    (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))
-          fs (apply hash-map filters)
-          nspublics (ns-publics ns)
-          rename (or (:rename fs) {})
-          exclude (set (:exclude fs))
-          to-do (if (= :all (:refer fs))
-                  (keys nspublics)
-                  (or (:refer fs) (:only fs) (keys nspublics)))]
-      (when (and to-do (not (instance? clojure.lang.Sequential to-do)))
-        (throw (new Exception ":only/:refer value must be a sequential collection of symbols")))
-      (doseq [sym to-do]
-        (when-not (exclude sym)
-          (let [v (nspublics sym)]
-            (when-not v
-              (throw (new java.lang.IllegalAccessError
-                          (if (get (ns-interns ns) sym)
-                            (str sym " is not public")
-                            (str sym " does not exist")))))
-            (. *ns* (refer (or (rename sym) sym) v)))))))
+  (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))]
+    (or
+     (and (= ns-sym 'clojure.core)
+          (nil? filters)
+          (.initWith *ns* ns))
+     (let [fs (apply hash-map filters)
+           nspublics (ns-publics ns)
+           rename (or (:rename fs) {})
+           exclude (set (:exclude fs))
+           to-do (if (= :all (:refer fs))
+                   (keys nspublics)
+                   (or (:refer fs) (:only fs) (keys nspublics)))]
+       (when (and to-do (not (instance? clojure.lang.Sequential to-do)))
+         (throw (new Exception ":only/:refer value must be a sequential collection of symbols")))
+       (doseq [sym to-do]
+         (when-not (exclude sym)
+           (let [v (nspublics sym)]
+             (when-not v
+               (throw (new java.lang.IllegalAccessError
+                           (if (get (ns-interns ns) sym)
+                             (str sym " is not public")
+                             (str sym " does not exist")))))
+             (. *ns* (refer (or (rename sym) sym) v)))))))))
 
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."
@@ -5355,7 +5361,7 @@
         ~@(map process-reference references))
         (if (.equals '~name 'clojure.core) 
           nil
-          (do (dosync (commute @#'*loaded-libs* conj '~name)) nil)))))
+          (do (swap! @#'*loaded-libs* conj '~name) nil)))))
 
 (defmacro refer-clojure
   "Same as (refer 'clojure.core <filters>)"
@@ -5376,8 +5382,8 @@
 
 (defonce ^:dynamic
   ^{:private true
-     :doc "A ref to a sorted set of symbols representing loaded libs"}
-  *loaded-libs* (ref (sorted-set)))
+     :doc "An atom around a sorted set of symbols representing loaded libs"}
+  *loaded-libs* (atom (sorted-set)))
 
 (defonce ^:dynamic
   ^{:private true
@@ -5448,8 +5454,7 @@
             "namespace '%s' not found after loading '%s'"
             lib (root-resource lib))
   (when require
-    (dosync
-     (commute *loaded-libs* conj lib))))
+    (swap! *loaded-libs* conj lib)))
 
 (defn- load-all
   "Loads a lib given its name and forces a load of any libs it directly or
@@ -5457,11 +5462,10 @@
   exists after loading. If require, records the load so any duplicate loads
   can be skipped."
   [lib need-ns require]
-  (dosync
-   (commute *loaded-libs* #(reduce1 conj %1 %2)
-            (binding [*loaded-libs* (ref (sorted-set))]
-              (load-one lib need-ns require)
-              @*loaded-libs*))))
+  (swap! *loaded-libs* #(reduce1 conj %1 %2)
+         (binding [*loaded-libs* (atom (sorted-set))]
+           (load-one lib need-ns require)
+           @*loaded-libs*)))
 
 (defn- load-lib
   "Loads a lib with options"
