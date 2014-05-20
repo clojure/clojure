@@ -2522,6 +2522,14 @@
    :added "1.0"}
  not-any? (comp not some))
 
+(def
+ ^{:tag Boolean
+   :doc "Returns true if (pred x) is logical true for any x in coll,
+  else false."
+   :arglists '([pred coll])
+   :added "1.7"}
+ any? (comp boolean some))
+
 ;will be redefed later with arg checks
 (defmacro dotimes
   "bindings => name n
