@@ -147,11 +147,7 @@ private IPersistentMap resetCache() {
 	IFn targetFn = (IFn) methodCache.valAt(dispatchVal);
 	if(targetFn != null)
 		return targetFn;
-	 targetFn = findAndCacheBestMethod(dispatchVal);
-	if(targetFn != null)
-		return targetFn;
-	targetFn = (IFn) getMethodTable().valAt(defaultDispatchVal);
-	return targetFn;
+	return findAndCacheBestMethod(dispatchVal);
 }
 
 private IFn getFn(Object dispatchVal) {
@@ -164,13 +160,13 @@ private IFn getFn(Object dispatchVal) {
 
 private IFn findAndCacheBestMethod(Object dispatchVal) {
 	rw.readLock().lock();
-	Map.Entry bestEntry;
+	Object bestValue;
 	IPersistentMap mt = methodTable;
 	IPersistentMap pt = preferTable;
 	Object ch = cachedHierarchy;
 	try
 		{
-		bestEntry = null;
+		Map.Entry bestEntry = null;
 		for(Object o : getMethodTable())
 			{
 			Map.Entry e = (Map.Entry) o;
@@ -186,7 +182,13 @@ private IFn findAndCacheBestMethod(Object dispatchVal) {
 				}
 			}
 		if(bestEntry == null)
-			return null;
+			{
+			bestValue = methodTable.valAt(defaultDispatchVal);
+		        if(bestValue == null)
+				return null;
+			}
+		else
+			bestValue = bestEntry.getValue();
 		}
 	finally
 		{
@@ -204,8 +206,8 @@ private IFn findAndCacheBestMethod(Object dispatchVal) {
 			cachedHierarchy == hierarchy.deref())
 			{
 			//place in cache
-			methodCache = methodCache.assoc(dispatchVal, bestEntry.getValue());
-			return (IFn) bestEntry.getValue();
+			methodCache = methodCache.assoc(dispatchVal, bestValue);
+			return (IFn) bestValue;
 			}
 		else
 			{
