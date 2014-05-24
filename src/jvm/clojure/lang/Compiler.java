@@ -413,7 +413,7 @@ static class DefExpr implements Expr{
 			if(initProvided)
 				{
 //			if(init instanceof FnExpr && ((FnExpr) init).closes.count()==0)
-//				var.bindRoot(new FnLoaderThunk((FnExpr) init,var));
+//				var.bindRoot(new FnLoaderThunk(var, ((FnExpr) init).getCompiledClass().getName().replace('/','.')));
 //			else
 				var.bindRoot(init.eval());
 				}
@@ -436,6 +436,10 @@ static class DefExpr implements Expr{
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		objx.emitVar(gen, var);
+//		gen.push(var.ns.name.toString());
+//		gen.push(var.sym.toString());
+//		gen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
+
 		if(isDynamic)
 			{
 			gen.push(isDynamic);
@@ -491,6 +495,7 @@ static class DefExpr implements Expr{
 					throw Util.runtimeException("First argument to def must be a Symbol");
 			Symbol sym = (Symbol) RT.second(form);
 			Var v = lookupVar(sym, true);
+			//Var v = lookupVar(sym, true, true, false);
 			if(v == null)
 				throw Util.runtimeException("Can't refer to qualified var that doesn't exist");
 			if(!v.ns.equals(currentNS()))
@@ -7004,7 +7009,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 }
 
 
-static Var lookupVar(Symbol sym, boolean internNew, boolean registerMacro) {
+static Var lookupVar(Symbol sym, boolean internNew, boolean registerMacro, boolean registerVar) {
 	Var var = null;
 
 	//note - ns-qualified vars in other namespaces must already exist
@@ -7043,10 +7048,15 @@ static Var lookupVar(Symbol sym, boolean internNew, boolean registerMacro) {
 				throw Util.runtimeException("Expecting var, but " + sym + " is mapped to " + o);
 				}
 			}
-	if(var != null && (!var.isMacro() || registerMacro))
+	if(registerVar && var != null && (!var.isMacro() || registerMacro))
 		registerVar(var);
 	return var;
 }
+
+static Var lookupVar(Symbol sym, boolean internNew, boolean registerMacro) {
+    return lookupVar(sym, internNew, registerMacro, true);
+}
+
 static Var lookupVar(Symbol sym, boolean internNew) {
     return lookupVar(sym, internNew, true);
 }

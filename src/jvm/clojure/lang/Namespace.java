@@ -175,37 +175,45 @@ public Var refer(Symbol sym, Var var){
 
 public boolean initWith(Namespace ns){
 //	System.out.println("initWith: " + name + ", " + ns.name);
-	synchronized(lock){
-		IPersistentMap ms = ns.mappings.get();
-		if(ms == lastCore)
-			{
-//			System.out.println("initWith reuse: " + name + ", " + ns.name);
-			return mappings.compareAndSet(RT.DEFAULT_IMPORTS,lastMerge);
-			}
-//		System.out.println("initWith no reuse: " + name + ", " + ns.name);
-		IPersistentMap tm = mappings.get();
-		if(mappings.get() == RT.DEFAULT_IMPORTS)
-			{
-			for(Object o : ms)
-				{
-				Map.Entry<Object,Object> e = (Map.Entry<Object, Object>) o;
 
-				Symbol s = (Symbol) e.getKey();
-				Var v = (e.getValue() instanceof Var) ? (Var) e.getValue() :null;
-				if(v != null && v.ns == ns && v.isPublic())
-					{
-	//				System.out.println("refer: " + s);
-					tm = tm.assoc(s, v);
-					}
-	//			else
-	//				System.out.println("not refer: " + s);
-				}
-			IPersistentMap m = tm;
-			lastCore = ms;
-			lastMerge = m;
-			return mappings.compareAndSet(RT.DEFAULT_IMPORTS,m);
+	synchronized(lock){
+	IPersistentMap ms = ns.mappings.get();
+	IPersistentMap tm = mappings.get();
+	IPersistentMap dimp = RT.DEFAULT_IMPORTS;
+	if(lastCore != ms)
+		{
+//		System.out.println("initWith REMERGE: " + name + ", " + ns.name + ", " + ms.count() + ", " +
+//		                   (lastCore == null?0:lastCore.count()));
+
+		IPersistentMap merge = (lastMerge != null)?lastMerge:dimp;
+		for(Object o : ms)
+			{
+			Map.Entry e = (Map.Entry) o;
+			Symbol s = (Symbol) e.getKey();
+			Var v = (e.getValue() instanceof Var) ? (Var) e.getValue() : null;
+			if(v != null && v.ns == ns && v.isPublic() && merge.valAt(s) != v)
+				merge = merge.assoc(s,v);
 			}
-		return false;
+		lastCore = ms;
+		lastMerge = merge;
+		}
+	if(tm == dimp)
+		{
+//		System.out.println("initWith REUSE: " + name + ", " + ns.name);
+		return mappings.compareAndSet(tm,lastMerge);
+		}
+	else
+		{
+//		System.out.println("initWith ADD: " + name + ", " + ns.name);
+		IPersistentMap m = lastMerge;
+		for(Object o : tm)
+			{
+			Map.Entry e = (Map.Entry) o;
+			if(m.valAt(e.getKey()) != e.getValue())
+				m = m.assoc(e.getKey(),e.getValue());
+			}
+		return mappings.compareAndSet(tm,m);
+		}
 	}
 }
 

@@ -6272,9 +6272,9 @@
 (load "genclass")
 (load "core_deftype")
 (load "core/protocols")
-(load "gvec")
 (load "instant")
 (load "uuid")
+(load "gvec")
 
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
