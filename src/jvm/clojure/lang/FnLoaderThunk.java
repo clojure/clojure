@@ -14,22 +14,19 @@ package clojure.lang;
 
 public class FnLoaderThunk extends RestFn{
 
-final Var v;
 final ClassLoader loader;
 final String fnClassName;
 final Compiler.ObjExpr expr;
 IFn fn;
 
-public FnLoaderThunk(Var v, String fnClassName){
-	this.v = v;
+public FnLoaderThunk(String fnClassName){
 	this.loader = (ClassLoader) RT.FN_LOADER_VAR.get();
 	this.fnClassName = fnClassName;
 	this.expr = null;
 	fn = null;
 }
 
-public FnLoaderThunk(Var v, Compiler.ObjExpr expr){
-	this.v = v;
+public FnLoaderThunk(Compiler.ObjExpr expr){
 	this.loader = (ClassLoader) Compiler.LOADER.get();
 	this.fnClassName = null;
 	this.expr = expr;
@@ -66,7 +63,7 @@ protected Object doInvoke(Object args) {
 	return fn.applyTo((ISeq) args);
 }
 
-private void load() {
+Object load() {
 	if(fn == null)
 		{
 		try
@@ -83,9 +80,8 @@ private void load() {
 			{
 			throw Util.sneakyThrow(e);
 			}
-		if(v != null)
-			v.root = fn;
 		}
+	return fn;
 }
 
 public int getRequiredArity(){

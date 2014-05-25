@@ -80,10 +80,12 @@ static Keyword nameKey = Keyword.intern(null, "name");
 static Keyword nsKey = Keyword.intern(null, "ns");
 //static Keyword tagKey = Keyword.intern(null, "tag");
 
-volatile Object root;
+volatile Object _root;
+FnLoaderThunk lazyLoader = null;
 
 volatile boolean dynamic = false;
-transient final AtomicBoolean threadBound;
+transient volatile boolean threadBound;
+//transient final AtomicBoolean threadBound;
 public final Symbol sym;
 public final Namespace ns;
 
@@ -170,24 +172,40 @@ public static Var create(Object root){
 Var(Namespace ns, Symbol sym){
 	this.ns = ns;
 	this.sym = sym;
-	this.threadBound = new AtomicBoolean(false);
-	this.root = new Unbound(this);
+	this.threadBound = false; //new AtomicBoolean(false);
+	this._root = new Unbound(this);
 	setMeta(PersistentHashMap.EMPTY);
 }
 
 Var(Namespace ns, Symbol sym, Object root){
 	this(ns, sym);
-	this.root = root;
+	this._root = root;
 	++rev;
 }
 
 public boolean isBound(){
-	return hasRoot() || (threadBound.get() && dvals.get().bindings.containsKey(this));
+	return hasRoot() || (threadBound && dvals.get().bindings.containsKey(this));
+}
+
+synchronized final Object lazyRoot(){
+	if(_root == this)
+		{
+		_root = lazyLoader.load();
+		lazyLoader = null;
+		}
+	return _root;
+}
+
+final Object root(){
+	Object ret = _root;
+	if(ret != this)
+		return ret;
+	return lazyRoot();
 }
 
 final public Object get(){
-	if(!threadBound.get())
-		return root;
+	if(!threadBound)
+		return root();
 	return deref();
 }
 
@@ -195,12 +213,12 @@ final public Object deref(){
 	TBox b = getThreadBinding();
 	if(b != null)
 		return b.val;
-	return root;
+	return root();
 }
 
 public void setValidator(IFn vf){
 	if(hasRoot())
-		validate(vf, root);
+		validate(vf, root());
 	validator = vf;
 }
 
@@ -252,7 +270,7 @@ public boolean isPublic(){
 }
 
 final public Object getRawRoot(){
-		return root;
+		return root();
 }
 
 public Object getTag(){
@@ -264,54 +282,66 @@ public void setTag(Symbol tag) {
 }
 
 final public boolean hasRoot(){
-	return !(root instanceof Unbound);
+	return !(root() instanceof Unbound);
 }
 
 //binding root always clears macro flag
 synchronized public void bindRoot(Object root){
 	validate(getValidator(), root);
-	Object oldroot = this.root;
-	this.root = root;
+	Object oldroot = this.root();
+	this._root = root;
 	++rev;
-        alterMeta(dissoc, RT.list(macroKey));
-    notifyWatches(oldroot,this.root);
+    alterMeta(dissoc, RT.list(macroKey));
+	if(watches.count() > 0)
+        notifyWatches(oldroot,root());
 }
 
 //do not call this
-public void initRoot(Object root){
-	this.root = root;
-	rev = 1;
+synchronized public void initLazyRoot(FnLoaderThunk loader){
+	//these will force immediate load anyway
+	if(getValidator() != null || watches.count() > 0)
+		bindRoot(loader.load());
+	else{
+		this._root = this;
+		this.lazyLoader = loader;
+		++rev;
+        alterMeta(dissoc, RT.list(macroKey));
+	}
 }
 
 synchronized void swapRoot(Object root){
 	validate(getValidator(), root);
-	Object oldroot = this.root;
-	this.root = root;
+	Object oldroot = this.root();
+	this._root = root;
 	++rev;
-    notifyWatches(oldroot,root);
+	if(watches.count() > 0)
+        notifyWatches(oldroot,root());
 }
 
 synchronized public void unbindRoot(){
-	this.root = new Unbound(this);
+	this._root = new Unbound(this);
+	this.lazyLoader = null;
 	++rev;
 }
 
 synchronized public void commuteRoot(IFn fn) {
-	Object newRoot = fn.invoke(root);
+	Object newRoot = fn.invoke(root());
 	validate(getValidator(), newRoot);
-	Object oldroot = root;
-	this.root = newRoot;
+	Object oldroot = _root;
+	this._root = newRoot;
 	++rev;
-    notifyWatches(oldroot,newRoot);
+	if(watches.count() > 0)
+        notifyWatches(oldroot,root());
 }
 
 synchronized public Object alterRoot(IFn fn, ISeq args) {
-	Object newRoot = fn.applyTo(RT.cons(root, args));
+	Object newRoot = fn.applyTo(RT.cons(root(), args));
 	validate(getValidator(), newRoot);
-	Object oldroot = root;
-	this.root = newRoot;
+	Object oldroot = _root;
+	this._root = newRoot;
 	++rev;
-    notifyWatches(oldroot,newRoot);
+	if(watches.count() > 0)
+        notifyWatches(oldroot,root());
 	return newRoot;
 }
 
@@ -325,7 +355,7 @@ public static void pushThreadBindings(Associative bindings){
 		if(!v.dynamic)
 			throw new IllegalStateException(String.format("Can't dynamically bind non-dynamic var: %s/%s", v.ns, v.sym));
 		v.validate(v.getValidator(), e.val());
-		v.threadBound.set(true);
+		v.threadBound = true;
 		bmap = bmap.assoc(v, new TBox(Thread.currentThread(), e.val()));
 		}
 	dvals.set(new Frame(bmap, f));
@@ -356,7 +386,7 @@ public static Associative getThreadBindings(){
 }
 
 public final TBox getThreadBinding(){
-	if(threadBound.get())
+	if(threadBound)
 		{
 		IMapEntry e = dvals.get().bindings.entryAt(this);
 		if(e != null)

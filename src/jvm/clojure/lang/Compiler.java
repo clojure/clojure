@@ -380,7 +380,7 @@ static class DefExpr implements Expr{
 	public final int line;
 	public final int column;
 	final static Method bindRootMethod = Method.getMethod("void bindRoot(Object)");
-	final static Method initRootMethod = Method.getMethod("void initRoot(Object)");
+	final static Method initLazyRootMethod = Method.getMethod("void initLazyRoot(clojure.lang.FnLoaderThunk)");
 	final static Method setTagMethod = Method.getMethod("void setTag(clojure.lang.Symbol)");
 	final static Method setMetaMethod = Method.getMethod("void setMeta(clojure.lang.IPersistentMap)");
 	final static Method setDynamicMethod = Method.getMethod("clojure.lang.Var setDynamic(boolean)");
@@ -417,9 +417,9 @@ static class DefExpr implements Expr{
 				{
 			if(init instanceof FnExpr
 			   && !((FnExpr) init).hasEnclosingMethod
-			   && !((FnExpr) init).hasPrimSigs
+//			   && !((FnExpr) init).hasPrimSigs
 			   && ((FnExpr) init).closes.count()==0)
-				var.bindRoot(new FnLoaderThunk(var, (ObjExpr) init));
+				var.initLazyRoot(new FnLoaderThunk((ObjExpr) init));
 			else
 				var.bindRoot(init.eval());
 				}
@@ -466,11 +466,19 @@ static class DefExpr implements Expr{
 			gen.dup();
 			if(init instanceof FnExpr)
 				{
-				((FnExpr)init).emitForDefn(objx, gen);
+				if(((FnExpr)init).emitForDefn(objx, gen))
+					{
+//					System.out.println("emit lazy thunk for defn var: " + var);
+					gen.invokeVirtual(VAR_TYPE, initLazyRootMethod);
+					}
+				else
+					gen.invokeVirtual(VAR_TYPE, bindRootMethod);
 				}
 			else
+				{
 				init.emit(C.EXPRESSION, objx, gen);
-			gen.invokeVirtual(VAR_TYPE, initRootMethod);
+				gen.invokeVirtual(VAR_TYPE, bindRootMethod);
+				}
 			}
 
 		if(context == C.STATEMENT)
@@ -3979,35 +3987,41 @@ static public class FnExpr extends ObjExpr{
 			String iname = internalName.replace('/','.');
 //			System.out.println("emit lazy thunk for fn: " + name + ", iname: " + iname);
 			Type thunkType = Type.getType(FnLoaderThunk.class);
-			gen.visitInsn(Opcodes.ACONST_NULL);
+//			gen.visitInsn(Opcodes.ACONST_NULL);
 			gen.newInstance(thunkType);
-			gen.dupX1();
-			gen.swap();
+			gen.dup();
+//			gen.dupX1();
+//			gen.swap();
 			gen.push(iname);
-			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(clojure.lang.Var,String)"));
+			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(String)"));
 			}
 		else
 			super.emit(context,objx,gen);
 	}
 
-	public void emitForDefn(ObjExpr objx, GeneratorAdapter gen){
-		if(!hasEnclosingMethod && !hasPrimSigs && closes.count() == 0)
+	public boolean emitForDefn(ObjExpr objx, GeneratorAdapter gen){
+		if(!hasEnclosingMethod
+		   //&& !hasPrimSigs
+		   && closes.count() == 0)
 			{
 			String iname = internalName.replace('/','.');
 //			System.out.println("emit lazy thunk for defn: " + name + ", iname: " + iname);
 			Type thunkType = Type.getType(FnLoaderThunk.class);
 //			presumes var on stack
-			gen.dup();
+//			gen.dup();
 			gen.newInstance(thunkType);
-			gen.dupX1();
-			gen.swap();
+			gen.dup();
+//			gen.dupX1();
+//			gen.swap();
 			gen.push(iname);
-			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(clojure.lang.Var,String)"));
+			gen.invokeConstructor(thunkType,Method.getMethod("void <init>(String)"));
+			return true;
 			}
 		else
 			{
 //			System.out.println("Not emit lazy thunk for defn: " + name);
 			emit(C.EXPRESSION, objx, gen);
+			return false;
 			}
 	}
 }
