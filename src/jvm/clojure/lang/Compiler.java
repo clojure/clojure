@@ -220,6 +220,9 @@ static final public Var NO_RECUR = Var.create(null).setDynamic();
 //DynamicClassLoader
 static final public Var LOADER = Var.create().setDynamic();
 
+//Map form->class or null
+static final public Var MAYBE_CLASSES = Var.create().setDynamic();
+
 //String
 static final public Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                             Symbol.intern("*source-path*"), "NO_SOURCE_FILE").setDynamic();
@@ -412,9 +415,12 @@ static class DefExpr implements Expr{
 			{
 			if(initProvided)
 				{
-//			if(init instanceof FnExpr && ((FnExpr) init).closes.count()==0)
-//				var.bindRoot(new FnLoaderThunk(var, ((FnExpr) init).getCompiledClass().getName().replace('/','.')));
-//			else
+			if(init instanceof FnExpr
+			   && !((FnExpr) init).hasEnclosingMethod
+			   && !((FnExpr) init).hasPrimSigs
+			   && ((FnExpr) init).closes.count()==0)
+				var.bindRoot(new FnLoaderThunk(var, (ObjExpr) init));
+			else
 				var.bindRoot(init.eval());
 				}
 			if(meta != null)
@@ -969,9 +975,20 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		}
 	}
 
-	private static Class maybeClass(Object form, boolean stringOk) {
+	public static Class maybeClass(Object form, boolean stringOk) {
 		if(form instanceof Class)
 			return (Class) form;
+		HashMap m = MAYBE_CLASSES.isBound()?(HashMap) MAYBE_CLASSES.get():null;
+		if(m != null){
+			if(m.containsKey(form))
+				return (Class) m.get(form);
+//			else
+//				System.out.println("MAYBE_CLASSES can't find: " + form);
+			}
+		else
+			throw new RuntimeException("MAYBE_CLASSES unbound: " + form);
+//			System.out.println("MAYBE_CLASSES unbound");
+
 		Class c = null;
 		if(form instanceof Symbol)
 			{
@@ -981,18 +998,23 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(Util.equals(sym,COMPILE_STUB_SYM.get()))
 					return (Class) COMPILE_STUB_CLASS.get();
 				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+					{
 					c = RT.classForName(sym.name);
+//					System.out.println("maybeClass: " + form + ", " + c);
+					}
 				else
 					{
 					Object o = currentNS().getMapping(sym);
 					if(o instanceof Class)
-						c = (Class) o;
+						return (Class) o;
 					else
 						{
 						try{
 						c = RT.classForName(sym.name);
+//						System.out.println("maybeClass: " + form + ", " + c);
 						}
 						catch(Exception e){
+//							System.out.println("maybeClass: " + form + ", MISS, " + form.getClass() + "," + form.hashCode() + ", " + m.size());
 							// aargh
 							// leave c set to null -> return null
 						}
@@ -1000,8 +1022,16 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 					}
 				}
 			}
-		else if(stringOk && form instanceof String)
+		else if(stringOk && form instanceof String){
 			c = RT.classForName((String) form);
+		}
+
+		if(m != null)
+			{
+			m.put(form,c);
+//			System.out.println("maybeClass ADDED: " + form + ", " + m.size());
+			}
+
 		return c;
 	}
 
@@ -3919,7 +3949,7 @@ static public class FnExpr extends ObjExpr{
 			{
 			throw Util.sneakyThrow(e);
 			}
-		fn.getCompiledClass();
+		fn.getCompiledClass((DynamicClassLoader) LOADER.deref());
 
 		if(fn.supportsMeta())
 			{
@@ -4777,13 +4807,13 @@ static public class ObjExpr implements Expr{
 //			}
 	}
 
-	synchronized Class getCompiledClass(){
+	synchronized Class getCompiledClass(DynamicClassLoader loader){
 		if(compiledClass == null)
 //			if(RT.booleanCast(COMPILE_FILES.deref()))
 //				compiledClass = RT.classForName(name);//loader.defineClass(name, bytecode);
 //			else
 				{
-				loader = (DynamicClassLoader) LOADER.deref();
+				//loader = (DynamicClassLoader) LOADER.deref();
 				compiledClass = loader.defineClass(name, bytecode, src);
 				}
 		return compiledClass;
@@ -4794,7 +4824,7 @@ static public class ObjExpr implements Expr{
 			return null;
 		try
 			{
-			return getCompiledClass().newInstance();
+			return getCompiledClass((DynamicClassLoader) LOADER.deref()).newInstance();
 			}
 		catch(Exception e)
 			{
@@ -6698,14 +6728,24 @@ static String errorMsg(String source, int line, int column, String s){
 }
 
 public static Object eval(Object form) {
-	return eval(form, true);
+	Var.pushThreadBindings(RT.map(MAYBE_CLASSES, new HashMap()));
+
+	try{
+		return eval(form, true);
+	}
+	finally{
+		Var.popThreadBindings();
+	}
+
 }
 
 public static Object eval(Object form, boolean freshLoader) {
 	boolean createdLoader = false;
 	if(true)//!LOADER.isBound())
 		{
-		Var.pushThreadBindings(RT.map(LOADER, RT.makeClassLoader()));
+		Var.pushThreadBindings(RT.map(LOADER, RT.makeClassLoader()
+//		                              ,MAYBE_CLASSES, new HashMap()
+		));
 		createdLoader = true;
 		}
 	try
@@ -7149,6 +7189,8 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) {
 			       LOCAL_ENV, null,
 					LOOP_LOCALS, null,
 					NEXT_LOCAL_NUM, 0,
+//					MAYBE_CLASSES, new HashMap(),
+					MAYBE_CLASSES, MAYBE_CLASSES.isBound()?MAYBE_CLASSES.get():new HashMap(),
 					RT.READEVAL, RT.T,
 			       RT.CURRENT_NS, RT.CURRENT_NS.deref(),
 			       LINE_BEFORE, pushbackReader.getLineNumber(),
@@ -7305,6 +7347,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       CONSTANT_IDS, new IdentityHashMap(),
 			       KEYWORDS, PersistentHashMap.EMPTY,
 			       VARS, PersistentHashMap.EMPTY
+			       ,MAYBE_CLASSES, new HashMap()
 					,RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()
 					,RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref()
 					,RT.DATA_READERS, RT.DATA_READERS.deref()
@@ -7647,7 +7690,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			{
 			throw Util.sneakyThrow(e);
 			}
-		ret.getCompiledClass();
+		ret.getCompiledClass((DynamicClassLoader) LOADER.deref());
 		return ret;
 		}
 

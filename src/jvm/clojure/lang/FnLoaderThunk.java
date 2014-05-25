@@ -17,12 +17,22 @@ public class FnLoaderThunk extends RestFn{
 final Var v;
 final ClassLoader loader;
 final String fnClassName;
+final Compiler.ObjExpr expr;
 IFn fn;
 
 public FnLoaderThunk(Var v, String fnClassName){
 	this.v = v;
 	this.loader = (ClassLoader) RT.FN_LOADER_VAR.get();
 	this.fnClassName = fnClassName;
+	this.expr = null;
+	fn = null;
+}
+
+public FnLoaderThunk(Var v, Compiler.ObjExpr expr){
+	this.v = v;
+	this.loader = (ClassLoader) Compiler.LOADER.get();
+	this.fnClassName = null;
+	this.expr = expr;
 	fn = null;
 }
 
@@ -62,7 +72,10 @@ private void load() {
 		try
 			{
 //			long start = System.nanoTime();
-			fn = (IFn) Class.forName(fnClassName,true,loader).newInstance();
+			if(fnClassName != null)
+				fn = (IFn) Class.forName(fnClassName,true,loader).newInstance();
+			else
+				fn = (IFn) expr.getCompiledClass((DynamicClassLoader) loader).newInstance();
 //			long ns = System.nanoTime() - start;
 //			System.out.println("Lazily loaded: " + fnClassName + ", in: " + ns/1000 + "μs");
 			}

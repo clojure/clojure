@@ -407,11 +407,20 @@ static void compile(String cljfile) throws IOException{
 		throw new FileNotFoundException("Could not locate Clojure resource on classpath: " + cljfile);
 }
 
+static int loadIndent = 0;
+
 static public void load(String scriptbase) throws IOException, ClassNotFoundException{
 //	long start = System.nanoTime();
+//	for(int i = 0;i<loadIndent;i++)
+//		System.out.print(' ');
+//	System.out.println("loading: " + scriptbase);
+//	++loadIndent;
 	load(scriptbase, true);
+//	--loadIndent;
 //	long ns = System.nanoTime() - start;
-//	System.out.println("loaded script: " + scriptbase + ", in: " + ns/1000000 + "ms");
+//	for(int i = 0;i<loadIndent;i++)
+//		System.out.print(' ');
+//	System.out.println("loaded: " + scriptbase + ", in: " + ns/1000000 + "ms");
 }
 
 static public void load(String scriptbase, boolean failIfNotFound) throws IOException, ClassNotFoundException{
