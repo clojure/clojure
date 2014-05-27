@@ -987,14 +987,14 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		if(form instanceof Class)
 			return (Class) form;
 		HashMap m = MAYBE_CLASSES.isBound()?(HashMap) MAYBE_CLASSES.get():null;
-		if(m != null){
-			if(m.containsKey(form))
-				return (Class) m.get(form);
+//		if(m != null){
+//			if(m.containsKey(form))
+//				return (Class) m.get(form);
 //			else
 //				System.out.println("MAYBE_CLASSES can't find: " + form);
-			}
-		else
-			throw new RuntimeException("MAYBE_CLASSES unbound: " + form);
+//			}
+//		else
+//			throw new RuntimeException("MAYBE_CLASSES unbound: " + form);
 //			System.out.println("MAYBE_CLASSES unbound");
 
 		Class c = null;
@@ -1007,6 +1007,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 					return (Class) COMPILE_STUB_CLASS.get();
 				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 					{
+					if(m != null && m.containsKey(form))
+						return (Class) m.get(form);
 					c = RT.classForName(sym.name);
 //					System.out.println("maybeClass: " + form + ", " + c);
 					}
@@ -1017,6 +1019,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 						return (Class) o;
 					else
 						{
+						if(m != null && m.containsKey(form))
+							return (Class) m.get(form);
 						try{
 						c = RT.classForName(sym.name);
 //						System.out.println("maybeClass: " + form + ", " + c);
@@ -1031,6 +1035,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				}
 			}
 		else if(stringOk && form instanceof String){
+			if(m != null && m.containsKey(form))
+				return (Class) m.get(form);
 			c = RT.classForName((String) form);
 		}
 
