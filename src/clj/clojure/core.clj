@@ -5361,7 +5361,7 @@
         ~@(map process-reference references))
         (if (.equals '~name 'clojure.core) 
           nil
-          (do (swap! @#'*loaded-libs* conj '~name) nil)))))
+          (do (dosync (commute @#'*loaded-libs* conj '~name)) nil)))))
 
 (defmacro refer-clojure
   "Same as (refer 'clojure.core <filters>)"
@@ -5382,8 +5382,8 @@
 
 (defonce ^:dynamic
   ^{:private true
-     :doc "An atom around a sorted set of symbols representing loaded libs"}
-  *loaded-libs* (atom (sorted-set)))
+     :doc "A ref to a sorted set of symbols representing loaded libs"}
+  *loaded-libs* (ref (sorted-set)))
 
 (defonce ^:dynamic
   ^{:private true
@@ -5454,7 +5454,8 @@
             "namespace '%s' not found after loading '%s'"
             lib (root-resource lib))
   (when require
-    (swap! *loaded-libs* conj lib)))
+    (dosync
+     (commute *loaded-libs* conj lib))))
 
 (defn- load-all
   "Loads a lib given its name and forces a load of any libs it directly or
@@ -5462,10 +5463,11 @@
   exists after loading. If require, records the load so any duplicate loads
   can be skipped."
   [lib need-ns require]
-  (swap! *loaded-libs* #(reduce1 conj %1 %2)
-         (binding [*loaded-libs* (atom (sorted-set))]
+  (dosync
+   (commute *loaded-libs* #(reduce1 conj %1 %2)
+            (binding [*loaded-libs* (ref (sorted-set))]
            (load-one lib need-ns require)
-           @*loaded-libs*)))
+              @*loaded-libs*))))
 
 (defn- load-lib
   "Loads a lib with options"
