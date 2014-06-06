@@ -274,5 +274,87 @@
         </plugins>
       </build>
     </profile>
-  </profiles>
+    <profile>
+      <id>prod</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>clojure-compile</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <property name="maven.compile.classpath"
+                              refid="maven.compile.classpath" />
+                    <property name="compiler.elide-meta"
+                              value="[:doc :file :line :added]"/>
+		                <ant target="compile-clojure"/>
+                  </target>
+               </configuration>
+             </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>2.3.1</version>
+            <configuration>
+              <classifier>prod</classifier>
+              <archive>
+                <manifest>
+                  <mainClass>clojure.main</mainClass>
+                </manifest>
+              </archive>
+              <excludes><exclude>**/*.clj</exclude></excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+	<profile>
+		<id>omit-extra-jars</id>
+		<activation>
+			<activeByDefault>false</activeByDefault>
+		</activation>
+		<build>
+			<plugins>
+				<plugin>
+					<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sources-jar</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>clojure-slim-jar</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
