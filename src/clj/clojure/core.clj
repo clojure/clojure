@@ -82,11 +82,11 @@
    :added "1.0"
    :static true}
  conj (fn ^:static conj 
-        ([coll x] (. clojure.lang.RT (conj coll x)))
+        ([coll x] (clojure.lang.RT/conj coll x))
         ([coll x & xs]
          (if xs
-           (recur (conj coll x) (first xs) (next xs))
-           (conj coll x)))))
+           (recur (clojure.lang.RT/conj coll x) (first xs) (next xs))
+           (clojure.lang.RT/conj coll x)))))
 
 (def
  ^{:doc "Same as (first (next x))"
@@ -186,9 +186,9 @@
    :static true}
  assoc
  (fn ^:static assoc
-   ([map key val] (. clojure.lang.RT (assoc map key val)))
+   ([map key val] (clojure.lang.RT/assoc map key val))
    ([map key val & kvs]
-    (let [ret (assoc map key val)]
+    (let [ret (clojure.lang.RT/assoc map key val)]
       (if kvs
         (if (next kvs)
           (recur ret (first kvs) (second kvs) (nnext kvs))
@@ -315,7 +315,7 @@
           (list 'def (with-meta name m)
                 ;;todo - restore propagation of fn name
                 ;;must figure out how to convey primitive hints to self calls first
-                (cons `fn fdecl) ))))
+                (with-meta (cons `fn fdecl) {:rettag (:tag m)}) ))))
 
 (. (var defn) (setMacro))
 

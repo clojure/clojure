@@ -19,12 +19,27 @@ private final Object _first;
 private final IPersistentList _rest;
 private final int _count;
 
-public static IFn creator = new RestFn(){
+static public class Primordial extends RestFn{
 	final public int getRequiredArity(){
 		return 0;
 	}
 
 	final protected Object doInvoke(Object args) {
+		if(args instanceof ArraySeq)
+			{
+			Object[] argsarray = ((ArraySeq) args).array;
+			IPersistentList ret = EMPTY;
+			for(int i = argsarray.length - 1; i >= 0; --i)
+				ret = (IPersistentList) ret.cons(argsarray[i]);
+			return ret;
+			}
+		LinkedList list = new LinkedList();
+		for(ISeq s = RT.seq(args); s != null; s = s.next())
+			list.add(s.first());
+		return create(list);
+	}
+
+	static public Object invokeStatic(ISeq args) {
 		if(args instanceof ArraySeq)
 			{
 			Object[] argsarray = ((ArraySeq) args).array;
@@ -46,7 +61,9 @@ public static IFn creator = new RestFn(){
 	public IPersistentMap meta(){
 		return null;
 	}
-};
+}
+
+public static IFn creator = new Primordial();
 
 final public static EmptyList EMPTY = new EmptyList(null);
 

@@ -295,9 +295,8 @@
                   <target>
                     <property name="maven.compile.classpath"
                               refid="maven.compile.classpath" />
-                    <property name="compiler.elide-meta"
-                              value="[:doc :file :line :added :column :ns :name :static :arglists]"/>
-		                <ant target="compile-clojure"/>
+                    <property name="compiler.elide-meta" value="[:doc :file :line :added :column :ns :name :static :arglists]"/>
+		            <ant target="compile-clojure"/>
                   </target>
                </configuration>
              </execution>
