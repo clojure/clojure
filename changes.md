@@ -1111,7 +1111,7 @@ must be free of side-effects.
     (= [] (filterv even? [1 3 5]))
     ;=> true
 
-    (= [2 4] (filter even? [1 2 3 4 5]))
+    (= [2 4] (filterv even? [1 2 3 4 5]))
     ;=> true
 
 ### 2.4 clojure.core/ex-info and clojure.core/ex-data
