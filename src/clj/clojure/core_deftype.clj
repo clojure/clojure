@@ -417,7 +417,7 @@
   are optional. The only methods that can be supplied are those
   declared in the protocols/interfaces.  Note that method bodies are
   not closures, the local environment includes only the named fields,
-  and those fields can be accessed directy. Fields can be qualified
+  and those fields can be accessed directly. Fields can be qualified
   with the metadata :volatile-mutable true or :unsynchronized-mutable
   true, at which point (set! afield aval) will be supported in method
   bodies. Note well that mutable fields are extremely difficult to use
