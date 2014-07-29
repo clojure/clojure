@@ -190,6 +190,6 @@
      (t/with-test-out
        (println "<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
        (println "<testsuites>"))
-     (let [result# ~@body]
+     (let [result# (do ~@body)]
        (t/with-test-out (println "</testsuites>"))
        result#)))
