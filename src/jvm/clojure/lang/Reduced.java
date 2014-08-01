@@ -10,7 +10,7 @@
 
 package clojure.lang;
 
-public class Reduced implements IDeref{
+public final class Reduced implements IDeref{
 Object val;
 
 public Reduced(Object val){
