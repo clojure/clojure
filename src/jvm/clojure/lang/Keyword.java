@@ -30,11 +30,16 @@ final int hasheq;
 String _str;
 
 public static Keyword intern(Symbol sym){
-	if(sym.meta() != null)
-		sym = (Symbol) sym.withMeta(null);
-	Util.clearCache(rq, table);
-	Keyword k = new Keyword(sym);
-	Reference<Keyword> existingRef = table.putIfAbsent(sym, new WeakReference<Keyword>(k,rq));
+	Keyword k = null;
+	Reference<Keyword> existingRef = table.get(sym);
+	if(existingRef == null)
+		{
+		Util.clearCache(rq, table);
+		if(sym.meta() != null)
+			sym = (Symbol) sym.withMeta(null);
+		k = new Keyword(sym);
+		existingRef = table.putIfAbsent(sym, new WeakReference<Keyword>(k, rq));
+		}
 	if(existingRef == null)
 		return k;
 	Keyword existingk = existingRef.get();
@@ -84,7 +89,7 @@ public int hasheq() {
 
 public String toString(){
 	if(_str == null)
-		_str = (":" + sym).intern();
+		_str = (":" + sym);
 	return _str;
 }
 
