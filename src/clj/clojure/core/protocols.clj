@@ -41,6 +41,11 @@
    ([coll f] (seq-reduce coll f))
    ([coll f val] (seq-reduce coll f val)))
 
+  clojure.lang.IReduce
+  (coll-reduce
+   ([coll f] (.reduce coll f))
+   ([coll f val] (.reduce coll f val)))
+  
   ;;aseqs are iterable, masking internal-reducers
   clojure.lang.ASeq
   (coll-reduce

@@ -79,7 +79,9 @@
     happen at different 'places' depending on the concrete type."
    :added "1.0"
    :static true}
- conj (fn ^:static conj 
+ conj (fn ^:static conj
+        ([] [])
+        ([coll] coll)
         ([coll x] (. clojure.lang.RT (conj coll x)))
         ([coll x & xs]
          (if xs
@@ -317,13 +319,6 @@
 
 (. (var defn) (setMacro))
 
-(defn cast
-  "Throws a ClassCastException if x is not a c, else returns x."
-  {:added "1.0"
-   :static true}
-  [^Class c x] 
-  (. c (cast x)))
-
 (defn to-array
   "Returns an array of Objects containing the contents of coll, which
   can be any Collection.  Maps to java.util.Collection.toArray()."
@@ -331,6 +326,13 @@
    :added "1.0"
    :static true}
   [coll] (. clojure.lang.RT (toArray coll)))
+
+(defn cast
+  "Throws a ClassCastException if x is not a c, else returns x."
+  {:added "1.0"
+   :static true}
+  [^Class c x] 
+  (. c (cast x)))
  
 (defn vector
   "Creates a new vector containing the args."
@@ -2474,14 +2476,25 @@
    (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
 
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn sequence
   "Coerces coll to a (possibly empty) sequence, if it is not already
-  one. Will not force a lazy seq. (sequence nil) yields ()"
+  one. Will not force a lazy seq. (sequence nil) yields (), When a
+  transducer is supplied, returns a lazy sequence of applications of
+  the transform to the items in coll(s), i.e. to the set of first
+  items of each coll, followed by the set of second
+  items in each coll, until any one of the colls is exhausted.  Any
+  remaining items in other colls are ignored. The transform should accept
+  number-of-colls arguments"
   {:added "1.0"
    :static true}
-  [coll]
-   (if (seq? coll) coll
-    (or (seq coll) ())))
+  ([coll]
+     (if (seq? coll) coll
+         (or (seq coll) ())))
+  ([xform coll]
+     (clojure.lang.LazyTransformer/create xform coll))
+  ([xform coll & colls]
+     (clojure.lang.LazyTransformer/createMulti xform (to-array (cons coll colls)))))
 
 (defn every?
   "Returns true if (pred x) is logical true for every x in coll, else
@@ -2539,13 +2552,23 @@
            (recur (unchecked-inc ~i)))))))
 
 (defn map
-  "Returns a lazy sequence consisting of the result of applying f to the
-  set of first items of each coll, followed by applying f to the set
-  of second items in each coll, until any one of the colls is
+  "Returns a lazy sequence consisting of the result of applying f to
+  the set of first items of each coll, followed by applying f to the
+  set of second items in each coll, until any one of the colls is
   exhausted.  Any remaining items in other colls are ignored. Function
-  f should accept number-of-colls arguments."
+  f should accept number-of-colls arguments. Returns a transducer when
+  no collection is provided."
   {:added "1.0"
    :static true}
+  ([f]
+    (fn [f1]
+      (fn
+        ([] (f1))
+        ([result] (f1 result))
+        ([result input]
+           (f1 result (f input)))
+        ([result input & inputs]
+           (f1 result (apply f input inputs))))))
   ([f coll]
    (lazy-seq
     (when-let [s (seq coll)]
@@ -2587,9 +2610,19 @@
 
 (defn filter
   "Returns a lazy sequence of the items in coll for which
-  (pred item) returns true. pred must be free of side-effects."
+  (pred item) returns true. pred must be free of side-effects.
+  Returns a transducer when no collection is provided."
   {:added "1.0"
    :static true}
+  ([pred]
+    (fn [f1]
+      (fn
+        ([] (f1))
+        ([result] (f1 result))
+        ([result input]
+           (if (pred input)
+             (f1 result input)
+             result)))))
   ([pred coll]
    (lazy-seq
     (when-let [s (seq coll)]
@@ -2609,45 +2642,99 @@
 
 (defn remove
   "Returns a lazy sequence of the items in coll for which
-  (pred item) returns false. pred must be free of side-effects."
+  (pred item) returns false. pred must be free of side-effects.
+  Returns a transducer when no collection is provided."
   {:added "1.0"
    :static true}
-  [pred coll]
-  (filter (complement pred) coll))
+  ([pred] (filter (complement pred)))
+  ([pred coll]
+     (filter (complement pred) coll)))
+
+(defn reduced
+  "Wraps x in a way such that a reduce will terminate with the value x"
+  {:added "1.5"}
+  [x]
+  (clojure.lang.Reduced. x))
+
+(defn reduced?
+  "Returns true if x is the result of a call to reduced"
+  {:inline (fn [x] `(clojure.lang.RT/isReduced ~x ))
+   :inline-arities #{1}
+   :added "1.5"}
+  ([x] (clojure.lang.RT/isReduced x)))
 
 (defn take
   "Returns a lazy sequence of the first n items in coll, or all items if
-  there are fewer than n."
+  there are fewer than n.  Returns a stateful transducer when
+  no collection is provided."
   {:added "1.0"
    :static true}
-  [n coll]
-  (lazy-seq
-   (when (pos? n) 
-     (when-let [s (seq coll)]
-      (cons (first s) (take (dec n) (rest s)))))))
+  ([n]
+     (fn [f1]
+       (let [na (atom n)]
+         (fn
+           ([] (f1))
+           ([result] (f1 result))
+           ([result input]
+              (let [n @na
+                    nn (swap! na dec)
+                    result (if (pos? n)
+                             (f1 result input)
+                             result)]
+                (if (not (pos? nn))
+                  (reduced result)
+                  result)))))))
+  ([n coll]
+     (lazy-seq
+      (when (pos? n) 
+        (when-let [s (seq coll)]
+          (cons (first s) (take (dec n) (rest s))))))))
 
 (defn take-while
   "Returns a lazy sequence of successive items from coll while
-  (pred item) returns true. pred must be free of side-effects."
+  (pred item) returns true. pred must be free of side-effects.
+  Returns a transducer when no collection is provided."
   {:added "1.0"
    :static true}
-  [pred coll]
-  (lazy-seq
-   (when-let [s (seq coll)]
-       (when (pred (first s))
-         (cons (first s) (take-while pred (rest s)))))))
+  ([pred]
+     (fn [f1]
+       (fn
+         ([] (f1))
+         ([result] (f1 result))
+         ([result input]
+            (if (pred input)
+              (f1 result input)
+              (reduced result))))))
+  ([pred coll]
+     (lazy-seq
+      (when-let [s (seq coll)]
+        (when (pred (first s))
+          (cons (first s) (take-while pred (rest s))))))))
 
 (defn drop
-  "Returns a lazy sequence of all but the first n items in coll."
+  "Returns a lazy sequence of all but the first n items in coll.
+  Returns a stateful transducer when no collection is provided."
   {:added "1.0"
    :static true}
-  [n coll]
-  (let [step (fn [n coll]
-               (let [s (seq coll)]
-                 (if (and (pos? n) s)
-                   (recur (dec n) (rest s))
-                   s)))]
-    (lazy-seq (step n coll))))
+  ([n]
+     (fn [f1]
+       (let [na (atom n)]
+         (fn
+           ([] (f1))
+           ([result] (f1 result))
+           ([result input]
+              (let [n @na]
+                (swap! na dec)
+                (if (pos? n)
+                  result
+                  (f1 result input))))))))
+  ([n coll]
+     (let [step (fn [n coll]
+                  (let [s (seq coll)]
+                    (if (and (pos? n) s)
+                      (recur (dec n) (rest s))
+                      s)))]
+       (lazy-seq (step n coll)))))
 
 (defn drop-last
   "Return a lazy sequence of all but the last n (default 1) items in coll"
@@ -2668,17 +2755,31 @@
       s)))
 
 (defn drop-while
-  "Returns a lazy sequence of the items in coll starting from the first
-  item for which (pred item) returns logical false."
+  "Returns a lazy sequence of the items in coll starting from the
+  first item for which (pred item) returns logical false.  Returns a
+  stateful transducer when no collection is provided."
   {:added "1.0"
    :static true}
-  [pred coll]
-  (let [step (fn [pred coll]
-               (let [s (seq coll)]
-                 (if (and s (pred (first s)))
-                   (recur pred (rest s))
-                   s)))]
-    (lazy-seq (step pred coll))))
+  ([pred]
+     (fn [f1]
+       (let [da (atom true)]
+         (fn
+           ([] (f1))
+           ([result] (f1 result))
+           ([result input]
+              (let [drop? @da]
+                (if (and drop? (pred input))
+                  result
+                  (do
+                    (reset! da nil)
+                    (f1 result input)))))))))
+  ([pred coll]
+     (let [step (fn [pred coll]
+                  (let [s (seq coll)]
+                    (if (and s (pred (first s)))
+                      (recur pred (rest s))
+                      s)))]
+       (lazy-seq (step pred coll)))))
 
 (defn cycle
   "Returns a lazy (infinite!) sequence of repetitions of the items in coll."
@@ -3073,8 +3174,10 @@
   may happen at different 'places' depending on the concrete type."
   {:added "1.1"
    :static true}
-  [^clojure.lang.ITransientCollection coll x]
-  (.conj coll x))
+  ([] (transient []))
+  ([coll] coll)
+  ([^clojure.lang.ITransientCollection coll x]
+     (.conj coll x)))
 
 (defn assoc!
   "When applied to a transient map, adds mapping of key(s) to
@@ -3954,13 +4057,25 @@
   (.removeAlias (the-ns ns) sym))
 
 (defn take-nth
-  "Returns a lazy seq of every nth item in coll."
+  "Returns a lazy seq of every nth item in coll.  Returns a stateful
+  transducer when no collection is provided."
   {:added "1.0"
    :static true}
-  [n coll]
-    (lazy-seq
-     (when-let [s (seq coll)]
-       (cons (first s) (take-nth n (drop n s))))))
+  ([n]
+     (fn [f1]
+       (let [ia (atom -1)]
+         (fn
+           ([] (f1))
+           ([result] (f1 result))
+           ([result input]
+              (let [i (swap! ia inc)]
+                (if (zero? (rem i n))
+                  (f1 result input)
+                  result)))))))
+  ([n coll]
+     (lazy-seq
+      (when-let [s (seq coll)]
+        (cons (first s) (take-nth n (drop n s)))))))
 
 (defn interleave
   "Returns a lazy seq of the first item in each coll, then the second etc."
@@ -4628,17 +4743,20 @@
 (defn replace
   "Given a map of replacement pairs and a vector/collection, returns a
   vector/seq with any elements = a key in smap replaced with the
-  corresponding val in smap"
+  corresponding val in smap.  Returns a transducer when no collection
+  is provided."
   {:added "1.0"
    :static true}
-  [smap coll]
-    (if (vector? coll)
-      (reduce1 (fn [v i]
-                (if-let [e (find smap (nth v i))]
-                        (assoc v i (val e))
-                        v))
-              coll (range (count coll)))
-      (map #(if-let [e (find smap %)] (val e) %) coll)))
+  ([smap]
+     (map #(if-let [e (find smap %)] (val e) %)))
+  ([smap coll]
+     (if (vector? coll)
+       (reduce1 (fn [v i]
+                  (if-let [e (find smap (nth v i))]
+                    (assoc v i (val e))
+                    v))
+                coll (range (count coll)))
+       (map #(if-let [e (find smap %)] (val e) %) coll))))
 
 (defmacro dosync
   "Runs the exprs (in an implicit do) in a transaction that encompasses
@@ -6248,18 +6366,6 @@
 
 
 ;; redefine reduce with internal-reduce
-(defn reduced
-  "Wraps x in a way such that a reduce will terminate with the value x"
-  {:added "1.5"}
-  [x]
-  (clojure.lang.Reduced. x))
-
-(defn reduced?
-  "Returns true if x is the result of a call to reduced"
-  {:inline (fn [x] `(clojure.lang.RT/isReduced ~x ))
-   :inline-arities #{1}
-   :added "1.5"}
-  ([x] (clojure.lang.RT/isReduced x)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
@@ -6331,15 +6437,42 @@
   ([f init coll]
      (clojure.core.protocols/kv-reduce coll f init)))
 
+(defn- completing [f]
+  (fn
+    ([] (f))
+    ([x] x)
+    ([x y] (f x y))))
+
+(defn transduce
+  "reduce with a transformation of f (xf). If init is not
+  supplied, (f) will be called to produce it. Returns the result of
+  applying (the transformed) xf to init and the first item in coll,
+  then applying xf to that result and the 2nd item, etc. If coll
+  contains no items, returns init and f is not called. Note that
+  certain transforms may inject or skip items."
+  {:added "1.7"}
+  ([xform f coll] (transduce xform f (f) coll))
+  ([xform f init coll]
+     (let [f (xform (completing f))
+           ret (if (instance? clojure.lang.IReduce coll)
+                 (.reduce ^clojure.lang.IReduce coll f init)
+                 (clojure.core.protocols/coll-reduce coll f init))
+           ret (f (if (reduced? ret) @ret ret))]
+       (if (reduced? ret) @ret ret))))
+
 (defn into
   "Returns a new coll consisting of to-coll with all of the items of
-  from-coll conjoined."
+  from-coll conjoined. A transducer may be supplied."
   {:added "1.0"
    :static true}
-  [to from]
-  (if (instance? clojure.lang.IEditableCollection to)
-    (with-meta (persistent! (reduce conj! (transient to) from)) (meta to))
-    (reduce conj to from)))
+  ([to from]
+     (if (instance? clojure.lang.IEditableCollection to)
+       (with-meta (persistent! (reduce conj! (transient to) from)) (meta to))
+       (reduce conj to from)))
+  ([to xform from]
+     (if (instance? clojure.lang.IEditableCollection to)
+       (with-meta (persistent! (transduce xform conj! (transient to) from)) (meta to))
+       (transduce xform conj to from))))
 
 (defn mapv
   "Returns a vector consisting of the result of applying f to the
@@ -6602,17 +6735,46 @@
     (transient {}) coll)))
 
 (defn partition-by
-  "Applies f to each value in coll, splitting it each time f returns
-   a new value.  Returns a lazy seq of partitions."
+  "Applies f to each value in coll, splitting it each time f returns a
+   new value.  Returns a lazy seq of partitions.  Returns a stateful
+   transducer when no collection is provided."
   {:added "1.2"
    :static true}
-  [f coll]
-  (lazy-seq
-   (when-let [s (seq coll)]
-     (let [fst (first s)
-           fv (f fst)
-           run (cons fst (take-while #(= fv (f %)) (next s)))]
-       (cons run (partition-by f (seq (drop (count run) s))))))))
+  ([f]
+  (fn [f1]
+    (let [a (java.util.ArrayList.)
+          pa (atom ::none)]
+      (fn
+        ([] (f1))
+        ([result]
+           (let [result (if (.isEmpty a)
+                          result
+                          (let [v (vec (.toArray a))]
+                            ;;flushing ops must clear before invoking possibly
+                            ;;failing nested op, else infinite loop
+                            (.clear a)
+                            (f1 result v)))]
+             (f1 result)))
+        ([result input]
+           (let [pval @pa
+                 val (f input)]
+             (reset! pa val)
+             (if (or (identical? pval ::none)
+                     (= val pval))
+               (do
+                 (.add a input)
+                 result)
+               (let [v (vec (.toArray a))]
+                 (.clear a)
+                 (.add a input)
+                 (f1 result v)))))))))
+  ([f coll]
+     (lazy-seq
+      (when-let [s (seq coll)]
+        (let [fst (first s)
+              fv (f fst)
+              run (cons fst (take-while #(= fv (f %)) (next s)))]
+          (cons run (partition-by f (seq (drop (count run) s)))))))))
 
 (defn frequencies
   "Returns a map from distinct items in coll to the number of times
@@ -6651,9 +6813,31 @@
 
 (defn partition-all
   "Returns a lazy sequence of lists like partition, but may include
-  partitions with fewer than n items at the end."
+  partitions with fewer than n items at the end.  Returns a stateful
+  transducer when no collection is provided."
   {:added "1.2"
    :static true}
+  ([^long n]
+   (fn [f1]
+     (let [a (java.util.ArrayList. n)]
+       (fn
+         ([] (f1))
+         ([result]
+            (let [result (if (.isEmpty a)
+                           result
+                           (let [v (vec (.toArray a))]
+                             ;;flushing ops must clear before invoking possibly
+                             ;;failing nested op, else infinite loop
+                             (.clear a)
+                             (f1 result v)))]
+              (f1 result)))
+         ([result input]
+            (.add a input)
+            (if (= n (.size a))
+              (let [v (vec (.toArray a))]
+                (.clear a)
+                (f1 result v))
+              result))))))
   ([n coll]
      (partition-all n n coll))
   ([n step coll]
@@ -6695,9 +6879,19 @@
 (defn keep
   "Returns a lazy sequence of the non-nil results of (f item). Note,
   this means false return values will be included.  f must be free of
-  side-effects."
+  side-effects.  Returns a transducer when no collection is provided."
   {:added "1.2"
    :static true}
+  ([f]
+   (fn [f1]
+     (fn
+       ([] (f1))
+       ([result] (f1 result))
+       ([result input]
+          (let [v (f input)]
+            (if (nil? v)
+              result
+              (f1 result v)))))))
   ([f coll]
    (lazy-seq
     (when-let [s (seq coll)]
@@ -6718,9 +6912,22 @@
 (defn keep-indexed
   "Returns a lazy sequence of the non-nil results of (f index item). Note,
   this means false return values will be included.  f must be free of
-  side-effects."
+  side-effects.  Returns a stateful transducer when no collection is
+  provided."
   {:added "1.2"
    :static true}
+  ([f]
+   (fn [f1]
+     (let [ia (atom -1)]
+       (fn
+         ([] (f1))
+         ([result] (f1 result))
+         ([result input]
+            (let [i (swap! ia inc)
+                  v (f i input)]
+              (if (nil? v)
+                result
+                (f1 result v))))))))
   ([f coll]
      (letfn [(keepi [idx coll]
                (lazy-seq
@@ -6941,6 +7148,87 @@
     `(let [~g ~expr
            ~@(interleave (repeat g) (map pstep forms))]
        ~g)))
+
+(defn- preserving-reduced
+  [f1]
+  #(let [ret (f1 %1 %2)]
+     (if (reduced? ret)
+       (reduced ret)
+       ret)))
+
+(defn flatmap
+  "maps f over coll and concatenates the results.  Thus function f
+  should return a collection.  Returns a transducer when no collection
+  is provided."
+  {:added "1.7"}
+  ([f]
+   (fn [f1]
+     (fn
+       ([] (f1))
+       ([result] (f1 result))
+       ([result input]
+          (reduce (preserving-reduced f1) result (f input))))))
+  ([f coll] (sequence (flatmap f) coll)))
+
+(defn dedupe
+  "Returns a lazy sequence removing consecutive duplicates in coll.
+  Returns a transducer when no collection is provided."
+  {:added "1.7"}
+  ([]
+   (fn [f1]
+     (let [pa (atom ::none)]
+       (fn
+         ([] (f1))
+         ([result] (f1 result))
+         ([result input]
+            (let [prior @pa]
+              (reset! pa input)
+              (if (= prior input)
+                result
+                (f1 result input))))))))
+  ([coll] (sequence (dedupe) coll)))
+
+(defn random-sample
+  "Returns items from coll with random probability of prob (0.0 -
+  1.0).  Returns a transducer when no collection is provided."
+  {:added "1.7"}
+  ([prob]
+     (filter (fn [_] (< (rand) prob))))
+  ([prob coll]
+     (filter (fn [_] (< (rand) prob)) coll)))
+
+(deftype Iteration [xform coll]
+   Iterable
+   (iterator [_] (.iterator ^java.util.Collection (sequence xform coll)))
+
+   clojure.lang.Seqable
+   (seq [_] (seq (sequence xform coll)))
+
+   clojure.lang.IReduce
+   (reduce [_ f init] (transduce xform f init coll))
+
+   clojure.lang.Sequential)
+
+(defn iteration
+  "Returns an iterable/seqable/reducible sequence of applications of
+  the transducer to the items in coll. Note that these applications
+  will be performed every time iterator/seq/reduce is called."
+  {:added "1.7"}
+  [xform coll]
+  (Iteration. xform coll))
+
+(defmethod print-method Iteration [c, ^Writer w]
+  (if *print-readably*
+    (do
+      (print-sequential "(" pr-on " " ")" c w))
+    (print-object c w)))
+
+(defn run!
+  "Runs the supplied procedure (via reduce), for purposes of side
+  effects, on successive items in the collection. Returns nil"
+  {:added "1.7"}
+  [proc coll]
+  (reduce #(proc %2) nil coll))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; data readers ;;;;;;;;;;;;;;;;;;
 

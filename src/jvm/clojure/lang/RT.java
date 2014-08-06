@@ -506,6 +506,49 @@ static ISeq seqFrom(Object coll){
 	}
 }
 
+static public Iterator iter(Object coll){
+	if(coll instanceof Iterable)
+		return ((Iterable)coll).iterator();
+	else if(coll == null)
+		return new Iterator(){
+			public boolean hasNext(){
+				return false;
+			}
+
+			public Object next(){
+				throw new NoSuchElementException();
+			}
+
+			public void remove(){
+				throw new UnsupportedOperationException();
+			}
+		};
+	else if(coll instanceof Map){
+		return ((Map)coll).entrySet().iterator();
+	}
+	else if(coll instanceof String){
+		final String s = (String) coll;
+		return new Iterator(){
+			int i = 0;
+
+			public boolean hasNext(){
+				return i < s.length();
+			}
+
+			public Object next(){
+				return s.charAt(i++);
+			}
+
+			public void remove(){
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
+	//TODO - something better for arrays
+	else
+		return iter(seq(coll));
+}
+
 static public Object seqOrElse(Object o) {
 	return seq(o) == null ? null : o;
 }
