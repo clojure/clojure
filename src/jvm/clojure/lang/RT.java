@@ -544,7 +544,9 @@ static public Iterator iter(Object coll){
 			}
 		};
 	}
-	//TODO - something better for arrays
+  else if(coll.getClass().isArray()){
+    return ArrayIter.createFromObject(coll);
+  }
 	else
 		return iter(seq(coll));
 }
