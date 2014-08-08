@@ -117,7 +117,11 @@ static class Stepper implements IStepper{
 	public void step(LazyTransformer lt){
 		while(lt.stepper != null && iter.hasNext()){
 			if(RT.isReduced(xform.invoke(lt, iter.next())))
+				{
+				if(lt.rest != null)
+					lt.rest.stepper = null;
 				break;
+				}
 			}
 		if(lt.stepper != null)
 			xform.invoke(lt);
@@ -166,7 +170,11 @@ static class MultiStepper implements IStepper{
 	public void step(LazyTransformer lt){
 		while(lt.stepper != null && hasNext()){
 			if(RT.isReduced(xform.applyTo(RT.cons(lt, next()))))
+				{
+				if(lt.rest != null)
+					lt.rest.stepper = null;
 				break;
+				}
 			}
 		if(lt.stepper != null)
 			xform.invoke(lt);
@@ -266,7 +274,7 @@ public boolean contains(Object o){
 }
 
 public Iterator iterator(){
-	return new SeqIterator(seq());
+	return new SeqIterator(this);
 }
 
 //////////// List stuff /////////////////

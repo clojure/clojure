@@ -17,22 +17,30 @@ import java.util.NoSuchElementException;
 
 public class SeqIterator implements Iterator{
 
-ISeq seq;
+static Object START = new Object();
+Object seq;
+Object next;
 
-public SeqIterator(ISeq seq){
-	this.seq = seq;
+public SeqIterator(Object o){
+	seq = this;
+	next = o;
 }
 
 public boolean hasNext(){
-	return seq != null;
+	if(seq == this){
+		seq = START;
+		next = RT.seq(next);
+		}
+	else if(seq == next)
+		next = RT.next(seq);
+	return next != null;
 }
 
 public Object next() throws NoSuchElementException {
-	if(seq == null)
+	if(!hasNext())
 		throw new NoSuchElementException();
-	Object ret = RT.first(seq);
-	seq = RT.next(seq);
-	return ret;
+	seq = next;
+	return RT.first(next);
 }
 
 public void remove(){

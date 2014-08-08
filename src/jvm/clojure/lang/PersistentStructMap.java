@@ -183,7 +183,7 @@ public IPersistentMap without(Object key) {
 }
 
 public Iterator iterator(){
-	return new SeqIterator(seq());
+	return new SeqIterator(this);
 }
 
 

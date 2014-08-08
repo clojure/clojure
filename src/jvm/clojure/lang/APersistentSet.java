@@ -170,7 +170,7 @@ public boolean isEmpty(){
 }
 
 public Iterator iterator(){
-	return new SeqIterator(seq());
+	return new SeqIterator(this);
 }
 
 }
