@@ -97,7 +97,11 @@ public IPersistentCollection empty(){
 }
 
 public boolean equiv(Object o){
-	return equals(o);
+	ISeq s = seq();
+	if(s != null)
+		return s.equiv(o);
+	else
+		return (o instanceof Sequential || o instanceof List) && RT.seq(o) == null;
 }
 
 public int hashCode(){
@@ -114,7 +118,7 @@ public int hasheq(){
 public boolean equals(Object o){
 	ISeq s = seq();
 	if(s != null)
-		return s.equiv(o);
+		return s.equals(o);
 	else
 		return (o instanceof Sequential || o instanceof List) && RT.seq(o) == null;
 }

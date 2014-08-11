@@ -98,6 +98,8 @@
       (lazy-seq [])
       (lazy-seq [1 2]))
 
+  (is (not (.equals (lazy-seq [3]) (lazy-seq [3N]))))
+
   (are [x y] (= x y)
       (lazy-seq nil) ()
       (lazy-seq [nil]) '(nil)
@@ -109,6 +111,7 @@
       (lazy-seq "") ()
       (lazy-seq (into-array [])) ()
 
+      (lazy-seq [3]) [3N]
       (lazy-seq (list 1 2)) '(1 2)
       (lazy-seq [1 2]) '(1 2)
       (lazy-seq (sorted-set 1 2)) '(1 2)
@@ -120,6 +123,7 @@
 (deftest test-seq
   (is (not (seq? (seq []))))
   (is (seq? (seq [1 2])))
+  (is (not (.equals (seq [3]) (seq [3N]))))
   
   (are [x y] (= x y)
     (seq nil) nil
@@ -132,6 +136,7 @@
     (seq "") nil
     (seq (into-array [])) nil
 
+    (seq [3]) [3N]
     (seq (list 1 2)) '(1 2)
     (seq [1 2]) '(1 2)
     (seq (sorted-set 1 2)) '(1 2)
