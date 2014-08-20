@@ -13,7 +13,7 @@ package clojure.lang;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
  A persistent rendition of Phil Bagwell's Hash Array Mapped Trie
@@ -238,7 +238,7 @@ public IPersistentMap meta(){
 }
 
 static final class TransientHashMap extends ATransientMap {
-	AtomicReference<Thread> edit;
+	AtomicBoolean edit;
 	INode root;
 	int count;
 	boolean hasNull;
@@ -247,10 +247,10 @@ static final class TransientHashMap extends ATransientMap {
 
 
 	TransientHashMap(PersistentHashMap m) {
-		this(new AtomicReference<Thread>(Thread.currentThread()), m.root, m.count, m.hasNull, m.nullValue);
+		this(new AtomicBoolean(true), m.root, m.count, m.hasNull, m.nullValue);
 	}
 	
-	TransientHashMap(AtomicReference<Thread> edit, INode root, int count, boolean hasNull, Object nullValue) {
+	TransientHashMap(AtomicBoolean edit, INode root, int count, boolean hasNull, Object nullValue) {
 		this.edit = edit;
 		this.root = root; 
 		this.count = count; 
@@ -297,7 +297,7 @@ static final class TransientHashMap extends ATransientMap {
 	}
 
 	IPersistentMap doPersistent() {
-		edit.set(null);
+		edit.set(false);
 		return new PersistentHashMap(count, root, hasNull, nullValue);
 	}
 
@@ -317,11 +317,8 @@ static final class TransientHashMap extends ATransientMap {
 	}
 	
 	void ensureEditable(){
-		Thread owner = edit.get();
-		if(owner == Thread.currentThread())
+		if(edit.get())
 			return;
-		if(owner != null)
-			throw new IllegalAccessError("Transient used by non-owner thread");
 		throw new IllegalAccessError("Transient used after persistent! call");
 	}
 }
@@ -337,9 +334,9 @@ static interface INode extends Serializable {
 
 	ISeq nodeSeq();
 
-	INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf);
+	INode assoc(AtomicBoolean edit, int shift, int hash, Object key, Object val, Box addedLeaf);
 
-	INode without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf);
+	INode without(AtomicBoolean edit, int shift, int hash, Object key, Box removedLeaf);
 
     public Object kvreduce(IFn f, Object init);
 
@@ -349,9 +346,9 @@ static interface INode extends Serializable {
 final static class ArrayNode implements INode{
 	int count;
 	final INode[] array;
-	final AtomicReference<Thread> edit;
+	final AtomicBoolean edit;
 
-	ArrayNode(AtomicReference<Thread> edit, int count, INode[] array){
+	ArrayNode(AtomicBoolean edit, int count, INode[] array){
 		this.array = array;
 		this.edit = edit;
 		this.count = count;
@@ -462,20 +459,20 @@ final static class ArrayNode implements INode{
 	}
 
 
-	private ArrayNode ensureEditable(AtomicReference<Thread> edit){
+	private ArrayNode ensureEditable(AtomicBoolean edit){
 		if(this.edit == edit)
 			return this;
 		return new ArrayNode(edit, count, this.array.clone());
 	}
 	
-	private ArrayNode editAndSet(AtomicReference<Thread> edit, int i, INode n){
+	private ArrayNode editAndSet(AtomicBoolean edit, int i, INode n){
 		ArrayNode editable = ensureEditable(edit);
 		editable.array[i] = n;
 		return editable;
 	}
 
 
-	private INode pack(AtomicReference<Thread> edit, int idx) {
+	private INode pack(AtomicBoolean edit, int idx) {
 		Object[] newArray = new Object[2*(count - 1)];
 		int j = 1;
 		int bitmap = 0;
@@ -494,7 +491,7 @@ final static class ArrayNode implements INode{
 		return new BitmapIndexedNode(edit, bitmap, newArray);
 	}
 
-	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
+	public INode assoc(AtomicBoolean edit, int shift, int hash, Object key, Object val, Box addedLeaf){
 		int idx = mask(hash, shift);
 		INode node = array[idx];
 		if(node == null) {
@@ -508,7 +505,7 @@ final static class ArrayNode implements INode{
 		return editAndSet(edit, idx, n);
 	}	
 
-	public INode without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf){
+	public INode without(AtomicBoolean edit, int shift, int hash, Object key, Box removedLeaf){
 		int idx = mask(hash, shift);
 		INode node = array[idx];
 		if(node == null)
@@ -574,13 +571,13 @@ final static class BitmapIndexedNode implements INode{
 	
 	int bitmap;
 	Object[] array;
-	final AtomicReference<Thread> edit;
+	final AtomicBoolean edit;
 
 	final int index(int bit){
 		return Integer.bitCount(bitmap & (bit - 1));
 	}
 
-	BitmapIndexedNode(AtomicReference<Thread> edit, int bitmap, Object[] array){
+	BitmapIndexedNode(AtomicBoolean edit, int bitmap, Object[] array){
 		this.bitmap = bitmap;
 		this.array = array;
 		this.edit = edit;
@@ -699,7 +696,7 @@ final static class BitmapIndexedNode implements INode{
 		return NodeSeq.kvreduce(array, reducef, combinef.invoke());
 	}
 
-	private BitmapIndexedNode ensureEditable(AtomicReference<Thread> edit){
+	private BitmapIndexedNode ensureEditable(AtomicBoolean edit){
 		if(this.edit == edit)
 			return this;
 		int n = Integer.bitCount(bitmap);
@@ -708,20 +705,20 @@ final static class BitmapIndexedNode implements INode{
 		return new BitmapIndexedNode(edit, bitmap, newArray);
 	}
 	
-	private BitmapIndexedNode editAndSet(AtomicReference<Thread> edit, int i, Object a) {
+	private BitmapIndexedNode editAndSet(AtomicBoolean edit, int i, Object a) {
 		BitmapIndexedNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		return editable;
 	}
 
-	private BitmapIndexedNode editAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b) {
+	private BitmapIndexedNode editAndSet(AtomicBoolean edit, int i, Object a, int j, Object b) {
 		BitmapIndexedNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		editable.array[j] = b;
 		return editable;
 	}
 
-	private BitmapIndexedNode editAndRemovePair(AtomicReference<Thread> edit, int bit, int i) {
+	private BitmapIndexedNode editAndRemovePair(AtomicBoolean edit, int bit, int i) {
 		if (bitmap == bit) 
 			return null;
 		BitmapIndexedNode editable = ensureEditable(edit);
@@ -732,7 +729,7 @@ final static class BitmapIndexedNode implements INode{
 		return editable;
 	}
 
-	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
+	public INode assoc(AtomicBoolean edit, int shift, int hash, Object key, Object val, Box addedLeaf){
 		int bit = bitpos(hash, shift);
 		int idx = index(bit);
 		if((bitmap & bit) != 0) {
@@ -792,7 +789,7 @@ final static class BitmapIndexedNode implements INode{
 		}
 	}
 
-	public INode without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf){
+	public INode without(AtomicBoolean edit, int shift, int hash, Object key, Box removedLeaf){
 		int bit = bitpos(hash, shift);
 		if((bitmap & bit) == 0)
 			return this;
@@ -823,9 +820,9 @@ final static class HashCollisionNode implements INode{
 	final int hash;
 	int count;
 	Object[] array;
-	final AtomicReference<Thread> edit;
+	final AtomicBoolean edit;
 
-	HashCollisionNode(AtomicReference<Thread> edit, int hash, int count, Object... array){
+	HashCollisionNode(AtomicBoolean edit, int hash, int count, Object... array){
 		this.edit = edit;
 		this.hash = hash;
 		this.count = count;
@@ -900,7 +897,7 @@ final static class HashCollisionNode implements INode{
 		return -1;
 	}
 
-	private HashCollisionNode ensureEditable(AtomicReference<Thread> edit){
+	private HashCollisionNode ensureEditable(AtomicBoolean edit){
 		if(this.edit == edit)
 			return this;
 		Object[] newArray = new Object[2*(count+1)]; // make room for next assoc
@@ -908,7 +905,7 @@ final static class HashCollisionNode implements INode{
 		return new HashCollisionNode(edit, hash, count, newArray);
 	}
 
-	private HashCollisionNode ensureEditable(AtomicReference<Thread> edit, int count, Object[] array){
+	private HashCollisionNode ensureEditable(AtomicBoolean edit, int count, Object[] array){
 		if(this.edit == edit) {
 			this.array = array;
 			this.count = count;
@@ -917,13 +914,13 @@ final static class HashCollisionNode implements INode{
 		return new HashCollisionNode(edit, hash, count, array);
 	}
 
-	private HashCollisionNode editAndSet(AtomicReference<Thread> edit, int i, Object a) {
+	private HashCollisionNode editAndSet(AtomicBoolean edit, int i, Object a) {
 		HashCollisionNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		return editable;
 	}
 
-	private HashCollisionNode editAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b) {
+	private HashCollisionNode editAndSet(AtomicBoolean edit, int i, Object a, int j, Object b) {
 		HashCollisionNode editable = ensureEditable(edit);
 		editable.array[i] = a;
 		editable.array[j] = b;
@@ -931,7 +928,7 @@ final static class HashCollisionNode implements INode{
 	}
 
 
-	public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf){
+	public INode assoc(AtomicBoolean edit, int shift, int hash, Object key, Object val, Box addedLeaf){
 		if(hash == this.hash) {
 			int idx = findIndex(key);
 			if(idx != -1) {
@@ -957,7 +954,7 @@ final static class HashCollisionNode implements INode{
 			.assoc(edit, shift, hash, key, val, addedLeaf);
 	}	
 
-	public INode without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf){
+	public INode without(AtomicBoolean edit, int shift, int hash, Object key, Box removedLeaf){
 		int idx = findIndex(key);
 		if(idx == -1)
 			return this;
@@ -1091,13 +1088,13 @@ private static INode createNode(int shift, Object key1, Object val1, int key2has
 	if(key1hash == key2hash)
 		return new HashCollisionNode(null, key1hash, 2, new Object[] {key1, val1, key2, val2});
 	Box addedLeaf = new Box(null);
-	AtomicReference<Thread> edit = new AtomicReference<Thread>();
+	AtomicBoolean edit = new AtomicBoolean(false);
 	return BitmapIndexedNode.EMPTY
 		.assoc(edit, shift, key1hash, key1, val1, addedLeaf)
 		.assoc(edit, shift, key2hash, key2, val2, addedLeaf);
 }
 
-private static INode createNode(AtomicReference<Thread> edit, int shift, Object key1, Object val1, int key2hash, Object key2, Object val2) {
+private static INode createNode(AtomicBoolean edit, int shift, Object key1, Object val1, int key2hash, Object key2, Object val2) {
 	int key1hash = hash(key1);
 	if(key1hash == key2hash)
 		return new HashCollisionNode(null, key1hash, 2, new Object[] {key1, val1, key2, val2});

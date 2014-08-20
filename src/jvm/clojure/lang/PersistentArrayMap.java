@@ -374,10 +374,10 @@ public ITransientMap asTransient(){
 static final class TransientArrayMap extends ATransientMap {
 	int len;
 	final Object[] array;
-	Thread owner;
+	boolean owner;
 
 	public TransientArrayMap(Object[] array){
-		this.owner = Thread.currentThread();
+		this.owner = true;
 		this.array = new Object[Math.max(HASHTABLE_THRESHOLD, array.length)];
 		System.arraycopy(array, 0, this.array, 0, array.length);
 		this.len = array.length;
@@ -436,17 +436,15 @@ static final class TransientArrayMap extends ATransientMap {
 	
 	IPersistentMap doPersistent(){
 		ensureEditable();
-		owner = null;
+		owner = false;
 		Object[] a = new Object[len];
 		System.arraycopy(array,0,a,0,len);
 		return new PersistentArrayMap(a);
 	}
 
 	void ensureEditable(){
-		if(owner == Thread.currentThread())
+		if(owner)
 			return;
-		if(owner != null)
-			throw new IllegalAccessError("Transient used by non-owner thread");
 		throw new IllegalAccessError("Transient used after persistent! call");
 	}
 }
