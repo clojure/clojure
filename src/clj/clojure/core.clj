@@ -5111,6 +5111,7 @@
                       (do @agt nil)  ;touch agent just to propagate errors
                       (do
                         (send-off agt fill)
+                        (release-pending-sends)
                         (cons (if (identical? x NIL) nil x) (drain)))))))]
      (send-off agt fill)
      (drain))))

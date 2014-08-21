@@ -176,6 +176,13 @@
         (is (= (.size small-lbq)
                (dec queue-backlog)))))))
 
+;; Check for a deadlock condition when one seque was fed into another
+;; seque.  Note that this test does not throw an exception or
+;; otherwise fail if the issue is not fixed -- it simply deadlocks and
+;; hangs until killed.
+(deftest seque-into-seque-deadlock
+  (is (= (range 10) (seque 3 (seque 3 (range 10))))))
+
 ; http://clojure.org/agents
 
 ; agent
