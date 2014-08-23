@@ -21,7 +21,7 @@ final String ns;
 final String name;
 private int _hasheq;
 final IPersistentMap _meta;
-String _str;
+transient String _str;
 
 public String toString(){
 	if(_str == null){
