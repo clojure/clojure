@@ -87,7 +87,9 @@
       (map inc ()) ()
       (map inc []) ()
       (map inc #{}) ()
-      (map inc {}) () ))
+      (map inc {}) ()
+      (sequence (map inc) (range 10)) (range 1 11)
+      (range 1 11) (sequence (map inc) (range 10))))
 
 
 (deftest test-lazy-seq

@@ -190,8 +190,17 @@ public IPersistentCollection empty(){
 }
 
 public boolean equiv(Object o){
-	return equals(o);
-}
+	if(this == o)
+        return true;
+	if(!(o instanceof Sequential || o instanceof List))
+		return false;
+	ISeq ms = RT.seq(o);
+	for(ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
+		{
+            if(ms == null || !Util.equiv(s.first(), ms.first()))
+                return false;
+		}
+	return ms == null;}
 
 public int hashCode(){
 	ISeq s = seq();
@@ -205,11 +214,17 @@ public int hasheq(){
 }
 
 public boolean equals(Object o){
-	ISeq s = seq();
-	if(s != null)
-		return s.equiv(o);
-	else
-		return (o instanceof Sequential || o instanceof List) && RT.seq(o) == null;
+	if(this == o)
+        return true;
+	if(!(o instanceof Sequential || o instanceof List))
+		return false;
+	ISeq ms = RT.seq(o);
+	for(ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
+		{
+            if(ms == null || !Util.equals(s.first(), ms.first()))
+                return false;
+		}
+	return ms == null;
 }
 
 
