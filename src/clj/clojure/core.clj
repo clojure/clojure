@@ -2387,6 +2387,35 @@
        (throw (new IllegalStateException ~(or message "I/O in transaction")))
        (do ~@body))))
 
+(defn volatile!
+  "Creates and returns a Volatile with an initial value of val."
+  {:added "1.7"
+   :tag clojure.lang.Volatile}
+  [val]
+  (clojure.lang.Volatile. val))
+
+(defn vreset!
+  "Sets the value of volatile to newval without regard for the
+   current value. Returns newval."
+  {:added "1.7"}
+  [^clojure.lang.Volatile vol newval]
+  (.reset vol newval))
+
+(defmacro vswap!
+  "Non-atomically swaps the value of the volatile as if:
+   (apply f current-value-of-vol args). Returns the value that
+   was swapped in."
+  {:added "1.7"}
+  [vol f & args]
+  (let [v (with-meta vol {:tag 'clojure.lang.Volatile})]
+    `(.reset ~v (~f (.deref ~v) ~@args))))
+
+(defn volatile?
+  "Returns true if x is a volatile."
+  {:added "1.7"}
+  [x]
+  (instance? clojure.lang.Volatile x))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; fn stuff ;;;;;;;;;;;;;;;;
 
 
@@ -2695,13 +2724,13 @@
    :static true}
   ([n]
      (fn [f1]
-       (let [na (atom n)]
+       (let [nv (volatile! n)]
          (fn
            ([] (f1))
            ([result] (f1 result))
            ([result input]
-              (let [n @na
-                    nn (swap! na dec)
+              (let [n @nv
+                    nn (vswap! nv dec)
                     result (if (pos? n)
                              (f1 result input)
                              result)]
@@ -2742,13 +2771,13 @@
    :static true}
   ([n]
      (fn [f1]
-       (let [na (atom n)]
+       (let [nv (volatile! n)]
          (fn
            ([] (f1))
            ([result] (f1 result))
            ([result input]
-              (let [n @na]
-                (swap! na dec)
+              (let [n @nv]
+                (vswap! nv dec)
                 (if (pos? n)
                   result
                   (f1 result input))))))))
@@ -2786,16 +2815,16 @@
    :static true}
   ([pred]
      (fn [f1]
-       (let [da (atom true)]
+       (let [dv (volatile! true)]
          (fn
            ([] (f1))
            ([result] (f1 result))
            ([result input]
-              (let [drop? @da]
+              (let [drop? @dv]
                 (if (and drop? (pred input))
                   result
                   (do
-                    (reset! da nil)
+                    (vreset! dv nil)
                     (f1 result input)))))))))
   ([pred coll]
      (let [step (fn [pred coll]
@@ -4082,12 +4111,12 @@
    :static true}
   ([n]
      (fn [f1]
-       (let [ia (atom -1)]
+       (let [iv (volatile! -1)]
          (fn
            ([] (f1))
            ([result] (f1 result))
            ([result input]
-              (let [i (swap! ia inc)]
+              (let [i (vswap! iv inc)]
                 (if (zero? (rem i n))
                   (f1 result input)
                   result)))))))
@@ -6786,7 +6815,7 @@
   ([f]
   (fn [f1]
     (let [a (java.util.ArrayList.)
-          pa (atom ::none)]
+          pv (volatile! ::none)]
       (fn
         ([] (f1))
         ([result]
@@ -6798,9 +6827,9 @@
                             (f1 result v)))]
              (f1 result)))
         ([result input]
-           (let [pval @pa
+           (let [pval @pv
                  val (f input)]
-             (reset! pa val)
+             (vreset! pv val)
              (if (or (identical? pval ::none)
                      (= val pval))
                (do
@@ -6963,12 +6992,12 @@
    :static true}
   ([f]
    (fn [f1]
-     (let [ia (atom -1)]
+     (let [iv (volatile! -1)]
        (fn
          ([] (f1))
          ([result] (f1 result))
          ([result input]
-            (let [i (swap! ia inc)
+            (let [i (vswap! iv inc)
                   v (f i input)]
               (if (nil? v)
                 result
@@ -7219,13 +7248,13 @@
   {:added "1.7"}
   ([]
    (fn [f1]
-     (let [pa (atom ::none)]
+     (let [pv (volatile! ::none)]
        (fn
          ([] (f1))
          ([result] (f1 result))
          ([result input]
-            (let [prior @pa]
-              (reset! pa input)
+            (let [prior @pv]
+              (vreset! pv input)
               (if (= prior input)
                 result
                 (f1 result input))))))))
