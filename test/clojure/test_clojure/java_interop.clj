@@ -120,6 +120,12 @@
 
 ; set!
 
+(defprotocol p (f [_]))
+(deftype t [^:unsynchronized-mutable x] p (f [_] (set! (.x _) 1)))
+
+(deftest test-set!
+  (is (= 1 (f (t. 1)))))
+
 ; memfn
 
 

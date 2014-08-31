@@ -1224,12 +1224,12 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		if(targetClass != null && field != null)
 			{
 			target.emit(C.EXPRESSION, objx, gen);
-			gen.checkCast(Type.getType(targetClass));
+			gen.checkCast(getType(targetClass));
 			val.emit(C.EXPRESSION, objx, gen);
 			gen.visitLineNumber(line, gen.mark());
 			gen.dupX1();
 			HostExpr.emitUnboxArg(objx, gen, field.getType());
-			gen.putField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
+			gen.putField(getType(targetClass), fieldName, Type.getType(field.getType()));
 			}
 		else
 			{
