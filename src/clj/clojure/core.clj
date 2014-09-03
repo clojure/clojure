@@ -2615,13 +2615,22 @@
                       (cons (map first ss) (step (map rest ss)))))))]
      (map #(apply f %) (step (conj colls c3 c2 c1))))))
 
+(defmacro declare
+  "defs the supplied var names with no bindings, useful for making forward declarations."
+  {:added "1.0"}
+  [& names] `(do ~@(map #(list 'def (vary-meta % assoc :declared true)) names)))
+
+(declare cat)
+
 (defn mapcat
   "Returns the result of applying concat to the result of applying map
-  to f and colls.  Thus function f should return a collection."
+  to f and colls.  Thus function f should return a collection. Returns
+  a transducer when no collections are provided"
   {:added "1.0"
    :static true}
-  [f & colls]
-    (apply concat (apply map f colls)))
+  ([f] (comp (map f) cat))
+  ([f & colls]
+     (apply concat (apply map f colls))))
 
 (defn filter
   "Returns a lazy sequence of the items in coll for which
@@ -2907,11 +2916,6 @@
                (next ks)
                (next vs))
         map)))
-
-(defmacro declare
-  "defs the supplied var names with no bindings, useful for making forward declarations."
-  {:added "1.0"}
-  [& names] `(do ~@(map #(list 'def (vary-meta % assoc :declared true)) names)))
 
 (defn line-seq
   "Returns the lines of text from rdr as a lazy sequence of strings.
@@ -6470,28 +6474,34 @@
   ([f init coll]
      (clojure.core.protocols/kv-reduce coll f init)))
 
-(defn- completing [f]
-  (fn
-    ([] (f))
-    ([x] x)
-    ([x y] (f x y))))
+(defn completing
+  "Takes a reducing function f of 2 args and returns a fn suitable for
+  transduce by adding an arity-1 signature that calls cf (default -
+  identity) on the result argument."
+  {:added "1.7"}
+  ([f] (completing f identity))
+  ([f cf]
+     (fn
+       ([] (f))
+       ([x] (cf x))
+       ([x y] (f x y)))))
 
 (defn transduce
   "reduce with a transformation of f (xf). If init is not
-  supplied, (f) will be called to produce it. Returns the result of
-  applying (the transformed) xf to init and the first item in coll,
+  supplied, (f) will be called to produce it. f should be a reducing
+  step function that accepts both 1 and 2 arguments, if it accepts
+  only 2 you can add the arity-1 with 'completing'. Returns the result
+  of applying (the transformed) xf to init and the first item in coll,
   then applying xf to that result and the 2nd item, etc. If coll
   contains no items, returns init and f is not called. Note that
-  certain transforms may inject or skip items."
-  {:added "1.7"}
+  certain transforms may inject or skip items."  {:added "1.7"}
   ([xform f coll] (transduce xform f (f) coll))
   ([xform f init coll]
-     (let [f (xform (completing f))
+     (let [f (xform f)
            ret (if (instance? clojure.lang.IReduce coll)
                  (.reduce ^clojure.lang.IReduce coll f init)
-                 (clojure.core.protocols/coll-reduce coll f init))
-           ret (f (if (reduced? ret) @ret ret))]
-       (if (reduced? ret) @ret ret))))
+                 (clojure.core.protocols/coll-reduce coll f init))]
+       (f ret))))
 
 (defn into
   "Returns a new coll consisting of to-coll with all of the items of
@@ -6783,8 +6793,7 @@
            (let [result (if (.isEmpty a)
                           result
                           (let [v (vec (.toArray a))]
-                            ;;flushing ops must clear before invoking possibly
-                            ;;failing nested op, else infinite loop
+                            ;;clear first!
                             (.clear a)
                             (f1 result v)))]
              (f1 result)))
@@ -6799,8 +6808,10 @@
                  result)
                (let [v (vec (.toArray a))]
                  (.clear a)
-                 (.add a input)
-                 (f1 result v)))))))))
+                 (let [ret (f1 result v)]
+                   (when-not (reduced? ret)
+                     (.add a input))
+                   ret)))))))))
   ([f coll]
      (lazy-seq
       (when-let [s (seq coll)]
@@ -6861,8 +6872,7 @@
             (let [result (if (.isEmpty a)
                            result
                            (let [v (vec (.toArray a))]
-                             ;;flushing ops must clear before invoking possibly
-                             ;;failing nested op, else infinite loop
+                             ;;clear first!
                              (.clear a)
                              (f1 result v)))]
               (f1 result)))
@@ -7184,26 +7194,24 @@
            ~@(interleave (repeat g) (map pstep forms))]
        ~g)))
 
-(defn- preserving-reduced
+(defn ^:private preserving-reduced
   [f1]
   #(let [ret (f1 %1 %2)]
      (if (reduced? ret)
        (reduced ret)
        ret)))
 
-(defn flatmap
-  "maps f over coll and concatenates the results.  Thus function f
-  should return a collection.  Returns a transducer when no collection
-  is provided."
+(defn cat
+  "A transducer which concatenates the contents of each input, which must be a
+  collection, into the reduction."
   {:added "1.7"}
-  ([f]
-   (fn [f1]
-     (fn
-       ([] (f1))
-       ([result] (f1 result))
-       ([result input]
-          (reduce (preserving-reduced f1) result (f input))))))
-  ([f coll] (sequence (flatmap f) coll)))
+  [f1]
+  (let [rf1 (preserving-reduced f1)]  
+    (fn
+      ([] (f1))
+      ([result] (f1 result))
+      ([result input]
+         (reduce rf1 result input)))))
 
 (defn dedupe
   "Returns a lazy sequence removing consecutive duplicates in coll.
