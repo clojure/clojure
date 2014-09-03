@@ -15,26 +15,26 @@ package clojure.lang;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PersistentVector extends APersistentVector implements IObj, IEditableCollection{
 
 public static class Node implements Serializable {
-	transient public final AtomicBoolean edit;
+	transient public final AtomicReference<Thread> edit;
 	public final Object[] array;
 
-	public Node(AtomicBoolean edit, Object[] array){
+	public Node(AtomicReference<Thread> edit, Object[] array){
 		this.edit = edit;
 		this.array = array;
 	}
 
-	Node(AtomicBoolean edit){
+	Node(AtomicReference<Thread> edit){
 		this.edit = edit;
 		this.array = new Object[32];
 	}
 }
 
-final static AtomicBoolean NOEDIT = new AtomicBoolean(false);
+final static AtomicReference<Thread> NOEDIT = new AtomicReference<Thread>(null);
 public final static Node EMPTY_NODE = new Node(NOEDIT, new Object[32]);
 
 final int cnt;
@@ -215,7 +215,7 @@ private Node pushTail(int level, Node parent, Node tailnode){
 	return ret;
 }
 
-private static Node newPath(AtomicBoolean edit,int level, Node node){
+private static Node newPath(AtomicReference<Thread> edit,int level, Node node){
 	if(level == 0)
 		return node;
 	Node ret = new Node(edit);
@@ -457,16 +457,15 @@ static final class TransientVector extends AFn implements ITransientVector, Coun
 	}
 
 	void ensureEditable(){
-		if(root.edit.get())
-			return;
-		throw new IllegalAccessError("Transient used after persistent! call");
+		if(root.edit.get() == null)
+			throw new IllegalAccessError("Transient used after persistent! call");
 
 //		root = editableRoot(root);
 //		tail = editableTail(tail);
 	}
 
 	static Node editableRoot(Node node){
-		return new Node(new AtomicBoolean(true), node.array.clone());
+		return new Node(new AtomicReference<Thread>(Thread.currentThread()), node.array.clone());
 	}
 
 	public PersistentVector persistent(){
@@ -476,7 +475,7 @@ static final class TransientVector extends AFn implements ITransientVector, Coun
 //			{
 //			throw new IllegalAccessError("Mutation release by non-owner thread");
 //			}
-		root.edit.set(false);
+		root.edit.set(null);
 		Object[] trimmedTail = new Object[cnt-tailoff()];
 		System.arraycopy(tail,0,trimmedTail,0,trimmedTail.length);
 		return new PersistentVector(cnt, shift, root, trimmedTail);
