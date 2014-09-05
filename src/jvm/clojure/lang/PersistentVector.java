@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class PersistentVector extends APersistentVector implements IObj, IEditableCollection{
+public class PersistentVector extends APersistentVector implements IObj, IEditableCollection, IReduce{
 
 public static class Node implements Serializable {
 	transient public final AtomicBoolean edit;
@@ -259,6 +259,24 @@ Iterator rangedIterator(final int start, final int end){
 }
 
 public Iterator iterator(){return rangedIterator(0,count());}
+
+public Object reduce(IFn f){
+	throw new UnsupportedOperationException();
+}
+
+public Object reduce(IFn f, Object init){
+    int step = 0;
+    for(int i=0;i<cnt;i+=step){
+        Object[] array = arrayFor(i);
+        for(int j =0;j<array.length;++j){
+            init = f.invoke(init,array[j]);
+            if(RT.isReduced(init))
+	            return ((IDeref)init).deref();
+            }
+        step = array.length;
+    }
+    return init;
+}
 
 public Object kvreduce(IFn f, Object init){
     int step = 0;
