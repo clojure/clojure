@@ -1,5 +1,167 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.7
+
+## 1 New and Improved Features
+
+### 1.1 Transducers
+
+Transducers is a new way to decouple algorithmic transformations from their
+application in different contexts. Transducers are functions that transform
+reducing functions to build up a "recipe" for transformation.
+
+Also see: http://blog.cognitect.com/blog/2014/8/6/transducers-are-coming
+
+Many existing sequence functions now have a new arity (one fewer argument
+than before). This arity will return a transducer that represents the same
+logic but is independent of lazy sequence processing. Functions included are:
+
+* conj (conjs to [])
+* map
+* mapcat
+* filter
+* remove
+* take
+* take-while
+* drop
+* drop-while
+* cycle
+* take-nth
+* replace
+* partition-by
+* partition-all
+* keep
+* keep-indexed
+
+Additionally some new transducer functions have been added:
+
+* cat - concatenates the contents of each input
+* de-dupe - removes consecutive duplicated values
+* random-sample - returns items from coll with random probability
+
+And this function can be used to make completing transforms:
+
+* completing
+
+There are also several new or modified functions that can be used to apply
+transducers in different ways:
+
+* sequence - takes a transformation and a coll and produces a lazy seq
+* transduce - reduce with a transformation (eager)
+* iteration - returns an iterable/seqable/reducible seq of applications of the transducer to items in coll. Applications are re-performed with every iterator/seq/reduce.
+* run! - run the transformation for side effects on the collection
+
+There have been a number of internal changes to support transducers:
+
+* volatiles - there are a new set of functions (volatile!, vswap!, vreset!, volatile?) to create and use volatile "boxes" to hold state in stateful transducers. Volatiles are faster than atoms but give up atomicity guarantees so should only be used with thread isolation.
+* array iterators - added support for iterators over arrays
+
+Some issues created and addressed during development:
+* [CLJ-1511](http://dev.clojure.org/jira/browse/CLJ-1511)
+* [CLJ-1497](http://dev.clojure.org/jira/browse/CLJ-1497)
+
+### 1.2 Keyword and Symbol Construction
+
+In response to issues raised in [CLJ-1439](http://dev.clojure.org/jira/browse/CLJ-1439),
+several changes have been made in symbol and keyword construction:
+
+1) The main bottleneck in construction of symbols (which also occurs inside keywords) was
+interning of the name and namespace strings. This interning has been removed, resulting
+in a performance increase.
+
+2) Keywords are cached and keyword construction includes a cache check. A change was made
+to only clear the cache reference queue when there is a cache miss.
+
+### 1.3 Warn on Boxed Math
+
+One source of performance issues is the (unintended) use of arithmetic operations on
+boxed numbers. To make detecting the presence of boxed math easier, a warning will now
+be emitted about boxed math if \*unchecked-math* is enabled.
+
+Example use:
+
+    user> (defn plus-2 [x] (+ x 2))  ;; no warning, but boxed
+	#'user/plus-2
+    user> (set! *unchecked-math* true)
+	true
+    user> (defn plus-2 [x] (+ x 2)) ;; now we see a warning
+    Boxed math warning, NO_SOURCE_PATH:10:18 - call: public static java.lang.Number
+	clojure.lang.Numbers.unchecked_add(java.lang.Object,long).
+    #'user/plus-2
+	user> (defn plus-2 [^long x] (+ x 2)) ;; use a hint to avoid boxing
+	#'user/plus-2
+
+* [CLJ-1325](http://dev.clojure.org/jira/browse/CLJ-1325)
+
+### 1.4 update - like update-in for first level
+
+`update` is a new function that is like update-in specifically for first-level keys:
+
+    (update m k f args...)
+
+Example use:
+
+    user> (update {:a 1} :a inc)
+	{:a 2}
+	user> (update {:a 1} :a + 2)
+	{:a 3}
+	user> (update {} :a identity)  ;; missing returns nil
+	{:a nil}
+
+* [CLJ-1251](http://dev.clojure.org/jira/browse/CLJ-1251)
+
+## 2 Enhancements
+
+### 2.1 Error messages
+
+* [CLJ-1261](http://dev.clojure.org/jira/browse/CLJ-1261)
+  Invalid defrecord results in exception attributed to consuming ns instead of defrecord ns
+* [CLJ-1169](http://dev.clojure.org/jira/browse/CLJ-1169)
+  Report line,column, and source in defmacro errors
+
+### 2.2 Documentation strings
+
+No changes.
+
+### 2.3 Performance
+
+* [CLJ-1430](http://dev.clojure.org/jira/browse/CLJ-1430)
+  Improve performance of partial with more unrolling
+* [CLJ-1384](http://dev.clojure.org/jira/browse/CLJ-1384)
+  clojure.core/set should use transients for better performance
+* [CLJ-1429](http://dev.clojure.org/jira/browse/CLJ-1429)
+  Cache unknown multimethod value default dispatch
+
+### 2.4 Other enhancements
+
+* [CLJ-1191](http://dev.clojure.org/jira/browse/CLJ-1191)
+  Improve apropos to show some indication of namespace of symbols found
+* [CLJ-1378](http://dev.clojure.org/jira/browse/CLJ-1378)
+  Hints don't work with #() form of function
+* [CLJ-1498](http://dev.clojure.org/jira/browse/CLJ-1498)
+  Removes owner-thread check from transients - this check was preventing some valid usage of transients in core.async where a transient is created on one thread and then used again in another pooled thread (while still maintaining thread isolation).
+
+## 3 Bug Fixes
+
+* [CLJ-1362](http://dev.clojure.org/jira/browse/CLJ-1362)
+  Reduce broken on some primitive vectors
+* [CLJ-1388](http://dev.clojure.org/jira/browse/CLJ-1388)
+  Equality bug on records created with nested calls to map->record
+* [CLJ-1274](http://dev.clojure.org/jira/browse/CLJ-1274)
+  Unable to set compiler options via system properties except for AOT compilation
+* [CLJ-1241](http://dev.clojure.org/jira/browse/CLJ-1241)
+  NPE when AOTing overrided clojure.core functions
+* [CLJ-1185](http://dev.clojure.org/jira/browse/CLJ-1185)
+  reductions does not check for reduced value
+* [CLJ-1039](http://dev.clojure.org/jira/browse/CLJ-1039)
+  Using def with metadata {:type :anything} throws ClassCastException during printing
+* [CLJ-887](http://dev.clojure.org/jira/browse/CLJ-887)
+  Error when calling primitive functions with destructuring in the arg vector
+* [CLJ-823](http://dev.clojure.org/jira/browse/CLJ-823)
+  Piping seque into seque can deadlock
+* [CLJ-738](http://dev.clojure.org/jira/browse/CLJ-738)
+  <= is incorrect when args include Double/NaN
+
 # Changes to Clojure in Version 1.6
 
 ## CONTENTS
