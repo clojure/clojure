@@ -26,6 +26,12 @@ public SeqIterator(Object o){
 	next = o;
 }
 
+//preserved for binary compatibility
+public SeqIterator(ISeq o){
+	seq = this;
+	next = o;
+}
+
 public boolean hasNext(){
 	if(seq == this){
 		seq = START;
