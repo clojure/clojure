@@ -122,7 +122,7 @@
   "Attempts to coerce its argument into an open java.io.InputStream.
    Default implementations always return a java.io.BufferedInputStream.
 
-   Default implementations are defined for OutputStream, File, URI, URL,
+   Default implementations are defined for InputStream, File, URI, URL,
    Socket, byte array, and String arguments.
 
    If the argument is a String, it tries to resolve it first as a URI, then
