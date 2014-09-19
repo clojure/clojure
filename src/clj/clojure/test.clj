@@ -316,8 +316,7 @@
   {:added "1.1"}
   [name]
   (when *report-counters*
-    (dosync (commute *report-counters* assoc name
-                     (inc (or (*report-counters* name) 0))))))
+    (dosync (commute *report-counters* update-in [name] (fnil inc 0)))))
 
 ;;; TEST RESULT REPORTING
 
