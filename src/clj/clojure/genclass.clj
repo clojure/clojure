@@ -161,6 +161,7 @@
         ifn-type (totype clojure.lang.IFn)
         iseq-type (totype clojure.lang.ISeq)
         ex-type  (totype java.lang.UnsupportedOperationException)
+        util-type (totype clojure.lang.Util)
         all-sigs (distinct (concat (map #(let[[m p] (key %)] {m [p]}) (mapcat non-private-methods supers))
                                    (map (fn [[m p]] {(str m) [p]}) methods)))
         sigs-by-name (apply merge-with concat {} all-sigs)
@@ -287,11 +288,9 @@
         (. gen putStatic ctype (var-name v) var-type))
       
       (when load-impl-ns
-        (. gen push "clojure.core")
-        (. gen push "load")
-        (. gen (invokeStatic rt-type (. Method (getMethod "clojure.lang.Var var(String,String)"))))
         (. gen push (str "/" impl-cname))
-        (. gen (invokeInterface ifn-type (new Method "invoke" obj-type (to-types [Object]))))
+        (. gen push ctype)
+        (. gen (invokeStatic util-type (. Method (getMethod "Object loadWithClass(String,Class)"))))
 ;        (. gen push (str (.replace impl-pkg-name \- \_) "__init"))
 ;        (. gen (invokeStatic class-type (. Method (getMethod "Class forName(String)"))))
         (. gen pop))

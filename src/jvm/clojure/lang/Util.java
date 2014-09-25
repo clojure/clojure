@@ -12,12 +12,12 @@
 
 package clojure.lang;
 
+import java.io.IOException;
 import java.lang.ref.Reference;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.lang.ref.SoftReference;
 import java.lang.ref.ReferenceQueue;
 
 public class Util{
@@ -242,6 +242,17 @@ static public RuntimeException sneakyThrow(Throwable t) {
 @SuppressWarnings("unchecked")
 static private <T extends Throwable> void sneakyThrow0(Throwable t) throws T {
 	throw (T) t;
+}
+
+static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws IOException, ClassNotFoundException{
+    Var.pushThreadBindings(RT.map(new Object[] { Compiler.LOADER, loadFrom.getClassLoader() }));
+    try {
+        return RT.var("clojure.core", "load").invoke(scriptbase);
+    }
+    finally
+    {
+        Var.popThreadBindings();
+    }
 }
 
 }
