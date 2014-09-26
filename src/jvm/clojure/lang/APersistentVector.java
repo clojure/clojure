@@ -469,15 +469,19 @@ public int compareTo(Object o){
 
 	public Object reduce(IFn f) {
 		Object ret = v.nth(i);
-		for(int x = i + 1; x < v.count(); x++)
-			ret = f.invoke(ret, v.nth(x));
+		for(int x = i + 1; x < v.count(); x++) {
+            ret = f.invoke(ret, v.nth(x));
+            if (RT.isReduced(ret)) return ((IDeref)ret).deref();
+        }
 		return ret;
 	}
 
 	public Object reduce(IFn f, Object start) {
 		Object ret = f.invoke(start, v.nth(i));
-		for(int x = i + 1; x < v.count(); x++)
-			ret = f.invoke(ret, v.nth(x));
+		for(int x = i + 1; x < v.count(); x++) {
+            if (RT.isReduced(ret)) return ((IDeref)ret).deref();
+            ret = f.invoke(ret, v.nth(x));
+        }
 		return ret;
 	}
     }
