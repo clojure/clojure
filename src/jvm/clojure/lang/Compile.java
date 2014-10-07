@@ -47,7 +47,12 @@ public static void main(String[] args) throws IOException{
 		}
 
     boolean warnOnReflection = System.getProperty(REFLECTION_WARNING_PROP, "false").equals("true");
-    boolean uncheckedMath = System.getProperty(UNCHECKED_MATH_PROP, "false").equals("true");
+    String uncheckedMathProp = System.getProperty(UNCHECKED_MATH_PROP);
+    Object uncheckedMath = Boolean.FALSE;
+    if("true".equals(uncheckedMathProp))
+        uncheckedMath = Boolean.TRUE;
+    else if("warn-on-boxed".equals(uncheckedMathProp))
+        uncheckedMath = Keyword.intern("warn-on-boxed");
 
 	try
 		{

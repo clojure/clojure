@@ -1595,7 +1595,7 @@ static class StaticMethodExpr extends MethodExpr{
 	final static Method forNameMethod = Method.getMethod("Class forName(String)");
 	final static Method invokeStaticMethodMethod =
 			Method.getMethod("Object invokeStaticMethod(Class,String,Object[])");
-
+	final static Keyword warnOnBoxedKeyword = Keyword.intern("warn-on-boxed");
 
 	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c, String methodName, IPersistentVector args)
 			{
@@ -1631,7 +1631,7 @@ static class StaticMethodExpr extends MethodExpr{
 				.format("Reflection warning, %s:%d:%d - call to static method %s on %s can't be resolved (argument types: %s).\n",
 					SOURCE_PATH.deref(), line, column, methodName, c.getName(), getTypeStringForArgs(args));
 			}
-		if(method != null && RT.booleanCast(RT.UNCHECKED_MATH.deref()) && isBoxedMath(method))
+		if(method != null && warnOnBoxedKeyword.equals(RT.UNCHECKED_MATH.deref()) && isBoxedMath(method))
 			{
 			RT.errPrintWriter()
 				.format("Boxed math warning, %s:%d:%d - call: %s.\n",

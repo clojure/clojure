@@ -725,12 +725,24 @@ Math/pow overflows to Infinity."
                  (unchecked-add (unchecked-multiply q d) r))))))
 
 (defmacro check-warn-on-box [warn? form]
-  `(binding [*unchecked-math* true]
-    (is (= ~warn?
-           (boolean
-             (re-find #"^Boxed math warning"
-                      (helper/with-err-string-writer
-                        (helper/eval-in-temp-ns ~form))))))))
+  `(do (binding [*unchecked-math* :warn-on-boxed]
+                (is (= ~warn?
+                       (boolean
+                         (re-find #"^Boxed math warning"
+                                  (helper/with-err-string-writer
+                                    (helper/eval-in-temp-ns ~form)))))))
+       (binding [*unchecked-math* true]
+                (is (false?
+                      (boolean
+                        (re-find #"^Boxed math warning"
+                                 (helper/with-err-string-writer
+                                   (helper/eval-in-temp-ns ~form)))))))
+       (binding [*unchecked-math* false]
+                (is (false?
+                      (boolean
+                        (re-find #"^Boxed math warning"
+                                 (helper/with-err-string-writer
+                                   (helper/eval-in-temp-ns ~form)))))))))
 
 (deftest warn-on-boxed
   (check-warn-on-box true (#(inc %) 2))
