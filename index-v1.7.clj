@@ -37,7 +37,7 @@
    :author "Christophe Grand",
    :doc "Start a web browser from Clojure"}
   {:source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.java.io-api.html",
    :name "clojure.java.io",
@@ -56,7 +56,7 @@
    :name "clojure.java.shell",
    :doc nil}
   {:source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url "http://clojure.github.com/clojure/clojure.main-api.html",
    :name "clojure.main",
    :doc nil}
@@ -2479,10 +2479,10 @@
    :name "definterface",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L20",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L20",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/definterface",
    :doc
@@ -2592,10 +2592,10 @@
    :name "defprotocol",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L664",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L664",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defprotocol",
    :doc
@@ -2607,10 +2607,10 @@
    :name "defrecord",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L295",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L295",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defrecord",
    :doc
@@ -2636,14 +2636,14 @@
    :name "deftype",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L399",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L399",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/deftype",
    :doc
-   "(deftype name [fields*]  options* specs*)\n\nCurrently there are no options.\n\nEach spec consists of a protocol or interface name followed by zero\nor more method bodies:\n\nprotocol-or-interface-or-Object\n(methodName [args*] body)*\n\nDynamically generates compiled bytecode for class with the given\nname, in a package with the same name as the current namespace, the\ngiven fields, and, optionally, methods for protocols and/or\ninterfaces. \n\nThe class will have the (by default, immutable) fields named by\nfields, which can have type hints. Protocols/interfaces and methods\nare optional. The only methods that can be supplied are those\ndeclared in the protocols/interfaces.  Note that method bodies are\nnot closures, the local environment includes only the named fields,\nand those fields can be accessed directy. Fields can be qualified\nwith the metadata :volatile-mutable true or :unsynchronized-mutable\ntrue, at which point (set! afield aval) will be supported in method\nbodies. Note well that mutable fields are extremely difficult to use\ncorrectly, and are present only to facilitate the building of higher\nlevel constructs, such as Clojure's reference types, in Clojure\nitself. They are for experts only - if the semantics and\nimplications of :volatile-mutable or :unsynchronized-mutable are not\nimmediately apparent to you, you should not be using them.\n\nMethod definitions take the form:\n\n(methodname [args*] body)\n\nThe argument and return types can be hinted on the arg and\nmethodname symbols. If not supplied, they will be inferred, so type\nhints should be reserved for disambiguation.\n\nMethods should be supplied for all methods of the desired\nprotocol(s) and interface(s). You can also define overrides for\nmethods of Object. Note that a parameter must be supplied to\ncorrespond to the target object ('this' in Java parlance). Thus\nmethods for interfaces will take one more argument than do the\ninterface declarations. Note also that recur calls to the method\nhead should *not* pass the target object, it will be supplied\nautomatically and can not be substituted.\n\nIn the method bodies, the (unqualified) name can be used to name the\nclass (for calls to new, instance? etc).\n\nWhen AOT compiling, generates compiled bytecode for a class with the\ngiven name (a symbol), prepends the current ns as the package, and\nwrites the .class file to the *compile-path* directory.\n\nOne constructor will be defined, taking the designated fields.  Note\nthat the field names __meta and __extmap are currently reserved and\nshould not be used when defining your own types.\n\nGiven (deftype TypeName ...), a factory function called ->TypeName\nwill be defined, taking positional parameters for the fields",
+   "(deftype name [fields*]  options* specs*)\n\nCurrently there are no options.\n\nEach spec consists of a protocol or interface name followed by zero\nor more method bodies:\n\nprotocol-or-interface-or-Object\n(methodName [args*] body)*\n\nDynamically generates compiled bytecode for class with the given\nname, in a package with the same name as the current namespace, the\ngiven fields, and, optionally, methods for protocols and/or\ninterfaces. \n\nThe class will have the (by default, immutable) fields named by\nfields, which can have type hints. Protocols/interfaces and methods\nare optional. The only methods that can be supplied are those\ndeclared in the protocols/interfaces.  Note that method bodies are\nnot closures, the local environment includes only the named fields,\nand those fields can be accessed directly. Fields can be qualified\nwith the metadata :volatile-mutable true or :unsynchronized-mutable\ntrue, at which point (set! afield aval) will be supported in method\nbodies. Note well that mutable fields are extremely difficult to use\ncorrectly, and are present only to facilitate the building of higher\nlevel constructs, such as Clojure's reference types, in Clojure\nitself. They are for experts only - if the semantics and\nimplications of :volatile-mutable or :unsynchronized-mutable are not\nimmediately apparent to you, you should not be using them.\n\nMethod definitions take the form:\n\n(methodname [args*] body)\n\nThe argument and return types can be hinted on the arg and\nmethodname symbols. If not supplied, they will be inferred, so type\nhints should be reserved for disambiguation.\n\nMethods should be supplied for all methods of the desired\nprotocol(s) and interface(s). You can also define overrides for\nmethods of Object. Note that a parameter must be supplied to\ncorrespond to the target object ('this' in Java parlance). Thus\nmethods for interfaces will take one more argument than do the\ninterface declarations. Note also that recur calls to the method\nhead should *not* pass the target object, it will be supplied\nautomatically and can not be substituted.\n\nIn the method bodies, the (unqualified) name can be used to name the\nclass (for calls to new, instance? etc).\n\nWhen AOT compiling, generates compiled bytecode for a class with the\ngiven name (a symbol), prepends the current ns as the package, and\nwrites the .class file to the *compile-path* directory.\n\nOne constructor will be defined, taking the designated fields.  Note\nthat the field names __meta and __extmap are currently reserved and\nshould not be used when defining your own types.\n\nGiven (deftype TypeName ...), a factory function called ->TypeName\nwill be defined, taking positional parameters for the fields",
    :var-type "macro",
    :line 399,
    :file "src/clj/clojure/core_deftype.clj"}
@@ -3225,10 +3225,10 @@
    :name "extend",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L718",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L718",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extend",
    :doc
@@ -3240,10 +3240,10 @@
    :name "extend-protocol",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L818",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L818",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extend-protocol",
    :doc
@@ -3255,10 +3255,10 @@
    :name "extend-type",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L786",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L786",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extend-type",
    :doc
@@ -3270,10 +3270,10 @@
    :name "extenders",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L535",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L535",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extenders",
    :doc
@@ -3285,10 +3285,10 @@
    :name "extends?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L528",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L528",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extends?",
    :doc "Returns true if atype extends protocol",
@@ -3749,14 +3749,14 @@
    :name "gen-class",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/ba8269d34db04639bd10d0789866ea446a388979/src/clj/clojure/genclass.clj#L508",
+   "https://github.com/clojure/clojure/blob/ae5e679111b3b72e2a8e3d2ebb1439ff0ca695a7/src/clj/clojure/genclass.clj#L508",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/ba8269d34db04639bd10d0789866ea446a388979/src/clj/clojure/genclass.clj",
+   "https://github.com/clojure/clojure/raw/ae5e679111b3b72e2a8e3d2ebb1439ff0ca695a7/src/clj/clojure/genclass.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/gen-class",
    :doc
-   "When compiling, generates compiled bytecode for a class with the\ngiven package-qualified :name (which, as all names in these\nparameters, can be a string or symbol), and writes the .class file\nto the *compile-path* directory.  When not compiling, does\nnothing. The gen-class construct contains no implementation, as the\nimplementation will be dynamically sought by the generated class in\nfunctions in an implementing Clojure namespace. Given a generated\nclass org.mydomain.MyClass with a method named mymethod, gen-class\nwill generate an implementation that looks for a function named by \n(str prefix mymethod) (default prefix: \"-\") in a\nClojure namespace specified by :impl-ns\n(defaults to the current namespace). All inherited methods,\ngenerated methods, and init and main functions (see :methods, :init,\nand :main below) will be found similarly prefixed. By default, the\nstatic initializer for the generated class will attempt to load the\nClojure support code for the class as a resource from the classpath,\ne.g. in the example case, ``org/mydomain/MyClass__init.class``. This\nbehavior can be controlled by :load-impl-ns\n\nNote that methods with a maximum of 18 parameters are supported.\n\nIn all subsequent sections taking types, the primitive types can be\nreferred to by their Java names (int, float etc), and classes in the\njava.lang package can be used without a package qualifier. All other\nclasses must be fully qualified.\n\nOptions should be a set of key/value pairs, all except for :name are optional:\n\n:name aname\n\nThe package-qualified name of the class to be generated\n\n:extends aclass\n\nSpecifies the superclass, the non-private methods of which will be\noverridden by the class. If not provided, defaults to Object.\n\n:implements [interface ...]\n\nOne or more interfaces, the methods of which will be implemented by the class.\n\n:init name\n\nIf supplied, names a function that will be called with the arguments\nto the constructor. Must return [ [superclass-constructor-args] state] \nIf not supplied, the constructor args are passed directly to\nthe superclass constructor and the state will be nil\n\n:constructors {[param-types] [super-param-types], ...}\n\nBy default, constructors are created for the generated class which\nmatch the signature(s) of the constructors for the superclass. This\nparameter may be used to explicitly specify constructors, each entry\nproviding a mapping from a constructor signature to a superclass\nconstructor signature. When you supply this, you must supply an :init\nspecifier. \n\n:post-init name\n\nIf supplied, names a function that will be called with the object as\nthe first argument, followed by the arguments to the constructor.\nIt will be called every time an object of this class is created,\nimmediately after all the inherited constructors have completed.\nIt's return value is ignored.\n\n:methods [ [name [param-types] return-type], ...]\n\nThe generated class automatically defines all of the non-private\nmethods of its superclasses/interfaces. This parameter can be used\nto specify the signatures of additional methods of the generated\nclass. Static methods can be specified with ^{:static true} in the\nsignature's metadata. Do not repeat superclass/interface signatures\nhere.\n\n:main boolean\n\nIf supplied and true, a static public main function will be generated. It will\npass each string of the String[] argument as a separate argument to\na function called (str prefix main).\n\n:factory name\n\nIf supplied, a (set of) public static factory function(s) will be\ncreated with the given name, and the same signature(s) as the\nconstructor(s).\n\n:state name\n\nIf supplied, a public final instance field with the given name will be\ncreated. You must supply an :init function in order to provide a\nvalue for the state. Note that, though final, the state can be a ref\nor agent, supporting the creation of Java objects with transactional\nor asynchronous mutation semantics.\n\n:exposes {protected-field-name {:get name :set name}, ...}\n\nSince the implementations of the methods of the generated class\noccur in Clojure functions, they have no access to the inherited\nprotected fields of the superclass. This parameter can be used to\ngenerate public getter/setter methods exposing the protected field(s)\nfor use in the implementation.\n\n:exposes-methods {super-method-name exposed-name, ...}\n\nIt is sometimes necessary to call the superclass' implementation of an\noverridden method.  Those methods may be exposed and referred in \nthe new method implementation by a local name.\n\n:prefix string\n\nDefault: \"-\" Methods called e.g. Foo will be looked up in vars called\nprefixFoo in the implementing ns.\n\n:impl-ns name\n\nDefault: the name of the current ns. Implementations of methods will be \nlooked up in this namespace.\n\n:load-impl-ns boolean\n\nDefault: true. Causes the static initializer for the generated class\nto reference the load code for the implementing namespace. Should be\ntrue when implementing-ns is the default, false if you intend to\nload the code via some other method.",
+   "When compiling, generates compiled bytecode for a class with the\ngiven package-qualified :name (which, as all names in these\nparameters, can be a string or symbol), and writes the .class file\nto the *compile-path* directory.  When not compiling, does\nnothing. The gen-class construct contains no implementation, as the\nimplementation will be dynamically sought by the generated class in\nfunctions in an implementing Clojure namespace. Given a generated\nclass org.mydomain.MyClass with a method named mymethod, gen-class\nwill generate an implementation that looks for a function named by \n(str prefix mymethod) (default prefix: \"-\") in a\nClojure namespace specified by :impl-ns\n(defaults to the current namespace). All inherited methods,\ngenerated methods, and init and main functions (see :methods, :init,\nand :main below) will be found similarly prefixed. By default, the\nstatic initializer for the generated class will attempt to load the\nClojure support code for the class as a resource from the classpath,\ne.g. in the example case, ``org/mydomain/MyClass__init.class``. This\nbehavior can be controlled by :load-impl-ns\n\nNote that methods with a maximum of 18 parameters are supported.\n\nIn all subsequent sections taking types, the primitive types can be\nreferred to by their Java names (int, float etc), and classes in the\njava.lang package can be used without a package qualifier. All other\nclasses must be fully qualified.\n\nOptions should be a set of key/value pairs, all except for :name are optional:\n\n:name aname\n\nThe package-qualified name of the class to be generated\n\n:extends aclass\n\nSpecifies the superclass, the non-private methods of which will be\noverridden by the class. If not provided, defaults to Object.\n\n:implements [interface ...]\n\nOne or more interfaces, the methods of which will be implemented by the class.\n\n:init name\n\nIf supplied, names a function that will be called with the arguments\nto the constructor. Must return [ [superclass-constructor-args] state] \nIf not supplied, the constructor args are passed directly to\nthe superclass constructor and the state will be nil\n\n:constructors {[param-types] [super-param-types], ...}\n\nBy default, constructors are created for the generated class which\nmatch the signature(s) of the constructors for the superclass. This\nparameter may be used to explicitly specify constructors, each entry\nproviding a mapping from a constructor signature to a superclass\nconstructor signature. When you supply this, you must supply an :init\nspecifier. \n\n:post-init name\n\nIf supplied, names a function that will be called with the object as\nthe first argument, followed by the arguments to the constructor.\nIt will be called every time an object of this class is created,\nimmediately after all the inherited constructors have completed.\nIts return value is ignored.\n\n:methods [ [name [param-types] return-type], ...]\n\nThe generated class automatically defines all of the non-private\nmethods of its superclasses/interfaces. This parameter can be used\nto specify the signatures of additional methods of the generated\nclass. Static methods can be specified with ^{:static true} in the\nsignature's metadata. Do not repeat superclass/interface signatures\nhere.\n\n:main boolean\n\nIf supplied and true, a static public main function will be generated. It will\npass each string of the String[] argument as a separate argument to\na function called (str prefix main).\n\n:factory name\n\nIf supplied, a (set of) public static factory function(s) will be\ncreated with the given name, and the same signature(s) as the\nconstructor(s).\n\n:state name\n\nIf supplied, a public final instance field with the given name will be\ncreated. You must supply an :init function in order to provide a\nvalue for the state. Note that, though final, the state can be a ref\nor agent, supporting the creation of Java objects with transactional\nor asynchronous mutation semantics.\n\n:exposes {protected-field-name {:get name :set name}, ...}\n\nSince the implementations of the methods of the generated class\noccur in Clojure functions, they have no access to the inherited\nprotected fields of the superclass. This parameter can be used to\ngenerate public getter/setter methods exposing the protected field(s)\nfor use in the implementation.\n\n:exposes-methods {super-method-name exposed-name, ...}\n\nIt is sometimes necessary to call the superclass' implementation of an\noverridden method.  Those methods may be exposed and referred in \nthe new method implementation by a local name.\n\n:prefix string\n\nDefault: \"-\" Methods called e.g. Foo will be looked up in vars called\nprefixFoo in the implementing ns.\n\n:impl-ns name\n\nDefault: the name of the current ns. Implementations of methods will be \nlooked up in this namespace.\n\n:load-impl-ns boolean\n\nDefault: true. Causes the static initializer for the generated class\nto reference the load code for the implementing namespace. Should be\ntrue when implementing-ns is the default, false if you intend to\nload the code via some other method.",
    :var-type "macro",
    :line 508,
    :file "src/clj/clojure/genclass.clj"}
@@ -3764,10 +3764,10 @@
    :name "gen-interface",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/ba8269d34db04639bd10d0789866ea446a388979/src/clj/clojure/genclass.clj#L688",
+   "https://github.com/clojure/clojure/blob/ae5e679111b3b72e2a8e3d2ebb1439ff0ca695a7/src/clj/clojure/genclass.clj#L688",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/ba8269d34db04639bd10d0789866ea446a388979/src/clj/clojure/genclass.clj",
+   "https://github.com/clojure/clojure/raw/ae5e679111b3b72e2a8e3d2ebb1439ff0ca695a7/src/clj/clojure/genclass.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/gen-interface",
    :doc
@@ -5095,10 +5095,10 @@
    :name "namespace-munge",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L13",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L13",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/namespace-munge",
    :doc
@@ -6310,10 +6310,10 @@
    :name "record?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L383",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L383",
    :added "1.6",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/record?",
    :doc "Returns true if x is a record",
@@ -6513,10 +6513,10 @@
    :name "reify",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L70",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L70",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reify",
    :doc
@@ -6871,10 +6871,10 @@
    :name "satisfies?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L541",
+   "https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L541",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/satisfies?",
    :doc "Returns true if x satisfies the protocol",
@@ -9063,10 +9063,10 @@
    :name "as-relative-path",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L398",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L398",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/as-relative-path",
    :doc
@@ -9078,10 +9078,10 @@
    :name "copy",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L381",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L381",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/copy",
    :doc
@@ -9093,10 +9093,10 @@
    :name "delete-file",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L420",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L420",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/delete-file",
    :doc
@@ -9108,10 +9108,10 @@
    :name "file",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L408",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L408",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/file",
    :doc
@@ -9123,14 +9123,14 @@
    :name "input-stream",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L121",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L121",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/input-stream",
    :doc
-   "Attempts to coerce its argument into an open java.io.InputStream.\nDefault implementations always return a java.io.BufferedInputStream.\n\nDefault implementations are defined for OutputStream, File, URI, URL,\nSocket, byte array, and String arguments.\n\nIf the argument is a String, it tries to resolve it first as a URI, then\nas a local file name.  URIs with a 'file' protocol are converted to\nlocal file names.\n\nShould be used inside with-open to ensure the InputStream is properly\nclosed.",
+   "Attempts to coerce its argument into an open java.io.InputStream.\nDefault implementations always return a java.io.BufferedInputStream.\n\nDefault implementations are defined for InputStream, File, URI, URL,\nSocket, byte array, and String arguments.\n\nIf the argument is a String, it tries to resolve it first as a URI, then\nas a local file name.  URIs with a 'file' protocol are converted to\nlocal file names.\n\nShould be used inside with-open to ensure the InputStream is properly\nclosed.",
    :var-type "function",
    :line 121,
    :file "src/clj/clojure/java/io.clj"}
@@ -9138,10 +9138,10 @@
    :name "make-parents",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L428",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L428",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/make-parents",
    :doc
@@ -9153,10 +9153,10 @@
    :name "output-stream",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L138",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L138",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/output-stream",
    :doc
@@ -9168,10 +9168,10 @@
    :name "reader",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L86",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L86",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/reader",
    :doc
@@ -9183,10 +9183,10 @@
    :name "resource",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L436",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L436",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/resource",
    :doc
@@ -9198,10 +9198,10 @@
    :name "writer",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L104",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L104",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/writer",
    :doc
@@ -9212,10 +9212,10 @@
   {:name "Coercions",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L35",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L35",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/Coercions",
    :doc "Coerce between various 'resource-namish' things.",
@@ -9225,10 +9225,10 @@
   {:name "IOFactory",
    :namespace "clojure.java.io",
    :source-url
-   "https://github.com/clojure/clojure/blob/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj#L69",
+   "https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L69",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/8bd8e8d0f2d68e1652eaa3b08f315d4e6a573be7/src/clj/clojure/java/io.clj",
+   "https://github.com/clojure/clojure/raw/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.java.io-api.html#clojure.java.io/IOFactory",
    :doc
@@ -9393,10 +9393,10 @@
    :name "demunge",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L30",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L30",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/demunge",
    :doc
@@ -9408,9 +9408,9 @@
    :name "load-script",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L267",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L267",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/load-script",
    :doc
@@ -9422,13 +9422,13 @@
    :name "main",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L383",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L383",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/main",
    :doc
-   "Usage: java -cp clojure.jar clojure.main [init-opt*] [main-opt] [arg*]\n\nWith no options or args, runs an interactive Read-Eval-Print Loop\n\ninit options:\n  -i, --init path     Load a file or resource\n  -e, --eval string   Evaluate expressions in string; print non-nil values\n\nmain options:\n  -m, --main ns-name  Call the -main function from a namespace with args\n  -r, --repl          Run a repl\n  path                Run a script from from a file or resource\n  -                   Run a script from standard input\n  -h, -?, --help      Print this help message and exit\n\noperation:\n\n  - Establishes thread-local bindings for commonly set!-able vars\n  - Enters the user namespace\n  - Binds *command-line-args* to a seq of strings containing command line\n    args that appear after any main option\n  - Runs all init options in order\n  - Calls a -main function or runs a repl or script if requested\n\nThe init options may be repeated and mixed freely, but must appear before\nany main option. The appearance of any eval option before running a repl\nsuppresses the usual repl greeting message: \"Clojure ~(clojure-version)\".\n\nPaths may be absolute or relative in the filesystem or relative to\nclasspath. Classpath-relative paths have prefix of @ or @/",
+   "Usage: java -cp clojure.jar clojure.main [init-opt*] [main-opt] [arg*]\n\nWith no options or args, runs an interactive Read-Eval-Print Loop\n\ninit options:\n  -i, --init path     Load a file or resource\n  -e, --eval string   Evaluate expressions in string; print non-nil values\n\nmain options:\n  -m, --main ns-name  Call the -main function from a namespace with args\n  -r, --repl          Run a repl\n  path                Run a script from a file or resource\n  -                   Run a script from standard input\n  -h, -?, --help      Print this help message and exit\n\noperation:\n\n  - Establishes thread-local bindings for commonly set!-able vars\n  - Enters the user namespace\n  - Binds *command-line-args* to a seq of strings containing command line\n    args that appear after any main option\n  - Runs all init options in order\n  - Calls a -main function or runs a repl or script if requested\n\nThe init options may be repeated and mixed freely, but must appear before\nany main option. The appearance of any eval option before running a repl\nsuppresses the usual repl greeting message: \"Clojure ~(clojure-version)\".\n\nPaths may be absolute or relative in the filesystem or relative to\nclasspath. Classpath-relative paths have prefix of @ or @/",
    :var-type "function",
    :line 383,
    :file "src/clj/clojure/main.clj"}
@@ -9436,9 +9436,9 @@
    :name "repl",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L173",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L173",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl",
    :doc
@@ -9450,9 +9450,9 @@
    :name "repl-caught",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L148",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L148",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-caught",
    :doc "Default :caught hook for repl",
@@ -9463,9 +9463,9 @@
    :name "repl-exception",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L143",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L143",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-exception",
    :doc "Returns the root cause of throwables",
@@ -9476,9 +9476,9 @@
    :name "repl-prompt",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L88",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L88",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-prompt",
    :doc "Default :prompt hook for repl",
@@ -9489,9 +9489,9 @@
    :name "repl-read",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L125",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L125",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-read",
    :doc
@@ -9501,9 +9501,9 @@
    :file "src/clj/clojure/main.clj"}
   {:file "src/clj/clojure/main.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L160",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L160",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/repl-requires",
    :namespace "clojure.main",
@@ -9516,10 +9516,10 @@
    :name "root-cause",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L37",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L37",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/root-cause",
    :doc
@@ -9531,9 +9531,9 @@
    :name "skip-if-eol",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L93",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L93",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/skip-if-eol",
    :doc
@@ -9545,9 +9545,9 @@
    :name "skip-whitespace",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L107",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L107",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/skip-whitespace",
    :doc
@@ -9559,10 +9559,10 @@
    :name "stack-element-str",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L50",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L50",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/stack-element-str",
    :doc
@@ -9574,9 +9574,9 @@
    :name "with-bindings",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L64",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L64",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/with-bindings",
    :doc
@@ -9588,9 +9588,9 @@
    :name "with-read-known",
    :namespace "clojure.main",
    :source-url
-   "https://github.com/clojure/clojure/blob/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj#L166",
+   "https://github.com/clojure/clojure/blob/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj#L166",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/462e4b2b2cd3361cce7325334bae96ec831ca7c5/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/251b2ef896488951bb52703cfccd5d65f1286305/src/clj/clojure/main.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.main-api.html#clojure.main/with-read-known",
    :doc

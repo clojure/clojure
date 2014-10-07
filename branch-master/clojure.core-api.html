@@ -4202,7 +4202,7 @@ defaulting to Object if omitted.
   (^Bar method2 [^Baz b ^Quux q]))</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L20" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L20" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4356,7 +4356,7 @@ reify, as they support the protocol directly:
 =&gt; 17</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L664" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L664" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4430,7 +4430,7 @@ defined: -&gt;TypeName, taking positional parameters for the fields,
 and map-&gt;TypeName, taking a map of keywords to field values.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L295" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L295" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4469,7 +4469,7 @@ fields, which can have type hints. Protocols/interfaces and methods
 are optional. The only methods that can be supplied are those
 declared in the protocols/interfaces.  Note that method bodies are
 not closures, the local environment includes only the named fields,
-and those fields can be accessed directy. Fields can be qualified
+and those fields can be accessed directly. Fields can be qualified
 with the metadata :volatile-mutable true or :unsynchronized-mutable
 true, at which point (set! afield aval) will be supported in method
 bodies. Note well that mutable fields are extremely difficult to use
@@ -4511,7 +4511,7 @@ Given (deftype TypeName ...), a factory function called -&gt;TypeName
 will be defined, taking positional parameters for the fields</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L399" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L399" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5070,7 +5070,7 @@ that carries a map of additional data.</pre>
  extends?, satisfies?, extenders</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L718" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L718" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5114,7 +5114,7 @@ expands into:
    (bar [x y] ...)))</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L818" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L818" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5144,7 +5144,7 @@ expands into:
     :bar (fn [x y] ...)})</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L786" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L786" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5155,7 +5155,7 @@ expands into:
     <pre id="var-docstr">Returns a collection of the types explicitly extending protocol</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L535" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L535" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5166,7 +5166,7 @@ expands into:
     <pre id="var-docstr">Returns true if atype extends protocol</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L528" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L528" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5623,7 +5623,7 @@ If supplied, names a function that will be called with the object as
 the first argument, followed by the arguments to the constructor.
 It will be called every time an object of this class is created,
 immediately after all the inherited constructors have completed.
-It's return value is ignored.
+Its return value is ignored.
 
 :methods [ [name [param-types] return-type], ...]
 
@@ -5686,7 +5686,7 @@ true when implementing-ns is the default, false if you intend to
 load the code via some other method.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/ba8269d34db04639bd10d0789866ea446a388979/src/clj/clojure/genclass.clj#L508" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/ae5e679111b3b72e2a8e3d2ebb1439ff0ca695a7/src/clj/clojure/genclass.clj#L508" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5722,7 +5722,7 @@ load the code via some other method.</pre>
  here.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/ba8269d34db04639bd10d0789866ea446a388979/src/clj/clojure/genclass.clj#L688" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/ae5e679111b3b72e2a8e3d2ebb1439ff0ca695a7/src/clj/clojure/genclass.clj#L688" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -6906,7 +6906,7 @@ Please see <a href="http://clojure.org/special_forms#monitor-exit">http://clojur
     <pre id="var-docstr">Convert a Clojure namespace name to a legal Java package name.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L13" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L13" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -7985,7 +7985,7 @@ For data structure interop use clojure.edn/read-string</pre>
     <pre id="var-docstr">Returns true if x is a record</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.6</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L383" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L383" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -8246,7 +8246,7 @@ clashes. Use :use in the ns macro in preference to calling this directly.</pre>
  == {:k :v}</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L70" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L70" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -8602,7 +8602,7 @@ effects, on successive items in the collection. Returns nil</pre>
     <pre id="var-docstr">Returns true if x satisfies the protocol</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a href="https://github.com/clojure/clojure/blob/b8181b7e424230b8d43008f86d03645dbef8edb0/src/clj/clojure/core_deftype.clj#L541" id="var-source">Source</a>
+    <a href="https://github.com/clojure/clojure/blob/6fba51724bb10b2368419dce54fdd595b2815232/src/clj/clojure/core_deftype.clj#L541" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
