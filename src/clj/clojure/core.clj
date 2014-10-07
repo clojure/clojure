@@ -6515,8 +6515,8 @@
   ([xform f coll] (transduce xform f (f) coll))
   ([xform f init coll]
      (let [f (xform f)
-           ret (if (instance? clojure.lang.IReduce coll)
-                 (.reduce ^clojure.lang.IReduce coll f init)
+           ret (if (instance? clojure.lang.IReduceInit coll)
+                 (.reduce ^clojure.lang.IReduceInit coll f init)
                  (clojure.core.protocols/coll-reduce coll f init))]
        (f ret))))
 
@@ -7264,7 +7264,7 @@
    clojure.lang.Seqable
    (seq [_] (seq (sequence xform coll)))
 
-   clojure.lang.IReduce
+   clojure.lang.IReduceInit
    (reduce [_ f init] (transduce xform f init coll))
 
    clojure.lang.Sequential)

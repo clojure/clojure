@@ -8,10 +8,8 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/* rich Jun 11, 2008 */
-
 package clojure.lang;
 
-public interface IReduce extends IReduceInit{
-Object reduce(IFn f) ;
+public interface IReduceInit{
+Object reduce(IFn f, Object start) ;
 }
