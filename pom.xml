@@ -48,7 +48,19 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>test.generative</artifactId>
-      <version>0.4.0</version>
+      <version>0.5.1</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.clojure</groupId>
+          <artifactId>clojure</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>test.check</artifactId>
+      <version>0.5.9</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
