@@ -10,7 +10,7 @@ Transducers is a new way to decouple algorithmic transformations from their
 application in different contexts. Transducers are functions that transform
 reducing functions to build up a "recipe" for transformation.
 
-Also see: http://blog.cognitect.com/blog/2014/8/6/transducers-are-coming
+Also see: http://clojure.org/transducers
 
 Many existing sequence functions now have a new arity (one fewer argument
 than before). This arity will return a transducer that represents the same
@@ -48,7 +48,7 @@ transducers in different ways:
 
 * sequence - takes a transformation and a coll and produces a lazy seq
 * transduce - reduce with a transformation (eager)
-* iteration - returns an iterable/seqable/reducible seq of applications of the transducer to items in coll. Applications are re-performed with every iterator/seq/reduce.
+* eduction - returns a reducible/seqable/iterable seq of applications of the transducer to items in coll. Applications are re-performed with every reduce/seq/iterator.
 * run! - run the transformation for side effects on the collection
 
 There have been a number of internal changes to support transducers:
@@ -56,9 +56,11 @@ There have been a number of internal changes to support transducers:
 * volatiles - there are a new set of functions (volatile!, vswap!, vreset!, volatile?) to create and use volatile "boxes" to hold state in stateful transducers. Volatiles are faster than atoms but give up atomicity guarantees so should only be used with thread isolation.
 * array iterators - added support for iterators over arrays
 
-Some issues created and addressed during development:
+Some related issues addressed during development:
 * [CLJ-1511](http://dev.clojure.org/jira/browse/CLJ-1511)
 * [CLJ-1497](http://dev.clojure.org/jira/browse/CLJ-1497)
+* [CLJ-1549](http://dev.clojure.org/jira/browse/CLJ-1549)
+* [CLJ-1537](http://dev.clojure.org/jira/browse/CLJ-1537)
 
 ### 1.2 Keyword and Symbol Construction
 
@@ -76,13 +78,14 @@ to only clear the cache reference queue when there is a cache miss.
 
 One source of performance issues is the (unintended) use of arithmetic operations on
 boxed numbers. To make detecting the presence of boxed math easier, a warning will now
-be emitted about boxed math if \*unchecked-math* is enabled.
+be emitted about boxed math if \*unchecked-math* is set to :warn-on-boxed (any truthy
+value will enable unchecked-math, only this specific value enables the warning).
 
 Example use:
 
     user> (defn plus-2 [x] (+ x 2))  ;; no warning, but boxed
 	#'user/plus-2
-    user> (set! *unchecked-math* true)
+    user> (set! *unchecked-math* :warn-on-boxed)
 	true
     user> (defn plus-2 [x] (+ x 2)) ;; now we see a warning
     Boxed math warning, NO_SOURCE_PATH:10:18 - call: public static java.lang.Number
@@ -92,6 +95,7 @@ Example use:
 	#'user/plus-2
 
 * [CLJ-1325](http://dev.clojure.org/jira/browse/CLJ-1325)
+* [CLJ-1535](http://dev.clojure.org/jira/browse/CLJ-1535)
 
 ### 1.4 update - like update-in for first level
 
@@ -118,10 +122,23 @@ Example use:
   Invalid defrecord results in exception attributed to consuming ns instead of defrecord ns
 * [CLJ-1169](http://dev.clojure.org/jira/browse/CLJ-1169)
   Report line,column, and source in defmacro errors
+* [CLJ-1297](http://dev.clojure.org/jira/browse/CLJ-1297)
+  Give more specific hint if namespace with "-" not found to check file uses "_"
 
 ### 2.2 Documentation strings
 
-No changes.
+* [CLJ-1417](http://dev.clojure.org/jira/browse/CLJ-1417)
+  clojure.java.io/input-stream has incorrect docstring
+* [CLJ-1357](http://dev.clojure.org/jira/browse/CLJ-1357)
+  Fix typo in gen-class doc-string
+* [CLJ-1479](http://dev.clojure.org/jira/browse/CLJ-1479)
+  Fix typo in filterv example
+* [CLJ-1480](http://dev.clojure.org/jira/browse/CLJ-1480)
+  Fix typo in defmulti docstring
+* [CLJ-1477](http://dev.clojure.org/jira/browse/CLJ-1477)
+  Fix typo in deftype docstring
+* [CLJ-1478](http://dev.clojure.org/jira/browse/CLJ-1378)
+  Fix typo in clojure.main usage
 
 ### 2.3 Performance
 
@@ -140,6 +157,12 @@ No changes.
   Hints don't work with #() form of function
 * [CLJ-1498](http://dev.clojure.org/jira/browse/CLJ-1498)
   Removes owner-thread check from transients - this check was preventing some valid usage of transients in core.async where a transient is created on one thread and then used again in another pooled thread (while still maintaining thread isolation).
+* [CLJ-803](http://dev.clojure.org/jira/browse/CLJ-803)
+  Extracted IAtom interface implemented by Atom.
+* [CLJ-1315](http://dev.clojure.org/jira/browse/CLJ-1315)
+  Don't initialize classes when importing them
+* [CLJ-1330](http://dev.clojure.org/jira/browse/CLJ-1330)
+  Class name clash between top-level functions and defn'ed ones
 
 ## 3 Bug Fixes
 
@@ -161,6 +184,10 @@ No changes.
   Piping seque into seque can deadlock
 * [CLJ-738](http://dev.clojure.org/jira/browse/CLJ-738)
   <= is incorrect when args include Double/NaN
+* [CLJ-1408](http://dev.clojure.org/jira/browse/CLJ-1408)
+  Make cached string value of Keyword and Symbol transient
+* [CLJ-1466](http://dev.clojure.org/jira/browse/CLJ-1466)
+  clojure.core/bean should implement Iterable
 
 # Changes to Clojure in Version 1.6
 
