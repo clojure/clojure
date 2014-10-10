@@ -2704,6 +2704,18 @@
    :added "1.5"}
   ([x] (clojure.lang.RT/isReduced x)))
 
+(defn ensure-reduced
+  "If x is already reduced?, returns it, else returns (reduced x)"
+  {:added "1.7"}
+  [x]
+  (if (reduced? x) x (reduced x)))
+
+(defn unreduced
+  "If x is reduced?, returns (deref x), else returns x"
+  {:added "1.7"}
+  [x]
+  (if (reduced? x) (deref x) x))
+
 (defn take
   "Returns a lazy sequence of the first n items in coll, or all items if
   there are fewer than n.  Returns a stateful transducer when
@@ -2723,7 +2735,7 @@
                              (rf result input)
                              result)]
                 (if (not (pos? nn))
-                  (reduced result)
+                  (ensure-reduced result)
                   result)))))))
   ([n coll]
      (lazy-seq
@@ -6812,7 +6824,7 @@
                           (let [v (vec (.toArray a))]
                             ;;clear first!
                             (.clear a)
-                            (rf result v)))]
+                            (unreduced (rf result v))))]
              (rf result)))
         ([result input]
            (let [pval @pv
@@ -6891,7 +6903,7 @@
                            (let [v (vec (.toArray a))]
                              ;;clear first!
                              (.clear a)
-                             (rf result v)))]
+                             (unreduced (rf result v))))]
               (rf result)))
          ([result input]
             (.add a input)
