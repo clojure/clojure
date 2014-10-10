@@ -1165,10 +1165,10 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
-		gen.visitLineNumber(line, gen.mark());
 		if(targetClass != null && field != null)
 			{
 			target.emit(C.EXPRESSION, objx, gen);
+			gen.visitLineNumber(line, gen.mark());
 			gen.checkCast(getType(targetClass));
 			gen.getField(getType(targetClass), fieldName, Type.getType(field.getType()));
 			}
@@ -1177,10 +1177,10 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-		gen.visitLineNumber(line, gen.mark());
 		if(targetClass != null && field != null)
 			{
 			target.emit(C.EXPRESSION, objx, gen);
+			gen.visitLineNumber(line, gen.mark());
 			gen.checkCast(getType(targetClass));
 			gen.getField(getType(targetClass), fieldName, Type.getType(field.getType()));
 			//if(context != C.STATEMENT)
@@ -1193,6 +1193,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		else
 			{
 			target.emit(C.EXPRESSION, objx, gen);
+			gen.visitLineNumber(line, gen.mark());
 			gen.push(fieldName);
 			gen.push(requireField);
 			gen.invokeStatic(REFLECTOR_TYPE, invokeNoArgInstanceMember);
@@ -1215,12 +1216,12 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 
 	public void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen,
 	                       Expr val){
-		gen.visitLineNumber(line, gen.mark());
 		if(targetClass != null && field != null)
 			{
 			target.emit(C.EXPRESSION, objx, gen);
 			gen.checkCast(Type.getType(targetClass));
 			val.emit(C.EXPRESSION, objx, gen);
+			gen.visitLineNumber(line, gen.mark());
 			gen.dupX1();
 			HostExpr.emitUnboxArg(objx, gen, field.getType());
 			gen.putField(Type.getType(targetClass), fieldName, Type.getType(field.getType()));
@@ -1230,6 +1231,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			target.emit(C.EXPRESSION, objx, gen);
 			gen.push(fieldName);
 			val.emit(C.EXPRESSION, objx, gen);
+			gen.visitLineNumber(line, gen.mark());
 			gen.invokeStatic(REFLECTOR_TYPE, setInstanceFieldMethod);
 			}
 		if(context == C.STATEMENT)
@@ -1310,8 +1312,8 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 
 	public void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen,
 	                       Expr val){
-		gen.visitLineNumber(line, gen.mark());
 		val.emit(C.EXPRESSION, objx, gen);
+		gen.visitLineNumber(line, gen.mark());
 		gen.dup();
 		HostExpr.emitUnboxArg(objx, gen, field.getType());
 		gen.putStatic(Type.getType(c), fieldName, Type.getType(field.getType()));
@@ -1532,7 +1534,6 @@ static class InstanceMethodExpr extends MethodExpr{
 	}
 
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
-		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
 			{
 			Type type = Type.getType(method.getDeclaringClass());
@@ -1540,6 +1541,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			//if(!method.getDeclaringClass().isInterface())
 			gen.checkCast(type);
 			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
+			gen.visitLineNumber(line, gen.mark());
 			if(context == C.RETURN)
 				{
 				ObjMethod method = (ObjMethod) METHOD.deref();
@@ -1556,7 +1558,6 @@ static class InstanceMethodExpr extends MethodExpr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
 			{
 			Type type = Type.getType(method.getDeclaringClass());
@@ -1564,6 +1565,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			//if(!method.getDeclaringClass().isInterface())
 			gen.checkCast(type);
 			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
+			gen.visitLineNumber(line, gen.mark());
 			if(context == C.RETURN)
 				{
 				ObjMethod method = (ObjMethod) METHOD.deref();
@@ -1582,6 +1584,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			target.emit(C.EXPRESSION, objx, gen);
 			gen.push(methodName);
 			emitArgsAsArray(args, objx, gen);
+			gen.visitLineNumber(line, gen.mark());
 			if(context == C.RETURN)
 				{
 				ObjMethod method = (ObjMethod) METHOD.deref();
@@ -1727,10 +1730,10 @@ static class StaticMethodExpr extends MethodExpr{
 	}
 
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
-		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
 			{
 			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
+			gen.visitLineNumber(line, gen.mark());
 			//Type type = Type.getObjectType(className.replace('.', '/'));
 			if(context == C.RETURN)
 				{
@@ -1760,10 +1763,10 @@ static class StaticMethodExpr extends MethodExpr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
 			{
 			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
+			gen.visitLineNumber(line, gen.mark());
 			//Type type = Type.getObjectType(className.replace('.', '/'));
 			if(context == C.RETURN)
 				{
@@ -1789,10 +1792,12 @@ static class StaticMethodExpr extends MethodExpr{
 			}
 		else
 			{
+			gen.visitLineNumber(line, gen.mark());
 			gen.push(c.getName());
 			gen.invokeStatic(RT_TYPE, forNameMethod);
 			gen.push(methodName);
 			emitArgsAsArray(args, objx, gen);
+			gen.visitLineNumber(line, gen.mark());
 			if(context == C.RETURN)
 				{
 				ObjMethod method = (ObjMethod) METHOD.deref();
@@ -3255,6 +3260,7 @@ static class KeywordInvokeExpr implements Expr{
         gen.getStatic(objx.objtype, objx.thunkNameStatic(siteIndex),ObjExpr.ILOOKUP_THUNK_TYPE);
         gen.dup();  //thunk, thunk
         target.emit(C.EXPRESSION, objx, gen); //thunk,thunk,target
+        gen.visitLineNumber(line, gen.mark());
         gen.dupX2();                          //target,thunk,thunk,target
         gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE, Method.getMethod("Object get(Object)")); //target,thunk,result
         gen.dupX2();                          //result,target,thunk,result
@@ -3626,15 +3632,16 @@ static class InvokeExpr implements Expr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-		gen.visitLineNumber(line, gen.mark());
 		if(isProtocol)
 			{
+			gen.visitLineNumber(line, gen.mark());
 			emitProto(context,objx,gen);
 			}
 
 		else
 			{
 			fexpr.emit(C.EXPRESSION, objx, gen);
+			gen.visitLineNumber(line, gen.mark());
 			gen.checkCast(IFN_TYPE);
 			emitArgsAndCall(0, context,objx,gen);
 			}
@@ -3704,6 +3711,7 @@ static class InvokeExpr implements Expr{
 				}
 			MethodExpr.emitArgsAsArray(restArgs, objx, gen);
 			}
+		gen.visitLineNumber(line, gen.mark());
 
 		if(context == C.RETURN)
 			{
