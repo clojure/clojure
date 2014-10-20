@@ -7176,12 +7176,20 @@ public static Object load(Reader rdr) {
 	return load(rdr, null, "NO_SOURCE_FILE");
 }
 
+static void consumeWhitespaces(LineNumberingPushbackReader pushbackReader) {
+	int ch = LispReader.read1(pushbackReader);
+	while(LispReader.isWhitespace(ch))
+		ch = LispReader.read1(pushbackReader);
+	LispReader.unread(pushbackReader, ch);
+}
+
 public static Object load(Reader rdr, String sourcePath, String sourceName) {
 	Object EOF = new Object();
 	Object ret = null;
 	LineNumberingPushbackReader pushbackReader =
 			(rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
 			new LineNumberingPushbackReader(rdr);
+	consumeWhitespaces(pushbackReader);
 	Var.pushThreadBindings(
 			RT.mapUniqueKeys(LOADER, RT.makeClassLoader(),
 			       SOURCE_PATH, sourcePath,
@@ -7206,6 +7214,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) {
 		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
 		    r = LispReader.read(pushbackReader, false, EOF, false))
 			{
+			consumeWhitespaces(pushbackReader);
 			LINE_AFTER.set(pushbackReader.getLineNumber());
 			COLUMN_AFTER.set(pushbackReader.getColumnNumber());
 			ret = eval(r,false);
