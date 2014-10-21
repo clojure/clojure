@@ -95,8 +95,7 @@ static class Stepper implements IStepper{
 	IFn xform;
 	static IFn stepfn = new AFn(){
 		public Object invoke(Object result){
-			LazyTransformer lt = (LazyTransformer) (RT.isReduced(result)?
-			                                        ((Reduced)result).deref():result);
+			LazyTransformer lt = (LazyTransformer) result;
 			lt.stepper = null;
 			return result;
 			}
@@ -116,11 +115,15 @@ static class Stepper implements IStepper{
 
 	public void step(LazyTransformer lt){
 		while(lt.stepper != null && iter.hasNext()){
-			if(RT.isReduced(xform.invoke(lt, iter.next())))
-				{
-				if(lt.rest != null)
-					lt.rest.stepper = null;
-				break;
+			if(RT.isReduced(xform.invoke(lt, iter.next()))){
+				lt.stepper = null;
+				LazyTransformer et = lt;
+				while(et.rest != null){
+					et = et.rest;
+					et.stepper = null;
+					}
+				xform.invoke(et);
+				return;
 				}
 			}
 		if(lt.stepper != null)
@@ -134,8 +137,7 @@ static class MultiStepper implements IStepper{
 	IFn xform;
 	static IFn stepfn = new AFn(){
 		public Object invoke(Object result){
-			LazyTransformer lt = (LazyTransformer) (RT.isReduced(result)?
-			                                        ((Reduced)result).deref():result);
+			LazyTransformer lt = (LazyTransformer)result;
 			lt.stepper = null;
 			return lt;
 			}
@@ -171,9 +173,14 @@ static class MultiStepper implements IStepper{
 		while(lt.stepper != null && hasNext()){
 			if(RT.isReduced(xform.applyTo(RT.cons(lt, next()))))
 				{
-				if(lt.rest != null)
-					lt.rest.stepper = null;
-				break;
+				lt.stepper = null;
+				LazyTransformer et = lt;
+				while(et.rest != null){
+					et = et.rest;
+					et.stepper = null;
+					}
+				xform.invoke(et);
+				return;
 				}
 			}
 		if(lt.stepper != null)
