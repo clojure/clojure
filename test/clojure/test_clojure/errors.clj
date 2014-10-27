@@ -80,3 +80,14 @@
           (Throwable->map (ex-info "ex-info"
                                    {:some "data"}))]
       (is (= data data-top-level {:some "data"})))))
+
+(deftest ex-info-disallows-nil-data
+  (is (thrown? IllegalArgumentException (ex-info "message" nil)))
+  (is (thrown? IllegalArgumentException (ex-info "message" nil (Throwable. "cause")))))
+
+(deftest ex-info-arities-construct-equivalent-exceptions
+  (let [ex1 (ex-info "message" {:foo "bar"})
+        ex2 (ex-info "message" {:foo "bar"} nil)]
+    (is (= (.getMessage ex1) (.getMessage ex2)))
+    (is (= (.getData ex1) (.getData ex2)))
+    (is (= (.getCause ex1) (.getCause ex2)))))
