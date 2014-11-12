@@ -179,7 +179,7 @@ public IPersistentMap assocEx(Object key, Object val) {
 		}
 	else //didn't have key, grow
 		{
-		if(array.length > HASHTABLE_THRESHOLD)
+		if(array.length >= HASHTABLE_THRESHOLD)
 			return createHT(array).assocEx(key, val);
 		newArray = new Object[array.length + 2];
 		if(array.length > 0)
@@ -202,7 +202,7 @@ public IPersistentMap assoc(Object key, Object val){
 		}
 	else //didn't have key, grow
 		{
-		if(array.length > HASHTABLE_THRESHOLD)
+		if(array.length >= HASHTABLE_THRESHOLD)
 			return createHT(array).assoc(key, val);
 		newArray = new Object[array.length + 2];
 		if(array.length > 0)
