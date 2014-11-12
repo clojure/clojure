@@ -155,6 +155,7 @@
 (use-method simple-dispatch clojure.lang.IPersistentMap pprint-map)
 (use-method simple-dispatch clojure.lang.IPersistentSet pprint-set)
 (use-method simple-dispatch clojure.lang.PersistentQueue pprint-pqueue)
+(use-method simple-dispatch clojure.lang.Var pprint-simple-default)
 (use-method simple-dispatch clojure.lang.IDeref pprint-ideref)
 (use-method simple-dispatch nil pr)
 (use-method simple-dispatch :default pprint-simple-default)
