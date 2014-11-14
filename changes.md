@@ -61,6 +61,8 @@ Some related issues addressed during development:
 * [CLJ-1497](http://dev.clojure.org/jira/browse/CLJ-1497)
 * [CLJ-1549](http://dev.clojure.org/jira/browse/CLJ-1549)
 * [CLJ-1537](http://dev.clojure.org/jira/browse/CLJ-1537)
+* [CLJ-1554](http://dev.clojure.org/jira/browse/CLJ-1554)
+
 
 ### 1.2 Keyword and Symbol Construction
 
@@ -148,6 +150,8 @@ Example use:
   clojure.core/set should use transients for better performance
 * [CLJ-1429](http://dev.clojure.org/jira/browse/CLJ-1429)
   Cache unknown multimethod value default dispatch
+* [CLJ-1529](http://dev.clojure.org/jira/browse/CLJ-1529)
+  Reduce compile times by avoiding unnecessary calls to Class.forName()
 
 ### 2.4 Other enhancements
 
@@ -163,6 +167,8 @@ Example use:
   Don't initialize classes when importing them
 * [CLJ-1330](http://dev.clojure.org/jira/browse/CLJ-1330)
   Class name clash between top-level functions and defn'ed ones
+* [CLJ-1349](http://dev.clojure.org/jira/browse/CLJ-1349)
+  Update to latest test.generative and add dependency on test.check
 
 ## 3 Bug Fixes
 
@@ -188,6 +194,10 @@ Example use:
   Make cached string value of Keyword and Symbol transient
 * [CLJ-1466](http://dev.clojure.org/jira/browse/CLJ-1466)
   clojure.core/bean should implement Iterable
+* [CLJ-1578](http://dev.clojure.org/jira/browse/CLJ-1578)
+  Make refer of Clojure core function not throw exception on reload
+* [CLJ-1501](http://dev.clojure.org/jira/browse/CLJ-1501)
+  LazySeq equals() should not use equiv() logic
 
 # Changes to Clojure in Version 1.6
 
