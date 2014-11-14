@@ -81,6 +81,12 @@
            (reduce #(and %1 %2) all-true)
            (reduce #(and %1 %2) true all-true)))))
 
+(deftest test-into-IReduceInit
+  (let [iri (reify clojure.lang.IReduceInit
+              (reduce [_ f start]
+                (reduce f start (range 5))))]
+    (is (= [0 1 2 3 4] (into [] iri)))))
+
 (deftest test-equality
   ; lazy sequences
   (are [x y] (= x y)

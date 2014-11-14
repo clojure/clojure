@@ -6490,9 +6490,13 @@
   items, returns val and f is not called."
   {:added "1.0"}
   ([f coll]
-     (clojure.core.protocols/coll-reduce coll f))
+     (if (instance? clojure.lang.IReduce coll)
+       (.reduce ^clojure.lang.IReduce coll f)
+       (clojure.core.protocols/coll-reduce coll f)))
   ([f val coll]
-     (clojure.core.protocols/coll-reduce coll f val)))
+     (if (instance? clojure.lang.IReduceInit coll)
+       (.reduce ^clojure.lang.IReduceInit coll f val)
+       (clojure.core.protocols/coll-reduce coll f val))))
 
 (extend-protocol clojure.core.protocols/IKVReduce
  nil
