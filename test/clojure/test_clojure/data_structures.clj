@@ -1157,3 +1157,8 @@
         s (into #{} unique-elem)]
     (is (= (hash s)
            (hash-unordered unique-elem)))))
+
+(deftest ireduce-reduced
+  (let [f (fn [_ a] (if (= a 5) (reduced "foo")))]
+    (is (= "foo" (.reduce ^clojure.lang.IReduce (list 1 2 3 4 5) f)))
+    (is (= "foo" (.reduce ^clojure.lang.IReduce (seq (long-array [1 2 3 4 5])) f)))))

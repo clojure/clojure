@@ -126,6 +126,7 @@ public Object reduce(IFn f, Object start) {
         if (RT.isReduced(ret)) return ((IDeref)ret).deref();
         ret = f.invoke(ret, s.first());
     }
+	if (RT.isReduced(ret)) return ((IDeref)ret).deref();
 	return ret;
 }
 

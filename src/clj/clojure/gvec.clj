@@ -49,9 +49,11 @@
   (reduce [_ f init]
     (loop [ret init i off]
       (if (< i end)
-        (recur (f ret (.aget am arr i)) (inc i))
-        ret)))
-  )
+        (let [ret (f ret (.aget am arr i))]
+          (if (reduced? ret)
+            ret
+            (recur ret (inc i))))
+        ret))))
 
 (deftype VecSeq [^clojure.core.ArrayManager am ^clojure.core.IVecImpl vec anode ^int i ^int offset] 
   :no-print true
@@ -66,9 +68,14 @@
              result (loop [result result
                            node-idx (bit-and 0x1f aidx)]
                       (if (< node-idx (.alength am node))
-                        (recur (f result (.aget am node node-idx)) (inc node-idx))
+                        (let [result (f result (.aget am node node-idx))]
+                          (if (reduced? result)
+                            result
+                            (recur result (inc node-idx))))
                         result))]
-         (recur result (bit-and 0xffe0 (+ aidx 32))))
+         (if (reduced? result)
+           @result
+           (recur result (bit-and 0xffe0 (+ aidx 32)))))
        result)))
   
   clojure.lang.ISeq

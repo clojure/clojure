@@ -482,6 +482,7 @@ public int compareTo(Object o){
             if (RT.isReduced(ret)) return ((IDeref)ret).deref();
             ret = f.invoke(ret, v.nth(x));
         }
+		if (RT.isReduced(ret)) return ((IDeref)ret).deref();
 		return ret;
 	}
     }

@@ -262,4 +262,5 @@
   (is (= [[:a]] (transduce (comp (partition-by keyword?) (take 1)) conj [] [:a])))
   (is (= [[:a]] (sequence (comp (partition-by keyword?) (take 1)) [:a])))
   (is (= [[[:a]]] (sequence (comp (partition-by keyword?) (take 1)  (partition-by keyword?) (take 1)) [:a])))
-  (is (= [[0]] (transduce (comp (take 1) (partition-all 3) (take 1)) conj [] (range 15)))))
+  (is (= [[0]] (transduce (comp (take 1) (partition-all 3) (take 1)) conj [] (range 15))))
+  (is (= [1] (transduce (take 1) conj (seq (long-array [1 2 3 4]))))))
