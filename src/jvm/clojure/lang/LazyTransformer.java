@@ -15,6 +15,8 @@ package clojure.lang;
 import java.util.*;
 
 public final class LazyTransformer extends Obj implements ISeq, Sequential, List, IPending, IHashEq{
+transient int _hash = -1;
+transient int _hasheq = -1;
 
 IStepper stepper;
 Object first = null;
@@ -210,14 +212,24 @@ public boolean equiv(Object o){
 	return ms == null;}
 
 public int hashCode(){
-	ISeq s = seq();
-	if(s == null)
-		return 1;
-	return Util.hash(seq());
+	if(_hash == -1)
+		{
+		int hash = 1;
+		for(ISeq s = seq(); s != null; s = s.next())
+			{
+			hash = 31 * hash + (s.first() == null ? 0 : s.first().hashCode());
+			}
+		this._hash = hash;
+		}
+	return _hash;
 }
 
 public int hasheq(){
-	return Murmur3.hashOrdered(this);
+	if(_hasheq == -1)
+		{
+		_hasheq  = Murmur3.hashOrdered(this);
+		}
+	return _hasheq;
 }
 
 public boolean equals(Object o){
