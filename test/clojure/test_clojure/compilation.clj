@@ -249,3 +249,18 @@
                  (load-string "(.submit (java.util.concurrent.Executors/newCachedThreadPool) #())")))
     (is (try (load-string "(.submit (java.util.concurrent.Executors/newCachedThreadPool) ^Runnable #())")
              (catch Compiler$CompilerException e nil)))))
+
+(defrecord Y [a])
+#clojure.test_clojure.compilation.Y[1]
+(defrecord Y [b])
+
+(binding [*compile-path* "target/test-classes"]
+  (compile 'clojure.test-clojure.compilation.examples))
+
+(deftest CLJ-979
+  (is (= clojure.test_clojure.compilation.examples.X
+         (class (clojure.test-clojure.compilation.examples/->X))))
+  (is (.b (clojure.test_clojure.compilation.Y. 1)))
+  (is (= clojure.test_clojure.compilation.examples.T
+         (class (clojure.test_clojure.compilation.examples.T.))
+         (class (clojure.test-clojure.compilation.examples/->T)))))

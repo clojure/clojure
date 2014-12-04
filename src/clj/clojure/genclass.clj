@@ -717,10 +717,10 @@
   [& options]
     (let [options-map (apply hash-map options)
           [cname bytecode] (generate-interface options-map)]
-      (if *compile-files*
-        (clojure.lang.Compiler/writeClassFile cname bytecode)
-        (.defineClass ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) 
-                      (str (:name options-map)) bytecode options)))) 
+      (when *compile-files*
+        (clojure.lang.Compiler/writeClassFile cname bytecode))
+      (.defineClass ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER)
+                    (str (:name options-map)) bytecode options)))
 
 (comment
 
