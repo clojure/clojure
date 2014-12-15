@@ -290,3 +290,19 @@
   (is (= [[[:a]]] (sequence (comp (partition-by keyword?) (take 1)  (partition-by keyword?) (take 1)) [:a])))
   (is (= [[0]] (transduce (comp (take 1) (partition-all 3) (take 1)) conj [] (range 15))))
   (is (= [1] (transduce (take 1) conj (seq (long-array [1 2 3 4]))))))
+
+(deftest test-eduction-completion
+  (testing "eduction completes inner xformed reducing fn"
+    (is (= [[0 1 2] [3 4 5] [6 7]]
+           (into []
+                 (comp cat (partition-all 3))
+                 (eduction (partition-all 5) (range 8))))))
+  (testing "outer reducing fn completed only once"
+    (let [counter (atom 0)
+          ;; outer rfn
+          rf      (completing conj #(do (swap! counter inc)
+                                        (vec %)))
+          coll    (eduction  (map inc) (range 5))
+          res     (transduce (map str) rf [] coll)]
+      (is (= 1 @counter))
+      (is (= ["1" "2" "3" "4" "5"] res)))))

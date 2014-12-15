@@ -7282,7 +7282,9 @@
    (seq [_] (seq (sequence xform coll)))
 
    clojure.lang.IReduceInit
-   (reduce [_ f init] (transduce xform f init coll))
+   (reduce [_ f init]
+     ;; NB (completing f) isolates completion of inner rf from outer rf
+     (transduce xform (completing f) init coll))
 
    clojure.lang.Sequential)
 
