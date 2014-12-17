@@ -261,7 +261,22 @@ Iterator rangedIterator(final int start, final int end){
 public Iterator iterator(){return rangedIterator(0,count());}
 
 public Object reduce(IFn f){
-	throw new UnsupportedOperationException();
+    Object init;
+    if (cnt > 0)
+        init = arrayFor(0)[0];
+    else
+        return f.invoke();
+    int step = 0;
+    for(int i=0;i<cnt;i+=step){
+        Object[] array = arrayFor(i);
+        for(int j = (i==0)?1:0;j<array.length;++j){
+            init = f.invoke(init,array[j]);
+            if(RT.isReduced(init))
+	            return ((IDeref)init).deref();
+            }
+        step = array.length;
+    }
+    return init;
 }
 
 public Object reduce(IFn f, Object init){

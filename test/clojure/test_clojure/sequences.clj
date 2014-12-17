@@ -10,7 +10,8 @@
 ; Contributors: Stuart Halloway
 
 (ns clojure.test-clojure.sequences
-  (:use clojure.test))
+  (:use clojure.test)
+  (:import clojure.lang.IReduce))
 
 ;; *** Tests ***
 
@@ -43,6 +44,7 @@
     (is (== 4950
            (reduce + arange)
            (reduce + avec)
+           (.reduce ^IReduce avec +)
            (reduce + alist)
            (reduce + obj-array)
            (reduce + int-array)
@@ -60,6 +62,7 @@
     (is (== 4951
            (reduce + 1 arange)
            (reduce + 1 avec)
+           (.reduce ^IReduce avec + 1)
            (reduce + 1 alist)
            (reduce + 1 obj-array)
            (reduce + 1 int-array)
