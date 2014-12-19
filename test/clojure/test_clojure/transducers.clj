@@ -11,42 +11,54 @@
 (ns clojure.test-clojure.transducers
   (:require [clojure.string :as s]
             [clojure.test :refer :all]
+            [clojure.test.check :as chk]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.clojure-test :as ctest]))
 
 (defmacro fbind [source-gen f]
-  `(gen/bind ~source-gen
-             (fn [s#]
-               (gen/return {:desc (str ~(str f) " " s#)
-                            :seq  (partial ~f s#)
-                            :xf   (~f s#)}))))
+  `(gen/fmap
+     (fn [s#]
+       {:desc (list '~f (:name s#))
+        :seq  (partial ~f (:val s#))
+        :xf   (~f (:val s#))})
+     ~source-gen))
+
+(defmacro pickfn [& fns]
+  `(gen/elements
+     [~@(for [f fns] `{:val ~f :name '~f})]))
+
+(defn literal
+  [g]
+  (gen/fmap
+    (fn [s] {:val s :name s})
+    g))
 
 (def gen-mapfn
-  (gen/elements [inc dec]))
+  (pickfn inc dec))
 
 (def gen-predfn
-  (gen/elements [odd? even? pos? zero? empty? sequential?]))
+  (pickfn odd? even? pos? zero? empty? sequential?))
 
 (def gen-indexedfn
-  (gen/elements [(fn [index item] index)
-                 (fn [index item] item)
-                 (fn [index item] (+ index item))]))
+  (pickfn (fn [index item] index)
+          (fn [index item] item)
+          (fn [index item] (+ index item))))
 
-(def gen-take (fbind gen/s-pos-int take))
-(def gen-drop (fbind gen/pos-int drop))
+(def gen-take (fbind (literal gen/s-pos-int) take))
+(def gen-drop (fbind (literal gen/pos-int) drop))
 (def gen-map (fbind gen-mapfn map))
 (def gen-mapcat (fbind gen-mapfn mapcat))
 (def gen-filter (fbind gen-predfn filter))
 (def gen-remove (fbind gen-predfn remove))
 (def gen-keep (fbind gen-predfn keep))
-(def gen-partition-all (fbind gen/s-pos-int partition-all))
+(def gen-partition-all (fbind (literal gen/s-pos-int) partition-all))
 (def gen-partition-by (fbind gen-predfn partition-by))
 (def gen-take-while (fbind gen-predfn take-while))
-(def gen-take-nth (fbind gen/s-pos-int take-nth))
+(def gen-take-nth (fbind (literal gen/s-pos-int) take-nth))
 (def gen-drop-while (fbind gen-predfn drop-while))
 (def gen-keep-indexed (fbind gen-indexedfn keep-indexed))
-(def gen-replace (fbind (gen/return (hash-map (range 100) (range 1 100))) replace))
+(def gen-replace (fbind (literal (gen/return (hash-map (range 100) (range 1 100)))) replace))
 
 (def gen-action
   (gen/one-of [gen-take gen-drop gen-map gen-mapcat
@@ -84,32 +96,46 @@
        (or (instance? IllegalArgumentException ex)
            (instance? ClassCastException ex)))
 
-(defn seq-and-transducer-same-result
-  [coll actions]
-  #_(println "test" (map :desc actions) "on" coll)
-  (let [s (try (apply-as-seq coll actions)
-               (catch Throwable e e))
-        xs (try (apply-as-xf-seq coll actions)
-                (catch Throwable e e))
-        xi (try (apply-as-xf-into coll actions)
-                (catch Throwable e e))
-        xt (try (apply-as-xf-transduce coll actions)
-                (catch Throwable e e))]
-    (if (or ((every-pred possible-exception?) s xs xi xt)
-            (= s xs xi xt))
-      true
-      (throw (ex-info "Applied actions to coll as seq, sequence transducer, and into transducer and got different results."
-                      {:coll    coll
-                       :actions (s/join "," (map :desc actions))
-                       :s       s
-                       :xs      xs
-                       :xi      xi
-                       :xt      xt})))))
+(defmacro return-exc [& forms]
+  `(try ~@forms (catch Throwable e# e#)))
 
-(ctest/defspec seq-and-transducer
-               100000
-               (prop/for-all* [gen-coll gen-actions]
-                              seq-and-transducer-same-result))
+(defn build-results
+  [coll actions]
+  (let [s (return-exc (apply-as-seq coll actions))
+        xs (return-exc (apply-as-xf-seq coll actions))
+        xi (return-exc (apply-as-xf-into coll actions))
+        xt (return-exc (apply-as-xf-transduce coll actions))]
+    {:coll    coll
+     :actions (concat '(->> coll) (map :desc actions))
+     :s       s
+     :xs      xs
+     :xi      xi
+     :xt      xt}))
+
+(def result-gen
+  (gen/fmap
+    (fn [[c a]] (build-results c a))
+    (gen/tuple gen-coll gen-actions)))
+
+(defn result-good?
+  [{:keys [s xs xi xt]}]
+  (or ((every-pred possible-exception?) s xs xi xt)
+      (= s xs xi xt)))
+
+(deftest seq-and-transducer
+  (let [res (chk/quick-check
+              100000
+              (prop/for-all* [result-gen] result-good?))]
+    (when-not (:result res)
+      (is
+        (:result res)
+        (->
+          res
+          :shrunk
+          :smallest
+          first
+          clojure.pprint/pprint
+          with-out-str)))))
 
 (deftest test-transduce
   (let [long+ (fn ([a b] (+ (long a) (long b)))
