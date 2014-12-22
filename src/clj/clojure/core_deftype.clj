@@ -765,7 +765,7 @@
 
 (defn- emit-impl [[p fs]]
   [p (zipmap (map #(-> % first keyword) fs)
-             (map #(cons 'fn (drop 1 %)) fs))])
+             (map #(cons `fn (drop 1 %)) fs))])
 
 (defn- emit-hinted-impl [c [p fs]]
   (let [hint (fn [specs]
@@ -777,7 +777,7 @@
                               body))
                       specs)))]
     [p (zipmap (map #(-> % first name keyword) fs)
-               (map #(cons 'fn (hint (drop 1 %))) fs))]))
+               (map #(cons `fn (hint (drop 1 %))) fs))]))
 
 (defn- emit-extend-type [c specs]
   (let [impls (parse-impls specs)]
