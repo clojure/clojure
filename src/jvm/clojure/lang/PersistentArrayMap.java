@@ -372,9 +372,9 @@ public ITransientMap asTransient(){
 }
 
 static final class TransientArrayMap extends ATransientMap {
-	int len;
+	volatile int len;
 	final Object[] array;
-	Thread owner;
+	volatile Thread owner;
 
 	public TransientArrayMap(Object[] array){
 		this.owner = Thread.currentThread();

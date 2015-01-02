@@ -238,11 +238,11 @@ public IPersistentMap meta(){
 }
 
 static final class TransientHashMap extends ATransientMap {
-	AtomicReference<Thread> edit;
-	INode root;
-	int count;
-	boolean hasNull;
-	Object nullValue;
+	final AtomicReference<Thread> edit;
+	volatile INode root;
+	volatile int count;
+	volatile boolean hasNull;
+	volatile Object nullValue;
 	final Box leafFlag = new Box(null);
 
 

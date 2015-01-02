@@ -13,7 +13,7 @@
 package clojure.lang;
 
 public abstract class ATransientSet extends AFn implements ITransientSet{
-	ITransientMap impl;
+	volatile ITransientMap impl;
 
 	ATransientSet(ITransientMap impl) {
 		this.impl = impl;

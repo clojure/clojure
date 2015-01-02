@@ -447,10 +447,10 @@ private Node popTail(int level, Node node){
 }
 
 static final class TransientVector extends AFn implements ITransientVector, Counted{
-	int cnt;
-	int shift;
-	Node root;
-	Object[] tail;
+	volatile int cnt;
+	volatile int shift;
+	volatile Node root;
+	volatile Object[] tail;
 
 	TransientVector(int cnt, int shift, Node root, Object[] tail){
 		this.cnt = cnt;
