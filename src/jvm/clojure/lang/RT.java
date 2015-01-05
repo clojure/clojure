@@ -596,6 +596,8 @@ static int countFrom(Object o){
 		return ((Collection) o).size();
 	else if(o instanceof Map)
 		return ((Map) o).size();
+	else if (o instanceof Map.Entry)
+		return 2;
 	else if(o.getClass().isArray())
 		return Array.getLength(o);
 
