@@ -29,7 +29,7 @@ public static IFn creator = new RestFn(){
 			{
 			Object[] argsarray = ((ArraySeq) args).array;
 			IPersistentList ret = EMPTY;
-			for(int i = argsarray.length - 1; i >= 0; --i)
+			for(int i = argsarray.length - 1; i >= ((ArraySeq)args).i; --i)
 				ret = (IPersistentList) ret.cons(argsarray[i]);
 			return ret;
 			}

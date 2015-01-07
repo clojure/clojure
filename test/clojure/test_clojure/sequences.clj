@@ -1205,3 +1205,6 @@
     (float-array [2.0 -2.5]) [2.0 -2.5]
     (double-array [1.2 -3.5]) [1.2 -3.5]
     (char-array [\H \i]) [\H \i]))
+
+(deftest CLJ-1633
+  (is (= ((fn [& args] (apply (fn [a & b] (apply list b)) args)) 1 2 3) '(2 3))))
