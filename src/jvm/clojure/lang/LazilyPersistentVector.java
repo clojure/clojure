@@ -12,8 +12,6 @@
 
 package clojure.lang;
 
-import java.util.Collection;
-
 public class LazilyPersistentVector{
 
 
@@ -25,10 +23,15 @@ static public IPersistentVector createOwning(Object... items){
 	return PersistentVector.create(items);
 }
 
-static public IPersistentVector create(Collection coll){
-	if(!(coll instanceof ISeq) && coll.size() <= 32)
-		return createOwning(coll.toArray());
-	return PersistentVector.create(RT.seq(coll));
+static public IPersistentVector create(Object obj){
+   if(obj instanceof IReduceInit)
+       return PersistentVector.create((IReduceInit) obj);
+   else if(obj instanceof ISeq)
+       return PersistentVector.create(RT.seq(obj));
+   else if(obj instanceof Iterable)
+       return PersistentVector.create((Iterable)obj);
+   else
+       return createOwning(RT.toArray(obj));
 }
 
 }

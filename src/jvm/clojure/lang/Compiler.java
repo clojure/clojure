@@ -8506,7 +8506,7 @@ public static class CaseExpr implements Expr, MaybePrimitiveExpr{
 			ISeq form = (ISeq) frm;
 			if(context == C.EVAL)
 				return analyze(context, RT.list(RT.list(FNONCE, PersistentVector.EMPTY, form)));
-			PersistentVector args = PersistentVector.create(form.next());
+			IPersistentVector args = LazilyPersistentVector.create(form.next());
 
 			Object exprForm = args.nth(0);
 			int shift = ((Number)args.nth(1)).intValue();

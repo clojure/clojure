@@ -13,8 +13,8 @@
 package clojure.lang;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PersistentVector extends APersistentVector implements IObj, IEditableCollection, IReduce{
@@ -46,18 +46,63 @@ final IPersistentMap _meta;
 
 public final static PersistentVector EMPTY = new PersistentVector(0, 5, EMPTY_NODE, new Object[]{});
 
-static public PersistentVector create(ISeq items){
-	TransientVector ret = EMPTY.asTransient();
-	for(; items != null; items = items.next())
-		ret = ret.conj(items.first());
-	return ret.persistent();
+private static final IFn TRANSIENT_VECTOR_CONJ = new AFn() {
+    public Object invoke(Object coll, Object val) {
+        return ((ITransientVector)coll).conj(val);
+    }
+    public Object invoke(Object coll) {
+        return coll;
+    }
+};
+
+static public PersistentVector create(IReduceInit items) {
+    TransientVector ret = EMPTY.asTransient();
+    items.reduce(TRANSIENT_VECTOR_CONJ, ret);
+    return ret.persistent();
 }
 
-static public PersistentVector create(List items){
-	TransientVector ret = EMPTY.asTransient();
-	for(Object item : items)
-		ret = ret.conj(item);
-	return ret.persistent();
+static public PersistentVector create(ISeq items){
+    Object[] arr = new Object[32];
+    int i = 0;
+    for(;items != null && i < 32; items = items.next())
+        arr[i++] = items.first();
+
+    if(items != null) {  // >32, construct with array directly
+        PersistentVector start = new PersistentVector(32, 5, EMPTY_NODE, arr);
+        TransientVector ret = start.asTransient();
+        for (; items != null; items = items.next())
+            ret = ret.conj(items.first());
+        return ret.persistent();
+    } else if(i == 32) {   // exactly 32, skip copy
+        return new PersistentVector(32, 5, EMPTY_NODE, arr);
+    } else {  // <32, copy to minimum array and construct
+        Object[] arr2 = new Object[i];
+        System.arraycopy(arr, 0, arr2, 0, i);
+        return new PersistentVector(i, 5, EMPTY_NODE, arr2);
+    }
+}
+
+static public PersistentVector create(ArrayList list){
+    int size = list.size();
+    if (size <= 32)
+        return new PersistentVector(size, 5, PersistentVector.EMPTY_NODE, list.toArray());
+
+    TransientVector ret = EMPTY.asTransient();
+    for(int i=0; i<size; i++)
+        ret = ret.conj(list.get(i));
+    return ret.persistent();
+}
+
+static public PersistentVector create(Iterable items){
+    // optimize common case
+    if(items instanceof ArrayList)
+        return create((ArrayList)items);
+
+    Iterator iter = items.iterator();
+    TransientVector ret = EMPTY.asTransient();
+    while(iter.hasNext())
+        ret = ret.conj(iter.next());
+    return ret.persistent();
 }
 
 static public PersistentVector create(Object... items){

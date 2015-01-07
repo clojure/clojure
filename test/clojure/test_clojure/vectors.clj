@@ -393,3 +393,16 @@
     (is (thrown? IndexOutOfBoundsException (v2 7)))
     (is (= (v1 50) (v2 0)))
     (is (= (v1 56) (v2 6)))))
+
+(deftest test-vec
+  (is (= [0 1 2 3] (vec [0 1 2 3])))
+  (is (= [0 1 2 3] (vec (list 0 1 2 3))))
+  (is (= [0 1 2 3] (vec (sorted-set 0 1 2 3))))
+  (is (= [[1 2] [3 4]] (vec (sorted-map 1 2 3 4))))
+  (is (= [0 1 2 3] (vec (range 4))))
+  (is (= [\a \b \c \d] (vec "abcd")))
+  (is (= [0 1 2 3] (vec (object-array (range 4)))))
+  (is (= [1 2 3 4] (vec (eduction (map inc) (range 4)))))
+  (is (= [0 1 2 3] (vec (reify clojure.lang.IReduceInit
+                          (reduce [_ f start]
+                            (reduce f start (range 4))))))))
