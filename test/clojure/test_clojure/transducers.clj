@@ -60,9 +60,9 @@
 (def gen-keep-indexed (fbind gen-indexedfn keep-indexed))
 (def gen-map-indexed (fbind gen-indexedfn map-indexed))
 (def gen-replace (fbind (literal (gen/return (hash-map (range 100) (range 1 100)))) replace))
-(def gen-distinct (gen/return {:desc "distinct" :seq (partial distinct) :xf (distinct)}))
-(def gen-dedupe (gen/return {:desc "dedupe" :seq (partial dedupe) :xf (dedupe)}))
-(def gen-interpose (fbind gen/s-pos-int interpose))
+(def gen-distinct (gen/return {:desc 'distinct :seq (partial distinct) :xf (distinct)}))
+(def gen-dedupe (gen/return {:desc 'dedupe :seq (partial dedupe) :xf (dedupe)}))
+(def gen-interpose (fbind (literal gen/s-pos-int) interpose))
 
 (def gen-action
   (gen/one-of [gen-take gen-drop gen-map gen-mapcat
