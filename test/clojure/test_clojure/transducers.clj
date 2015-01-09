@@ -47,6 +47,7 @@
 
 (def gen-take (fbind (literal gen/s-pos-int) take))
 (def gen-drop (fbind (literal gen/pos-int) drop))
+(def gen-drop-while (fbind gen-predfn drop-while))
 (def gen-map (fbind gen-mapfn map))
 (def gen-mapcat (fbind gen-mapfn mapcat))
 (def gen-filter (fbind gen-predfn filter))
@@ -56,15 +57,20 @@
 (def gen-partition-by (fbind gen-predfn partition-by))
 (def gen-take-while (fbind gen-predfn take-while))
 (def gen-take-nth (fbind (literal gen/s-pos-int) take-nth))
-(def gen-drop-while (fbind gen-predfn drop-while))
 (def gen-keep-indexed (fbind gen-indexedfn keep-indexed))
+(def gen-map-indexed (fbind gen-indexedfn map-indexed))
 (def gen-replace (fbind (literal (gen/return (hash-map (range 100) (range 1 100)))) replace))
+(def gen-distinct (gen/return {:desc "distinct" :seq (partial distinct) :xf (distinct)}))
+(def gen-dedupe (gen/return {:desc "dedupe" :seq (partial dedupe) :xf (dedupe)}))
+(def gen-interpose (fbind gen/s-pos-int interpose))
 
 (def gen-action
   (gen/one-of [gen-take gen-drop gen-map gen-mapcat
                gen-filter gen-remove gen-keep
                gen-partition-all gen-partition-by gen-take-while
-               gen-take-nth gen-drop-while gen-keep-indexed]))
+               gen-take-nth gen-drop-while
+               gen-keep-indexed gen-map-indexed
+               gen-distinct gen-dedupe gen-interpose]))
 
 (def gen-actions
   (gen/vector gen-action))
@@ -94,7 +100,8 @@
 
 (defn- possible-exception? [ex]
        (or (instance? IllegalArgumentException ex)
-           (instance? ClassCastException ex)))
+           (instance? ClassCastException ex)
+           (instance? NullPointerException ex)))
 
 (defmacro return-exc [& forms]
   `(try ~@forms (catch Throwable e# e#)))
@@ -306,3 +313,30 @@
           res     (transduce (map str) rf [] coll)]
       (is (= 1 @counter))
       (is (= ["1" "2" "3" "4" "5"] res)))))
+
+(deftest test-distinct
+  (are [out in] (= out (sequence (distinct in)))
+       [] []
+       (range 10) (range 10)
+       [0] (repeat 10 0)
+       [0 1 2] [0 0 1 1 2 2 1 1 0 0]
+       [1] [1 1N]))
+
+(deftest test-interpose
+  (are [out in] (= out (sequence (interpose :s) in))
+       [] (range 0)
+       [0] (range 1)
+       [0 :s 1] (range 2)
+       [0 :s 1 :s 2] (range 3))
+  (testing "Can end reduction on separator or input"
+    (let [expected (interpose :s (range))]
+      (dotimes [i 10]
+        (is (= (take i expected)
+          (sequence (comp (interpose :s) (take i))
+                    (range))))))))
+
+(deftest test-map-indexed
+  (is (= []
+         (sequence (map-indexed vector) [])))
+  (is (= [[0 1] [1 2] [2 3] [3 4]]
+         (sequence (map-indexed vector) (range 1 5)))))
