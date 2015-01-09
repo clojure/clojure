@@ -32,6 +32,9 @@ logic but is independent of lazy sequence processing. Functions included are:
 * partition-all
 * keep
 * keep-indexed
+* map-indexed
+* distinct
+* interpose
 
 Additionally some new transducer functions have been added:
 
@@ -62,7 +65,10 @@ Some related issues addressed during development:
 * [CLJ-1549](http://dev.clojure.org/jira/browse/CLJ-1549)
 * [CLJ-1537](http://dev.clojure.org/jira/browse/CLJ-1537)
 * [CLJ-1554](http://dev.clojure.org/jira/browse/CLJ-1554)
-
+* [CLJ-1601](http://dev.clojure.org/jira/browse/CLJ-1601)
+* [CLJ-1606](http://dev.clojure.org/jira/browse/CLJ-1606)
+* [CLJ-1621](http://dev.clojure.org/jira/browse/CLJ-1621)
+* [CLJ-1600](http://dev.clojure.org/jira/browse/CLJ-1600)
 
 ### 1.2 Keyword and Symbol Construction
 
@@ -152,6 +158,10 @@ Example use:
   Cache unknown multimethod value default dispatch
 * [CLJ-1529](http://dev.clojure.org/jira/browse/CLJ-1529)
   Reduce compile times by avoiding unnecessary calls to Class.forName()
+* [CLJ-1546](http://dev.clojure.org/jira/browse/CLJ-1546)
+  vec is now faster on almost all inputs
+* [CLJ-1618](http://dev.clojure.org/jira/browse/CLJ-1618)
+  set is now faster on almost all inputs
 
 ### 2.4 Other enhancements
 
@@ -169,6 +179,12 @@ Example use:
   Class name clash between top-level functions and defn'ed ones
 * [CLJ-1349](http://dev.clojure.org/jira/browse/CLJ-1349)
   Update to latest test.generative and add dependency on test.check
+* [CLJ-1546](http://dev.clojure.org/jira/browse/CLJ-1546)
+  vec now works with things that only implement Iterable or IReduceInit
+* [CLJ-1618](http://dev.clojure.org/jira/browse/CLJ-1618)
+  set now works with things that only implement Iterable or IReduceInit
+* [CLJ-1633](http://dev.clojure.org/jira/browse/CLJ-1633)
+  PersistentList/creator doesn't handle ArraySeqs correctly
 
 ## 3 Bug Fixes
 
@@ -198,6 +214,18 @@ Example use:
   Make refer of Clojure core function not throw exception on reload
 * [CLJ-1501](http://dev.clojure.org/jira/browse/CLJ-1501)
   LazySeq equals() should not use equiv() logic
+* [CLJ-1572](http://dev.clojure.org/jira/browse/CLJ-1572)
+  into (and other fns that rely on reduce) require only IReduceInit
+* [CLJ-1619](http://dev.clojure.org/jira/browse/CLJ-1619)
+  PersistentVector now directly implements reduce without init
+* [CLJ-1580](http://dev.clojure.org/jira/browse/CLJ-1580)
+  Transient collections should guarantee thread visibility
+* [CLJ-1590](http://dev.clojure.org/jira/browse/CLJ-1590)
+  Some IReduce/IReduceInit implementors don't respect reduced
+* [CLJ-979](http://dev.clojure.org/jira/browse/CLJ-979)
+  Clojure resolves to wrong deftype classes when AOT compiling or reloading
+* [CLJ-1544](http://dev.clojure.org/jira/browse/CLJ-1544)
+  AOT bug involving namespaces loaded before AOT compilation started
 
 # Changes to Clojure in Version 1.6
 
