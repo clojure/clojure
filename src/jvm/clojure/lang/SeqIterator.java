@@ -17,24 +17,24 @@ import java.util.NoSuchElementException;
 
 public class SeqIterator implements Iterator{
 
-static Object START = new Object();
+static final Object START = new Object();
 Object seq;
 Object next;
 
 public SeqIterator(Object o){
-	seq = this;
+	seq = START;
 	next = o;
 }
 
 //preserved for binary compatibility
 public SeqIterator(ISeq o){
-	seq = this;
+	seq = START;
 	next = o;
 }
 
 public boolean hasNext(){
-	if(seq == this){
-		seq = START;
+	if(seq == START){
+		seq = null;
 		next = RT.seq(next);
 		}
 	else if(seq == next)
