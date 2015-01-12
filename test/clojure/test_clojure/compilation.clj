@@ -12,7 +12,8 @@
 (ns clojure.test-clojure.compilation
   (:import (clojure.lang Compiler Compiler$CompilerException))
   (:require [clojure.test.generative :refer (defspec)]
-            [clojure.data.generators :as gen])
+            [clojure.data.generators :as gen]
+            [clojure.test-clojure.compilation.line-number-examples :as line])
   (:use clojure.test
         [clojure.test-helper :only (should-not-reflect should-print-err-message)]))
 
@@ -30,7 +31,7 @@
 
         (string? (:doc m)) true
         (> (.length (:doc m)) 0) true
-        
+
         (string? (:file m)) true
         (> (.length (:file m)) 0) true
 
@@ -53,7 +54,7 @@
     (is (eval `(= Integer/TYPE ~Integer/TYPE)))
     (is (eval `(= Long/TYPE ~Long/TYPE)))
     (is (eval `(= Short/TYPE ~Short/TYPE)))))
- 
+
 (deftest test-compiler-resolution
   (testing "resolve nonexistent class create should return nil (assembla #262)"
     (is (nil? (resolve 'NonExistentClass.)))))
@@ -171,7 +172,7 @@
 (deftest primitive-return-decl
   (should-not-reflect #(loop [k 5] (recur (clojure.test-clojure.compilation/primfn))))
   (should-not-reflect #(loop [k 5.0] (recur (clojure.test-clojure.compilation/primfn 0))))
-  
+
   (should-print-err-message #"(?s).*k is not matching primitive.*"
     #(loop [k (clojure.test-clojure.compilation/primfn)] (recur :foo))))
 
@@ -256,6 +257,37 @@
 
 (binding [*compile-path* "target/test-classes"]
   (compile 'clojure.test-clojure.compilation.examples))
+
+
+(deftest test-compiler-line-numbers
+  (let [fails-on-line-number? (fn [expected function]
+                                 (try
+                                   (function)
+                                   nil
+                                   (catch Throwable t
+                                     (let [frames (filter #(= "line_number_examples.clj" (.getFileName %))
+                                                          (.getStackTrace t))
+                                           _ (if (zero? (count frames))
+                                               (.printStackTrace t)
+                                               )
+                                           actual (.getLineNumber ^StackTraceElement (first frames))]
+                                       (= expected actual)))))]
+    (is (fails-on-line-number?  13 line/instance-field))
+    (is (fails-on-line-number?  19 line/instance-field-reflected))
+    (is (fails-on-line-number?  25 line/instance-field-unboxed))
+    (is (fails-on-line-number?  32 line/instance-field-assign))
+    (is (fails-on-line-number?  40 line/instance-field-assign-reflected))
+    (is (fails-on-line-number?  47 line/static-field-assign))
+    (is (fails-on-line-number?  54 line/instance-method))
+    (is (fails-on-line-number?  61 line/instance-method-reflected))
+    (is (fails-on-line-number?  68 line/instance-method-unboxed))
+    (is (fails-on-line-number?  74 line/static-method))
+    (is (fails-on-line-number?  80 line/static-method-reflected))
+    (is (fails-on-line-number?  86 line/static-method-unboxed))
+    (is (fails-on-line-number?  92 line/invoke))
+    (is (fails-on-line-number? 101 line/threading))
+    (is (fails-on-line-number? 112 line/keyword-invoke))
+    (is (fails-on-line-number? 119 line/invoke-cast))))
 
 (deftest CLJ-979
   (is (= clojure.test_clojure.compilation.examples.X
