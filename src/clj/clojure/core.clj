@@ -353,7 +353,9 @@
    :static true}
   ([coll]
    (if (vector? coll)
-     (with-meta coll nil)
+     (if (instance? clojure.lang.IObj coll)
+       (with-meta coll nil)
+       (clojure.lang.LazilyPersistentVector/create coll))
      (clojure.lang.LazilyPersistentVector/create coll))))
 
 (defn hash-map
