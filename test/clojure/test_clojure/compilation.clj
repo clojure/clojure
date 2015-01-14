@@ -264,3 +264,29 @@
   (is (= clojure.test_clojure.compilation.examples.T
          (class (clojure.test_clojure.compilation.examples.T.))
          (class (clojure.test-clojure.compilation.examples/->T)))))
+
+(deftest clj-1568
+  (let [compiler-fails-at?
+          (fn [row col source]
+            (try
+              (Compiler/load (java.io.StringReader. source) (name (gensym "clj-1568.example-")) "clj-1568.example")
+              nil
+              (catch Compiler$CompilerException e
+                (re-find (re-pattern (str "^.*:" row ":" col "\\)$"))
+                         (.getMessage e)))))]
+    (testing "with error in the initial form"
+      (are [row col source] (compiler-fails-at? row col source)
+           ;; note that the spacing of the following string is important
+           1  4 "   (.foo nil)"
+           2 18 "
+                 (/ 1 0)"))
+    (testing "with error in an non-initial form"
+      (are [row col source] (compiler-fails-at? row col source)
+           ;; note that the spacing of the following string is important
+           3 18 "(:foo {})
+
+                 (.foo nil)"
+           4 20 "(ns clj-1568.example)
+
+
+                   (/ 1 0)"))))
