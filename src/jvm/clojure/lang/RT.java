@@ -1695,7 +1695,7 @@ static public Object[] seqToArray(ISeq seq){
     }
 
 static public Object seqToTypedArray(ISeq seq) {
-	Class type = (seq != null) ? seq.first().getClass() : Object.class;
+	Class type = (seq != null && seq.first() != null) ? seq.first().getClass() : Object.class;
 	return seqToTypedArray(type, seq);
 }
 

@@ -353,6 +353,8 @@
         (class (first a)) (class (first v)) ))
 
   (is (= \a (aget (into-array Character/TYPE [\a \b \c]) 0)))
+
+  (is (= [nil 1 2] (seq (into-array [nil 1 2]))))
   
   (let [types [Integer/TYPE
                Byte/TYPE
