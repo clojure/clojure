@@ -6150,7 +6150,9 @@
 
 (add-doc-and-meta *unchecked-math*
   "While bound to true, compilations of +, -, *, inc, dec and the
-  coercions will be done without overflow checks. Default: false."
+  coercions will be done without overflow checks. While bound
+  to :warn-on-boxed, same behavior as true, and a warning is emitted
+  when compilation uses boxed math. Default: false."
   {:added "1.3"})
 
 (add-doc-and-meta *compiler-options*
