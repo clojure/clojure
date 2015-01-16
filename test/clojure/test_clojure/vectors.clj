@@ -395,6 +395,7 @@
     (is (= (v1 56) (v2 6)))))
 
 (deftest test-vec
+  (is (= [1 2] (vec (first {1 2}))))
   (is (= [0 1 2 3] (vec [0 1 2 3])))
   (is (= [0 1 2 3] (vec (list 0 1 2 3))))
   (is (= [0 1 2 3] (vec (sorted-set 0 1 2 3))))
