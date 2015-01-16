@@ -5670,19 +5670,6 @@
               (load-one lib need-ns require)
               @*loaded-libs*))))
 
-(defn- already-compiled? [lib]
-  (let [path (subs (root-resource lib) 1)
-        clj-path (str path ".clj")
-        class-path (str path "__init.class")
-        loader (clojure.lang.RT/baseLoader)
-        compiled-file (java.io.File. (str *compile-path* "/" class-path))
-        clj-url (.getResource loader clj-path)]
-    (or (and (.exists compiled-file)
-             (or (nil? clj-url)
-                 (> (clojure.lang.RT/lastModified (-> compiled-file .toURI .toURL) class-path)
-                    (clojure.lang.RT/lastModified clj-url clj-path))))
-        (.getResource loader class-path))))
-
 (defn- load-lib
   "Loads a lib with options"
   [prefix lib & options]
@@ -5692,9 +5679,7 @@
   (let [lib (if prefix (symbol (str prefix \. lib)) lib)
         opts (apply hash-map options)
         {:keys [as reload reload-all require use verbose]} opts
-        loaded (and (contains? @*loaded-libs* lib)
-                    (or (not *compile-files*)
-                        (already-compiled? lib)))
+        loaded (contains? @*loaded-libs* lib)
         load (cond reload-all
                    load-all
                    (or reload (not require) (not loaded))
