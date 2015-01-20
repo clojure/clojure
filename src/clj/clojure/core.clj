@@ -3054,12 +3054,14 @@
   ([n coll]
      (partition n n coll))
   ([n step coll]
+     {:pre [(pos? step)]}	
      (lazy-seq
        (when-let [s (seq coll)]
          (let [p (doall (take n s))]
            (when (= n (count p))
              (cons p (partition n step (nthrest s step))))))))
   ([n step pad coll]
+     {:pre [(pos? step)]}
      (lazy-seq
        (when-let [s (seq coll)]
          (let [p (doall (take n s))]
