@@ -368,7 +368,7 @@ static Symbol resolveSymbol(Symbol sym){
 	if(sym.ns != null)
 		{
 		Namespace ns = namespaceFor(sym);
-		if(ns == null || ns.name.name == sym.ns)
+		if(ns == null || (ns.name.name == null ? sym.ns == null : ns.name.name.equals(sym.ns)))
 			return sym;
 		return Symbol.intern(ns.name.name, sym.name);
 		}
