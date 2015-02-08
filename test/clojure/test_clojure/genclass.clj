@@ -141,3 +141,11 @@
                "returnsFloatArray"   :floats
                "returnsDoubleArray"  :doubles
                "returnsBooleanArray" :booleans))))))
+
+(deftest gen-interface-source-file
+  (let [classReader (clojure.asm.ClassReader. "clojure.test_clojure.genclass.examples.ArrayGenInterface")
+        sourceFile (StringBuilder.)
+        sourceVisitor (proxy [clojure.asm.ClassVisitor] [clojure.asm.Opcodes/ASM4 nil]
+                        (visitSource [source debug] (.append sourceFile source)))]
+    (.accept classReader sourceVisitor 0)
+    (is (= "examples.clj" (str sourceFile)))))

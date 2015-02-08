@@ -669,6 +669,7 @@
        iname nil "java/lang/Object"
        (when (seq extends)
          (into-array (map #(.getInternalName (asm-type %)) extends))))
+    (when (not= "NO_SOURCE_FILE" *source-path*) (. cv visitSource *source-path* nil))
     (add-annotations cv (meta name))
     (doseq [[mname pclasses rclass pmetas] methods]
       (let [mv (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
