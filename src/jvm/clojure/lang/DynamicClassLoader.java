@@ -74,7 +74,7 @@ protected synchronized Class<?> loadClass(String name, boolean resolve) throws C
 	if (c == null) {
 		c = findInMemoryClass(name);
 		if (c == null)
-			c = getParent().loadClass(name);
+			c = super.loadClass(name, false);
     }
 	if (resolve)
 		resolveClass(c);
