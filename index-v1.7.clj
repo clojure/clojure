@@ -136,7 +136,7 @@
    :doc
    "Functional hierarchical zipper, with navigation, editing,\nand enumeration.  See Huet"}
   {:source-url
-   "https://github.com/clojure/clojure/blob/fee155d40c71f74a672866b16f45ae9e0271db1f/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/blob/1242c4878f3d4ef30535a22f6c74144637504fbe/src/clj/clojure/core/protocols.clj",
    :wiki-url
    "http://clojure.github.com/clojure/clojure.core.protocols-api.html",
    :name "clojure.core.protocols",
@@ -10105,7 +10105,7 @@
    :doc
    "The Java access bitflags, along with their friendly names and\nthe kinds of objects to which they can apply.",
    :name "flag-descriptors"}
-  {:arglists ([m__1261__auto__]),
+  {:arglists ([m__1221__auto__]),
    :name "map->Constructor",
    :namespace "clojure.reflect",
    :source-url
@@ -10119,7 +10119,7 @@
    :var-type "function",
    :line 109,
    :file "src/clj/clojure/reflect/java.clj"}
-  {:arglists ([m__1261__auto__]),
+  {:arglists ([m__1221__auto__]),
    :name "map->Field",
    :namespace "clojure.reflect",
    :source-url
@@ -10133,7 +10133,7 @@
    :var-type "function",
    :line 148,
    :file "src/clj/clojure/reflect/java.clj"}
-  {:arglists ([m__1261__auto__]),
+  {:arglists ([m__1221__auto__]),
    :name "map->Method",
    :namespace "clojure.reflect",
    :source-url
@@ -12034,9 +12034,9 @@
    :file "src/clj/clojure/zip.clj"}
   {:file "src/clj/clojure/core/protocols.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fee155d40c71f74a672866b16f45ae9e0271db1f/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/1242c4878f3d4ef30535a22f6c74144637504fbe/src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/fee155d40c71f74a672866b16f45ae9e0271db1f/src/clj/clojure/core/protocols.clj#L13",
+   "https://github.com/clojure/clojure/blob/1242c4878f3d4ef30535a22f6c74144637504fbe/src/clj/clojure/core/protocols.clj#L13",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/CollReduce",
    :namespace "clojure.core.protocols",
@@ -12047,22 +12047,22 @@
    :name "CollReduce"}
   {:file "src/clj/clojure/core/protocols.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fee155d40c71f74a672866b16f45ae9e0271db1f/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/1242c4878f3d4ef30535a22f6c74144637504fbe/src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/fee155d40c71f74a672866b16f45ae9e0271db1f/src/clj/clojure/core/protocols.clj#L185",
+   "https://github.com/clojure/clojure/blob/1242c4878f3d4ef30535a22f6c74144637504fbe/src/clj/clojure/core/protocols.clj#L142",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/IKVReduce",
    :namespace "clojure.core.protocols",
-   :line 185,
+   :line 142,
    :var-type "protocol",
    :doc
    "Protocol for concrete associative types that can reduce themselves\nvia a function of key and val faster than first/next recursion over map\nentries. Called by clojure.core/reduce-kv, and has same\nsemantics (just different arg order).",
    :name "IKVReduce"}
   {:file "src/clj/clojure/core/protocols.clj",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/fee155d40c71f74a672866b16f45ae9e0271db1f/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/1242c4878f3d4ef30535a22f6c74144637504fbe/src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/fee155d40c71f74a672866b16f45ae9e0271db1f/src/clj/clojure/core/protocols.clj#L19",
+   "https://github.com/clojure/clojure/blob/1242c4878f3d4ef30535a22f6c74144637504fbe/src/clj/clojure/core/protocols.clj#L19",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/InternalReduce",
    :namespace "clojure.core.protocols",
