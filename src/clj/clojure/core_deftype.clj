@@ -215,7 +215,8 @@
                                               (clojure.lang.MapEntry. k# v#))))
                    `(seq [this#] (seq (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
                                               ~'__extmap)))
-                   `(iterator [this#] (clojure.lang.SeqIterator. (.seq this#)))
+                   `(iterator [~gs]
+                        (clojure.lang.RecordIterator. ~gs [~@(map keyword base-fields)] (RT/iter ~'__extmap)))
                    `(assoc [this# k# ~gs]
                      (condp identical? k#
                        ~@(mapcat (fn [fld]

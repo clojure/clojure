@@ -12,6 +12,7 @@ package clojure.lang;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 //import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -240,7 +241,31 @@ public boolean contains(Object o){
 }
 
 public Iterator iterator(){
-	return new SeqIterator(this);
+    return new Iterator(){
+        private ISeq fseq = f;
+        private final Iterator riter = r != null ? r.iterator() : null;
+
+        public boolean hasNext(){
+            return ((fseq != null && fseq.seq() != null) || (riter != null && riter.hasNext()));
+        }
+
+        public Object next(){
+            if(fseq != null)
+            {
+                Object ret = fseq.first();
+                fseq = fseq.next();
+                return ret;
+            }
+            else if(riter != null && riter.hasNext())
+                return riter.next();
+            else
+                throw new NoSuchElementException();
+        }
+
+        public void remove(){
+            throw new UnsupportedOperationException();
+        }
+    };
 }
 
 /*

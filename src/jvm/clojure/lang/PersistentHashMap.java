@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
  Any errors are my own
  */
 
-public class PersistentHashMap extends APersistentMap implements IEditableCollection, IObj {
+public class PersistentHashMap extends APersistentMap implements IEditableCollection, IObj, IMapIterable {
 
 final int count;
 final INode root;
@@ -173,8 +173,59 @@ public IPersistentMap without(Object key){
 	return new PersistentHashMap(meta(), count - 1, newroot, hasNull, nullValue); 
 }
 
+static final Iterator EMPTY_ITER = new Iterator(){
+    public boolean hasNext(){
+        return false;
+    }
+
+    public Object next(){
+        throw new NoSuchElementException();
+    }
+
+    public void remove(){
+        throw new UnsupportedOperationException();
+    }
+};
+
+private Iterator iterator(final IFn f){
+    final Iterator rootIter = (root == null) ? EMPTY_ITER : root.iterator(f);
+    if(hasNull) {
+        return new Iterator() {
+            private boolean seen = false;
+            public boolean hasNext() {
+                if (!seen)
+                    return true;
+                else
+                    return rootIter.hasNext();
+            }
+
+            public Object next(){
+                if (!seen) {
+                    seen = true;
+                    return f.invoke(null, nullValue);
+                } else
+                    return rootIter.next();
+            }
+
+            public void remove(){
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+    else
+        return rootIter;
+}
+
 public Iterator iterator(){
-	return new SeqIterator(this);
+    return iterator(APersistentMap.MAKE_ENTRY);
+}
+
+public Iterator keyIterator(){
+    return iterator(APersistentMap.MAKE_KEY);
+}
+
+public Iterator valIterator(){
+    return iterator(APersistentMap.MAKE_VAL);
 }
 
 public Object kvreduce(IFn f, Object init){
@@ -340,6 +391,9 @@ static interface INode extends Serializable {
     public Object kvreduce(IFn f, Object init);
 
 	Object fold(IFn combinef, IFn reducef, IFn fjtask, IFn fjfork, IFn fjjoin);
+
+    // returns the result of (f [k v]) for each iterated element
+    Iterator iterator(IFn f);
 }
 
 final static class ArrayNode implements INode{
@@ -399,6 +453,10 @@ final static class ArrayNode implements INode{
 	public ISeq nodeSeq(){
 		return Seq.create(array);
 	}
+
+    public Iterator iterator(IFn f){
+        return new Iter(array, f);
+    }
 
     public Object kvreduce(IFn f, Object init){
         for(INode node : array){
@@ -563,6 +621,49 @@ final static class ArrayNode implements INode{
 		}
 		
 	}
+
+    static class Iter implements Iterator {
+        private final INode[] array;
+        private final IFn f;
+        private int i = 0;
+        private Iterator nestedIter;
+
+        private Iter(INode[] array, IFn f){
+            this.array = array;
+            this.f = f;
+        }
+
+        public boolean hasNext(){
+            while(true)
+            {
+                if(nestedIter != null)
+                    if(nestedIter.hasNext())
+                        return true;
+                    else
+                        nestedIter = null;
+
+                if(i < array.length)
+                {
+                    INode node = array[i++];
+                    if (node != null)
+                        nestedIter = node.iterator(f);
+                }
+                else
+                    return false;
+            }
+        }
+
+        public Object next(){
+            if(hasNext())
+                return nestedIter.next();
+            else
+                throw new NoSuchElementException();
+        }
+
+        public void remove(){
+            throw new UnsupportedOperationException();
+        }
+    }
 }
 
 final static class BitmapIndexedNode implements INode{
@@ -686,6 +787,10 @@ final static class BitmapIndexedNode implements INode{
 	public ISeq nodeSeq(){
 		return NodeSeq.create(array);
 	}
+
+    public Iterator iterator(IFn f){
+        return new NodeIter(array, f);
+    }
 
     public Object kvreduce(IFn f, Object init){
          return NodeSeq.kvreduce(array,f,init);
@@ -878,6 +983,10 @@ final static class HashCollisionNode implements INode{
 	public ISeq nodeSeq(){
 		return NodeSeq.create(array);
 	}
+
+    public Iterator iterator(IFn f){
+        return new NodeIter(array, f);
+    }
 
     public Object kvreduce(IFn f, Object init){
          return NodeSeq.kvreduce(array,f,init);
@@ -1105,6 +1214,73 @@ private static INode createNode(AtomicReference<Thread> edit, int shift, Object 
 
 private static int bitpos(int hash, int shift){
 	return 1 << mask(hash, shift);
+}
+
+static final class NodeIter implements Iterator {
+    private static final Object NULL = new Object();
+    final Object[] array;
+    final IFn f;
+    private int i = 0;
+    private Object nextEntry = NULL;
+    private Iterator nextIter;
+
+    NodeIter(Object[] array, IFn f){
+        this.array = array;
+        this.f = f;
+    }
+
+    private boolean advance(){
+        while (i<array.length)
+        {
+            Object key = array[i];
+            Object nodeOrVal = array[i+1];
+            i += 2;
+            if (key != null)
+            {
+                nextEntry = f.invoke(key, nodeOrVal);
+                return true;
+            }
+            else if(nodeOrVal != null)
+            {
+                Iterator iter = ((INode) nodeOrVal).iterator(f);
+                if(iter != null && iter.hasNext())
+                {
+                    nextIter = iter;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean hasNext(){
+        if (nextEntry != NULL || nextIter != null)
+            return true;
+        return advance();
+    }
+
+    public Object next(){
+        Object ret = nextEntry;
+        if(ret != NULL)
+        {
+            nextEntry = NULL;
+            return ret;
+        }
+        else if(nextIter != null)
+        {
+            ret = nextIter.next();
+            if(! nextIter.hasNext())
+                nextIter = null;
+            return ret;
+        }
+        else if(advance())
+            return next();
+        throw new NoSuchElementException();
+    }
+
+    public void remove(){
+        throw new UnsupportedOperationException();
+    }
 }
 
 static final class NodeSeq extends ASeq {

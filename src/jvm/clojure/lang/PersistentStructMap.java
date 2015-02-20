@@ -15,6 +15,7 @@ package clojure.lang;
 import java.util.Iterator;
 import java.util.Map;
 import java.io.Serializable;
+import java.util.NoSuchElementException;
 
 public class PersistentStructMap extends APersistentMap implements IObj{
 
@@ -183,9 +184,32 @@ public IPersistentMap without(Object key) {
 }
 
 public Iterator iterator(){
-	return new SeqIterator(this);
-}
+    return new Iterator(){
+        private ISeq ks = def.keys;
+        private Iterator extIter = ext == null ? null : ext.iterator();
 
+        public boolean hasNext(){
+            return ((ks != null && ks.seq() != null) || (extIter != null && extIter.hasNext()));
+        }
+
+        public Object next(){
+            if(ks != null)
+            {
+                Object ret = ks.first();
+                ks = ks.next();
+                return ret;
+            }
+            else if(extIter != null && extIter.hasNext())
+                return extIter.next();
+            else
+                throw new NoSuchElementException();
+        }
+
+        public void remove(){
+            throw new UnsupportedOperationException();
+        }
+    };
+}
 
 public int count(){
 	return vals.length + RT.count(ext);

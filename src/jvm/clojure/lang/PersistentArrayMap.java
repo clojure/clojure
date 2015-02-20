@@ -26,7 +26,7 @@ import java.util.Map;
  * null keys and values are ok, but you won't be able to distinguish a null value via valAt - use contains/entryAt
  */
 
-public class PersistentArrayMap extends APersistentMap implements IObj, IEditableCollection {
+public class PersistentArrayMap extends APersistentMap implements IObj, IEditableCollection, IMapIterable {
 
 final Object[] array;
 static final int HASHTABLE_THRESHOLD = 16;
@@ -281,7 +281,15 @@ static boolean equalKey(Object k1, Object k2){
 }
 
 public Iterator iterator(){
-	return new Iter(array);
+	return new Iter(array,APersistentMap.MAKE_ENTRY);
+}
+
+public Iterator keyIterator(){
+    return new Iter(array,APersistentMap.MAKE_KEY);
+}
+
+public Iterator valIterator() {
+    return new Iter(array,APersistentMap.MAKE_VAL);
 }
 
 public ISeq seq(){
@@ -329,18 +337,20 @@ static class Seq extends ASeq implements Counted{
 }
 
 static class Iter implements Iterator{
+    IFn f;
 	Object[] array;
 	int i;
 
 	//for iterator
-	Iter(Object[] array){
-		this(array, -2);
+	Iter(Object[] array, IFn f){
+		this(array, -2, f);
 	}
 
 	//for entryAt
-	Iter(Object[] array, int i){
+	Iter(Object[] array, int i, IFn f){
 		this.array = array;
 		this.i = i;
+        this.f = f;
 	}
 
 	public boolean hasNext(){
@@ -349,7 +359,7 @@ static class Iter implements Iterator{
 
 	public Object next(){
 		i += 2;
-		return new MapEntry(array[i],array[i+1]);
+		return f.invoke(array[i],array[i+1]);
 	}
 
 	public void remove(){
