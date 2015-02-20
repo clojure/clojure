@@ -15,6 +15,7 @@ package clojure.lang;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PersistentVector extends APersistentVector implements IObj, IEditableCollection, IReduce{
@@ -82,7 +83,7 @@ static public PersistentVector create(ISeq items){
     }
 }
 
-static public PersistentVector create(ArrayList list){
+static public PersistentVector create(List list){
     int size = list.size();
     if (size <= 32)
         return new PersistentVector(size, 5, PersistentVector.EMPTY_NODE, list.toArray());
