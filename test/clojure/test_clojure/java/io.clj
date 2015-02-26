@@ -219,9 +219,8 @@
     (delete-file (file tmp "test-make-parents"))))
 
 (deftest test-socket-iofactory
-  (let [port 65321
-        server-socket (ServerSocket. port)
-        client-socket (Socket. "localhost" port)]
+  (let [server-socket (ServerSocket. 0)
+        client-socket (Socket. "localhost" (.getLocalPort server-socket))]
     (try
       (is (instance? InputStream (input-stream client-socket)))
       (is (instance? OutputStream (output-stream client-socket)))
