@@ -24,7 +24,7 @@
  
 (deftest test-reduce
   (let [int+ (fn [a b] (+ (int a) (int b)))
-        arange (range 100) ;; enough to cross nodes
+        arange (range 1 100) ;; enough to cross nodes
         avec (into [] arange)
         alist (into () arange)
         obj-array (into-array arange)
