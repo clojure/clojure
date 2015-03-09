@@ -201,9 +201,9 @@ public IPersistentMap assoc(Object key, Object val){
 			return createHT(array).assoc(key, val);
 		newArray = new Object[array.length + 2];
 		if(array.length > 0)
-			System.arraycopy(array, 0, newArray, 2, array.length);
-		newArray[0] = key;
-		newArray[1] = val;
+			System.arraycopy(array, 0, newArray, 0, array.length);
+		newArray[newArray.length-2] = key;
+		newArray[newArray.length-1] = val;
 		}
 	return create(newArray);
 }
