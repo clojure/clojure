@@ -445,32 +445,32 @@
   {:name "*print-length*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c4efa8dda485267c117e0a75e5a11155bd72f8d6/src/clj/clojure/core_print.clj#L15",
+   "https://github.com/clojure/clojure/blob/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj#L16",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c4efa8dda485267c117e0a75e5a11155bd72f8d6/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-length*",
    :doc
    "*print-length* controls how many items of each collection the\nprinter will print. If it is bound to logical false, there is no\nlimit. Otherwise, it must be bound to an integer indicating the maximum\nnumber of items of each collection to print. If a collection contains\nmore items, the printer will print items up to the limit followed by\n'...' to represent the remaining items. The root binding is nil\nindicating no limit.",
    :var-type "var",
-   :line 15,
+   :line 16,
    :file "src/clj/clojure/core_print.clj"}
   {:name "*print-level*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c4efa8dda485267c117e0a75e5a11155bd72f8d6/src/clj/clojure/core_print.clj#L26",
+   "https://github.com/clojure/clojure/blob/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj#L27",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c4efa8dda485267c117e0a75e5a11155bd72f8d6/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-level*",
    :doc
    "*print-level* controls how many levels deep the printer will\nprint nested objects. If it is bound to logical false, there is no\nlimit. Otherwise, it must be bound to an integer indicating the maximum\nlevel to print. Each argument to print is at level 0; if an argument is a\ncollection, its items are at level 1; and so on. If an object is a\ncollection and is at a level greater than or equal to the value bound to\n*print-level*, the printer prints '#' to represent it. The root binding\nis nil indicating no limit.",
    :var-type "var",
-   :line 26,
+   :line 27,
    :file "src/clj/clojure/core_print.clj"}
   {:file nil,
    :raw-source-url nil,
@@ -1865,28 +1865,28 @@
   {:name "char-escape-string",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c4efa8dda485267c117e0a75e5a11155bd72f8d6/src/clj/clojure/core_print.clj#L173",
+   "https://github.com/clojure/clojure/blob/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj#L175",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c4efa8dda485267c117e0a75e5a11155bd72f8d6/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/char-escape-string",
    :doc "Returns escape string for char or nil if none",
    :var-type "var",
-   :line 173,
+   :line 175,
    :file "src/clj/clojure/core_print.clj"}
   {:name "char-name-string",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/c4efa8dda485267c117e0a75e5a11155bd72f8d6/src/clj/clojure/core_print.clj#L287",
+   "https://github.com/clojure/clojure/blob/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj#L289",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/c4efa8dda485267c117e0a75e5a11155bd72f8d6/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/char-name-string",
    :doc "Returns name string for char or nil if none",
    :var-type "var",
-   :line 287,
+   :line 289,
    :file "src/clj/clojure/core_print.clj"}
   {:arglists ([x]),
    :name "char?",
