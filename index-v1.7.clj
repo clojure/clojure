@@ -445,11 +445,11 @@
   {:name "*print-length*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj#L16",
+   "https://github.com/clojure/clojure/blob/e03d787720a16fae37a2ec9afb3859a15e67b976/src/clj/clojure/core_print.clj#L16",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/e03d787720a16fae37a2ec9afb3859a15e67b976/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-length*",
    :doc
@@ -460,11 +460,11 @@
   {:name "*print-level*",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj#L27",
+   "https://github.com/clojure/clojure/blob/e03d787720a16fae37a2ec9afb3859a15e67b976/src/clj/clojure/core_print.clj#L27",
    :dynamic true,
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/e03d787720a16fae37a2ec9afb3859a15e67b976/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-level*",
    :doc
@@ -1865,28 +1865,28 @@
   {:name "char-escape-string",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj#L175",
+   "https://github.com/clojure/clojure/blob/e03d787720a16fae37a2ec9afb3859a15e67b976/src/clj/clojure/core_print.clj#L179",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/e03d787720a16fae37a2ec9afb3859a15e67b976/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/char-escape-string",
    :doc "Returns escape string for char or nil if none",
    :var-type "var",
-   :line 175,
+   :line 179,
    :file "src/clj/clojure/core_print.clj"}
   {:name "char-name-string",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj#L289",
+   "https://github.com/clojure/clojure/blob/e03d787720a16fae37a2ec9afb3859a15e67b976/src/clj/clojure/core_print.clj#L293",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/692645c73c86d12c93a97c858dc6e8b0f4280a0b/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/e03d787720a16fae37a2ec9afb3859a15e67b976/src/clj/clojure/core_print.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/char-name-string",
    :doc "Returns name string for char or nil if none",
    :var-type "var",
-   :line 289,
+   :line 293,
    :file "src/clj/clojure/core_print.clj"}
   {:arglists ([x]),
    :name "char?",
