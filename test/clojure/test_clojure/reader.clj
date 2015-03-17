@@ -433,6 +433,11 @@
     ;; sanity check against e.g. reading returning ()
     (is (= (count expected-metadata) @verified-forms))))
 
+(deftest set-line-number
+  (let [r (clojure.lang.LineNumberingPushbackReader. *in*)]
+    (.setLineNumber r 100)
+    (is (= 100 (.getLineNumber r)))))
+
 (deftest t-Metadata
   (is (= (meta '^:static ^:awesome ^{:static false :bar :baz} sym) {:awesome true, :bar :baz, :static true})))
 

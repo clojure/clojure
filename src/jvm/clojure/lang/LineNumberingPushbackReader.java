@@ -41,6 +41,8 @@ public int getLineNumber(){
 	return ((LineNumberReader) in).getLineNumber() + 1;
 }
 
+public void setLineNumber(int line) { ((LineNumberReader) in).setLineNumber(line - 1); }
+
 public int getColumnNumber(){
 	return _columnNumber;
 }
