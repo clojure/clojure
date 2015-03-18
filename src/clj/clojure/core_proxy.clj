@@ -210,6 +210,12 @@
                          (for [^Class iface interfaces meth (. iface (getMethods))
                                :let [msig (method-sig meth)] :when (not (considered msig))]
                            {msig meth}))
+          ;; Treat abstract methods as interface methods
+          [mm ifaces-meths] (let [abstract? (fn [[_ ^Method meth]]
+                                              (Modifier/isAbstract (. meth (getModifiers))))
+                                  mm-no-abstract (remove abstract? mm)
+                                  abstract-meths (filter abstract? mm)]
+                              [mm-no-abstract (concat ifaces-meths abstract-meths)])
           mgroups (group-by-sig (concat mm ifaces-meths))
           rtypes (map #(most-specific (keys %)) mgroups)
           mb (map #(vector (%1 %2) (vals (dissoc %1 %2))) mgroups rtypes)
