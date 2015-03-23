@@ -557,11 +557,17 @@ static public Object seqOrElse(Object o) {
 }
 
 static public ISeq keys(Object coll){
-	return APersistentMap.KeySeq.create(seq(coll));
+	if(coll instanceof IPersistentMap)
+		return APersistentMap.KeySeq.createFromMap((IPersistentMap)coll);
+	else
+		return APersistentMap.KeySeq.create(seq(coll));
 }
 
 static public ISeq vals(Object coll){
-	return APersistentMap.ValSeq.create(seq(coll));
+	if(coll instanceof IPersistentMap)
+		return APersistentMap.ValSeq.createFromMap((IPersistentMap)coll);
+	else
+		return APersistentMap.ValSeq.create(seq(coll));
 }
 
 static public IPersistentMap meta(Object x){

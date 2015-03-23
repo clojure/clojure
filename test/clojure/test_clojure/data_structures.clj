@@ -589,7 +589,11 @@
       ; (class (hash-map :a 1)) => clojure.lang.PersistentHashMap
       (keys (hash-map)) nil
       (keys (hash-map :a 1)) '(:a)
-      (diff (keys (hash-map :a 1 :b 2)) '(:a :b)) nil ))  ; (keys (hash-map :a 1 :b 2)) '(:a :b)
+      (diff (keys (hash-map :a 1 :b 2)) '(:a :b)) nil )   ; (keys (hash-map :a 1 :b 2)) '(:a :b)
+
+  (let [m {:a 1 :b 2}
+        k (keys m)]
+    (is (= {:hi :there} (meta (with-meta k {:hi :there}))))))
 
 
 (deftest test-vals
@@ -614,7 +618,11 @@
       ; (class (hash-map :a 1)) => clojure.lang.PersistentHashMap
       (vals (hash-map)) nil
       (vals (hash-map :a 1)) '(1)
-      (diff (vals (hash-map :a 1 :b 2)) '(1 2)) nil ))  ; (vals (hash-map :a 1 :b 2)) '(1 2)
+      (diff (vals (hash-map :a 1 :b 2)) '(1 2)) nil )   ; (vals (hash-map :a 1 :b 2)) '(1 2)
+
+  (let [m {:a 1 :b 2}
+        v (vals m)]
+    (is (= {:hi :there} (meta (with-meta v {:hi :there}))))))
 
 
 (deftest test-key
@@ -1193,10 +1201,16 @@
                             {:pos n :seqable seqable :iterable iterable}))))))))
 
 (deftest test-seq-iter-match
-  (doseq [am [{} {nil 1} {nil 1 2 3} {1 2 3 4}]]
-    (seq-iter-match am am)
-    (let [hm (into (hash-map) am)]
-         (seq-iter-match hm hm))))
+  (let [maps (mapcat #(vector (apply array-map %)
+                              (apply hash-map %)
+                              (apply sorted-map %))
+                     [[] [nil 1] [nil 1 2 3] [1 2 3 4]])]
+    (doseq [m maps]
+      (seq-iter-match m m)
+      (seq-iter-match (keys m) (keys m))
+      (seq-iter-match (vals m) (vals m))
+      (seq-iter-match (rest (keys m)) (rest (keys m)))
+      (seq-iter-match (rest (vals m)) (rest (vals m))))))
 
 (defn gen-map
   []

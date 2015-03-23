@@ -30,6 +30,28 @@
      (let [s (seq coll)]
        (internal-reduce s f val))))
 
+(defn- iter-reduce
+  ([^java.lang.Iterable coll f]
+   (let [iter (.iterator coll)]
+     (if (.hasNext iter)
+       (loop [ret (.next iter)]
+         (if (.hasNext iter)
+           (let [ret (f ret (.next iter))]
+             (if (reduced? ret)
+               @ret
+               (recur ret)))
+           ret))
+       (f))))
+  ([^java.lang.Iterable coll f val]
+   (let [iter (.iterator coll)]
+     (loop [ret val]
+       (if (.hasNext iter)
+         (let [ret (f ret (.next iter))]
+           (if (reduced? ret)
+             @ret
+             (recur ret)))
+         ret)))))
+
 (extend-protocol CollReduce
   nil
   (coll-reduce
@@ -66,27 +88,18 @@
   
   Iterable
   (coll-reduce
-   ([coll f]
-      (let [iter (.iterator coll)]
-        (if (.hasNext iter)
-          (loop [ret (.next iter)]
-            (if (.hasNext iter)
-              (let [ret (f ret (.next iter))]
-                (if (reduced? ret)
-                  @ret
-                  (recur ret)))
-              ret))
-          (f))))
-   ([coll f val]
-      (let [iter (.iterator coll)]
-        (loop [ret val]
-          (if (.hasNext iter)
-            (let [ret (f ret (.next iter))]
-                (if (reduced? ret)
-                  @ret
-                  (recur ret)))
-            ret)))))
-  )
+   ([coll f] (iter-reduce coll f))
+   ([coll f val] (iter-reduce coll f val)))
+
+  clojure.lang.APersistentMap$KeySeq
+  (coll-reduce
+    ([coll f] (iter-reduce coll f))
+    ([coll f val] (iter-reduce coll f val)))
+
+  clojure.lang.APersistentMap$ValSeq
+  (coll-reduce
+    ([coll f] (iter-reduce coll f))
+    ([coll f val] (iter-reduce coll f val))))
 
 (extend-protocol InternalReduce
   nil

@@ -1217,3 +1217,11 @@
 
 (deftest CLJ-1633
   (is (= ((fn [& args] (apply (fn [a & b] (apply list b)) args)) 1 2 3) '(2 3))))
+
+(deftest test-subseq
+  (let [s1 (range 100)
+        s2 (into (sorted-set) s1)]
+    (is (= s1 (seq s2)))
+    (doseq [i (range 100)]
+      (is (= s1 (concat (subseq s2 < i) (subseq s2 >= i))))
+      (is (= (reverse s1) (concat (rsubseq s2 >= i) (rsubseq s2 < i)))))))
