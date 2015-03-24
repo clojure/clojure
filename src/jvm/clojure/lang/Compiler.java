@@ -2437,7 +2437,7 @@ static String getTypeStringForArgs(IPersistentVector args){
 		{
 		Expr arg = (Expr) args.nth(i);
 		if (i > 0) sb.append(", ");
-		sb.append(arg.hasJavaClass() ? arg.getJavaClass().getName() : "unknown");
+		sb.append((arg.hasJavaClass() && arg.getJavaClass() != null) ? arg.getJavaClass().getName() : "unknown");
 		}
 	return sb.toString();
 }

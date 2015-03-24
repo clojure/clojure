@@ -51,6 +51,10 @@
     (should-print-err-message
      #"Reflection warning, .*:\d+:\d+ - call to method getBytes on java\.lang\.String can't be resolved \(argument types: unknown\)\.\r?\n"
      (defn foo [^String x y] (.getBytes x y))))
+  (testing "reflection error prints correctly for nil arguments"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+:\d+ - call to method divide on java\.math\.BigDecimal can't be resolved \(argument types: unknown, unknown\)\.\r?\n"
+     (defn foo [a] (.divide 1M a nil))))
   (testing "reflection cannot resolve instance method because target class is unknown"
     (should-print-err-message
      #"Reflection warning, .*:\d+:\d+ - call to method zap can't be resolved \(target class is unknown\)\.\r?\n"
