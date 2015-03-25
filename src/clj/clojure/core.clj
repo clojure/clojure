@@ -2840,9 +2840,7 @@
   "Returns a lazy (infinite!) sequence of repetitions of the items in coll."
   {:added "1.0"
    :static true}
-  [coll] (lazy-seq 
-          (when-let [s (seq coll)] 
-              (concat s (cycle s)))))
+  [coll] (clojure.lang.Cycle/create (seq coll)))
 
 (defn split-at
   "Returns a vector of [(take n coll) (drop n coll)]"
@@ -2862,8 +2860,8 @@
   "Returns a lazy (infinite!, or length n if supplied) sequence of xs."
   {:added "1.0"
    :static true}
-  ([x] (lazy-seq (cons x (repeat x))))
-  ([n x] (take n (repeat x))))
+  ([x] (clojure.lang.Repeat/create x))
+  ([n x] (clojure.lang.Repeat/create n x)))
 
 (defn replicate
   "DEPRECATED: Use 'repeat' instead.
@@ -2876,7 +2874,7 @@
   "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
   {:added "1.0"
    :static true}
-  [f x] (cons x (lazy-seq (iterate f (f x)))))
+  [f x] (clojure.lang.Iterate/create f x) )
 
 (defn range
   "Returns a lazy seq of nums from start (inclusive) to end
