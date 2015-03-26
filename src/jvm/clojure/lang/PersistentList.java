@@ -39,13 +39,6 @@ public static IFn creator = new RestFn(){
 		return create(list);
 	}
 
-	public IObj withMeta(IPersistentMap meta){
-		throw new UnsupportedOperationException();
-	}
-
-	public IPersistentMap meta(){
-		return null;
-	}
 };
 
 final public static EmptyList EMPTY = new EmptyList(null);
