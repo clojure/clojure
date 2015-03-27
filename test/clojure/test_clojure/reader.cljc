@@ -543,7 +543,7 @@
     (binding [*data-readers* {'inst read-instant-calendar}]
       (testing "read-instant-calendar should preserve timezone"
         (is (not= (read-string s) (read-string s2)))))))
-      
+
 ;; UUID Literals
 ;; #uuid "550e8400-e29b-41d4-a716-446655440000"
 
@@ -621,3 +621,75 @@
   [^{:tag cgen/dup-readable} o]
   (when-not (= o %)
     (throw (ex-info "Value cannot roundtrip, see ex-data" {:printed o :read %}))))
+
+(defrecord TestRecord [x y])
+
+(deftest preserve-read-cond-test
+  (let [x (read-string {:read-cond :preserve} "#?(:clj foo :cljs bar)" )]
+       (is (reader-conditional? x))
+       (is (not (:splicing? x)))
+       (is (= :foo (get x :no-such-key :foo)))
+       (is (= (:form x) '(:clj foo :cljs bar)))
+       (is (= x (reader-conditional '(:clj foo :cljs bar) false))))
+  (let [x (read-string {:read-cond :preserve} "#?@(:clj [foo])" )]
+       (is (reader-conditional? x))
+       (is (:splicing? x))
+       (is (= :foo (get x :no-such-key :foo)))
+       (is (= (:form x) '(:clj [foo])))
+       (is (= x (reader-conditional '(:clj [foo]) true))))
+  (is (thrown-with-msg? RuntimeException #"No reader function for tag"
+                        (read-string {:read-cond :preserve} "#js {:x 1 :y 2}" )))
+  (let [x (read-string {:read-cond :preserve} "#?(:cljs #js {:x 1 :y 2})")
+        [platform tl] (:form x)]
+       (is (reader-conditional? x))
+       (is (tagged-literal? tl))
+       (is (= 'js (:tag tl)))
+       (is (= {:x 1 :y 2} (:form tl)))
+       (is (= :foo (get tl :no-such-key :foo)))
+       (is (= tl (tagged-literal 'js {:x 1 :y 2}))))
+  (testing "print form roundtrips"
+           (doseq [s ["#?(:clj foo :cljs bar)"
+                      "#?(:cljs #js {:x 1, :y 2})"
+                      "#?(:clj #clojure.test_clojure.reader.TestRecord [42 85])"]]
+                  (is (= s (pr-str (read-string {:read-cond :preserve} s)))))))
+
+(deftest reader-conditionals
+  (testing "basic read-cond"
+    (is (= '[foo-form]
+           (read-string {:read-cond :allow :features #{:foo}} "[#?(:foo foo-form :bar bar-form)]")))
+    (is (= '[bar-form]
+           (read-string {:read-cond :allow :features #{:bar}} "[#?(:foo foo-form :bar bar-form)]")))
+    (is (= '[foo-form]
+           (read-string {:read-cond :allow :features #{:foo :bar}} "[#?(:foo foo-form :bar bar-form)]")))
+    (is (= '[]
+           (read-string {:read-cond :allow :features #{:baz}} "[#?( :foo foo-form :bar bar-form)]"))))
+  (testing "environmental features"
+    (is (= "clojure" #?(:clj "clojure" :cljs "clojurescript" :default "default"))))
+  (testing "default features"
+    (is (= "default" #?(:clj-clr "clr" :cljs "cljs" :default "default"))))
+  (testing "splicing"
+    (is (= [] [#?@(:clj [])]))
+    (is (= [:a] [#?@(:clj [:a])]))
+    (is (= [:a :b] [#?@(:clj [:a :b])]))
+    (is (= [:a :b :c] [#?@(:clj [:a :b :c])]))
+    (is (= [:a :b :c] [#?@(:clj [:a :b :c])])))
+  (testing "nested splicing"
+    (is (= [:a :b :c :d :e]
+           [#?@(:clj [:a #?@(:clj [:b #?@(:clj [:c]) :d]):e])]))
+    (is (= '(+ 1 (+ 2 3))
+           '(+ #?@(:clj [1 (+ #?@(:clj [2 3]))]))))
+    (is (= '(+ (+ 2 3) 1)
+           '(+ #?@(:clj [(+ #?@(:clj [2 3])) 1]))))
+    (is (= [:a [:b [:c] :d] :e]
+           [#?@(:clj [:a [#?@(:clj [:b #?@(:clj [[:c]]) :d])] :e])])))
+  (testing "bypass unknown tagged literals"
+    (is (= [1 2 3] #?(:cljs #js [1 2 3] :clj [1 2 3])))
+    (is (= :clojure #?(:foo #some.nonexistent.Record {:x 1} :clj :clojure))))
+  (testing "error cases"
+    (is (thrown-with-msg? RuntimeException #"Feature should be a keyword" (read-string {:read-cond :allow} "#?((+ 1 2) :a)")))
+    (is (thrown-with-msg? RuntimeException #"even number of forms" (read-string {:read-cond :allow} "#?(:cljs :a :clj)")))
+    (is (thrown-with-msg? RuntimeException #"read-cond-splicing must implement" (read-string {:read-cond :allow} "#?@(:clj :a)")))
+    (is (thrown-with-msg? RuntimeException #"is reserved" (read-string {:read-cond :allow} "#?@(:foo :a :else :b)")))
+    (is (thrown-with-msg? RuntimeException #"must be a list" (read-string {:read-cond :allow} "#?[:foo :a :else :b]")))
+    (is (thrown-with-msg? RuntimeException #"Conditional read not allowed" (read-string {:read-cond :BOGUS} "#?[:clj :a :default nil]")))
+    (is (thrown-with-msg? RuntimeException #"Conditional read not allowed" (read-string "#?[:clj :a :default nil]")))))

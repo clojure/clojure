@@ -7191,6 +7191,14 @@ static void consumeWhitespaces(LineNumberingPushbackReader pushbackReader) {
 	LispReader.unread(pushbackReader, ch);
 }
 
+private static final Object OPTS_COND_ALLOWED = RT.mapUniqueKeys(LispReader.OPT_READ_COND, LispReader.COND_ALLOW);
+private static Object readerOpts(String sourceName) {
+    if(sourceName != null && sourceName.endsWith(".cljc"))
+        return OPTS_COND_ALLOWED;
+    else
+        return null;
+}
+
 public static Object load(Reader rdr, String sourcePath, String sourceName) {
 	Object EOF = new Object();
 	Object ret = null;
@@ -7217,10 +7225,11 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) {
 			       ,RT.DATA_READERS, RT.DATA_READERS.deref()
                         ));
 
+	Object readerOpts = readerOpts(sourceName);
 	try
 		{
-		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
-		    r = LispReader.read(pushbackReader, false, EOF, false))
+		for(Object r = LispReader.read(pushbackReader, false, EOF, false, readerOpts); r != EOF;
+			r = LispReader.read(pushbackReader, false, EOF, false, readerOpts))
 			{
 			consumeWhitespaces(pushbackReader);
 			LINE_AFTER.set(pushbackReader.getLineNumber());
@@ -7382,8 +7391,9 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		                                            cv);
 		gen.visitCode();
 
-		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
-		    r = LispReader.read(pushbackReader, false, EOF, false))
+		Object readerOpts = readerOpts(sourceName);
+		for(Object r = LispReader.read(pushbackReader, false, EOF, false, readerOpts); r != EOF;
+			r = LispReader.read(pushbackReader, false, EOF, false, readerOpts))
 			{
 				LINE_AFTER.set(pushbackReader.getLineNumber());
 				COLUMN_AFTER.set(pushbackReader.getColumnNumber());

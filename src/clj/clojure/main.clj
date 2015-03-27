@@ -53,6 +53,7 @@
   [^StackTraceElement el]
   (let [file (.getFileName el)
         clojure-fn? (and file (or (.endsWith file ".clj")
+                                  (.endsWith file ".cljc")
                                   (= file "NO_SOURCE_FILE")))]
     (str (if clojure-fn?
            (demunge (.getClassName el))

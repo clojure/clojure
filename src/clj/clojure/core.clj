@@ -3618,6 +3618,12 @@
   java.io.PushbackReader or some derivee.  stream defaults to the
   current value of *in*.
 
+  Opts is a persistent map with valid keys:
+    :read-cond - :allow to process reader conditionals, or
+                 :preserve to keep all branches
+    :features - persistent set of feature keywords for reader conditionals
+    :eof - on eof, return value unless :eofthrow, then throw
+
   Note that read can execute code (controlled by *read-eval*),
   and as such should be used only with trusted sources.
 
@@ -3631,7 +3637,9 @@
   ([stream eof-error? eof-value]
    (read stream eof-error? eof-value false))
   ([stream eof-error? eof-value recursive?]
-   (. clojure.lang.LispReader (read stream (boolean eof-error?) eof-value recursive?))))
+   (. clojure.lang.LispReader (read stream (boolean eof-error?) eof-value recursive?)))
+  ([opts stream]
+   (. clojure.lang.LispReader (read stream opts))))
 
 (defn read-line
   "Reads the next line from stream that is the current value of *in* ."
@@ -3643,7 +3651,8 @@
     (.readLine ^java.io.BufferedReader *in*)))
 
 (defn read-string
-  "Reads one object from the string s.
+  "Reads one object from the string s. Optionally include reader
+  options, as specified in read.
 
   Note that read-string can execute code (controlled by *read-eval*),
   and as such should be used only with trusted sources.
@@ -3651,7 +3660,8 @@
   For data structure interop use clojure.edn/read-string"
   {:added "1.0"
    :static true}
-  [s] (clojure.lang.RT/readString s))
+  ([s] (clojure.lang.RT/readString s))
+  ([opts s] (clojure.lang.RT/readString s opts)))
 
 (defn subvec
   "Returns a persistent vector of the items in vector from
@@ -7358,6 +7368,36 @@
   {:added "1.7"}
   [proc coll]
   (reduce #(proc %2) nil coll))
+
+
+(defn tagged-literal?
+  "Return true if the value is the data representation of a tagged literal"
+  {:added "1.7"}
+  [value]
+  (instance? clojure.lang.TaggedLiteral value))
+
+(defn tagged-literal
+  "Construct a data representation of a tagged literal from a
+  tag symbol and a form."
+  {:added "1.7"}
+  [^clojure.lang.Symbol tag form]
+  (clojure.lang.TaggedLiteral/create tag form))
+
+(defn reader-conditional?
+  "Return true if the value is the data representation of a reader conditional"
+  {:added "1.7"}
+  [value]
+  (instance? clojure.lang.ReaderConditional value))
+
+(defn reader-conditional
+  "Construct a data representation of a reader conditional.
+  If true, splicing? indicates read-cond-splicing."
+  {:added "1.7"}
+  [form ^Boolean splicing?]
+  (clojure.lang.ReaderConditional/create form splicing?))
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; data readers ;;;;;;;;;;;;;;;;;;
 

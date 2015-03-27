@@ -194,6 +194,7 @@ final static public Var READEVAL = Var.intern(CLOJURE_NS, Symbol.intern("*read-e
 final static public Var DATA_READERS = Var.intern(CLOJURE_NS, Symbol.intern("*data-readers*"), RT.map()).setDynamic();
 final static public Var DEFAULT_DATA_READER_FN = Var.intern(CLOJURE_NS, Symbol.intern("*default-data-reader-fn*"), RT.map()).setDynamic();
 final static public Var DEFAULT_DATA_READERS = Var.intern(CLOJURE_NS, Symbol.intern("default-data-readers"), RT.map());
+final static public Var SUPPRESS_READ = Var.intern(CLOJURE_NS, Symbol.intern("*suppress-read*"), null).setDynamic();
 final static public Var ASSERT = Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), T).setDynamic();
 final static public Var MATH_CONTEXT = Var.intern(CLOJURE_NS, Symbol.intern("*math-context*"), null).setDynamic();
 static Keyword LINE_KEY = Keyword.intern(null, "line");
@@ -414,13 +415,18 @@ static public void load(String scriptbase) throws IOException, ClassNotFoundExce
 static public void load(String scriptbase, boolean failIfNotFound) throws IOException, ClassNotFoundException{
 	String classfile = scriptbase + LOADER_SUFFIX + ".class";
 	String cljfile = scriptbase + ".clj";
+	String scriptfile = cljfile;
 	URL classURL = getResource(baseLoader(),classfile);
-	URL cljURL = getResource(baseLoader(), cljfile);
+	URL cljURL = getResource(baseLoader(), scriptfile);
+	if(cljURL == null) {
+		scriptfile = scriptbase + ".cljc";
+		cljURL = getResource(baseLoader(), scriptfile);
+	}
 	boolean loaded = false;
 
 	if((classURL != null &&
 	    (cljURL == null
-	     || lastModified(classURL, classfile) > lastModified(cljURL, cljfile)))
+	     || lastModified(classURL, classfile) > lastModified(cljURL, scriptfile)))
 	   || classURL == null) {
 		try {
 			Var.pushThreadBindings(
@@ -435,9 +441,9 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 	}
 	if(!loaded && cljURL != null) {
 		if(booleanCast(Compiler.COMPILE_FILES.deref()))
-			compile(cljfile);
+			compile(scriptfile);
 		else
-			loadResourceScript(RT.class, cljfile);
+			loadResourceScript(RT.class, scriptfile);
 	}
 	else if(!loaded && failIfNotFound)
 		throw new FileNotFoundException(String.format("Could not locate %s or %s on classpath.%s", classfile, cljfile,
@@ -1792,8 +1798,7 @@ static public String resolveClassNameInContext(String className){
 }
 
 static public boolean suppressRead(){
-	//todo - look up in suppress-read var
-	return false;
+	return booleanCast(SUPPRESS_READ.deref());
 }
 
 static public String printString(Object x){
@@ -1808,8 +1813,12 @@ static public String printString(Object x){
 }
 
 static public Object readString(String s){
+	return readString(s, null);
+}
+
+static public Object readString(String s, Object opts) {
 	PushbackReader r = new PushbackReader(new StringReader(s));
-	return LispReader.read(r, true, null, false);
+	return LispReader.read(r, true, null, false, opts);
 }
 
 static public void print(Object x, Writer w) throws IOException{
