@@ -478,6 +478,22 @@ public static void loadLibrary(String libname){
 
 ////////////// Collections support /////////////////////////////////
 
+private static final int CHUNK_SIZE = 32;
+public static ISeq chunkIteratorSeq(final Iterator iter){
+    if(iter.hasNext()) {
+        return new LazySeq(new AFn() {
+            public Object invoke() {
+                Object[] arr = new Object[CHUNK_SIZE];
+                int n = 0;
+                while(iter.hasNext() && n < CHUNK_SIZE)
+                    arr[n++] = iter.next();
+                return new ChunkedCons(new ArrayChunk(arr, 0, n), chunkIteratorSeq(iter));
+            }
+        });
+    }
+    return null;
+}
+
 static public ISeq seq(Object coll){
 	if(coll instanceof ASeq)
 		return (ASeq) coll;
@@ -493,7 +509,7 @@ static ISeq seqFrom(Object coll){
 	else if(coll == null)
 		return null;
 	else if(coll instanceof Iterable)
-		return IteratorSeq.create(((Iterable) coll).iterator());
+		return chunkIteratorSeq(((Iterable) coll).iterator());
 	else if(coll.getClass().isArray())
 		return ArraySeq.createFromObject(coll);
 	else if(coll instanceof CharSequence)
@@ -1617,7 +1633,12 @@ static public Object[] toArray(Object coll) {
 		return (Object[]) coll;
 	else if(coll instanceof Collection)
 		return ((Collection) coll).toArray();
-	else if(coll instanceof Map)
+	else if(coll instanceof Iterable) {
+		ArrayList ret = new ArrayList();
+		for(Object o : (Iterable)coll)
+			ret.add(o);
+		return ret.toArray();
+	} else if(coll instanceof Map)
 		return ((Map) coll).entrySet().toArray();
 	else if(coll instanceof String) {
 		char[] chars = ((String) coll).toCharArray();
