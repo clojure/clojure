@@ -51,7 +51,7 @@ transducers in different ways:
 
 * sequence - takes a transformation and a coll and produces a lazy seq
 * transduce - reduce with a transformation (eager)
-* eduction - returns a reducible/seqable/iterable seq of applications of the transducer to items in coll. Applications are re-performed with every reduce/seq/iterator.
+* eduction - returns a reducible/iterable of applications of the transducer to items in coll. Applications are re-performed with every reduce/iterator.
 * run! - run the transformation for side effects on the collection
 
 There have been a number of internal changes to support transducers:
@@ -69,8 +69,64 @@ Some related issues addressed during development:
 * [CLJ-1606](http://dev.clojure.org/jira/browse/CLJ-1606)
 * [CLJ-1621](http://dev.clojure.org/jira/browse/CLJ-1621)
 * [CLJ-1600](http://dev.clojure.org/jira/browse/CLJ-1600)
+* [CLJ-1635](http://dev.clojure.org/jira/browse/CLJ-1635)
+* [CLJ-1683](http://dev.clojure.org/jira/browse/CLJ-1683)
+* [CLJ-1669](http://dev.clojure.org/jira/browse/CLJ-1669)
 
-### 1.2 Keyword and Symbol Construction
+### 1.2 Reader Conditionals
+
+Reader Conditionals is a new capability to support portable code that
+can run on multiple Clojure platforms with only small changes. In
+particular, this feature aims to support the increasingly common case
+of libraries targeting both Clojure and ClojureScript.
+
+Code intended to be common across multiple platforms should use a new
+supported file extension: ".cljc". When requested to load a namespace,
+the platform-specific file extension (.clj, .cljs) will be checked
+prior to .cljc.
+
+A new reader form can be used to specify "reader conditional" code in
+cljc files (and *only* cljc files). Each platform defines a feature
+identifying the platform (:clj, :cljs, :cljr). The reader conditional
+specifies code that is read conditionally based on the feature/
+
+Form #? takes a list of alternating feature and expression. These are
+checked like cond and the selected expression is read and returned. Other
+branches are unread. If no branch is selected, the reader reads nothing
+(not nil, but literally as if reading ""). An optional ":default" branch
+can be used as a fallthrough.
+
+Reader conditional with 2 features and a default:
+
+	#?(:clj     Double/NaN
+	   :cljs    js/NaN
+	   :default nil)
+
+There is also a reader conditional splicing form. The evaluated expression
+should be sequential and will be spliced into the surrounded code, similar
+to unqoute-splicing.
+
+For example:
+
+   [1 2 #?@(:clj [3 4] :cljs [5 6])]
+
+This form would read as [1 2 3 4] on Clojure, [1 2 5 6] on ClojureScript,
+and [1 2] on any other platform.
+
+Additionally, the reader can now be invoked with options for the features
+to use and how to interpret reader conditionals. By default, reader conditionals
+are not allowed, but that can be turned on, or a "preserve" mode can be used to
+preserve all branches (most likely useful for tooling or source transforms).
+
+In the preserve mode, the reader conditional itself and any tagged literals
+within the unselected branches are returned as tagged literal data.
+
+For more information, see:
+http://dev.clojure.org/display/design/Reader+Conditionals
+
+* [CLJ-1424](http://dev.clojure.org/jira/browse/CLJ-1424)
+
+### 1.3 Keyword and Symbol Construction
 
 In response to issues raised in [CLJ-1439](http://dev.clojure.org/jira/browse/CLJ-1439),
 several changes have been made in symbol and keyword construction:
@@ -82,7 +138,7 @@ in a performance increase.
 2) Keywords are cached and keyword construction includes a cache check. A change was made
 to only clear the cache reference queue when there is a cache miss.
 
-### 1.3 Warn on Boxed Math
+### 1.4 Warn on Boxed Math
 
 One source of performance issues is the (unintended) use of arithmetic operations on
 boxed numbers. To make detecting the presence of boxed math easier, a warning will now
@@ -104,8 +160,9 @@ Example use:
 
 * [CLJ-1325](http://dev.clojure.org/jira/browse/CLJ-1325)
 * [CLJ-1535](http://dev.clojure.org/jira/browse/CLJ-1535)
+* [CLJ-1642](http://dev.clojure.org/jira/browse/CLJ-1642)
 
-### 1.4 update - like update-in for first level
+### 1.5 update - like update-in for first level
 
 `update` is a new function that is like update-in specifically for first-level keys:
 
@@ -121,6 +178,65 @@ Example use:
 	{:a nil}
 
 * [CLJ-1251](http://dev.clojure.org/jira/browse/CLJ-1251)
+
+### 1.6 Faster reduce and iterator paths
+
+Several important Clojure functions now return sequences that also
+contain fast reduce() (or in some cases iterator()) paths. In many
+cases, the new implementations are also faster for lazy sequences
+
+* repeat - now implements IReduce
+* cycle - implements IReduceInit
+* iterate - implements IReduceInit
+* range - implements IReduce, specialized case handles common case of all longs
+* keys - iterates directly over the keys of a map, without seq or MapEntry allocation
+* vals - iterates directly over the vals of a map, without seq or MapEntry allocation
+* iterator-seq - creates a chunked sequence when previously it was unchunked
+
+Additionally, hash-maps and hash-sets now provide iterators that walk
+the data structure directly rather than via a sequence.
+
+A new interface (IMapIterable) for direct key and val iterators on maps
+was added. External data structures can use this interface to provide
+direct key and val iterators via keys and vals.
+
+These enhancements are particularly effective when used
+in tandem with transducers via transduce, sequence, into, and
+eduction.
+
+* [CLJ-1603](http://dev.clojure.org/jira/browse/CLJ-1603)
+* [CLJ-1515](http://dev.clojure.org/jira/browse/CLJ-1515)
+* [CLJ-1602](http://dev.clojure.org/jira/browse/CLJ-1602)
+* [CLJ-1669](http://dev.clojure.org/jira/browse/CLJ-1669)
+
+### 1.7 Printing as data
+
+There have been enhancements in how the REPL prints values without a
+print-method, specifically Throwable and the fallthrough Object case.
+Both cases now print in a tagged literal data form that can be read
+by the reader.
+
+Unhandled objects print with the class, hash code, and toString:
+
+	user=> *ns*
+	#object[clojure.lang.Namespace 0x55aa628 "user"]
+
+Thrown exceptions will still be printed in the normal way by the default
+REPL but printing them to a stream will show a different form:
+
+	user=> (/ 1 0)
+	ArithmeticException Divide by zero  clojure.lang.Numbers.divide (Numbers.java:158)
+	user=> (println *e)
+	#error{:cause Divide by zero,
+		   :via [{:type java.lang.ArithmeticException,
+			      :message Divide by zero,
+				  :at [clojure.lang.Numbers divide Numbers.java 158]}],
+		   :trace
+		     [[clojure.lang.Numbers divide Numbers.java 158]
+			  [clojure.lang.Numbers divide Numbers.java 3808]
+			  [user$eval5 invoke NO_SOURCE_FILE 3]
+			  ;; elided ...
+			  ]]}
 
 ## 2 Enhancements
 
@@ -185,6 +301,14 @@ Example use:
   set now works with things that only implement Iterable or IReduceInit
 * [CLJ-1633](http://dev.clojure.org/jira/browse/CLJ-1633)
   PersistentList/creator doesn't handle ArraySeqs correctly
+* [CLJ-1589](http://dev.clojure.org/jira/browse/CLJ-1589)
+  Clean up unused paths in InternalReduce
+* [CLJ-1677](http://dev.clojure.org/jira/browse/CLJ-1677)
+  Add setLineNumber() to LineNumberingPushbackReader
+* [CLJ-1667](http://dev.clojure.org/jira/browse/CLJ-1667)
+  Change test to avoid using hard-coded socket port
+* [CLJ-1683](http://dev.clojure.org/jira/browse/CLJ-1683)
+  Change reduce tests to better catch reduce without init bugs
 
 ## 3 Bug Fixes
 
@@ -224,8 +348,23 @@ Example use:
   Some IReduce/IReduceInit implementors don't respect reduced
 * [CLJ-979](http://dev.clojure.org/jira/browse/CLJ-979)
   Clojure resolves to wrong deftype classes when AOT compiling or reloading
-* [CLJ-1544](http://dev.clojure.org/jira/browse/CLJ-1544)
-  AOT bug involving namespaces loaded before AOT compilation started
+* [CLJ-1636](http://dev.clojure.org/jira/browse/CLJ-1636)
+  Fix intermittent SeqIterator problem by removing use of this as a sentinel
+* [CLJ-1637](http://dev.clojure.org/jira/browse/CLJ-1636)
+  Fix regression from CLJ-1546 that broke vec on MapEntry
+* [CLJ-1663](http://dev.clojure.org/jira/browse/CLJ-1663)
+  Fix regression from CLJ-979 for DynamicClassLoader classloader delegation
+* [CLJ-1604](http://dev.clojure.org/jira/browse/CLJ-1604)
+  Fix error from AOT'ed code defining a var with a clojure.core symbol name
+* [CLJ-1561](http://dev.clojure.org/jira/browse/CLJ-1561)
+  Fix incorrect line number reporting for error locations
+* [CLJ-1568](http://dev.clojure.org/jira/browse/CLJ-1568)
+  Fix incorrect line number reporting for error locations
+* [CLJ-1638](http://dev.clojure.org/jira/browse/CLJ-1638)
+  Fix regression from CLJ-1546 removed PersistentVector.create(List) method
+* [CLJ-1681](http://dev.clojure.org/jira/browse/CLJ-1681)
+  Fix regression from CLJ-1248 (1.6) in reflection warning with literal nil argument
+
 
 # Changes to Clojure in Version 1.6
 
