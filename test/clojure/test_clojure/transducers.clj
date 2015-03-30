@@ -73,7 +73,7 @@
                gen-distinct gen-dedupe gen-interpose]))
 
 (def gen-actions
-  (gen/vector gen-action))
+  (gen/vector gen-action 1 5))
 
 (def gen-coll
   (gen/vector gen/int))
@@ -96,7 +96,7 @@
 
 (defn apply-as-xf-eduction
   [coll actions]
-  (apply eduction (into actions [coll])))
+  (into [] (eduction (apply comp (map :xf actions)) coll)))
 
 (defn apply-as-xf-transduce
   [coll actions]
@@ -137,7 +137,7 @@
 
 (deftest seq-and-transducer
   (let [res (chk/quick-check
-              100000
+              200000
               (prop/for-all* [result-gen] result-good?))]
     (when-not (:result res)
       (is
