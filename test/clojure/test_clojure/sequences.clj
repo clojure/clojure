@@ -789,6 +789,9 @@
       (is (= '(:foo 42 :foo 42) (take 4 (iterate #(if (= % :foo) 42 :foo) :foo))))
       (is (= '(1 false true true) (take 4 (iterate #(instance? Boolean %) 1))))
       (is (= '(256 128 64 32 16 8 4 2 1 0) (take 10 (iterate #(quot % 2) 256))))
+      (is (= '(0 true) (take 2 (iterate zero? 0))))
+      (is (= 2 (first (next (next (iterate inc 0))))))
+      (is (= [1 2 3] (into [] (take 3) (next (iterate inc 0)))))
 
       ;; reduce via transduce
       (is (= (transduce (take 5) + (iterate #(* 2 %) 2)) 62))
@@ -965,19 +968,6 @@
       [] [1 2]
       {} {:a 1 :b 2}
       #{} #{1 2} ))
-
-
-(deftest test-iterate
-      (are [x y] (= x y)
-           (take 0 (iterate inc 0)) ()
-           (take 1 (iterate inc 0)) '(0)
-           (take 2 (iterate inc 0)) '(0 1)
-           (take 5 (iterate inc 0)) '(0 1 2 3 4) )
-
-      ; test other fns
-      (is (= '(:foo 42 :foo 42) (take 4 (iterate #(if (= % :foo) 42 :foo) :foo))))
-      (is (= '(1 false true true) (take 4 (iterate #(instance? Boolean %) 1))))
-      (is (= '(256 128 64 32 16 8 4 2 1 0) (take 10 (iterate #(quot % 2) 256)))))
 
 
 (deftest test-range
