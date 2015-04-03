@@ -976,6 +976,8 @@
 
 (deftest test-range
   (are [x y] (= x y)
+      (take 100 (range)) (range 100)
+
       (range 0) ()   ; exclusive end!
       (range 1) '(0)
       (range 5) '(0 1 2 3 4)
@@ -1011,7 +1013,29 @@
       (range 3 9 2) '(3 5 7)
       (range 3 9 3) '(3 6)
       (range 3 9 10) '(3)
-      (range 3 9 -1) () ))
+      (range 3 9 -1) ()
+      (range 10 10 -1) ()
+      (range 10 9 -1) '(10)
+      (range 10 8 -1) '(10 9)
+      (range 10 7 -1) '(10 9 8)
+      (range 10 0 -2) '(10 8 6 4 2)
+
+      (take 100 (range)) (take 100 (iterate inc 0))
+
+      (range 1/2 5 1/3) '(1/2 5/6 7/6 3/2 11/6 13/6 5/2 17/6 19/6 7/2 23/6 25/6 9/2 29/6)
+      (range 0.5 8 1.2) '(0.5 1.7 2.9 4.1 5.3 6.5 7.7)
+      (range 0.5 -4 -2) '(0.5 -1.5 -3.5)
+      (take 3 (range Long/MAX_VALUE Double/POSITIVE_INFINITY)) '(9223372036854775807 9223372036854775808N 9223372036854775809N)
+
+      (reduce + (take 100 (range))) 4950
+      (reduce + 0 (take 100 (range))) 4950
+      (reduce + (range 100)) 4950
+      (reduce + 0 (range 100)) 4950
+      (reduce + (range 0.0 100.0)) 4950.0
+      (reduce + 0 (range 0.0 100.0)) 4950.0
+
+      (reduce + (iterator-seq (.iterator (range 100)))) 4950
+      (reduce + (iterator-seq (.iterator (range 0.0 100.0 1.0)))) 4950.0 ))
 
 
 (deftest test-empty?

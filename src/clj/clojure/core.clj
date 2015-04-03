@@ -2680,8 +2680,9 @@
               size (count c)
               b (chunk-buffer size)]
           (dotimes [i size]
-              (when (pred (.nth c i))
-                (chunk-append b (.nth c i))))
+              (let [v (.nth c i)]
+                (when (pred v)
+                  (chunk-append b v))))
           (chunk-cons (chunk b) (filter pred (chunk-rest s))))
         (let [f (first s) r (rest s)]
           (if (pred f)
@@ -2889,24 +2890,20 @@
   start. When start is equal to end, returns empty list."
   {:added "1.0"
    :static true}
-  ([] (range 0 Double/POSITIVE_INFINITY 1))
-  ([end] (range 0 end 1))
-  ([start end] (range start end 1))
+  ([]
+   (iterate inc' 0))
+  ([end]
+   (if (instance? Long end)
+     (clojure.lang.LongRange/create end)
+     (clojure.lang.Range/create end)))
+  ([start end]
+   (if (and (instance? Long start) (instance? Long end))
+     (clojure.lang.LongRange/create start end)
+     (clojure.lang.Range/create start end)))
   ([start end step]
-   (lazy-seq
-    (let [b (chunk-buffer 32)
-          comp (cond (or (zero? step) (= start end)) not=
-                     (pos? step) <
-                     (neg? step) >)]
-      (loop [i start]
-        (if (and (< (count b) 32)
-                 (comp i end))
-          (do
-            (chunk-append b i)
-            (recur (+ i step)))
-          (chunk-cons (chunk b) 
-                      (when (comp i end) 
-                        (range i end step)))))))))
+   (if (and (instance? Long start) (instance? Long end) (instance? Long step))
+     (clojure.lang.LongRange/create start end step)
+     (clojure.lang.Range/create start end step))))
 
 (defn merge
   "Returns a map that consists of the rest of the maps conj-ed onto

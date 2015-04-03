@@ -89,7 +89,7 @@
 
     ; lazy seqs
     (lazy-seq nil)
-    (lazy-seq (range 50))
+    (lazy-seq (list* (range 50)))
 
     ; transient / persistent! round-trip
     (build-via-transient [])
