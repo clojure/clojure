@@ -196,7 +196,7 @@
     (is (thrown? java.lang.IllegalArgumentException
                  (bar ::rect ::rect))))
  (testing "The prefers method returns empty table w/ no prefs"
-   (= {} (prefers bar)))
+   (is (= {} (prefers bar))))
  (testing "Adding a preference to resolve it dispatches correctly"
    (prefer-method bar [::rect ::shape] [::shape ::rect])
    (is (= :rect-shape (bar ::rect ::rect))))
@@ -228,7 +228,7 @@
     (defmethod simple3 :a [x] :a)
     (defmethod simple3 :b [x] :b)
     (is (fn? (get-method simple3 :a)))
-    (is (= (:a ((get-method simple3 :a) 1))))
+    (is (= :a ((get-method simple3 :a) 1)))
     (is (fn? (get-method simple3 :b)))
-    (is (= (:b ((get-method simple3 :b) 1))))
+    (is (= :b ((get-method simple3 :b) 1)))
     (is (nil? (get-method simple3 :c)))))

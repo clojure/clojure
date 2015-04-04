@@ -165,7 +165,7 @@
                        x))
         small-lbq (java.util.concurrent.LinkedBlockingQueue. queue-size)
         worker (seque small-lbq slow-seq)]
-    (doall worker)
+    (dorun worker)
     (is (= worker slow-seq))
     (Thread/sleep 250) ;; make sure agents have time to run or get blocked
     (let [queue-backlog (.size small-lbq)]

@@ -23,7 +23,7 @@
 ; and more...
 
 (deftest test-reduce-from-chunked-into-unchunked
-  (= [1 2 \a \b] (into [] (concat [1 2] "ab"))))
+  (is (= [1 2 \a \b] (into [] (concat [1 2] "ab")))))
  
 (deftest test-reduce
   (let [int+ (fn [a b] (+ (int a) (int b)))

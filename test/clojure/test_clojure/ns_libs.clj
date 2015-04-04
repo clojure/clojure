@@ -66,15 +66,15 @@
 
 (deftest naming-types
   (testing "you cannot use a name already referred from another namespace"
-    (is (thrown? IllegalStateException
-                 #"String already refers to: class java.lang.String"
-                 (definterface String)))
-    (is (thrown? IllegalStateException
-                 #"StringBuffer already refers to: class java.lang.StringBuffer"
-                 (deftype StringBuffer [])))
-    (is (thrown? IllegalStateException
-                 #"Integer already refers to: class java.lang.Integer"
-                 (defrecord Integer [])))))
+    (is (thrown-with-msg? IllegalStateException
+                          #"String already refers to: class java.lang.String"
+                          (definterface String)))
+    (is (thrown-with-msg? IllegalStateException
+                          #"StringBuffer already refers to: class java.lang.StringBuffer"
+                          (deftype StringBuffer [])))
+    (is (thrown-with-msg? IllegalStateException
+                          #"Integer already refers to: class java.lang.Integer"
+                          (defrecord Integer [])))))
 
 (deftest resolution
   (let [s (gensym)]
