@@ -172,14 +172,13 @@ static public final Keyword COND_ALLOW = Keyword.intern(null, "allow");
     static public final Keyword COND_PRESERVE = Keyword.intern(null, "preserve");
 
 static public Object read(PushbackReader r, Object opts){
-    boolean eofIsError = false;
+    boolean eofIsError = true;
     Object eofValue = null;
     if(opts != null && opts instanceof IPersistentMap)
     {
-        Object eof = ((IPersistentMap)opts).containsKey(OPT_EOF);
-        if(EOFTHROW.equals(eof))
-            eofIsError = true;
-        else {
+        Object eof = ((IPersistentMap)opts).valAt(OPT_EOF, EOFTHROW);
+        if(!EOFTHROW.equals(eof)) {
+            eofIsError = false;
             eofValue = eof;
         }
     }

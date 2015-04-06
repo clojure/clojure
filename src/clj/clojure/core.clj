@@ -3622,7 +3622,8 @@
     :read-cond - :allow to process reader conditionals, or
                  :preserve to keep all branches
     :features - persistent set of feature keywords for reader conditionals
-    :eof - on eof, return value unless :eofthrow, then throw
+    :eof - on eof, return value unless :eofthrow, then throw.
+           if not specified, will throw
 
   Note that read can execute code (controlled by *read-eval*),
   and as such should be used only with trusted sources.

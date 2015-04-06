@@ -1818,7 +1818,7 @@ static public Object readString(String s){
 
 static public Object readString(String s, Object opts) {
 	PushbackReader r = new PushbackReader(new StringReader(s));
-	return LispReader.read(r, true, null, false, opts);
+	return LispReader.read(r, opts);
 }
 
 static public void print(Object x, Writer w) throws IOException{
