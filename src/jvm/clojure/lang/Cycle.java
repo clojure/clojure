@@ -15,48 +15,56 @@ package clojure.lang;
 public class Cycle extends ASeq implements IReduce {
 
 private final ISeq all;      // never null
-private final ISeq current;  // never null
+private final ISeq prev;
+private volatile ISeq _current; // lazily realized
 private volatile ISeq _next;  // cached
 
-private Cycle(ISeq all, ISeq current){
+private Cycle(ISeq all, ISeq prev, ISeq current){
     this.all = all;
-    this.current = current;
+    this.prev = prev;
+    this._current = current;
 }
 
-private Cycle(IPersistentMap meta, ISeq all, ISeq current){
+private Cycle(IPersistentMap meta, ISeq all, ISeq prev, ISeq current, ISeq next){
     super(meta);
     this.all = all;
-    this.current = current;
+    this.prev = prev;
+    this._current = current;
+    this._next = next;
 }
 
 public static ISeq create(ISeq vals){
     if(vals == null)
         return PersistentList.EMPTY;
-    return new Cycle(vals, vals);
+    return new Cycle(vals, null, vals);
+}
+
+// realization for use of current
+private ISeq current() {
+    if(_current == null) {
+        ISeq current = prev.next();
+        _current = (current == null) ? all : current;
+    }
+    return _current;
 }
 
 public Object first(){
-    return current.first();
+    return current().first();
 }
 
 public ISeq next(){
-    if(_next == null) {
-        ISeq next = current.next();
-        if (next != null)
-            _next = new Cycle(all, next);
-        else
-            _next = new Cycle(all, all);
-    }
+    if(_next == null)
+        _next = new Cycle(all, current(), null);
     return _next;
 }
 
 public Cycle withMeta(IPersistentMap meta){
-    return new Cycle(meta, all, current);
+    return new Cycle(meta, all, prev, _current, _next);
 }
 
 public Object reduce(IFn f){
-    Object ret = current.first();
-    ISeq s = current;
+    ISeq s = current();
+    Object ret = s.first();
     while(true) {
         s = s.next();
         if(s == null)
@@ -69,7 +77,7 @@ public Object reduce(IFn f){
 
 public Object reduce(IFn f, Object start){
     Object ret = start;
-    ISeq s = current;
+    ISeq s = current();
     while(true){
         ret = f.invoke(ret, s.first());
         if(RT.isReduced(ret))

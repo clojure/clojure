@@ -744,7 +744,11 @@
     (transduce (take 5) + (cycle [1])) 5
     (transduce (take 5) + 2 (cycle [1])) 7
     (transduce (take 5) + (cycle [3 7])) 23
-    (transduce (take 5) + 2 (cycle [3 7])) 25 ))
+    (transduce (take 5) + 2 (cycle [3 7])) 25
+
+    (take 2 (cycle (map #(/ 42 %) '(2 1 0)))) '(21 42)
+    (first (next (cycle (map #(/ 42 %) '(2 1 0))))) 42
+    (into [] (take 2) (cycle (map #(/ 42 %) '(2 1 0)))) '(21 42)))
 
 
 (deftest test-partition
