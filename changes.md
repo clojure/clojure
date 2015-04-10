@@ -25,7 +25,6 @@ logic but is independent of lazy sequence processing. Functions included are:
 * take-while
 * drop
 * drop-while
-* cycle
 * take-nth
 * replace
 * partition-by
@@ -75,7 +74,7 @@ Some related issues addressed during development:
 
 ### 1.2 Reader Conditionals
 
-Reader Conditionals is a new capability to support portable code that
+Reader Conditionals are a new capability to support portable code that
 can run on multiple Clojure platforms with only small changes. In
 particular, this feature aims to support the increasingly common case
 of libraries targeting both Clojure and ClojureScript.
@@ -125,6 +124,7 @@ For more information, see:
 http://dev.clojure.org/display/design/Reader+Conditionals
 
 * [CLJ-1424](http://dev.clojure.org/jira/browse/CLJ-1424)
+* [CLJ-1685](http://dev.clojure.org/jira/browse/CLJ-1685)
 
 ### 1.3 Keyword and Symbol Construction
 
@@ -208,6 +208,8 @@ eduction.
 * [CLJ-1515](http://dev.clojure.org/jira/browse/CLJ-1515)
 * [CLJ-1602](http://dev.clojure.org/jira/browse/CLJ-1602)
 * [CLJ-1669](http://dev.clojure.org/jira/browse/CLJ-1669)
+* [CLJ-1692](http://dev.clojure.org/jira/browse/CLJ-1692)
+* [CLJ-1694](http://dev.clojure.org/jira/browse/CLJ-1694)
 
 ### 1.7 Printing as data
 
@@ -278,6 +280,8 @@ REPL but printing them to a stream will show a different form:
   vec is now faster on almost all inputs
 * [CLJ-1618](http://dev.clojure.org/jira/browse/CLJ-1618)
   set is now faster on almost all inputs
+* [CLJ-1695](http://dev.clojure.org/jira/browse/CLJ-1695)
+  Fixed reflection call in variadic vector-of constructor
 
 ### 2.4 Other enhancements
 
