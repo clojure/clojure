@@ -34,22 +34,43 @@
     (fn [s] {:val s :name s})
     g))
 
+;; These $ versions are "safe" when used with possibly mixed numbers, sequences, etc
+
+(defn- inc$ [n]
+  (if (number? n) (inc n) 1))
+
+(defn- dec$ [n]
+  (if (number? n) (dec n) 1))
+
+(defn- odd?$ [n]
+  (if (number? n) (odd? n) false))
+
+(defn- pos?$ [n]
+  (if (number? n) (pos? n) false))
+
+(defn- empty?$ [s]
+  (if (instance? clojure.lang.Seqable s) (empty? s) false))
+
 (def gen-mapfn
-  (pickfn inc dec))
+  (pickfn inc$ dec$))
+
+(def gen-mapcatfn
+  (pickfn vector
+          #(if (instance? clojure.lang.Seqable %) (partition-all 3 %) (vector %))))
 
 (def gen-predfn
-  (pickfn odd? even? pos? zero? empty? sequential?))
+  (pickfn odd?$ pos?$ empty?$ sequential?))
 
 (def gen-indexedfn
   (pickfn (fn [index item] index)
           (fn [index item] item)
-          (fn [index item] (+ index item))))
+          (fn [index item] (if (number? item) (+ index item) index))))
 
 (def gen-take (fbind (literal gen/s-pos-int) take))
 (def gen-drop (fbind (literal gen/pos-int) drop))
 (def gen-drop-while (fbind gen-predfn drop-while))
 (def gen-map (fbind gen-mapfn map))
-(def gen-mapcat (fbind gen-mapfn mapcat))
+(def gen-mapcat (fbind gen-mapcatfn mapcat))
 (def gen-filter (fbind gen-predfn filter))
 (def gen-remove (fbind gen-predfn remove))
 (def gen-keep (fbind gen-predfn keep))
@@ -102,11 +123,6 @@
   [coll actions]
   (transduce (apply comp (map :xf actions)) conj coll))
 
-(defn- possible-exception? [ex]
-       (or (instance? IllegalArgumentException ex)
-           (instance? ClassCastException ex)
-           (instance? NullPointerException ex)))
-
 (defmacro return-exc [& forms]
   `(try ~@forms (catch Throwable e# e#)))
 
@@ -132,8 +148,7 @@
 
 (defn result-good?
   [{:keys [s xs xi xe xt]}]
-  (or ((every-pred possible-exception?) s xs xi xe xt)
-      (= s xs xi xe xt)))
+  (= s xs xi xe xt))
 
 (deftest seq-and-transducer
   (let [res (chk/quick-check
