@@ -40,7 +40,7 @@
   [argv expr values]
   (assert (vector? argv))
   (assert (every? symbol? argv))
-  (walk/prewalk-replace (zipmap argv values) expr))
+  (walk/postwalk-replace (zipmap argv values) expr))
 
 (defmacro do-template
   "Repeatedly copies expr (in a do block) for each group of arguments

@@ -121,3 +121,8 @@
   (binding [original-report report
             report custom-report]
     (test-all-vars (find-ns 'clojure.test-clojure.test))))
+
+(deftest clj-1588-symbols-in-are-isolated-from-test-clauses
+  (binding [report original-report]
+    (are [x y] (= x y)
+      ((fn [x] (inc x)) 1) 2)))
