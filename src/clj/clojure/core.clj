@@ -7442,9 +7442,10 @@
   nil)
 
 (defn- data-reader-urls []
-  (enumeration-seq
-   (.. Thread currentThread getContextClassLoader
-       (getResources "data_readers.clj"))))
+  (let [cl (.. Thread currentThread getContextClassLoader)]
+    (concat
+      (enumeration-seq (.getResources cl "data_readers.clj"))
+      (enumeration-seq (.getResources cl "data_readers.cljc")))))
 
 (defn- data-reader-var [sym]
   (intern (create-ns (symbol (namespace sym)))
@@ -7455,7 +7456,10 @@
                    (java.io.InputStreamReader.
                     (.openStream url) "UTF-8"))]
     (binding [*file* (.getFile url)]
-      (let [new-mappings (read rdr false nil)]
+      (let [read-opts (if (.endsWith (.getPath url) "cljc")
+                        {:eof nil :read-cond :allow}
+                        {:eof nil})
+            new-mappings (read read-opts rdr)]
         (when (not (map? new-mappings))
           (throw (ex-info (str "Not a valid data-reader map")
                           {:url url})))
