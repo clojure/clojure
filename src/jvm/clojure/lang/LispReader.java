@@ -253,8 +253,6 @@ static private Object read(PushbackReader r, boolean eofIsError, Object eofValue
 			if(macroFn != null)
 				{
 				Object ret = macroFn.invoke(r, (char) ch, opts, pendingForms);
-				if(RT.suppressRead())
-					return null;
 				//no op macros return the reader
 				if(ret == r)
 					continue;
@@ -1210,13 +1208,9 @@ public static class CtorReader extends AFn{
 		if (!(name instanceof Symbol))
 			throw new RuntimeException("Reader tag must be a symbol");
 		Symbol sym = (Symbol)name;
-		if (RT.suppressRead()) {
-			read(r, true, null, true, opts, pendingForms);
-			return r;
-		}
 		Object form = read(r, true, null, true, opts, pendingForms);
 
-		if(isPreserveReadCond(opts)) {
+		if(isPreserveReadCond(opts) || RT.suppressRead()) {
 			return TaggedLiteral.create(sym, form);
 		} else {
 			return sym.getName().contains(".") ? readRecord(form, sym, opts, pendingForms) : readTagged(form, sym, opts, pendingForms);

@@ -692,7 +692,14 @@
     (is (thrown-with-msg? RuntimeException #"is reserved" (read-string {:read-cond :allow} "#?@(:foo :a :else :b)")))
     (is (thrown-with-msg? RuntimeException #"must be a list" (read-string {:read-cond :allow} "#?[:foo :a :else :b]")))
     (is (thrown-with-msg? RuntimeException #"Conditional read not allowed" (read-string {:read-cond :BOGUS} "#?[:clj :a :default nil]")))
-    (is (thrown-with-msg? RuntimeException #"Conditional read not allowed" (read-string "#?[:clj :a :default nil]")))))
+    (is (thrown-with-msg? RuntimeException #"Conditional read not allowed" (read-string "#?[:clj :a :default nil]"))))
+  (testing "clj-1698-regression"
+    (let [opts {:features #{:clj} :read-cond :allow}]
+      (is (= 1 (read-string opts "#?(:cljs {'a 1 'b 2} :clj 1)")))
+      (is (= 1 (read-string opts "#?(:cljs (let [{{b :b} :a {d :d} :c} {}]) :clj 1)")))
+      (is (= '(def m {}) (read-string opts "(def m #?(:cljs ^{:a :b} {} :clj  ^{:a :b} {}))")))
+      (is (= '(def m {}) (read-string opts "(def m #?(:cljs ^{:a :b} {} :clj ^{:a :b} {}))")))
+      (is (= 1 (read-string opts "#?(:cljs {:a #_:b :c} :clj 1)"))))))
 
 (deftest eof-option
   (is (= 23 (read-string {:eof 23} "")))
