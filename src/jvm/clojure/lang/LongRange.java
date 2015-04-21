@@ -220,7 +220,7 @@ class LongRangeIterator implements Iterator {
     }
 }
 
-private static class LongChunk implements IChunk {
+private static class LongChunk implements IChunk, Serializable {
     final long start;
     final long step;
     final int count;

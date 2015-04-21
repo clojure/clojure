@@ -95,7 +95,7 @@
     (build-via-transient [])
     (build-via-transient {})
     (build-via-transient #{})
-    
+
     ; array-seqs
     (seq (make-array Object 10))
     (seq (make-array Boolean/TYPE 10))
@@ -113,7 +113,12 @@
     ; misc seqs
     (seq "s11n")
     (range 50)
-    (rseq (apply sorted-set (reverse (range 100))))))
+    (rseq (apply sorted-set (reverse (range 100))))
+
+    ;; partially realized chunked range
+    (let [r (range 50)]
+      (nth r 35)
+      r)))
 
 (deftest misc-serialization
   (are [v] (= v (-> v serialize deserialize))
