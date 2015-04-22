@@ -1262,3 +1262,16 @@
          identity
          [^{:tag clojure.test-clojure.data-structures/gen-map} m]
          (seq-iter-match (vals m) (vals m)))
+
+(defstruct test-struct :a :b)
+
+(defn gen-struct
+  []
+  (let [s (struct test-struct (gen/int) (gen/int))]
+    (gen/one-of s
+                (assoc s (rand-nth cgen/ednable-scalars) (rand-nth cgen/ednable-scalars)))))
+
+(defspec seq-and-iter-match-for-structs
+         identity
+         [^{:tag clojure.test-clojure.data-structures/gen-struct} s]
+         (seq-iter-match s s))

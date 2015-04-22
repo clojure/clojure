@@ -195,9 +195,9 @@ public Iterator iterator(){
         public Object next(){
             if(ks != null)
             {
-                Object ret = ks.first();
+                Object key = ks.first();
                 ks = ks.next();
-                return ret;
+                return entryAt(key);
             }
             else if(extIter != null && extIter.hasNext())
                 return extIter.next();
