@@ -10,7 +10,10 @@
 ; Contributors: Stuart Halloway
 
 (ns clojure.test-clojure.sequences
-  (:use clojure.test)
+  (:require [clojure.test :refer :all]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.clojure-test :refer (defspec)])
   (:import clojure.lang.IReduce))
 
 ;; *** Tests ***
@@ -973,6 +976,12 @@
       {} {:a 1 :b 2}
       #{} #{1 2} ))
 
+(defspec longrange-equals-range 100
+  (prop/for-all [start gen/int
+                 end gen/int
+                 step gen/s-pos-int]
+                (= (clojure.lang.Range/create start end step)
+                   (clojure.lang.LongRange/create start end step))))
 
 (deftest test-range
   (are [x y] (= x y)
