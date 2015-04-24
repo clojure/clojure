@@ -125,6 +125,9 @@ http://dev.clojure.org/display/design/Reader+Conditionals
 
 * [CLJ-1424](http://dev.clojure.org/jira/browse/CLJ-1424)
 * [CLJ-1685](http://dev.clojure.org/jira/browse/CLJ-1685)
+* [CLJ-1698](http://dev.clojure.org/jira/browse/CLJ-1698)
+* [CLJ-1699](http://dev.clojure.org/jira/browse/CLJ-1699)
+* [CLJ-1700](http://dev.clojure.org/jira/browse/CLJ-1700)
 
 ### 1.3 Keyword and Symbol Construction
 
@@ -210,6 +213,9 @@ eduction.
 * [CLJ-1669](http://dev.clojure.org/jira/browse/CLJ-1669)
 * [CLJ-1692](http://dev.clojure.org/jira/browse/CLJ-1692)
 * [CLJ-1694](http://dev.clojure.org/jira/browse/CLJ-1694)
+* [CLJ-1711](http://dev.clojure.org/jira/browse/CLJ-1711)
+* [CLJ-1709](http://dev.clojure.org/jira/browse/CLJ-1709)
+* [CLJ-1713](http://dev.clojure.org/jira/browse/CLJ-1713)
 
 ### 1.7 Printing as data
 
@@ -229,16 +235,22 @@ REPL but printing them to a stream will show a different form:
 	user=> (/ 1 0)
 	ArithmeticException Divide by zero  clojure.lang.Numbers.divide (Numbers.java:158)
 	user=> (println *e)
-	#error{:cause Divide by zero,
-		   :via [{:type java.lang.ArithmeticException,
-			      :message Divide by zero,
-				  :at [clojure.lang.Numbers divide Numbers.java 158]}],
-		   :trace
-		     [[clojure.lang.Numbers divide Numbers.java 158]
-			  [clojure.lang.Numbers divide Numbers.java 3808]
-			  [user$eval5 invoke NO_SOURCE_FILE 3]
-			  ;; elided ...
-			  ]]}
+	#error {
+	 :cause Divide by zero
+	 :via
+	 [{:type java.lang.ArithmeticException
+	   :message Divide by zero
+	   :at [clojure.lang.Numbers divide Numbers.java 158]}]
+	 :trace
+	 [[clojure.lang.Numbers divide Numbers.java 158]
+	  [clojure.lang.Numbers divide Numbers.java 3808]
+	  ;; ... elided frames
+	  ]}
+
+Additionally, there is a new function available to obtain a Throwable as 
+map data: `Throwable->map`.
+
+* [CLJ-1703](http://dev.clojure.org/jira/browse/CLJ-1703)
 
 ## 2 Enhancements
 
