@@ -119,3 +119,35 @@
        #'var-with-meta "#'clojure.test-clojure.printer/var-with-meta"
        #'var-with-type "#'clojure.test-clojure.printer/var-with-type"))
 
+(defn ^:private ednize-stack-trace-element
+  [^StackTraceElement ste]
+  [(symbol (.getClassName ste))
+   (symbol (.getMethodName ste))
+   (.getFileName ste)
+   (.getLineNumber ste)])
+
+(defn ^:private ednize-throwable-data
+  [throwable-data]
+  (-> throwable-data
+      (update :via (fn [vias]
+                     (map (fn [via]
+                            (-> via
+                                (update :type #(symbol (.getName %)))
+                                (update :at ednize-stack-trace-element)))
+                          vias)))
+      (update :trace #(map ednize-stack-trace-element %))))
+
+(deftest print-throwable
+  (binding [*data-readers* {'error identity}]
+    (are [e] (= (-> e Throwable->map ednize-throwable-data)
+                (-> e pr-str read-string))
+         (Exception. "heyo")
+         (Throwable. "I can a throwable"
+                     (Exception. "chain 1"
+                                 (Exception. "chan 2")))
+         (ex-info "an ex-info" {:with "its" :data 29})
+         (Exception. "outer"
+                     (ex-info "an ex-info" {:with "data"}
+                              (Error. "less outer"
+                                      (ex-info "the root"
+                                               {:with "even" :more 'data})))))))

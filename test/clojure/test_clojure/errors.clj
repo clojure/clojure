@@ -58,3 +58,25 @@
    (catch Throwable t
      (is (= {:foo 1} (ex-data t)))))
   (is (nil? (ex-data (RuntimeException. "example non ex-data")))))
+
+(deftest Throwable->map-test
+  (testing "base functionality"
+    (let [{:keys [cause via trace]} (Throwable->map
+                                     (Exception. "I am a string literal"))]
+      (is (= cause "I am a string literal"))
+      (is (= 1 (count via)))
+      (is (vector? via))
+      (is (= ["I am a string literal"] (map :message via)))))
+  (testing "causes"
+    (let [{:keys [cause via trace]} (Throwable->map
+                                     (Exception. "I am not a number"
+                                                 (Exception. "double two")))]
+      (is (= cause "double two"))
+      (is (= ["I am not a number" "double two"]
+             (map :message via)))))
+  (testing "ex-data"
+    (let [{[{:keys [data]}] :via
+           data-top-level :data}
+          (Throwable->map (ex-info "ex-info"
+                                   {:some "data"}))]
+      (is (= data data-top-level {:some "data"})))))

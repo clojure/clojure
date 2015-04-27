@@ -415,28 +415,43 @@
 
 (defn Throwable->map [^Throwable o]
   (let [base (fn [^Throwable t]
-               {:type (class t)
-                :message (.getLocalizedMessage t)
-                :at (get (.getStackTrace t) 0)})
+               (let [m {:type (class t)
+                        :message (.getLocalizedMessage t)
+                        :at (get (.getStackTrace t) 0)}
+                     data (ex-data t)]
+                 (if data
+                   (assoc m :data data)
+                   m)))
         via (loop [via [], ^Throwable t o]
               (if t
                 (recur (conj via t) (.getCause t))
-                via))] 
-    {:cause (.getLocalizedMessage ^Throwable (last via))
+                via))
+        ^Throwable root (peek via)
+        m {:cause (.getLocalizedMessage root)
            :via (vec (map base via))
-           :trace (vec (.getStackTrace (or ^Throwable (last via) o)))}))
+           :trace (vec (.getStackTrace ^Throwable (or root o)))}
+        data (ex-data root)]
+    (if data
+      (assoc m :data data)
+      m)))
 
 (defn- print-throwable [^Throwable o ^Writer w]
   (.write w "#error {\n :cause ")
-  (let [{:keys [cause via trace]} (Throwable->map o)
+  (let [{:keys [cause data via trace]} (Throwable->map o)
         print-via #(do (.write w "{:type ")
 		               (print-method (:type %) w)
 					   (.write w "\n   :message ")
 					   (print-method (:message %) w)
+             (when-let [data (:data %)]
+               (.write w "\n   :data ")
+               (print-method data w))
 					   (.write w "\n   :at ")
 					   (print-method (:at %) w)
 					   (.write w "}"))]
     (print-method cause w)
+    (when data
+      (.write w "\n :data ")
+      (print-method data w))
     (when via
       (.write w "\n :via\n [")
       (when-let [fv (first via)]
