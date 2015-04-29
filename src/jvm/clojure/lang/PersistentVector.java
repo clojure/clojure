@@ -215,7 +215,6 @@ public IPersistentMap meta(){
 
 
 public PersistentVector cons(Object val){
-	int i = cnt;
 	//room in tail?
 //	if(tail.length < 32)
 	if(cnt - tailoff() < 32)
