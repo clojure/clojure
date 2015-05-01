@@ -61,6 +61,8 @@ Usage: *hello*
     (cl-format nil "~<{~;LIST ~@_~W ~@_~W ~@_~W~;}~:>" '(first second third)))
   "{LIST\n first\n second\n third}")
 
+(defprotocol Foo (foo-you [this]))
+
 (simple-tests pprint-test
   (binding [*print-pprint-dispatch* simple-dispatch]
     (write '(defn foo [x y] 
@@ -103,7 +105,11 @@ Usage: *hello*
        '(add-to-buffer this (make-buffer-blob (str (char c)) nil))
        :stream nil)))
   "(add-to-buffer\n  this\n  (make-buffer-blob (str (char c)) nil))"
-  )
+
+  (binding [*print-pprint-dispatch* simple-dispatch]
+    (write (var Foo) :stream nil))
+  "#'clojure.test-clojure.pprint/Foo"
+)
 
 
 
