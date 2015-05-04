@@ -108,7 +108,7 @@ public int hashCode(){
 	ISeq s = seq();
 	if(s == null)
 		return 1;
-	return Util.hash(seq());
+	return Util.hash(s);
 }
 
 public int hasheq(){
