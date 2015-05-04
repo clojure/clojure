@@ -347,7 +347,10 @@
     (is (= ["drib" "god" "hsif" "kravdraa" "tac"]
           (->> ["cat" "dog" "fish" "bird" "aardvark"]
             (eduction (map clojure.string/reverse))
-            (sort-by first))))))
+            (sort-by first)))))
+  (testing "expanding transducer with nils"
+           (is (= '(1 2 3 nil 4 5 6 nil)
+                  (eduction cat [[1 2 3 nil] [4 5 6 nil]])))))
 
 (deftest test-eduction-completion
   (testing "eduction completes inner xformed reducing fn"

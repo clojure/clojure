@@ -16,7 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.LinkedList;
 
 public class TransformerIterator implements Iterator {
 
@@ -169,7 +169,7 @@ private static class Single implements Buffer {
 }
 
 private static class Many implements Buffer {
-    private final Queue vals = new ConcurrentLinkedQueue();
+    private final Queue vals = new LinkedList();
 
     public Many(Object o1, Object o2) {
         vals.add(o1);
