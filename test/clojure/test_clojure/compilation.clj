@@ -251,6 +251,13 @@
     (is (try (load-string "(.submit (java.util.concurrent.Executors/newCachedThreadPool) ^Runnable #())")
              (catch Compiler$CompilerException e nil)))))
 
+(defn ^{:tag 'long} hinted-primfn [^long x] x)
+(defn unhinted-primfn [^long x] x)
+(deftest CLJ-1533-primitive-functions-lose-tag
+  (should-not-reflect #(Math/abs (clojure.test-clojure.compilation/hinted-primfn 1)))
+  (should-not-reflect #(Math/abs ^long (clojure.test-clojure.compilation/unhinted-primfn 1))))
+
+
 (defrecord Y [a])
 #clojure.test_clojure.compilation.Y[1]
 (defrecord Y [b])

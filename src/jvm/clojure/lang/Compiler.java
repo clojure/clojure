@@ -3792,9 +3792,9 @@ static class InvokeExpr implements Expr{
 					String primc = FnMethod.primInterface(args);
 					if(primc != null)
 						return analyze(context,
-						               RT.listStar(Symbol.intern(".invokePrim"),
-						                        ((Symbol) form.first()).withMeta(RT.map(RT.TAG_KEY, Symbol.intern(primc))),
-						                        form.next()));
+						               ((IObj)RT.listStar(Symbol.intern(".invokePrim"),
+						                                  ((Symbol) form.first()).withMeta(RT.map(RT.TAG_KEY, Symbol.intern(primc))),
+						                                  form.next())).withMeta((IPersistentMap)RT.conj(RT.meta(v), RT.meta(form))));
 					break;
 					}
 				}
