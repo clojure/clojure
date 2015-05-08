@@ -12,7 +12,7 @@ package clojure.lang;
 
 /* Alex Miller, Dec 5, 2014 */
 
-public class Iterate extends ASeq implements IReduce {
+public class Iterate extends ASeq implements IReduce, IPending {
 
 private static final Object UNREALIZED_SEED = new Object();
 private final IFn f;      // never null
@@ -36,6 +36,10 @@ private Iterate(IPersistentMap meta, IFn f, Object prevSeed, Object seed, ISeq n
 
 public static ISeq create(IFn f, Object seed){
     return new Iterate(f, null, seed);
+}
+
+public boolean isRealized() {
+    return _seed != UNREALIZED_SEED;
 }
 
 public Object first(){

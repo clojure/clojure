@@ -12,7 +12,7 @@ package clojure.lang;
 
 /* Alex Miller, Dec 5, 2014 */
 
-public class Cycle extends ASeq implements IReduce {
+public class Cycle extends ASeq implements IReduce, IPending {
 
 private final ISeq all;      // never null
 private final ISeq prev;
@@ -46,6 +46,10 @@ private ISeq current() {
         _current = (current == null) ? all : current;
     }
     return _current;
+}
+
+public boolean isRealized() {
+    return _current != null;
 }
 
 public Object first(){
