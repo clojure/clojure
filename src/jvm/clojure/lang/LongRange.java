@@ -116,13 +116,22 @@ public Object first() {
 public void forceChunk() {
     if(_chunk != null) return;
 
-    long nextStart = start + (step * CHUNK_SIZE);
-    if(boundsCheck.exceededBounds(nextStart)) {
-        int count = absCount(start, end, step);
-        _chunk = new LongChunk(start, step, count);
-    } else {
+    long count;
+    try {
+        count = rangeCount(start, end, step);
+    } catch(ArithmeticException e) {
+        // size of total range is > Long.MAX_VALUE so must step to count
+        // this only happens in pathological range cases like:
+        // (range -9223372036854775808 9223372036854775807 9223372036854775807)
+        count = steppingCount(start, end, step);
+    }
+
+    if (count > CHUNK_SIZE) { // not last chunk
+        long nextStart = start + (step * CHUNK_SIZE);   // cannot overflow, must be < end
         _chunk = new LongChunk(start, step, CHUNK_SIZE);
         _chunkNext = new LongRange(nextStart, end, step, boundsCheck);
+    } else {  // last chunk
+        _chunk = new LongChunk(start, step, (int) count);   // count must be <= CHUNK_SIZE
     }
 }
 
@@ -155,17 +164,55 @@ public ISeq chunkedMore() {
     return _chunkNext;
 }
 
-public int absCount(long start, long end, long step) {
-    double c = (double) (end - start) / step;
-    int ic = (int) c;
-    if(c > ic)
-        return ic + 1;
-    else
-        return ic;
+// fallback count mechanism for pathological cases
+// returns either exact count or CHUNK_SIZE+1
+long steppingCount(long start, long end, long step) {
+    long count = 1;
+    long s = start;
+    while(count <= CHUNK_SIZE) {
+        try {
+            s = Numbers.add(s, step);
+            if(boundsCheck.exceededBounds(s))
+                break;
+            else
+                count++;
+        } catch(ArithmeticException e) {
+            break;
+        }
+    }
+    return count;
+}
+
+// returns exact size of remaining items OR throws ArithmeticException for overflow case
+long rangeCount(long start, long end, long step) {
+    // (1) count = ceiling ( (end - start) / step )
+    // (2) ceiling(a/b) = (a+b+o)/b where o=-1 for positive stepping and +1 for negative stepping
+    // thus: count = end - start + step + o / step
+    return Numbers.add(Numbers.add(Numbers.minus(end, start), step), this.step > 0 ? -1 : 1) / step;
 }
 
 public int count() {
-    return absCount(start, end, step);
+    try {
+        long c = rangeCount(start, end, step);
+        if(c > Integer.MAX_VALUE) {
+            return Numbers.throwIntOverflow();
+        } else {
+            return (int) c;
+        }
+    } catch(ArithmeticException e) {
+        // rare case from large range or step, fall back to iterating and counting
+        Iterator iter = this.iterator();
+        long count = 0;
+        while(iter.hasNext()) {
+            iter.next();
+            count++;
+        }
+
+        if(count > Integer.MAX_VALUE)
+            return Numbers.throwIntOverflow();
+        else
+            return (int)count;
+    }
 }
 
 public Object reduce(IFn f) {
@@ -196,19 +243,26 @@ public Iterator iterator() {
 
 class LongRangeIterator implements Iterator {
     private long next;
+    private boolean hasNext;
 
     public LongRangeIterator() {
         this.next = start;
+        this.hasNext = true;
     }
 
     public boolean hasNext() {
-        return(! boundsCheck.exceededBounds(next));
+        return hasNext;
     }
 
     public Object next() {
-        if (hasNext()) {
+        if (hasNext) {
             long ret = next;
-            next = next + step;
+            try {
+                next = Numbers.add(next, step);
+                hasNext = ! boundsCheck.exceededBounds(next);
+            } catch(ArithmeticException e) {
+                hasNext = false;
+            }
             return ret;
         } else {
             throw new NoSuchElementException();
