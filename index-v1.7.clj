@@ -77,7 +77,7 @@
    :doc
    "Reflection on Host Types\nAlpha - subject to change.\n\nTwo main entry points: \n\n* type-reflect reflects on something that implements TypeReference.\n* reflect (for REPL use) reflects on the class of an instance, or\n  on a class if passed a class\n\nKey features:\n\n* Exposes the read side of reflection as pure data. Reflecting\n  on a type returns a map with keys :bases, :flags, and :members.\n\n* Canonicalizes class names as Clojure symbols. Types can extend\n  to the TypeReference protocol to indicate that they can be\n  unambiguously resolved as a type name. The canonical format\n  requires one non-Java-ish convention: array brackets are <>\n  instead of [] so they can be part of a Clojure symbol.\n\n* Pluggable Reflectors for different implementations. The default\n  JavaReflector is good when you have a class in hand, or use\n  the AsmReflector for \"hands off\" reflection without forcing\n  classes to load.\n\nPlatform implementers must:\n\n* Create an implementation of Reflector.\n* Create one or more implementations of TypeReference.\n* def default-reflector to be an instance that satisfies Reflector."}
   {:source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url "http://clojure.github.com/clojure/clojure.repl-api.html",
    :name "clojure.repl",
    :author
@@ -10351,66 +10351,66 @@
    :name "apropos",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L167",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L168",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/apropos",
    :doc
    "Given a regular expression or stringable thing, return a seq of all\npublic definitions in all currently-loaded namespaces that match the\nstr-or-pattern.",
    :var-type "function",
-   :line 167,
+   :line 168,
    :file "src/clj/clojure/repl.clj"}
   {:arglists ([fn-name]),
    :name "demunge",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L193",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L194",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/demunge",
    :doc
    "Given a string representation of a fn class,\nas in a stack trace element, returns a readable version.",
    :var-type "function",
-   :line 193,
+   :line 194,
    :file "src/clj/clojure/repl.clj"}
   {:arglists ([nsname]),
    :name "dir",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L187",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L188",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/dir",
    :doc "Prints a sorted directory of public vars in a namespace",
    :var-type "macro",
-   :line 187,
+   :line 188,
    :file "src/clj/clojure/repl.clj"}
   {:arglists ([ns]),
    :name "dir-fn",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L181",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L182",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/dir-fn",
    :doc
    "Returns a sorted seq of symbols naming public vars in\na namespace",
    :var-type "function",
-   :line 181,
+   :line 182,
    :file "src/clj/clojure/repl.clj"}
   {:arglists ([name]),
    :name "doc",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L120",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L120",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/doc",
    :doc
@@ -10422,10 +10422,10 @@
    :name "find-doc",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L104",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L104",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/find-doc",
    :doc
@@ -10437,67 +10437,67 @@
    :name "pst",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L226",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L227",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/pst",
    :doc
    "Prints a stack trace of the exception, to the depth requested. If none supplied, uses the root cause of the\nmost recent repl exception (*e), and a depth of 12.",
    :var-type "function",
-   :line 226,
+   :line 227,
    :file "src/clj/clojure/repl.clj"}
   {:arglists ([t]),
    :name "root-cause",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L200",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L201",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/root-cause",
    :doc
    "Returns the initial cause of an exception or error by peeling off all of\nits wrappers",
    :var-type "function",
-   :line 200,
+   :line 201,
    :file "src/clj/clojure/repl.clj"}
   {:arglists ([] [f]),
    :name "set-break-handler!",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L262",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L263",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/set-break-handler!",
    :doc
    "Register INT signal handler.  After calling this, Ctrl-C will cause\nthe given function f to be called with a single argument, the signal.\nUses thread-stopper if no function given.",
    :var-type "function",
-   :line 262,
+   :line 263,
    :file "src/clj/clojure/repl.clj"}
   {:arglists ([n]),
    :name "source",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L158",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L159",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/source",
    :doc
    "Prints the source code for the given symbol, if it can find it.\nThis requires that the symbol resolve to a Var defined in a\nnamespace for which the .clj is in the classpath.\n\nExample: (source filter)",
    :var-type "macro",
-   :line 158,
+   :line 159,
    :file "src/clj/clojure/repl.clj"}
   {:arglists ([x]),
    :name "source-fn",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L134",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L134",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/source-fn",
    :doc
@@ -10509,30 +10509,30 @@
    :name "stack-element-str",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L213",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L214",
    :added "1.3",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/stack-element-str",
    :doc
    "Returns a (possibly unmunged) string representation of a StackTraceElement",
    :var-type "function",
-   :line 213,
+   :line 214,
    :file "src/clj/clojure/repl.clj"}
   {:arglists ([] [thread]),
    :name "thread-stopper",
    :namespace "clojure.repl",
    :source-url
-   "https://github.com/clojure/clojure/blob/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj#L256",
+   "https://github.com/clojure/clojure/blob/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj#L257",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/caa3b4fdc8da5880309b317d0045b1280181c452/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/61bc3523eebaade6a1d856f74330169eb26211ea/src/clj/clojure/repl.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.repl-api.html#clojure.repl/thread-stopper",
    :doc
    "Returns a function that takes one arg and uses that as an exception message\nto stop the given thread.  Defaults to the current thread",
    :var-type "function",
-   :line 256,
+   :line 257,
    :file "src/clj/clojure/repl.clj"}
   {:arglists ([s1] [s1 s2] [s1 s2 & sets]),
    :name "difference",
