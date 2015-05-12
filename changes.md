@@ -71,6 +71,7 @@ Some related issues addressed during development:
 * [CLJ-1635](http://dev.clojure.org/jira/browse/CLJ-1635)
 * [CLJ-1683](http://dev.clojure.org/jira/browse/CLJ-1683)
 * [CLJ-1669](http://dev.clojure.org/jira/browse/CLJ-1669)
+* [CLJ-1723](http://dev.clojure.org/jira/browse/CLJ-1723)
 
 ### 1.2 Reader Conditionals
 
@@ -128,6 +129,7 @@ http://dev.clojure.org/display/design/Reader+Conditionals
 * [CLJ-1698](http://dev.clojure.org/jira/browse/CLJ-1698)
 * [CLJ-1699](http://dev.clojure.org/jira/browse/CLJ-1699)
 * [CLJ-1700](http://dev.clojure.org/jira/browse/CLJ-1700)
+* [CLJ-1728](http://dev.clojure.org/jira/browse/CLJ-1728)
 
 ### 1.3 Keyword and Symbol Construction
 
@@ -216,6 +218,8 @@ eduction.
 * [CLJ-1711](http://dev.clojure.org/jira/browse/CLJ-1711)
 * [CLJ-1709](http://dev.clojure.org/jira/browse/CLJ-1709)
 * [CLJ-1713](http://dev.clojure.org/jira/browse/CLJ-1713)
+* [CLJ-1726](http://dev.clojure.org/jira/browse/CLJ-1726)
+* [CLJ-1727](http://dev.clojure.org/jira/browse/CLJ-1727)
 
 ### 1.7 Printing as data
 
@@ -251,6 +255,7 @@ Additionally, there is a new function available to obtain a Throwable as
 map data: `Throwable->map`.
 
 * [CLJ-1703](http://dev.clojure.org/jira/browse/CLJ-1703)
+* [CLJ-1716](http://dev.clojure.org/jira/browse/CLJ-1716)
 
 ## 2 Enhancements
 
@@ -380,7 +385,10 @@ map data: `Throwable->map`.
   Fix regression from CLJ-1546 removed PersistentVector.create(List) method
 * [CLJ-1681](http://dev.clojure.org/jira/browse/CLJ-1681)
   Fix regression from CLJ-1248 (1.6) in reflection warning with literal nil argument
-
+* [CLJ-1648](http://dev.clojure.org/jira/browse/CLJ-1648)
+  Use equals() instead of == when resolving Symbol
+* [CLJ-1195](http://dev.clojure.org/jira/browse/CLJ-1195)
+  emit-hinted-impl expands to ns-qualified invocation of fn
 
 # Changes to Clojure in Version 1.6
 
