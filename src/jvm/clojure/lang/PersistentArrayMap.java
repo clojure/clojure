@@ -74,6 +74,8 @@ static public PersistentArrayMap createWithCheck(Object[] init){
 }
 
 static public PersistentArrayMap createAsIfByAssoc(Object[] init){
+	if ((init.length & 1) == 1)
+                throw new IllegalArgumentException(String.format("No value supplied for key: %s", init[init.length-1]));
 	// If this looks like it is doing busy-work, it is because it
 	// is achieving these goals: O(n^2) run time like
 	// createWithCheck(), never modify init arg, and only

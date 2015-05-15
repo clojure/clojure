@@ -1062,6 +1062,9 @@
       {x1 v4a, w5a v4c, v4a z3b, y2 2} [x1 v4a, w5a v4a, w5b v4b,
                                         v4a z3a, y2 2, v4b z3b, w5c v4c])))
 
+(deftest test-array-map-arity
+  (is (thrown? IllegalArgumentException
+               (array-map 1 2 3))))
 
 (deftest test-assoc
   (are [x y] (= x y)
