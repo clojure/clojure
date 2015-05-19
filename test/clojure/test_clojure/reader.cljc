@@ -692,7 +692,10 @@
     (is (thrown-with-msg? RuntimeException #"is reserved" (read-string {:read-cond :allow} "#?@(:foo :a :else :b)")))
     (is (thrown-with-msg? RuntimeException #"must be a list" (read-string {:read-cond :allow} "#?[:foo :a :else :b]")))
     (is (thrown-with-msg? RuntimeException #"Conditional read not allowed" (read-string {:read-cond :BOGUS} "#?[:clj :a :default nil]")))
-    (is (thrown-with-msg? RuntimeException #"Conditional read not allowed" (read-string "#?[:clj :a :default nil]"))))
+    (is (thrown-with-msg? RuntimeException #"Conditional read not allowed" (read-string "#?[:clj :a :default nil]")))
+    (is (thrown-with-msg? RuntimeException #"Reader conditional splicing not allowed at the top level" (read-string {:read-cond :allow} "#?@(:clj [1 2])")))
+    (is (thrown-with-msg? RuntimeException #"Reader conditional splicing not allowed at the top level" (read-string {:read-cond :allow} "#?@(:clj [1])")))
+    (is (thrown-with-msg? RuntimeException #"Reader conditional splicing not allowed at the top level" (read-string {:read-cond :allow} "#?@(:clj []) 1"))))
   (testing "clj-1698-regression"
     (let [opts {:features #{:clj} :read-cond :allow}]
       (is (= 1 (read-string opts "#?(:cljs {'a 1 'b 2} :clj 1)")))
