@@ -16,7 +16,6 @@ Many existing sequence functions now have a new arity (one fewer argument
 than before). This arity will return a transducer that represents the same
 logic but is independent of lazy sequence processing. Functions included are:
 
-* conj (conjs to [])
 * map
 * mapcat
 * filter
@@ -38,7 +37,7 @@ logic but is independent of lazy sequence processing. Functions included are:
 Additionally some new transducer functions have been added:
 
 * cat - concatenates the contents of each input
-* de-dupe - removes consecutive duplicated values
+* dedupe - removes consecutive duplicated values
 * random-sample - returns items from coll with random probability
 
 And this function can be used to make completing transforms:
@@ -51,12 +50,12 @@ transducers in different ways:
 * sequence - takes a transformation and a coll and produces a lazy seq
 * transduce - reduce with a transformation (eager)
 * eduction - returns a reducible/iterable of applications of the transducer to items in coll. Applications are re-performed with every reduce/iterator.
-* run! - run the transformation for side effects on the collection
 
 There have been a number of internal changes to support transducers:
 
 * volatiles - there are a new set of functions (volatile!, vswap!, vreset!, volatile?) to create and use volatile "boxes" to hold state in stateful transducers. Volatiles are faster than atoms but give up atomicity guarantees so should only be used with thread isolation.
 * array iterators - added support for iterators over arrays
+* conj can be used as a reducing function and will conj to []
 
 Some related issues addressed during development:
 * [CLJ-1511](http://dev.clojure.org/jira/browse/CLJ-1511)
@@ -88,13 +87,14 @@ prior to .cljc.
 A new reader form can be used to specify "reader conditional" code in
 cljc files (and *only* cljc files). Each platform defines a feature
 identifying the platform (:clj, :cljs, :cljr). The reader conditional
-specifies code that is read conditionally based on the feature/
+specifies code that is read conditionally based on the feature. The
+REPL also allows reader conditionals.
 
 Form #? takes a list of alternating feature and expression. These are
 checked like cond and the selected expression is read and returned. Other
-branches are unread. If no branch is selected, the reader reads nothing
-(not nil, but literally as if reading ""). An optional ":default" branch
-can be used as a fallthrough.
+branches are read but skipped. If no branch is selected, the reader reads
+nothing (not nil, but literally as if reading no form). An optional
+`:default` branch can be used as a fallthrough.
 
 Reader conditional with 2 features and a default:
 
@@ -104,14 +104,14 @@ Reader conditional with 2 features and a default:
 
 There is also a reader conditional splicing form. The evaluated expression
 should be sequential and will be spliced into the surrounded code, similar
-to unqoute-splicing.
+to unquote-splicing.
 
 For example:
 
    [1 2 #?@(:clj [3 4] :cljs [5 6])]
 
 This form would read as [1 2 3 4] on Clojure, [1 2 5 6] on ClojureScript,
-and [1 2] on any other platform.
+and [1 2] on any other platform. Splicing is not allowed at the top level.
 
 Additionally, the reader can now be invoked with options for the features
 to use and how to interpret reader conditionals. By default, reader conditionals
@@ -130,6 +130,7 @@ http://dev.clojure.org/display/design/Reader+Conditionals
 * [CLJ-1699](http://dev.clojure.org/jira/browse/CLJ-1699)
 * [CLJ-1700](http://dev.clojure.org/jira/browse/CLJ-1700)
 * [CLJ-1728](http://dev.clojure.org/jira/browse/CLJ-1728)
+* [CLJ-1706](http://dev.clojure.org/jira/browse/CLJ-1706)
 
 ### 1.3 Keyword and Symbol Construction
 
@@ -256,6 +257,15 @@ map data: `Throwable->map`.
 
 * [CLJ-1703](http://dev.clojure.org/jira/browse/CLJ-1703)
 * [CLJ-1716](http://dev.clojure.org/jira/browse/CLJ-1716)
+* [CLJ-1735](http://dev.clojure.org/jira/browse/CLJ-1735)
+
+### 1.8 run!
+
+run! is a new function that takes a side effect reducing function and runs
+it for all items in a collection via reduce. The accumulator is ignored and
+nil is returned.
+
+    (run! println (range 10))
 
 ## 2 Enhancements
 
