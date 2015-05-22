@@ -413,7 +413,10 @@
 (defmethod print-method StackTraceElement [^StackTraceElement o ^Writer w]
   (print-method [(symbol (.getClassName o)) (symbol (.getMethodName o)) (.getFileName o) (.getLineNumber o)] w))
 
-(defn Throwable->map [^Throwable o]
+(defn Throwable->map
+  "Constructs a data representation for a Throwable."
+  {:added "1.7"}
+  [^Throwable o]
   (let [base (fn [^Throwable t]
                (let [m {:type (class t)
                         :message (.getLocalizedMessage t)
