@@ -2167,10 +2167,11 @@ static public Class classForNameNonLoading(String name) {
 	return classForName(name, false, baseLoader());
 }
 
-static public Class loadClassForName(String name) {
+static public Class loadClassForName(String name, boolean load) {
+	Class c = null;
 	try
 		{
-		classForNameNonLoading(name);
+		c = classForName(name, load, baseLoader());
 		}
 	catch(Exception e)
 		{
@@ -2179,7 +2180,11 @@ static public Class loadClassForName(String name) {
 		else
 			throw Util.sneakyThrow(e);
 		}
-	return classForName(name);
+	return c;
+}
+
+static public Class loadClassForName(String name) {
+	return loadClassForName(name, true);
 }
 
 static public float aget(float[] xs, int i){
