@@ -2182,6 +2182,22 @@ static public Class loadClassForName(String name) {
 	return classForName(name);
 }
 
+static public Class getClassForNameNonLoading(String name) {
+	Class c = null;
+	try
+		{
+		c = classForNameNonLoading(name);
+		}
+	catch(Exception e)
+		{
+		if (e instanceof ClassNotFoundException)
+			return null;
+		else
+			throw Util.sneakyThrow(e);
+		}
+	return c;
+}
+
 static public float aget(float[] xs, int i){
 	return xs[i];
 }

@@ -257,7 +257,7 @@
   [& bases]
     (let [[super interfaces] (get-super-and-interfaces bases)
           pname (proxy-name super interfaces)]
-      (or (RT/loadClassForName pname)
+      (or (RT/getClassForNameNonLoading pname)
           (let [[cname bytecode] (generate-proxy super interfaces)]
             (. ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) (defineClass pname bytecode [super interfaces]))))))
 
@@ -406,6 +406,3 @@
                    (when-let [pseq (seq plseq)]
                      (cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
                            (thisfn (rest pseq)))))) (keys pmap))))))
-
-
-
