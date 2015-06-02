@@ -52,6 +52,26 @@
              (recur ret)))
          ret)))))
 
+(defn- naive-seq-reduce
+  "Reduces a seq, ignoring any opportunities to switch to a more
+  specialized implementation."
+  [s f val]
+  (loop [s (seq s)
+         val val]
+    (if s
+      (let [ret (f val (first s))]
+        (if (reduced? ret)
+          @ret
+          (recur (next s) ret)))
+      val)))
+
+(defn- interface-or-naive-reduce
+  "Reduces via IReduceInit if possible, else naively."
+  [coll f val]
+  (if (instance? clojure.lang.IReduceInit coll)
+    (.reduce ^clojure.lang.IReduceInit coll f val)
+    (naive-seq-reduce coll f val)))
+
 (extend-protocol CollReduce
   nil
   (coll-reduce
@@ -119,7 +139,7 @@
            (recur (chunk-next s)
                   f
                   ret)))
-       (coll-reduce s f val))
+       (interface-or-naive-reduce s f val))
      val))
  
   clojure.lang.StringSeq
@@ -143,13 +163,12 @@
           f f
           val val]
      (if-let [s (seq s)]
-       ;; roll over to faster implementation if underlying seq changes type
        (if (identical? (class s) cls)
          (let [ret (f val (first s))]
                 (if (reduced? ret)
                   @ret
                   (recur cls (next s) f ret)))
-         (coll-reduce s f val))
+         (interface-or-naive-reduce s f val))
        val))))
 
 (defprotocol IKVReduce

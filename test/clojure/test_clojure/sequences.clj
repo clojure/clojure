@@ -90,6 +90,18 @@
                 (reduce f start (range 5))))]
     (is (= [0 1 2 3 4] (into [] iri)))))
 
+;; CLJ-1237 regression test
+(deftest reduce-with-varying-impls
+  (is (= 1000000
+         (->> (repeat 500000 (cons 1 [1]))
+              (apply concat)
+              (reduce +))))
+
+  (is (= 4500000
+         (->> (range 100000)
+              (mapcat (fn [_] (java.util.ArrayList. (range 10))))
+              (reduce +)))))
+
 (deftest test-equality
   ; lazy sequences
   (are [x y] (= x y)
