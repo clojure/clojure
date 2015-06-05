@@ -6635,16 +6635,6 @@ public static Object macroexpand1(Object x) {
 						// hide the 2 extra params for a macro
 						throw new ArityException(e.actual - 2, e.name);
 					}
-				catch(Throwable e)
-					{
-						if(!(e instanceof CompilerException)) {
-								Integer line = (Integer) LINE.deref();
-								Integer column = (Integer) COLUMN.deref();
-								String source = (String) SOURCE.deref();
-								throw new CompilerException(source, line, column, e);
-						} else
-							throw (CompilerException) e;
-					}
 			}
 		else
 			{

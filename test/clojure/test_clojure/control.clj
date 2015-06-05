@@ -373,7 +373,7 @@
       :a (char 97)))
   (testing "test error on duplicate test constants"
     (is (thrown-with-msg?
-          clojure.lang.Compiler$CompilerException
+          IllegalArgumentException
           #"Duplicate case test constant: 1"
           (eval `(case 0 1 :x 1 :y)))))
   (testing "test correct behaviour on Number truncation"
