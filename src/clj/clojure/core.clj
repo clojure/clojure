@@ -128,7 +128,9 @@
    :doc "Returns a seq on the collection. If the collection is
     empty, returns nil.  (seq nil) returns nil. seq also works on
     Strings, native Java arrays (of reference types) and any objects
-    that implement Iterable."
+    that implement Iterable. Note that seqs cache values, thus seq
+    should not be used on any Iterable whose iterator repeatedly
+    returns the same mutable object."
    :tag clojure.lang.ISeq
    :added "1.0"
    :static true}
@@ -5483,7 +5485,9 @@
 
 (defn iterator-seq
   "Returns a seq on a java.util.Iterator. Note that most collections
-  providing iterators implement Iterable and thus support seq directly."
+  providing iterators implement Iterable and thus support seq directly.
+  Seqs cache values, thus iterator-seq should not be used on any
+  iterator that repeatedly returns the same mutable object."
   {:added "1.0"
    :static true}
   [iter]
