@@ -614,7 +614,7 @@
    :else (cons (first arglist) (spread (next arglist)))))
 
 (defn list*
-  "Creates a new list containing the items prepended to the rest, the
+  "Creates a new seq containing the items prepended to the rest, the
   last of which will be treated as a sequence."
   {:added "1.0"
    :static true}
