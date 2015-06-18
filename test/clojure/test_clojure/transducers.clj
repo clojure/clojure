@@ -368,6 +368,10 @@
       (is (= 1 @counter))
       (is (= ["1" "2" "3" "4" "5"] res)))))
 
+(deftest test-run!
+  (is (nil? (run! identity [1])))
+  (is (nil? (run! reduced (range)))))
+
 (deftest test-distinct
   (are [out in] (= out (sequence (distinct in)) (sequence (distinct) in))
        [] []
