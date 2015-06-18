@@ -7369,7 +7369,8 @@
   effects, on successive items in the collection. Returns nil"
   {:added "1.7"}
   [proc coll]
-  (reduce #(proc %2) nil coll))
+  (reduce #(proc %2) nil coll)
+  nil)
 
 
 (defn tagged-literal?
