@@ -67,3 +67,47 @@
       (is (= {:baz :quux} (meta (first expanded))))
       (is (= {:bar :baz} (meta (second expanded))))
       (is (= {:foo :bar} (meta (last (second expanded))))))))
+
+(def constantly-nil (constantly nil))
+
+(deftest some->test
+  (is (nil? (some-> nil)))
+  (is (= 0 (some-> 0)))
+  (is (= -1 (some-> 1 (- 2))))
+  (is (nil? (some-> 1 constantly-nil (- 2)))))
+
+(deftest some->>test
+  (is (nil? (some->> nil)))
+  (is (= 0 (some->> 0)))
+  (is (= 1 (some->> 1 (- 2))))
+  (is (nil? (some->> 1 constantly-nil (- 2)))))
+
+(deftest cond->test
+  (is (= 0 (cond-> 0)))
+  (is (= -1 (cond-> 0 true inc true (- 2))))
+  (is (= 0 (cond-> 0 false inc)))
+  (is (= -1 (cond-> 1 true (- 2) false inc))))
+
+(deftest cond->>test
+  (is (= 0 (cond->> 0)))
+  (is (= 1 (cond->> 0 true inc true (- 2))))
+  (is (= 0 (cond->> 0 false inc)))
+  (is (= 1 (cond->> 1 true (- 2) false inc))))
+
+(deftest as->test
+  (is (= 0 (as-> 0 x)))
+  (is (= 1 (as-> 0 x (inc x))))
+  (is (= 2 (as-> [0 1] x
+             (map inc x)
+             (reverse x)
+             (first x)))))
+
+(deftest threading-loop-recur
+  (is (nil? (loop []
+              (as-> 0 x
+                (when-not (zero? x)
+                  (recur))))))
+  (is (nil? (loop [x nil] (some-> x recur))))
+  (is (nil? (loop [x nil] (some->> x recur))))
+  (is (= 0 (loop [x 0] (cond-> x false recur))))
+  (is (= 0 (loop [x 0] (cond->> x false recur)))))
