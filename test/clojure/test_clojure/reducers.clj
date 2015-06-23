@@ -89,3 +89,7 @@
                            ([ret k v] (when (= k k-fail)
                                         (throw (IndexOutOfBoundsException.)))))
                          (zipmap (range test-map-count) (repeat :dummy)))))))
+
+(deftest test-closed-over-clearing
+  ;; this will throw OutOfMemory without proper reference clearing
+  (is (number? (reduce + 0 (r/map identity (range 1e8))))))
