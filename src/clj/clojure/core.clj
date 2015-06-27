@@ -938,7 +938,7 @@
 (defn ^:private >0? [n] (clojure.lang.Numbers/gt n 0))
 
 (defn +'
-  "Returns the sum of nums. (+) returns 0. Supports arbitrary precision.
+  "Returns the sum of nums. (+') returns 0. Supports arbitrary precision.
   See also: +"
   {:inline (nary-inline 'addP)
    :inline-arities >1?
@@ -962,7 +962,7 @@
      (reduce1 + (+ x y) more)))
 
 (defn *'
-  "Returns the product of nums. (*) returns 1. Supports arbitrary precision.
+  "Returns the product of nums. (*') returns 1. Supports arbitrary precision.
   See also: *"
   {:inline (nary-inline 'multiplyP)
    :inline-arities >1?
