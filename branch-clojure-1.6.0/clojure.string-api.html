@@ -1,0 +1,388 @@
+<html>
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <title>clojure.string - Clojure v1.6 API documentation</title>
+    <link href="../static/favicon.png" rel="icon" />
+    <link href="../static/favicon.png" rel="shortcut icon" />
+    <link media="all" type="text/css" href="../static/clojure.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="../static/wiki.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="../static/internal.css" rel="stylesheet" />
+    <style>.menuWrapper{height: 36px;}</style>
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="../static/clojure-icon.gif" /></a>
+	<h1><a title="page header title" id="page-header" href="index.html">Clojure Core API Reference</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.6</span> API</span><br />
+    <ul>
+      <li><a class="wiki_link" href="index.html">Overview</a></li>
+      <li><a class="wiki_link" href="api-index.html">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.data-api.html" class="wiki_link">clojure.data</a></li><li><a href="clojure.edn-api.html" class="wiki_link">clojure.edn</a></li><li><a href="clojure.inspector-api.html" class="wiki_link">clojure.inspector</a></li><li><a href="clojure.instant-api.html" class="wiki_link">clojure.instant</a></li><li><a href="clojure.java.browse-api.html" class="wiki_link">clojure.java.browse</a></li><li><a href="clojure.java.io-api.html" class="wiki_link">clojure.java.io</a></li><li><a href="clojure.java.javadoc-api.html" class="wiki_link">clojure.java.javadoc</a></li><li><a href="clojure.java.shell-api.html" class="wiki_link">clojure.java.shell</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.pprint-api.html" class="wiki_link">clojure.pprint</a></li><li><a href="clojure.reflect-api.html" class="wiki_link">clojure.reflect</a></li><li><a href="clojure.repl-api.html" class="wiki_link">clojure.repl</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.stacktrace-api.html" class="wiki_link">clojure.stacktrace</a></li><li><a href="clojure.string-api.html" class="wiki_link">clojure.string</a></li><li><a href="clojure.template-api.html" class="wiki_link">clojure.template</a></li><li><a href="clojure.test-api.html" class="wiki_link">clojure.test</a></li><li><a href="clojure.walk-api.html" class="wiki_link">clojure.walk</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
+      </ul>
+    </div>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a href="../index.html" class="wiki_link">v1.7 (stable)</a></li><li><a href="../branch-master/index.html" class="wiki_link">v1.8 (in development)</a></li><li><a href="../branch-clojure-1.5.0/index.html" class="wiki_link">v1.5 (stable)</a></li><li><a href="../branch-clojure-1.4.0/index.html" class="wiki_link">v1.4 (legacy)</a></li><li><a href="../branch-1.3.x/index.html" class="wiki_link">v1.3 (legacy)</a></li><li><a href="../branch-1.2.x/index.html" class="wiki_link">v1.2 (legacy)</a></li><li><a href="../branch-1.1.x/index.html" class="wiki_link">v1.1 (legacy)</a></li>
+      </ul>
+    </div>
+    <a href="http://clojure.org" class="wiki_link">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div id="content_view" class="wiki wikiPage">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div style="margin-left: 1em;" class="toc-section">
+    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
+    <div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/blank?">blank?</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/capitalize">capitalize</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/escape">escape</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/join">join</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/lower-case">lower-case</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/re-quote-replacement">re-quote-replacement</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/replace">replace</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/replace-first">replace-first</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/reverse">reverse</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/split">split</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/split-lines">split-lines</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/trim">trim</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/trim-newline">trim-newline</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/triml">triml</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/trimr">trimr</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.string/upper-case">upper-case</a>
+      
+    </div>
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.string">clojure.string</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.6</span><span id="header-status-block"> (<span id="header-status">legacy</span>)</span>
+  </h1>
+
+<br />Full namespace name: <span id="long-name">clojure.string</span>
+<p></p>
+<h2>Overview</h2>
+
+<pre id="namespace-docstr"></pre>
+
+
+<br />
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/blank?">blank?</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (blank? s)
+</pre>
+    <pre id="var-docstr">True if s is nil, empty, or contains only whitespace.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L285" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/capitalize">capitalize</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (capitalize s)
+</pre>
+    <pre id="var-docstr">Converts first character of the string to upper-case, all other
+characters to lower-case.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L194" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/escape">escape</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (escape s cmap)
+</pre>
+    <pre id="var-docstr">Return a new string, using cmap to escape each character ch
+from s as follows:
+
+If (cmap ch) is nil, append ch to the new string.
+If (cmap ch) is non-nil, append (str (cmap ch)) instead.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L298" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/join">join</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (join coll)
+       (join separator coll)
+</pre>
+    <pre id="var-docstr">Returns a string of all elements in coll, as returned by (seq coll),
+separated by an optional separator.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L178" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/lower-case">lower-case</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (lower-case s)
+</pre>
+    <pre id="var-docstr">Converts string to all lower-case.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L211" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/re-quote-replacement">re-quote-replacement</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (re-quote-replacement replacement)
+</pre>
+    <pre id="var-docstr">Given a replacement string that you wish to be a literal
+replacement for a pattern match in replace or replace-first, do the
+necessary escaping of special characters in the replacement.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.5</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L52" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/replace">replace</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (replace s match replacement)
+</pre>
+    <pre id="var-docstr">Replaces all instance of match with replacement in s.
+
+match/replacement can be:
+
+string / string
+char / char
+pattern / (string or function of match).
+
+See also replace-first.
+
+The replacement is literal (i.e. none of its characters are treated
+specially) for all cases above except pattern / string.
+
+For pattern / string, $1, $2, etc. in the replacement string are
+substituted with the string that matched the corresponding
+parenthesized group in the pattern.  If you wish your replacement
+string r to be used literally, use (re-quote-replacement r) as the
+replacement argument.  See also documentation for
+java.util.regex.Matcher's appendReplacement method.
+
+Example:
+(clojure.string/replace "Almost Pig Latin" #"\b(\w)(\w+)\b" "$2$1ay")
+-&gt; "lmostAay igPay atinLay"</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L73" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/replace-first">replace-first</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (replace-first s match replacement)
+</pre>
+    <pre id="var-docstr">Replaces the first instance of match with replacement in s.
+
+match/replacement can be:
+
+char / char
+string / string
+pattern / (string or function of match).
+
+See also replace.
+
+The replacement is literal (i.e. none of its characters are treated
+specially) for all cases above except pattern / string.
+
+For pattern / string, $1, $2, etc. in the replacement string are
+substituted with the string that matched the corresponding
+parenthesized group in the pattern.  If you wish your replacement
+string r to be used literally, use (re-quote-replacement r) as the
+replacement argument.  See also documentation for
+java.util.regex.Matcher's appendReplacement method.
+
+Example:
+(clojure.string/replace-first "swap first two words"
+                              #"(\w+)(\s+)(\w+)" "$3$2$1")
+-&gt; "first swap two words"</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L136" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/reverse">reverse</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (reverse s)
+</pre>
+    <pre id="var-docstr">Returns s with its characters reversed.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L46" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/split">split</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (split s re)
+       (split s re limit)
+</pre>
+    <pre id="var-docstr">Splits string on a regular expression.  Optional argument limit is
+the maximum number of splits. Not lazy. Returns vector of the splits.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L217" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/split-lines">split-lines</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (split-lines s)
+</pre>
+    <pre id="var-docstr">Splits s on \n or \r\n.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L226" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/trim">trim</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (trim s)
+</pre>
+    <pre id="var-docstr">Removes whitespace from both ends of string.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L232" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/trim-newline">trim-newline</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (trim-newline s)
+</pre>
+    <pre id="var-docstr">Removes all trailing newline \n or return \r characters from
+string.  Similar to Perl's chomp.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L272" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/triml">triml</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (triml s)
+</pre>
+    <pre id="var-docstr">Removes whitespace from the left side of string.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L249" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/trimr">trimr</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (trimr s)
+</pre>
+    <pre id="var-docstr">Removes whitespace from the right side of string.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L261" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.string/upper-case">upper-case</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (upper-case s)
+</pre>
+    <pre id="var-docstr">Converts string to all upper-case.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/clojure/blob/d7175e84e27816ee227220023a5411386d6aa32e/src/clj/clojure/string.clj#L205" id="var-source">Source</a>
+  </div>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div style="text-align: center;" id="copyright">Copyright 2007-2014 by Rich Hickey</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>
