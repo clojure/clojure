@@ -267,7 +267,7 @@
          (< (int k) cnt)))
   (entryAt [this k]
     (if (.containsKey this k)
-      (clojure.lang.MapEntry. k (.nth this (int k)))
+      (clojure.lang.Tuple/create k (.nth this (int k)))
       nil))
 
   clojure.lang.ILookup

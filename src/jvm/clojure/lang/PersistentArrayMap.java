@@ -161,7 +161,7 @@ public boolean containsKey(Object key){
 public IMapEntry entryAt(Object key){
 	int i = indexOf(key);
 	if(i >= 0)
-		return new MapEntry(array[i],array[i+1]);
+		return Tuple.create(array[i],array[i+1]);
 	return null;
 }
 
@@ -318,7 +318,7 @@ static class Seq extends ASeq implements Counted{
 	}
 
 	public Object first(){
-		return new MapEntry(array[i],array[i+1]);
+		return Tuple.create(array[i],array[i+1]);
 	}
 
 	public ISeq next(){

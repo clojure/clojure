@@ -56,6 +56,10 @@ private static final IFn TRANSIENT_VECTOR_CONJ = new AFn() {
     }
 };
 
+static public PersistentVector adopt(Object [] items){
+	return new PersistentVector(items.length, 5, EMPTY_NODE, items);
+}
+
 static public PersistentVector create(IReduceInit items) {
     TransientVector ret = EMPTY.asTransient();
     items.reduce(TRANSIENT_VECTOR_CONJ, ret);

@@ -394,7 +394,7 @@
            []
       (iterator [] (.iterator ^Iterable pmap))
       (containsKey [k] (contains? pmap k))
-      (entryAt [k] (when (contains? pmap k) (new clojure.lang.MapEntry k (v k))))
+      (entryAt [k] (when (contains? pmap k) (clojure.lang.Tuple/create k (v k))))
       (valAt ([k] (when (contains? pmap k) (v k)))
 	     ([k default] (if (contains? pmap k) (v k) default)))
       (cons [m] (conj (snapshot) m))
@@ -404,7 +404,7 @@
       (seq [] ((fn thisfn [plseq]
 		  (lazy-seq
                    (when-let [pseq (seq plseq)]
-                     (cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
+                     (cons (clojure.lang.Tuple/create (first pseq) (v (first pseq)))
                            (thisfn (rest pseq)))))) (keys pmap))))))
 
 

@@ -266,7 +266,7 @@ static public class ValSeq extends ASeq{
 
 static final IFn MAKE_ENTRY = new AFn() {
     public Object invoke(Object key, Object val) {
-        return new MapEntry(key, val);
+        return Tuple.create(key, val);
     }
 };
 

@@ -41,7 +41,7 @@ public final class RecordIterator implements Iterator {
         if (i < basecnt) {
             Object k = basefields.nth(i);
             i++;
-            return new MapEntry(k, rec.valAt(k));
+            return Tuple.create(k, rec.valAt(k));
         } else  {
             return extmap.next();
         }

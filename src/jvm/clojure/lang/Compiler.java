@@ -153,6 +153,15 @@ final static Type THROWABLE_TYPE = Type.getType(Throwable.class);
 final static Type BOOLEAN_OBJECT_TYPE = Type.getType(Boolean.class);
 final static Type IPERSISTENTMAP_TYPE = Type.getType(IPersistentMap.class);
 final static Type IOBJ_TYPE = Type.getType(IObj.class);
+final static Type TUPLE_TYPE = Type.getType(Tuple.class);
+final static Method createTupleMethods[] = {Method.getMethod("clojure.lang.IPersistentVector create()"),
+        Method.getMethod("clojure.lang.Tuple$T1 create(Object)"),
+        Method.getMethod("clojure.lang.Tuple$T2 create(Object,Object)"),
+        Method.getMethod("clojure.lang.Tuple$T3 create(Object,Object,Object)"),
+        Method.getMethod("clojure.lang.Tuple$T4 create(Object,Object,Object,Object)"),
+        Method.getMethod("clojure.lang.Tuple$T5 create(Object,Object,Object,Object,Object)"),
+        Method.getMethod("clojure.lang.Tuple$T6 create(Object,Object,Object,Object,Object,Object)")
+};
 
 private static final Type[][] ARG_TYPES;
 //private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
@@ -2904,6 +2913,8 @@ public static class EmptyExpr implements Expr{
 	final static Type HASHMAP_TYPE = Type.getType(PersistentArrayMap.class);
 	final static Type HASHSET_TYPE = Type.getType(PersistentHashSet.class);
 	final static Type VECTOR_TYPE = Type.getType(PersistentVector.class);
+    final static Type IVECTOR_TYPE = Type.getType(IPersistentVector.class);
+    final static Type TUPLE_TYPE = Type.getType(Tuple.class);
 	final static Type LIST_TYPE = Type.getType(PersistentList.class);
 	final static Type EMPTY_LIST_TYPE = Type.getType(PersistentList.EmptyList.class);
 
@@ -2920,7 +2931,7 @@ public static class EmptyExpr implements Expr{
 		if(coll instanceof IPersistentList)
 			gen.getStatic(LIST_TYPE, "EMPTY", EMPTY_LIST_TYPE);
 		else if(coll instanceof IPersistentVector)
-			gen.getStatic(VECTOR_TYPE, "EMPTY", VECTOR_TYPE);
+			gen.getStatic(TUPLE_TYPE, "EMPTY", IVECTOR_TYPE);
 		else if(coll instanceof IPersistentMap)
 				gen.getStatic(HASHMAP_TYPE, "EMPTY", HASHMAP_TYPE);
 			else if(coll instanceof IPersistentSet)
@@ -3157,8 +3168,7 @@ public static class SetExpr implements Expr{
 
 public static class VectorExpr implements Expr{
 	public final IPersistentVector args;
-	final static Method vectorMethod = Method.getMethod("clojure.lang.IPersistentVector vector(Object[])");
-
+    final static Method vectorMethod = Method.getMethod("clojure.lang.IPersistentVector vector(Object[])");
 
 	public VectorExpr(IPersistentVector args){
 		this.args = args;
@@ -3172,9 +3182,21 @@ public static class VectorExpr implements Expr{
 	}
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-		MethodExpr.emitArgsAsArray(args, objx, gen);
-		gen.invokeStatic(RT_TYPE, vectorMethod);
-		if(context == C.STATEMENT)
+        if(args.count() <= Tuple.MAX_SIZE)
+            {
+            for(int i = 0; i < args.count(); i++) {
+      			((Expr) args.nth(i)).emit(C.EXPRESSION, objx, gen);
+      			}
+            gen.invokeStatic(TUPLE_TYPE, createTupleMethods[args.count()]);
+            }
+
+        else
+            {
+            MethodExpr.emitArgsAsArray(args, objx, gen);
+            gen.invokeStatic(RT_TYPE, vectorMethod);
+            }
+
+        if(context == C.STATEMENT)
 			gen.pop();
 	}
 
@@ -3203,7 +3225,7 @@ public static class VectorExpr implements Expr{
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
 		else if (constant)
 			{
-			PersistentVector rv = PersistentVector.EMPTY;
+			IPersistentVector rv = Tuple.EMPTY;
 			for(int i =0;i<args.count();i++)
 				{
 				LiteralExpr ve = (LiteralExpr)args.nth(i);
@@ -4699,9 +4721,20 @@ static public class ObjExpr implements Expr{
 			}
 		else if(value instanceof IPersistentVector)
 			{
-			emitListAsObjectArray(value, gen);
-			gen.invokeStatic(RT_TYPE, Method.getMethod(
-					"clojure.lang.IPersistentVector vector(Object[])"));
+            IPersistentVector args = (IPersistentVector) value;
+            if(args.count() <= Tuple.MAX_SIZE)
+                {
+                for(int i = 0; i < args.count(); i++) {
+          			emitValue(args.nth(i), gen);
+          			}
+                gen.invokeStatic(TUPLE_TYPE, createTupleMethods[args.count()]);
+                }
+            else
+                {
+                emitListAsObjectArray(value, gen);
+                gen.invokeStatic(RT_TYPE, Method.getMethod(
+                        "clojure.lang.IPersistentVector vector(Object[])"));
+                }
 			}
 		else if(value instanceof PersistentHashSet)
 			{

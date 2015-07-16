@@ -128,7 +128,7 @@ public boolean containsKey(Object key){
 
 public IMapEntry entryAt(Object key){
 	if(key == null)
-		return hasNull ? new MapEntry(null, nullValue) : null;
+		return hasNull ? Tuple.create(null, nullValue) : null;
 	return (root != null) ? root.find(0, hash(key), key) : null;
 }
 
@@ -264,7 +264,7 @@ public int count(){
 
 public ISeq seq(){
 	ISeq s = root != null ? root.nodeSeq() : null; 
-	return hasNull ? new Cons(new MapEntry(null, nullValue), s) : s;
+	return hasNull ? new Cons(Tuple.create(null, nullValue), s) : s;
 }
 
 public IPersistentCollection empty(){
@@ -766,7 +766,7 @@ final static class BitmapIndexedNode implements INode{
 		if(keyOrNull == null)
 			return ((INode) valOrNode).find(shift + 5, hash, key);
 		if(Util.equiv(key, keyOrNull))
-			return new MapEntry(keyOrNull, valOrNode);
+			return Tuple.create(keyOrNull, valOrNode);
 		return null;
 	}
 
@@ -967,7 +967,7 @@ final static class HashCollisionNode implements INode{
 		if(idx < 0)
 			return null;
 		if(Util.equiv(key, array[idx]))
-			return new MapEntry(array[idx], array[idx+1]);
+			return Tuple.create(array[idx], array[idx+1]);
 		return null;
 	}
 
@@ -1343,7 +1343,7 @@ static final class NodeSeq extends ASeq {
 	public Object first() {
 		if(s != null)
 			return s.first();
-		return new MapEntry(array[i], array[i+1]);
+		return Tuple.create(array[i], array[i+1]);
 	}
 
 	public ISeq next() {

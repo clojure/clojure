@@ -39,9 +39,20 @@ public ISeq rseq(){
 }
 
 static boolean doEquals(IPersistentVector v, Object obj){
-	if(v == obj) return true;
-	if(obj instanceof List || obj instanceof IPersistentVector)
-		{
+    if(obj instanceof IPersistentVector)
+        {
+        IPersistentVector ov = (IPersistentVector) obj;
+        if(ov.count() != v.count())
+            return false;
+        for(int i = 0;i< v.count();i++)
+            {
+            if(!Util.equals(v.nth(i), ov.nth(i)))
+                return false;
+            }
+        return true;
+        }
+	else if(obj instanceof List)
+        {
 		Collection ma = (Collection) obj;
 		if(ma.size() != v.count() || ma.hashCode() != v.hashCode())
 			return false;
@@ -53,19 +64,8 @@ static boolean doEquals(IPersistentVector v, Object obj){
 			}
 		return true;
 		}
-//	if(obj instanceof IPersistentVector)
-//		{
-//		IPersistentVector ma = (IPersistentVector) obj;
-//		if(ma.count() != v.count() || ma.hashCode() != v.hashCode())
-//			return false;
-//		for(int i = 0; i < v.count(); i++)
-//			{
-//			if(!Util.equal(v.nth(i), ma.nth(i)))
-//				return false;
-//			}
-//		}
 	else
-		{
+        {
 		if(!(obj instanceof Sequential))
 			return false;
 		ISeq ms = RT.seq(obj);
@@ -83,7 +83,19 @@ static boolean doEquals(IPersistentVector v, Object obj){
 }
 
 static boolean doEquiv(IPersistentVector v, Object obj){
-	if(obj instanceof List || obj instanceof IPersistentVector)
+    if(obj instanceof IPersistentVector)
+        {
+        IPersistentVector ov = (IPersistentVector) obj;
+        if(ov.count() != v.count())
+            return false;
+        for(int i = 0;i< v.count();i++)
+            {
+            if(!Util.equiv(v.nth(i), ov.nth(i)))
+                return false;
+            }
+        return true;
+    }
+	else if(obj instanceof List)
 		{
 		Collection ma = (Collection) obj;
 		if(ma.size() != v.count())
@@ -96,17 +108,6 @@ static boolean doEquiv(IPersistentVector v, Object obj){
 			}
 		return true;
 		}
-//	if(obj instanceof IPersistentVector)
-//		{
-//		IPersistentVector ma = (IPersistentVector) obj;
-//		if(ma.count() != v.count() || ma.hashCode() != v.hashCode())
-//			return false;
-//		for(int i = 0; i < v.count(); i++)
-//			{
-//			if(!Util.equal(v.nth(i), ma.nth(i)))
-//				return false;
-//			}
-//		}
 	else
 		{
 		if(!(obj instanceof Sequential))
@@ -126,10 +127,14 @@ static boolean doEquiv(IPersistentVector v, Object obj){
 }
 
 public boolean equals(Object obj){
+    if(obj == this)
+        return true;
 	return doEquals(this, obj);
 }
 
 public boolean equiv(Object obj){
+    if(obj == this)
+        return true;
 	return doEquiv(this, obj);
 }
 
@@ -137,17 +142,11 @@ public int hashCode(){
 	if(_hash == -1)
 		{
 		int hash = 1;
-		Iterator i = iterator();
-		while(i.hasNext())
+		for(int i = 0;i<count();i++)
 			{
-			Object obj = i.next();
+			Object obj = nth(i);
 			hash = 31 * hash + (obj == null ? 0 : obj.hashCode());
 			}
-//		int hash = 0;
-//		for(int i = 0; i < count(); i++)
-//			{
-//			hash = Util.hashCombine(hash, Util.hash(nth(i)));
-//			}
 		this._hash = hash;
 		}
 	return _hash;
@@ -155,15 +154,15 @@ public int hashCode(){
 
 public int hasheq(){
 	if(_hasheq == -1) {
-//	int hash = 1;
-//	Iterator i = iterator();
-//	while(i.hasNext())
-//		{
-//		Object obj = i.next();
-//		hash = 31 * hash + Util.hasheq(obj);
-//		}
-//	_hasheq = hash;
-	_hasheq  = Murmur3.hashOrdered(this);
+        int n;
+        int hash = 1;
+
+        for(n=0;n<count();++n)
+            {
+            hash = 31 * hash + Util.hasheq(nth(n));
+            }
+
+        _hasheq = Murmur3.mixCollHash(hash, n);
 	}
 	return _hasheq;
 }
@@ -321,7 +320,7 @@ public IMapEntry entryAt(Object key){
 		{
 		int i = ((Number) key).intValue();
 		if(i >= 0 && i < count())
-			return new MapEntry(key, nth(i));
+			return Tuple.create(key, nth(i));
 		}
 	return null;
 }
@@ -352,7 +351,10 @@ public Object valAt(Object key){
 // java.util.Collection implementation
 
 public Object[] toArray(){
-	return RT.seqToArray(seq());
+	Object[] ret = new Object[count()];
+	for(int i=0;i<count();i++)
+		ret[i] = nth(i);
+	return ret;
 }
 
 public boolean add(Object o){
