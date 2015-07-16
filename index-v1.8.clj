@@ -621,9 +621,9 @@
    :name "->ArrayChunk",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/bcb8e9a7aa0b0588b4872384256d86bf53d12f15/src/clj/clojure/gvec.clj#L36",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/gvec.clj#L36",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/bcb8e9a7aa0b0588b4872384256d86bf53d12f15/src/clj/clojure/gvec.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/gvec.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/->ArrayChunk",
    :doc
@@ -648,9 +648,9 @@
    :name "->Vec",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/bcb8e9a7aa0b0588b4872384256d86bf53d12f15/src/clj/clojure/gvec.clj#L131",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/gvec.clj#L131",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/bcb8e9a7aa0b0588b4872384256d86bf53d12f15/src/clj/clojure/gvec.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/gvec.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/->Vec",
    :doc "Positional factory function for class clojure.core.Vec.",
@@ -661,9 +661,9 @@
    :name "->VecNode",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/bcb8e9a7aa0b0588b4872384256d86bf53d12f15/src/clj/clojure/gvec.clj#L17",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/gvec.clj#L17",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/bcb8e9a7aa0b0588b4872384256d86bf53d12f15/src/clj/clojure/gvec.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/gvec.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/->VecNode",
    :doc "Positional factory function for class clojure.core.VecNode.",
@@ -674,9 +674,9 @@
    :name "->VecSeq",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/bcb8e9a7aa0b0588b4872384256d86bf53d12f15/src/clj/clojure/gvec.clj#L58",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/gvec.clj#L58",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/bcb8e9a7aa0b0588b4872384256d86bf53d12f15/src/clj/clojure/gvec.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/gvec.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/->VecSeq",
    :doc "Positional factory function for class clojure.core.VecSeq.",
@@ -1427,10 +1427,10 @@
    :name "bean",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj#L372",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L372",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bean",
    :doc
@@ -2275,10 +2275,10 @@
    :name "construct-proxy",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj#L264",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L264",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/construct-proxy",
    :doc
@@ -2493,10 +2493,10 @@
    :name "definterface",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L20",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L20",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/definterface",
    :doc
@@ -2606,10 +2606,10 @@
    :name "defprotocol",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L665",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L665",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defprotocol",
    :doc
@@ -2621,10 +2621,10 @@
    :name "defrecord",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L296",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L296",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defrecord",
    :doc
@@ -2650,10 +2650,10 @@
    :name "deftype",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L400",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L400",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/deftype",
    :doc
@@ -3254,10 +3254,10 @@
    :name "extend",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L719",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L719",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extend",
    :doc
@@ -3269,10 +3269,10 @@
    :name "extend-protocol",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L819",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L819",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extend-protocol",
    :doc
@@ -3284,10 +3284,10 @@
    :name "extend-type",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L787",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L787",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extend-type",
    :doc
@@ -3299,10 +3299,10 @@
    :name "extenders",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L536",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L536",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extenders",
    :doc
@@ -3314,10 +3314,10 @@
    :name "extends?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L529",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L529",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extends?",
    :doc "Returns true if atype extends protocol",
@@ -3868,10 +3868,10 @@
    :name "get-proxy-class",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj#L250",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L250",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/get-proxy-class",
    :doc
@@ -4159,10 +4159,10 @@
    :name "init-proxy",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj#L271",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L271",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/init-proxy",
    :doc
@@ -5125,10 +5125,10 @@
    :name "namespace-munge",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L13",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L13",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/namespace-munge",
    :doc
@@ -5969,10 +5969,10 @@
    :name "proxy",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj#L303",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L303",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/proxy",
    :doc
@@ -5984,10 +5984,10 @@
    :name "proxy-mappings",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj#L297",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L297",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/proxy-mappings",
    :doc "Takes a proxy instance and returns the proxy's fn map.",
@@ -5998,10 +5998,10 @@
    :name "proxy-super",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj#L365",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L365",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/proxy-super",
    :doc
@@ -6371,10 +6371,10 @@
    :name "record?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L384",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L384",
    :added "1.6",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/record?",
    :doc "Returns true if x is a record",
@@ -6574,10 +6574,10 @@
    :name "reify",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L70",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L70",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reify",
    :doc
@@ -6932,10 +6932,10 @@
    :name "satisfies?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj#L542",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L542",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/49baf1e8ae394c9b98523a3601779a5468920ba1/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/satisfies?",
    :doc "Returns true if x satisfies the protocol",
@@ -8383,10 +8383,10 @@
    :name "update-proxy",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj#L282",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L282",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/044930b2c957d9815f11bfe5ab474675604378af/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/update-proxy",
    :doc
@@ -8541,10 +8541,10 @@
    :name "vector-of",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/bcb8e9a7aa0b0588b4872384256d86bf53d12f15/src/clj/clojure/gvec.clj#L468",
+   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/gvec.clj#L468",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/bcb8e9a7aa0b0588b4872384256d86bf53d12f15/src/clj/clojure/gvec.clj",
+   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/gvec.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/vector-of",
    :doc
