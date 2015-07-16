@@ -4294,24 +4294,24 @@
                            (if (seq bes)
                              (let [bb (key (first bes))
                                    bk (val (first bes))
-                                   has-default (contains? defaults bb)]
-                               (recur (pb ret bb (if has-default
-                                                   (list `get gmap bk (defaults bb))
-                                                   (list `get gmap bk)))
+                                   bv (if (contains? defaults bb)
+                                        (list `get gmap bk (defaults bb))
+                                        (list `get gmap bk))]
+                               (recur (cond
+                                        (symbol? bb) (-> ret (conj (if (namespace bb) (symbol (name bb)) bb)) (conj bv))
+                                        (keyword? bb) (-> ret (conj (symbol (name bb)) bv))
+                                        :else (pb ret bb bv))
                                       (next bes)))
                              ret))))]
                  (cond
-                  (symbol? b) (-> bvec (conj (if (namespace b) (symbol (name b)) b)) (conj v))
-                  (keyword? b) (-> bvec (conj (symbol (name b))) (conj v))
-                  (vector? b) (pvec bvec b v)
-                  (map? b) (pmap bvec b v)
-                  :else (throw (new Exception (str "Unsupported binding form: " b))))))
+                   (symbol? b) (-> bvec (conj b) (conj v))
+                   (vector? b) (pvec bvec b v)
+                   (map? b) (pmap bvec b v)
+                   :else (throw (new Exception (str "Unsupported binding form: " b))))))
         process-entry (fn [bvec b] (pb bvec (first b) (second b)))]
     (if (every? symbol? (map first bents))
       bindings
-      (if-let [kwbs (seq (filter #(keyword? (first %)) bents))]
-        (throw (new Exception (str "Unsupported binding key: " (ffirst kwbs))))
-        (reduce1 process-entry [] bents)))))
+      (reduce1 process-entry [] bents))))
 
 (defmacro let
   "binding => binding-form init-expr
