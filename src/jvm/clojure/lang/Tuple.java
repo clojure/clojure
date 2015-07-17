@@ -50,9 +50,9 @@ public class Tuple{
         throw new IllegalAccessError("Too large an array for tuple");
     }
 
-    public static IPersistentVector createFromColl(Object coll){
+    public static IPersistentVector createFromColl(int count, Object coll){
         if(coll instanceof RandomAccess) {
-            switch(RT.count(coll)){
+            switch(count){
                 case 0:
                     return EMPTY;
                 case 1:
@@ -78,6 +78,8 @@ static public abstract class ATuple extends APersistentVector implements IObj, I
     }
 
     public IObj withMeta(IPersistentMap meta){
+        if(meta == null)
+            return this;
         return vec().withMeta(meta);
     }
 

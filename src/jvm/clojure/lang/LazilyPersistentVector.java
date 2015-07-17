@@ -12,6 +12,7 @@
 
 package clojure.lang;
 
+import java.util.Collection;
 import java.util.RandomAccess;
 
 public class LazilyPersistentVector{
@@ -25,10 +26,16 @@ static public IPersistentVector createOwning(Object... items){
 	return PersistentVector.create(items);
 }
 
+static int fcount(Object c){
+    if(c instanceof Counted)
+        return ((Counted) c).count();
+    return ((Collection)c).size();
+}
+
 static public IPersistentVector create(Object obj){
    if((obj instanceof Counted || obj instanceof RandomAccess)
-      && RT.count(obj) <= Tuple.MAX_SIZE)
-        return Tuple.createFromColl(obj);
+      && fcount(obj) <= Tuple.MAX_SIZE)
+        return Tuple.createFromColl(fcount(obj), obj);
    else if(obj instanceof IReduceInit)
        return PersistentVector.create((IReduceInit) obj);
    else if(obj instanceof ISeq)
