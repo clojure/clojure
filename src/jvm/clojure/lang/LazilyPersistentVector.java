@@ -35,7 +35,7 @@ static int fcount(Object c){
 static public IPersistentVector create(Object obj){
    if((obj instanceof Counted || obj instanceof RandomAccess)
       && fcount(obj) <= Tuple.MAX_SIZE)
-        return Tuple.createFromColl(fcount(obj), obj);
+        return Tuple.createFromColl(obj);
    else if(obj instanceof IReduceInit)
        return PersistentVector.create((IReduceInit) obj);
    else if(obj instanceof ISeq)

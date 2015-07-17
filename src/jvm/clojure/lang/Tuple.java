@@ -13,6 +13,7 @@
 
 package clojure.lang;
 
+import java.util.Collection;
 import java.util.RandomAccess;
 
 public class Tuple{
@@ -50,9 +51,9 @@ public class Tuple{
         throw new IllegalAccessError("Too large an array for tuple");
     }
 
-    public static IPersistentVector createFromColl(int count, Object coll){
+    public static IPersistentVector createFromColl(Object coll){
         if(coll instanceof RandomAccess) {
-            switch(count){
+            switch(((Collection) coll).size()){
                 case 0:
                     return EMPTY;
                 case 1:
