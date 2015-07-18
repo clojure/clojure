@@ -2493,10 +2493,10 @@
    :name "definterface",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L20",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L20",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/definterface",
    :doc
@@ -2606,31 +2606,31 @@
    :name "defprotocol",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L665",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L667",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defprotocol",
    :doc
    "A protocol is a named set of named methods and their signatures:\n(defprotocol AProtocolName\n\n  ;optional doc string\n  \"A doc string for AProtocol abstraction\"\n\n;method signatures\n  (bar [this a b] \"bar docs\")\n  (baz [this a] [this a b] [this a b c] \"baz docs\"))\n\nNo implementations are provided. Docs can be specified for the\nprotocol overall and for each method. The above yields a set of\npolymorphic functions and a protocol object. All are\nnamespace-qualified by the ns enclosing the definition The resulting\nfunctions dispatch on the type of their first argument, which is\nrequired and corresponds to the implicit target object ('this' in \nJava parlance). defprotocol is dynamic, has no special compile-time \neffect, and defines no new types or classes. Implementations of \nthe protocol methods can be provided using extend.\n\ndefprotocol will automatically generate a corresponding interface,\nwith the same name as the protocol, i.e. given a protocol:\nmy.ns/Protocol, an interface: my.ns.Protocol. The interface will\nhave methods corresponding to the protocol functions, and the\nprotocol will automatically work with instances of the interface.\n\nNote that you should not use this interface with deftype or\nreify, as they support the protocol directly:\n\n(defprotocol P \n  (foo [this]) \n  (bar-me [this] [this y]))\n\n(deftype Foo [a b c] \n P\n  (foo [this] a)\n  (bar-me [this] b)\n  (bar-me [this y] (+ c y)))\n\n(bar-me (Foo. 1 2 3) 42)\n=> 45\n\n(foo \n  (let [x 42]\n    (reify P \n      (foo [this] 17)\n      (bar-me [this] x)\n      (bar-me [this y] x))))\n=> 17",
    :var-type "macro",
-   :line 665,
+   :line 667,
    :file "src/clj/clojure/core_deftype.clj"}
   {:arglists ([name [& fields] & opts+specs]),
    :name "defrecord",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L296",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L297",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/defrecord",
    :doc
    "(defrecord name [fields*]  options* specs*)\n\nCurrently there are no options.\n\nEach spec consists of a protocol or interface name followed by zero\nor more method bodies:\n\nprotocol-or-interface-or-Object\n(methodName [args*] body)*\n\nDynamically generates compiled bytecode for class with the given\nname, in a package with the same name as the current namespace, the\ngiven fields, and, optionally, methods for protocols and/or\ninterfaces.\n\nThe class will have the (immutable) fields named by\nfields, which can have type hints. Protocols/interfaces and methods\nare optional. The only methods that can be supplied are those\ndeclared in the protocols/interfaces.  Note that method bodies are\nnot closures, the local environment includes only the named fields,\nand those fields can be accessed directly.\n\nMethod definitions take the form:\n\n(methodname [args*] body)\n\nThe argument and return types can be hinted on the arg and\nmethodname symbols. If not supplied, they will be inferred, so type\nhints should be reserved for disambiguation.\n\nMethods should be supplied for all methods of the desired\nprotocol(s) and interface(s). You can also define overrides for\nmethods of Object. Note that a parameter must be supplied to\ncorrespond to the target object ('this' in Java parlance). Thus\nmethods for interfaces will take one more argument than do the\ninterface declarations. Note also that recur calls to the method\nhead should *not* pass the target object, it will be supplied\nautomatically and can not be substituted.\n\nIn the method bodies, the (unqualified) name can be used to name the\nclass (for calls to new, instance? etc).\n\nThe class will have implementations of several (clojure.lang)\ninterfaces generated automatically: IObj (metadata support) and\nIPersistentMap, and all of their superinterfaces.\n\nIn addition, defrecord will define type-and-value-based =,\nand will defined Java .hashCode and .equals consistent with the\ncontract for java.util.Map.\n\nWhen AOT compiling, generates compiled bytecode for a class with the\ngiven name (a symbol), prepends the current ns as the package, and\nwrites the .class file to the *compile-path* directory.\n\nTwo constructors will be defined, one taking the designated fields\nfollowed by a metadata map (nil for none) and an extension field\nmap (nil for none), and one taking only the fields (using nil for\nmeta and extension fields). Note that the field names __meta\nand __extmap are currently reserved and should not be used when\ndefining your own records.\n\nGiven (defrecord TypeName ...), two factory functions will be\ndefined: ->TypeName, taking positional parameters for the fields,\nand map->TypeName, taking a map of keywords to field values.",
    :var-type "macro",
-   :line 296,
+   :line 297,
    :file "src/clj/clojure/core_deftype.clj"}
   {:arglists ([name & keys]),
    :name "defstruct",
@@ -2650,16 +2650,16 @@
    :name "deftype",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L400",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L402",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/deftype",
    :doc
    "(deftype name [fields*]  options* specs*)\n\nCurrently there are no options.\n\nEach spec consists of a protocol or interface name followed by zero\nor more method bodies:\n\nprotocol-or-interface-or-Object\n(methodName [args*] body)*\n\nDynamically generates compiled bytecode for class with the given\nname, in a package with the same name as the current namespace, the\ngiven fields, and, optionally, methods for protocols and/or\ninterfaces. \n\nThe class will have the (by default, immutable) fields named by\nfields, which can have type hints. Protocols/interfaces and methods\nare optional. The only methods that can be supplied are those\ndeclared in the protocols/interfaces.  Note that method bodies are\nnot closures, the local environment includes only the named fields,\nand those fields can be accessed directly. Fields can be qualified\nwith the metadata :volatile-mutable true or :unsynchronized-mutable\ntrue, at which point (set! afield aval) will be supported in method\nbodies. Note well that mutable fields are extremely difficult to use\ncorrectly, and are present only to facilitate the building of higher\nlevel constructs, such as Clojure's reference types, in Clojure\nitself. They are for experts only - if the semantics and\nimplications of :volatile-mutable or :unsynchronized-mutable are not\nimmediately apparent to you, you should not be using them.\n\nMethod definitions take the form:\n\n(methodname [args*] body)\n\nThe argument and return types can be hinted on the arg and\nmethodname symbols. If not supplied, they will be inferred, so type\nhints should be reserved for disambiguation.\n\nMethods should be supplied for all methods of the desired\nprotocol(s) and interface(s). You can also define overrides for\nmethods of Object. Note that a parameter must be supplied to\ncorrespond to the target object ('this' in Java parlance). Thus\nmethods for interfaces will take one more argument than do the\ninterface declarations. Note also that recur calls to the method\nhead should *not* pass the target object, it will be supplied\nautomatically and can not be substituted.\n\nIn the method bodies, the (unqualified) name can be used to name the\nclass (for calls to new, instance? etc).\n\nWhen AOT compiling, generates compiled bytecode for a class with the\ngiven name (a symbol), prepends the current ns as the package, and\nwrites the .class file to the *compile-path* directory.\n\nOne constructor will be defined, taking the designated fields.  Note\nthat the field names __meta and __extmap are currently reserved and\nshould not be used when defining your own types.\n\nGiven (deftype TypeName ...), a factory function called ->TypeName\nwill be defined, taking positional parameters for the fields",
    :var-type "macro",
-   :line 400,
+   :line 402,
    :file "src/clj/clojure/core_deftype.clj"}
   {:arglists ([& body]),
    :name "delay",
@@ -3254,75 +3254,75 @@
    :name "extend",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L719",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L721",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extend",
    :doc
    "Implementations of protocol methods can be provided using the extend construct:\n\n (extend AType\n   AProtocol\n    {:foo an-existing-fn\n     :bar (fn [a b] ...)\n     :baz (fn ([a]...) ([a b] ...)...)}\n   BProtocol \n     {...} \n   ...)\n\n extend takes a type/class (or interface, see below), and one or more\n protocol + method map pairs. It will extend the polymorphism of the\n protocol's methods to call the supplied methods when an AType is\n provided as the first argument. \n\n Method maps are maps of the keyword-ized method names to ordinary\n fns. This facilitates easy reuse of existing fns and fn maps, for\n code reuse/mixins without derivation or composition. You can extend\n an interface to a protocol. This is primarily to facilitate interop\n with the host (e.g. Java) but opens the door to incidental multiple\n inheritance of implementation since a class can inherit from more\n than one interface, both of which extend the protocol. It is TBD how\n to specify which impl to use. You can extend a protocol on nil.\n\n If you are supplying the definitions explicitly (i.e. not reusing\n exsting functions or mixin maps), you may find it more convenient to\n use the extend-type or extend-protocol macros.\n\n Note that multiple independent extend clauses can exist for the same\n type, not all protocols need be defined in a single extend call.\n\n See also:\n extends?, satisfies?, extenders",
    :var-type "function",
-   :line 719,
+   :line 721,
    :file "src/clj/clojure/core_deftype.clj"}
   {:arglists ([p & specs]),
    :name "extend-protocol",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L819",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L821",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extend-protocol",
    :doc
    "Useful when you want to provide several implementations of the same\nprotocol all at once. Takes a single protocol and the implementation\nof that protocol for one or more types. Expands into calls to\nextend-type:\n\n(extend-protocol Protocol\n  AType\n    (foo [x] ...)\n    (bar [x y] ...)\n  BType\n    (foo [x] ...)\n    (bar [x y] ...)\n  AClass\n    (foo [x] ...)\n    (bar [x y] ...)\n  nil\n    (foo [x] ...)\n    (bar [x y] ...))\n\nexpands into:\n\n(do\n (clojure.core/extend-type AType Protocol \n   (foo [x] ...) \n   (bar [x y] ...))\n (clojure.core/extend-type BType Protocol \n   (foo [x] ...) \n   (bar [x y] ...))\n (clojure.core/extend-type AClass Protocol \n   (foo [x] ...) \n   (bar [x y] ...))\n (clojure.core/extend-type nil Protocol \n   (foo [x] ...) \n   (bar [x y] ...)))",
    :var-type "macro",
-   :line 819,
+   :line 821,
    :file "src/clj/clojure/core_deftype.clj"}
   {:arglists ([t & specs]),
    :name "extend-type",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L787",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L789",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extend-type",
    :doc
    "A macro that expands into an extend call. Useful when you are\nsupplying the definitions explicitly inline, extend-type\nautomatically creates the maps required by extend.  Propagates the\nclass as a type hint on the first argument of all fns.\n\n(extend-type MyType \n  Countable\n    (cnt [c] ...)\n  Foo\n    (bar [x y] ...)\n    (baz ([x] ...) ([x y & zs] ...)))\n\nexpands into:\n\n(extend MyType\n Countable\n   {:cnt (fn [c] ...)}\n Foo\n   {:baz (fn ([x] ...) ([x y & zs] ...))\n    :bar (fn [x y] ...)})",
    :var-type "macro",
-   :line 787,
+   :line 789,
    :file "src/clj/clojure/core_deftype.clj"}
   {:arglists ([protocol]),
    :name "extenders",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L536",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L538",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extenders",
    :doc
    "Returns a collection of the types explicitly extending protocol",
    :var-type "function",
-   :line 536,
+   :line 538,
    :file "src/clj/clojure/core_deftype.clj"}
   {:arglists ([protocol atype]),
    :name "extends?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L529",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L531",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/extends?",
    :doc "Returns true if atype extends protocol",
    :var-type "function",
-   :line 529,
+   :line 531,
    :file "src/clj/clojure/core_deftype.clj"}
   {:arglists ([x]),
    :name "false?",
@@ -5125,10 +5125,10 @@
    :name "namespace-munge",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L13",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L13",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/namespace-munge",
    :doc
@@ -6371,15 +6371,15 @@
    :name "record?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L384",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L385",
    :added "1.6",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/record?",
    :doc "Returns true if x is a record",
    :var-type "function",
-   :line 384,
+   :line 385,
    :file "src/clj/clojure/core_deftype.clj"}
   {:forms [(recur exprs*)],
    :name "recur",
@@ -6574,10 +6574,10 @@
    :name "reify",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L70",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L70",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/reify",
    :doc
@@ -6932,15 +6932,15 @@
    :name "satisfies?",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj#L542",
+   "https://github.com/clojure/clojure/blob/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj#L544",
    :added "1.2",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/c8e248d84740dbe1538c6f86ff1ecc59e200d23a/src/clj/clojure/core_deftype.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/satisfies?",
    :doc "Returns true if x satisfies the protocol",
    :var-type "function",
-   :line 542,
+   :line 544,
    :file "src/clj/clojure/core_deftype.clj"}
   {:arglists ([x]),
    :name "second",
