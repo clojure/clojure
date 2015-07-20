@@ -299,6 +299,18 @@ static public class T4 extends ATuple{
         return create(v0, v1, v2, v3, o);
     }
 
+    public boolean equiv(Object obj){
+        if(this == obj) return true;
+        if(obj instanceof T4) {
+            T4 o = (T4) obj;
+            return Util.equiv(v0, o.v0) &&
+                   Util.equiv(v1, o.v1) &&
+                   Util.equiv(v2, o.v2) &&
+                   Util.equiv(v3, o.v3);
+            }
+        return super.equiv(obj);
+    }
+
 }
 
 static public class T5 extends ATuple{
@@ -339,6 +351,19 @@ static public class T5 extends ATuple{
 
     public IPersistentVector cons(Object o){
         return create(v0, v1, v2, v3, v4, o);
+    }
+
+    public boolean equiv(Object obj){
+        if(this == obj) return true;
+        if(obj instanceof T5) {
+            T5 o = (T5) obj;
+            return Util.equiv(v0, o.v0) &&
+                   Util.equiv(v1, o.v1) &&
+                   Util.equiv(v2, o.v2) &&
+                   Util.equiv(v3, o.v3) &&
+                   Util.equiv(v4, o.v4);
+            }
+        return super.equiv(obj);
     }
 
 }
@@ -385,6 +410,20 @@ static public class T6 extends ATuple{
 
     public IPersistentVector cons(Object o){
         return vec().cons(o);
+    }
+
+    public boolean equiv(Object obj){
+        if(this == obj) return true;
+        if(obj instanceof T6) {
+            T6 o = (T6) obj;
+            return Util.equiv(v0, o.v0) &&
+                   Util.equiv(v1, o.v1) &&
+                   Util.equiv(v2, o.v2) &&
+                   Util.equiv(v3, o.v3) &&
+                   Util.equiv(v4, o.v4) &&
+                   Util.equiv(v5, o.v5);
+            }
+        return super.equiv(obj);
     }
 
 }
