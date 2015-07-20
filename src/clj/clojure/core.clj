@@ -6532,25 +6532,10 @@
   [amap f init]
   (reduce (fn [ret [k v]] (f ret k v)) init amap))
 
- clojure.lang.PersistentHashMap
+ clojure.lang.IKVReduce
  (kv-reduce 
   [amap f init]
-  (.kvreduce amap f init))
-
- clojure.lang.PersistentArrayMap
- (kv-reduce 
-  [amap f init]
-  (.kvreduce amap f init))
-
- clojure.lang.PersistentTreeMap
- (kv-reduce 
-  [amap f init]
-  (.kvreduce amap f init))
-
- clojure.lang.PersistentVector
- (kv-reduce 
-  [vec f init]
-  (.kvreduce vec f init)))
+  (.kvreduce amap f init)))
 
 (defn reduce-kv
   "Reduces an associative collection. f should be a function of 3

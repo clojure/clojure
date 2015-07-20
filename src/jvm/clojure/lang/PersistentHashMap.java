@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
  Any errors are my own
  */
 
-public class PersistentHashMap extends APersistentMap implements IEditableCollection, IObj, IMapIterable {
+public class PersistentHashMap extends APersistentMap implements IEditableCollection, IObj, IMapIterable, IKVReduce {
 
 final int count;
 final INode root;

@@ -26,7 +26,7 @@ import java.util.Map;
  * null keys and values are ok, but you won't be able to distinguish a null value via valAt - use contains/entryAt
  */
 
-public class PersistentArrayMap extends APersistentMap implements IObj, IEditableCollection, IMapIterable {
+public class PersistentArrayMap extends APersistentMap implements IObj, IEditableCollection, IMapIterable, IKVReduce{
 
 final Object[] array;
 static final int HASHTABLE_THRESHOLD = 16;

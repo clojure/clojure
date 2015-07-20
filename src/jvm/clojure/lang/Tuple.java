@@ -73,7 +73,7 @@ public class Tuple{
         return createFromArray(RT.toArray(coll));
     }
 
-static public abstract class ATuple extends APersistentVector implements IObj, IEditableCollection{
+static public abstract class ATuple extends APersistentVector implements IObj, IEditableCollection, IKVReduce, IReduceInit{
     PersistentVector vec(){
         return PersistentVector.adopt(toArray());
     }
@@ -103,26 +103,46 @@ static public abstract class ATuple extends APersistentVector implements IObj, I
     public ITransientCollection asTransient(){
         return vec().asTransient();
     }
+
+    public Object kvreduce(IFn f, Object init){
+        for(int i=0;i<count();i++){
+            init = f.invoke(init,i,nth(i));
+            if(init instanceof Reduced)
+                return ((IDeref)init).deref();
+        }
+        return init;
+    }
+
 }
 
 static public class T0 extends ATuple{
-    public int count(){
+    final public int count(){
         return 0;
     }
 
-    public Object nth(int i){
+    final public Object nth(int i){
         throw new IndexOutOfBoundsException();
     }
 
-    public IPersistentVector cons(Object o){
+    final public IPersistentVector cons(Object o){
         return create(o);
     }
 
-    public boolean equiv(Object obj){
+    final public boolean equiv(Object obj){
         if(obj instanceof T0)
             return true;
         return super.equiv(obj);
     }
+
+    public Object reduce(IFn f, Object init){
+        for(int i=0;i<count();i++){
+            init = f.invoke(init,nth(i));
+            if(init instanceof Reduced)
+                return ((IDeref)init).deref();
+        }
+        return init;
+    }
+
 }
 
 static public class T1 extends ATuple{
@@ -132,11 +152,11 @@ static public class T1 extends ATuple{
         this.v0 = v0;
     }
 
-    public int count(){
+    final public int count(){
         return 1;
     }
 
-    public Object nth(int i){
+    final public Object nth(int i){
         switch(i){
         case 0:
             return v0;
@@ -145,11 +165,11 @@ static public class T1 extends ATuple{
         }
     }
 
-    public IPersistentVector cons(Object o){
+    final public IPersistentVector cons(Object o){
         return create(v0, o);
     }
 
-    public boolean equiv(Object obj){
+    final public boolean equiv(Object obj){
         if(this == obj) return true;
         if(obj instanceof T1) {
             T1 o = (T1) obj;
@@ -157,6 +177,16 @@ static public class T1 extends ATuple{
             }
         return super.equiv(obj);
     }
+
+    public Object reduce(IFn f, Object init){
+        for(int i=0;i<count();i++){
+            init = f.invoke(init,nth(i));
+            if(init instanceof Reduced)
+                return ((IDeref)init).deref();
+        }
+        return init;
+    }
+
 }
 
 static public class T2 extends ATuple implements IMapEntry{
@@ -168,11 +198,11 @@ static public class T2 extends ATuple implements IMapEntry{
         this.v1 = v1;
     }
 
-    public int count(){
+    final public int count(){
         return 2;
     }
 
-    public Object nth(int i){
+    final public Object nth(int i){
         switch(i){
         case 0:
             return v0;
@@ -183,11 +213,11 @@ static public class T2 extends ATuple implements IMapEntry{
         }
     }
 
-    public IPersistentVector cons(Object o){
+    final public IPersistentVector cons(Object o){
         return create(v0, v1, o);
     }
 
-    public boolean equiv(Object obj){
+    final public boolean equiv(Object obj){
         if(this == obj) return true;
         if(obj instanceof T2) {
             T2 o = (T2) obj;
@@ -197,24 +227,34 @@ static public class T2 extends ATuple implements IMapEntry{
         return super.equiv(obj);
     }
 
-    @Override
-    public Object key(){
+    public Object reduce(IFn f, Object init){
+        for(int i=0;i<count();i++){
+            init = f.invoke(init,nth(i));
+            if(init instanceof Reduced)
+                return ((IDeref)init).deref();
+        }
+        return init;
+    }
+
+
+    //map entry stuff
+    final public Object key(){
         return v0;
     }
 
-    public Object val(){
+    final public Object val(){
         return v1;
     }
 
-    public Object getKey(){
+    final public Object getKey(){
         return v0;
     }
 
-    public Object getValue(){
+    final public Object getValue(){
         return v1;
     }
 
-    public Object setValue(Object value){
+    final public Object setValue(Object value){
         throw new UnsupportedOperationException();
     }
 }
@@ -230,11 +270,11 @@ static public class T3 extends ATuple{
         this.v2 = v2;
     }
 
-    public int count(){
+    final public int count(){
         return 3;
     }
 
-    public Object nth(int i){
+    final public Object nth(int i){
         switch(i){
         case 0:
             return v0;
@@ -247,11 +287,11 @@ static public class T3 extends ATuple{
         }
     }
 
-    public IPersistentVector cons(Object o){
+    final public IPersistentVector cons(Object o){
         return create(v0, v1, v2, o);
     }
 
-    public boolean equiv(Object obj){
+    final public boolean equiv(Object obj){
         if(this == obj) return true;
         if(obj instanceof T3) {
             T3 o = (T3) obj;
@@ -260,6 +300,15 @@ static public class T3 extends ATuple{
                    Util.equiv(v2, o.v2);
             }
         return super.equiv(obj);
+    }
+
+    public Object reduce(IFn f, Object init){
+        for(int i=0;i<count();i++){
+            init = f.invoke(init,nth(i));
+            if(init instanceof Reduced)
+                return ((IDeref)init).deref();
+        }
+        return init;
     }
 }
 
@@ -276,11 +325,11 @@ static public class T4 extends ATuple{
         this.v3 = v3;
     }
 
-    public int count(){
+    final public int count(){
         return 4;
     }
 
-    public Object nth(int i){
+    final public Object nth(int i){
         switch(i){
         case 0:
             return v0;
@@ -295,11 +344,11 @@ static public class T4 extends ATuple{
         }
     }
 
-    public IPersistentVector cons(Object o){
+    final public IPersistentVector cons(Object o){
         return create(v0, v1, v2, v3, o);
     }
 
-    public boolean equiv(Object obj){
+    final public boolean equiv(Object obj){
         if(this == obj) return true;
         if(obj instanceof T4) {
             T4 o = (T4) obj;
@@ -309,6 +358,15 @@ static public class T4 extends ATuple{
                    Util.equiv(v3, o.v3);
             }
         return super.equiv(obj);
+    }
+
+    public Object reduce(IFn f, Object init){
+        for(int i=0;i<count();i++){
+            init = f.invoke(init,nth(i));
+            if(init instanceof Reduced)
+                return ((IDeref)init).deref();
+        }
+        return init;
     }
 
 }
@@ -328,11 +386,11 @@ static public class T5 extends ATuple{
         this.v4 = v4;
     }
 
-    public int count(){
+    final public int count(){
         return 5;
     }
 
-    public Object nth(int i){
+    final public Object nth(int i){
         switch(i){
         case 0:
             return v0;
@@ -349,11 +407,11 @@ static public class T5 extends ATuple{
         }
     }
 
-    public IPersistentVector cons(Object o){
+    final public IPersistentVector cons(Object o){
         return create(v0, v1, v2, v3, v4, o);
     }
 
-    public boolean equiv(Object obj){
+    final public boolean equiv(Object obj){
         if(this == obj) return true;
         if(obj instanceof T5) {
             T5 o = (T5) obj;
@@ -366,6 +424,14 @@ static public class T5 extends ATuple{
         return super.equiv(obj);
     }
 
+    public Object reduce(IFn f, Object init){
+        for(int i=0;i<count();i++){
+            init = f.invoke(init,nth(i));
+            if(init instanceof Reduced)
+                return ((IDeref)init).deref();
+        }
+        return init;
+    }
 }
 
 static public class T6 extends ATuple{
@@ -385,11 +451,11 @@ static public class T6 extends ATuple{
         this.v5 = v5;
     }
 
-    public int count(){
+    final public int count(){
         return 6;
     }
 
-    public Object nth(int i){
+    final public Object nth(int i){
         switch(i){
         case 0:
             return v0;
@@ -412,7 +478,7 @@ static public class T6 extends ATuple{
         return vec().cons(o);
     }
 
-    public boolean equiv(Object obj){
+    final public boolean equiv(Object obj){
         if(this == obj) return true;
         if(obj instanceof T6) {
             T6 o = (T6) obj;
@@ -426,5 +492,13 @@ static public class T6 extends ATuple{
         return super.equiv(obj);
     }
 
+    public Object reduce(IFn f, Object init){
+        for(int i=0;i<count();i++){
+            init = f.invoke(init,nth(i));
+            if(init instanceof Reduced)
+                return ((IDeref)init).deref();
+        }
+        return init;
+    }
 }
 }

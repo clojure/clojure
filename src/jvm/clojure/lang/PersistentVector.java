@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PersistentVector extends APersistentVector implements IObj, IEditableCollection, IReduce{
+public class PersistentVector extends APersistentVector implements IObj, IEditableCollection, IReduce, IKVReduce{
 
 public static class Node implements Serializable {
 	transient public final AtomicReference<Thread> edit;
