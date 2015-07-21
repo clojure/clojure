@@ -702,7 +702,12 @@
       (is (= 1 (read-string opts "#?(:cljs (let [{{b :b} :a {d :d} :c} {}]) :clj 1)")))
       (is (= '(def m {}) (read-string opts "(def m #?(:cljs ^{:a :b} {} :clj  ^{:a :b} {}))")))
       (is (= '(def m {}) (read-string opts "(def m #?(:cljs ^{:a :b} {} :clj ^{:a :b} {}))")))
-      (is (= 1 (read-string opts "#?(:cljs {:a #_:b :c} :clj 1)"))))))
+      (is (= 1 (read-string opts "#?(:cljs {:a #_:b :c} :clj 1)")))))
+  (testing "nil expressions"
+    (is (nil? #?(:default nil)))
+    (is (nil? #?(:foo :bar :clj nil)))
+    (is (nil? #?(:clj nil :foo :bar)))
+    (is (nil? #?(:foo :bar :default nil)))))
 
 (deftest eof-option
   (is (= 23 (read-string {:eof 23} "")))

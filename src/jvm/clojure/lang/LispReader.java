@@ -1314,6 +1314,7 @@ static boolean isPreserveReadCond(Object opts) {
 
 public static class ConditionalReader extends AFn {
 
+	final static private Object READ_STARTED = new Object();
 	final static public Keyword DEFAULT_FEATURE = Keyword.intern(null, "default");
 	final static public IPersistentSet RESERVED_FEATURES =
 		RT.set(Keyword.intern(null, "else"), Keyword.intern(null, "none"));
@@ -1330,7 +1331,7 @@ public static class ConditionalReader extends AFn {
 	}
 
 	public static Object readCondDelimited(PushbackReader r, boolean splicing, Object opts, Object pendingForms) {
-		Object result = null;
+		Object result = READ_STARTED;
 		Object form; // The most recently ready form
 		boolean toplevel = (pendingForms == null);
 		pendingForms = ensurePending(pendingForms);
@@ -1340,7 +1341,7 @@ public static class ConditionalReader extends AFn {
 						((LineNumberingPushbackReader) r).getLineNumber() : -1;
 
 		for(; ;) {
-			if(result == null) {
+			if(result == READ_STARTED) {
 				// Read the next feature
 				form = read(r, false, READ_EOF, ')', READ_FINISHED, true, opts, pendingForms);
 
@@ -1398,7 +1399,7 @@ public static class ConditionalReader extends AFn {
 
 		}
 
-		if (result == null)  // no features matched
+		if (result == READ_STARTED)  // no features matched
             return r;
 
 		if (splicing) {
