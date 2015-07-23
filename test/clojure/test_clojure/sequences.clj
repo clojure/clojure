@@ -1287,7 +1287,10 @@
        ["a" "bb" "cccc" "dd" "eee" "f" "" "hh"]
        '("a" "bb" "cccc" "dd" "eee" "f" "" "hh"))
   (is (=(partition-by #{\a \e \i \o \u} "abcdefghijklm")
-       [[\a] [\b \c \d] [\e] [\f \g \h] [\i] [\j \k \l \m]])))
+        [[\a] [\b \c \d] [\e] [\f \g \h] [\i] [\j \k \l \m]]))
+  ;; CLJ-1764 regression test
+  (is (=(first (second (partition-by zero? (range))))
+        1)))
 
 (deftest test-frequencies
   (are [expected test-seq] (= (frequencies test-seq) expected)
