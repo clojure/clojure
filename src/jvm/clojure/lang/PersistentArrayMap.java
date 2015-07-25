@@ -161,7 +161,7 @@ public boolean containsKey(Object key){
 public IMapEntry entryAt(Object key){
 	int i = indexOf(key);
 	if(i >= 0)
-		return Tuple.create(array[i],array[i+1]);
+		return (IMapEntry) Tuple.create(array[i],array[i+1]);
 	return null;
 }
 

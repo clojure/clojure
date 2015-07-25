@@ -132,7 +132,7 @@ public IMapEntry entryAt(Object key){
 	Map.Entry e = def.keyslots.entryAt(key);
 	if(e != null)
 		{
-		return Tuple.create(e.getKey(), vals[(Integer) e.getValue()]);
+		return (IMapEntry) Tuple.create(e.getKey(), vals[(Integer) e.getValue()]);
 		}
 	return ext.entryAt(key);
 }

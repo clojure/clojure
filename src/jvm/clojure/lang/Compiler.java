@@ -156,12 +156,12 @@ final static Type IPERSISTENTMAP_TYPE = Type.getType(IPersistentMap.class);
 final static Type IOBJ_TYPE = Type.getType(IObj.class);
 final static Type TUPLE_TYPE = Type.getType(Tuple.class);
 final static Method createTupleMethods[] = {Method.getMethod("clojure.lang.IPersistentVector create()"),
-        Method.getMethod("clojure.lang.Tuple$T1 create(Object)"),
-        Method.getMethod("clojure.lang.Tuple$T2 create(Object,Object)"),
-        Method.getMethod("clojure.lang.Tuple$T3 create(Object,Object,Object)"),
-        Method.getMethod("clojure.lang.Tuple$T4 create(Object,Object,Object,Object)"),
-        Method.getMethod("clojure.lang.Tuple$T5 create(Object,Object,Object,Object,Object)"),
-        Method.getMethod("clojure.lang.Tuple$T6 create(Object,Object,Object,Object,Object,Object)")
+        Method.getMethod("clojure.lang.IPersistentVector create(Object)"),
+        Method.getMethod("clojure.lang.IPersistentVector create(Object,Object)"),
+        Method.getMethod("clojure.lang.IPersistentVector create(Object,Object,Object)"),
+        Method.getMethod("clojure.lang.IPersistentVector create(Object,Object,Object,Object)"),
+        Method.getMethod("clojure.lang.IPersistentVector create(Object,Object,Object,Object,Object)"),
+        Method.getMethod("clojure.lang.IPersistentVector create(Object,Object,Object,Object,Object,Object)")
 };
 
 private static final Type[][] ARG_TYPES;
@@ -2939,7 +2939,7 @@ public static class EmptyExpr implements Expr{
 		if(coll instanceof IPersistentList)
 			gen.getStatic(LIST_TYPE, "EMPTY", EMPTY_LIST_TYPE);
 		else if(coll instanceof IPersistentVector)
-			gen.getStatic(TUPLE_TYPE, "EMPTY", IVECTOR_TYPE);
+			gen.getStatic(VECTOR_TYPE, "EMPTY", VECTOR_TYPE);
 		else if(coll instanceof IPersistentMap)
 				gen.getStatic(HASHMAP_TYPE, "EMPTY", HASHMAP_TYPE);
 			else if(coll instanceof IPersistentSet)
@@ -3233,7 +3233,7 @@ public static class VectorExpr implements Expr{
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) form).meta()));
 		else if (constant)
 			{
-			IPersistentVector rv = Tuple.EMPTY;
+			IPersistentVector rv = PersistentVector.EMPTY;
 			for(int i =0;i<args.count();i++)
 				{
 				LiteralExpr ve = (LiteralExpr)args.nth(i);

@@ -128,7 +128,7 @@ public boolean containsKey(Object key){
 
 public IMapEntry entryAt(Object key){
 	if(key == null)
-		return hasNull ? Tuple.create(null, nullValue) : null;
+		return hasNull ? (IMapEntry) Tuple.create(null, nullValue) : null;
 	return (root != null) ? root.find(0, hash(key), key) : null;
 }
 
@@ -766,7 +766,7 @@ final static class BitmapIndexedNode implements INode{
 		if(keyOrNull == null)
 			return ((INode) valOrNode).find(shift + 5, hash, key);
 		if(Util.equiv(key, keyOrNull))
-			return Tuple.create(keyOrNull, valOrNode);
+			return (IMapEntry) Tuple.create(keyOrNull, valOrNode);
 		return null;
 	}
 
@@ -967,7 +967,7 @@ final static class HashCollisionNode implements INode{
 		if(idx < 0)
 			return null;
 		if(Util.equiv(key, array[idx]))
-			return Tuple.create(array[idx], array[idx+1]);
+			return (IMapEntry) Tuple.create(array[idx], array[idx+1]);
 		return null;
 	}
 
