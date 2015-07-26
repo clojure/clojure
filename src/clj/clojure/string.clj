@@ -43,6 +43,8 @@ Design notes for clojure.string:
   (:import (java.util.regex Pattern Matcher)
            clojure.lang.LazilyPersistentVector))
 
+(set! *warn-on-reflection* true)
+
 (defn ^String reverse
   "Returns s with its characters reversed."
   {:added "1.2"}
@@ -312,3 +314,63 @@ Design notes for clojure.string:
           (.append buffer replacement)
           (.append buffer ch))
         (recur (inc index) buffer)))))
+
+(defn index-of
+  "Return index of value (string or char) in s, optionally searching
+  forward from from-index or nil if not found."
+  {:added "1.8"}
+  ([^CharSequence s value]
+  (let [result ^long
+        (if (instance? Character value)
+          (.indexOf (.toString s) ^int (.charValue ^Character value))
+          (.indexOf (.toString s) ^String value))]
+    (if (= result -1)
+      nil
+      result)))
+  ([^CharSequence s value ^long from-index]
+  (let [result ^long
+        (if (instance? Character value)
+          (.indexOf (.toString s) ^int (.charValue ^Character value) (unchecked-int from-index))
+          (.indexOf (.toString s) ^String value (unchecked-int from-index)))]
+    (if (= result -1)
+      nil
+      result))))
+
+(defn last-index-of
+  "Return last index of value (string or char) in s, optionally
+  searching backward from from-index or nil if not found."
+  {:added "1.8"}
+  ([^CharSequence s value]
+  (let [result ^long
+        (if (instance? Character value)
+          (.lastIndexOf (.toString s) ^int (.charValue ^Character value))
+          (.lastIndexOf (.toString s) ^String value))]
+    (if (= result -1)
+      nil
+      result)))
+  ([^CharSequence s value ^long from-index]
+  (let [result ^long
+        (if (instance? Character value)
+          (.lastIndexOf (.toString s) ^int (.charValue ^Character value) (unchecked-int from-index))
+          (.lastIndexOf (.toString s) ^String value (unchecked-int from-index)))]
+    (if (= result -1)
+      nil
+      result))))
+
+(defn starts-with?
+  "True if s starts with substr."
+  {:added "1.8"}
+  [^CharSequence s ^String substr]
+  (.startsWith (.toString s) substr))
+
+(defn ends-with?
+  "True if s ends with substr."
+  {:added "1.8"}
+  [^CharSequence s ^String substr]
+  (.endsWith (.toString s) substr))
+
+(defn includes?
+  "True if s includes substr."
+  {:added "1.8"}
+  [^CharSequence s ^CharSequence substr]
+  (.contains (.toString s) substr))

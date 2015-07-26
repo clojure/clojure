@@ -2,6 +2,8 @@
   (:require [clojure.string :as s])
   (:use clojure.test))
 
+(set! *warn-on-reflection* true)
+
 (deftest t-split
   (is (= ["a" "b"] (s/split "a-b" #"-")))
   (is (= ["a" "b-c"] (s/split "a-b-c" #"-" 2)))
@@ -145,3 +147,45 @@
     (is (vector? result)))
   (is (= (list "foo") (s/split-lines "foo"))))
 
+(deftest t-index-of
+  (let [sb (StringBuffer. "tacos")]
+    (is (= 2  (s/index-of sb "c")))
+    (is (= 2  (s/index-of sb \c)))
+    (is (= 1  (s/index-of sb "ac")))
+    (is (= 3  (s/index-of sb "o" 2)))
+    (is (= 3  (s/index-of sb  \o  2)))
+    (is (= 3  (s/index-of sb "o" -100)))
+    (is (= nil (s/index-of sb "z")))
+    (is (= nil (s/index-of sb \z)))
+    (is (= nil (s/index-of sb "z" 2)))
+    (is (= nil (s/index-of sb \z  2)))
+    (is (= nil (s/index-of sb "z" 100))
+    (is (= nil (s/index-of sb "z" -10))))))
+
+(deftest t-last-index-of
+  (let [sb (StringBuffer. "banana")]
+    (is (= 4 (s/last-index-of sb "n")))
+    (is (= 4 (s/last-index-of sb \n)))
+    (is (= 3 (s/last-index-of sb "an")))
+    (is (= 4 (s/last-index-of sb "n" )))
+    (is (= 4 (s/last-index-of sb "n" 5)))
+    (is (= 4 (s/last-index-of sb \n  5)))
+    (is (= 4 (s/last-index-of sb "n" 500)))
+    (is (= nil (s/last-index-of sb "z")))
+    (is (= nil (s/last-index-of sb "z" 1)))
+    (is (= nil (s/last-index-of sb \z  1)))
+    (is (= nil (s/last-index-of sb "z" 100))
+    (is (= nil (s/last-index-of sb "z" -10))))))
+
+(deftest t-starts-with?
+  (is (s/starts-with? (StringBuffer. "clojure west") "clojure"))
+  (is (not (s/starts-with? (StringBuffer. "conj") "clojure"))))
+
+(deftest t-ends-with?
+  (is (s/ends-with? (StringBuffer. "Clojure West") "West")
+  (is (not (s/ends-with? (StringBuffer. "Conj") "West")))))
+
+(deftest t-includes?
+  (let [sb (StringBuffer. "Clojure Applied Book")]
+    (is (s/includes? sb "Applied"))
+    (is (not (s/includes? sb "Living")))))
