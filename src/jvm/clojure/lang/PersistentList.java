@@ -19,7 +19,7 @@ private final Object _first;
 private final IPersistentList _rest;
 private final int _count;
 
-public static IFn creator = new RestFn(){
+static public class Primordial extends RestFn{
 	final public int getRequiredArity(){
 		return 0;
 	}
@@ -39,7 +39,31 @@ public static IFn creator = new RestFn(){
 		return create(list);
 	}
 
-};
+	static public Object invokeStatic(ISeq args) {
+		if(args instanceof ArraySeq)
+			{
+			Object[] argsarray = ((ArraySeq) args).array;
+			IPersistentList ret = EMPTY;
+			for(int i = argsarray.length - 1; i >= 0; --i)
+				ret = (IPersistentList) ret.cons(argsarray[i]);
+			return ret;
+			}
+		LinkedList list = new LinkedList();
+		for(ISeq s = RT.seq(args); s != null; s = s.next())
+			list.add(s.first());
+		return create(list);
+	}
+
+	public IObj withMeta(IPersistentMap meta){
+		throw new UnsupportedOperationException();
+	}
+
+	public IPersistentMap meta(){
+		return null;
+	}
+}
+
+public static IFn creator = new Primordial();
 
 final public static EmptyList EMPTY = new EmptyList(null);
 
@@ -117,7 +141,7 @@ public Object reduce(IFn f, Object start) {
 	Object ret = f.invoke(start, first());
 	for(ISeq s = next(); s != null; s = s.next()) {
         if (RT.isReduced(ret)) return ((IDeref)ret).deref();
-        ret = f.invoke(ret, s.first());
+		ret = f.invoke(ret, s.first());
     }
 	if (RT.isReduced(ret)) return ((IDeref)ret).deref();
 	return ret;
