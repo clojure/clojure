@@ -5475,6 +5475,11 @@ public static class FnMethod extends ObjMethod{
 			{
 			gen.loadArg(i);
 			HostExpr.emitUnboxArg(fn, gen, argclasses[i]);
+            if(!argclasses[i].isPrimitive())
+                {
+                gen.visitInsn(Opcodes.ACONST_NULL);
+                gen.storeArg(i);
+                }
 			}
 		gen.invokeStatic(objx.objtype, ms);
 		gen.box(returnType);
@@ -5503,6 +5508,11 @@ public static class FnMethod extends ObjMethod{
 			for(int i = 0; i < argtypes.length; i++)
 				{
 				gen.loadArg(i);
+                if(!argclasses[i].isPrimitive())
+                    {
+                    gen.visitInsn(Opcodes.ACONST_NULL);
+                    gen.storeArg(i);
+                    }
 				}
 			gen.invokeStatic(objx.objtype, ms);
 
