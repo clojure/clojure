@@ -1082,8 +1082,6 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
  */
 	static Class tagToClass(Object tag) {
 		Class c = null;
-        if(tag instanceof ISeq && RT.first(tag).equals(QUOTE))
-            tag = RT.second(tag);
         if(tag instanceof Symbol)
 			{
 			Symbol sym = (Symbol) tag;
@@ -5306,10 +5304,15 @@ public static class FnMethod extends ObjMethod{
 
 			if(rettag instanceof String)
 				rettag = Symbol.intern(null, (String) rettag);
+            if(!(rettag instanceof Symbol))
+                rettag = null;
 			method.retClass = tagClass(tagOf(parms)!=null?tagOf(parms):rettag);
-			if(method.retClass.isPrimitive() && !(method.retClass == double.class || method.retClass == long.class))
-				throw new IllegalArgumentException("Only long and double primitives are supported");
-
+			if(method.retClass.isPrimitive()){
+                if(!(method.retClass == double.class || method.retClass == long.class))
+                    throw new IllegalArgumentException("Only long and double primitives are supported");
+            }
+            else
+                method.retClass = Object.class;
 			//register 'this' as local 0
 			//registerLocal(THISFN, null, null);
 //			if(!canBeDirect)
