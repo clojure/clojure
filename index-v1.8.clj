@@ -1427,16 +1427,16 @@
    :name "bean",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L372",
+   "https://github.com/clojure/clojure/blob/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj#L378",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/bean",
    :doc
    "Takes a Java object and returns a read-only implementation of the\nmap abstraction based upon its JavaBean properties.",
    :var-type "function",
-   :line 372,
+   :line 378,
    :file "src/clj/clojure/core_proxy.clj"}
   {:arglists ([x]),
    :name "bigdec",
@@ -2275,16 +2275,16 @@
    :name "construct-proxy",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L264",
+   "https://github.com/clojure/clojure/blob/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj#L270",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/construct-proxy",
    :doc
    "Takes a proxy class and any arguments for its superclass ctor and\ncreates and returns an instance of the proxy.",
    :var-type "function",
-   :line 264,
+   :line 270,
    :file "src/clj/clojure/core_proxy.clj"}
   {:arglists ([coll key]),
    :name "contains?",
@@ -3868,16 +3868,16 @@
    :name "get-proxy-class",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L250",
+   "https://github.com/clojure/clojure/blob/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj#L256",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/get-proxy-class",
    :doc
    "Takes an optional single class followed by zero or more\ninterfaces. If not supplied class defaults to Object.  Creates an\nreturns an instance of a proxy class derived from the supplied\nclasses. The resulting value is cached and used for any subsequent\nrequests for the same class set. Returns a Class object.",
    :var-type "function",
-   :line 250,
+   :line 256,
    :file "src/clj/clojure/core_proxy.clj"}
   {:arglists ([]),
    :name "get-thread-bindings",
@@ -4159,16 +4159,16 @@
    :name "init-proxy",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L271",
+   "https://github.com/clojure/clojure/blob/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj#L277",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/init-proxy",
    :doc
    "Takes a proxy instance and a map of strings (which must\ncorrespond to methods of the proxy superclass/superinterfaces) to\nfns (which must take arguments matching the corresponding method,\nplus an additional (explicit) first arg corresponding to this, and\nsets the proxy's fn map.  Returns the proxy.",
    :var-type "function",
-   :line 271,
+   :line 277,
    :file "src/clj/clojure/core_proxy.clj"}
   {:arglists ([c x]),
    :name "instance?",
@@ -5969,45 +5969,45 @@
    :name "proxy",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L303",
+   "https://github.com/clojure/clojure/blob/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj#L309",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/proxy",
    :doc
    "class-and-interfaces - a vector of class names\n\nargs - a (possibly empty) vector of arguments to the superclass\nconstructor.\n\nf => (name [params*] body) or\n(name ([params*] body) ([params+] body) ...)\n\nExpands to code which creates a instance of a proxy class that\nimplements the named class/interface(s) by calling the supplied\nfns. A single class, if provided, must be first. If not provided it\ndefaults to Object.\n\nThe interfaces names must be valid interface types. If a method fn\nis not provided for a class method, the superclass methd will be\ncalled. If a method fn is not provided for an interface method, an\nUnsupportedOperationException will be thrown should it be\ncalled. Method fns are closures and can capture the environment in\nwhich proxy is called. Each method fn takes an additional implicit\nfirst arg, which is bound to 'this. Note that while method fns can\nbe provided to override protected methods, they have no other access\nto protected members, nor to super, as these capabilities cannot be\nproxied.",
    :var-type "macro",
-   :line 303,
+   :line 309,
    :file "src/clj/clojure/core_proxy.clj"}
   {:arglists ([proxy]),
    :name "proxy-mappings",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L297",
+   "https://github.com/clojure/clojure/blob/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj#L303",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/proxy-mappings",
    :doc "Takes a proxy instance and returns the proxy's fn map.",
    :var-type "function",
-   :line 297,
+   :line 303,
    :file "src/clj/clojure/core_proxy.clj"}
   {:arglists ([meth & args]),
    :name "proxy-super",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L365",
+   "https://github.com/clojure/clojure/blob/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj#L371",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/proxy-super",
    :doc
    "Use to call a superclass method in the body of a proxy method. \nNote, expansion captures 'this",
    :var-type "macro",
-   :line 365,
+   :line 371,
    :file "src/clj/clojure/core_proxy.clj"}
   {:arglists ([bindings]),
    :name "push-thread-bindings",
@@ -8383,16 +8383,16 @@
    :name "update-proxy",
    :namespace "clojure.core",
    :source-url
-   "https://github.com/clojure/clojure/blob/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj#L282",
+   "https://github.com/clojure/clojure/blob/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj#L288",
    :added "1.0",
    :raw-source-url
-   "https://github.com/clojure/clojure/raw/36d665793b43f62cfd22354aced4c6892088abd6/src/clj/clojure/core_proxy.clj",
+   "https://github.com/clojure/clojure/raw/3b0af1b70de9c733872f4cc1ff68cec2f23a27a7/src/clj/clojure/core_proxy.clj",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/update-proxy",
    :doc
    "Takes a proxy instance and a map of strings (which must\ncorrespond to methods of the proxy superclass/superinterfaces) to\nfns (which must take arguments matching the corresponding method,\nplus an additional (explicit) first arg corresponding to this, and\nupdates (via assoc) the proxy's fn map. nil can be passed instead of\na fn, in which case the corresponding method will revert to the\ndefault behavior. Note that this function can be used to update the\nbehavior of an existing instance without changing its identity.\nReturns the proxy.",
    :var-type "function",
-   :line 282,
+   :line 288,
    :file "src/clj/clojure/core_proxy.clj"}
   {:arglists ([& args]),
    :name "use",
