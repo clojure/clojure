@@ -163,7 +163,7 @@ namespace.
   <br />
   <hr />
   <h2 id="clojure.core">clojure.core</h2>
-  
+  <span id="author-line">by <span id="author-name">Rich Hickey</span><br /></span>
   <a href="clojure.core-api.html" id="api-link">Detailed API documentation</a><br />
   <pre id="namespace-docstr">Fundamental library of the Clojure language</pre>
   
@@ -297,9 +297,9 @@ namespace.
   <br />
   <hr />
   <h2 id="clojure.java.io">clojure.java.io</h2>
-  
+  <span id="author-line">by <span id="author-name">Stuart Sierra, Chas Emerick, Stuart Halloway</span><br /></span>
   <a href="clojure.java.io-api.html" id="api-link">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">This file defines polymorphic I/O utility functions for Clojure.</pre>
   
   
   
@@ -323,9 +323,10 @@ namespace.
   <br />
   <hr />
   <h2 id="clojure.java.shell">clojure.java.shell</h2>
-  
+  <span id="author-line">by <span id="author-name">Chris Houser, Stuart Halloway</span><br /></span>
   <a href="clojure.java.shell-api.html" id="api-link">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">Conveniently launch a sub-process providing its stdin and
+collecting its stdout</pre>
   
   
   
@@ -336,9 +337,9 @@ namespace.
   <br />
   <hr />
   <h2 id="clojure.main">clojure.main</h2>
-  
+  <span id="author-line">by <span id="author-name">Stephen C. Gilardi and Rich Hickey</span><br /></span>
   <a href="clojure.main-api.html" id="api-link">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">Top-level main function for Clojure REPL and scripts.</pre>
   
   
   
@@ -436,9 +437,9 @@ Platform implementers must:
   <br />
   <hr />
   <h2 id="clojure.set">clojure.set</h2>
-  
+  <span id="author-line">by <span id="author-name">Rich Hickey</span><br /></span>
   <a href="clojure.set-api.html" id="api-link">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">Set operations such as union/intersection.</pre>
   
   
   
@@ -462,9 +463,39 @@ Platform implementers must:
   <br />
   <hr />
   <h2 id="clojure.string">clojure.string</h2>
-  
+  <span id="author-line">by <span id="author-name">Stuart Sierra, Stuart Halloway, David Liebke</span><br /></span>
   <a href="clojure.string-api.html" id="api-link">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">Clojure String utilities
+
+It is poor form to (:use clojure.string). Instead, use require
+with :as to specify a prefix, e.g.
+
+(ns your.namespace.here
+  (:require [clojure.string :as str]))
+
+Design notes for clojure.string:
+
+1. Strings are objects (as opposed to sequences). As such, the
+   string being manipulated is the first argument to a function;
+   passing nil will result in a NullPointerException unless
+   documented otherwise. If you want sequence-y behavior instead,
+   use a sequence.
+
+2. Functions are generally not lazy, and call straight to host
+   methods where those are available and efficient.
+
+3. Functions take advantage of String implementation details to
+   write high-performing loop/recurs instead of using higher-order
+   functions. (This is not idiomatic in general-purpose application
+   code.)
+
+4. When a function is documented to accept a string argument, it
+   will take any implementation of the correct *interface* on the
+   host platform. In Java, this is CharSequence, which is more
+   general than String. In ordinary usage you will almost always
+   pass concrete strings. If you are doing something unusual,
+   e.g. passing a mutable implementation of CharSequence, then
+   thread-safety is your responsibility.</pre>
   
   
   
@@ -734,9 +765,18 @@ For additional event types, see the examples in the code.</pre>
   <br />
   <hr />
   <h2 id="clojure.walk">clojure.walk</h2>
-  
+  <span id="author-line">by <span id="author-name">Stuart Sierra</span><br /></span>
   <a href="clojure.walk-api.html" id="api-link">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">This file defines a generic tree walker for Clojure data
+structures.  It takes any data structure (list, vector, map, set,
+seq), calls a function on every element, and uses the return value
+of the function in place of the original.  This makes it fairly
+easy to write recursive search-and-replace functions, as shown in
+the examples.
+
+Note: "walk" supports all Clojure data structures EXCEPT maps
+created with sorted-map-by.  There is no (obvious) way to retrieve
+the sorting function.</pre>
   
   
   
