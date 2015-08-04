@@ -1014,7 +1014,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		}
 	}
 
-	private static Class maybeClass(Object form, boolean stringOk) {
+	public static Class maybeClass(Object form, boolean stringOk) {
 		if(form instanceof Class)
 			return (Class) form;
 		Class c = null;
@@ -1074,6 +1074,32 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		 return className;
 	 }
  */
+    public static Class maybeSpecialTag(Symbol sym) {
+		Class c = primClass(sym);
+		if (c != null)
+			return c;
+		else if(sym.name.equals("objects"))
+			c = Object[].class;
+		else if(sym.name.equals("ints"))
+			c = int[].class;
+		else if(sym.name.equals("longs"))
+			c = long[].class;
+		else if(sym.name.equals("floats"))
+			c = float[].class;
+		else if(sym.name.equals("doubles"))
+			c = double[].class;
+		else if(sym.name.equals("chars"))
+			c = char[].class;
+		else if(sym.name.equals("shorts"))
+			c = short[].class;
+		else if(sym.name.equals("bytes"))
+			c = byte[].class;
+		else if(sym.name.equals("booleans"))
+			c = boolean[].class;
+		return c;
+    }
+
+
 	static Class tagToClass(Object tag) {
 		Class c = null;
         if(tag instanceof Symbol)
@@ -1081,40 +1107,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			Symbol sym = (Symbol) tag;
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
-				if(sym.name.equals("objects"))
-					c = Object[].class;
-				else if(sym.name.equals("ints"))
-					c = int[].class;
-				else if(sym.name.equals("longs"))
-					c = long[].class;
-				else if(sym.name.equals("floats"))
-					c = float[].class;
-				else if(sym.name.equals("doubles"))
-					c = double[].class;
-				else if(sym.name.equals("chars"))
-					c = char[].class;
-				else if(sym.name.equals("shorts"))
-					c = short[].class;
-				else if(sym.name.equals("bytes"))
-					c = byte[].class;
-				else if(sym.name.equals("booleans"))
-					c = boolean[].class;
-				else if(sym.name.equals("int"))
-					c = Integer.TYPE;
-				else if(sym.name.equals("long"))
-					c = Long.TYPE;
-				else if(sym.name.equals("float"))
-					c = Float.TYPE;
-				else if(sym.name.equals("double"))
-					c = Double.TYPE;
-				else if(sym.name.equals("char"))
-					c = Character.TYPE;
-				else if(sym.name.equals("short"))
-					c = Short.TYPE;
-				else if(sym.name.equals("byte"))
-					c = Byte.TYPE;
-				else if(sym.name.equals("boolean"))
-					c = Boolean.TYPE;
+				c = maybeSpecialTag(sym);
 				}
 			}
 		if(c == null)

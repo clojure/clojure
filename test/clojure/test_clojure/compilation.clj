@@ -140,6 +140,11 @@
   (should-not-reflect #(.floatValue (clojure.test-clojure.compilation/hinted "arg")))
   (should-not-reflect #(.size (clojure.test-clojure.compilation/hinted :many :rest :args :here))))
 
+(deftest CLJ-1232-qualify-hints
+  (let [arglists (-> #'clojure.test-clojure.compilation/hinted meta :arglists)]
+    (is (= 'java.lang.String (-> arglists first meta :tag)))
+    (is (= 'java.lang.Integer (-> arglists second meta :tag)))))
+
 (defn ^String hinting-conflict ^Integer [])
 
 (deftest calls-use-arg-vector-hint
