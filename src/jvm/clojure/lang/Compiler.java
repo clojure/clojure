@@ -6666,7 +6666,10 @@ private static Expr analyze(C context, Object form, String name) {
 				return new StringExpr(((String) form).intern());
 //	else if(fclass == Character.class)
 //		return new CharExpr((Character) form);
-		else if(form instanceof IPersistentCollection && ((IPersistentCollection) form).count() == 0)
+		else if(form instanceof IPersistentCollection
+                && !(form instanceof IRecord)
+                && !(form instanceof IType)
+                && ((IPersistentCollection) form).count() == 0)
 				{
 				Expr ret = new EmptyExpr(form);
 				if(RT.meta(form) != null)
