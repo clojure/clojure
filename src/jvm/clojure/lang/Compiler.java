@@ -5295,6 +5295,12 @@ public static class FnMethod extends ObjMethod{
 				rettag = Symbol.intern(null, (String) rettag);
             if(!(rettag instanceof Symbol))
                 rettag = null;
+            if(rettag != null)
+                {
+                String retstr = ((Symbol)rettag).getName();
+                if(!retstr.equals("long") || !retstr.equals("double"))
+                   rettag = null;
+                }
 			method.retClass = tagClass(tagOf(parms)!=null?tagOf(parms):rettag);
 			if(method.retClass.isPrimitive()){
                 if(!(method.retClass == double.class || method.retClass == long.class))
