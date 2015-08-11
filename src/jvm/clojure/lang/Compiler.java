@@ -6645,9 +6645,11 @@ private static Expr analyze(C context, Object form, String name) {
 		{
 		if(form instanceof LazySeq)
 			{
+			Object mform = form;
 			form = RT.seq(form);
 			if(form == null)
 				form = PersistentList.EMPTY;
+			form = ((IObj)form).withMeta(RT.meta(mform));
 			}
 		if(form == null)
 			return NIL_EXPR;

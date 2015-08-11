@@ -342,3 +342,6 @@
 (deftest clj-1399
   ;; throws an exception on failure
   (is (eval `(fn [] ~(CLJ1399. 1)))))
+
+(deftest CLJ-1586-lazyseq-literals-preserve-metadata
+  (should-not-reflect (eval (list '.substring (with-meta (concat '(identity) '("foo")) {:tag 'String}) 0))))
