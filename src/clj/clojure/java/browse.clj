@@ -44,15 +44,15 @@
   work on all platforms.  Returns url on success, nil if not
   supported."
   [url]
-  (try 
-    (when (clojure.lang.Reflector/invokeStaticMethod "java.awt.Desktop" 
+  (try
+    (when (clojure.lang.Reflector/invokeStaticMethod "java.awt.Desktop"
       "isDesktopSupported" (to-array nil))
-      (-> (clojure.lang.Reflector/invokeStaticMethod "java.awt.Desktop" 
+      (-> (clojure.lang.Reflector/invokeStaticMethod "java.awt.Desktop"
             "getDesktop" (to-array nil))
         (.browse (URI. url)))
       url)
     (catch ClassNotFoundException e
-      nil)))        
+      nil)))
 
 (defn- open-url-in-swing
  "Opens url (a string) in a Swing window."
