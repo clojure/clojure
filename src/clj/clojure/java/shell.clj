@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns 
+(ns
   ^{:author "Chris Houser, Stuart Halloway",
     :doc "Conveniently launch a sub-process providing its stdin and
 collecting its stdout"}
@@ -31,7 +31,7 @@ collecting its stdout"}
   [env & forms]
   `(binding [*sh-env* ~env]
      ~@forms))
-     
+
 (defn- aconcat
   "Concatenates arrays of given type."
   [type & xs]
@@ -49,7 +49,7 @@ collecting its stdout"}
         [cmd opts] (split-with string? args)]
     [cmd (merge default-opts (apply hash-map opts))]))
 
-(defn- ^"[Ljava.lang.String;" as-env-strings 
+(defn- ^"[Ljava.lang.String;" as-env-strings
   "Helper so that callers can pass a Clojure map for the :env to sh."
   [arg]
   (cond
@@ -110,7 +110,7 @@ collecting its stdout"}
   {:added "1.2"}
   [& args]
   (let [[cmd opts] (parse-args args)
-        proc (.exec (Runtime/getRuntime) 
+        proc (.exec (Runtime/getRuntime)
                ^"[Ljava.lang.String;" (into-array cmd)
                (as-env-strings (:env opts))
                (as-file (:dir opts)))

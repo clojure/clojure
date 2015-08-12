@@ -27,4 +27,3 @@
       (.setContentPane (javax.swing.JScrollPane. htmlpane))
       (.setBounds 32 32 700 900)
       (.show))))
-      
