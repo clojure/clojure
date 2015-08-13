@@ -102,7 +102,7 @@ Info info;
 long readPoint;
 long startPoint;
 long startTime;
-final RetryEx retryex = new RetryEx();
+static final RetryEx retryex = new RetryEx();
 final ArrayList<Agent.Action> actions = new ArrayList<Agent.Action>();
 final HashMap<Ref, Object> vals = new HashMap<Ref, Object>();
 final HashSet<Ref> sets = new HashSet<Ref>();
