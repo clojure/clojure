@@ -43,7 +43,9 @@
         rt-seq (-> v seq serialize deserialize)]
     (and (= v rt)
       (= (seq v) (seq rt))
-      (= (seq v) rt-seq))))
+      (= (seq v) rt-seq)
+      (= (hash v) (hash rt))
+      (= (.hashCode v) (.hashCode rt)))))
 
 (deftest sequable-serialization
   (are [val] (roundtrip val)
