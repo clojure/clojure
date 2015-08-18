@@ -1,6 +1,7 @@
 (ns clojure.test-clojure.reflect
   (:use clojure.data [clojure.reflect :as reflect] clojure.test clojure.pprint)
-  (:import [clojure.reflect AsmReflector JavaReflector]))
+  (:import [clojure.reflect AsmReflector JavaReflector]
+           [reflector IBar$Factory]))
 
 (defn nodiff
   [x y]
@@ -32,3 +33,7 @@
 (deftest internal-name->class-symbol-test
   (are [s n] (= s (@#'reflect/internal-name->class-symbol n))
        'java.lang.Exception "java/lang/Exception"))
+
+(def inst (IBar$Factory/get))
+(deftest invoking-nonpublic-super
+  (is (= "stuff" (.stuff inst))))
