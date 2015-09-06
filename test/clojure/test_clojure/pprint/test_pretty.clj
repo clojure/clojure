@@ -380,6 +380,7 @@ It is implemented with a number of custom enlive templates.\"
   (let [calendar (doto (java.util.GregorianCalendar. 2014 3 29 14 0 0)
                    (.setTimeZone (java.util.TimeZone/getTimeZone "GMT")))
         calendar-str (with-out-str (pprint calendar))]
-    (is (= calendar-str "#inst \"2014-04-29T14:00:00.000+00:00\"\n")
+    (is (= (str/split-lines calendar-str)
+           ["#inst \"2014-04-29T14:00:00.000+00:00\""])
         "calendar object pretty prints")))
 
