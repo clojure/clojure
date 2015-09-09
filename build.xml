@@ -56,6 +56,7 @@
       <sysproperty key="java.awt.headless" value="true"/>
       <arg value="clojure.core"/>
       <arg value="clojure.core.protocols"/>
+      <arg value="clojure.core.server"/>
       <arg value="clojure.main"/>
       <arg value="clojure.set"/>
       <arg value="clojure.edn"/>

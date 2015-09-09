@@ -473,6 +473,13 @@ static void doInit() throws ClassNotFoundException, IOException{
 		in_ns.invoke(USER);
 		refer.invoke(CLOJURE);
 		maybeLoadResourceScript("user.clj");
+
+		// start socket servers
+		Var require = var("clojure.core", "require");
+		Symbol SERVER = Symbol.intern("clojure.core.server");
+		require.invoke(SERVER);
+		Var start_servers = var("clojure.core.server", "start-servers");
+		start_servers.invoke(System.getProperties());
 	}
 	finally {
 		Var.popThreadBindings();
