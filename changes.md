@@ -34,9 +34,57 @@ portability and reduce the need for Java interop calls:
 
 [CLJ-1449](http://dev.clojure.org/jira/browse/CLJ-1449)
 
+### 1.3 Socket Server and REPL
+
+The Clojure runtime now has the ability to start a socket server at initialization
+based on system properties. One expected use for this is serving a socket-based
+REPL, but it also has many other potential uses for dynamically adding server
+capability to existing programs without code changes.
+
+A socket server will be started for each JVM system property like
+"clojure.server.<server-name>". The value for this property is an edn map
+representing the configuration of the socket server with the following properties:
+
+* address - host or address, defaults to loopback
+* port - positive integer, required
+* accept - namespaced symbol of function to invoke on socket accept, required
+* args - sequential collection of args to pass to accept
+* bind-err - defaults to true, binds `*err*` to socket out stream
+* server-daemon - defaults to true, socket server thread doesn't block exit
+* client-daemon - defaults to true, socket client thread doesn't block exit
+
+Additionally, there is a repl function provided that is slightly customized for
+use with the socket server in `clojure.core.server/repl`.
+
+Following is an example of starting a socket server with a repl listener.
+This can be added to any existing Clojure program to allow it to accept
+external REPL clients.
+
+```
+-Dclojure.server.repl="{:port 5555 :accept clojure.core.server/repl}"
+```
+
+An example client you can use to connect to this socket repl is telnet:
+
+```
+$ telnet 127.0.0.1 5555
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+user=> (println "hello")
+hello
+```
+
+See:
+* [CLJ-1671](http://dev.clojure.org/jira/browse/CLJ-1671)
+* [Socket REPL design page](http://dev.clojure.org/display/design/Socket+Server+REPL)
+
 ## 2 Enhancements
 
 ### 2.1 Error messages
+
+* [CLJ-1778](http://dev.clojure.org/jira/browse/CLJ-1778)
+  let-bound namespace-qualified bindings should throw (if not map destructuring)
 
 ### 2.2 Documentation strings
 
@@ -115,6 +163,8 @@ portability and reduce the need for Java interop calls:
 * [CLJ-1232](http://dev.clojure.org/jira/browse/CLJ-1232)
   Functions with non-qualified return type hints will now work without
   import from other namespace
+* [CLJ-1812](http://dev.clojure.org/jira/browse/CLJ-1812)
+  Fix test failure on windows due to line endings
 * Records and types without fields eval to empty map
 
 # Changes to Clojure in Version 1.7
