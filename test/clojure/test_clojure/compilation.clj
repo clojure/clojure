@@ -356,3 +356,9 @@
   (is (thrown? RuntimeException (eval '(defn foo [] (throw RuntimeException any-symbol)))))
   (is (thrown? RuntimeException (eval '(defn foo [] (throw (RuntimeException.) any-symbol)))))
   (is (var? (eval '(defn foo [] (throw (IllegalArgumentException.)))))))
+
+(deftest clj-1809
+  (is (eval `(fn [y#]
+               (try
+                 (finally
+                   (let [z# y#])))))))

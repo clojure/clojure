@@ -4012,9 +4012,9 @@ static public class FnExpr extends ObjExpr{
 						{
 						for(LocalBinding lb : (Collection<LocalBinding>)RT.keys(fm.locals))
 							{
-							lb.idx -= 1;
+							if(lb.isArg)
+								lb.idx -= 1;
 							}
-						fm.maxLocal -= 1;
 						}
 					}
 				}
