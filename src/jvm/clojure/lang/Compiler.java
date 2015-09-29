@@ -5270,7 +5270,7 @@ public static class FnMethod extends ObjMethod{
             if(rettag != null)
                 {
                 String retstr = ((Symbol)rettag).getName();
-                if(!retstr.equals("long") || !retstr.equals("double"))
+                if(!(retstr.equals("long") || retstr.equals("double")))
                    rettag = null;
                 }
 			method.retClass = tagClass(tagOf(parms)!=null?tagOf(parms):rettag);
