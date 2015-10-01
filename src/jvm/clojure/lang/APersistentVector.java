@@ -223,7 +223,10 @@ public ListIterator listIterator(final int index){
 		}
 
 		public Object next(){
-			return nth(nexti++);
+			if(nexti < count())
+				return nth(nexti++);
+			else
+				throw new NoSuchElementException();
 		}
 
 		public boolean hasPrevious(){
@@ -231,7 +234,10 @@ public ListIterator listIterator(final int index){
 		}
 
 		public Object previous(){
-			return nth(--nexti);
+			if(nexti > 0)
+				return nth(--nexti);
+			else
+				throw new NoSuchElementException();
 		}
 
 		public int nextIndex(){
@@ -265,7 +271,10 @@ Iterator rangedIterator(final int start, final int end){
 		}
 
 		public Object next(){
-			return nth(i++);
+			if(i < end)
+				return nth(i++);
+			else
+				throw new NoSuchElementException();
 		}
 
 		public void remove(){
@@ -308,7 +317,9 @@ public Iterator iterator(){
 		}
 
 		public Object next(){
-			return nth(i++);
+			if(i < count())
+				return nth(i++);
+			else throw new NoSuchElementException();
 		}
 
 		public void remove(){

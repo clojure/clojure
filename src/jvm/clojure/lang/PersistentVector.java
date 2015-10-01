@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PersistentVector extends APersistentVector implements IObj, IEditableCollection, IReduce, IKVReduce{
@@ -294,12 +295,16 @@ Iterator rangedIterator(final int start, final int end){
 			}
 
 		public Object next(){
-			if(i-base == 32){
-				array = arrayFor(i);
-				base += 32;
+			if(i < end) {
+				if(i-base == 32){
+					array = arrayFor(i);
+					base += 32;
 				}
-			return array[i++ & 0x01f];
+				return array[i++ & 0x01f];
+			} else {
+				throw new NoSuchElementException();
 			}
+		}
 
 		public void remove(){
 			throw new UnsupportedOperationException();

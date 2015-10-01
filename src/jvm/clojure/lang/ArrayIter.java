@@ -19,7 +19,7 @@ int i;
 
 static public Iterator EMPTY_ITERATOR = new Iterator() {
   public boolean hasNext() { return false; }
-  public Object next() { return null; }
+  public Object next() { throw new java.util.NoSuchElementException(); }
   public void remove() { throw new UnsupportedOperationException("remove() not supported"); }
 };
 
@@ -68,7 +68,7 @@ public boolean hasNext() {
 public Object next() {
   if(array != null && i < array.length)
     return array[i++];
-  return null;
+  throw new java.util.NoSuchElementException();
 }
 
 public void remove() {
@@ -93,7 +93,7 @@ static public class ArrayIter_int implements Iterator<Long> {
   public Long next() {
     if(array != null && i < array.length)
       return Long.valueOf(array[i++]);
-    return null;
+    throw new java.util.NoSuchElementException();
   }
 
   public void remove() {
@@ -117,7 +117,7 @@ static public class ArrayIter_float implements Iterator<Double> {
   public Double next() {
     if(array != null && i < array.length)
       return Double.valueOf(array[i++]);
-    return null;
+    throw new java.util.NoSuchElementException();
   }
 
   public void remove() {
@@ -141,7 +141,7 @@ static public class ArrayIter_double implements Iterator<Double> {
   public Double next() {
     if(array != null && i < array.length)
       return array[i++];
-    return null;
+    throw new java.util.NoSuchElementException();
   }
 
   public void remove() {
@@ -166,7 +166,7 @@ static public class ArrayIter_long implements Iterator<Long> {
   public Long next() {
     if(array != null && i < array.length)
       return Long.valueOf(array[i++]);
-    return null;
+    throw new java.util.NoSuchElementException();
   }
 
   public void remove() {
@@ -191,7 +191,7 @@ static public class ArrayIter_byte implements Iterator<Byte> {
   public Byte next() {
     if(array != null && i < array.length)
       return array[i++];
-    return null;
+    throw new java.util.NoSuchElementException();
   }
 
   public void remove() {
@@ -216,7 +216,7 @@ static public class ArrayIter_char implements Iterator<Character> {
   public Character next() {
     if(array != null && i < array.length)
       return array[i++];
-    return null;
+    throw new java.util.NoSuchElementException();
   }
 
   public void remove() {
@@ -241,7 +241,7 @@ static public class ArrayIter_short implements Iterator<Long> {
   public Long next() {
     if(array != null && i < array.length)
       return Long.valueOf(array[i++]);
-    return null;
+    throw new java.util.NoSuchElementException();
   }
 
   public void remove() {
@@ -266,7 +266,7 @@ static public class ArrayIter_boolean implements Iterator<Boolean> {
   public Boolean next() {
     if(array != null && i < array.length)
       return Boolean.valueOf(array[i++]);
-    return null;
+    throw new java.util.NoSuchElementException();
   }
 
   public void remove() {

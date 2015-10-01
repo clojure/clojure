@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Simple implementation of persistent map on an array
@@ -353,8 +354,12 @@ static class Iter implements Iterator{
 	}
 
 	public Object next(){
-		i += 2;
-		return f.invoke(array[i],array[i+1]);
+		try {
+			i += 2;
+			return f.invoke(array[i], array[i+1]);
+		} catch(IndexOutOfBoundsException e) {
+			throw new NoSuchElementException();
+		}
 	}
 
 	public void remove(){

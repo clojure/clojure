@@ -855,9 +855,13 @@ static public class NodeIterator implements Iterator{
 	}
 
 	public Object next(){
-		Node t = (Node) stack.pop();
-		push(asc ? t.right() : t.left());
-		return t;
+		try {
+			Node t = (Node) stack.pop();
+			push(asc ? t.right() : t.left());
+			return t;
+		} catch(EmptyStackException e) {
+			throw new NoSuchElementException();
+		}
 	}
 
 	public void remove(){
