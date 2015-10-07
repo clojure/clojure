@@ -9873,7 +9873,7 @@
    :doc
    "The Java access bitflags, along with their friendly names and\nthe kinds of objects to which they can apply.",
    :name "flag-descriptors"}
-  {:arglists ([m__1257__auto__]),
+  {:arglists ([m__1261__auto__]),
    :name "map->Constructor",
    :namespace "clojure.reflect",
    :source-url
@@ -9887,7 +9887,7 @@
    :var-type "function",
    :line 109,
    :file "src/clj/clojure/reflect/java.clj"}
-  {:arglists ([m__1257__auto__]),
+  {:arglists ([m__1261__auto__]),
    :name "map->Field",
    :namespace "clojure.reflect",
    :source-url
@@ -9901,7 +9901,7 @@
    :var-type "function",
    :line 148,
    :file "src/clj/clojure/reflect/java.clj"}
-  {:arglists ([m__1257__auto__]),
+  {:arglists ([m__1261__auto__]),
    :name "map->Method",
    :namespace "clojure.reflect",
    :source-url
