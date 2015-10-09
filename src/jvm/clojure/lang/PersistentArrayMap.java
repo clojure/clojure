@@ -218,15 +218,8 @@ public IPersistentMap without(Object key){
 		if(newlen == 0)
 			return empty();
 		Object[] newArray = new Object[newlen];
-		for(int s = 0, d = 0; s < array.length; s += 2)
-			{
-			if(!equalKey(array[s], key)) //skip removal key
-				{
-				newArray[d] = array[s];
-				newArray[d + 1] = array[s + 1];
-				d += 2;
-				}
-			}
+		System.arraycopy(array, 0, newArray, 0, i);
+		System.arraycopy(array, i+2, newArray, i, newlen - i);
 		return create(newArray);
 		}
 	//don't have key, no op
