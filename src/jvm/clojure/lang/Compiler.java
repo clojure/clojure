@@ -2411,6 +2411,10 @@ static class ThrowExpr extends UntypedExpr{
 		public Expr parse(C context, Object form) {
 			if(context == C.EVAL)
 				return analyze(context, RT.list(RT.list(FNONCE, PersistentVector.EMPTY, form)));
+			else if(RT.count(form) == 1)
+				throw Util.runtimeException("Too few arguments to throw, throw expects a single Throwable instance");
+			else if(RT.count(form) > 2)
+				throw Util.runtimeException("Too many arguments to throw, throw expects a single Throwable instance");
 			return new ThrowExpr(analyze(C.EXPRESSION, RT.second(form)));
 		}
 	}
