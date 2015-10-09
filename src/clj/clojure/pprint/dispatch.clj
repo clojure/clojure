@@ -19,7 +19,7 @@
 
 (defn- use-method
   "Installs a function as a new method of multimethod associated with dispatch-value. "
-  [multifn dispatch-val func]
+  [^clojure.lang.MultiFn multifn dispatch-val func]
   (. multifn addMethod dispatch-val func))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -132,7 +132,7 @@
                            (pprint-newline :linear)
                            (write-out (cond 
                                        (and (future? o) (not (future-done? o))) :pending
-                                       (and (instance? clojure.lang.IPending o) (not (.isRealized o))) :not-delivered
+                                       (and (instance? clojure.lang.IPending o) (not (.isRealized ^clojure.lang.IPending o))) :not-delivered
                                        :else @o)))))
 
 (def ^{:private true} pprint-pqueue (formatter-out "~<<-(~;~@{~w~^ ~_~}~;)-<~:>"))

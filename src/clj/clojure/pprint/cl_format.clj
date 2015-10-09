@@ -174,9 +174,9 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
                     (opt-base-str *print-base* n)))
     (ratio? n) (str
                 (if *print-radix* (or (get special-radix-markers *print-base*) (str "#" *print-base* "r")))
-                (opt-base-str *print-base* (.numerator n))
+                (opt-base-str *print-base* (.numerator ^clojure.lang.Ratio n))
                 "/"
-                (opt-base-str *print-base* (.denominator n)))
+                (opt-base-str *print-base* (.denominator ^clojure.lang.Ratio n)))
     :else nil))
 
 (defn- format-ascii [print-func params arg-navigator offsets]
@@ -681,7 +681,7 @@ string, or one character longer."
         append-zero (and (not d) (<= (dec (count mantissa)) scaled-exp))
         [rounded-mantissa scaled-exp expanded] (round-str mantissa scaled-exp 
                                                           d (if w (- w (if add-sign 1 0))))
-        fixed-repr (get-fixed rounded-mantissa (if expanded (inc scaled-exp) scaled-exp) d)
+        ^String fixed-repr (get-fixed rounded-mantissa (if expanded (inc scaled-exp) scaled-exp) d)
         fixed-repr (if (and w d
                             (>= d 1)
                             (= (.charAt fixed-repr 0) \0)

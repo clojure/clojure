@@ -54,7 +54,7 @@
 
 (defn- column-writer   
   ([writer] (column-writer writer *default-page-width*))
-  ([writer max-columns]
+  ([^Writer writer max-columns]
      (let [fields (ref {:max max-columns, :cur 0, :line 0 :base writer})]
        (proxy [Writer IDeref] []
          (deref [] fields)
