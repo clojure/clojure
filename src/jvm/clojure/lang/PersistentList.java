@@ -159,6 +159,10 @@ public Object reduce(IFn f, Object start) {
 		return hasheq;
 	}
 
+    public String toString() {
+        return "()";
+    }
+
     public boolean equals(Object o) {
         return (o instanceof Sequential || o instanceof List) && RT.seq(o) == null;
     }

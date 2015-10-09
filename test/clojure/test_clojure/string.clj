@@ -189,3 +189,8 @@
   (let [sb (StringBuffer. "Clojure Applied Book")]
     (is (s/includes? sb "Applied"))
     (is (not (s/includes? sb "Living")))))
+
+(deftest empty-collections
+  (is (= "()" (str ())))
+  (is (= "{}" (str {})))
+  (is (= "[]" (str []))))
