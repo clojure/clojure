@@ -6136,8 +6136,7 @@
                              ~(emit pred expr more))
                   :else `(if-let [p# (~pred ~a ~expr)]
                            (~c p#)
-                           ~(emit pred expr more)))))
-        gres (gensym "res__")]
+                           ~(emit pred expr more)))))]
     `(let [~gpred ~pred
            ~gexpr ~expr]
        ~(emit gpred gexpr clauses))))
