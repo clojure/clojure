@@ -5055,10 +5055,10 @@
   evaluation of expr at each step, returning ret."
   {:added "1.0"}
   [a idx ret init expr]
-  `(let [a# ~a]
+  `(let [a# ~a l# (alength a#)]
      (loop  [~idx 0 ~ret ~init]
-       (if (< ~idx  (alength a#))
-         (recur (unchecked-inc ~idx) ~expr)
+       (if (< ~idx l#)
+         (recur (unchecked-inc-int ~idx) ~expr)
          ~ret))))
 
 (defn float-array
