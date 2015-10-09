@@ -60,6 +60,12 @@
       (finally
        (.delete f)))))
 
+(deftest test-streams-nil
+  (is (thrown-with-msg? IllegalArgumentException #"Cannot open.*nil" (reader nil)))
+  (is (thrown-with-msg? IllegalArgumentException #"Cannot open.*nil" (writer nil)))
+  (is (thrown-with-msg? IllegalArgumentException #"Cannot open.*nil" (input-stream nil)))
+  (is (thrown-with-msg? IllegalArgumentException #"Cannot open.*nil" (output-stream nil))))
+
 (defn bytes-should-equal [byte-array-1 byte-array-2 msg]
   (is (= @#'clojure.java.io/byte-array-type (class byte-array-1) (class byte-array-2)) msg)
   (is (= (into []  byte-array-1) (into []  byte-array-2)) msg))
