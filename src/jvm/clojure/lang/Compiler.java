@@ -4561,41 +4561,6 @@ static public class ObjExpr implements Expr{
 		emitStatics(cv);
 		emitMethods(cv);
 
-		if(keywordCallsites.count() > 0)
-			{
-			Method meth = Method.getMethod("void swapThunk(int,clojure.lang.ILookupThunk)");
-
-			GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
-												meth,
-												null,
-												null,
-												cv);
-			gen.visitCode();
-			Label endLabel = gen.newLabel();
-
-			Label[] labels = new Label[keywordCallsites.count()];
-			for(int i = 0; i < keywordCallsites.count();i++)
-				{
-				labels[i] = gen.newLabel();
-				}
-			gen.loadArg(0);
-			gen.visitTableSwitchInsn(0,keywordCallsites.count()-1,endLabel,labels);
-
-			for(int i = 0; i < keywordCallsites.count();i++)
-				{
-				gen.mark(labels[i]);
-//				gen.loadThis();
-				gen.loadArg(1);
-				gen.putStatic(objtype, thunkNameStatic(i),ILOOKUP_THUNK_TYPE);
-				gen.goTo(endLabel);
-				}
-
-			gen.mark(endLabel);
-
-			gen.returnValue();
-			gen.endMethod();
-			}
-		
 		//end of class
 		cv.visitEnd();
 
