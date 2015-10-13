@@ -81,10 +81,16 @@ See:
 
 ## 2 Enhancements
 
-### 2.1 Error messages
+### 2.1 Error handling
 
 * [CLJ-1778](http://dev.clojure.org/jira/browse/CLJ-1778)
   let-bound namespace-qualified bindings should throw (if not map destructuring)
+* [CLJ-1456](http://dev.clojure.org/jira/browse/CLJ-1456)
+  Compiler now errors if too few or too many arguments to throw
+* [CLJ-1282](http://dev.clojure.org/jira/browse/CLJ-1282)
+  quote now throws if passed more or less than one arg
+* [CLJ-1210](http://dev.clojure.org/jira/browse/CLJ-1210)
+  Improved error message for (clojure.java.io/reader nil)
 
 ### 2.2 Documentation strings
 
@@ -94,16 +100,40 @@ See:
   Typo in the docstring of 'with-bindings'
 * [CLJ-1769](http://dev.clojure.org/jira/browse/CLJ-1769)
   Docstrings for *' and +' refer to * and +
+* [CLJ-1414](http://dev.clojure.org/jira/browse/CLJ-1414)
+  sort and sort-by now indicate sort is stable in docstring
 
 ### 2.3 Performance
 
 * [CLJ-703](http://dev.clojure.org/jira/browse/CLJ-703)
   Improve writeClassFile performance
+* [CLJ-1765](http://dev.clojure.org/jira/browse/CLJ-1765)
+  areduce performance improvements
+* [CLJ-1724](http://dev.clojure.org/jira/browse/CLJ-1724)
+  Remove unnecessary call to seq() in LazySeq.hashCode()
+* [CLJ-1295](http://dev.clojure.org/jira/browse/CLJ-1295)
+  Improved array-map dissoc performance
+* [CLJ-1277](http://dev.clojure.org/jira/browse/CLJ-1277)
+  Speed up printing of time instants with type hints
+* [CLJ-1259](http://dev.clojure.org/jira/browse/CLJ-1259)
+  Speed up pprint and cl-format with type hints
+* [CLJ-668](http://dev.clojure.org/jira/browse/CLJ-668)
+  Improve slurp performance by using StringWriter and jio/copy
 
 ### 2.4 Other enhancements
 
 * [CLJ-1208](http://dev.clojure.org/jira/browse/CLJ-1208)
   Optionally require namespace on defrecord class init
+* [CLJ-1810](http://dev.clojure.org/jira/browse/CLJ-1810)
+  ATransientMap now marked public
+* [CLJ-1653](http://dev.clojure.org/jira/browse/CLJ-1653)
+  str of an empty list should be "()"
+* [CLJ-1567](http://dev.clojure.org/jira/browse/CLJ-1567)
+  Removed unused local in condp implementation
+* [CLJ-1351](http://dev.clojure.org/jira/browse/CLJ-1351)
+  Unused swapThunk method was being emitted for fns with keyword callsites
+* [CLJ-1329](http://dev.clojure.org/jira/browse/CLJ-1329)
+  Removed unused local in PersistentVector.cons()
 
 ## 3 Bug Fixes
 
@@ -165,6 +195,10 @@ See:
   import from other namespace
 * [CLJ-1812](http://dev.clojure.org/jira/browse/CLJ-1812)
   Fix test failure on windows due to line endings
+* [CLJ-1380](http://dev.clojure.org/jira/browse/CLJ-1380)
+  3-arg ExceptionInfo constructor permitted nil data
+* [CLJ-1226](http://dev.clojure.org/jira/browse/CLJ-1226)
+  set! of a deftype field using field-access syntax caused ClassCastException
 * Records and types without fields eval to empty map
 
 # Changes to Clojure in Version 1.7
