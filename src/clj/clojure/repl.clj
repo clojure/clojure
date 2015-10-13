@@ -195,9 +195,9 @@ str-or-pattern."
 
 (defn dir-fn
   "Returns a sorted seq of symbols naming public vars in
-  a namespace"
+  a namespace or namespace alias. Looks for aliases in *ns*"
   [ns]
-  (sort (map first (ns-publics (the-ns ns)))))
+  (sort (map first (ns-publics (the-ns (get (ns-aliases *ns*) ns ns))))))
 
 (defmacro dir
   "Prints a sorted directory of public vars in a namespace"
