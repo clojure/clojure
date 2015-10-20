@@ -2915,8 +2915,8 @@
   "Return a lazy sequence of all but the last n (default 1) items in coll"
   {:added "1.0"
    :static true}
-  ([s] (drop-last 1 s))
-  ([n s] (map (fn [x _] x) s (drop n s))))
+  ([coll] (drop-last 1 coll))
+  ([n coll] (map (fn [x _] x) coll (drop n coll))))
 
 (defn take-last
   "Returns a seq of the last n items in coll.  Depending on the type
