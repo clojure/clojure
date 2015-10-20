@@ -132,7 +132,7 @@
 (defn- imap-cons
   [^IPersistentMap this o]
   (cond
-   (instance? java.util.Map$Entry o)
+   (map-entry? o)
      (let [^java.util.Map$Entry pair o]
        (.assoc this (.getKey pair) (.getValue pair)))
    (instance? clojure.lang.IPersistentVector o)

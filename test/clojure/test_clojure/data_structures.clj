@@ -704,6 +704,16 @@
          ai3 ao3
          ai4 ao4)))
 
+(deftest test-map-entry?
+  (testing "map-entry? = false"
+    (are [entry]
+      (false? (map-entry? entry))
+      nil 5 #{1 2} '(1 2) {:a 1} [] [0] [1 2 3]))
+  (testing "map-entry? = true"
+    (are [entry]
+      (true? (map-entry? entry))
+      [1 2] (first (doto (java.util.HashMap.) (.put "x" 1))))))
+
 ;; *** Sets ***
 
 (deftest test-hash-set
