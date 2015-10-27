@@ -469,8 +469,6 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 		return true;
 	if(paramType == int.class)
 		return argType == Integer.class
-		       || argType == long.class
-				|| argType == Long.class
 				|| argType == short.class
 				|| argType == byte.class;// || argType == FixNum.class;
 	else if(paramType == float.class)
@@ -481,6 +479,7 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 				|| argType == float.class;// || argType == DoubleNum.class;
 	else if(paramType == long.class)
 		return argType == Long.class
+				|| argType == Integer.class
 				|| argType == int.class
 				|| argType == short.class
 				|| argType == byte.class;// || argType == BigNum.class;
