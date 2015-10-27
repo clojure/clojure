@@ -38,6 +38,10 @@
     <url>git@github.com:clojure/clojure.git</url>
   </scm>
 
+  <properties>
+    <directlinking>true</directlinking>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.codehaus.jsr166-mirror</groupId>
@@ -221,6 +225,19 @@
   </build>
 
   <profiles>
+    <!-- Use "mvn -Ptest-direct" or "mvn -Ptest-no-direct" to choose testing with direct linking -->
+    <profile>
+      <id>test-direct</id>
+      <properties>
+        <directlinking>true</directlinking>
+      </properties>
+    </profile>
+    <profile>
+      <id>test-no-direct</id>
+      <properties>
+        <directlinking>false</directlinking>
+      </properties>
+    </profile>
     <profile>
       <!-- "mvn -Pdistribution package" builds a .zip file -->
       <id>distribution</id>

@@ -28,6 +28,8 @@
   <property name="clojure_jar" location="clojure-${clojure.version.label}.jar"/>
   <property name="clojure_noversion_jar" location="clojure.jar"/>
 
+  <property name="directlinking" value="true"/>
+
   <target name="init" depends="clean">
     <tstamp/>
     <mkdir dir="${build}"/>
@@ -88,6 +90,7 @@
     <mkdir dir="${test-classes}"/>
     <javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes"
            debug="true" source="1.6" target="1.6" includeantruntime="no"/>
+    <echo>Direct linking = ${directlinking}</echo>
     <java classname="clojure.lang.Compile"
           classpath="${test-classes}:${test}:${build}:${cljsrc}"
           failonerror="true"
@@ -95,6 +98,7 @@
       <sysproperty key="clojure.compile.path" value="${test-classes}"/>
         <!--<sysproperty key="clojure.compiler.elide-meta" value="[:doc]"/>-->
         <!--<sysproperty key="clojure.compiler.disable-locals-clearing" value="true"/>-->
+      <sysproperty key="clojure.compiler.direct-linking" value="${directlinking}"/>
       <arg value="clojure.test-clojure.protocols.examples"/>
       <arg value="clojure.test-clojure.genclass.examples"/>
       <arg value="clojure.test-clojure.compilation.load-ns"/>
@@ -109,6 +113,7 @@
     <java classname="clojure.main" failonerror="true" fork="true">
       <sysproperty key="clojure.test-clojure.exclude-namespaces"
                    value="#{clojure.test-clojure.compilation.load-ns}"/>
+      <sysproperty key="clojure.compiler.direct-linking" value="${directlinking}"/>
       <classpath>
         <pathelement path="${maven.test.classpath}"/>
         <path location="${test-classes}"/>
@@ -125,6 +130,7 @@
           depends="compile-tests"
           unless="maven.test.skip">
     <java classname="clojure.main" failonerror="true" fork="true">
+      <sysproperty key="clojure.compiler.direct-linking" value="${directlinking}"/>
       <classpath>
         <pathelement path="${maven.test.classpath}"/>
         <path location="${test-classes}"/>
