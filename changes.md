@@ -21,6 +21,9 @@ redefinitions seen by core code.
 
 Functions declared as dynamic will never be direct linked.
 
+[CLJ-1809](http://dev.clojure.org/jira/browse/CLJ-1809)
+[CLJ-1805](http://dev.clojure.org/jira/browse/CLJ-1805)
+
 ### 1.2 String Functions
 
 Several new string functions were added to clojure.string to increase
@@ -124,6 +127,8 @@ See:
 
 * [CLJ-1208](http://dev.clojure.org/jira/browse/CLJ-1208)
   Optionally require namespace on defrecord class init
+* [CLJ-1823](http://dev.clojure.org/jira/browse/CLJ-1823)
+  Document new :load-ns option to defrecord/deftype
 * [CLJ-1810](http://dev.clojure.org/jira/browse/CLJ-1810)
   ATransientMap now marked public
 * [CLJ-1653](http://dev.clojure.org/jira/browse/CLJ-1653)
@@ -134,6 +139,9 @@ See:
   Unused swapThunk method was being emitted for fns with keyword callsites
 * [CLJ-1329](http://dev.clojure.org/jira/browse/CLJ-1329)
   Removed unused local in PersistentVector.cons()
+* [CLJ-1831](http://dev.clojure.org/jira/browse/CLJ-1831)
+  Add clojure.core/map-entry? predicate
+
 
 ## 3 Bug Fixes
 
@@ -200,6 +208,11 @@ See:
 * [CLJ-1226](http://dev.clojure.org/jira/browse/CLJ-1226)
   set! of a deftype field using field-access syntax caused ClassCastException
 * Records and types without fields eval to empty map
+* [CLJ-1827](http://dev.clojure.org/jira/browse/CLJ-1827)
+  Fix reflection warning introduced in CLJ-1259
+* [CLJ-1453](http://dev.clojure.org/jira/browse/CLJ-1453)
+  Ensure that all Iterator implementations throw NoSuchElementException
+  on next() when exhausted
 
 # Changes to Clojure in Version 1.7
 
