@@ -3712,6 +3712,7 @@ static class InvokeExpr implements Expr{
 		gen.mark(onLabel); //target
 		if(protocolOn != null)
 			{
+ 			gen.checkCast(Type.getType(protocolOn));
 			MethodExpr.emitTypedArgs(objx, gen, onMethod.getParameterTypes(), RT.subvec(args,1,args.count()));
 			if(context == C.RETURN)
 				{
