@@ -6,8 +6,6 @@
 
 ### 1.1 Direct Linking
 
-*This feature is a work in progress, subject to change.*
-
 Direct linking can be enabled with -Dclojure.compiler.direct-linking=true
 
 Direct linking allows functions compiled with direct linking on to make direct
@@ -15,14 +13,14 @@ static method calls to most other functions, instead of going through the var
 and the Fn object. This can enable further optimization by the jit, at a cost
 in dynamism. In particular, directly-linked calls will not see redefinitions.
 
-As of 1.8.0-alpha3, clojure.core is compiled with direct linking by default
+With this change, clojure.core itself is compiled with direct linking
 and therefore other namespaces cannot redefine core fns and have those
 redefinitions seen by core code.
 
 Functions declared as dynamic will never be direct linked.
 
-[CLJ-1809](http://dev.clojure.org/jira/browse/CLJ-1809)
-[CLJ-1805](http://dev.clojure.org/jira/browse/CLJ-1805)
+* [CLJ-1809](http://dev.clojure.org/jira/browse/CLJ-1809)
+* [CLJ-1805](http://dev.clojure.org/jira/browse/CLJ-1805)
 
 ### 1.2 String Functions
 
@@ -35,7 +33,7 @@ portability and reduce the need for Java interop calls:
 * ends-with? - true if string ends with a substring
 * includes? - true if string includes a substring
 
-[CLJ-1449](http://dev.clojure.org/jira/browse/CLJ-1449)
+* [CLJ-1449](http://dev.clojure.org/jira/browse/CLJ-1449)
 
 ### 1.3 Socket Server and REPL
 
@@ -141,7 +139,8 @@ See:
   Removed unused local in PersistentVector.cons()
 * [CLJ-1831](http://dev.clojure.org/jira/browse/CLJ-1831)
   Add clojure.core/map-entry? predicate
-
+* [CLJ-1845](http://dev.clojure.org/jira/browse/CLJ-1845)
+  Make clojure.core/load dynamic so it can be redef'ed even with direct linking
 
 ## 3 Bug Fixes
 
