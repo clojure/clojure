@@ -1424,7 +1424,7 @@ static abstract class MethodExpr extends HostExpr{
 				}
 			catch(Exception e1)
 				{
-				e1.printStackTrace(RT.errPrintWriter());
+                throw Util.sneakyThrow(e1);
 				}
 
 			}
@@ -1606,7 +1606,7 @@ static class InstanceMethodExpr extends MethodExpr{
 	}
 
 	public Class getJavaClass() {
-		return tag != null ? HostExpr.tagToClass(tag) : method.getReturnType();
+        return retType((tag!=null)?HostExpr.tagToClass(tag):null, (method!=null)?method.getReturnType():null);
 	}
 }
 
@@ -1819,7 +1819,7 @@ static class StaticMethodExpr extends MethodExpr{
 	}
 
 	public Class getJavaClass() {
-		return tag != null ? HostExpr.tagToClass(tag) : method.getReturnType();
+        return retType((tag!=null)?HostExpr.tagToClass(tag):null, (method!=null)?method.getReturnType():null);
 	}
 }
 
@@ -3465,7 +3465,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	public Class getJavaClass() {
-		return tag != null ? HostExpr.tagToClass(tag) : retClass;
+        return retType((tag!=null)?HostExpr.tagToClass(tag):null, retClass);
 	}
 
 	public boolean canEmitPrimitive(){
@@ -8318,6 +8318,27 @@ public static class NewInstanceMethod extends ObjMethod{
 		gen.endMethod();
 	}
 }
+
+    static boolean inty(Class c){
+        return c == int.class
+                || c == short.class
+                || c == byte.class
+                || c == char.class;
+    }
+
+    static Class retType(Class tc, Class ret){
+        if(tc == null)
+            return ret;
+        if(ret == null)
+            return tc;
+        if(ret.isPrimitive() && tc.isPrimitive()){
+            if((inty(ret) && inty(tc)) || (ret == tc))
+                return tc;
+            throw new UnsupportedOperationException("Cannot coerce " + ret +
+                                                    " to " + tc + ", use a cast instead");
+            }
+        return tc;
+    }
 
 	static Class primClass(Symbol sym){
 		if(sym == null)
