@@ -7251,15 +7251,20 @@ static Namespace currentNS(){
 static void closeOver(LocalBinding b, ObjMethod method){
 	if(b != null && method != null)
 		{
-		if(RT.get(method.locals, b) == null)
+        LocalBinding lb = (LocalBinding) RT.get(method.locals, b);
+		if(lb == null)
 			{
 			method.objx.closes = (IPersistentMap) RT.assoc(method.objx.closes, b, b);
 			closeOver(b, method.parent);
 			}
-		else if(IN_CATCH_FINALLY.deref() != null)
-			{
-			method.localsUsedInCatchFinally = (PersistentHashSet) method.localsUsedInCatchFinally.cons(b.idx);
-			}
+		else {
+            if(lb.idx == 0)
+                method.usesThis = true;
+            if(IN_CATCH_FINALLY.deref() != null)
+                {
+                method.localsUsedInCatchFinally = (PersistentHashSet) method.localsUsedInCatchFinally.cons(b.idx);
+                }
+            }
 		}
 }
 
