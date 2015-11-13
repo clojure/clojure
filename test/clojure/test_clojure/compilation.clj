@@ -362,3 +362,17 @@
                (try
                  (finally
                    (let [z# y#])))))))
+
+;; See CLJ-1846
+(deftest incorrect-primitive-type-hint-throws
+  ;; invalid primitive type hint
+  (is (thrown-with-msg? Compiler$CompilerException #"Cannot coerce long to int"
+        (load-string "(defn returns-long ^long [] 1) (Integer/bitCount ^int (returns-long))")))
+  ;; correct casting instead
+  (is (= 1 (load-string "(defn returns-long ^long [] 1) (Integer/bitCount (int (returns-long)))"))))
+
+;; See CLJ-1825
+(def zf (fn rf [x] (lazy-seq (cons x (rf x)))))
+(deftest test-anon-recursive-fn
+  (is (= [0 0] (take 2 ((fn rf [x] (lazy-seq (cons x (rf x)))) 0))))
+  (is (= [0 0] (take 2 (zf 0)))))
