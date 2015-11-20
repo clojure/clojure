@@ -376,3 +376,16 @@
 (deftest test-anon-recursive-fn
   (is (= [0 0] (take 2 ((fn rf [x] (lazy-seq (cons x (rf x)))) 0))))
   (is (= [0 0] (take 2 (zf 0)))))
+
+
+;; See CLJ-1845
+(deftest direct-linking-for-load
+  (let [called? (atom nil)
+        logger (fn [& args]
+                 (reset! called? true)
+                 nil)]
+    (with-redefs [load logger]
+      ;; doesn't actually load clojure.repl, but should
+      ;; eventually call `load` and reset called?.
+      (require 'clojure.repl :reload))
+    (is @called?)))
