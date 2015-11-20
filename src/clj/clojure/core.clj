@@ -5689,7 +5689,7 @@
   (let [d (root-resource lib)]
     (subs d 0 (.lastIndexOf d "/"))))
 
-(declare load)
+(def ^:declared ^:redef load)
 
 (defn- load-one
   "Loads a lib given its name. If need-ns, ensures that the associated
@@ -5879,7 +5879,7 @@
   "Loads Clojure code from resources in classpath. A path is interpreted as
   classpath-relative if it begins with a slash or relative to the root
   directory for the current namespace otherwise."
-  {:dynamic true
+  {:redef true
    :added "1.0"}
   [& paths]
   (doseq [^String path paths]

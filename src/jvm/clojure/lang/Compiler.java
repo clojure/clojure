@@ -92,6 +92,7 @@ static final String COMPILE_STUB_PREFIX = "compile__stub";
 static final Keyword protocolKey = Keyword.intern(null, "protocol");
 static final Keyword onKey = Keyword.intern(null, "on");
 static Keyword dynamicKey = Keyword.intern("dynamic");
+static final Keyword redefKey = Keyword.intern(null, "redef");
 
 static final Symbol NS = Symbol.intern("ns");
 static final Symbol IN_NS = Symbol.intern("in-ns");
@@ -3781,7 +3782,7 @@ static class InvokeExpr implements Expr{
            && context != C.EVAL)
 			{
 			Var v = ((VarExpr)fexpr).var;
-            if(!v.isDynamic())
+            if(!v.isDynamic() && !RT.booleanCast(RT.get(v.meta(), redefKey, false)))
                 {
                 Symbol formtag = tagOf(form);
                 Object arglists = RT.get(RT.meta(v), arglistsKey);
