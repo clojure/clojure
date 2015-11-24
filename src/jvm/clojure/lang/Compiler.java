@@ -5451,6 +5451,8 @@ public static class FnMethod extends ObjMethod{
                 gen.storeArg(i);
                 }
 			}
+		Label callLabel = gen.mark();
+		gen.visitLineNumber(line, callLabel);
 		gen.invokeStatic(objx.objtype, ms);
 		gen.box(returnType);
 
