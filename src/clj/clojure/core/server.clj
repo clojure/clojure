@@ -59,8 +59,8 @@
               *session* {:server name :client client-id}]
       (locking lock
         (alter-var-root #'servers assoc-in [name :sessions client-id] {}))
+      (require (symbol (namespace accept)))
       (let [accept-fn (resolve accept)]
-        (require (symbol (namespace accept)))
         (apply accept-fn args)))
     (catch SocketException _disconnect)
     (finally
