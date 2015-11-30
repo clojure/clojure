@@ -859,9 +859,9 @@
 (defn zero?
   "Returns true if num is zero, else false"
   {
-   :inline (fn [x] `(. clojure.lang.Numbers (isZero ~x)))
+   :inline (fn [num] `(. clojure.lang.Numbers (isZero ~num)))
    :added "1.0"}
-  [x] (. clojure.lang.Numbers (isZero x)))
+  [num] (. clojure.lang.Numbers (isZero num)))
 
 (defn count
   "Returns the number of items in the collection. (count nil) returns
@@ -1239,16 +1239,16 @@
 (defn pos?
   "Returns true if num is greater than zero, else false"
   {
-   :inline (fn [x] `(. clojure.lang.Numbers (isPos ~x)))
+   :inline (fn [num] `(. clojure.lang.Numbers (isPos ~num)))
    :added "1.0"}
-  [x] (. clojure.lang.Numbers (isPos x)))
+  [num] (. clojure.lang.Numbers (isPos num)))
 
 (defn neg?
   "Returns true if num is less than zero, else false"
   {
-   :inline (fn [x] `(. clojure.lang.Numbers (isNeg ~x)))
+   :inline (fn [num] `(. clojure.lang.Numbers (isNeg ~num)))
    :added "1.0"}
-  [x] (. clojure.lang.Numbers (isNeg x)))
+  [num] (. clojure.lang.Numbers (isNeg num)))
 
 (defn quot
   "quot[ient] of dividing numerator by denominator."
