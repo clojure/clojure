@@ -17,10 +17,12 @@ With this change, clojure.core itself is compiled with direct linking
 and therefore other namespaces cannot redefine core fns and have those
 redefinitions seen by core code.
 
-Functions declared as dynamic will never be direct linked.
+A new metadata key ^:redef is provided. A function declared with this key can be redefined and will never be direct linked. Also, functions declared as ^:dynamic will never be direct linked.
 
 * [CLJ-1809](http://dev.clojure.org/jira/browse/CLJ-1809)
 * [CLJ-1805](http://dev.clojure.org/jira/browse/CLJ-1805)
+* [CLJ-1854](http://dev.clojure.org/jira/browse/CLJ-1854)
+* [CLJ-1856](http://dev.clojure.org/jira/browse/CLJ-1856)
 
 ### 1.2 String Functions
 
@@ -78,6 +80,7 @@ hello
 
 See:
 * [CLJ-1671](http://dev.clojure.org/jira/browse/CLJ-1671)
+* [CLJ-1853](http://dev.clojure.org/jira/browse/CLJ-1853)
 * [Socket REPL design page](http://dev.clojure.org/display/design/Socket+Server+REPL)
 
 ## 2 Enhancements
