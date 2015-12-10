@@ -4125,6 +4125,8 @@ static public class ObjExpr implements Expr{
 	int line;
 	int column;
 	PersistentVector constants;
+    IPersistentSet usedConstants = PersistentHashSet.EMPTY;
+
 	int constantsID;
 	int altCtorDrops = 0;
 
@@ -4277,23 +4279,7 @@ static public class ObjExpr implements Expr{
 			cv.visitSource(source, smap);
 			}
 		addAnnotation(cv, classMeta);
-		//static fields for constants
-		for(int i = 0; i < constants.count(); i++)
-			{
-			cv.visitField(ACC_PUBLIC + ACC_FINAL
-			              + ACC_STATIC, constantName(i), constantType(i).getDescriptor(),
-			              null, null);
-			}
 
-		//static fields for lookup sites
-		for(int i = 0; i < keywordCallsites.count(); i++)
-			{
-			cv.visitField(ACC_FINAL
-			              + ACC_STATIC, siteNameStatic(i), KEYWORD_LOOKUPSITE_TYPE.getDescriptor(),
-			              null, null);
-			cv.visitField(ACC_STATIC, thunkNameStatic(i), ILOOKUP_THUNK_TYPE.getDescriptor(),
-			              null, null);
-			}
 
 //		for(int i=0;i<varCallsites.count();i++)
 //			{
@@ -4301,69 +4287,7 @@ static public class ObjExpr implements Expr{
 //					, varCallsiteName(i), IFN_TYPE.getDescriptor(), null, null);
 //			}
 
-		//static init for constants, keywords and vars
-		GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
-		                                                  Method.getMethod("void <clinit> ()"),
-		                                                  null,
-		                                                  null,
-		                                                  cv);
-		clinitgen.visitCode();
-		clinitgen.visitLineNumber(line, clinitgen.mark());
 
-		if(constants.count() > 0)
-			{
-			emitConstants(clinitgen);
-			}
-
-		if(keywordCallsites.count() > 0)
-			emitKeywordCallsites(clinitgen);
-
-		/*
-		for(int i=0;i<varCallsites.count();i++)
-			{
-			Label skipLabel = clinitgen.newLabel();
-			Label endLabel = clinitgen.newLabel();
-			Var var = (Var) varCallsites.nth(i);
-			clinitgen.push(var.ns.name.toString());
-			clinitgen.push(var.sym.toString());
-			clinitgen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
-			clinitgen.dup();
-			clinitgen.invokeVirtual(VAR_TYPE,Method.getMethod("boolean hasRoot()"));
-			clinitgen.ifZCmp(GeneratorAdapter.EQ,skipLabel);
-
-			clinitgen.invokeVirtual(VAR_TYPE,Method.getMethod("Object getRoot()"));
-            clinitgen.dup();
-            clinitgen.instanceOf(AFUNCTION_TYPE);
-            clinitgen.ifZCmp(GeneratorAdapter.EQ,skipLabel);
-			clinitgen.checkCast(IFN_TYPE);
-			clinitgen.putStatic(objtype, varCallsiteName(i), IFN_TYPE);
-			clinitgen.goTo(endLabel);
-
-			clinitgen.mark(skipLabel);
-			clinitgen.pop();
-
-			clinitgen.mark(endLabel);
-			}
-        */
-
-        if(isDeftype() && RT.booleanCast(RT.get(opts, loadNs))) {
-            String nsname = ((Symbol)RT.second(src)).getNamespace();
-            if (!nsname.equals("clojure.core")) {
-                clinitgen.push("clojure.core");
-                clinitgen.push("require");
-                clinitgen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
-                clinitgen.invokeVirtual(VAR_TYPE,Method.getMethod("Object getRawRoot()"));
-                clinitgen.checkCast(IFN_TYPE);
-                clinitgen.push(nsname);
-                clinitgen.invokeStatic(SYMBOL_TYPE, Method.getMethod("clojure.lang.Symbol create(String)"));
-                clinitgen.invokeInterface(IFN_TYPE, Method.getMethod("Object invoke(Object)"));
-                clinitgen.pop();
-            }
-        }
-
-		clinitgen.returnValue();
-
-		clinitgen.endMethod();
 		if(supportsMeta())
 			{
 			cv.visitField(ACC_FINAL, "__meta", IPERSISTENTMAP_TYPE.getDescriptor(), null, null);
@@ -4571,6 +4495,89 @@ static public class ObjExpr implements Expr{
 
 		emitStatics(cv);
 		emitMethods(cv);
+
+        //static fields for constants
+        for(int i = 0; i < constants.count(); i++)
+            {
+            if(usedConstants.contains(i))
+                cv.visitField(ACC_PUBLIC + ACC_FINAL
+                          + ACC_STATIC, constantName(i), constantType(i).getDescriptor(),
+                          null, null);
+            }
+
+        //static fields for lookup sites
+        for(int i = 0; i < keywordCallsites.count(); i++)
+            {
+            cv.visitField(ACC_FINAL
+                          + ACC_STATIC, siteNameStatic(i), KEYWORD_LOOKUPSITE_TYPE.getDescriptor(),
+                          null, null);
+            cv.visitField(ACC_STATIC, thunkNameStatic(i), ILOOKUP_THUNK_TYPE.getDescriptor(),
+                          null, null);
+            }
+
+        //static init for constants, keywords and vars
+        GeneratorAdapter clinitgen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
+                                                          Method.getMethod("void <clinit> ()"),
+                                                          null,
+                                                          null,
+                                                          cv);
+        clinitgen.visitCode();
+        clinitgen.visitLineNumber(line, clinitgen.mark());
+
+        if(constants.count() > 0)
+            {
+            emitConstants(clinitgen);
+            }
+
+        if(keywordCallsites.count() > 0)
+            emitKeywordCallsites(clinitgen);
+
+      		/*
+      		for(int i=0;i<varCallsites.count();i++)
+      			{
+      			Label skipLabel = clinitgen.newLabel();
+      			Label endLabel = clinitgen.newLabel();
+      			Var var = (Var) varCallsites.nth(i);
+      			clinitgen.push(var.ns.name.toString());
+      			clinitgen.push(var.sym.toString());
+      			clinitgen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
+      			clinitgen.dup();
+      			clinitgen.invokeVirtual(VAR_TYPE,Method.getMethod("boolean hasRoot()"));
+      			clinitgen.ifZCmp(GeneratorAdapter.EQ,skipLabel);
+
+      			clinitgen.invokeVirtual(VAR_TYPE,Method.getMethod("Object getRoot()"));
+                  clinitgen.dup();
+                  clinitgen.instanceOf(AFUNCTION_TYPE);
+                  clinitgen.ifZCmp(GeneratorAdapter.EQ,skipLabel);
+      			clinitgen.checkCast(IFN_TYPE);
+      			clinitgen.putStatic(objtype, varCallsiteName(i), IFN_TYPE);
+      			clinitgen.goTo(endLabel);
+
+      			clinitgen.mark(skipLabel);
+      			clinitgen.pop();
+
+      			clinitgen.mark(endLabel);
+      			}
+              */
+
+        if(isDeftype() && RT.booleanCast(RT.get(opts, loadNs))) {
+              String nsname = ((Symbol)RT.second(src)).getNamespace();
+              if (!nsname.equals("clojure.core")) {
+                  clinitgen.push("clojure.core");
+                  clinitgen.push("require");
+                  clinitgen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
+                  clinitgen.invokeVirtual(VAR_TYPE,Method.getMethod("Object getRawRoot()"));
+                  clinitgen.checkCast(IFN_TYPE);
+                  clinitgen.push(nsname);
+                  clinitgen.invokeStatic(SYMBOL_TYPE, Method.getMethod("clojure.lang.Symbol create(String)"));
+                  clinitgen.invokeInterface(IFN_TYPE, Method.getMethod("Object invoke(Object)"));
+                  clinitgen.pop();
+              }
+          }
+
+        clinitgen.returnValue();
+
+        clinitgen.endMethod();
 
 		//end of class
 		cv.visitEnd();
@@ -4839,9 +4846,12 @@ static public class ObjExpr implements Expr{
 
 			for(int i = 0; i < constants.count(); i++)
 				{
-				emitValue(constants.nth(i), clinitgen);
-				clinitgen.checkCast(constantType(i));
-				clinitgen.putStatic(objtype, constantName(i), constantType(i));
+                if(usedConstants.contains(i))
+                    {
+                    emitValue(constants.nth(i), clinitgen);
+                    clinitgen.checkCast(constantType(i));
+                    clinitgen.putStatic(objtype, constantName(i), constantType(i));
+                    }
 				}
 			}
 		finally
@@ -5108,6 +5118,7 @@ static public class ObjExpr implements Expr{
 	}
 
 	public void emitConstant(GeneratorAdapter gen, int id){
+        usedConstants = (IPersistentSet) usedConstants.cons(id);
 		gen.getStatic(objtype, constantName(id), constantType(id));
 	}
 
@@ -6846,7 +6857,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 
 		Object op = RT.first(form);
 		if(op == null)
-			throw new IllegalArgumentException("Can't call nil");
+			throw new IllegalArgumentException("Can't call nil, form: " + form);
 		IFn inline = isInline(op, RT.count(RT.next(form)));
 		if(inline != null)
 			return analyze(context, preserveTag(form, inline.applyTo(RT.next(form))));
@@ -7538,7 +7549,8 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		//static fields for constants
 		for(int i = 0; i < objx.constants.count(); i++)
 			{
-			cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, objx.constantName(i), objx.constantType(i).getDescriptor(),
+            if(objx.usedConstants.contains(i))
+			    cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, objx.constantName(i), objx.constantType(i).getDescriptor(),
 			              null, null);
 			}
 
@@ -7561,9 +7573,12 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 
 				for(int i = n*INITS_PER; i < objx.constants.count() && i < (n+1)*INITS_PER; i++)
 					{
-					objx.emitValue(objx.constants.nth(i), clinitgen);
-					clinitgen.checkCast(objx.constantType(i));
-					clinitgen.putStatic(objx.objtype, objx.constantName(i), objx.constantType(i));
+                    if(objx.usedConstants.contains(i))
+                        {
+                        objx.emitValue(objx.constants.nth(i), clinitgen);
+                        clinitgen.checkCast(objx.constantType(i));
+                        clinitgen.putStatic(objx.objtype, objx.constantName(i), objx.constantType(i));
+                        }
 					}
 				}
 			finally
