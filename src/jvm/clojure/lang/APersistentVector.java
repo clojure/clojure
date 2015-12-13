@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.util.*;
 
 public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable,
-                                                               List, IMapEntry,
+                                                               List,
                                                                RandomAccess, Comparable,
                                                                Serializable, IHashEq {
 int _hash = -1;
@@ -124,21 +124,6 @@ static boolean doEquiv(IPersistentVector v, Object obj){
 
 	return true;
 
-}
-
-@Override
-public Object getKey(){
-    return key();
-}
-
-@Override
-public Object getValue(){
-    return val();
-}
-
-@Override
-public Object setValue(Object value){
-    throw new UnsupportedOperationException();
 }
 
 public boolean equals(Object obj){
@@ -346,7 +331,7 @@ public IMapEntry entryAt(Object key){
 		{
 		int i = ((Number) key).intValue();
 		if(i >= 0 && i < count())
-			return (IMapEntry) Tuple.create(key, nth(i));
+			return (IMapEntry) MapEntry.create(key, nth(i));
 		}
 	return null;
 }
@@ -454,20 +439,6 @@ public int compareTo(Object o){
 			return c;
 		}
 	return 0;
-}
-
-@Override
-public Object key(){
-    if(count() == 2)
-        return nth(0);
-    throw new UnsupportedOperationException();
-}
-
-@Override
-public Object val(){
-    if(count() == 2)
-        return nth(1);
-    throw new UnsupportedOperationException();
 }
 
 static class Seq extends ASeq implements IndexedSeq, IReduce{

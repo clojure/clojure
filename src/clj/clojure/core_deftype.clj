@@ -212,8 +212,8 @@
                    `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
                                             (when-not (identical? this# v#)
-                                              (clojure.lang.Tuple/create k# v#))))
-                   `(seq [this#] (seq (concat [~@(map #(list `clojure.lang.Tuple/create (keyword %) %) base-fields)]
+                                              (clojure.lang.MapEntry/create k# v#))))
+                   `(seq [this#] (seq (concat [~@(map #(list `clojure.lang.MapEntry/create (keyword %) %) base-fields)]
                                               ~'__extmap)))
                    `(iterator [~gs]
                         (clojure.lang.RecordIterator. ~gs [~@(map keyword base-fields)] (RT/iter ~'__extmap)))

@@ -712,7 +712,7 @@
   (testing "map-entry? = true"
     (are [entry]
       (true? (map-entry? entry))
-      [1 2] (first (doto (java.util.HashMap.) (.put "x" 1))))))
+      (first (doto (java.util.HashMap.) (.put "x" 1))))))
 
 ;; *** Sets ***
 

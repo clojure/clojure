@@ -1429,10 +1429,7 @@
   "Return true if x is a map entry"
   {:added "1.8"}
   [x]
-  (and (instance? java.util.Map$Entry x)
-    (if (instance? clojure.lang.IPersistentVector x)
-      (= 2 (count x))
-      true)))
+	(instance? java.util.Map$Entry x))
 
 (defn contains?
   "Returns true if key is present in the given collection, otherwise

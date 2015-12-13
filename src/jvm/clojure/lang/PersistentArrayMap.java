@@ -39,8 +39,8 @@ static public IPersistentMap create(Map other){
 	ITransientMap ret = EMPTY.asTransient();
 	for(Object o : other.entrySet())
 		{
-		Map.Entry e = (Entry) o;
-		ret = ret.assoc(e.getKey(), e.getValue());
+            Map.Entry e = (Entry) o;
+            ret = ret.assoc(e.getKey(), e.getValue());
 		}
 	return ret.persistent();
 }
@@ -164,7 +164,7 @@ public boolean containsKey(Object key){
 public IMapEntry entryAt(Object key){
 	int i = indexOf(key);
 	if(i >= 0)
-		return (IMapEntry) Tuple.create(array[i],array[i+1]);
+		return (IMapEntry) MapEntry.create(array[i],array[i+1]);
 	return null;
 }
 
@@ -314,7 +314,7 @@ static class Seq extends ASeq implements Counted{
 	}
 
 	public Object first(){
-		return Tuple.create(array[i],array[i+1]);
+		return MapEntry.create(array[i],array[i+1]);
 	}
 
 	public ISeq next(){

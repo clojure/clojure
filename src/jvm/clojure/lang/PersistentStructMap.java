@@ -132,7 +132,7 @@ public IMapEntry entryAt(Object key){
 	Map.Entry e = def.keyslots.entryAt(key);
 	if(e != null)
 		{
-		return (IMapEntry) Tuple.create(e.getKey(), vals[(Integer) e.getValue()]);
+		return (IMapEntry) MapEntry.create(e.getKey(), vals[(Integer) e.getValue()]);
 		}
 	return ext.entryAt(key);
 }
@@ -245,7 +245,7 @@ static class Seq extends ASeq{
 	}
 
 	public Object first(){
-		return Tuple.create(keys.first(), vals[i]);
+		return MapEntry.create(keys.first(), vals[i]);
 	}
 
 	public ISeq next(){

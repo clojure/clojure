@@ -16,6 +16,10 @@ public class MapEntry extends AMapEntry{
 final Object _key;
 final Object _val;
 
+static public MapEntry create(Object key, Object val){
+    return new MapEntry(key, val);
+}
+
 public MapEntry(Object key, Object val){
 	this._key = key;
 	this._val = val;

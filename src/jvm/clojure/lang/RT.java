@@ -822,7 +822,7 @@ static public Object find(Object coll, Object key){
 	else {
 		Map m = (Map) coll;
 		if(m.containsKey(key))
-			return Tuple.create(key, m.get(key));
+			return MapEntry.create(key, m.get(key));
 		return null;
 	}
 }
