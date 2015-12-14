@@ -187,7 +187,7 @@
 	<version>2.1.2</version>
 	<executions>
 	  <execution>
-	    <id>sources-jar</id>
+	    <id>attach-sources</id>
 	    <phase>package</phase>
 	    <goals>
 	      <goal>jar</goal>
