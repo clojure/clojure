@@ -145,6 +145,12 @@
     (is (= 'java.lang.String (-> arglists first meta :tag)))
     (is (= 'java.lang.Integer (-> arglists second meta :tag)))))
 
+(deftest CLJ-1232-return-type-not-imported
+  (is (thrown-with-msg? Compiler$CompilerException #"Unable to resolve classname: Closeable"
+                        (eval '(defn a ^Closeable []))))
+  (is (thrown-with-msg? Compiler$CompilerException #"Unable to resolve classname: Closeable"
+                        (eval '(defn a (^Closeable []))))))
+
 (defn ^String hinting-conflict ^Integer [])
 
 (deftest calls-use-arg-vector-hint
