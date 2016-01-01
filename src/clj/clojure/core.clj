@@ -5946,9 +5946,11 @@
   'require loads a lib by loading its root resource. The root resource path
   is derived from the lib name in the following manner:
   Consider a lib named by the symbol 'x.y.z; it has the root directory
-  <classpath>/x/y/, and its root resource is <classpath>/x/y/z.clj. The root
-  resource should contain code to create the lib's namespace (usually by using
-  the ns macro) and load any additional lib resources.
+  <classpath>/x/y/, and its root resource is <classpath>/x/y/z.clj, or
+  <classpath>/x/y/z.cljc if <classpath>/x/y/z.clj does not exist. The
+  root resource should contain code to create the lib's
+  namespace (usually by using the ns macro) and load any additional
+  lib resources.
 
   Libspecs
 
@@ -7650,8 +7652,8 @@
   "Map from reader tag symbols to data reader Vars.
 
   When Clojure starts, it searches for files named 'data_readers.clj'
-  at the root of the classpath. Each such file must contain a literal
-  map of symbols, like this:
+  and 'data_readers.cljc' at the root of the classpath. Each such file
+  must contain a literal map of symbols, like this:
 
       {foo/bar my.project.foo/bar
        foo/baz my.project/baz}
@@ -7672,7 +7674,7 @@
   Reader tags without namespace qualifiers are reserved for
   Clojure. Default reader tags are defined in
   clojure.core/default-data-readers but may be overridden in
-  data_readers.clj or by rebinding this Var."
+  data_readers.clj, data_readers.cljc, or by rebinding this Var."
   {})
 
 (def ^{:added "1.5" :dynamic true} *default-data-reader-fn* 
