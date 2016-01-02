@@ -1,12 +1,12 @@
 <html>
   <head>
-    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>clojure.instant - Clojure v1.4 API documentation</title>
-    <link href="../static/favicon.png" rel="icon" />
-    <link href="../static/favicon.png" rel="shortcut icon" />
-    <link media="all" type="text/css" href="../static/clojure.css" rel="stylesheet" />
-    <link media="all" type="text/css" href="../static/wiki.css" rel="stylesheet" />
-    <link media="all" type="text/css" href="../static/internal.css" rel="stylesheet" />
+    <link rel="icon" href="../static/favicon.png" />
+    <link rel="shortcut icon" href="../static/favicon.png" />
+    <link rel="stylesheet" href="../static/clojure.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/wiki.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/internal.css" type="text/css" media="all" />
     <style>.menuWrapper{height: 36px;}</style>
   </head>
 <!--
@@ -19,64 +19,64 @@ namespace.
   <body>
     <div id="AllContentContainer">
       <div id="Header">
-	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="../static/clojure-icon.gif" /></a>
-	<h1><a title="page header title" id="page-header" href="index.html">Clojure Core API Reference</a></h1>
+	<a href="index.html" id="Logo"><img src="../static/clojure-icon.gif" width="100" height="100" alt="Clojure" /></a>
+	<h1><a href="index.html" id="page-header" title="page header title">Clojure Core API Reference</a></h1>
       </div>
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
     <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.4</span> API</span><br />
     <ul>
-      <li><a class="wiki_link" href="index.html">Overview</a></li>
-      <li><a class="wiki_link" href="api-index.html">API Index</a></li>
+      <li><a href="index.html" class="wiki_link">Overview</a></li>
+      <li><a href="api-index.html" class="wiki_link">API Index</a></li>
     </ul>
     <div class="NamespaceTOC">
       <span class="toc-header">Namespaces</span>
       <ul id="left-sidebar-list">
-        <li><a href="clojure.core-api.html" class="wiki_link">clojure.core</a></li><li><a href="clojure.data-api.html" class="wiki_link">clojure.data</a></li><li><a href="clojure.inspector-api.html" class="wiki_link">clojure.inspector</a></li><li><a href="clojure.instant-api.html" class="wiki_link">clojure.instant</a></li><li><a href="clojure.java.browse-api.html" class="wiki_link">clojure.java.browse</a></li><li><a href="clojure.java.io-api.html" class="wiki_link">clojure.java.io</a></li><li><a href="clojure.java.javadoc-api.html" class="wiki_link">clojure.java.javadoc</a></li><li><a href="clojure.java.shell-api.html" class="wiki_link">clojure.java.shell</a></li><li><a href="clojure.main-api.html" class="wiki_link">clojure.main</a></li><li><a href="clojure.pprint-api.html" class="wiki_link">clojure.pprint</a></li><li><a href="clojure.reflect-api.html" class="wiki_link">clojure.reflect</a></li><li><a href="clojure.repl-api.html" class="wiki_link">clojure.repl</a></li><li><a href="clojure.set-api.html" class="wiki_link">clojure.set</a></li><li><a href="clojure.stacktrace-api.html" class="wiki_link">clojure.stacktrace</a></li><li><a href="clojure.string-api.html" class="wiki_link">clojure.string</a></li><li><a href="clojure.template-api.html" class="wiki_link">clojure.template</a></li><li><a href="clojure.test-api.html" class="wiki_link">clojure.test</a></li><li><a href="clojure.walk-api.html" class="wiki_link">clojure.walk</a></li><li><a href="clojure.xml-api.html" class="wiki_link">clojure.xml</a></li><li><a href="clojure.zip-api.html" class="wiki_link">clojure.zip</a></li>
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
       </ul>
     </div>
     <div class="BranchTOC">
       <span class="toc-header">Other Versions</span>
       <ul id="left-sidebar-branch-list">
-        <li><a href="../index.html" class="wiki_link">v1.7 (stable)</a></li><li><a href="../branch-master/index.html" class="wiki_link">v1.8 (in development)</a></li><li><a href="../branch-clojure-1.6.0/index.html" class="wiki_link">v1.6 (stable)</a></li><li><a href="../branch-clojure-1.5.0/index.html" class="wiki_link">v1.5 (legacy)</a></li><li><a href="../branch-1.3.x/index.html" class="wiki_link">v1.3 (legacy)</a></li><li><a href="../branch-1.2.x/index.html" class="wiki_link">v1.2 (legacy)</a></li><li><a href="../branch-1.1.x/index.html" class="wiki_link">v1.1 (legacy)</a></li>
+        <li><a class="wiki_link" href="../index.html">v1.7 (stable)</a></li><li><a class="wiki_link" href="../branch-master/index.html">v1.8 (in development)</a></li><li><a class="wiki_link" href="../branch-clojure-1.6.0/index.html">v1.6 (stable)</a></li><li><a class="wiki_link" href="../branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.1.x/index.html">v1.1 (legacy)</a></li>
       </ul>
     </div>
-    <a href="http://clojure.org" class="wiki_link">Clojure Home</a>
+    <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
   </div>
 </div>
 </div>
       <div id="rightcolumn">
 	<div id="Content">
 	  <div class="contentBox"><div class="innerContentBox">
-              <div id="content_view" class="wiki wikiPage">
+              <div class="wiki wikiPage" id="content_view">
                 <div id="right-sidebar"><div id="toc">
   <h1 class="nopad">Table of Contents</h1>
-  <div style="margin-left: 1em;" class="toc-section">
-    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+  <div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#toc0">Overview</a>
     
-  </div><div style="margin-left: 1em;" class="toc-section">
-    <a href="#" style="margin-top: 3px;"></a>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
     
-  </div><div style="margin-left: 1em;" class="toc-section">
-    <a href="#" style="margin-top: 3px;"></a>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
     
-  </div><div style="margin-left: 1em;" class="toc-section">
-    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
-    <div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.instant/parse-timestamp">parse-timestamp</a>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.instant/parse-timestamp" class="toc-entry-anchor">parse-timestamp</a>
       
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.instant/read-instant-calendar">read-instant-calendar</a>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.instant/read-instant-calendar" class="toc-entry-anchor">read-instant-calendar</a>
       
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.instant/read-instant-date">read-instant-date</a>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.instant/read-instant-date" class="toc-entry-anchor">read-instant-date</a>
       
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.instant/read-instant-timestamp">read-instant-timestamp</a>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.instant/read-instant-timestamp" class="toc-entry-anchor">read-instant-timestamp</a>
       
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.instant/validated">validated</a>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.instant/validated" class="toc-entry-anchor">validated</a>
       
     </div>
   </div>
@@ -157,7 +157,7 @@ will be treated as if the time-offset zero (+00:00) had been
 specified.</pre>
     
     
-    <a href="https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L48" id="var-source">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L48">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -169,7 +169,7 @@ this var as the value for the 'inst key.  Calendar preserves the timezone
 offset.</pre>
     
     
-    <a href="https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L277" id="var-source">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L277">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -181,7 +181,7 @@ this var as the value for the 'inst key. The timezone offset will be used
 to convert into UTC.</pre>
     
     
-    <a href="https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L271" id="var-source">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L271">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -194,7 +194,7 @@ fractional seconds with nanosecond precision. The timezone offset will
 be used to convert into UTC.</pre>
     
     
-    <a href="https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L283" id="var-source">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L283">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -208,7 +208,7 @@ plausible. The resulting function will throw an exception if called
 with invalid arguments.</pre>
     
     
-    <a href="https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L136" id="var-source">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/b62df08fc3567d17cca68acfaa96adba2880126d/src/clj/clojure/instant.clj#L136">Source</a>
   </div>
 </div>
 
@@ -219,10 +219,10 @@ with invalid arguments.</pre>
           </div>
 	</div>
 	<div id="foot">
-	  <div style="text-align: center;" id="copyright">Copyright 2007-2015 by Rich Hickey</div>
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2015 by Rich Hickey</div>
 	</div>
       </div>
-      <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />
+      <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
       Clojure auto-documentation system by Tom Faulhaber.</div>
     </div>
     <!-- /AllContentContainer -->
