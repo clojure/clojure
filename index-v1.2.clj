@@ -141,17 +141,18 @@
    :source-url
    "https://github.com/clojure/clojure/blob/c1c39162608551d50cfb18998d015974b11cfecc/src/clj/clojure/test/tap.clj"}),
  :vars
- ({:name "&",
+ ({:raw-source-url nil,
+   :added "1.0",
+   :name "&",
+   :file nil,
+   :source-url nil,
+   :var-type "special syntax",
+   :arglists nil,
    :doc
    "Syntax for use with fn.\n\nPlease see http://clojure.org/special_forms#fn",
-   :var-type "special syntax",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/&",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/&"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj",
    :added "1.0",
@@ -175,6 +176,7 @@
    "https://github.com/clojure/clojure/blob/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj#L5030",
    :line 5030,
    :var-type "var",
+   :arglists nil,
    :doc "bound in a repl thread to the most recent value printed",
    :namespace "clojure.core",
    :wiki-url
@@ -188,6 +190,7 @@
    "https://github.com/clojure/clojure/blob/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj#L5035",
    :line 5035,
    :var-type "var",
+   :arglists nil,
    :doc
    "bound in a repl thread to the second most recent value printed",
    :namespace "clojure.core",
@@ -202,22 +205,24 @@
    "https://github.com/clojure/clojure/blob/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj#L5040",
    :line 5040,
    :var-type "var",
+   :arglists nil,
    :doc
    "bound in a repl thread to the third most recent value printed",
    :namespace "clojure.core",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*3"}
-  {:name "*agent*",
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*agent*",
+   :file nil,
+   :source-url nil,
+   :var-type "var",
+   :arglists nil,
    :doc
    "The agent currently running an action on this thread, else nil",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*agent*",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*agent*"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj",
    :added "1.0",
@@ -227,43 +232,47 @@
    "https://github.com/clojure/clojure/blob/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj#L5484",
    :line 5484,
    :var-type "var",
+   :arglists nil,
    :doc
    "The version info for Clojure core, as a map containing :major :minor \n:incremental and :qualifier keys. Feature releases may increment \n:minor and/or :major, bugfix releases will increment :incremental. \nPossible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\"",
    :namespace "clojure.core",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*clojure-version*"}
-  {:name "*command-line-args*",
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*command-line-args*",
+   :file nil,
+   :source-url nil,
+   :var-type "var",
+   :arglists nil,
    :doc
    "A sequence of the supplied command line arguments, or nil if\nnone were supplied",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*command-line-args*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*command-line-args*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*compile-files*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*compile-files*",
+   :var-type "var",
+   :arglists nil,
    :doc "Set to true when compiling files, false otherwise.",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*compile-files*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*compile-files*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*compile-path*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*compile-path*",
+   :var-type "var",
+   :arglists nil,
    :doc
    "Specifies the directory where 'compile' will write out .class\nfiles. This directory must be in the classpath for 'compile' to\nwork.\n\nDefaults to \"classes\"",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*compile-path*",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*compile-path*"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj",
    :added "1.0",
@@ -273,88 +282,96 @@
    "https://github.com/clojure/clojure/blob/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj#L5045",
    :line 5045,
    :var-type "var",
+   :arglists nil,
    :doc
    "bound in a repl thread to the most recent exception caught by the repl",
    :namespace "clojure.core",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*e"}
-  {:name "*err*",
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*err*",
+   :file nil,
+   :source-url nil,
+   :var-type "var",
+   :arglists nil,
    :doc
    "A java.io.Writer object representing standard error for print operations.\n\nDefaults to System/err, wrapped in a PrintWriter",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*err*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*err*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*file*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*file*",
+   :var-type "var",
+   :arglists nil,
    :doc
    "The path of the file being evaluated, as a String.\n\nEvaluates to nil when there is no file, eg. in the REPL.",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*file*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*file*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*flush-on-newline*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*flush-on-newline*",
+   :var-type "var",
+   :arglists nil,
    :doc
    "When set to true, output will be flushed whenever a newline is printed.\n\nDefaults to true.",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*flush-on-newline*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*flush-on-newline*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*in*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*in*",
+   :var-type "var",
+   :arglists nil,
    :doc
    "A java.io.Reader object representing standard input for read operations.\n\nDefaults to System/in, wrapped in a LineNumberingPushbackReader",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*in*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*in*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*ns*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*ns*",
+   :var-type "var",
+   :arglists nil,
    :doc
    "A clojure.lang.Namespace object representing the current namespace.",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*ns*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*ns*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*out*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*out*",
+   :var-type "var",
+   :arglists nil,
    :doc
    "A java.io.Writer object representing standard output for print operations.\n\nDefaults to System/out",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*out*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*out*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*print-dup*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*print-dup*",
+   :var-type "var",
+   :arglists nil,
    :doc
    "When set to logical true, objects will be printed in a way that preserves\ntheir type when read in later.\n\nDefaults to false.",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-dup*",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-dup*"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/core_print.clj",
    :added "1.0",
@@ -364,6 +381,7 @@
    "https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/core_print.clj#L15",
    :line 15,
    :var-type "var",
+   :arglists nil,
    :doc
    "*print-length* controls how many items of each collection the\nprinter will print. If it is bound to logical false, there is no\nlimit. Otherwise, it must be bound to an integer indicating the maximum\nnumber of items of each collection to print. If a collection contains\nmore items, the printer will print items up to the limit followed by\n'...' to represent the remaining items. The root binding is nil\nindicating no limit.",
    :namespace "clojure.core",
@@ -378,55 +396,60 @@
    "https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/core_print.clj#L26",
    :line 26,
    :var-type "var",
+   :arglists nil,
    :doc
    "*print-level* controls how many levels deep the printer will\nprint nested objects. If it is bound to logical false, there is no\nlimit. Otherwise, it must be bound to an integer indicating the maximum\nlevel to print. Each argument to print is at level 0; if an argument is a\ncollection, its items are at level 1; and so on. If an object is a\ncollection and is at a level greater than or equal to the value bound to\n*print-level*, the printer prints '#' to represent it. The root binding\nis nil indicating no limit.",
    :namespace "clojure.core",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-level*"}
-  {:name "*print-meta*",
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*print-meta*",
+   :file nil,
+   :source-url nil,
+   :var-type "var",
+   :arglists nil,
    :doc
    "If set to logical true, when printing an object, its metadata will also\nbe printed in a form that can be read back by the reader.\n\nDefaults to false.",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-meta*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-meta*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*print-readably*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*print-readably*",
+   :var-type "var",
+   :arglists nil,
    :doc
    "When set to logical false, strings and characters will be printed with\nnon-alphanumeric characters converted to the appropriate escape sequences.\n\nDefaults to true",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-readably*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*print-readably*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*read-eval*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*read-eval*",
+   :var-type "var",
+   :arglists nil,
    :doc
    "When set to logical false, the EvalReader (#=(...)) is disabled in the \nread/load in the thread-local binding.\nExample: (binding [*read-eval* false] (read-string \"#=(eval (def x 3))\"))\n\nDefaults to true",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*read-eval*",
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*read-eval*"}
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "*warn-on-reflection*",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "*warn-on-reflection*",
+   :var-type "var",
+   :arglists nil,
    :doc
    "When set to true, the compiler will emit warnings when reflection is\nneeded to resolve Java method calls or field accesses.\n\nDefaults to false.",
-   :var-type "var",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*warn-on-reflection*",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/*warn-on-reflection*"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj",
    :added "1.0",
@@ -492,6 +515,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "The instance member form works for both fields and methods.\nThey all expand into calls to the dot operator at macroexpansion time.\n\nPlease see http://clojure.org/java_interop#dot",
    :namespace "clojure.core",
@@ -1576,17 +1600,18 @@
    :namespace "clojure.core",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/cast"}
-  {:name "catch",
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "catch",
+   :file nil,
+   :source-url nil,
+   :var-type "special syntax",
+   :arglists nil,
    :doc
    "Syntax for use with try.\n\nPlease see http://clojure.org/special_forms#try",
-   :var-type "special syntax",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/catch",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/catch"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj",
    :added "1.1",
@@ -1624,6 +1649,7 @@
    "https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/core_print.clj#L162",
    :line 162,
    :var-type "var",
+   :arglists nil,
    :doc "Returns escape string for char or nil if none",
    :namespace "clojure.core",
    :wiki-url
@@ -1637,6 +1663,7 @@
    "https://github.com/clojure/clojure/blob/59b65669860a1f33825775494809e5d500c19c63/src/clj/clojure/core_print.clj#L221",
    :line 221,
    :var-type "var",
+   :arglists nil,
    :doc "Returns name string for char or nil if none",
    :namespace "clojure.core",
    :wiki-url
@@ -2117,6 +2144,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "Creates and interns a global var with the name\nof symbol in the current namespace (*ns*) or locates such a var if\nit already exists.  If init is supplied, it is evaluated, and the\nroot binding of the var is set to the resulting value.  If init is\nnot supplied, the root binding of the var is unaffected.\n\nPlease see http://clojure.org/special_forms#def",
    :namespace "clojure.core",
@@ -2488,6 +2516,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "Evaluates the expressions in order and returns the value of\nthe last. If no expressions are supplied, returns nil.\n\nPlease see http://clojure.org/special_forms#do",
    :namespace "clojure.core",
@@ -2950,17 +2979,18 @@
    :namespace "clojure.core",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/filter"}
-  {:name "finally",
+  {:raw-source-url nil,
+   :added "1.0",
+   :name "finally",
+   :file nil,
+   :source-url nil,
+   :var-type "special syntax",
+   :arglists nil,
    :doc
    "Syntax for use with try.\n\nPlease see http://clojure.org/special_forms#try",
-   :var-type "special syntax",
-   :added "1.0",
    :namespace "clojure.core",
    :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/finally",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core/finally"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/f86db9cc68773dd3e4a166c1ff7b81e4a98aa602/src/clj/clojure/core.clj",
    :added "1.0",
@@ -3552,6 +3582,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "Evaluates test. If not the singular values nil or false,\nevaluates and yields then, otherwise, evaluates and yields else. If\nelse is not supplied it defaults to nil.\n\nPlease see http://clojure.org/special_forms#if",
    :namespace "clojure.core",
@@ -4527,6 +4558,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "Synchronization primitive that should be avoided\nin user code. Use the 'locking' macro.\n\nPlease see http://clojure.org/special_forms#monitor-enter",
    :namespace "clojure.core",
@@ -4539,6 +4571,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "Synchronization primitive that should be avoided\nin user code. Use the 'locking' macro.\n\nPlease see http://clojure.org/special_forms#monitor-exit",
    :namespace "clojure.core",
@@ -4609,6 +4642,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "The args, if any, are evaluated from left to right, and\npassed to the constructor of the class named by Classname. The\nconstructed object is returned.\n\nPlease see http://clojure.org/java_interop#new",
    :namespace "clojure.core",
@@ -5512,6 +5546,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "Yields the unevaluated form.\n\nPlease see http://clojure.org/special_forms#quote",
    :namespace "clojure.core",
@@ -5750,6 +5785,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "Evaluates the exprs in order, then, in parallel, rebinds\nthe bindings of the recursion point to the values of the exprs.\nExecution then jumps back to the recursion point, a loop or fn method.\n\nPlease see http://clojure.org/special_forms#recur",
    :namespace "clojure.core",
@@ -6396,6 +6432,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "Used to set thread-local-bound vars, Java object instance\nfields, and Java class static fields.\n\nPlease see http://clojure.org/vars#set",
    :namespace "clojure.core",
@@ -7044,6 +7081,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "The expr is evaluated and thrown, therefore it should\nyield an instance of some derivee of Throwable.\n\nPlease see http://clojure.org/special_forms#throw",
    :namespace "clojure.core",
@@ -7160,6 +7198,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "catch-clause => (catch classname name expr*)\nfinally-clause => (finally expr*)\n\nCatches and handles Java exceptions.\n\nPlease see http://clojure.org/special_forms#try",
    :namespace "clojure.core",
@@ -7394,6 +7433,7 @@
    :file nil,
    :source-url nil,
    :var-type "special form",
+   :arglists nil,
    :doc
    "The symbol must resolve to a var, and the Var object\nitself (not its value) is returned. The reader macro #'x\nexpands to (var x).\n\nPlease see http://clojure.org/special_forms#var",
    :namespace "clojure.core",
@@ -7970,6 +8010,7 @@
    "https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L34",
    :line 34,
    :var-type "protocol",
+   :arglists nil,
    :doc "Coerce between various 'resource-namish' things.",
    :namespace "clojure.java.io",
    :wiki-url
@@ -7983,6 +8024,7 @@
    "https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L63",
    :line 63,
    :var-type "protocol",
+   :arglists nil,
    :doc
    "Factory functions that create ready-to-use, buffered versions of\nthe various Java I/O stream types, on top of anything that can\nbe unequivocally converted to the requested kind of stream.\n\nCommon options include\n\n  :append    true to open stream in append mode\n  :encoding  string name of encoding to use, e.g. \"UTF-8\".\n\nCallers should generally prefer the higher level API provided by\nreader, writer, input-stream, and output-stream.",
    :namespace "clojure.java.io",
@@ -8288,6 +8330,7 @@
    "https://github.com/clojure/clojure/blob/a642708b6e9a1718b74248cc28a467bd53afc81f/src/clj/clojure/pprint/pprint_base.clj#L87",
    :line 87,
    :var-type "var",
+   :arglists nil,
    :doc "The base to use for printing integers and rationals.",
    :namespace "clojure.pprint",
    :wiki-url
@@ -8301,6 +8344,7 @@
    "https://github.com/clojure/clojure/blob/a642708b6e9a1718b74248cc28a467bd53afc81f/src/clj/clojure/pprint/pprint_base.clj#L47",
    :line 47,
    :var-type "var",
+   :arglists nil,
    :doc
    "The column at which to enter miser style. Depending on the dispatch table, \nmiser style add newlines in more places to try to keep lines short allowing for further \nlevels of nesting.",
    :namespace "clojure.pprint",
@@ -8315,6 +8359,7 @@
    "https://github.com/clojure/clojure/blob/a642708b6e9a1718b74248cc28a467bd53afc81f/src/clj/clojure/pprint/pprint_base.clj#L34",
    :line 34,
    :var-type "multimethod",
+   :arglists nil,
    :doc
    "The pretty print dispatch function. Use with-pprint-dispatch or set-pprint-dispatch\nto modify.",
    :namespace "clojure.pprint",
@@ -8329,6 +8374,7 @@
    "https://github.com/clojure/clojure/blob/a642708b6e9a1718b74248cc28a467bd53afc81f/src/clj/clojure/pprint/pprint_base.clj#L30",
    :line 30,
    :var-type "var",
+   :arglists nil,
    :doc "Bind to true if you want write to use pretty printing",
    :namespace "clojure.pprint",
    :wiki-url
@@ -8342,6 +8388,7 @@
    "https://github.com/clojure/clojure/blob/a642708b6e9a1718b74248cc28a467bd53afc81f/src/clj/clojure/pprint/pprint_base.clj#L80",
    :line 80,
    :var-type "var",
+   :arglists nil,
    :doc
    "Print a radix specifier in front of integers and rationals. If *print-base* is 2, 8, \nor 16, then the radix specifier used is #b, #o, or #x, respectively. Otherwise the \nradix specifier is in the form #XXr where XX is the decimal value of *print-base* ",
    :namespace "clojure.pprint",
@@ -8356,6 +8403,7 @@
    "https://github.com/clojure/clojure/blob/a642708b6e9a1718b74248cc28a467bd53afc81f/src/clj/clojure/pprint/pprint_base.clj#L40",
    :line 40,
    :var-type "var",
+   :arglists nil,
    :doc
    "Pretty printing will try to avoid anything going beyond this column.\nSet it to nil to have pprint let the line be arbitrarily long. This will ignore all \nnon-mandatory newlines.",
    :namespace "clojure.pprint",
@@ -8370,6 +8418,7 @@
    "https://github.com/clojure/clojure/blob/a642708b6e9a1718b74248cc28a467bd53afc81f/src/clj/clojure/pprint/pprint_base.clj#L72",
    :line 72,
    :var-type "var",
+   :arglists nil,
    :doc
    "Don't print namespaces with symbols. This is particularly useful when \npretty printing the results of macro expansions",
    :namespace "clojure.pprint",
@@ -9215,6 +9264,7 @@
    "https://github.com/clojure/clojure/blob/a9d9ddb6ad4f86809d44f8e3370ae284f0a084f2/src/clj/clojure/test.clj#L239",
    :line 239,
    :var-type "var",
+   :arglists nil,
    :doc
    "True by default.  If set to false, no test functions will\nbe created by deftest, set-test, or with-test.  Use this to omit\ntests when compiling or loading production code.",
    :namespace "clojure.test",
@@ -9229,6 +9279,7 @@
    "https://github.com/clojure/clojure/blob/a9d9ddb6ad4f86809d44f8e3370ae284f0a084f2/src/clj/clojure/test.clj#L246",
    :line 246,
    :var-type "var",
+   :arglists nil,
    :doc
    "The maximum depth of stack traces to print when an Exception\nis thrown during a test.  Defaults to nil, which means print the \ncomplete stack trace.",
    :namespace "clojure.test",
@@ -9438,6 +9489,7 @@
    :dynamic true,
    :line 319,
    :var-type "multimethod",
+   :arglists nil,
    :doc
    "Generic reporting function, may be overridden to plug in\ndifferent report formats (e.g., TAP, JUnit).  Assertions such as\n'is' call 'report' to indicate results.  The argument given to\n'report' will be a map with a :type key.  See the documentation at\nthe top of test_is.clj for more information on the types of\narguments for 'report'.",
    :namespace "clojure.test",
@@ -9618,6 +9670,7 @@
    "https://github.com/clojure/clojure/blob/a9d9ddb6ad4f86809d44f8e3370ae284f0a084f2/src/clj/clojure/test.clj#L641",
    :line 641,
    :var-type "multimethod",
+   :arglists nil,
    :doc
    "Wrap test runs in a fixture function to perform setup and\nteardown. Using a fixture-type of :each wraps every test\nindividually, while:once wraps the whole run in a single function.",
    :namespace "clojure.test",
@@ -10226,24 +10279,25 @@
    :namespace "clojure.zip",
    :wiki-url
    "http://clojure.github.com/clojure//clojure.zip-api.html#clojure.zip/zipper"}
-  {:name "InternalReduce",
-   :doc
-   "Protocol for concrete seq types that can reduce themselves\nfaster than first/next recursion. Called by clojure.core/reduce.",
-   :var-type "protocol",
-   :line 11,
-   :namespace "clojure.core.protocols",
-   :wiki-url
-   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/InternalReduce",
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/d2fce54ccfcf46815524c2af94d1939573c1e9a9/src/clj/clojure/core/protocols.clj",
+   :name "InternalReduce",
+   :file "src/clj/clojure/core/protocols.clj",
    :source-url
    "https://github.com/clojure/clojure/blob/d2fce54ccfcf46815524c2af94d1939573c1e9a9/src/clj/clojure/core/protocols.clj#L11",
-   :raw-source-url
-   "https://github.com/clojure/clojure/raw/d2fce54ccfcf46815524c2af94d1939573c1e9a9/src/clj/clojure/core/protocols.clj",
-   :file "src/clj/clojure/core/protocols.clj"}
+   :line 11,
+   :var-type "protocol",
+   :arglists nil,
+   :doc
+   "Protocol for concrete seq types that can reduce themselves\nfaster than first/next recursion. Called by clojure.core/reduce.",
+   :namespace "clojure.core.protocols",
+   :wiki-url
+   "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/InternalReduce"}
   {:name "internal-reduce",
    :doc nil,
-   :arglists ([seq f start]),
    :var-type "function",
    :namespace "clojure.core.protocols",
+   :arglists ([seq f start]),
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.protocols/internal-reduce",
    :source-url nil,
