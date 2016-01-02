@@ -9763,7 +9763,7 @@
    "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect/java.clj#L109",
    :line 109,
    :var-type "function",
-   :arglists ([m__1254__auto__]),
+   :arglists ([m__1249__auto__]),
    :doc
    "Factory function for class clojure.reflect.Constructor, taking a map of keywords to field values.",
    :namespace "clojure.reflect",
@@ -9777,7 +9777,7 @@
    "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect/java.clj#L148",
    :line 148,
    :var-type "function",
-   :arglists ([m__1254__auto__]),
+   :arglists ([m__1249__auto__]),
    :doc
    "Factory function for class clojure.reflect.Field, taking a map of keywords to field values.",
    :namespace "clojure.reflect",
@@ -9791,7 +9791,7 @@
    "https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect/java.clj#L128",
    :line 128,
    :var-type "function",
-   :arglists ([m__1254__auto__]),
+   :arglists ([m__1249__auto__]),
    :doc
    "Factory function for class clojure.reflect.Method, taking a map of keywords to field values.",
    :namespace "clojure.reflect",
