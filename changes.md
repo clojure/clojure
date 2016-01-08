@@ -6,7 +6,7 @@
 
 ### 1.1 Direct Linking
 
-Direct linking can be enabled with -Dclojure.compiler.direct-linking=true
+Direct linking can be enabled with `-Dclojure.compiler.direct-linking=true`
 
 Direct linking allows functions compiled with direct linking on to make direct
 static method calls to most other functions, instead of going through the var
@@ -17,7 +17,9 @@ With this change, clojure.core itself is compiled with direct linking
 and therefore other namespaces cannot redefine core fns and have those
 redefinitions seen by core code.
 
-A new metadata key ^:redef is provided. A function declared with this key can be redefined and will never be direct linked. Also, functions declared as ^:dynamic will never be direct linked.
+A new metadata key ^:redef is provided. A function declared with this key can
+be redefined and will never be direct linked. Also, functions declared as
+^:dynamic will never be direct linked.
 
 * [CLJ-1809](http://dev.clojure.org/jira/browse/CLJ-1809)
 * [CLJ-1805](http://dev.clojure.org/jira/browse/CLJ-1805)
@@ -45,7 +47,7 @@ REPL, but it also has many other potential uses for dynamically adding server
 capability to existing programs without code changes.
 
 A socket server will be started for each JVM system property like
-"clojure.server.<server-name>". The value for this property is an edn map
+`clojure.server.<server-name>`. The value for this property is an edn map
 representing the configuration of the socket server with the following properties:
 
 * address - host or address, defaults to loopback
@@ -79,9 +81,11 @@ hello
 ```
 
 See:
+
 * [CLJ-1671](http://dev.clojure.org/jira/browse/CLJ-1671)
 * [CLJ-1853](http://dev.clojure.org/jira/browse/CLJ-1853)
 * [Socket REPL design page](http://dev.clojure.org/display/design/Socket+Server+REPL)
+* [CLJ-1829](http://dev.clojure.org/jira/browse/CLJ-1829)
 
 ## 2 Enhancements
 
@@ -215,6 +219,8 @@ See:
 * [CLJ-1453](http://dev.clojure.org/jira/browse/CLJ-1453)
   Ensure that all Iterator implementations throw NoSuchElementException
   on next() when exhausted
+* [CLJ-1868](http://dev.clojure.org/jira/browse/CLJ-1868)
+  Avoid compiler NPE when checking class return type
 
 # Changes to Clojure in Version 1.7
 
