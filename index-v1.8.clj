@@ -166,7 +166,7 @@
    :wiki-url
    "http://clojure.github.com/clojure/clojure.core.server-api.html",
    :source-url
-   "https://github.com/clojure/clojure/blob/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj"}
+   "https://github.com/clojure/clojure/blob/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj"}
   {:doc
    "clojure.test extension for JUnit-compatible XML output.\n\nJUnit (http://junit.org/) is the most popular unit-testing library\nfor Java.  As such, tool support for JUnit output formats is\ncommon.  By producing compatible output from tests, this tool\nsupport can be exploited.\n\nTo use, wrap any calls to clojure.test/run-tests in the\nwith-junit-output macro, like this:\n\n  (use 'clojure.test)\n  (use 'clojure.test.junit)\n\n  (with-junit-output\n    (run-tests 'my.cool.library))\n\nTo write the output to a file, rebind clojure.test/*test-out* to\nyour own PrintWriter (perhaps opened using\nclojure.java.io/writer).",
    :author "Jason Sankey",
@@ -12629,12 +12629,12 @@
    :raw-source-url nil,
    :file nil}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj",
    :name "repl",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj#L167",
-   :line 167,
+   "https://github.com/clojure/clojure/blob/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj#L177",
+   :line 177,
    :var-type "function",
    :arglists ([]),
    :doc "REPL with predefined hooks for attachable socket server.",
@@ -12642,12 +12642,12 @@
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.server/repl"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj",
    :name "repl-init",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj#L150",
-   :line 150,
+   "https://github.com/clojure/clojure/blob/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj#L160",
+   :line 160,
    :var-type "function",
    :arglists ([]),
    :doc
@@ -12656,12 +12656,12 @@
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.server/repl-init"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj",
    :name "repl-read",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj#L156",
-   :line 156,
+   "https://github.com/clojure/clojure/blob/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj#L166",
+   :line 166,
    :var-type "function",
    :arglists ([request-prompt request-exit]),
    :doc "Enhanced :read hook for repl supporting :repl/quit.",
@@ -12669,12 +12669,12 @@
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.server/repl-read"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj",
    :name "start-server",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj#L71",
-   :line 71,
+   "https://github.com/clojure/clojure/blob/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj#L81",
+   :line 81,
    :var-type "function",
    :arglists ([opts]),
    :doc
@@ -12683,12 +12683,12 @@
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.server/start-server"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj",
    :name "start-servers",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj#L144",
-   :line 144,
+   "https://github.com/clojure/clojure/blob/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj#L154",
+   :line 154,
    :var-type "function",
    :arglists ([system-props]),
    :doc "Start all servers specified in the system properties.",
@@ -12696,12 +12696,12 @@
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.server/start-servers"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj",
    :name "stop-server",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj#L112",
-   :line 112,
+   "https://github.com/clojure/clojure/blob/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj#L122",
+   :line 122,
    :var-type "function",
    :arglists ([] [name]),
    :doc
@@ -12710,12 +12710,12 @@
    :wiki-url
    "http://clojure.github.com/clojure//clojure.core-api.html#clojure.core.server/stop-server"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj",
    :name "stop-servers",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/7be225fde436bc26caee6f8d8400d4137522f413/src/clj/clojure/core/server.clj#L126",
-   :line 126,
+   "https://github.com/clojure/clojure/blob/2932d562e3a809f88130e5434c32aa18e34a67eb/src/clj/clojure/core/server.clj#L136",
+   :line 136,
    :var-type "function",
    :arglists ([]),
    :doc "Stop all servers ignores all errors, and returns nil.",
