@@ -2689,8 +2689,8 @@
   {:added "1.0"
    :static true}
   [pred coll]
-    (when (seq coll)
-      (or (pred (first coll)) (recur pred (next coll)))))
+    (when-let [s (seq coll)]
+      (or (pred (first s)) (recur pred (next s)))))
 
 (def
  ^{:tag Boolean
