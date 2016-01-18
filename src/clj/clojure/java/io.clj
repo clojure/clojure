@@ -428,7 +428,7 @@
      (reduce file (file parent child) more)))
 
 (defn delete-file
-  "Delete file f. Raise an exception if it fails unless silently is true."
+  "Delete file f. If silently is nil or false, raise an exception on failure, else return the value of silently."
   {:added "1.2"}
   [f & [silently]]
   (or (.delete (file f))
