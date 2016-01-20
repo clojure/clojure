@@ -1,0 +1,187 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>clojure.data - Clojure v1.7 API documentation</title>
+    <link rel="icon" href="../static/favicon.png" />
+    <link rel="shortcut icon" href="../static/favicon.png" />
+    <link rel="stylesheet" href="../static/clojure.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/wiki.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/internal.css" type="text/css" media="all" />
+    <style>.menuWrapper{height: 36px;}</style>
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a href="index.html" id="Logo"><img src="../static/clojure-icon.gif" width="100" height="100" alt="Clojure" /></a>
+	<h1><a href="index.html" id="page-header" title="page header title">Clojure Core API Reference</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.7</span> API</span><br />
+    <ul>
+      <li><a href="index.html" class="wiki_link">Overview</a></li>
+      <li><a href="api-index.html" class="wiki_link">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
+      </ul>
+    </div>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a class="wiki_link" href="../index.html">v1.8 (stable)</a></li><li><a class="wiki_link" href="../branch-master/index.html">v1.9 (in development)</a></li><li><a class="wiki_link" href="../branch-clojure-1.6.0/index.html">v1.6 (stable)</a></li><li><a class="wiki_link" href="../branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+      </ul>
+    </div>
+    <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div class="wiki wikiPage" id="content_view">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#toc0">Overview</a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#proto-section">Protocols</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.data/Diff" class="toc-entry-anchor">Diff</a>
+      <div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.data/diff-similar" class="toc-subentry-anchor">diff-similar</a>
+      </div>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.data/EqualityPartition" class="toc-entry-anchor">EqualityPartition</a>
+      <div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.data/equality-partition" class="toc-subentry-anchor">equality-partition</a>
+      </div>
+    </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.data/diff" class="toc-entry-anchor">diff</a>
+      
+    </div>
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.data">clojure.data</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.7</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
+  </h1>
+<span id="author-line">by <span id="author-name">Stuart Halloway</span><br /></span>
+<br />Full namespace name: <span id="long-name">clojure.data</span>
+<p></p>
+<h2>Overview</h2>
+
+<pre id="namespace-docstr">Non-core data functions.</pre>
+
+
+<br />
+
+<div id="proto-section">
+  <p></p>
+  <h2>Protocols</h2>
+  <div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.data/Diff">Diff</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr">Implementation detail. Subject to change.</pre>
+    Known implementations: <span id="proto-impls">java.util.List, java.util.Map, java.util.Set, nil, Object</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.data/diff-similar">diff-similar</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (diff-similar a b)
+</pre>
+      <pre id="var-docstr">Implementation detail. Subject to change.</pre>
+      <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+      
+      
+    </div>
+    <span class="proto-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/9baebd091b1301aecaaac3b5f9c7ede5dcc58f8c/src/clj/clojure/data.clj#L71">Source</a>
+  </div><div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.data/EqualityPartition">EqualityPartition</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr">Implementation detail. Subject to change.</pre>
+    Known implementations: <span id="proto-impls">java.util.List, java.util.Map, java.util.Set, nil, Object</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.data/equality-partition">equality-partition</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (equality-partition x)
+</pre>
+      <pre id="var-docstr">Implementation detail. Subject to change.</pre>
+      <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+      
+      
+    </div>
+    <span class="proto-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/9baebd091b1301aecaaac3b5f9c7ede5dcc58f8c/src/clj/clojure/data.clj#L67">Source</a>
+  </div>
+</div>
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.data/diff">diff</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (diff a b)
+</pre>
+    <pre id="var-docstr">Recursively compares a and b, returning a tuple of
+[things-only-in-a things-only-in-b things-in-both].
+Comparison rules:
+
+* For equal a and b, return [nil nil a].
+* Maps are subdiffed where keys match and values differ.
+* Sets are never subdiffed.
+* All sequential things are treated as associative collections
+  by their indexes, with results returned as vectors.
+* Everything else (including strings!) is treated as
+  an atom and compared for equality.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/9baebd091b1301aecaaac3b5f9c7ede5dcc58f8c/src/clj/clojure/data.clj#L120">Source</a>
+  </div>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2016 by Rich Hickey</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>

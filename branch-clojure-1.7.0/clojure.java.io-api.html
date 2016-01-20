@@ -1,0 +1,425 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>clojure.java.io - Clojure v1.7 API documentation</title>
+    <link rel="icon" href="../static/favicon.png" />
+    <link rel="shortcut icon" href="../static/favicon.png" />
+    <link rel="stylesheet" href="../static/clojure.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/wiki.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/internal.css" type="text/css" media="all" />
+    <style>.menuWrapper{height: 36px;}</style>
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a href="index.html" id="Logo"><img src="../static/clojure-icon.gif" width="100" height="100" alt="Clojure" /></a>
+	<h1><a href="index.html" id="page-header" title="page header title">Clojure Core API Reference</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.7</span> API</span><br />
+    <ul>
+      <li><a href="index.html" class="wiki_link">Overview</a></li>
+      <li><a href="api-index.html" class="wiki_link">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
+      </ul>
+    </div>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a class="wiki_link" href="../index.html">v1.8 (stable)</a></li><li><a class="wiki_link" href="../branch-master/index.html">v1.9 (in development)</a></li><li><a class="wiki_link" href="../branch-clojure-1.6.0/index.html">v1.6 (stable)</a></li><li><a class="wiki_link" href="../branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+      </ul>
+    </div>
+    <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div class="wiki wikiPage" id="content_view">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#toc0">Overview</a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#proto-section">Protocols</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/Coercions" class="toc-entry-anchor">Coercions</a>
+      <div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.java.io/as-file" class="toc-subentry-anchor">as-file</a>
+      </div><div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.java.io/as-url" class="toc-subentry-anchor">as-url</a>
+      </div>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/IOFactory" class="toc-entry-anchor">IOFactory</a>
+      <div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.java.io/make-input-stream" class="toc-subentry-anchor">make-input-stream</a>
+      </div><div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.java.io/make-output-stream" class="toc-subentry-anchor">make-output-stream</a>
+      </div><div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.java.io/make-reader" class="toc-subentry-anchor">make-reader</a>
+      </div><div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.java.io/make-writer" class="toc-subentry-anchor">make-writer</a>
+      </div>
+    </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/as-relative-path" class="toc-entry-anchor">as-relative-path</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/copy" class="toc-entry-anchor">copy</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/delete-file" class="toc-entry-anchor">delete-file</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/file" class="toc-entry-anchor">file</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/input-stream" class="toc-entry-anchor">input-stream</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/make-parents" class="toc-entry-anchor">make-parents</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/output-stream" class="toc-entry-anchor">output-stream</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/reader" class="toc-entry-anchor">reader</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/resource" class="toc-entry-anchor">resource</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.io/writer" class="toc-entry-anchor">writer</a>
+      
+    </div>
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.java.io">clojure.java.io</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.7</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
+  </h1>
+
+<br />Full namespace name: <span id="long-name">clojure.java.io</span>
+<p></p>
+<h2>Overview</h2>
+
+<pre id="namespace-docstr"></pre>
+
+
+<br />
+
+<div id="proto-section">
+  <p></p>
+  <h2>Protocols</h2>
+  <div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/Coercions">Coercions</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr">Coerce between various 'resource-namish' things.</pre>
+    Known implementations: <span id="proto-impls">java.io.File, java.lang.String, java.net.URI, java.net.URL, nil</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.java.io/as-file">as-file</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (as-file x)
+</pre>
+      <pre id="var-docstr">Coerce argument to a file.</pre>
+      <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+      
+      
+    </div><div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.java.io/as-url">as-url</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (as-url x)
+</pre>
+      <pre id="var-docstr">Coerce argument to a URL.</pre>
+      <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+      
+      
+    </div>
+    <span class="proto-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L35">Source</a>
+  </div><div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/IOFactory">IOFactory</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr">Factory functions that create ready-to-use, buffered versions of
+the various Java I/O stream types, on top of anything that can
+be unequivocally converted to the requested kind of stream.
+
+Common options include
+
+  :append    true to open stream in append mode
+  :encoding  string name of encoding to use, e.g. "UTF-8".
+
+Callers should generally prefer the higher level API provided by
+reader, writer, input-stream, and output-stream.</pre>
+    Known implementations: <span id="proto-impls">array-of-bytes, array-of-characters, java.io.BufferedInputStream, java.io.BufferedOutputStream, java.io.BufferedReader, java.io.BufferedWriter, java.io.File, java.io.InputStream, java.io.OutputStream, java.io.Reader, java.io.Writer, java.lang.String, java.net.Socket, java.net.URI, java.net.URL, Object</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.java.io/make-input-stream">make-input-stream</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (make-input-stream x opts)
+</pre>
+      <pre id="var-docstr">Creates a BufferedInputStream. See also IOFactory docs.</pre>
+      <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+      
+      
+    </div><div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.java.io/make-output-stream">make-output-stream</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (make-output-stream x opts)
+</pre>
+      <pre id="var-docstr">Creates a BufferedOutputStream. See also IOFactory docs.</pre>
+      <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+      
+      
+    </div><div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.java.io/make-reader">make-reader</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (make-reader x opts)
+</pre>
+      <pre id="var-docstr">Creates a BufferedReader. See also IOFactory docs.</pre>
+      <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+      
+      
+    </div><div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.java.io/make-writer">make-writer</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (make-writer x opts)
+</pre>
+      <pre id="var-docstr">Creates a BufferedWriter. See also IOFactory docs.</pre>
+      <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+      
+      
+    </div>
+    <span class="proto-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L69">Source</a>
+  </div>
+</div>
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/as-relative-path">as-relative-path</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (as-relative-path x)
+</pre>
+    <pre id="var-docstr">Take an as-file-able thing and return a string if it is
+a relative path, else IllegalArgumentException.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L398">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/copy">copy</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (copy input output &amp; opts)
+</pre>
+    <pre id="var-docstr">Copies input to output.  Returns nil or throws IOException.
+Input may be an InputStream, Reader, File, byte[], or String.
+Output may be an OutputStream, Writer, or File.
+
+Options are key/value pairs and may be one of
+
+  :buffer-size  buffer size to use, default is 1024.
+  :encoding     encoding to use if converting between
+                byte and char streams.   
+
+Does not close any streams except those it opens itself 
+(on a File).</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L381">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/delete-file">delete-file</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (delete-file f &amp; [silently])
+</pre>
+    <pre id="var-docstr">Delete file f. Raise an exception if it fails unless silently is true.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L420">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/file">file</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (file arg)
+       (file parent child)
+       (file parent child &amp; more)
+</pre>
+    <pre id="var-docstr">Returns a java.io.File, passing each arg to as-file.  Multiple-arg
+versions treat the first argument as parent and subsequent args as
+children relative to the parent.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L408">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/input-stream">input-stream</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (input-stream x &amp; opts)
+</pre>
+    <pre id="var-docstr">Attempts to coerce its argument into an open java.io.InputStream.
+Default implementations always return a java.io.BufferedInputStream.
+
+Default implementations are defined for InputStream, File, URI, URL,
+Socket, byte array, and String arguments.
+
+If the argument is a String, it tries to resolve it first as a URI, then
+as a local file name.  URIs with a 'file' protocol are converted to
+local file names.
+
+Should be used inside with-open to ensure the InputStream is properly
+closed.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L121">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/make-parents">make-parents</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (make-parents f &amp; more)
+</pre>
+    <pre id="var-docstr">Given the same arg(s) as for file, creates all parent directories of
+the file they represent.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L428">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/output-stream">output-stream</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (output-stream x &amp; opts)
+</pre>
+    <pre id="var-docstr">Attempts to coerce its argument into an open java.io.OutputStream.
+Default implementations always return a java.io.BufferedOutputStream.
+
+Default implementations are defined for OutputStream, File, URI, URL,
+Socket, and String arguments.
+
+If the argument is a String, it tries to resolve it first as a URI, then
+as a local file name.  URIs with a 'file' protocol are converted to
+local file names.
+
+Should be used inside with-open to ensure the OutputStream is
+properly closed.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L138">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/reader">reader</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (reader x &amp; opts)
+</pre>
+    <pre id="var-docstr">Attempts to coerce its argument into an open java.io.Reader.
+Default implementations always return a java.io.BufferedReader.
+
+Default implementations are provided for Reader, BufferedReader,
+InputStream, File, URI, URL, Socket, byte arrays, character arrays,
+and String.
+
+If argument is a String, it tries to resolve it first as a URI, then
+as a local file name.  URIs with a 'file' protocol are converted to
+local file names.
+
+Should be used inside with-open to ensure the Reader is properly
+closed.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L86">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/resource">resource</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (resource n)
+       (resource n loader)
+</pre>
+    <pre id="var-docstr">Returns the URL for a named resource. Use the context class loader
+if no loader is specified.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L436">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.io/writer">writer</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (writer x &amp; opts)
+</pre>
+    <pre id="var-docstr">Attempts to coerce its argument into an open java.io.Writer.
+Default implementations always return a java.io.BufferedWriter.
+
+Default implementations are provided for Writer, BufferedWriter,
+OutputStream, File, URI, URL, Socket, and String.
+
+If the argument is a String, it tries to resolve it first as a URI, then
+as a local file name.  URIs with a 'file' protocol are converted to
+local file names.
+
+Should be used inside with-open to ensure the Writer is properly
+closed.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L104">Source</a>
+  </div>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2016 by Rich Hickey</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>

@@ -1,0 +1,991 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>clojure.test - Clojure v1.7 API documentation</title>
+    <link rel="icon" href="../static/favicon.png" />
+    <link rel="shortcut icon" href="../static/favicon.png" />
+    <link rel="stylesheet" href="../static/clojure.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/wiki.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/internal.css" type="text/css" media="all" />
+    <style>.menuWrapper{height: 36px;}</style>
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a href="index.html" id="Logo"><img src="../static/clojure-icon.gif" width="100" height="100" alt="Clojure" /></a>
+	<h1><a href="index.html" id="page-header" title="page header title">Clojure Core API Reference</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.7</span> API</span><br />
+    <ul>
+      <li><a href="index.html" class="wiki_link">Overview</a></li>
+      <li><a href="api-index.html" class="wiki_link">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
+      </ul>
+    </div>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a class="wiki_link" href="../index.html">v1.8 (stable)</a></li><li><a class="wiki_link" href="../branch-master/index.html">v1.9 (in development)</a></li><li><a class="wiki_link" href="../branch-clojure-1.6.0/index.html">v1.6 (stable)</a></li><li><a class="wiki_link" href="../branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+      </ul>
+    </div>
+    <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div class="wiki wikiPage" id="content_view">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#toc0">Overview</a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/*load-tests*" class="toc-entry-anchor">*load-tests*</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/*stack-trace-depth*" class="toc-entry-anchor">*stack-trace-depth*</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/are" class="toc-entry-anchor">are</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/assert-any" class="toc-entry-anchor">assert-any</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/assert-predicate" class="toc-entry-anchor">assert-predicate</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/compose-fixtures" class="toc-entry-anchor">compose-fixtures</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/deftest" class="toc-entry-anchor">deftest</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/deftest-" class="toc-entry-anchor">deftest-</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/do-report" class="toc-entry-anchor">do-report</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/file-position" class="toc-entry-anchor">file-position</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/function?" class="toc-entry-anchor">function?</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/get-possibly-unbound-var" class="toc-entry-anchor">get-possibly-unbound-var</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/inc-report-counter" class="toc-entry-anchor">inc-report-counter</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/is" class="toc-entry-anchor">is</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/join-fixtures" class="toc-entry-anchor">join-fixtures</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/report" class="toc-entry-anchor">report</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/run-all-tests" class="toc-entry-anchor">run-all-tests</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/run-tests" class="toc-entry-anchor">run-tests</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/set-test" class="toc-entry-anchor">set-test</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/successful?" class="toc-entry-anchor">successful?</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/test-all-vars" class="toc-entry-anchor">test-all-vars</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/test-ns" class="toc-entry-anchor">test-ns</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/test-var" class="toc-entry-anchor">test-var</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/test-vars" class="toc-entry-anchor">test-vars</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/testing" class="toc-entry-anchor">testing</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/testing-contexts-str" class="toc-entry-anchor">testing-contexts-str</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/testing-vars-str" class="toc-entry-anchor">testing-vars-str</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/try-expr" class="toc-entry-anchor">try-expr</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/use-fixtures" class="toc-entry-anchor">use-fixtures</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/with-test" class="toc-entry-anchor">with-test</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test/with-test-out" class="toc-entry-anchor">with-test-out</a>
+      
+    </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#clojure.test.junit">clojure.test.junit</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test.junit/with-junit-output" class="toc-entry-anchor">with-junit-output</a>
+      
+    </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#clojure.test.tap">clojure.test.tap</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test.tap/print-tap-diagnostic" class="toc-entry-anchor">print-tap-diagnostic</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test.tap/print-tap-fail" class="toc-entry-anchor">print-tap-fail</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test.tap/print-tap-pass" class="toc-entry-anchor">print-tap-pass</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test.tap/print-tap-plan" class="toc-entry-anchor">print-tap-plan</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.test.tap/with-tap-output" class="toc-entry-anchor">with-tap-output</a>
+      
+    </div>
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.test">clojure.test</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.7</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
+  </h1>
+<span id="author-line">by <span id="author-name">Stuart Sierra, with contributions and suggestions by 
+  Chas Emerick, Allen Rohner, and Stuart Halloway</span><br /></span>
+<br />Full namespace name: <span id="long-name">clojure.test</span>
+<p></p>
+<h2>Overview</h2>
+
+<pre id="namespace-docstr">A unit testing framework.
+
+ASSERTIONS
+
+The core of the library is the "is" macro, which lets you make
+assertions of any arbitrary expression:
+
+(is (= 4 (+ 2 2)))
+(is (instance? Integer 256))
+(is (.startsWith "abcde" "ab"))
+
+You can type an "is" expression directly at the REPL, which will
+print a message if it fails.
+
+    user&gt; (is (= 5 (+ 2 2)))
+
+    FAIL in  (:1)
+    expected: (= 5 (+ 2 2))
+      actual: (not (= 5 4))
+    false
+
+The "expected:" line shows you the original expression, and the
+"actual:" shows you what actually happened.  In this case, it
+shows that (+ 2 2) returned 4, which is not = to 5.  Finally, the
+"false" on the last line is the value returned from the
+expression.  The "is" macro always returns the result of the
+inner expression.
+
+There are two special assertions for testing exceptions.  The
+"(is (thrown? c ...))" form tests if an exception of class c is
+thrown:
+
+(is (thrown? ArithmeticException (/ 1 0))) 
+
+"(is (thrown-with-msg? c re ...))" does the same thing and also
+tests that the message on the exception matches the regular
+expression re:
+
+(is (thrown-with-msg? ArithmeticException #"Divide by zero"
+                      (/ 1 0)))
+
+DOCUMENTING TESTS
+
+"is" takes an optional second argument, a string describing the
+assertion.  This message will be included in the error report.
+
+(is (= 5 (+ 2 2)) "Crazy arithmetic")
+
+In addition, you can document groups of assertions with the
+"testing" macro, which takes a string followed by any number of
+assertions.  The string will be included in failure reports.
+Calls to "testing" may be nested, and all of the strings will be
+joined together with spaces in the final report, in a style
+similar to RSpec &lt;<a href="http://rspec.info/">http://rspec.info/</a>&gt;
+
+(testing "Arithmetic"
+  (testing "with positive integers"
+    (is (= 4 (+ 2 2)))
+    (is (= 7 (+ 3 4))))
+  (testing "with negative integers"
+    (is (= -4 (+ -2 -2)))
+    (is (= -1 (+ 3 -4)))))
+
+Note that, unlike RSpec, the "testing" macro may only be used
+INSIDE a "deftest" or "with-test" form (see below).
+
+
+DEFINING TESTS
+
+There are two ways to define tests.  The "with-test" macro takes
+a defn or def form as its first argument, followed by any number
+of assertions.  The tests will be stored as metadata on the
+definition.
+
+(with-test
+    (defn my-function [x y]
+      (+ x y))
+  (is (= 4 (my-function 2 2)))
+  (is (= 7 (my-function 3 4))))
+
+As of Clojure SVN rev. 1221, this does not work with defmacro.
+See <a href="http://code.google.com/p/clojure/issues/detail?id=51">http://code.google.com/p/clojure/issues/detail?id=51</a>
+
+The other way lets you define tests separately from the rest of
+your code, even in a different namespace:
+
+(deftest addition
+  (is (= 4 (+ 2 2)))
+  (is (= 7 (+ 3 4))))
+
+(deftest subtraction
+  (is (= 1 (- 4 3)))
+  (is (= 3 (- 7 4))))
+
+This creates functions named "addition" and "subtraction", which
+can be called like any other function.  Therefore, tests can be
+grouped and composed, in a style similar to the test framework in
+Peter Seibel's "Practical Common Lisp"
+&lt;<a href="http://www.gigamonkeys.com/book/practical-building-a-unit-test-framework.html">http://www.gigamonkeys.com/book/practical-building-a-unit-test-framework.html</a>&gt;
+
+(deftest arithmetic
+  (addition)
+  (subtraction))
+
+The names of the nested tests will be joined in a list, like
+"(arithmetic addition)", in failure reports.  You can use nested
+tests to set up a context shared by several tests.
+
+
+RUNNING TESTS
+
+Run tests with the function "(run-tests namespaces...)":
+
+(run-tests 'your.namespace 'some.other.namespace)
+
+If you don't specify any namespaces, the current namespace is
+used.  To run all tests in all namespaces, use "(run-all-tests)".
+
+By default, these functions will search for all tests defined in
+a namespace and run them in an undefined order.  However, if you
+are composing tests, as in the "arithmetic" example above, you
+probably do not want the "addition" and "subtraction" tests run
+separately.  In that case, you must define a special function
+named "test-ns-hook" that runs your tests in the correct order:
+
+(defn test-ns-hook []
+  (arithmetic))
+
+Note: test-ns-hook prevents execution of fixtures (see below).
+
+
+OMITTING TESTS FROM PRODUCTION CODE
+
+You can bind the variable "*load-tests*" to false when loading or
+compiling code in production.  This will prevent any tests from
+being created by "with-test" or "deftest".
+
+
+FIXTURES
+
+Fixtures allow you to run code before and after tests, to set up
+the context in which tests should be run.
+
+A fixture is just a function that calls another function passed as
+an argument.  It looks like this:
+
+(defn my-fixture [f]
+   Perform setup, establish bindings, whatever.
+  (f)  Then call the function we were passed.
+   Tear-down / clean-up code here.
+ )
+
+Fixtures are attached to namespaces in one of two ways.  "each"
+fixtures are run repeatedly, once for each test function created
+with "deftest" or "with-test".  "each" fixtures are useful for
+establishing a consistent before/after state for each test, like
+clearing out database tables.
+
+"each" fixtures can be attached to the current namespace like this:
+(use-fixtures :each fixture1 fixture2 ...)
+The fixture1, fixture2 are just functions like the example above.
+They can also be anonymous functions, like this:
+(use-fixtures :each (fn [f] setup... (f) cleanup...))
+
+The other kind of fixture, a "once" fixture, is only run once,
+around ALL the tests in the namespace.  "once" fixtures are useful
+for tasks that only need to be performed once, like establishing
+database connections, or for time-consuming tasks.
+
+Attach "once" fixtures to the current namespace like this:
+(use-fixtures :once fixture1 fixture2 ...)
+
+Note: Fixtures and test-ns-hook are mutually incompatible.  If you
+are using test-ns-hook, fixture functions will *never* be run.
+
+
+SAVING TEST OUTPUT TO A FILE
+
+All the test reporting functions write to the var *test-out*.  By
+default, this is the same as *out*, but you can rebind it to any
+PrintWriter.  For example, it could be a file opened with
+clojure.java.io/writer.
+
+
+EXTENDING TEST-IS (ADVANCED)
+
+You can extend the behavior of the "is" macro by defining new
+methods for the "assert-expr" multimethod.  These methods are
+called during expansion of the "is" macro, so they should return
+quoted forms to be evaluated.
+
+You can plug in your own test-reporting framework by rebinding
+the "report" function: (report event)
+
+The 'event' argument is a map.  It will always have a :type key,
+whose value will be a keyword signaling the type of event being
+reported.  Standard events with :type value of :pass, :fail, and
+:error are called when an assertion passes, fails, and throws an
+exception, respectively.  In that case, the event will also have
+the following keys:
+
+  :expected   The form that was expected to be true
+  :actual     A form representing what actually occurred
+  :message    The string message given as an argument to 'is'
+
+The "testing" strings will be a list in "*testing-contexts*", and
+the vars being tested will be a list in "*testing-vars*".
+
+Your "report" function should wrap any printing calls in the
+"with-test-out" macro, which rebinds *out* to the current value
+of *test-out*.
+
+For additional event types, see the examples in the code.</pre>
+
+
+<br />
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/*load-tests*">*load-tests*</h2>
+    <span id="var-type">dynamic var</span><br />
+    <pre id="var-usage"></pre>
+    <pre id="var-docstr">True by default.  If set to false, no test functions will
+be created by deftest, set-test, or with-test.  Use this to omit
+tests when compiling or loading production code.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L244">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/*stack-trace-depth*">*stack-trace-depth*</h2>
+    <span id="var-type">dynamic var</span><br />
+    <pre id="var-usage"></pre>
+    <pre id="var-docstr">The maximum depth of stack traces to print when an Exception
+is thrown during a test.  Defaults to nil, which means print the 
+complete stack trace.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L251">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/are">are</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (are argv expr &amp; args)
+</pre>
+    <pre id="var-docstr">Checks multiple assertions with a template expression.
+See clojure.template/do-template for an explanation of
+templates.
+
+Example: (are [x y] (= x y)  
+              2 (+ 1 1)
+              4 (* 2 2))
+Expands to: 
+         (do (is (= 2 (+ 1 1)))
+             (is (= 4 (* 2 2))))
+
+Note: This breaks some reporting features, such as line numbers.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L559">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/assert-any">assert-any</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (assert-any msg form)
+</pre>
+    <pre id="var-docstr">Returns generic assertion code for any test, including macros, Java
+method calls, or isolated symbols.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L442">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/assert-predicate">assert-predicate</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (assert-predicate msg form)
+</pre>
+    <pre id="var-docstr">Returns generic assertion code for any functional predicate.  The
+'expected' argument to 'report' will contains the original form, the
+'actual' argument will contain the form with all its sub-forms
+evaluated.  If the predicate returns false, the 'actual' form will
+be wrapped in (not...).</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L423">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/compose-fixtures">compose-fixtures</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (compose-fixtures f1 f2)
+</pre>
+    <pre id="var-docstr">Composes two fixture functions, creating a new fixture function
+that combines their behavior.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L676">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/deftest">deftest</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (deftest name &amp; body)
+</pre>
+    <pre id="var-docstr">Defines a test function with no arguments.  Test functions may call
+other tests, so tests may be composed.  If you compose tests, you
+should also define a function named test-ns-hook; run-tests will
+call test-ns-hook instead of testing all vars.
+
+Note: Actually, the test body goes in the :test metadata on the var,
+and the real function (the value of the var) calls test-var on
+itself.
+
+When *load-tests* is false, deftest is ignored.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L609">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/deftest-">deftest-</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (deftest- name &amp; body)
+</pre>
+    <pre id="var-docstr">Like deftest but creates a private var.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L626">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/do-report">do-report</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (do-report m)
+</pre>
+    <pre id="var-docstr">Add file and line information to a test result and call report.
+If you are writing a custom assert-expr method, call this function
+to pass test results to report.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L343">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/file-position">file-position</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (file-position n)
+</pre>
+    <pre id="var-docstr">Returns a vector [filename line-number] for the nth call up the
+stack.
+
+Deprecated in 1.2: The information needed for test reporting is
+now on :file and :line keys in the result map.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    <span class="var-deprecated"><span id="content">Deprecated since Clojure version 1.2</span><br /></span>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L281">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/function?">function?</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (function? x)
+</pre>
+    <pre id="var-docstr">Returns true if argument is a function or a symbol that resolves to
+a function (not a macro).</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L411">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/get-possibly-unbound-var">get-possibly-unbound-var</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (get-possibly-unbound-var v)
+</pre>
+    <pre id="var-docstr">Like var-get but returns nil if the var is unbound.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L403">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/inc-report-counter">inc-report-counter</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (inc-report-counter name)
+</pre>
+    <pre id="var-docstr">Increments the named counter in *report-counters*, a ref to a map.
+Does nothing if *report-counters* is nil.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L313">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/is">is</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (is form)
+       (is form msg)
+</pre>
+    <pre id="var-docstr">Generic assertion macro.  'form' is any predicate test.
+'msg' is an optional message to attach to the assertion.
+
+Example: (is (= 4 (+ 2 2)) "Two plus two should be 4")
+
+Special forms:
+
+(is (thrown? c body)) checks that an instance of c is thrown from
+body, fails if not; then returns the thing thrown.
+
+(is (thrown-with-msg? c re body)) checks that an instance of c is
+thrown AND that the message on the exception matches (with
+re-find) the regular expression re.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L541">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/join-fixtures">join-fixtures</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (join-fixtures fixtures)
+</pre>
+    <pre id="var-docstr">Composes a collection of fixtures, in order.  Always returns a valid
+fixture function, even if the collection is empty.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L683">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/report">report</h2>
+    <span id="var-type">dynamic multimethod</span><br />
+    <pre id="var-usage">No usage documentation available</pre>
+    <pre id="var-docstr">Generic reporting function, may be overridden to plug in
+different report formats (e.g., TAP, JUnit).  Assertions such as
+'is' call 'report' to indicate results.  The argument given to
+'report' will be a map with a :type key.  See the documentation at
+the top of test_is.clj for more information on the types of
+arguments for 'report'.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L324">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/run-all-tests">run-all-tests</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (run-all-tests)
+       (run-all-tests re)
+</pre>
+    <pre id="var-docstr">Runs all tests in all namespaces; prints results.
+Optional argument is a regular expression; only namespaces with
+names matching the regular expression (with re-matches) will be
+tested.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L767">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/run-tests">run-tests</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (run-tests)
+       (run-tests &amp; namespaces)
+</pre>
+    <pre id="var-docstr">Runs all tests in the given namespaces; prints results.
+Defaults to current namespace if none given.  Returns a map
+summarizing test results.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L755">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/set-test">set-test</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (set-test name &amp; body)
+</pre>
+    <pre id="var-docstr">Experimental.
+Sets :test metadata of the named var to a fn with the given body.
+The var must already exist.  Does not modify the value of the var.
+
+When *load-tests* is false, set-test is ignored.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L635">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/successful?">successful?</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (successful? summary)
+</pre>
+    <pre id="var-docstr">Returns true if the given test summary indicates all tests
+were successful, false otherwise.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L776">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/test-all-vars">test-all-vars</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (test-all-vars ns)
+</pre>
+    <pre id="var-docstr">Calls test-vars on every var interned in the namespace, with fixtures.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L724">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/test-ns">test-ns</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (test-ns ns)
+</pre>
+    <pre id="var-docstr">If the namespace defines a function named test-ns-hook, calls that.
+Otherwise, calls test-all-vars on the namespace.  'ns' is a
+namespace object or a symbol.
+
+Internally binds *report-counters* to a ref initialized to
+*initial-report-counters*.  Returns the final, dereferenced state of
+*report-counters*.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L730">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/test-var">test-var</h2>
+    <span id="var-type">dynamic function</span><br />
+    <pre id="var-usage">Usage: (test-var v)
+</pre>
+    <pre id="var-docstr">If v has a function in its :test metadata, calls that function,
+with *testing-vars* bound to (conj *testing-vars* v).</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L695">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/test-vars">test-vars</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (test-vars vars)
+</pre>
+    <pre id="var-docstr">Groups vars by their namespace and runs test-vars on them with
+appropriate fixtures applied.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.6</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L710">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/testing">testing</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (testing string &amp; body)
+</pre>
+    <pre id="var-docstr">Adds a new string to the list of testing contexts.  May be nested,
+but must occur inside a test function (deftest).</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L584">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/testing-contexts-str">testing-contexts-str</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (testing-contexts-str)
+</pre>
+    <pre id="var-docstr">Returns a string representation of the current test context. Joins
+strings in *testing-contexts* with spaces.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L306">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/testing-vars-str">testing-vars-str</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (testing-vars-str m)
+</pre>
+    <pre id="var-docstr">Returns a string representation of the current test.  Renders names
+in *testing-vars* as a list, then the source file and line of
+current assertion.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L293">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/try-expr">try-expr</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (try-expr msg form)
+</pre>
+    <pre id="var-docstr">Used by the 'is' macro to catch unexpected exceptions.
+You don't call this.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L525">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/use-fixtures">use-fixtures</h2>
+    <span id="var-type">multimethod</span><br />
+    <pre id="var-usage">No usage documentation available</pre>
+    <pre id="var-docstr">Wrap test runs in a fixture function to perform setup and
+teardown. Using a fixture-type of :each wraps every test
+individually, while:once wraps the whole run in a single function.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L657">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/with-test">with-test</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-test definition &amp; body)
+</pre>
+    <pre id="var-docstr">Takes any definition form (that returns a Var) as the first argument.
+Remaining body goes in the :test metadata function for that Var.
+
+When *load-tests* is false, only evaluates the definition, ignoring
+the tests.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L596">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test/with-test-out">with-test-out</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-test-out &amp; body)
+</pre>
+    <pre id="var-docstr">Runs body with *out* bound to the value of *test-out*.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/919a7100ddf327d73bc2d50d9ee1411d4a0e8921/src/clj/clojure/test.clj#L272">Source</a>
+  </div>
+</div>
+<br />
+<h2 id="clojure.test.junit">clojure.test.junit</h2>
+<pre id="namespace-docstr">clojure.test extension for JUnit-compatible XML output.
+
+JUnit (<a href="http://junit.org/">http://junit.org/</a>) is the most popular unit-testing library
+for Java.  As such, tool support for JUnit output formats is
+common.  By producing compatible output from tests, this tool
+support can be exploited.
+
+To use, wrap any calls to clojure.test/run-tests in the
+with-junit-output macro, like this:
+
+  (use 'clojure.test)
+  (use 'clojure.test.junit)
+
+  (with-junit-output
+    (run-tests 'my.cool.library))
+
+To write the output to a file, rebind clojure.test/*test-out* to
+your own PrintWriter (perhaps opened using
+clojure.java.io/writer).</pre>
+
+
+<br />
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test.junit/with-junit-output">with-junit-output</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-junit-output &amp; body)
+</pre>
+    <pre id="var-docstr">Execute body with modified test-is reporting functions that write
+JUnit-compatible XML output.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/36642c984cbf52456e45a8af0a96e4b7e7417041/src/clj/clojure/test/junit.clj#L182">Source</a>
+  </div>
+</div>
+<br />
+<h2 id="clojure.test.tap">clojure.test.tap</h2>
+<pre id="namespace-docstr">clojure.test extensions for the Test Anything Protocol (TAP)
+
+TAP is a simple text-based syntax for reporting test results.  TAP
+was originally developed for Perl, and now has implementations in
+several languages.  For more information on TAP, see
+<a href="http://testanything.org/">http://testanything.org/</a> and
+<a href="http://search.cpan.org/~petdance/TAP-1.0.0/TAP.pm">http://search.cpan.org/~petdance/TAP-1.0.0/TAP.pm</a>
+
+To use this library, wrap any calls to
+clojure.test/run-tests in the with-tap-output macro,
+like this:
+
+  (use 'clojure.test)
+  (use 'clojure.test.tap)
+
+  (with-tap-output
+   (run-tests 'my.cool.library))</pre>
+
+
+<br />
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test.tap/print-tap-diagnostic">print-tap-diagnostic</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-tap-diagnostic data)
+</pre>
+    <pre id="var-docstr">Prints a TAP diagnostic line.  data is a (possibly multi-line)
+string.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/153a2d0f000ab2f254704e4970968fee6a0329a1/src/clj/clojure/test/tap.clj#L51">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test.tap/print-tap-fail">print-tap-fail</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-tap-fail msg)
+</pre>
+    <pre id="var-docstr">Prints a TAP 'not ok' line.  msg is a string, with no line breaks</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/153a2d0f000ab2f254704e4970968fee6a0329a1/src/clj/clojure/test/tap.clj#L65">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test.tap/print-tap-pass">print-tap-pass</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-tap-pass msg)
+</pre>
+    <pre id="var-docstr">Prints a TAP 'ok' line.  msg is a string, with no line breaks</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/153a2d0f000ab2f254704e4970968fee6a0329a1/src/clj/clojure/test/tap.clj#L59">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test.tap/print-tap-plan">print-tap-plan</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (print-tap-plan n)
+</pre>
+    <pre id="var-docstr">Prints a TAP plan line like '1..n'.  n is the number of tests</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/153a2d0f000ab2f254704e4970968fee6a0329a1/src/clj/clojure/test/tap.clj#L45">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.test.tap/with-tap-output">with-tap-output</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-tap-output &amp; body)
+</pre>
+    <pre id="var-docstr">Execute body with modified test reporting functions that produce
+TAP output</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/153a2d0f000ab2f254704e4970968fee6a0329a1/src/clj/clojure/test/tap.clj#L117">Source</a>
+  </div>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2016 by Rich Hickey</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>

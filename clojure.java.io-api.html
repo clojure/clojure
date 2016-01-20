@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>clojure.java.io - Clojure v1.7 API documentation</title>
+    <title>clojure.java.io - Clojure v1.8 API documentation</title>
     <link rel="icon" href="static/favicon.png" />
     <link rel="shortcut icon" href="static/favicon.png" />
     <link rel="stylesheet" href="static/clojure.css" type="text/css" media="all" />
@@ -25,7 +25,7 @@ namespace.
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.7</span> API</span><br />
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.8</span> API</span><br />
     <ul>
       <li><a href="index.html" class="wiki_link">Overview</a></li>
       <li><a href="api-index.html" class="wiki_link">API Index</a></li>
@@ -39,7 +39,7 @@ namespace.
     <div class="BranchTOC">
       <span class="toc-header">Other Versions</span>
       <ul id="left-sidebar-branch-list">
-        <li><a class="wiki_link" href="branch-master/index.html">v1.8 (in development)</a></li><li><a class="wiki_link" href="branch-clojure-1.6.0/index.html">v1.6 (stable)</a></li><li><a class="wiki_link" href="branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+        <li><a class="wiki_link" href="branch-master/index.html">v1.9 (in development)</a></li><li><a class="wiki_link" href="branch-clojure-1.7.0/index.html">v1.7 (stable)</a></li><li><a class="wiki_link" href="branch-clojure-1.6.0/index.html">v1.6 (stable)</a></li><li><a class="wiki_link" href="branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="branch-1.1.x/index.html">v1.1 (legacy)</a></li>
       </ul>
     </div>
     <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
@@ -116,14 +116,14 @@ namespace.
 </div>
 </div>
                 <div id="content-tag"><h1 id="overview">API for <span id="clojure.java.io">clojure.java.io</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.7</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.8</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
   </h1>
-
+<span id="author-line">by <span id="author-name">Stuart Sierra, Chas Emerick, Stuart Halloway</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.java.io</span>
 <p></p>
 <h2>Overview</h2>
 
-<pre id="namespace-docstr"></pre>
+<pre id="namespace-docstr">This file defines polymorphic I/O utility functions for Clojure.</pre>
 
 
 <br />
@@ -161,7 +161,7 @@ namespace.
     </div>
     <span class="proto-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="proto-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L35">Source</a>
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L35">Source</a>
   </div><div id="proto-entry">
     <br />
     <hr />
@@ -178,7 +178,7 @@ Common options include
 
 Callers should generally prefer the higher level API provided by
 reader, writer, input-stream, and output-stream.</pre>
-    Known implementations: <span id="proto-impls">array-of-bytes, array-of-characters, java.io.BufferedInputStream, java.io.BufferedOutputStream, java.io.BufferedReader, java.io.BufferedWriter, java.io.File, java.io.InputStream, java.io.OutputStream, java.io.Reader, java.io.Writer, java.lang.String, java.net.Socket, java.net.URI, java.net.URL, Object</span>
+    Known implementations: <span id="proto-impls">array-of-bytes, array-of-characters, java.io.BufferedInputStream, java.io.BufferedOutputStream, java.io.BufferedReader, java.io.BufferedWriter, java.io.File, java.io.InputStream, java.io.OutputStream, java.io.Reader, java.io.Writer, java.lang.String, java.net.Socket, java.net.URI, java.net.URL, nil, Object</span>
     <div id="proto-var-entry">
       <br />
       <h3 id="clojure.java.io/make-input-stream">make-input-stream</h3>
@@ -222,7 +222,7 @@ reader, writer, input-stream, and output-stream.</pre>
     </div>
     <span class="proto-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="proto-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L69">Source</a>
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L69">Source</a>
   </div>
 </div>
 
@@ -240,7 +240,7 @@ reader, writer, input-stream, and output-stream.</pre>
 a relative path, else IllegalArgumentException.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L398">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L408">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -262,7 +262,7 @@ Does not close any streams except those it opens itself
 (on a File).</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L381">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L391">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -273,7 +273,7 @@ Does not close any streams except those it opens itself
     <pre id="var-docstr">Delete file f. Raise an exception if it fails unless silently is true.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L420">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L430">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -288,7 +288,7 @@ versions treat the first argument as parent and subsequent args as
 children relative to the parent.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L408">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L418">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -310,7 +310,7 @@ Should be used inside with-open to ensure the InputStream is properly
 closed.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L121">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L121">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -322,7 +322,7 @@ closed.</pre>
 the file they represent.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L428">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L438">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -344,7 +344,7 @@ Should be used inside with-open to ensure the OutputStream is
 properly closed.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L138">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L138">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -367,7 +367,7 @@ Should be used inside with-open to ensure the Reader is properly
 closed.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L86">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L86">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -380,7 +380,7 @@ closed.</pre>
 if no loader is specified.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L436">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L446">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -402,7 +402,7 @@ Should be used inside with-open to ensure the Writer is properly
 closed.</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/cc69d19bd471c48d441071fff43e768ffa7eb8e5/src/clj/clojure/java/io.clj#L104">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2c9ff46454ebf34b14ab4612f691b3c93031b362/src/clj/clojure/java/io.clj#L104">Source</a>
   </div>
 </div>
 

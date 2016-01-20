@@ -1,0 +1,476 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>clojure.reflect - Clojure v1.7 API documentation</title>
+    <link rel="icon" href="../static/favicon.png" />
+    <link rel="shortcut icon" href="../static/favicon.png" />
+    <link rel="stylesheet" href="../static/clojure.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/wiki.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/internal.css" type="text/css" media="all" />
+    <style>.menuWrapper{height: 36px;}</style>
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a href="index.html" id="Logo"><img src="../static/clojure-icon.gif" width="100" height="100" alt="Clojure" /></a>
+	<h1><a href="index.html" id="page-header" title="page header title">Clojure Core API Reference</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.7</span> API</span><br />
+    <ul>
+      <li><a href="index.html" class="wiki_link">Overview</a></li>
+      <li><a href="api-index.html" class="wiki_link">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
+      </ul>
+    </div>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a class="wiki_link" href="../index.html">v1.8 (stable)</a></li><li><a class="wiki_link" href="../branch-master/index.html">v1.9 (in development)</a></li><li><a class="wiki_link" href="../branch-clojure-1.6.0/index.html">v1.6 (stable)</a></li><li><a class="wiki_link" href="../branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+      </ul>
+    </div>
+    <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div class="wiki wikiPage" id="content_view">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#toc0">Overview</a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#proto-section">Protocols</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/ClassResolver" class="toc-entry-anchor">ClassResolver</a>
+      <div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.reflect/resolve-class" class="toc-subentry-anchor">resolve-class</a>
+      </div>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/Reflector" class="toc-entry-anchor">Reflector</a>
+      <div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.reflect/do-reflect" class="toc-subentry-anchor">do-reflect</a>
+      </div>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/TypeReference" class="toc-entry-anchor">TypeReference</a>
+      <div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.reflect/typename" class="toc-subentry-anchor">typename</a>
+      </div>
+    </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#type-section">Types</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/AsmReflector" class="toc-entry-anchor">AsmReflector</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/Constructor" class="toc-entry-anchor">Constructor</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/Field" class="toc-entry-anchor">Field</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/JavaReflector" class="toc-entry-anchor">JavaReflector</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/Method" class="toc-entry-anchor">Method</a>
+      
+    </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/-&gt;AsmReflector" class="toc-entry-anchor">-&gt;AsmReflector</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/-&gt;Constructor" class="toc-entry-anchor">-&gt;Constructor</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/-&gt;Field" class="toc-entry-anchor">-&gt;Field</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/-&gt;JavaReflector" class="toc-entry-anchor">-&gt;JavaReflector</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/-&gt;Method" class="toc-entry-anchor">-&gt;Method</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/flag-descriptors" class="toc-entry-anchor">flag-descriptors</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/map-&gt;Constructor" class="toc-entry-anchor">map-&gt;Constructor</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/map-&gt;Field" class="toc-entry-anchor">map-&gt;Field</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/map-&gt;Method" class="toc-entry-anchor">map-&gt;Method</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/reflect" class="toc-entry-anchor">reflect</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.reflect/type-reflect" class="toc-entry-anchor">type-reflect</a>
+      
+    </div>
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.reflect">clojure.reflect</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.7</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
+  </h1>
+<span id="author-line">by <span id="author-name">Stuart Halloway</span><br /></span>
+<br />Full namespace name: <span id="long-name">clojure.reflect</span>
+<p></p>
+<h2>Overview</h2>
+
+<pre id="namespace-docstr">Reflection on Host Types
+Alpha - subject to change.
+
+Two main entry points: 
+
+* type-reflect reflects on something that implements TypeReference.
+* reflect (for REPL use) reflects on the class of an instance, or
+  on a class if passed a class
+
+Key features:
+
+* Exposes the read side of reflection as pure data. Reflecting
+  on a type returns a map with keys :bases, :flags, and :members.
+
+* Canonicalizes class names as Clojure symbols. Types can extend
+  to the TypeReference protocol to indicate that they can be
+  unambiguously resolved as a type name. The canonical format
+  requires one non-Java-ish convention: array brackets are &lt;&gt;
+  instead of [] so they can be part of a Clojure symbol.
+
+* Pluggable Reflectors for different implementations. The default
+  JavaReflector is good when you have a class in hand, or use
+  the AsmReflector for "hands off" reflection without forcing
+  classes to load.
+
+Platform implementers must:
+
+* Create an implementation of Reflector.
+* Create one or more implementations of TypeReference.
+* def default-reflector to be an instance that satisfies Reflector.</pre>
+<span class="ns-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+
+<br />
+
+<div id="proto-section">
+  <p></p>
+  <h2>Protocols</h2>
+  <div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/ClassResolver">ClassResolver</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr"></pre>
+    Known implementations: <span id="proto-impls">clojure.lang.Fn, java.lang.ClassLoader</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.reflect/resolve-class">resolve-class</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (resolve-class this name)
+</pre>
+      <pre id="var-docstr">Given a class name, return that typeref's class bytes as an InputStream.</pre>
+      
+      
+      
+    </div>
+    
+    
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L184">Source</a>
+  </div><div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/Reflector">Reflector</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr">Protocol for reflection implementers.</pre>
+    Known implementations: <span id="proto-impls"><a href="#clojure.reflect/AsmReflector">AsmReflector</a>, <a href="#clojure.reflect/JavaReflector">JavaReflector</a></span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.reflect/do-reflect">do-reflect</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (do-reflect reflector typeref)
+</pre>
+      <pre id="var-docstr"></pre>
+      
+      
+      
+    </div>
+    
+    
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/ee00807bac64d55dbc7ec49442d6376352b77200/src/clj/clojure/reflect.clj#L44">Source</a>
+  </div><div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/TypeReference">TypeReference</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr">A TypeReference can be unambiguously converted to a type name on
+the host platform.
+
+All typerefs are normalized into symbols. If you need to
+normalize a typeref yourself, call typesym.</pre>
+    Known implementations: <span id="proto-impls">clojure.asm.Type, clojure.lang.Symbol, java.lang.Class</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.reflect/typename">typename</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (typename o)
+</pre>
+      <pre id="var-docstr">Returns Java name as returned by ASM getClassName, e.g. byte[], java.lang.String[]</pre>
+      
+      
+      
+    </div>
+    
+    
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/ee00807bac64d55dbc7ec49442d6376352b77200/src/clj/clojure/reflect.clj#L48">Source</a>
+  </div>
+</div>
+<div id="type-section">
+  <p></p>
+  <h2>Types</h2>
+  <div id="type-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/AsmReflector">AsmReflector</h2>
+    <span id="type-type">type</span><br />
+    <pre id="type-docstr"></pre>
+    Fields: <span id="type-fields">[class-resolver]</span><br />
+    Protocols: <span id="type-protocols"><a href="#clojure.reflect/Reflector">Reflector</a></span><br />
+    Interfaces: <span id="type-interfaces"></span><br />
+  </div><div id="type-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/Constructor">Constructor</h2>
+    <span id="type-type">record</span><br />
+    <pre id="type-docstr"></pre>
+    Fields: <span id="type-fields">[name declaring-class parameter-types exception-types flags]</span><br />
+    Protocols: <span id="type-protocols"></span><br />
+    Interfaces: <span id="type-interfaces">clojure.lang.IHashEq, clojure.lang.IKeywordLookup, clojure.lang.ILookup, clojure.lang.IObj, clojure.lang.IPersistentMap, java.io.Serializable, java.util.Map</span><br />
+  </div><div id="type-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/Field">Field</h2>
+    <span id="type-type">record</span><br />
+    <pre id="type-docstr"></pre>
+    Fields: <span id="type-fields">[name type declaring-class flags]</span><br />
+    Protocols: <span id="type-protocols"></span><br />
+    Interfaces: <span id="type-interfaces">clojure.lang.IHashEq, clojure.lang.IKeywordLookup, clojure.lang.ILookup, clojure.lang.IObj, clojure.lang.IPersistentMap, java.io.Serializable, java.util.Map</span><br />
+  </div><div id="type-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/JavaReflector">JavaReflector</h2>
+    <span id="type-type">type</span><br />
+    <pre id="type-docstr"></pre>
+    Fields: <span id="type-fields">[classloader]</span><br />
+    Protocols: <span id="type-protocols"><a href="#clojure.reflect/Reflector">Reflector</a></span><br />
+    Interfaces: <span id="type-interfaces"></span><br />
+  </div><div id="type-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/Method">Method</h2>
+    <span id="type-type">record</span><br />
+    <pre id="type-docstr"></pre>
+    Fields: <span id="type-fields">[name return-type declaring-class parameter-types exception-types flags]</span><br />
+    Protocols: <span id="type-protocols"></span><br />
+    Interfaces: <span id="type-interfaces">clojure.lang.IHashEq, clojure.lang.IKeywordLookup, clojure.lang.ILookup, clojure.lang.IObj, clojure.lang.IPersistentMap, java.io.Serializable, java.util.Map</span><br />
+  </div>
+</div>
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/-&gt;AsmReflector">-&gt;AsmReflector</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (-&gt;AsmReflector class-resolver)
+</pre>
+    <pre id="var-docstr">Positional factory function for class clojure.reflect.AsmReflector.</pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L196">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/-&gt;Constructor">-&gt;Constructor</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (-&gt;Constructor name declaring-class parameter-types exception-types flags)
+</pre>
+    <pre id="var-docstr">Positional factory function for class clojure.reflect.Constructor.</pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L109">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/-&gt;Field">-&gt;Field</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (-&gt;Field name type declaring-class flags)
+</pre>
+    <pre id="var-docstr">Positional factory function for class clojure.reflect.Field.</pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L148">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/-&gt;JavaReflector">-&gt;JavaReflector</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (-&gt;JavaReflector classloader)
+</pre>
+    <pre id="var-docstr">Positional factory function for class clojure.reflect.JavaReflector.</pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L166">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/-&gt;Method">-&gt;Method</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (-&gt;Method name return-type declaring-class parameter-types exception-types flags)
+</pre>
+    <pre id="var-docstr">Positional factory function for class clojure.reflect.Method.</pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L128">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/flag-descriptors">flag-descriptors</h2>
+    <span id="var-type">var</span><br />
+    <pre id="var-usage"></pre>
+    <pre id="var-docstr">The Java access bitflags, along with their friendly names and
+the kinds of objects to which they can apply.</pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L71">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/map-&gt;Constructor">map-&gt;Constructor</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (map-&gt;Constructor m#)
+</pre>
+    <pre id="var-docstr">Factory function for class clojure.reflect.Constructor, taking a map of keywords to field values.</pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L109">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/map-&gt;Field">map-&gt;Field</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (map-&gt;Field m#)
+</pre>
+    <pre id="var-docstr">Factory function for class clojure.reflect.Field, taking a map of keywords to field values.</pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L148">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/map-&gt;Method">map-&gt;Method</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (map-&gt;Method m#)
+</pre>
+    <pre id="var-docstr">Factory function for class clojure.reflect.Method, taking a map of keywords to field values.</pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L128">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/reflect">reflect</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (reflect obj &amp; options)
+</pre>
+    <pre id="var-docstr">Alpha - subject to change.
+Reflect on the type of obj (or obj itself if obj is a class).
+Return value and options are the same as for type-reflect. </pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/ee00807bac64d55dbc7ec49442d6376352b77200/src/clj/clojure/reflect.clj#L115">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.reflect/type-reflect">type-reflect</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (type-reflect typeref &amp; options)
+</pre>
+    <pre id="var-docstr">Alpha - subject to change.
+ Reflect on a typeref, returning a map with :bases, :flags, and
+:members. In the discussion below, names are always Clojure symbols.
+
+ :bases            a set of names of the type's bases
+ :flags            a set of keywords naming the boolean attributes
+                   of the type.
+ :members          a set of the type's members. Each member is a map
+                   and can be a constructor, method, or field.
+
+ Keys common to all members:
+ :name             name of the type 
+ :declaring-class  name of the declarer
+ :flags            keyword naming boolean attributes of the member
+
+ Keys specific to constructors:
+ :parameter-types  vector of parameter type names
+ :exception-types  vector of exception type names
+
+ Key specific to methods:
+ :parameter-types  vector of parameter type names
+ :exception-types  vector of exception type names
+ :return-type      return type name
+
+ Keys specific to fields:
+ :type             type name
+
+ Options:
+
+   :ancestors     in addition to the keys described above, also
+                  include an :ancestors key with the entire set of
+                  ancestors, and add all ancestor members to
+                  :members.
+   :reflector     implementation to use. Defaults to JavaReflector,
+                  AsmReflector is also an option.</pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/ee00807bac64d55dbc7ec49442d6376352b77200/src/clj/clojure/reflect.clj#L58">Source</a>
+  </div>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2016 by Rich Hickey</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>
