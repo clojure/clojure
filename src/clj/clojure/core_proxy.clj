@@ -413,10 +413,15 @@
         snapshot (fn []
                    (reduce1 (fn [m e]
                              (assoc m (key e) ((val e))))
-                           {} (seq pmap)))]
+                           {} (seq pmap)))
+        thisfn (fn thisfn [plseq]
+                 (lazy-seq
+                   (when-let [pseq (seq plseq)]
+                     (cons (clojure.lang.MapEntry/create (first pseq) (v (first pseq)))
+                           (thisfn (rest pseq))))))]
     (proxy [clojure.lang.APersistentMap]
            []
-      (iterator [] (.iterator ^Iterable pmap))
+      (iterator [] (clojure.lang.SeqIterator. ^java.util.Iterator (thisfn (keys pmap))))
       (containsKey [k] (contains? pmap k))
       (entryAt [k] (when (contains? pmap k) (clojure.lang.MapEntry/create k (v k))))
       (valAt ([k] (when (contains? pmap k) (v k)))
@@ -425,11 +430,7 @@
       (count [] (count pmap))
       (assoc [k v] (assoc (snapshot) k v))
       (without [k] (dissoc (snapshot) k))
-      (seq [] ((fn thisfn [plseq]
-		  (lazy-seq
-                   (when-let [pseq (seq plseq)]
-                     (cons (clojure.lang.MapEntry/create (first pseq) (v (first pseq)))
-                           (thisfn (rest pseq)))))) (keys pmap))))))
+      (seq [] (thisfn (keys pmap))))))
 
 
 
