@@ -7417,7 +7417,14 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 	else if(sym.name.indexOf('.') > 0 && !sym.name.endsWith(".") 
 			|| sym.name.charAt(0) == '[')
 		{
-		return RT.classForName(sym.name);
+		try {
+			return RT.classForName(sym.name);
+		} catch (Exception e) {
+			if (e instanceof ClassNotFoundException)
+				return null;
+			else
+				return Util.sneakyThrow(e);
+			}
 		}
 	else if(sym.equals(NS))
 			return RT.NS_VAR;

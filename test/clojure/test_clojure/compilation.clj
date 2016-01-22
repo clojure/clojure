@@ -57,7 +57,9 @@
 
 (deftest test-compiler-resolution
   (testing "resolve nonexistent class create should return nil (assembla #262)"
-    (is (nil? (resolve 'NonExistentClass.)))))
+    (is (nil? (resolve 'NonExistentClass.))))
+  (testing "resolve nonexistent class should return nil"
+    (is (nil? (resolve 'NonExistentClass.Name)))))
 
 (deftest test-no-recur-across-try
   (testing "don't recur to function from inside try"
