@@ -249,6 +249,7 @@
          (new Vec am cnt shift (.doAssoc this shift root i val) tail (meta this)))
      (= i cnt) (.cons this val)
      :else (throw (IndexOutOfBoundsException.))))
+  (length [_] cnt)
   
   clojure.lang.Reversible
   (rseq [this]

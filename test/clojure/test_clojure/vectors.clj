@@ -360,7 +360,15 @@
            (vector-of :int #{1 2 3 4})
            (vector-of :int (sorted-set 1 2 3 4))
            (vector-of :int 1 2 "3")
-           (vector-of :int "1" "2" "3")))))
+           (vector-of :int "1" "2" "3")))
+    (testing "instances of IPersistentVector"
+      (are [gvec] (instance? clojure.lang.IPersistentVector gvec)
+        (vector-of :int 1 2 3)
+        (vector-of :double 1 2 3)))
+    (testing "fully implements IPersistentVector"
+      (are [gvec] (= 3 (.length gvec))
+        (vector-of :int 1 2 3)
+        (vector-of :double 1 2 3)))))
 
 (deftest empty-vector-equality
   (let [colls [[] (vector-of :long) '()]]
