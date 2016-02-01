@@ -20,20 +20,24 @@
  
 (def ^:dynamic *core-java-api*
   (case (System/getProperty "java.specification.version")
-    "1.6" "http://java.sun.com/javase/6/docs/api/"
-    "http://java.sun.com/javase/7/docs/api/"))
+    "1.6" "http://docs.oracle.com/javase/6/docs/api/"
+    "1.7" "http://docs.oracle.com/javase/7/docs/api/"
+    "1.8" "http://docs.oracle.com/javase/8/docs/api/"
+    "http://docs.oracle.com/javase/8/docs/api/"))
 
 (def ^:dynamic *remote-javadocs*
  (ref (sorted-map
+       "com.google.common." "http://docs.guava-libraries.googlecode.com/git/javadoc/"
        "java." *core-java-api*
        "javax." *core-java-api*
        "org.ietf.jgss." *core-java-api*
        "org.omg." *core-java-api*
        "org.w3c.dom." *core-java-api*
        "org.xml.sax." *core-java-api*
-       "org.apache.commons.codec." "http://commons.apache.org/codec/api-release/"
-       "org.apache.commons.io." "http://commons.apache.org/io/api-release/"
-       "org.apache.commons.lang." "http://commons.apache.org/lang/api-release/")))
+       "org.apache.commons.codec." "http://commons.apache.org/proper/commons-codec/apidocs/"
+       "org.apache.commons.io." "http://commons.apache.org/proper/commons-io/javadocs/api-release/"
+       "org.apache.commons.lang." "http://commons.apache.org/proper/commons-lang/javadocs/api-2.6/"
+       "org.apache.commons.lang3." "http://commons.apache.org/proper/commons-lang/javadocs/api-release/")))
 
 (defn add-local-javadoc
   "Adds to the list of local Javadoc paths."
