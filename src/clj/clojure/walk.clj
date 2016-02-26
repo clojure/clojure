@@ -90,6 +90,14 @@ the sorting function."}
   [form]
   (prewalk (fn [x] (print "Walked: ") (prn x) x) form))
 
+(defn transform-keys
+  "Recursively transform all map keys using f as a transformation function."
+  {:added "1.9"}
+  [f m]
+  (let [entry-f (fn [[k v]] [(f k) v])]
+    ;; only apply to maps
+    (postwalk (fn [x] (if (map? x) (into {} (map entry-f x)) x)) m)))
+
 (defn keywordize-keys
   "Recursively transforms all map keys from strings to keywords."
   {:added "1.1"}

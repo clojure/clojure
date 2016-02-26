@@ -14,6 +14,14 @@
   (is (= (w/stringify-keys {:a 1, nil {:b 2 :c 3}, :d 4})
          {"a" 1, nil {"b" 2 "c" 3}, "d" 4})))
 
+(deftest t-transform-keys
+  (is (= (w/transform-keys (fn [k]
+                             (if (keyword? k)
+                               (str (name k) "-" (name k))
+                               k))
+                           {:a 1, nil {:b 2 :c 3}, :d 4, :e 5})
+         {"a-a" 1, nil {"b-b" 2 "c-c" 3}, "d-d" 4, "e-e" 5})))
+
 (deftest t-prewalk-order
   (is (= (let [a (atom [])]
            (w/prewalk (fn [form] (swap! a conj form) form)
