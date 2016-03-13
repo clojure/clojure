@@ -5157,10 +5157,10 @@
   array ret."
   {:added "1.0"}
   [a idx ret expr]
-  `(let [a# ~a
+  `(let [a# ~a l# (alength a#)
          ~ret (aclone a#)]
      (loop  [~idx 0]
-       (if (< ~idx  (alength a#))
+       (if (< ~idx  l#)
          (do
            (aset ~ret ~idx ~expr)
            (recur (unchecked-inc ~idx)))
