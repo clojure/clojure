@@ -793,3 +793,38 @@
   [summary]
   (and (zero? (:fail summary 0))
        (zero? (:error summary 0))))
+
+(defn run-test-var
+  "Runs the tests for a single Var, with fixtures executed around the test, and summary output after."
+  {:added "1.9"}
+  [v]
+  (binding [*report-counters* (ref *initial-report-counters*)]
+    (let [ns-obj (-> v meta :ns)
+          summary (do
+                    (do-report {:type :begin-test-ns
+                                :ns   ns-obj})
+                    (test-vars [v])
+                    (do-report {:type :end-test-ns
+                                :ns   ns-obj})
+                    (assoc @*report-counters* :type :summary))]
+      (do-report summary)
+      summary)))
+
+(defmacro run-test
+  "Runs a single test.
+
+  Because the intent is to run a single test, there is no check for the namespace test-ns-hook."
+  {:added "1.9"}
+  [test-symbol]
+  (let [test-var (resolve test-symbol)]
+    (cond
+      (nil? test-var)
+      (binding [*out* *err*]
+        (println "Unable to resolve" test-symbol "to a test function."))
+
+      (not (-> test-var meta :test))
+      (binding [*out* *err*]
+        (println test-symbol "is not a test."))
+
+      :else
+      `(run-test-var ~test-var))))
