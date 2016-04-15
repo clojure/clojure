@@ -128,8 +128,8 @@ public void forceChunk() {
 
     if (count > CHUNK_SIZE) { // not last chunk
         long nextStart = start + (step * CHUNK_SIZE);   // cannot overflow, must be < end
-        _chunk = new LongChunk(start, step, CHUNK_SIZE);
         _chunkNext = new LongRange(nextStart, end, step, boundsCheck);
+        _chunk = new LongChunk(start, step, CHUNK_SIZE);
     } else {  // last chunk
         _chunk = new LongChunk(start, step, (int) count);   // count must be <= CHUNK_SIZE
     }

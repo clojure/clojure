@@ -1058,6 +1058,24 @@
       (reduce + (iterator-seq (.iterator (range 100)))) 4950
       (reduce + (iterator-seq (.iterator (range 0.0 100.0 1.0)))) 4950.0 ))
 
+(deftest range-test
+  (let [threads 10
+        n       1000
+        r       (atom (range (inc n)))
+        m       (atom 0)]
+    ; Iterate through the range concurrently,
+    ; updating m to the highest seen value in the range
+    (->> (range threads)
+         (map (fn [id]
+                (future
+                  (loop []
+                    (when-let [r (swap! r next)]
+                      (swap! m max (first r))
+                      (recur))))))
+         (map deref)
+         dorun)
+    (is (= n @m))))
+
 (defn unlimited-range-create [& args]
   (let [[arg1 arg2 arg3] args]
     (case (count args)
