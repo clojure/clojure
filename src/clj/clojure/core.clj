@@ -3255,7 +3255,7 @@
   "Blocks the current thread (indefinitely!) until all actions
   dispatched thus far, from this thread or agent, to the agent(s) have
   occurred.  Will block on failed agents.  Will never return if
-  a failed agent is restarted with :clear-actions true."
+  a failed agent is restarted with :clear-actions true or shutdown-agents was called."
   {:added "1.0"
    :static true}
   [& agents]
