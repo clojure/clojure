@@ -205,18 +205,45 @@
   (print-meta v w)
   (print-sequential "[" pr-on " " "]" v w))
 
+(defn- print-prefix-map [prefix m print-one w]
+  (print-sequential
+    (str prefix "{")
+    (fn [e ^Writer w]
+      (do (print-one (key e) w) (.append w \space) (print-one (val e) w)))
+    ", "
+    "}"
+    (seq m) w))
+
 (defn- print-map [m print-one w]
-  (print-sequential 
-   "{"
-   (fn [e  ^Writer w]
-     (do (print-one (key e) w) (.append w \space) (print-one (val e) w)))
-   ", "
-   "}"
-   (seq m) w))
+  (print-prefix-map nil m print-one w))
+
+(defn- strip-ns
+  [named]
+  (if (symbol? named)
+    (symbol nil (name named))
+    (keyword nil (name named))))
+
+(defn- lift-ns
+  "Returns [lifted-ns lifted-map] or nil if m can't be lifted."
+  [m]
+  (loop [ns nil
+         [[k v :as entry] & entries] (seq m)
+         lm (empty m)]
+    (if entry
+      (when (or (keyword? k) (symbol? k))
+        (if ns
+          (when (= ns (namespace k))
+            (recur ns entries (assoc lm (strip-ns k) v)))
+          (when-let [new-ns (namespace k)]
+            (recur new-ns entries (assoc lm (strip-ns k) v)))))
+      [ns lm])))
 
 (defmethod print-method clojure.lang.IPersistentMap [m, ^Writer w]
   (print-meta m w)
-  (print-map m pr-on w))
+  (let [[ns lift-map] (lift-ns m)]
+    (if ns
+      (print-prefix-map (str "#:" ns) lift-map pr-on w)
+      (print-map m pr-on w))))
 
 (defmethod print-dup java.util.Map [m, ^Writer w]
   (print-ctor m #(print-map (seq %1) print-dup %2) w))
