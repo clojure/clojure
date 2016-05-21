@@ -12,6 +12,7 @@
   ^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim"
     :doc "Utilities meant to be used interactively at the REPL"}
   clojure.repl
+  (:require [clojure.spec :as spec])
   (:import (java.io LineNumberReader InputStreamReader PushbackReader)
            (clojure.lang RT Reflector)))
 
@@ -79,27 +80,39 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
 (defn- namespace-doc [nspace]
   (assoc (meta nspace) :name (ns-name nspace)))
 
-(defn- print-doc [m]
+(defn- print-doc [{n :ns
+                   nm :name
+                   :keys [forms arglists special-form doc url macro spec]
+                   :as m}]
   (println "-------------------------")
-  (println (str (when-let [ns (:ns m)] (str (ns-name ns) "/")) (:name m)))
+  (println (or spec (str (when n (str (ns-name n) "/")) nm)))
+  (when forms
+    (doseq [f forms]
+      (print "  ")
+      (prn f)))
+  (when arglists
+    (prn arglists))
   (cond
-    (:forms m) (doseq [f (:forms m)]
-                 (print "  ")
-                 (prn f))
-    (:arglists m) (prn (:arglists m)))
-  (if (:special-form m)
+    special-form
     (do
       (println "Special Form")
-      (println " " (:doc m)) 
+      (println " " doc)
       (if (contains? m :url)
-        (when (:url m)
-          (println (str "\n  Please see http://clojure.org/" (:url m))))
-        (println (str "\n  Please see http://clojure.org/special_forms#"
-                      (:name m)))))
-    (do
-      (when (:macro m)
-        (println "Macro")) 
-      (println " " (:doc m)))))
+        (when url
+          (println (str "\n  Please see http://clojure.org/" url)))
+        (println (str "\n  Please see http://clojure.org/special_forms#" nm))))
+    macro
+    (println "Macro")
+    spec
+    (println "Spec"))
+  (when doc (println " " doc))
+  (when n
+    (when-let [specs (spec/fn-specs (symbol (str (ns-name n)) (name nm)))]
+      (println "Spec")
+      (run! (fn [[role spec]]
+              (when (and spec (not (= spec ::spec/unknown)))
+                (println " " (str (name role) ":") (spec/describe spec))))
+        specs))))
 
 (defn find-doc
   "Prints documentation for any var whose documentation or name
@@ -118,13 +131,15 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
                (print-doc m))))
 
 (defmacro doc
-  "Prints documentation for a var or special form given its name"
+  "Prints documentation for a var or special form given its name,
+   or for a spec if given a keyword"
   {:added "1.0"}
   [name]
   (if-let [special-name ('{& fn catch try finally try} name)]
     (#'print-doc (#'special-doc special-name))
     (cond
       (special-doc-map name) `(#'print-doc (#'special-doc '~name))
+      (keyword? name) `(#'print-doc {:spec '~name :doc '~(spec/describe name)})
       (find-ns name) `(#'print-doc (#'namespace-doc (find-ns '~name)))
       (resolve name) `(#'print-doc (meta (var ~name))))))
 
