@@ -81,6 +81,7 @@
       <arg value="clojure.string"/>
       <arg value="clojure.data"/>
       <arg value="clojure.reflect"/>
+      <arg value="clojure.spec"/>
     </java>
   </target>
 
