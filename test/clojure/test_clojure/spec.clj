@@ -79,7 +79,7 @@
       opt [:k] :k nil
       opt [:k1 :k2] ::s/invalid '{[] {:reason "Extra input", :pred (alt), :val (:k2), :via []}}
       opt [:k1 :k2 "x"] ::s/invalid '{[] {:reason "Extra input", :pred (alt), :val (:k2 "x"), :via []}}
-      opt ["a"] ::s/invalid "java.lang.IllegalArgumentException"
+      opt ["a"] ::s/invalid '{[] {:pred keyword?, :val "a", :via []}}
 
       andre nil nil nil
       andre [] nil nil
