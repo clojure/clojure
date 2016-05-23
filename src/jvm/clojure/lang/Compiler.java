@@ -6771,17 +6771,32 @@ public static Object macroexpand1(Object x) {
 		Var v = isMacro(op);
 		if(v != null)
 			{
+				ISeq args = RT.cons(form, RT.cons(Compiler.LOCAL_ENV.get(), form.next()));
 				try
 					{
-						return v.applyTo(RT.cons(form,RT.cons(LOCAL_ENV.get(),form.next())));
+						final Namespace checkns = Namespace.find(Symbol.intern("clojure.spec"));
+						if (checkns != null)
+							{
+								final Var check = Var.find(Symbol.intern("clojure.spec/macroexpand-check"));
+								if ((check != null) && (check.isBound()))
+								    check.applyTo(RT.cons(v, RT.list(args)));
+							}
+						Symbol.intern("clojure.spec");
+					}
+				catch(IllegalArgumentException e)
+					{
+					throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), e);
+					}
+				try
+					{
+					return v.applyTo(args);
 					}
 				catch(ArityException e)
 					{
 						// hide the 2 extra params for a macro
 						throw new ArityException(e.actual - 2, e.name);
 					}
-			}
-		else
+			} else
 			{
 			if(op instanceof Symbol)
 				{
