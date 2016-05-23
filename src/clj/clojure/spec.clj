@@ -17,10 +17,10 @@
 (set! *warn-on-reflection* true)
 
 (def ^:dynamic *recursion-limit*
-  "A soft limit on how many times a branching spec (or/alt/*/opt-keys)
+  "A soft limit on how many times a branching spec (or/alt/*/opt-keys/multi-spec)
   can be recursed through during generation. After this a
   non-recursive branch will be chosen."
-  10)
+  4)
 
 (def ^:dynamic *fspec-iterations*
   "The number of times an anonymous fn specified by fspec will be (generatively) tested during conform"
@@ -830,7 +830,8 @@ by ns-syms. Idempotent."
      (assert (when-let [dm (-> (methods @mmvar) ::invalid)]
                (nil? (dm nil)))
              (str "Multimethod :" form " does not contain nil-returning default method for :clojure.spec/invalid" ))
-     (let [predx #(@mmvar %)
+     (let [id (java.util.UUID/randomUUID)
+           predx #(@mmvar %)
            tag (if (keyword? retag)
                  #(assoc %1 retag %2)
                  retag)]
@@ -850,9 +851,12 @@ by ns-syms. Idempotent."
                 (gfn)
                 (let [gen (fn [[k f]]
                             (let [p (f nil)]
-                              (gen/fmap
-                               #(tag % k)
-                                (gensub p overrides path rmap (list 'method form k)))))
+                              (let [idk [id k]
+                                    rmap (inck rmap idk)]
+                                (when-not (recur-limit? rmap idk [idk] idk)
+                                  (gen/fmap
+                                   #(tag % k)
+                                   (gensub p overrides path rmap (list 'method form k)))))))
                       gs (->> (methods @mmvar)
                               (remove (fn [[k]] (= k ::invalid)))
                               (map gen)
@@ -941,7 +945,7 @@ by ns-syms. Idempotent."
                 (let [gen (fn [k p f]
                             (let [rmap (inck rmap id)]
                               (when-not (recur-limit? rmap id path k)
-                             (gensub p overrides (conj path k) rmap f))))
+                                (gensub p overrides (conj path k) rmap f))))
                       gs (remove nil? (map gen keys preds forms))]
                   (when-not (empty? gs)
                     (gen/one-of gs)))))
