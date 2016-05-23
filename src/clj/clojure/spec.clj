@@ -1161,6 +1161,7 @@ by ns-syms. Idempotent."
                               :via via}})]
     (when p
       (case op
+            ::accept nil
             nil (if (empty? input)
                   (insufficient path form)
                   (explain-1 form p path via x))
