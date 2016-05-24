@@ -8,7 +8,7 @@
 
 (ns clojure.spec.gen
     (:refer-clojure :exclude [boolean cat hash-map list map not-empty set vector
-                              char double int keyword symbol string uuid]))
+                              char double int keyword symbol string uuid delay]))
 
 (alias 'c 'clojure.core)
 
@@ -23,27 +23,44 @@
         (throw (RuntimeException. (str "Var " s " is not on the classpath")))))))
 
 (def ^:private quick-check-ref
-     (delay (dynaload 'clojure.test.check/quick-check)))
+     (c/delay (dynaload 'clojure.test.check/quick-check)))
 (defn quick-check
   [& args]
   (apply @quick-check-ref args))
 
 (def ^:private for-all*-ref
-     (delay (dynaload 'clojure.test.check.properties/for-all*)))
+     (c/delay (dynaload 'clojure.test.check.properties/for-all*)))
 (defn for-all*
   "Dynamically loaded clojure.test.check.properties/for-all*."
   [& args]
   (apply @for-all*-ref args))
 
-(let [g? (delay (dynaload 'clojure.test.check.generators/generator?))
-      g (delay (dynaload 'clojure.test.check.generators/generate))]
+(let [g? (c/delay (dynaload 'clojure.test.check.generators/generator?))
+      g (c/delay (dynaload 'clojure.test.check.generators/generate))
+      mkg (c/delay (dynaload 'clojure.test.check.generators/->Generator))]
   (defn- generator?
     [x]
     (@g? x))
+  (defn- generator
+    [gfn]
+    (@mkg gfn))
   (defn generate
     "Generate a single value using generator."
     [generator]
     (@g generator)))
+
+(defn ^:skip-wiki delay-impl
+  [gfnd]
+  ;;N.B. depends on test.check impl details
+  (generator (fn [rnd size]
+               ((:gen @gfnd) rnd size))))
+
+(defmacro delay
+  "given body that returns a generator, returns a
+  generator that delegates to that, but delays
+  creation until used."
+  [& body]
+  `(delay-impl (c/delay ~@body)))
 
 (defn gen-for-name
   "Dynamically loads test.check generator named s."
@@ -58,7 +75,7 @@
   [s]
   (let [fqn (c/symbol "clojure.test.check.generators" (name s))
         doc (str "Lazy loaded version of " fqn)]
-    `(let [g# (delay (dynaload '~fqn))]
+    `(let [g# (c/delay (dynaload '~fqn))]
        (defn ~s
          ~doc
          [& ~'args]
@@ -80,7 +97,7 @@
   [s]
   (let [fqn (c/symbol "clojure.test.check.generators" (name s))
         doc (str "Fn returning " fqn)]
-    `(let [g# (delay (dynaload '~fqn))]
+    `(let [g# (c/delay (dynaload '~fqn))]
        (defn ~s
          ~doc
          [& ~'args]
@@ -107,7 +124,7 @@ gens, each of which should generate something sequential."
 
 (def ^:private
   gen-builtins
-  (delay
+  (c/delay
    (let [simple (simple-type-printable)]
      {number? (one-of [(large-integer) (double)])
       integer? (large-integer)

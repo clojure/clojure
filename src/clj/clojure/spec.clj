@@ -20,7 +20,7 @@
   "A soft limit on how many times a branching spec (or/alt/*/opt-keys/multi-spec)
   can be recursed through during generation. After this a
   non-recursive branch will be chosen."
-  4)
+  8)
 
 (def ^:dynamic *fspec-iterations*
   "The number of times an anonymous fn specified by fspec will be (generatively) tested during conform"
@@ -778,7 +778,7 @@ by ns-syms. Idempotent."
                    gen (fn [k s] (gensub s overrides (conj path k) rmap k))
                    ogen (fn [k s]
                           (when-not (recur-limit? rmap id path k)
-                            [k (gensub s overrides (conj path k) rmap k)]))
+                            [k (gen/delay (gensub s overrides (conj path k) rmap k))]))
                    req-gens (map gen req-keys req-specs)
                    opt-gens (remove nil? (map ogen opt-keys opt-specs))]
                (when (every? identity (concat req-gens opt-gens))
@@ -854,9 +854,10 @@ by ns-syms. Idempotent."
                               (let [idk [id k]
                                     rmap (inck rmap idk)]
                                 (when-not (recur-limit? rmap idk [idk] idk)
-                                  (gen/fmap
-                                   #(tag % k)
-                                   (gensub p overrides path rmap (list 'method form k)))))))
+                                  (gen/delay
+                                   (gen/fmap
+                                    #(tag % k)
+                                    (gensub p overrides path rmap (list 'method form k))))))))
                       gs (->> (methods @mmvar)
                               (remove (fn [[k]] (= k ::invalid)))
                               (map gen)
@@ -945,7 +946,8 @@ by ns-syms. Idempotent."
                 (let [gen (fn [k p f]
                             (let [rmap (inck rmap id)]
                               (when-not (recur-limit? rmap id path k)
-                                (gensub p overrides (conj path k) rmap f))))
+                                (gen/delay
+                                 (gensub p overrides (conj path k) rmap f)))))
                       gs (remove nil? (map gen keys preds forms))]
                   (when-not (empty? gs)
                     (gen/one-of gs)))))
@@ -1209,7 +1211,9 @@ by ns-syms. Idempotent."
                 (let [gen (fn [p k f]
                             ;;(prn {:k k :path path :rmap rmap :op op :id id})
                             (when-not (c/and rmap id k (recur-limit? rmap id path k))
-                              (re-gen p overrides (if k (conj path k) path) rmap (c/or f p))))]
+                              (if id
+                                (gen/delay (re-gen p overrides (if k (conj path k) path) rmap (c/or f p)))
+                                (re-gen p overrides (if k (conj path k) path) rmap (c/or f p)))))]
                   (map gen ps (c/or (seq ks) (repeat nil)) (c/or (seq forms) (repeat nil)))))]
     (c/or (when-let [g (get overrides path)]
             (case op
