@@ -1001,7 +1001,7 @@ by ns-syms. Idempotent."
 (defn- accept? [{:keys [::op]}]
   (= ::accept op))
 
-(defn- pcat* [{[p1 & pr :as ps] :ps,  [k1 & kr :as ks] :ks, [f1 & fr :as forms] :forms, ret :ret}]
+(defn- pcat* [{[p1 & pr :as ps] :ps,  [k1 & kr :as ks] :ks, [f1 & fr :as forms] :forms, ret :ret, rep+ :rep+}]
   (when (every? identity ps)
     (if (accept? p1)
       (let [rp (:ret p1)
@@ -1009,7 +1009,7 @@ by ns-syms. Idempotent."
         (if pr
           (pcat* {:ps pr :ks kr :forms fr :ret ret})
           (accept ret)))
-      {::op ::pcat, :ps ps, :ret ret, :ks ks, :forms forms})))
+      {::op ::pcat, :ps ps, :ret ret, :ks ks, :forms forms :rep+ rep+})))
 
 (defn- pcat [& ps] (pcat* {:ps ps :ret []}))
 
@@ -1032,7 +1032,7 @@ by ns-syms. Idempotent."
 (defn ^:skip-wiki rep+impl
   "Do not call this directly, use '+'"
   [form p]
-  (pcat* {:ps [p (rep* p p [] true form)] :forms `[~form (* ~form)] :ret []}))
+  (pcat* {:ps [p (rep* p p [] true form)] :forms `[~form (* ~form)] :ret [] :rep+ form}))
 
 (defn ^:skip-wiki amp-impl
   "Do not call this directly, use '&'"
@@ -1139,15 +1139,17 @@ by ns-syms. Idempotent."
             ::alt (alt* (map #(deriv % x) ps) ks forms)
             ::rep (rep* (deriv p1 x) p2 ret splice forms)))))
 
-(defn- op-describe [p]
-  ;;(prn {:op op :ks ks :forms forms})
-  (let [{:keys [::op ps ks forms splice p1] :as p} (reg-resolve p)]
+(defn- op-describe [p]  
+  (let [{:keys [::op ps ks forms splice p1 rep+] :as p} (reg-resolve p)]
+    ;;(prn {:op op :ks ks :forms forms :p p})
     (when p
       (case op
             ::accept nil
             nil p
             ::amp (list* 'clojure.spec/& (op-describe p1) forms)
-            ::pcat (cons `cat (mapcat vector ks forms))
+            ::pcat (if rep+
+                     (list `+ rep+)
+                     (cons `cat (mapcat vector ks forms)))
             ::alt (cons `alt (mapcat vector ks forms))
             ::rep (list (if splice `+ `*) forms)))))
 
