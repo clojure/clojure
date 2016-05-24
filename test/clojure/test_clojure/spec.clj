@@ -14,7 +14,16 @@
 
 (def even-count? #(even? (count %)))
 
-#_(deftest conform-explain
+(defn submap?
+  "Is m1 a subset of m2?"
+  [m1 m2]
+  (if (and (map? m1) (map? m2))
+    (every? (fn [[k v]] (and (contains? m2 k)
+                          (submap? v (get m2 k))))
+      m1)
+    (= m1 m2)))
+
+(deftest conform-explain
   (let [a (s/and #(> % 5) #(< % 10))
         o (s/or :s string? :k keyword?)
         c (s/cat :a string? :b keyword?)
@@ -29,8 +38,8 @@
       (let [co (result-or-ex (s/conform spec x))
             e (result-or-ex (::s/problems (s/explain-data spec x)))]
         (when (not= conformed co) (println "conform fail\n\texpect=" conformed "\n\tactual=" co))
-        (when (not= ed e) (println "explain fail\n\texpect=" ed "\n\tactual=" e))
-        (and (= conformed co) (= ed e)))
+        (when (not (submap? ed e)) (println "explain fail\n\texpect=" ed "\n\tactual=" e))
+        (and (= conformed co) (submap? ed e)))
 
       keyword? :k :k nil
       keyword? nil ::s/invalid {[] {:pred ::s/unknown :val nil :via []}}
