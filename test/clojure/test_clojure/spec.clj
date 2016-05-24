@@ -14,7 +14,7 @@
 
 (def even-count? #(even? (count %)))
 
-(deftest conform-explain
+#_(deftest conform-explain
   (let [a (s/and #(> % 5) #(< % 10))
         o (s/or :s string? :k keyword?)
         c (s/cat :a string? :b keyword?)

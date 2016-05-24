@@ -36,7 +36,7 @@
 
 (defprotocol Spec
   (conform* [spec x])
-  (explain* [spec path via x])
+  (explain* [spec path via in x])
   (gen* [spec overrides path rmap])
   (with-gen* [spec gfn])
   (describe* [spec]))
@@ -139,8 +139,8 @@
   [spec gen-fn]
   (with-gen* (specize spec) gen-fn))
 
-(defn explain-data* [spec path via x]
-  (when-let [probs (explain* (specize spec) path via x)]
+(defn explain-data* [spec path via in x]
+  (when-let [probs (explain* (specize spec) path via in x)]
     {::problems probs}))
 
 (defn explain-data
@@ -150,7 +150,7 @@
   keys describing the predicate and the value that failed at that
   path."
   [spec x]
-  (explain-data* spec [] (if-let [name (spec-name spec)] [name] []) x))
+  (explain-data* spec [] (if-let [name (spec-name spec)] [name] []) [] x))
 
 (defn- explain-out
   "prints an explanation to *out*."
@@ -158,19 +158,20 @@
   (if ed
     (do
       ;;(prn {:ed ed})
-      (doseq [[path {:keys [pred val reason via] :as prob}]  (::problems ed)]
-        (when-not (empty? path)
-          (print "At:" path ""))
+      (doseq [[path {:keys [pred val reason via in] :as prob}]  (::problems ed)]
+        (when-not (empty? in)
+          (print "In:" in ""))
         (print "val: ")
         (pr val)
-        (print " fails")
-        (when-let [specname (last via)]
-          (print " spec:" specname))
+        (print " fails spec: ")
+        (print (c/or (last via) "_"))
+        (when-not (empty? path)
+          (print " at:" path))
         (print " predicate: ")
         (pr pred)
         (when reason (print ", " reason))
         (doseq [[k v] prob]
-          (when-not (#{:pred :val :reason :via} k)
+          (when-not (#{:pred :val :reason :via :in} k)
             (print "\n\t" k " ")
             (pr v)))
         (newline))
@@ -723,11 +724,12 @@ by ns-syms. Idempotent."
   ([spec x form]
      (not= ::invalid (dt spec x form))))
 
-(defn- explain-1 [form pred path via v]
+(defn- explain-1 [form pred path via in v]
+  ;;(prn {:form form :pred pred :path path :in in :v v})
   (let [pred (maybe-spec pred)]
     (if (spec? pred)
-      (explain* pred path (if-let [name (spec-name pred)] (conj via name) via) v)
-      {path {:pred (abbrev form) :val v :via via}})))
+      (explain* pred path (if-let [name (spec-name pred)] (conj via name) via) in v)
+      {path {:pred (abbrev form) :val v :via via :in in}})))
 
 (defn ^:skip-wiki map-spec-impl
   "Do not call this directly, use 'spec' with a map argument"
@@ -756,20 +758,20 @@ by ns-syms. Idempotent."
                          (recur ret ks))
                        ret)))
                  ::invalid))
-     (explain* [_ path via x]
+     (explain* [_ path via in x]
                (if-not (map? x)
-                 {path {:pred 'map? :val x :via via}}
+                 {path {:pred 'map? :val x :via via :in in}}
                  (let [reg (registry)]
                    (apply merge
                           (when-let [probs (->> (map (fn [pred form] (when-not (pred x) (abbrev form)))
                                                      pred-exprs pred-forms)
                                                 (keep identity)
                                                 seq)]
-                            {path {:pred (vec probs) :val x :via via}})
+                            {path {:pred (vec probs) :val x :via via :in in}})
                           (map (fn [[k v]]
                                  (when-not (c/or (not (contains? reg (keys->specs k)))
                                                  (valid? (keys->specs k) v k))
-                                   (explain-1 (keys->specs k) (keys->specs k) (conj path k) via v)))
+                                   (explain-1 (keys->specs k) (keys->specs k) (conj path k) via (conj in k) v)))
                                (seq x))))))
      (gen* [_ overrides path rmap]
            (if gfn
@@ -814,9 +816,9 @@ by ns-syms. Idempotent."
        (invoke [this x] (valid? this x))
        Spec
        (conform* [_ x] (dt pred x form cpred?))
-       (explain* [_ path via x]
+       (explain* [_ path via in x]
                  (when (= ::invalid (dt pred x form cpred?))
-                   {path {:pred (abbrev form) :val x :via via}}))
+                   {path {:pred (abbrev form) :val x :via via :in in}}))
     (gen* [_ _ _ _] (if gfn
                          (gfn)
                          (gen/gen-for-pred pred)))
@@ -842,10 +844,10 @@ by ns-syms. Idempotent."
         (conform* [_ x] (if-let [pred (predx x)]
                           (dt pred x form)
                           ::invalid))
-        (explain* [_ path via x]
+        (explain* [_ path via in x]
                   (if-let [pred (predx x)]
-                    (explain-1 form pred path via x)
-                    {path {:pred form :val x :reason "no method" :via via}}))
+                    (explain-1 form pred path via in x)
+                    {path {:pred form :val x :reason "no method" :via via :in in}}))
          (gen* [_ overrides path rmap]
               (if gfn
                 (gfn)
@@ -888,20 +890,20 @@ by ns-syms. Idempotent."
                           ::invalid
                           (recur (if (identical? cv v) ret (assoc ret i cv))
                                  (inc i))))))))
-      (explain* [_ path via x]
+      (explain* [_ path via in x]
                 (cond
                  (not (vector? x))
-                 {path {:pred 'vector? :val x :via via}}
+                 {path {:pred 'vector? :val x :via via :in in}}
 
                  (not= (count x) (count preds))
-                 {path {:pred `(= (count ~'%) ~(count preds)) :val x :via via}}
+                 {path {:pred `(= (count ~'%) ~(count preds)) :val x :via via :in in}}
 
                  :else
                  (apply merge
                         (map (fn [i form pred]
                                (let [v (x i)]
                                  (when-not (valid? pred v)
-                                   (explain-1 form pred (conj path i) via v))))
+                                   (explain-1 form pred (conj path i) via (conj in i) v))))
                              (range (count preds)) forms preds))))
       (gen* [_ overrides path rmap]
             (if gfn
@@ -933,12 +935,12 @@ by ns-syms. Idempotent."
         (invoke [this x] (valid? this x))
         Spec
         (conform* [_ x] (cform x))
-        (explain* [this path via x]
+        (explain* [this path via in x]
                   (when-not (valid? this x)
                     (apply merge
                            (map (fn [k form pred]
                                   (when-not (valid? pred x)
-                                    (explain-1 form pred (conj path k) via x)))
+                                    (explain-1 form pred (conj path k) via in x)))
                                 keys forms preds))))
      (gen* [_ overrides path rmap]
               (if gfn
@@ -967,7 +969,7 @@ by ns-syms. Idempotent."
       ret)))
 
 (defn- explain-pred-list
-  [forms preds path via x]
+  [forms preds path via in x]
   (loop [ret x
          [form & forms] forms
          [pred & preds] preds]
@@ -975,7 +977,7 @@ by ns-syms. Idempotent."
       (let [nret (dt pred ret form)]
         (if (not= ::invalid nret)
           (recur nret forms preds)
-          (explain-1 form pred path via ret))))))
+          (explain-1 form pred path via in ret))))))
 
 (defn ^:skip-wiki and-spec-impl
   "Do not call this directly, use 'and'"
@@ -985,7 +987,7 @@ by ns-syms. Idempotent."
       (invoke [this x] (valid? this x))
       Spec
       (conform* [_ x] (and-preds x preds forms))
-      (explain* [_ path via x] (explain-pred-list forms preds path via x))
+      (explain* [_ path via in x] (explain-pred-list forms preds path via in x))
    (gen* [_ overrides path rmap] (if gfn (gfn) (gensub (first preds) overrides path rmap (first forms))))
    (with-gen* [_ gfn] (and-spec-impl forms preds gfn))
    (describe* [_] `(and ~@forms))))
@@ -1153,7 +1155,7 @@ by ns-syms. Idempotent."
             ::alt (cons `alt (mapcat vector ks forms))
             ::rep (list (if splice `+ `*) forms)))))
 
-(defn- op-explain [form p path via input]
+(defn- op-explain [form p path via in input]
   ;;(prn {:form form :p p :path path :input input})
   (let [[x :as input] input
         via (if-let [name (spec-name p)] (conj via name) via)
@@ -1162,20 +1164,21 @@ by ns-syms. Idempotent."
                        {path {:reason "Insufficient input"
                               :pred (abbrev form)
                               :val ()
-                              :via via}})]
+                              :via via
+                              :in in}})]
     (when p
       (case op
             ::accept nil
             nil (if (empty? input)
                   (insufficient path form)
-                  (explain-1 form p path via x))
+                  (explain-1 form p path via in x))
             ::amp (if (empty? input)
                     (if (accept-nil? p1)
-                      (explain-pred-list forms ps path via (preturn p1))
+                      (explain-pred-list forms ps path via in (preturn p1))
                       (insufficient path (op-describe p1)))
                     (if-let [p1 (deriv p1 x)]
-                      (explain-pred-list forms ps path via (preturn p1))
-                      (op-explain (op-describe p1) p1 path via input)))
+                      (explain-pred-list forms ps path via in (preturn p1))
+                      (op-explain (op-describe p1) p1 path via in input)))
             ::pcat (let [[pred k form] (->> (map vector
                                                  ps
                                                  (c/or (seq ks) (repeat nil))
@@ -1187,7 +1190,7 @@ by ns-syms. Idempotent."
                          form (c/or form (op-describe pred))]
                      (if (c/and (empty? input) (not pred))
                        (insufficient path form)
-                       (op-explain form pred path via input)))
+                       (op-explain form pred path via in input)))
             ::alt (if (empty? input)
                     (insufficient path (op-describe p))
                     (apply merge
@@ -1196,6 +1199,7 @@ by ns-syms. Idempotent."
                                               pred
                                               (if k (conj path k) path)
                                               via
+                                              in
                                               input))
                                 (c/or (seq ks) (repeat nil))
                                 (c/or (seq forms) (repeat nil))
@@ -1203,7 +1207,7 @@ by ns-syms. Idempotent."
             ::rep (op-explain (if (identical? p1 p2)
                                 forms
                                 (op-describe p1))
-                              p1 path via input)))))
+                              p1 path via in input)))))
 
 (defn- re-gen [p overrides path rmap f]
   ;;(prn {:op op :ks ks :forms forms})
@@ -1254,25 +1258,27 @@ by ns-syms. Idempotent."
       (recur dp xs)
       ::invalid)))
 
-(defn- re-explain [path via re input]
-  (loop [p re [x & xs :as data] input]
+(defn- re-explain [path via in re input]
+  (loop [p re [x & xs :as data] input i 0]
     ;;(prn {:p p :x x :xs xs}) (prn)
     (if (empty? data)
       (if (accept-nil? p)
         nil ;;success
-        (op-explain (op-describe p) p path via nil))
+        (op-explain (op-describe p) p path via in nil))
       (if-let [dp (deriv p x)]
-        (recur dp xs)
+        (recur dp xs (inc i))
         (if (accept? p)
           {path {:reason "Extra input"
                  :pred (abbrev (op-describe re))
                  :val data
-                 :via via}}
-          (c/or (op-explain (op-describe p) p path via (seq data))
+                 :via via
+                 :in (conj in i)}}
+          (c/or (op-explain (op-describe p) p path via (conj in i) (seq data))
                 {path {:reason "Extra input"
                        :pred (abbrev (op-describe p))
                        :val data
-                       :via via}}))))))
+                       :via via
+                       :in (conj in i)}}))))))
 
 (defn ^:skip-wiki regex-spec-impl
   "Do not call this directly, use 'spec' with a regex op argument"
@@ -1285,10 +1291,10 @@ by ns-syms. Idempotent."
                 (if (c/or (nil? x) (coll? x))
                   (re-conform re (seq x))
                   ::invalid))
-      (explain* [_ path via x]
+      (explain* [_ path via in x]
                 (if (c/or (nil? x) (coll? x))
-                  (re-explain path via re (seq x))
-                  {path {:pred (abbrev (op-describe re)) :val x :via via}}))
+                  (re-explain path via in re (seq x))
+                  {path {:pred (abbrev (op-describe re)) :val x :via via :in in}}))
    (gen* [_ overrides path rmap]
             (if gfn
               (gfn)
@@ -1330,7 +1336,7 @@ by ns-syms. Idempotent."
      (conform* [_ f] (if (fn? f)
                        (if (identical? f (validate-fn f specs *fspec-iterations*)) f ::invalid)
                        ::invalid))
-     (explain* [_ path via f]
+     (explain* [_ path via in f]
                (if (fn? f)
                  (let [args (validate-fn f specs 100)]
                    (if (identical? f args) ;;hrm, we might not be able to reproduce
@@ -1338,15 +1344,15 @@ by ns-syms. Idempotent."
                      (let [ret (try (apply f args) (catch Throwable t t))]
                        (if (instance? Throwable ret)
                          ;;TODO add exception data
-                         {path {:pred '(apply fn) :val args :reason (.getMessage ^Throwable ret) :via via}}
+                         {path {:pred '(apply fn) :val args :reason (.getMessage ^Throwable ret) :via via :in in}}
 
                          (let [cret (dt retspec ret rform)]
                            (if (= ::invalid cret)
-                             (explain-1 rform retspec (conj path :ret) via ret)
+                             (explain-1 rform retspec (conj path :ret) via in ret)
                              (when fnspec
                                (let [cargs (conform argspec args)]
-                                 (explain-1 fform fnspec (conj path :fn) via {:args cargs :ret cret})))))))))
-                 {path {:pred 'fn? :val f :via via}}))
+                                 (explain-1 fform fnspec (conj path :fn) via in {:args cargs :ret cret})))))))))
+                 {path {:pred 'fn? :val f :via via :in in}}))
      (gen* [_ _ _ _] (if gfn
              (gfn)
              (when-not fnspec
