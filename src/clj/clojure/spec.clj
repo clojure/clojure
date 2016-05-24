@@ -20,7 +20,7 @@
   "A soft limit on how many times a branching spec (or/alt/*/opt-keys/multi-spec)
   can be recursed through during generation. After this a
   non-recursive branch will be chosen."
-  8)
+  4)
 
 (def ^:dynamic *fspec-iterations*
   "The number of times an anonymous fn specified by fspec will be (generatively) tested during conform"
@@ -207,7 +207,7 @@
   sequential collection (i.e. a generator for s/? should return either
   an empty sequence/vector or a sequence/vector with one item in it)"
   ([spec] (gen spec nil))
-  ([spec overrides] (gensub spec overrides [] nil spec)))
+  ([spec overrides] (gensub spec overrides [] {::recursion-limit *recursion-limit*} spec)))
 
 (defn- ->sym
   "Returns a symbol from a symbol or var"
@@ -697,7 +697,7 @@ by ns-syms. Idempotent."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; impl ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn- recur-limit? [rmap id path k]
-  (c/and (> (get rmap id) *recursion-limit*)
+  (c/and (> (get rmap id) (::recursion-limit rmap))
          (contains? (set path) k)))
 
 (defn- inck [m k]
