@@ -519,7 +519,7 @@
   (let [conform! (fn [v role spec data args]
                    (let [conformed (conform spec data)]
                      (if (= ::invalid conformed)
-                       (let [ed (assoc (explain-data* spec [role] [] data)
+                       (let [ed (assoc (explain-data* spec [role] [] [] data)
                                   ::args args)]
                          (throw (ex-info
                                  (str "Call to " v " did not conform to spec:\n" (with-out-str (explain-out ed)))
@@ -545,7 +545,7 @@
     (when-let [arg-spec (:args specs)]
       (when (= ::invalid (conform arg-spec args))
         (let [ed (assoc (explain-data* arg-spec [:args]
-                                       (if-let [name (spec-name arg-spec)] [name] []) args)
+                                       (if-let [name (spec-name arg-spec)] [name] []) [] args)
                    ::args args)]
           (throw (IllegalArgumentException.
                    (str
