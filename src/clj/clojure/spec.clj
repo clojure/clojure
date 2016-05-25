@@ -298,7 +298,12 @@
   dispatch-tag that should return an appropriately retagged value.
 
   Note that because the tags themselves comprise an open set,
-  the tag keys cannot be :req in the specs.
+  the tag key spec cannot enumerate the values, but can e.g.
+  test for keyword?.
+
+  Note also that the dispatch values of the multimethod will be
+  included in the path, i.e. in reporting and gen overrides, even
+  though those values are not evident in the spec.
 "
   [mm retag]
   `(multi-spec-impl '~(res mm) (var ~mm) ~retag))
@@ -834,6 +839,7 @@ by ns-syms. Idempotent."
              (str "Multimethod :" form " does not contain nil-returning default method for :clojure.spec/invalid" ))
      (let [id (java.util.UUID/randomUUID)
            predx #(@mmvar %)
+           dval #((.dispatchFn ^clojure.lang.MultiFn @mmvar) %)
            tag (if (keyword? retag)
                  #(assoc %1 retag %2)
                  retag)]
@@ -845,21 +851,22 @@ by ns-syms. Idempotent."
                           (dt pred x form)
                           ::invalid))
         (explain* [_ path via in x]
-                  (if-let [pred (predx x)]
-                    (explain-1 form pred path via in x)
-                    {path {:pred form :val x :reason "no method" :via via :in in}}))
+                  (let [dv (dval x)
+                        path (conj path dv)]
+                    (if-let [pred (predx x)]
+                      (explain-1 form pred path via in x)
+                      {path {:pred form :val x :reason "no method" :via via :in in}})))
          (gen* [_ overrides path rmap]
               (if gfn
                 (gfn)
                 (let [gen (fn [[k f]]
                             (let [p (f nil)]
-                              (let [idk [id k]
-                                    rmap (inck rmap idk)]
-                                (when-not (recur-limit? rmap idk [idk] idk)
+                              (let [rmap (inck rmap id)]
+                                (when-not (recur-limit? rmap id path k)
                                   (gen/delay
                                    (gen/fmap
                                     #(tag % k)
-                                    (gensub p overrides path rmap (list 'method form k))))))))
+                                    (gensub p overrides (conj path k) rmap (list 'method form k))))))))
                       gs (->> (methods @mmvar)
                               (remove (fn [[k]] (= k ::invalid)))
                               (map gen)
@@ -1139,7 +1146,8 @@ by ns-syms. Idempotent."
             ::pcat (alt2 (pcat* {:ps (cons (deriv p0 x) pr), :ks ks, :forms forms, :ret ret})
                          (when (accept-nil? p0) (deriv (pcat* {:ps pr, :ks kr, :forms (next forms), :ret (add-ret p0 ret k0)}) x)))
             ::alt (alt* (map #(deriv % x) ps) ks forms)
-            ::rep (rep* (deriv p1 x) p2 ret splice forms)))))
+            ::rep (alt2 (rep* (deriv p1 x) p2 ret splice forms)
+                        (when (accept-nil? p1) (deriv (rep* p2 p2 (add-ret p1 ret nil) splice forms) x)))))))
 
 (defn- op-describe [p]  
   (let [{:keys [::op ps ks forms splice p1 rep+] :as p} (reg-resolve p)]
