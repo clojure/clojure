@@ -283,14 +283,10 @@
   extensibly associate specs with 'tagged' data (i.e. data where one
   of the fields indicates the shape of the rest of the structure).
 
-  The multimethod must use :clojure.spec/invalid as its default value
-  and should return nil from that dispatch value:
-
-  (defmulti mspec :tag :default :clojure.spec/invalid)
-  (defmethod mspec :clojure.spec/invalid [_] nil)
+  (defmulti mspec :tag)
 
   The methods should ignore their argument and return a predicate/spec:
-  (defmethod mspec :int [_] (s/keys :req-un [::i]))
+  (defmethod mspec :int [_] (s/keys :req-un [::tag ::i]))
 
   retag is used during generation to retag generated values with
   matching tags. retag can either be a keyword, at which key the
@@ -834,11 +830,11 @@ by ns-syms. Idempotent."
   "Do not call this directly, use 'multi-spec'"
   ([form mmvar retag] (multi-spec-impl form mmvar retag nil))
   ([form mmvar retag gfn]
-     (assert (when-let [dm (-> (methods @mmvar) ::invalid)]
-               (nil? (dm nil)))
-             (str "Multimethod :" form " does not contain nil-returning default method for :clojure.spec/invalid" ))
      (let [id (java.util.UUID/randomUUID)
-           predx #(@mmvar %)
+           predx #(let [^clojure.lang.MultiFn mm @mmvar]
+                    (c/and (contains? (methods mm)
+                                      ((.dispatchFn mm) %))
+                           (mm %)))
            dval #((.dispatchFn ^clojure.lang.MultiFn @mmvar) %)
            tag (if (keyword? retag)
                  #(assoc %1 retag %2)
@@ -856,7 +852,7 @@ by ns-syms. Idempotent."
                     (if-let [pred (predx x)]
                       (explain-1 form pred path via in x)
                       {path {:pred form :val x :reason "no method" :via via :in in}})))
-         (gen* [_ overrides path rmap]
+        (gen* [_ overrides path rmap]
               (if gfn
                 (gfn)
                 (let [gen (fn [[k f]]
@@ -873,7 +869,7 @@ by ns-syms. Idempotent."
                               (remove nil?))]
                   (when (every? identity gs)
                     (gen/one-of gs)))))
-         (with-gen* [_ gfn] (multi-spec-impl form mmvar retag gfn))
+        (with-gen* [_ gfn] (multi-spec-impl form mmvar retag gfn))
         (describe* [_] `(multi-spec ~form))))))
 
 (defn ^:skip-wiki tuple-impl
