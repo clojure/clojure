@@ -1283,22 +1283,23 @@ by ns-syms. Idempotent."
 (defn ^:skip-wiki regex-spec-impl
   "Do not call this directly, use 'spec' with a regex op argument"
   [re gfn]
-     (reify
-      clojure.lang.IFn
-      (invoke [this x] (valid? this x))
-      Spec
-      (conform* [_ x]
-                (if (c/or (nil? x) (coll? x))
-                  (re-conform re (seq x))
-                  ::invalid))
-      (explain* [_ path via in x]
-                (if (c/or (nil? x) (coll? x))
-                  (re-explain path via in re (seq x))
-                  {path {:pred (abbrev (op-describe re)) :val x :via via :in in}}))
+  (reify
+   clojure.lang.IFn
+   (invoke [this x] (valid? this x))
+   Spec
+   (conform* [_ x]
+             (if (c/or (nil? x) (coll? x))
+               (re-conform re (seq x))
+               ::invalid))
+   (explain* [_ path via in x]
+             (if (c/or (nil? x) (coll? x))
+               (re-explain path via in re (seq x))
+               {path {:pred (abbrev (op-describe re)) :val x :via via :in in}}))
    (gen* [_ overrides path rmap]
-            (if gfn
-              (gfn)
+         (if gfn
+           (gfn)
            (re-gen re overrides path rmap (op-describe re))))
+   (with-gen* [_ gfn] (regex-spec-impl re gfn))
    (describe* [_] (op-describe re))))
 
 ;;;;;;;;;;;;;;;;; HOFs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
