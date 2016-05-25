@@ -29,7 +29,8 @@
               (assoc ret :result explain)
               ret)]
     (if-let [shrunk-explain (-> ret :shrunk :result ex-data ::check-call)]
-      (assoc-in ret [:shrunk :result] shrunk-explain))))
+      (assoc-in ret [:shrunk :result] shrunk-explain)
+      ret)))
 
 (defn- check-call
   "Returns true if call passes specs, otherwise *returns* an exception
