@@ -145,11 +145,11 @@ its spec for test purposes."
        (is (nil? (flip-nums 1 1)))
        (s/instrument `flip-nums)
        (is (= [1 2] (flip-nums 2 1)))
-       (is (= '{:clojure.spec/problems {[:args :arg1] {:pred integer?, :val :a, :via []}}, :clojure.spec/args (:a :b)}
+       (is (submap? '{:clojure.spec/problems {[:args :arg1] {:pred integer?, :val :a, :via []}}, :clojure.spec/args (:a :b)}
               (get-ex-data (flip-nums :a :b))))
-       (is (= '{:clojure.spec/problems {[:fn] {:pred (fn [{:keys [args ret]}] (= ret [(:arg2 args) (:arg1 args)])), :val {:args {:arg1 1, :arg2 2}, :ret [1 2]}, :via []}}, :clojure.spec/args (1 2)}
+       (is (submap? '{:clojure.spec/problems {[:fn] {:pred (fn [{:keys [args ret]}] (= ret [(:arg2 args) (:arg1 args)])), :val {:args {:arg1 1, :arg2 2}, :ret [1 2]}, :via []}}, :clojure.spec/args (1 2)}
               (get-ex-data (flip-nums 1 2))))
-       (is (= '{:clojure.spec/problems {[:ret] {:pred vector?, :val nil, :via []}}, :clojure.spec/args (1 1)}
+       (is (submap? '{:clojure.spec/problems {[:ret] {:pred vector?, :val nil, :via []}}, :clojure.spec/args (1 1)}
               (get-ex-data (flip-nums 1 1))))
        (s/unstrument `flip-nums)
        (= [1 2] (flip-nums 2 1))
