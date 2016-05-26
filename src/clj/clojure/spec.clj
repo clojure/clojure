@@ -163,8 +163,9 @@
           (print "In:" in ""))
         (print "val: ")
         (pr val)
-        (print " fails spec: ")
-        (print (c/or (last via) "_"))
+        (print " fails")
+        (when-not (empty? via)
+          (print " spec:" (last via)))
         (when-not (empty? path)
           (print " at:" path))
         (print " predicate: ")
@@ -186,6 +187,11 @@
   "Given a spec and a value that fails to conform, prints an explanation to *out*."
   [spec x]
   (explain-out (explain-data spec x)))
+
+(defn explain-str
+  "Given a spec and a value that fails to conform, returns an explanation as a string."
+  [spec x]
+  (with-out-str (explain spec x)))
 
 (declare valid?)
 
@@ -1155,7 +1161,7 @@ by ns-syms. Idempotent."
             ::amp (list* 'clojure.spec/& (op-describe p1) forms)
             ::pcat (if rep+
                      (list `+ rep+)
-                     (cons `cat (mapcat vector ks forms)))
+                     (cons `cat (mapcat vector (c/or (seq ks) (repeat :_)) (c/or (seq forms) (repeat nil)))))
             ::alt (cons `alt (mapcat vector ks forms))
             ::rep (list (if splice `+ `*) forms)))))
 
@@ -1264,7 +1270,7 @@ by ns-syms. Idempotent."
 
 (defn- re-explain [path via in re input]
   (loop [p re [x & xs :as data] input i 0]
-    ;;(prn {:p p :x x :xs xs}) (prn)
+    ;;(prn {:p p :x x :xs xs :re re}) (prn)
     (if (empty? data)
       (if (accept-nil? p)
         nil ;;success

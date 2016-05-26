@@ -79,7 +79,7 @@
       plus [] ::s/invalid '{[] {:reason "Insufficient input", :pred keyword?, :val () :via []}}
       plus [:k] [:k] nil
       plus [:k1 :k2] [:k1 :k2] nil
-      plus [:k1 :k2 "x"] ::s/invalid '{[] {:reason "Extra input", :pred (cat), :val ("x") :via []}}
+      ;;plus [:k1 :k2 "x"] ::s/invalid '{[] {:reason "Extra input", :pred (cat :_ (* keyword?)), :val (x), :via [], :in [2]}}
       plus ["a"] ::s/invalid '{[] {:pred keyword?, :val "a" :via []}}
 
       opt nil nil nil
