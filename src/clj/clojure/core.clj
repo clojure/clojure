@@ -5958,10 +5958,13 @@
   created."
   {:added "1.0"
    :static true}
-  ([m [k & ks] f & args]
-   (if ks
-     (assoc m k (apply update-in (get m k) ks f args))
-     (assoc m k (apply f (get m k) args)))))
+  ([m ks f & args]
+     (let [up (fn up [m ks f args]
+                (let [[k & ks] ks]
+                  (if ks
+                    (assoc m k (up (get m k) ks f args))
+                    (assoc m k (apply f (get m k) args)))))]
+       (up m ks f args))))
 
 (defn update
   "'Updates' a value in an associative structure, where k is a
