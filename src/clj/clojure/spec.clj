@@ -1161,7 +1161,7 @@ by ns-syms. Idempotent."
             ::amp (list* 'clojure.spec/& (op-describe p1) forms)
             ::pcat (if rep+
                      (list `+ rep+)
-                     (cons `cat (mapcat vector (c/or (seq ks) (repeat :_)) (c/or (seq forms) (repeat nil)))))
+                     (cons `cat (mapcat vector (c/or (seq ks) (repeat :_)) forms)))
             ::alt (cons `alt (mapcat vector ks forms))
             ::rep (list (if splice `+ `*) forms)))))
 
