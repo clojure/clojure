@@ -201,11 +201,10 @@
 (defn- gensub
   [spec overrides path rmap form]
   ;;(prn {:spec spec :over overrides :path path :form form})
-  (if-let [spec (specize spec)]
+  (let [spec (specize spec)]
     (if-let [g (c/or (get overrides path) (gen* spec overrides path rmap))]
       (gen/such-that #(valid? spec %) g 100)
-      (throw (Exception. (str "Unable to construct gen at: " path " for: " (abbrev form)))))
-    (throw (Exception. (str "Unable to construct gen at: " path ", " (abbrev form) " can not be made a spec")))))
+      (throw (IllegalStateException. (str "Unable to construct gen at: " path " for: " (abbrev form)))))))
 
 (defn gen
   "Given a spec, returns the generator for it, or throws if none can
