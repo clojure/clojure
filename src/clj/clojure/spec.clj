@@ -49,8 +49,11 @@
   (with-meta spec (assoc (meta spec) ::name name)))
 
 (defn- spec-name [spec]
-  (when (instance? clojure.lang.IObj spec)
-    (-> (meta spec) ::name)))
+  (cond
+   (keyword? spec) spec
+
+   (instance? clojure.lang.IObj spec)
+   (-> (meta spec) ::name)))
 
 (defn- reg-resolve
   "returns the spec/regex at end of alias chain starting with k, nil if not found, k if k not Named"
