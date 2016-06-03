@@ -524,6 +524,7 @@ static public ISeq seq(Object coll){
 		return seqFrom(coll);
 }
 
+// N.B. canSeq must be kept in sync with this!
 static ISeq seqFrom(Object coll){
 	if(coll instanceof Seqable)
 		return ((Seqable) coll).seq();
@@ -542,6 +543,16 @@ static ISeq seqFrom(Object coll){
 		Class sc = c.getSuperclass();
 		throw new IllegalArgumentException("Don't know how to create ISeq from: " + c.getName());
 	}
+}
+
+static public boolean canSeq(Object coll){
+    return coll instanceof ISeq
+            || coll instanceof Seqable
+            || coll == null
+            || coll instanceof Iterable
+            || coll.getClass().isArray()
+            || coll instanceof CharSequence
+            || coll instanceof Map;
 }
 
 static public Iterator iter(Object coll){
