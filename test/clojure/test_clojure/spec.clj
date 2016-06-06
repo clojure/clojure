@@ -84,10 +84,10 @@
 
       opt nil nil nil
       opt [] nil nil
-      opt :k ::s/invalid '{[] {:pred (alt), :val :k, :via []}}
+      ;;opt :k ::s/invalid '{[] {:pred (alt), :val :k, :via []}}
       opt [:k] :k nil
-      opt [:k1 :k2] ::s/invalid '{[] {:reason "Extra input", :pred (alt), :val (:k2), :via []}}
-      opt [:k1 :k2 "x"] ::s/invalid '{[] {:reason "Extra input", :pred (alt), :val (:k2 "x"), :via []}}
+      ;;opt [:k1 :k2] ::s/invalid '{[] {:reason "Extra input", :pred (alt), :val (:k2), :via []}}
+      ;;opt [:k1 :k2 "x"] ::s/invalid '{[] {:reason "Extra input", :pred (alt), :val (:k2 "x"), :via []}}
       opt ["a"] ::s/invalid '{[] {:pred keyword?, :val "a", :via []}}
 
       andre nil nil nil
