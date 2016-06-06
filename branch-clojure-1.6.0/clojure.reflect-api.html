@@ -127,6 +127,9 @@ namespace.
       <a href="#clojure.reflect/type-reflect" class="toc-entry-anchor">type-reflect</a>
       
     </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
   </div>
 </div>
 </div>
@@ -189,6 +192,7 @@ Platform implementers must:
       <pre id="var-usage">Usage: (resolve-class this name)
 </pre>
       <pre id="var-docstr">Given a class name, return that typeref's class bytes as an InputStream.</pre>
+      <pre id="var-specs"></pre>
       
       
       
@@ -210,6 +214,7 @@ Platform implementers must:
       <pre id="var-usage">Usage: (do-reflect reflector typeref)
 </pre>
       <pre id="var-docstr"></pre>
+      <pre id="var-specs"></pre>
       
       
       
@@ -235,6 +240,7 @@ normalize a typeref yourself, call typesym.</pre>
       <pre id="var-usage">Usage: (typename o)
 </pre>
       <pre id="var-docstr">Returns Java name as returned by ASM getClassName, e.g. byte[], java.lang.String[]</pre>
+      <pre id="var-specs"></pre>
       
       
       
@@ -305,6 +311,7 @@ normalize a typeref yourself, call typesym.</pre>
     <pre id="var-usage">Usage: (-&gt;AsmReflector class-resolver)
 </pre>
     <pre id="var-docstr">Positional factory function for class clojure.reflect.AsmReflector.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c8d3ef3929e8049a84957002bc7e2071844bfb53/src/clj/clojure/reflect/java.clj#L196">Source</a>
@@ -316,6 +323,7 @@ normalize a typeref yourself, call typesym.</pre>
     <pre id="var-usage">Usage: (-&gt;Constructor name declaring-class parameter-types exception-types flags)
 </pre>
     <pre id="var-docstr">Positional factory function for class clojure.reflect.Constructor.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c8d3ef3929e8049a84957002bc7e2071844bfb53/src/clj/clojure/reflect/java.clj#L109">Source</a>
@@ -327,6 +335,7 @@ normalize a typeref yourself, call typesym.</pre>
     <pre id="var-usage">Usage: (-&gt;Field name type declaring-class flags)
 </pre>
     <pre id="var-docstr">Positional factory function for class clojure.reflect.Field.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c8d3ef3929e8049a84957002bc7e2071844bfb53/src/clj/clojure/reflect/java.clj#L148">Source</a>
@@ -338,6 +347,7 @@ normalize a typeref yourself, call typesym.</pre>
     <pre id="var-usage">Usage: (-&gt;JavaReflector classloader)
 </pre>
     <pre id="var-docstr">Positional factory function for class clojure.reflect.JavaReflector.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c8d3ef3929e8049a84957002bc7e2071844bfb53/src/clj/clojure/reflect/java.clj#L166">Source</a>
@@ -349,6 +359,7 @@ normalize a typeref yourself, call typesym.</pre>
     <pre id="var-usage">Usage: (-&gt;Method name return-type declaring-class parameter-types exception-types flags)
 </pre>
     <pre id="var-docstr">Positional factory function for class clojure.reflect.Method.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c8d3ef3929e8049a84957002bc7e2071844bfb53/src/clj/clojure/reflect/java.clj#L128">Source</a>
@@ -360,6 +371,7 @@ normalize a typeref yourself, call typesym.</pre>
     <pre id="var-usage"></pre>
     <pre id="var-docstr">The Java access bitflags, along with their friendly names and
 the kinds of objects to which they can apply.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c8d3ef3929e8049a84957002bc7e2071844bfb53/src/clj/clojure/reflect/java.clj#L71">Source</a>
@@ -371,6 +383,7 @@ the kinds of objects to which they can apply.</pre>
     <pre id="var-usage">Usage: (map-&gt;Constructor m#)
 </pre>
     <pre id="var-docstr">Factory function for class clojure.reflect.Constructor, taking a map of keywords to field values.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c8d3ef3929e8049a84957002bc7e2071844bfb53/src/clj/clojure/reflect/java.clj#L109">Source</a>
@@ -382,6 +395,7 @@ the kinds of objects to which they can apply.</pre>
     <pre id="var-usage">Usage: (map-&gt;Field m#)
 </pre>
     <pre id="var-docstr">Factory function for class clojure.reflect.Field, taking a map of keywords to field values.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c8d3ef3929e8049a84957002bc7e2071844bfb53/src/clj/clojure/reflect/java.clj#L148">Source</a>
@@ -393,6 +407,7 @@ the kinds of objects to which they can apply.</pre>
     <pre id="var-usage">Usage: (map-&gt;Method m#)
 </pre>
     <pre id="var-docstr">Factory function for class clojure.reflect.Method, taking a map of keywords to field values.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c8d3ef3929e8049a84957002bc7e2071844bfb53/src/clj/clojure/reflect/java.clj#L128">Source</a>
@@ -406,6 +421,7 @@ the kinds of objects to which they can apply.</pre>
     <pre id="var-docstr">Alpha - subject to change.
 Reflect on the type of obj (or obj itself if obj is a class).
 Return value and options are the same as for type-reflect. </pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj#L115">Source</a>
@@ -451,6 +467,7 @@ Return value and options are the same as for type-reflect. </pre>
                   :members.
    :reflector     implementation to use. Defaults to JavaReflector,
                   AsmReflector is also an option.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/479bb230b410cd39f3ca94120729096a38c8df67/src/clj/clojure/reflect.clj#L58">Source</a>

@@ -112,6 +112,9 @@ namespace.
       <a href="#clojure.java.io/writer" class="toc-entry-anchor">writer</a>
       
     </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
   </div>
 </div>
 </div>
@@ -145,6 +148,7 @@ namespace.
       <pre id="var-usage">Usage: (as-file x)
 </pre>
       <pre id="var-docstr">Coerce argument to a file.</pre>
+      <pre id="var-specs"></pre>
       <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
       
       
@@ -155,6 +159,7 @@ namespace.
       <pre id="var-usage">Usage: (as-url x)
 </pre>
       <pre id="var-docstr">Coerce argument to a URL.</pre>
+      <pre id="var-specs"></pre>
       <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
       
       
@@ -186,6 +191,7 @@ reader, writer, input-stream, and output-stream.</pre>
       <pre id="var-usage">Usage: (make-input-stream x opts)
 </pre>
       <pre id="var-docstr">Creates a BufferedInputStream. See also IOFactory docs.</pre>
+      <pre id="var-specs"></pre>
       <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
       
       
@@ -196,6 +202,7 @@ reader, writer, input-stream, and output-stream.</pre>
       <pre id="var-usage">Usage: (make-output-stream x opts)
 </pre>
       <pre id="var-docstr">Creates a BufferedOutputStream. See also IOFactory docs.</pre>
+      <pre id="var-specs"></pre>
       <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
       
       
@@ -206,6 +213,7 @@ reader, writer, input-stream, and output-stream.</pre>
       <pre id="var-usage">Usage: (make-reader x opts)
 </pre>
       <pre id="var-docstr">Creates a BufferedReader. See also IOFactory docs.</pre>
+      <pre id="var-specs"></pre>
       <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
       
       
@@ -216,6 +224,7 @@ reader, writer, input-stream, and output-stream.</pre>
       <pre id="var-usage">Usage: (make-writer x opts)
 </pre>
       <pre id="var-docstr">Creates a BufferedWriter. See also IOFactory docs.</pre>
+      <pre id="var-specs"></pre>
       <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
       
       
@@ -238,6 +247,7 @@ reader, writer, input-stream, and output-stream.</pre>
 </pre>
     <pre id="var-docstr">Take an as-file-able thing and return a string if it is
 a relative path, else IllegalArgumentException.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L385">Source</a>
@@ -260,6 +270,7 @@ Options are key/value pairs and may be one of
 
 Does not close any streams except those it opens itself 
 (on a File).</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L368">Source</a>
@@ -271,6 +282,7 @@ Does not close any streams except those it opens itself
     <pre id="var-usage">Usage: (delete-file f &amp; [silently])
 </pre>
     <pre id="var-docstr">Delete file f. Raise an exception if it fails unless silently is true.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L407">Source</a>
@@ -286,6 +298,7 @@ Does not close any streams except those it opens itself
     <pre id="var-docstr">Returns a java.io.File, passing each arg to as-file.  Multiple-arg
 versions treat the first argument as parent and subsequent args as
 children relative to the parent.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L395">Source</a>
@@ -308,6 +321,7 @@ local file names.
 
 Should be used inside with-open to ensure the InputStream is properly
 closed.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L115">Source</a>
@@ -320,6 +334,7 @@ closed.</pre>
 </pre>
     <pre id="var-docstr">Given the same arg(s) as for file, creates all parent directories of
 the file they represent.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L415">Source</a>
@@ -342,6 +357,7 @@ local file names.
 
 Should be used inside with-open to ensure the OutputStream is
 properly closed.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L132">Source</a>
@@ -365,6 +381,7 @@ local file names.
 
 Should be used inside with-open to ensure the Reader is properly
 closed.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L80">Source</a>
@@ -378,6 +395,7 @@ closed.</pre>
 </pre>
     <pre id="var-docstr">Returns the URL for a named resource. Use the context class loader
 if no loader is specified.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L422">Source</a>
@@ -400,6 +418,7 @@ local file names.
 
 Should be used inside with-open to ensure the Writer is properly
 closed.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3a3374f714e5a755b7de2a761f37696f07a74e80/src/clj/clojure/java/io.clj#L98">Source</a>

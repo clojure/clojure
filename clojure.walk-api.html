@@ -94,6 +94,9 @@ namespace.
       <a href="#clojure.walk/walk" class="toc-entry-anchor">walk</a>
       
     </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
   </div>
 </div>
 </div>
@@ -132,6 +135,7 @@ the sorting function.</pre>
     <pre id="var-usage">Usage: (keywordize-keys m)
 </pre>
     <pre id="var-docstr">Recursively transforms all map keys from strings to keywords.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L93">Source</a>
@@ -143,6 +147,7 @@ the sorting function.</pre>
     <pre id="var-usage">Usage: (macroexpand-all form)
 </pre>
     <pre id="var-docstr">Recursively performs all possible macroexpansions in form.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L125">Source</a>
@@ -156,6 +161,7 @@ the sorting function.</pre>
     <pre id="var-docstr">Performs a depth-first, post-order traversal of form.  Calls f on
 each sub-form, uses f's return value in place of the original.
 Recognizes all Clojure data structures. Consumes seqs as with doall.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L52">Source</a>
@@ -168,6 +174,7 @@ Recognizes all Clojure data structures. Consumes seqs as with doall.</pre>
 </pre>
     <pre id="var-docstr">Demonstrates the behavior of postwalk by printing each form as it is
 walked.  Returns form.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L79">Source</a>
@@ -181,6 +188,7 @@ walked.  Returns form.</pre>
     <pre id="var-docstr">Recursively transforms form by replacing keys in smap with their
 values.  Like clojure/replace but works on any data structure.  Does
 replacement at the leaves of the tree first.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L117">Source</a>
@@ -192,6 +200,7 @@ replacement at the leaves of the tree first.</pre>
     <pre id="var-usage">Usage: (prewalk f form)
 </pre>
     <pre id="var-docstr">Like postwalk, but does pre-order traversal.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L60">Source</a>
@@ -204,6 +213,7 @@ replacement at the leaves of the tree first.</pre>
 </pre>
     <pre id="var-docstr">Demonstrates the behavior of prewalk by printing each form as it is
 walked.  Returns form.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L86">Source</a>
@@ -217,6 +227,7 @@ walked.  Returns form.</pre>
     <pre id="var-docstr">Recursively transforms form by replacing keys in smap with their
 values.  Like clojure/replace but works on any data structure.  Does
 replacement at the root of the tree first.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L109">Source</a>
@@ -228,6 +239,7 @@ replacement at the root of the tree first.</pre>
     <pre id="var-usage">Usage: (stringify-keys m)
 </pre>
     <pre id="var-docstr">Recursively transforms all map keys from keywords to strings.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L101">Source</a>
@@ -242,6 +254,7 @@ replacement at the root of the tree first.</pre>
 functions.  Applies inner to each element of form, building up a
 data structure of the same type, then applies outer to the result.
 Recognizes all Clojure data structures. Consumes seqs as with doall.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L35">Source</a>

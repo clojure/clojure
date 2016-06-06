@@ -148,6 +148,9 @@ namespace.
       <a href="#clojure.zip/zipper" class="toc-entry-anchor">zipper</a>
       
     </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
   </div>
 </div>
 </div>
@@ -179,6 +182,7 @@ and enumeration.  See Huet</pre>
 </pre>
     <pre id="var-docstr">Inserts the item as the rightmost child of the node at this loc,
 without moving</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L200">Source</a>
@@ -190,6 +194,7 @@ without moving</pre>
     <pre id="var-usage">Usage: (branch? loc)
 </pre>
     <pre id="var-docstr">Returns true if the node at loc is a branch</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L64">Source</a>
@@ -201,6 +206,7 @@ without moving</pre>
     <pre id="var-usage">Usage: (children loc)
 </pre>
     <pre id="var-docstr">Returns a seq of the children of node at loc, which must be a branch</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L69">Source</a>
@@ -213,6 +219,7 @@ without moving</pre>
 </pre>
     <pre id="var-docstr">Returns the loc of the leftmost child of the node at this loc, or
 nil if no children</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L98">Source</a>
@@ -224,6 +231,7 @@ nil if no children</pre>
     <pre id="var-usage">Usage: (edit loc f &amp; args)
 </pre>
     <pre id="var-docstr">Replaces the node at this loc with the value of (f node args)</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L189">Source</a>
@@ -235,6 +243,7 @@ nil if no children</pre>
     <pre id="var-usage">Usage: (end? loc)
 </pre>
     <pre id="var-docstr">Returns true if loc represents the end of a depth-first walk</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L232">Source</a>
@@ -247,6 +256,7 @@ nil if no children</pre>
 </pre>
     <pre id="var-docstr">Inserts the item as the leftmost child of the node at this loc,
 without moving</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L194">Source</a>
@@ -259,6 +269,7 @@ without moving</pre>
 </pre>
     <pre id="var-docstr">Inserts the item as the left sibling of the node at this loc,
 without moving</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L165">Source</a>
@@ -271,6 +282,7 @@ without moving</pre>
 </pre>
     <pre id="var-docstr">Inserts the item as the right sibling of the node at this loc,
 without moving</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L174">Source</a>
@@ -282,6 +294,7 @@ without moving</pre>
     <pre id="var-usage">Usage: (left loc)
 </pre>
     <pre id="var-docstr">Returns the loc of the left sibling of the node at this loc, or nil</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L150">Source</a>
@@ -293,6 +306,7 @@ without moving</pre>
     <pre id="var-usage">Usage: (leftmost loc)
 </pre>
     <pre id="var-docstr">Returns the loc of the leftmost sibling of the node at this loc, or self</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L157">Source</a>
@@ -304,6 +318,7 @@ without moving</pre>
     <pre id="var-usage">Usage: (lefts loc)
 </pre>
     <pre id="var-docstr">Returns a seq of the left siblings of this loc</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L87">Source</a>
@@ -316,6 +331,7 @@ without moving</pre>
 </pre>
     <pre id="var-docstr">Returns a new branch node, given an existing node and new
 children. The loc is only used to supply the constructor.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L76">Source</a>
@@ -329,6 +345,7 @@ children. The loc is only used to supply the constructor.</pre>
     <pre id="var-docstr">Moves to the next loc in the hierarchy, depth-first. When reaching
 the end, returns a distinguished loc detectable via end?. If already
 at the end, stays there.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L206">Source</a>
@@ -340,6 +357,7 @@ at the end, stays there.</pre>
     <pre id="var-usage">Usage: (node loc)
 </pre>
     <pre id="var-docstr">Returns the node at loc</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L60">Source</a>
@@ -351,6 +369,7 @@ at the end, stays there.</pre>
     <pre id="var-usage">Usage: (path loc)
 </pre>
     <pre id="var-docstr">Returns a seq of nodes leading to this loc</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L82">Source</a>
@@ -363,6 +382,7 @@ at the end, stays there.</pre>
 </pre>
     <pre id="var-docstr">Moves to the previous loc in the hierarchy, depth-first. If already
 at the root, returns nil.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L221">Source</a>
@@ -375,6 +395,7 @@ at the root, returns nil.</pre>
 </pre>
     <pre id="var-docstr">Removes the node at loc, returning the loc that would have preceded
 it in a depth-first walk.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L237">Source</a>
@@ -386,6 +407,7 @@ it in a depth-first walk.</pre>
     <pre id="var-usage">Usage: (replace loc node)
 </pre>
     <pre id="var-docstr">Replaces the node at this loc, without moving</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L183">Source</a>
@@ -397,6 +419,7 @@ it in a depth-first walk.</pre>
     <pre id="var-usage">Usage: (right loc)
 </pre>
     <pre id="var-docstr">Returns the loc of the right sibling of the node at this loc, or nil</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L135">Source</a>
@@ -408,6 +431,7 @@ it in a depth-first walk.</pre>
     <pre id="var-usage">Usage: (rightmost loc)
 </pre>
     <pre id="var-docstr">Returns the loc of the rightmost sibling of the node at this loc, or self</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L142">Source</a>
@@ -419,6 +443,7 @@ it in a depth-first walk.</pre>
     <pre id="var-usage">Usage: (rights loc)
 </pre>
     <pre id="var-docstr">Returns a seq of the right siblings of this loc</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L92">Source</a>
@@ -431,6 +456,7 @@ it in a depth-first walk.</pre>
 </pre>
     <pre id="var-docstr">zips all the way up and returns the root node, reflecting any
 changes.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L124">Source</a>
@@ -442,6 +468,7 @@ changes.</pre>
     <pre id="var-usage">Usage: (seq-zip root)
 </pre>
     <pre id="var-docstr">Returns a zipper for nested sequences, given a root sequence</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L34">Source</a>
@@ -454,6 +481,7 @@ changes.</pre>
 </pre>
     <pre id="var-docstr">Returns the loc of the parent of the node at this loc, or nil if at
 the top</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L111">Source</a>
@@ -465,6 +493,7 @@ the top</pre>
     <pre id="var-usage">Usage: (vector-zip root)
 </pre>
     <pre id="var-docstr">Returns a zipper for nested vectors, given a root vector</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L42">Source</a>
@@ -477,6 +506,7 @@ the top</pre>
 </pre>
     <pre id="var-docstr">Returns a zipper for xml elements (as from xml/parse),
 given a root element</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L50">Source</a>
@@ -498,6 +528,7 @@ children.
 make-node is a fn that, given an existing node and a seq of
 children, returns a new branch node with the supplied children.
 root is the root node.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/76e7c4317dc3eac80c4908ac5e5fb885e302b2a4/src/clj/clojure/zip.clj#L18">Source</a>

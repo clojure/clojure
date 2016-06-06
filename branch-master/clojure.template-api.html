@@ -70,6 +70,9 @@ namespace.
       <a href="#clojure.template/do-template" class="toc-entry-anchor">do-template</a>
       
     </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
   </div>
 </div>
 </div>
@@ -107,6 +110,7 @@ with their corresponding values, returning a modified expr.
 
 Example: (apply-template '[x] '(+ x x) '[2])
          ;=&gt; (+ 2 2)</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c4c0740a0696bc95b2184c0fef55ed7c3bb097f6/src/clj/clojure/template.clj#L30">Source</a>
@@ -123,6 +127,7 @@ arguments in argv, an argument vector as in defn.
 
 Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))
          ;=&gt; (do (+ 4 2) (+ 5 3))</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/c4c0740a0696bc95b2184c0fef55ed7c3bb097f6/src/clj/clojure/template.clj#L45">Source</a>

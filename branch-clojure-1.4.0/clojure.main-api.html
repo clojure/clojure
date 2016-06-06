@@ -103,6 +103,9 @@ namespace.
       <a href="#clojure.main/with-bindings" class="toc-entry-anchor">with-bindings</a>
       
     </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
   </div>
 </div>
 </div>
@@ -133,6 +136,7 @@ namespace.
 </pre>
     <pre id="var-docstr">Given a string representation of a fn class,
 as in a stack trace element, returns a readable version.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L51">Source</a>
@@ -145,6 +149,7 @@ as in a stack trace element, returns a readable version.</pre>
 </pre>
     <pre id="var-docstr">Loads Clojure source from a file or resource given its path. Paths
 beginning with @ or @/ are considered relative to classpath.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L276">Source</a>
@@ -185,6 +190,7 @@ suppresses the usual repl greeting message: "Clojure ~(clojure-version)".
 
 Paths may be absolute or relative in the filesystem or relative to
 classpath. Classpath-relative paths have prefix of @ or @/</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L390">Source</a>
@@ -237,6 +243,7 @@ are sequential keyword-value pairs. Available options and their defaults:
    - :caught, function of one argument, a throwable, called when
      read, eval, or print throws an exception or error
      default: repl-caught</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L180">Source</a>
@@ -248,6 +255,7 @@ are sequential keyword-value pairs. Available options and their defaults:
     <pre id="var-usage">Usage: (repl-caught e)
 </pre>
     <pre id="var-docstr">Default :caught hook for repl</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L168">Source</a>
@@ -259,6 +267,7 @@ are sequential keyword-value pairs. Available options and their defaults:
     <pre id="var-usage">Usage: (repl-exception throwable)
 </pre>
     <pre id="var-docstr">Returns the root cause of throwables</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L163">Source</a>
@@ -270,6 +279,7 @@ are sequential keyword-value pairs. Available options and their defaults:
     <pre id="var-usage">Usage: (repl-prompt)
 </pre>
     <pre id="var-docstr">Default :prompt hook for repl</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L108">Source</a>
@@ -290,6 +300,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF into a single
     - reads an object from the input stream, then
       - skips the next input character if it's end of line, then
       - returns the object.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L145">Source</a>
@@ -302,6 +313,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF into a single
 </pre>
     <pre id="var-docstr">Returns the initial cause of an exception or error by peeling off all of
 its wrappers</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L58">Source</a>
@@ -318,6 +330,7 @@ to indicate the relative location of the next character on s. The stream
 must either be an instance of LineNumberingPushbackReader or duplicate
 its behavior of both supporting .unread and collapsing all of CR, LF, and
 CRLF to a single \newline.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L113">Source</a>
@@ -336,6 +349,7 @@ character of lookahead is available. The stream must either be an
 instance of LineNumberingPushbackReader or duplicate its behavior of both
 supporting .unread and collapsing all of CR, LF, and CRLF to a single
 \newline.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L127">Source</a>
@@ -347,6 +361,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF to a single
     <pre id="var-usage">Usage: (stack-element-str el)
 </pre>
     <pre id="var-docstr">Returns a (possibly unmunged) string representation of a StackTraceElement</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L71">Source</a>
@@ -361,6 +376,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF to a single
 that often need to be set!: *ns* *warn-on-reflection* *math-context*
 *print-meta* *print-length* *print-level* *compile-path*
 *command-line-args* *1 *2 *3 *e</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/d3b5665d21457ad27bda702f567ca2f55b14283b/src/clj/clojure/main.clj#L85">Source</a>

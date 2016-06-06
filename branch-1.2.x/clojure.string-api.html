@@ -109,6 +109,9 @@ namespace.
       <a href="#clojure.string/upper-case" class="toc-entry-anchor">upper-case</a>
       
     </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
   </div>
 </div>
 </div>
@@ -168,6 +171,7 @@ Design notes for clojure.string:
     <pre id="var-usage">Usage: (blank? s)
 </pre>
     <pre id="var-docstr">True if s is nil, empty, or contains only whitespace.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L225">Source</a>
@@ -180,6 +184,7 @@ Design notes for clojure.string:
 </pre>
     <pre id="var-docstr">Converts first character of the string to upper-case, all other
 characters to lower-case.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L146">Source</a>
@@ -195,6 +200,7 @@ from s as follows:
 
 If (cmap ch) is nil, append ch to the new string.
 If (cmap ch) is non-nil, append (str (cmap ch)) instead.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L238">Source</a>
@@ -208,6 +214,7 @@ If (cmap ch) is non-nil, append (str (cmap ch)) instead.</pre>
 </pre>
     <pre id="var-docstr">Returns a string of all elements in coll, separated by
 an optional separator.  Like Perl's join.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L130">Source</a>
@@ -219,6 +226,7 @@ an optional separator.  Like Perl's join.</pre>
     <pre id="var-usage">Usage: (lower-case s)
 </pre>
     <pre id="var-docstr">Converts string to all lower-case.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L163">Source</a>
@@ -238,6 +246,7 @@ char / char
 pattern / (string or function of match).
 
 See also replace-first.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L63">Source</a>
@@ -257,6 +266,7 @@ string / string
 pattern / (string or function of match).
 
 See also replace-all.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L103">Source</a>
@@ -268,6 +278,7 @@ See also replace-all.</pre>
     <pre id="var-usage">Usage: (reverse s)
 </pre>
     <pre id="var-docstr">Returns s with its characters reversed.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L46">Source</a>
@@ -281,6 +292,7 @@ See also replace-all.</pre>
 </pre>
     <pre id="var-docstr">Splits string on a regular expression.  Optional argument limit is
 the maximum number of splits. Not lazy. Returns vector of the splits.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L169">Source</a>
@@ -292,6 +304,7 @@ the maximum number of splits. Not lazy. Returns vector of the splits.</pre>
     <pre id="var-usage">Usage: (split-lines s)
 </pre>
     <pre id="var-docstr">Splits s on \n or \r\n.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L178">Source</a>
@@ -303,6 +316,7 @@ the maximum number of splits. Not lazy. Returns vector of the splits.</pre>
     <pre id="var-usage">Usage: (trim s)
 </pre>
     <pre id="var-docstr">Removes whitespace from both ends of string.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L184">Source</a>
@@ -315,6 +329,7 @@ the maximum number of splits. Not lazy. Returns vector of the splits.</pre>
 </pre>
     <pre id="var-docstr">Removes all trailing newline \n or return \r characters from
 string.  Similar to Perl's chomp.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L212">Source</a>
@@ -326,6 +341,7 @@ string.  Similar to Perl's chomp.</pre>
     <pre id="var-usage">Usage: (triml s)
 </pre>
     <pre id="var-docstr">Removes whitespace from the left side of string.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L190">Source</a>
@@ -337,6 +353,7 @@ string.  Similar to Perl's chomp.</pre>
     <pre id="var-usage">Usage: (trimr s)
 </pre>
     <pre id="var-docstr">Removes whitespace from the right side of string.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L201">Source</a>
@@ -348,6 +365,7 @@ string.  Similar to Perl's chomp.</pre>
     <pre id="var-usage">Usage: (upper-case s)
 </pre>
     <pre id="var-docstr">Converts string to all upper-case.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/fde4f64bb5eb5c87b618b37e3d69ac37f1531524/src/clj/clojure/string.clj#L157">Source</a>
