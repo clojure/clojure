@@ -33,13 +33,32 @@
         opt (s/? keyword?)
         andre (s/& (s/* keyword?) even-count?)
         m (s/map-of keyword? string?)
-        coll (s/coll-of keyword? [])]
+        coll (s/coll-of keyword? [])
+        lrange (s/long-in 7 42)
+        drange (s/double-in :infinite? false :NaN? false :min 3.1 :max 3.2)
+        irange (s/inst-in #inst "1939" #inst "1946")
+        ]
     (are [spec x conformed ed]
       (let [co (result-or-ex (s/conform spec x))
             e (result-or-ex (::s/problems (s/explain-data spec x)))]
         (when (not= conformed co) (println "conform fail\n\texpect=" conformed "\n\tactual=" co))
         (when (not (submap? ed e)) (println "explain fail\n\texpect=" ed "\n\tactual=" e))
         (and (= conformed co) (submap? ed e)))
+
+      lrange 7 7 nil
+      lrange 8 8 nil
+      lrange 42 ::s/invalid {[] {:pred '(long-in-range? 7 42 %), :val 42, :via [], :in []}}
+
+      irange #inst "1938" ::s/invalid {[] {:pred '(inst-in-range? #inst "1939-01-01T00:00:00.000-00:00" #inst "1946-01-01T00:00:00.000-00:00" %), :val #inst "1938", :via [], :in []}}
+      irange #inst "1942" #inst "1942" nil
+      irange #inst "1946" ::s/invalid {[] {:pred '(inst-in-range? #inst "1939-01-01T00:00:00.000-00:00" #inst "1946-01-01T00:00:00.000-00:00" %), :val #inst "1946", :via [], :in []}}
+
+      drange 3.0 ::s/invalid {[] {:pred '(<= 3.1 %), :val 3.0, :via [], :in []}}
+      drange 3.1 3.1 nil
+      drange 3.2 3.2 nil
+      drange Double/POSITIVE_INFINITY ::s/invalid {[] {:pred '(not (isInfinite %)), :val Double/POSITIVE_INFINITY, :via [], :in []}}
+      ;; can't use equality-based test for Double/NaN
+      ;; drange Double/NaN ::s/invalid {[] {:pred '(not (isNaN %)), :val Double/NaN, :via [], :in []}}
 
       keyword? :k :k nil
       keyword? nil ::s/invalid {[] {:pred ::s/unknown :val nil :via []}}
@@ -61,6 +80,8 @@
       c ["a"] ::s/invalid '{[:b] {:reason "Insufficient input", :pred keyword?, :val (), :via []}}
       c ["s" :k] '{:a "s" :b :k} nil
       c ["s" :k 5] ::s/invalid '{[] {:reason "Extra input", :pred (cat :a string? :b keyword?), :val (5), :via []}}
+      (s/cat) nil {} nil
+      (s/cat) [5] ::s/invalid '{[] {:reason "Extra input", :pred (cat), :val (5), :via [], :in [0]}}
 
       either nil ::s/invalid '{[] {:reason "Insufficient input", :pred (alt :a string? :b keyword?), :val () :via []}}
       either [] ::s/invalid '{[] {:reason "Insufficient input", :pred (alt :a string? :b keyword?), :val () :via []}}
@@ -79,15 +100,15 @@
       plus [] ::s/invalid '{[] {:reason "Insufficient input", :pred keyword?, :val () :via []}}
       plus [:k] [:k] nil
       plus [:k1 :k2] [:k1 :k2] nil
-      ;;plus [:k1 :k2 "x"] ::s/invalid '{[] {:reason "Extra input", :pred (cat :_ (* keyword?)), :val (x), :via [], :in [2]}}
+      plus [:k1 :k2 "x"] ::s/invalid '{[] {:pred keyword?, :val "x", :via [], :in [2]}}
       plus ["a"] ::s/invalid '{[] {:pred keyword?, :val "a" :via []}}
 
       opt nil nil nil
       opt [] nil nil
-      ;;opt :k ::s/invalid '{[] {:pred (alt), :val :k, :via []}}
+      opt :k ::s/invalid '{[] {:pred (? keyword?), :val :k, :via []}}
       opt [:k] :k nil
-      ;;opt [:k1 :k2] ::s/invalid '{[] {:reason "Extra input", :pred (alt), :val (:k2), :via []}}
-      ;;opt [:k1 :k2 "x"] ::s/invalid '{[] {:reason "Extra input", :pred (alt), :val (:k2 "x"), :via []}}
+      opt [:k1 :k2] ::s/invalid '{[] {:reason "Extra input", :pred (? keyword?), :val (:k2), :via []}}
+      opt [:k1 :k2 "x"] ::s/invalid '{[] {:reason "Extra input", :pred (? keyword?), :val (:k2 "x"), :via []}}
       opt ["a"] ::s/invalid '{[] {:pred keyword?, :val "a", :via []}}
 
       andre nil nil nil
@@ -180,7 +201,7 @@ its spec for test purposes."
 
 (comment
   (require '[clojure.test :refer (run-tests)])
-  (in-ns 'test-clojure.spec)
+  (in-ns 'clojure.test-clojure.spec)
   (run-tests)
 
   (stest/run-all-tests)

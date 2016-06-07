@@ -1511,4 +1511,50 @@ by ns-syms. Idempotent."
   [kpred vpred]
   `(and (coll-of (tuple ~kpred ~vpred) {}) map?))
 
+(defn inst-in-range?
+  "Return true if inst at or after start and before end"
+  [start end inst]
+  (c/and (inst? inst)
+         (let [t (inst-ms inst)]
+           (c/and (<= (inst-ms start) t) (< t (inst-ms end))))))
 
+(defmacro inst-in
+  "Returns a spec that validates insts in the range from start
+(inclusive) to end (exclusive)."
+  [start end]
+  `(let [st# (inst-ms ~start)
+         et# (inst-ms ~end)
+         mkdate# (fn [d#] (java.util.Date. ^{:tag ~'long} d#))]
+     (spec (and inst? #(inst-in-range? ~start ~end %))
+       :gen (fn []
+              (gen/fmap mkdate#
+                (gen/large-integer* {:min st# :max et#}))))))
+
+(defn long-in-range?
+  "Return true if start <= val and val < end"
+  [start end val]
+  (c/and (long? val) (<= start val) (< val end)))
+
+(defmacro long-in
+  "Returns a spec that validates longs in the range from start
+(inclusive) to end (exclusive)."
+  [start end]
+  `(spec (and c/long? #(long-in-range? ~start ~end %))
+     :gen #(gen/large-integer* {:min ~start :max (dec ~end)})))
+
+(defmacro double-in
+  "Specs a 64-bit floating point number. Options:
+
+    :infinite? - whether +/- infinity allowed (default true)
+    :NaN?      - whether NaN allowed (default true)
+    :min       - minimum value (inclusive, default none)
+    :max       - maximum value (inclusive, default none)"
+  [& {:keys [infinite? NaN? min max]
+    :or {infinite? true NaN? true}
+    :as m}]
+  `(spec (and c/double?
+              ~@(when-not infinite? '[#(not (Double/isInfinite %))])
+              ~@(when-not NaN? '[#(not (Double/isNaN %))])
+              ~@(when max `[#(<= % ~max)])
+              ~@(when min `[#(<= ~min %)]))
+         :gen #(gen/double* ~m)))
