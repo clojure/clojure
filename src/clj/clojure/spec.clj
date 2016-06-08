@@ -461,7 +461,7 @@
   conjunction of the predicates, and any conforming they might perform."
   [re & preds]
   (let [pv (vec preds)]
-    `(amp-impl ~re ~pv '~pv)))
+    `(amp-impl ~re ~pv '~(mapv res pv))))
 
 (defmacro conformer
   "takes a predicate function with the semantics of conform i.e. it should return either a
@@ -1142,9 +1142,7 @@ by ns-syms. Idempotent."
           ::amp (c/and (accept-nil? p1)
                        (c/or (noret? p1 (preturn p1))
                              (let [ret (-> (preturn p1) (and-preds ps (next forms)))]
-                               (if (= ret ::invalid)
-                                 nil
-                                 ret))))
+                               (not= ret ::invalid))))
           ::rep (c/or (identical? p1 p2) (accept-nil? p1))
           ::pcat (every? accept-nil? ps)
           ::alt (c/some accept-nil? ps))))
@@ -1209,7 +1207,11 @@ by ns-syms. Idempotent."
             nil (let [ret (dt p x p)]
                   (when-not (= ::invalid ret) (accept ret)))
             ::amp (when-let [p1 (deriv p1 x)]
-                    (amp-impl p1 ps forms))
+                    (if (= ::accept (::op p1))
+                      (let [ret (-> (preturn p1) (and-preds ps (next forms)))]
+                        (when-not (= ret ::invalid)
+                          (accept ret)))
+                      (amp-impl p1 ps forms)))
             ::pcat (alt2 (pcat* {:ps (cons (deriv p0 x) pr), :ks ks, :forms forms, :ret ret})
                          (when (accept-nil? p0) (deriv (pcat* {:ps pr, :ks kr, :forms (next forms), :ret (add-ret p0 ret k0)}) x)))
             ::alt (alt* (map #(deriv % x) ps) ks forms)
