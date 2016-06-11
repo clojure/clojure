@@ -385,9 +385,10 @@
 
   (s/or :even even? :small #(< % 42))
 
-  Returns a destructuring spec that
-  returns a vector containing the key of the first matching pred and the
-  corresponding value."
+  Returns a destructuring spec that returns a map entry containing the
+  key of the first matching pred and the corresponding value. Thus the
+  'key' and 'val' functions can be used to refer generically to the
+  components of the tagged return."
   [& key-pred-forms]
   (let [pairs (partition 2 key-pred-forms)
         keys (mapv first pairs)
@@ -429,8 +430,10 @@
 
   (s/alt :even even? :small #(< % 42))
 
-  Returns a regex op that returns a vector containing the key of the
-  first matching pred and the corresponding value."
+  Returns a regex op that returns a map entry containing the key of the
+  first matching pred and the corresponding value. Thus the
+  'key' and 'val' functions can be used to refer generically to the
+  components of the tagged return"
   [& key-pred-forms]
   (let [pairs (partition 2 key-pred-forms)
         keys (mapv first pairs)
@@ -966,6 +969,8 @@ by ns-syms. Idempotent."
       (with-gen* [_ gfn] (tuple-impl forms preds gfn))
       (describe* [_] `(tuple ~@forms)))))
 
+(defn- tagged-ret [tag ret]
+  (clojure.lang.MapEntry. tag ret))
 
 (defn ^:skip-wiki or-spec-impl
   "Do not call this directly, use 'or'"
@@ -979,7 +984,7 @@ by ns-syms. Idempotent."
                       (let [ret (dt pred x (nth forms i))]
                         (if (= ::invalid ret)
                           (recur (inc i))
-                          [(keys i) ret])))
+                          (tagged-ret (keys i) ret))))
                     ::invalid)))]
     (reify
      clojure.lang.IFn
@@ -1110,7 +1115,7 @@ by ns-syms. Idempotent."
         (if (nil? pr) 
           (if k1
             (if (accept? p1)
-              (accept [k1 (:ret p1)])
+              (accept (tagged-ret k1 (:ret p1)))
               ret)
             p1)
           ret)))))
@@ -1162,7 +1167,7 @@ by ns-syms. Idempotent."
           ::pcat (add-ret p0 ret k)
           ::alt (let [[[p0] [k0]] (filter-alt ps ks forms accept-nil?)
                       r (if (nil? p0) ::nil (preturn p0))]
-                  (if k0 [k0 r] r)))))
+                  (if k0 (tagged-ret k0 r) r)))))
 
 (defn- op-unform [p x]
   ;;(prn {:p p :x x})
