@@ -416,7 +416,7 @@ conjunction of the predicates, and any conforming they might perform.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L458">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L461">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -429,7 +429,7 @@ pred. Produces a vector of matches iff there is at least one match</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L409">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L410">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -440,7 +440,7 @@ pred. Produces a vector of matches iff there is at least one match</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L29">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L29">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -451,7 +451,7 @@ pred. Produces a vector of matches iff there is at least one match</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L25">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L25">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -464,7 +464,7 @@ non-recursive branch will be chosen.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L19">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L19">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -477,7 +477,7 @@ pred. Produces a vector of matches</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L415">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L416">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -490,7 +490,7 @@ pred. Produces a single value (not a collection) if matched.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L421">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L422">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -502,12 +502,14 @@ pred. Produces a single value (not a collection) if matched.</pre>
 
 (s/alt :even even? :small #(&lt; % 42))
 
-Returns a regex op that returns a vector containing the key of the
-first matching pred and the corresponding value.</pre>
+Returns a regex op that returns a map entry containing the key of the
+first matching pred and the corresponding value. Thus the
+'key' and 'val' functions can be used to refer generically to the
+components of the tagged return</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L427">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L428">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -524,7 +526,7 @@ conformed values propagate through rest of predicates.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L399">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L400">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -541,7 +543,7 @@ containing the keys of each pred and the corresponding value.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L442">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L445">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -553,7 +555,7 @@ containing the keys of each pred and the corresponding value.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1495">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1500">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -567,7 +569,7 @@ init-coll</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1505">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1510">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -579,7 +581,7 @@ init-coll</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1516">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1521">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -592,7 +594,7 @@ else the (possibly destructured) value.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L105">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L105">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -608,7 +610,7 @@ second fn that does unform of result of first</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L466">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L469">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -621,7 +623,7 @@ makes an entry in the registry mapping k to the spec</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L263">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L263">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -633,7 +635,7 @@ makes an entry in the registry mapping k to the spec</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L143">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L143">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -650,7 +652,7 @@ makes an entry in the registry mapping k to the spec</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1557">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1562">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -666,7 +668,7 @@ a generator overrides map as per gen</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1486">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1491">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -678,7 +680,7 @@ a generator overrides map as per gen</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L197">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L197">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -694,7 +696,7 @@ path.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L157">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L157">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -706,7 +708,7 @@ path.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L202">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L202">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -748,7 +750,7 @@ For example, to register function specs for the symbol function:
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L573">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L576">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -760,7 +762,7 @@ For example, to register function specs for the symbol function:
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L518">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L521">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -772,7 +774,7 @@ For example, to register function specs for the symbol function:
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L118">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L118">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -789,7 +791,7 @@ that returns a test.check generator.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L474">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L477">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -809,7 +811,7 @@ an empty sequence/vector or a sequence/vector with one item in it)</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L217">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L217">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -822,7 +824,7 @@ an empty sequence/vector or a sequence/vector with one item in it)</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1533">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1538">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -834,7 +836,7 @@ an empty sequence/vector or a sequence/vector with one item in it)</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1526">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1531">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -849,7 +851,7 @@ check fails. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L634">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L637">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -861,7 +863,7 @@ check fails. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L703">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L706">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -874,7 +876,7 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L685">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L688">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -912,7 +914,7 @@ returns a test.check generator.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L323">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L323">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -936,7 +938,7 @@ user=&gt; (s/conform (s/cat :i1 integer? :m (s/keys* :req-un [::a ::c]) :i2 inte
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1464">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1469">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -949,7 +951,7 @@ user=&gt; (s/conform (s/cat :i1 integer? :m (s/keys* :req-un [::a ::c]) :i2 inte
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1550">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1555">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -961,7 +963,7 @@ user=&gt; (s/conform (s/cat :i1 integer? :m (s/keys* :req-un [::a ::c]) :i2 inte
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1545">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1550">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -973,7 +975,7 @@ user=&gt; (s/conform (s/cat :i1 integer? :m (s/keys* :req-un [::a ::c]) :i2 inte
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1521">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1526">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1008,7 +1010,7 @@ though those values are not evident in the spec.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L294">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L294">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1020,7 +1022,7 @@ though those values are not evident in the spec.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L1481">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L1486">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1032,13 +1034,14 @@ though those values are not evident in the spec.</pre>
 
 (s/or :even even? :small #(&lt; % 42))
 
-Returns a destructuring spec that
-returns a vector containing the key of the first matching pred and the
-corresponding value.</pre>
+Returns a destructuring spec that returns a map entry containing the
+key of the first matching pred and the corresponding value. Thus the
+'key' and 'val' functions can be used to refer generically to the
+components of the tagged return.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L383">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L383">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1050,7 +1053,7 @@ corresponding value.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L76">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L76">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1062,7 +1065,7 @@ corresponding value.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L269">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L269">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1087,7 +1090,7 @@ Returns a spec.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L276">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L276">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1099,7 +1102,7 @@ Returns a spec.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L71">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L71">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1113,7 +1116,7 @@ specified, return speced vars from all namespaces.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L665">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L668">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1127,7 +1130,7 @@ will be referred to in paths using its ordinal.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L484">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L487">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1141,7 +1144,7 @@ destructuring undone.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L111">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L111">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1153,7 +1156,7 @@ destructuring undone.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L653">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L656">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1165,7 +1168,7 @@ destructuring undone.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L710">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L713">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1178,7 +1181,7 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L694">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L697">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1191,7 +1194,7 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L738">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L741">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1203,7 +1206,7 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L148">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L148">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1215,7 +1218,7 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0bc837b9c25ae62185795b2bf2c7952bf6e12d9e/src/clj/clojure/spec.clj#L529">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/f571c4bb05e82f8a13d557bfde89f50026a3570d/src/clj/clojure/spec.clj#L532">Source</a>
   </div>
 </div>
 <div id="spec-section">
