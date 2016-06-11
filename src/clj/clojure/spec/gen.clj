@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.spec.gen
-    (:refer-clojure :exclude [boolean cat hash-map list map not-empty set vector
+    (:refer-clojure :exclude [boolean bytes cat hash-map list map not-empty set vector
                               char double int keyword symbol string uuid delay]))
 
 (alias 'c 'clojure.core)
@@ -112,7 +112,7 @@
         (fn [s] (c/list 'lazy-prim s))
         syms)))
 
-(lazy-prims any any-printable boolean char char-alpha char-alphanumeric char-ascii double
+(lazy-prims any any-printable boolean bytes char char-alpha char-alphanumeric char-ascii double
             int keyword keyword-ns large-integer ratio simple-type simple-type-printable
             string string-ascii string-alphanumeric symbol symbol-ns uuid)
 
@@ -178,7 +178,8 @@ gens, each of which should generate something sequential."
       empty? (elements [nil '() [] {} #{}])
       associative? (one-of [(map simple simple) (vector simple)])
       sequential? (one-of [(list simple) (vector simple)])
-      ratio? (such-that ratio? (ratio))})))
+      ratio? (such-that ratio? (ratio))
+      bytes? (bytes)})))
 
 (defn gen-for-pred
   "Given a predicate, returns a built-in generator if one exists."
