@@ -149,6 +149,7 @@ gens, each of which should generate something sequential."
       simple-symbol? (symbol)
       qualified-symbol? (such-that qualified? (symbol-ns))
       uuid? (uuid)
+      uri? (fmap #(java.net.URI/create (str "http://" % ".com")) (uuid))
       bigdec? (fmap #(BigDecimal/valueOf %)
                     (double* {:infinite? false :NaN? false}))
       inst? (fmap #(java.util.Date. %)
