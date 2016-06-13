@@ -297,7 +297,8 @@
 
   Returns a spec."
   [form & {:keys [gen]}]
-  `(spec-impl '~(res form) ~form ~gen nil))
+  (when form
+    `(spec-impl '~(res form) ~form ~gen nil)))
 
 (defmacro multi-spec
   "Takes the name of a spec/predicate-returning multimethod and a
@@ -490,7 +491,9 @@
   Optionally takes :gen generator-fn, which must be a fn of no args
   that returns a test.check generator."
   [& {:keys [args ret fn gen]}]
-  `(fspec-impl ~args '~(res args) ~ret '~(res ret) ~fn '~(res fn) ~gen))
+  `(fspec-impl (spec ~args) '~(res args)
+               (spec ~ret) '~(res ret)
+               (spec ~fn) '~(res fn) ~gen))
 
 (defmacro tuple
   "takes one or more preds and returns a spec for a tuple, a vector
@@ -1423,20 +1426,14 @@ by ns-syms. Idempotent."
 (defn ^:skip-wiki fspec-impl
   "Do not call this directly, use 'fspec'"
   [argspec aform retspec rform fnspec fform gfn]
-  (assert (c/and argspec retspec))
   (let [specs {:args argspec :ret retspec :fn fnspec}]
     (reify
      clojure.lang.IFn
      (invoke [this x] (valid? this x))
      
      clojure.lang.ILookup
-     (valAt [this k] (.valAt this k nil))
-     (valAt [_ k not-found]
-            (case k
-                  :args argspec
-                  :ret retspec
-                  :fn fnspec
-                  not-found))
+     (valAt [this k] (get specs k))
+     (valAt [_ k not-found] (get specs k not-found))
 
      Spec
      (conform* [_ f] (if (fn? f)
