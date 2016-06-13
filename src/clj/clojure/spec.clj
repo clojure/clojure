@@ -513,32 +513,20 @@
       s
       (symbol (str (.name *ns*)) (str s)))))
 
-(defn- fn-spec-sym
-  [sym role]
-  (symbol (str (ns-qualify sym) "$" (name role))))
-
-(def ^:private fn-spec-roles [:args :ret :fn])
-
 (defn- expect
   "Returns nil if v conforms to spec, else throws ex-info with explain-data."
   [spec v]
   )
 
-(defn- fn-specs?
-  "Fn-specs must include at least :args or :ret specs."
+(defn- fn-spec?
+  "Fn-spec must include at least :args or :ret specs."
   [m]
   (c/or (:args m) (:ret m)))
 
-(defn fn-specs
-  "Returns :args/:ret/:fn map of specs for var or symbol v."
+(defn fn-spec
+  "Returns fspec of specs for var or symbol v, or nil."
   [v]
-  (let [s (->sym v)
-        reg (registry)]
-    (reduce
-     (fn [m role]
-       (assoc m role (get reg (fn-spec-sym s role))))
-     {}
-     fn-spec-roles)))
+  (get (registry) (->sym v)))
 
 (defmacro with-instrument-disabled
   "Disables instrument's checking of calls, within a scope."
@@ -561,7 +549,7 @@
      [& args]
      (if *instrument-enabled*
        (with-instrument-disabled
-         (let [specs (fn-specs v)]
+         (let [specs (fn-spec v)]
            (let [cargs (when (:args specs) (conform! v :args (:args specs) args args))
                  ret (binding [*instrument-enabled* true]
                        (.applyTo ^clojure.lang.IFn f args))
@@ -573,7 +561,7 @@
 
 (defn- macroexpand-check
   [v args]
-  (let [specs (fn-specs v)]
+  (let [specs (fn-spec v)]
     (when-let [arg-spec (:args specs)]
       (when (= ::invalid (conform arg-spec args))
         (let [ed (assoc (explain-data* arg-spec [:args]
@@ -597,7 +585,7 @@
 
   Qualifies fn-sym with resolve, or using *ns* if no resolution found.
   Registers specs in the global registry, where they can be retrieved
-  by calling fn-specs.
+  by calling fn-spec.
 
   Once registered, function specs are included in doc, checked by
   instrument, tested by the runner clojure.spec.test/run-tests, and (if
@@ -616,18 +604,11 @@
                  :str string?
                  :sym symbol?)
     :ret symbol?)"
-  [fn-sym & {:keys [args ret fn] :as m}]
+  [fn-sym & specs]
   (let [qn (ns-qualify fn-sym)]
-    `(do ~@(reduce
-            (c/fn [defns role]
-                  (if (contains? m role)
-                    (let [s (fn-spec-sym qn (name role))]
-                      (conj defns `(clojure.spec/def '~s ~(get m role))))
-                    defns))
-            [] [:args :ret :fn])
-         '~qn)))
+    `(clojure.spec/def '~qn (clojure.spec/fspec ~@specs))))
 
-(defn- no-fn-specs
+(defn- no-fn-spec
   [v specs]
   (ex-info (str "Fn at " v " is not spec'ed.")
            {:var v :specs specs}))
@@ -652,8 +633,8 @@ specs, if they exist, throwing an ex-info with explain-data if a
 check fails. Idempotent."
   [v]
   (let [v (->var v)
-        specs (fn-specs v)]
-    (if (fn-specs? specs)
+        spec (fn-spec v)]
+    (if (fn-spec? spec)
       (locking instrumented-vars
         (let [{:keys [raw wrapped]} (get @instrumented-vars v)
               current @v]
@@ -662,7 +643,7 @@ check fails. Idempotent."
               (alter-var-root v (constantly checked))
               (swap! instrumented-vars assoc v {:raw current :wrapped checked}))))
         v)
-      (throw (no-fn-specs v specs)))))
+      (throw (no-fn-spec v spec)))))
 
 (defn unstrument
   "Undoes instrument on the var at v, a var or symbol. Idempotent."
@@ -687,9 +668,8 @@ specified, return speced vars from all namespaces."
     (reduce-kv
      (fn [s k _]
        (if (c/and (symbol? k)
-                  (re-find  #"\$(args|ret)$" (name k))
                   (ns-match? (namespace k)))
-         (if-let [v (resolve (symbol (str/replace (str k) #"\$(args|ret)$" "")))]
+         (if-let [v (resolve k)]
            (conj s v)
            s)
          s))
