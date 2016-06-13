@@ -1468,7 +1468,7 @@ by ns-syms. Idempotent."
                   (assert (valid? argspec args) (with-out-str (explain argspec args)))
                   (gen/generate (gen retspec)))))))
      (with-gen* [_ gfn] (fspec-impl argspec aform retspec rform fnspec fform gfn))
-     (describe* [_] `(fspec ~aform ~rform ~fform)))))
+     (describe* [_] `(fspec :args ~aform :ret ~rform :fn ~fform)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; non-primitives ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (clojure.spec/def ::any (spec (constantly true) :gen gen/any))
