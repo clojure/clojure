@@ -33,24 +33,37 @@
     (is (= {} x))))
 
 (deftest keywords-in-destructuring
-  (let [{:keys [:a :b]} {:a 1 :b 2}]
-    (is (= 1 a))
-    (is (= 2 b))))
+  (let [m {:a 1 :b 2}]
+    (let [{:keys [:a :b]} m]
+      (is (= [1 2] [a b])))
+    (let [{:keys [:a :b :c] :or {c 3}} m]
+      (is (= [1 2 3] [a b c])))))
 
 (deftest namespaced-keywords-in-destructuring
-  (let [{:keys [:a/b :c/d]} {:a/b 1 :c/d 2}]
-    (is (= 1 b))
-    (is (= 2 d))))
+  (let [m {:a/b 1 :c/d 2}]
+    (let [{:keys [:a/b :c/d]} m]
+      (is (= [1 2] [b d])))
+    (let [{:keys [:a/b :c/d :e/f] :or {f 3}} m]
+      (is (= [1 2 3] [b d f])))))
 
 (deftest namespaced-keys-in-destructuring
-  (let [{:keys [a/b c/d]} {:a/b 1 :c/d 2}]
-    (is (= 1 b))
-    (is (= 2 d))))
+  (let [m {:a/b 1 :c/d 2}]
+    (let [{:keys [a/b c/d]} m]
+      (is (= [1 2] [b d])))
+    (let [{:keys [a/b c/d e/f] :or {f 3}} m]
+      (is (= [1 2 3] [b d f])))))
 
 (deftest namespaced-syms-in-destructuring
-  (let [{:syms [a/b c/d]} {'a/b 1 'c/d 2}]
-    (is (= 1 b))
-    (is (= 2 d))))
+  (let [{:syms [a/b c/d e/f] :or {f 3}} {'a/b 1 'c/d 2}]
+    (is (= [1 2 3] [b d f]))))
+
+(deftest namespaced-keys-syntax
+  (let [{:a/keys [b c d] :or {d 3}} {:a/b 1 :a/c 2}]
+    (is (= [1 2 3] [b c d]))))
+
+(deftest namespaced-syms-syntax
+  (let [{:a/syms [b c d] :or {d 3}} {'a/b 1 'a/c 2}]
+    (is (= [1 2 3] [b c d]))))
 
 (deftest keywords-not-allowed-in-let-bindings
   (is (thrown-with-msg? Exception #"Unsupported binding form: :a"
@@ -68,11 +81,14 @@
   (is (thrown-with-msg? Exception #"Can't let qualified name: a/x"
                         (eval '(let [[a/x] [1]] x)))))
 
+(deftest or-doesnt-create-bindings
+  (is (thrown-with-msg? Exception #"Unable to resolve symbol: b"
+                        (eval '(let [{:keys [a] :or {b 2}} {:a 1}] [a b])))))
+
 (require '[clojure.string :as s])
 (deftest resolve-keyword-ns-alias-in-destructuring
-  (let [{:keys [::s/x ::s/y]} {:clojure.string/x 1 :clojure.string/y 2}]
-    (is (= x 1))
-    (is (= y 2))))
+  (let [{:keys [::s/x ::s/y ::s/z] :or {z 3}} {:clojure.string/x 1 :clojure.string/y 2}]
+    (is (= [1 2 3] [x y z]))))
 
 (deftest quote-with-multiple-args
   (let [ex (is (thrown? clojure.lang.Compiler$CompilerException

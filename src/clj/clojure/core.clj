@@ -4381,24 +4381,36 @@
                                          (if (:as b)
                                            (conj ret (:as b) gmap)
                                            ret))))
-                              bes (reduce1
-                                   (fn [bes entry]
-                                     (reduce1 #(assoc %1 %2 ((val entry) %2))
-                                              (dissoc bes (key entry))
-                                              ((key entry) bes)))
-                                   (dissoc b :as :or)
-                                   {:keys #(if (keyword? %) % (keyword (str %))),
-                                    :strs str, :syms #(list `quote %)})]
+                              bes (let [transforms
+                                          (reduce1
+                                            (fn [transforms mk]
+                                              (if (keyword? mk)
+                                                (let [mkns (namespace mk)
+                                                      mkn (name mk)]
+                                                  (cond (= mkn "keys") (assoc transforms mk #(keyword (or mkns (namespace %)) (name %)))
+                                                        (= mkn "syms") (assoc transforms mk #(list `quote (symbol (or mkns (namespace %)) (name %))))
+                                                        (= mkn "strs") (assoc transforms mk str)
+                                                        :else transforms))
+                                                transforms))
+                                            {}
+                                            (keys b))]
+                                    (reduce1
+                                        (fn [bes entry]
+                                          (reduce1 #(assoc %1 %2 ((val entry) %2))
+                                                   (dissoc bes (key entry))
+                                                   ((key entry) bes)))
+                                        (dissoc b :as :or)
+                                        transforms))]
                          (if (seq bes)
                            (let [bb (key (first bes))
                                  bk (val (first bes))
-                                 bv (if (contains? defaults bb)
-                                      (list `get gmap bk (defaults bb))
+                                 local (if (instance? clojure.lang.Named bb) (symbol nil (name bb)) bb)
+                                 bv (if (contains? defaults local)
+                                      (list `get gmap bk (defaults local))
                                       (list `get gmap bk))]
-                             (recur (cond
-                                     (symbol? bb) (-> ret (conj (if (namespace bb) (symbol (name bb)) bb)) (conj bv))
-                                     (keyword? bb) (-> ret (conj (symbol (name bb)) bv))
-                                     :else (pb ret bb bv))
+                             (recur (if (ident? bb)
+                                      (-> ret (conj local bv))
+                                      (pb ret bb bv))
                                     (next bes)))
                            ret))))]
                (cond
