@@ -1528,16 +1528,16 @@ by ns-syms. Idempotent."
               (gen/fmap mkdate#
                 (gen/large-integer* {:min st# :max et#}))))))
 
-(defn long-in-range?
+(defn int-in-range?
   "Return true if start <= val and val < end"
   [start end val]
-  (c/and (long? val) (<= start val) (< val end)))
+  (c/and int? (<= start val) (< val end)))
 
-(defmacro long-in
-  "Returns a spec that validates longs in the range from start
+(defmacro int-in
+  "Returns a spec that validates ints in the range from start
 (inclusive) to end (exclusive)."
   [start end]
-  `(spec (and c/long? #(long-in-range? ~start ~end %))
+  `(spec (and int? #(int-in-range? ~start ~end %))
      :gen #(gen/large-integer* {:min ~start :max (dec ~end)})))
 
 (defmacro double-in

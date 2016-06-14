@@ -1383,27 +1383,30 @@
    :static true}
   [n] (not (even? n)))
 
-(defn long?
-  "Return true if x is a Long"
+(defn int?
+  "Return true if x is a fixed precision integer"
   {:added "1.9"}
-  [x] (instance? Long x))
+  [x] (or (instance? Long x)
+          (instance? Integer x)
+          (instance? Short x)
+          (instance? Byte x)))
 
-(defn pos-long?
-  "Return true if x is a positive Long"
+(defn pos-int?
+  "Return true if x is a positive fixed precision integer"
   {:added "1.9"}
-  [x] (and (instance? Long x)
+  [x] (and (int? x)
            (pos? x)))
 
-(defn neg-long?
-  "Return true if x is a negative Long"
+(defn neg-int?
+  "Return true if x is a negative fixed precision integer"
   {:added "1.9"}
-  [x] (and (instance? Long x)
+  [x] (and (int? x)
            (neg? x)))
 
-(defn nat-long?
-  "Return true if x is a non-negative Long"
+(defn nat-int?
+  "Return true if x is a non-negative fixed precision integer"
   {:added "1.9"}
-  [x] (and (instance? Long x)
+  [x] (and (int? x)
            (not (neg? x))))
 
 (defn double?

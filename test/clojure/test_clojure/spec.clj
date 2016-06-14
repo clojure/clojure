@@ -34,7 +34,7 @@
         andre (s/& (s/* keyword?) even-count?)
         m (s/map-of keyword? string?)
         coll (s/coll-of keyword? [])
-        lrange (s/long-in 7 42)
+        lrange (s/int-in 7 42)
         drange (s/double-in :infinite? false :NaN? false :min 3.1 :max 3.2)
         irange (s/inst-in #inst "1939" #inst "1946")
         ]
@@ -47,7 +47,7 @@
 
       lrange 7 7 nil
       lrange 8 8 nil
-      lrange 42 ::s/invalid {[] {:pred '(long-in-range? 7 42 %), :val 42, :via [], :in []}}
+      lrange 42 ::s/invalid {[] {:pred '(int-in-range? 7 42 %), :val 42, :via [], :in []}}
 
       irange #inst "1938" ::s/invalid {[] {:pred '(inst-in-range? #inst "1939-01-01T00:00:00.000-00:00" #inst "1946-01-01T00:00:00.000-00:00" %), :val #inst "1938", :via [], :in []}}
       irange #inst "1942" #inst "1942" nil

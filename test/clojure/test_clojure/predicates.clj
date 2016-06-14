@@ -147,7 +147,7 @@
         barray (byte-array 0)
         uri (java.net.URI. "http://clojure.org")]
     ['
-     [identity   long? pos-long? neg-long? nat-long? double? boolean? indexed? seqable? ident? uuid? bigdec? inst? uri?  bytes?]
+     [identity   int?  pos-int?  neg-int?  nat-int?  double? boolean? indexed? seqable? ident? uuid? bigdec? inst? uri?  bytes?]
      [0          true  false     false     true      false   false    false    false    false  false false   false false false]
      [1          true  true      false     true      false   false    false    false    false  false false   false false false]
      [-1         true  false     true      false     false   false    false    false    false  false false   false false false]
