@@ -1412,12 +1412,12 @@ by ns-syms. Idempotent."
      (valAt [_ k not-found] (get specs k not-found))
 
      Spec
-     (conform* [_ f] (if (fn? f)
+     (conform* [_ f] (if (ifn? f)
                        (if (identical? f (validate-fn f specs *fspec-iterations*)) f ::invalid)
                        ::invalid))
      (unform* [_ f] f)
      (explain* [_ path via in f]
-               (if (fn? f)
+               (if (ifn? f)
                  (let [args (validate-fn f specs 100)]
                    (if (identical? f args) ;;hrm, we might not be able to reproduce
                      nil
@@ -1432,7 +1432,7 @@ by ns-syms. Idempotent."
                              (when fnspec
                                (let [cargs (conform argspec args)]
                                  (explain-1 fform fnspec (conj path :fn) via in {:args cargs :ret cret})))))))))
-                 {path {:pred 'fn? :val f :via via :in in}}))
+                 {path {:pred 'ifn? :val f :via via :in in}}))
      (gen* [_ _ _ _] (if gfn
              (gfn)
              (when-not fnspec
