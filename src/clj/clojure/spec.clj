@@ -550,13 +550,9 @@
      (if *instrument-enabled*
        (with-instrument-disabled
          (let [specs (fn-spec v)]
-           (let [cargs (when (:args specs) (conform! v :args (:args specs) args args))
-                 ret (binding [*instrument-enabled* true]
-                       (.applyTo ^clojure.lang.IFn f args))
-                 cret (when (:ret specs) (conform! v :ret (:ret specs) ret args))]
-             (when (c/and (:args specs) (:ret specs) (:fn specs))
-               (conform! v :fn (:fn specs) {:args cargs :ret cret} args))
-             ret)))
+           (when (:args specs) (conform! v :args (:args specs) args args))
+           (binding [*instrument-enabled* true]
+             (.applyTo ^clojure.lang.IFn f args))))
        (.applyTo ^clojure.lang.IFn f args)))))
 
 (defn- macroexpand-check
@@ -628,8 +624,8 @@
 
 (defn instrument
   "Instruments the var at v, a var or symbol, to check specs
-registered with fdef. Wraps the fn at v to check :args/:ret/:fn
-specs, if they exist, throwing an ex-info with explain-data if a
+registered with fdef. Wraps the fn at v to check the :args
+spec, if it exists, throwing an ex-info with explain-data if a
 check fails. Idempotent."
   [v]
   (let [v (->var v)
