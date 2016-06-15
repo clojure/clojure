@@ -261,23 +261,39 @@
 (defn ^:skip-wiki def-impl
   "Do not call this directly, use 'def'"
   [k form spec]
-  (assert (c/and (named? k) (namespace k)) "k must be namespaced keyword/symbol")
+  (assert (c/and (named? k) (namespace k)) "k must be namespaced keyword or resolvable symbol")
   (let [spec (if (c/or (spec? spec) (regex? spec) (get @registry-ref spec))
                spec
                (spec-impl form spec nil nil))]
     (swap! registry-ref assoc k spec)
     k))
 
+(defn ns-qualify
+  "Qualify symbol s by resolving it or using the current *ns*."
+  [s]
+  (if (namespace s)
+    (let [v (resolve s)]
+      (assert v (str "Unable to resolve: " s))
+      (->sym v))
+    (symbol (str (.name *ns*)) (str s))))
+
 (defmacro def
-  "Given a namespace-qualified keyword or symbol k, and a spec, spec-name, predicate or regex-op
-  makes an entry in the registry mapping k to the spec"
+  "Given a namespace-qualified keyword or resolvable symbol k, and a
+  spec, spec-name, predicate or regex-op makes an entry in the
+  registry mapping k to the spec"
   [k spec-form]
-  `(def-impl ~k '~(res spec-form) ~spec-form))
+  (let [k (if (symbol? k) (ns-qualify k) k)]
+    `(def-impl '~k '~(res spec-form) ~spec-form)))
 
 (defn registry
-  "returns the registry map"
+  "returns the registry map, prefer 'get-spec' to lookup a spec by name"
   []
   @registry-ref)
+
+(defn get-spec
+  "Returns spec registered for keyword/symbol/var k, or nil."
+  [k]
+  (get (registry) (if (keyword? k) k (->sym k))))
 
 (declare map-spec)
 
@@ -488,8 +504,12 @@
   and returns a spec whose conform/explain take a fn and validates it
   using generative testing. The conformed value is always the fn itself.
 
+  See 'fdef' for a single operation that creates an fspec and
+  registers it, as well as a full description of :args, :ret and :fn
+
   Optionally takes :gen generator-fn, which must be a fn of no args
   that returns a test.check generator."
+  
   [& {:keys [args ret fn gen]}]
   `(fspec-impl (spec ~args) '~(res args)
                (spec ~ret) '~(res ret)
@@ -504,15 +524,6 @@
   `(tuple-impl '~(mapv res preds) ~(vec preds)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; instrument ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- ns-qualify
-  "Qualify symbol s by resolving it or using the current *ns*."
-  [s]
-  (if-let [resolved (resolve s)]
-    (->sym resolved)
-    (if (namespace s)
-      s
-      (symbol (str (.name *ns*)) (str s)))))
-
 (defn- expect
   "Returns nil if v conforms to spec, else throws ex-info with explain-data."
   [spec v]
@@ -522,11 +533,6 @@
   "Fn-spec must include at least :args or :ret specs."
   [m]
   (c/or (:args m) (:ret m)))
-
-(defn fn-spec
-  "Returns fspec of specs for var or symbol v, or nil."
-  [v]
-  (get (registry) (->sym v)))
 
 (defmacro with-instrument-disabled
   "Disables instrument's checking of calls, within a scope."
@@ -549,7 +555,7 @@
      [& args]
      (if *instrument-enabled*
        (with-instrument-disabled
-         (let [specs (fn-spec v)]
+         (let [specs (get-spec v)]
            (when (:args specs) (conform! v :args (:args specs) args args))
            (binding [*instrument-enabled* true]
              (.applyTo ^clojure.lang.IFn f args))))
@@ -557,7 +563,7 @@
 
 (defn- macroexpand-check
   [v args]
-  (let [specs (fn-spec v)]
+  (let [specs (get-spec v)]
     (when-let [arg-spec (:args specs)]
       (when (= ::invalid (conform arg-spec args))
         (let [ed (assoc (explain-data* arg-spec [:args]
@@ -580,8 +586,8 @@
     expected to contain predicates that relate those values
 
   Qualifies fn-sym with resolve, or using *ns* if no resolution found.
-  Registers specs in the global registry, where they can be retrieved
-  by calling fn-spec.
+  Registers an fspec in the global registry, where it can be retrieved
+  by calling get-spec with the var or fully-qualified symbol.
 
   Once registered, function specs are included in doc, checked by
   instrument, tested by the runner clojure.spec.test/run-tests, and (if
@@ -601,8 +607,7 @@
                  :sym symbol?)
     :ret symbol?)"
   [fn-sym & specs]
-  (let [qn (ns-qualify fn-sym)]
-    `(clojure.spec/def '~qn (clojure.spec/fspec ~@specs))))
+  `(clojure.spec/def ~fn-sym (clojure.spec/fspec ~@specs)))
 
 (defn- no-fn-spec
   [v specs]
@@ -629,7 +634,7 @@ spec, if it exists, throwing an ex-info with explain-data if a
 check fails. Idempotent."
   [v]
   (let [v (->var v)
-        spec (fn-spec v)]
+        spec (get-spec v)]
     (if (fn-spec? spec)
       (locking instrumented-vars
         (let [{:keys [raw wrapped]} (get @instrumented-vars v)

@@ -74,7 +74,7 @@ passed through to test.check/quick-check:
 Returns a map as quick-check, with :explain-data added if
 :result is false."
   [v & opts]
-  (let [specs (spec/fn-spec v)]
+  (let [specs (spec/get-spec v)]
     (if (:args specs)
       (apply check-fn @v specs opts)
       (throw (IllegalArgumentException. (str  "No :args spec for " v))))))
@@ -102,7 +102,7 @@ Returns a map as quick-check, with :explain-data added if
   [& ns-syms]
   (if (seq ns-syms)
     (run-var-tests (->> (apply spec/speced-vars ns-syms)
-                        (filter (fn [v] (:args (spec/fn-spec v))))))
+                        (filter (fn [v] (:args (spec/get-spec v))))))
     (run-tests (.name ^clojure.lang.Namespace *ns*))))
 
 (defn run-all-tests

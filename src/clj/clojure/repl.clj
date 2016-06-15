@@ -107,7 +107,7 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
     (println "Spec"))
   (when doc (println " " doc))
   (when n
-    (when-let [fnspec (spec/fn-spec (symbol (str (ns-name n)) (name nm)))]
+    (when-let [fnspec (spec/get-spec (symbol (str (ns-name n)) (name nm)))]
       (println "Spec")
       (doseq [role [:args :ret :fn]]
         (when-let [spec (get fnspec role)]
