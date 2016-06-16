@@ -507,6 +507,10 @@
   See 'fdef' for a single operation that creates an fspec and
   registers it, as well as a full description of :args, :ret and :fn
 
+  fspecs can generate functions that validate the arguments and
+  fabricate a return value compliant with the :ret spec, ignoring
+  the :fn spec if present.
+
   Optionally takes :gen generator-fn, which must be a fn of no args
   that returns a test.check generator."
   
@@ -1440,11 +1444,10 @@ by ns-syms. Idempotent."
                  {path {:pred 'ifn? :val f :via via :in in}}))
      (gen* [_ _ _ _] (if gfn
              (gfn)
-             (when-not fnspec
-               (gen/return
-                (fn [& args]
-                  (assert (valid? argspec args) (with-out-str (explain argspec args)))
-                  (gen/generate (gen retspec)))))))
+             (gen/return
+              (fn [& args]
+                (assert (valid? argspec args) (with-out-str (explain argspec args)))
+                (gen/generate (gen retspec))))))
      (with-gen* [_ gfn] (fspec-impl argspec aform retspec rform fnspec fform gfn))
      (describe* [_] `(fspec :args ~aform :ret ~rform :fn ~fform)))))
 
