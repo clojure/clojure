@@ -27,8 +27,12 @@
   21)
 
 (def ^:dynamic *coll-check-limit*
-  "The number of items validated in a collection spec'ed with 'coll'"
-  100)
+  "The number of elements validated in a collection spec'ed with 'every'"
+  101)
+
+(def ^:dynamic *coll-error-limit*
+  "The number of errors reported by explain in a collection spec'ed with 'every'"
+  20)
 
 (def ^:private ^:dynamic *instrument-enabled*
   "if false, instrumented fns call straight through"
@@ -179,25 +183,25 @@
       ;;(prn {:ed ed})
       (doseq [[path {:keys [pred val reason via in] :as prob}]  (::problems ed)]
         (when-not (empty? in)
-          (print "In:" in ""))
+          (print "In:" (pr-str in) ""))
         (print "val: ")
         (pr val)
         (print " fails")
         (when-not (empty? via)
-          (print " spec:" (last via)))
+          (print " spec:" (pr-str (last via))))
         (when-not (empty? path)
-          (print " at:" path))
+          (print " at:" (pr-str path)))
         (print " predicate: ")
         (pr pred)
         (when reason (print ", " reason))
         (doseq [[k v] prob]
           (when-not (#{:pred :val :reason :via :in} k)
-            (print "\n\t" k " ")
+            (print "\n\t" (pr-str k) " ")
             (pr v)))
         (newline))
       (doseq [[k v] ed]
         (when-not (#{::problems} k)
-          (print k " ")
+          (print (pr-str k) " ")
           (pr v)
           (newline))))
     (println "Success!")))
@@ -431,6 +435,40 @@
   conformed values propagate through rest of predicates."
   [& pred-forms]
   `(and-spec-impl '~(mapv res pred-forms) ~(vec pred-forms) nil))
+
+(defmacro every
+  "takes a pred and validates collection elements against that pred.
+
+  Note that 'every' does not do exhaustive checking, rather it samples
+  *coll-check-limit* elements. Nor (as a result) does it do any
+  conforming of elements. 'explain' will report at most *coll-error-limit*
+  problems.  Thus 'every' should be suitable for potentially large
+  collections.
+
+  Takes several kwargs options that further constrain the collection:
+
+  :count - specifies coll has exactly this count (default nil)
+  :min-count, :max-count - coll has count (<= min count max) (default nil)
+  :distinct - all the elements are distinct (default nil)
+
+  And additional args that control gen
+
+  :gen-max - the maximum coll size to generate (default 20)
+  :gen-into - the default colection to generate into (will be emptied) (default [])
+  
+  Optionally takes :gen generator-fn, which must be a fn of no args that
+  returns a test.check generator
+"
+  [pred & {:keys [count max-count min-count distinct gen-max gen-into gen] :as opts}]
+  `(every-impl '~pred ~pred ~(dissoc opts :gen) ~gen))
+
+(defmacro every-kv
+  "like 'every' but takes separate key and val preds and works on associative collections.
+
+  Same options as 'every'"
+
+  [kpred vpred & opts]
+  `(every (tuple ~kpred ~vpred) ::kfn (fn [i# v#] (key v#)) :gen-into {} ~@opts))
 
 (defmacro *
   "Returns a regex op that matches zero or more values matching
@@ -1033,6 +1071,94 @@ by ns-syms. Idempotent."
    (gen* [_ overrides path rmap] (if gfn (gfn) (gensub (first preds) overrides path rmap (first forms))))
    (with-gen* [_ gfn] (and-spec-impl forms preds gfn))
    (describe* [_] `(and ~@forms))))
+
+(defn ^:skip-wiki every-impl
+  "Do not call this directly, use 'every'"
+  ([form pred opts] (every-impl form pred opts nil))
+  ([form pred {:keys [count max-count min-count distinct gen-max gen-into ::kfn]
+               :or {gen-max 20, gen-into []}
+               :as opts}
+    gfn]
+     (let [check? #(valid? pred %)
+           kfn (c/or kfn (fn [i v] i))]
+       (reify
+        Spec
+        (conform* [_ x]
+                  (cond
+                   (c/or (not (seqable? x))
+                         (c/and distinct (not (empty? x)) (not (apply distinct? x)))
+                         (c/and count (not= count (bounded-count (inc count) x)))
+                         (c/and (c/or min-count max-count)
+                                (not (<= (c/or min-count 0)
+                                         (bounded-count (if max-count (inc max-count) min-count) x)
+                                         (c/or max-count Integer/MAX_VALUE)))))
+                   :invalid
+
+                   :else
+                   (if (indexed? x)
+                     (let [step (max 1 (long (/ (c/count x) *coll-check-limit*)))]
+                       (loop [i 0]
+                         (if (>= i (c/count x))
+                           x
+                           (if (check? (nth x i))
+                             (recur (c/+ i step))
+                             ::invalid))))
+                     (c/or (c/and (every? check? (take *coll-check-limit* x)) x)
+                           ::invalid))))
+        (unform* [_ x] x)
+        (explain* [_ path via in x]
+                  (cond
+                   (not (seqable? x))
+                   {path {:pred 'seqable? :val x :via via :in in}}
+
+                   (c/and distinct (not (empty? x)) (not (apply distinct? x)))
+                   {path {:pred 'distinct? :val x :via via :in in}}
+
+                   (c/and count (not= count (bounded-count count x)))
+                   {path {:pred `(= ~count (c/count %)) :val x :via via :in in}}
+
+                   (c/and (c/or min-count max-count)
+                          (not (<= (c/or min-count 0)
+                                   (bounded-count (if max-count (inc max-count) min-count) x)
+                                   (c/or max-count Integer/MAX_VALUE))))
+                   {path {:pred `(<= ~(c/or min-count 0) (c/count %) ~(c/or max-count 'Integer/MAX_VALUE)) :val x :via via :in in}}
+                   
+                   :else
+                   (apply merge
+                          (take *coll-error-limit*
+                                (keep identity
+                                      (map (fn [i v]
+                                             (let [k (kfn i v)]
+                                               (when-not (check? v)
+                                                 (let [prob (explain-1 form pred (conj path k) via (conj in k) v)]
+                                                   prob))))
+                                           (range) x))))))
+        (gen* [_ overrides path rmap]
+              (if gfn
+                (gfn)
+                (let [init (empty gen-into)
+                      pgen (gensub pred overrides path rmap form)]
+                  (gen/fmap
+                   #(if (vector? init) % (into init %))
+                   (cond
+                    distinct
+                    (if count
+                      (gen/vector-distinct pgen {:num-elements count :max-tries 100})
+                      (gen/vector-distinct pgen {:min-elements (c/or min-count 0)
+                                                 :max-elements (c/or max-count (max gen-max (c/* 2 (c/or min-count 0))))
+                                                 :max-tries 100}))
+
+                    count
+                    (gen/vector pgen count)
+
+                    (c/or min-count max-count)
+                    (gen/vector pgen (c/or min-count 0) (c/or max-count (max gen-max (c/* 2 (c/or min-count 0)))))
+
+                    :else
+                    (gen/vector pgen 0 gen-max))))))
+        
+        (with-gen* [_ gfn] (every-impl form pred opts gfn))
+        (describe* [_] `(every ~form ~@(mapcat identity opts)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;; regex ;;;;;;;;;;;;;;;;;;;
 ;;See:

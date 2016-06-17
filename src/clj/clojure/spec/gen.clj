@@ -89,7 +89,7 @@
         (fn [s] (c/list 'lazy-combinator s))
         syms)))
 
-(lazy-combinators hash-map list map not-empty set vector fmap elements
+(lazy-combinators hash-map list map not-empty set vector vector-distinct fmap elements
                   bind choose fmap one-of such-that tuple sample return
                   large-integer* double*)
 
