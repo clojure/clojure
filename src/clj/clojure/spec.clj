@@ -171,8 +171,8 @@
   [spec x]
   (explain-data* spec [] (if-let [name (spec-name spec)] [name] []) [] x))
 
-(defn- explain-out
-  "prints an explanation to *out*."
+(defn explain-out
+  "prints explanation data (per 'explain-data') to *out*."
   [ed]
   (if ed
     (do
