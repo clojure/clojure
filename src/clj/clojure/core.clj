@@ -7229,6 +7229,18 @@
                         (cons x (keepi (inc idx) (rest s)))))))))]
        (keepi 0 coll))))
 
+(defn bounded-count
+  "If coll is counted? returns its count, else will count at most the first n
+  elements of coll using its seq"
+  {:added "1.9"}
+  [n coll]
+  (if (counted? coll)
+    (count coll)
+    (loop [i 0 s (seq coll)]
+      (if (and s (< i n))
+        (recur (inc i) (next s))
+        i))))
+
 (defn every-pred
   "Takes a set of predicates and returns a function f that returns true if all of its
   composing predicates return a logical true value against all of its arguments, else it returns
