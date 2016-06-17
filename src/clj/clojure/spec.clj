@@ -757,8 +757,6 @@ by ns-syms. Idempotent."
         keys->specs #(c/or (k->s %) %)
         id (java.util.UUID/randomUUID)]
     (reify
-     clojure.lang.IFn
-     (invoke [this x] (valid? this x))
      Spec
      (conform* [_ m]
                (if (keys-pred m)
@@ -841,8 +839,6 @@ by ns-syms. Idempotent."
       (named? pred) (cond-> (the-spec pred) gfn (with-gen gfn))
       :else
       (reify
-       clojure.lang.IFn
-       (invoke [this x] (valid? this x))
        Spec
        (conform* [_ x] (dt pred x form cpred?))
        (unform* [_ x] (if cpred?
@@ -873,8 +869,6 @@ by ns-syms. Idempotent."
                  #(assoc %1 retag %2)
                  retag)]
        (reify
-        clojure.lang.IFn
-        (invoke [this x] (valid? this x))
         Spec
         (conform* [_ x] (if-let [pred (predx x)]
                           (dt pred x form)
@@ -913,8 +907,6 @@ by ns-syms. Idempotent."
   ([forms preds] (tuple-impl forms preds nil))
   ([forms preds gfn]
      (reify
-      clojure.lang.IFn
-      (invoke [this x] (valid? this x))
       Spec
       (conform* [_ x]
                 (if-not (c/and (vector? x)
@@ -983,8 +975,6 @@ by ns-syms. Idempotent."
                           (tagged-ret (keys i) ret))))
                     ::invalid)))]
     (reify
-     clojure.lang.IFn
-     (invoke [this x] (valid? this x))
      Spec
      (conform* [_ x] (cform x))
      (unform* [_ [k x]] (unform (kps k) x))
@@ -1036,8 +1026,6 @@ by ns-syms. Idempotent."
   "Do not call this directly, use 'and'"
   [forms preds gfn]
      (reify
-      clojure.lang.IFn
-      (invoke [this x] (valid? this x))
       Spec
       (conform* [_ x] (and-preds x preds forms))
       (unform* [_ x] (reduce #(unform %2 %1) x (reverse preds)))
@@ -1366,8 +1354,6 @@ by ns-syms. Idempotent."
   "Do not call this directly, use 'spec' with a regex op argument"
   [re gfn]
   (reify
-   clojure.lang.IFn
-   (invoke [this x] (valid? this x))
    Spec
    (conform* [_ x]
              (if (c/or (nil? x) (coll? x))
@@ -1413,9 +1399,6 @@ by ns-syms. Idempotent."
   [argspec aform retspec rform fnspec fform gfn]
   (let [specs {:args argspec :ret retspec :fn fnspec}]
     (reify
-     clojure.lang.IFn
-     (invoke [this x] (valid? this x))
-     
      clojure.lang.ILookup
      (valAt [this k] (get specs k))
      (valAt [_ k not-found] (get specs k not-found))
