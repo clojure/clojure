@@ -1092,7 +1092,7 @@ by ns-syms. Idempotent."
                                 (not (<= (c/or min-count 0)
                                          (bounded-count (if max-count (inc max-count) min-count) x)
                                          (c/or max-count Integer/MAX_VALUE)))))
-                   :invalid
+                   ::invalid
 
                    :else
                    (if (indexed? x)
