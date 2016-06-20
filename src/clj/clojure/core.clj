@@ -6639,6 +6639,12 @@
   java.util.Date
   (inst-ms* [inst] (.getTime ^java.util.Date inst)))
 
+;; conditionally extend to Instant on Java 8+
+(try
+  (Class/forName "java.time.Instant")
+  (load "core_instant18")
+  (catch ClassNotFoundException cnfe))
+
 (defn inst-ms
   "Return the number of milliseconds since January 1, 1970, 00:00:00 GMT"
   {:added "1.9"}
