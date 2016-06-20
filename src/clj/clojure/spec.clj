@@ -221,7 +221,8 @@
 (defn- gensub
   [spec overrides path rmap form]
   ;;(prn {:spec spec :over overrides :path path :form form})
-  (let [spec (specize spec)]
+  (let [spec (c/or (get overrides spec) spec)
+        spec (specize spec)]
     (if-let [g (c/or (get overrides path) (gen* spec overrides path rmap))]
       (gen/such-that #(valid? spec %) g 100)
       (throw (IllegalStateException. (str "Unable to construct gen at: " path " for: " (abbrev form)))))))
@@ -229,12 +230,13 @@
 (defn gen
   "Given a spec, returns the generator for it, or throws if none can
   be constructed. Optionally an overrides map can be provided which
-  should map paths (vectors of keywords) to generators. These will be
-  used instead of the generators at those paths. Note that parent
-  generator (in the spec or overrides map) will supersede those of any
-  subtrees. A generator for a regex op must always return a
-  sequential collection (i.e. a generator for s/? should return either
-  an empty sequence/vector or a sequence/vector with one item in it)"
+  should map spec names or paths (vectors of keywords) to
+  generators. These will be used instead of the generators at those
+  names/paths. Note that parent generator (in the spec or overrides
+  map) will supersede those of any subtrees. A generator for a regex
+  op must always return a sequential collection (i.e. a generator for
+  s/? should return either an empty sequence/vector or a
+  sequence/vector with one item in it)"
   ([spec] (gen spec nil))
   ([spec overrides] (gensub spec overrides [] {::recursion-limit *recursion-limit*} spec)))
 
