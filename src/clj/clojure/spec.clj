@@ -712,11 +712,15 @@ fn that checks arg conformance (throwing an exception on failure)
 before delegating to the original fn.
 
 The opts map can be used to override registered specs, and/or to
-replace fn implementations entirely:
+replace fn implementations entirely. Opts for symbols not named by
+sym-or-syms are ignored. This facilitates sharing a common options map
+across many different calls to instrument.
 
-  :spec     a map from fn symbols to spec overrides
-  :stub     a collection of fn symbols to stub
-  :replace  a map from fn symbols to fn overrides
+The opts map may have the following keys:
+
+  :spec     a map from var-name symbols to override specs
+  :stub     a collection of var-name symbols to be replaced by stubs
+  :replace  a map from var-name symbols to replacement fns
 
 :spec overrides registered fn-specs with specs your provide. Use
 :spec overrides to provide specs for libraries that do not have
@@ -726,14 +730,10 @@ spec'ed contract.
 :stub replaces a fn with a stub that checks :args, then uses the
 :ret spec to generate a return value.
 
-:replace replaces a fn with a fn that check :args, then invokes
-a fn you provide, enabling arbitrary stubbing and mocking.
+:replace replaces a fn with a fn that checks args conformance, then
+invokes the fn you provide, enabling arbitrary stubbing and mocking.
 
 :spec can be used in combination with :stub or :replace.
-
-Opts for symbols not named by sym-or-syms are ignored. This
-facilitates sharing a common options map across many different
-calls to instrument.
 
 Returns a collection of syms naming the vars instrumented."
   ([sym-or-syms] (instrument sym-or-syms nil))
@@ -778,8 +778,8 @@ Returns a collection of syms naming the vars unstrumented."
       (contains? ns-names (namespace s)))))
 
 (defn instrument-ns
-  "Like instrument, but works on all symbols whose namespace is
-in ns-or-nses, specified as a symbol or a seq of symbols."
+  "Like instrument, but works on all symbols whose namespace name is
+in ns-or-nses, a symbol or a collection of symbols."
   ([] (instrument-ns (.name ^clojure.lang.Namespace *ns*)))
   ([ns-or-nses] (instrument-ns ns-or-nses nil))
   ([ns-or-nses opts]
@@ -796,8 +796,8 @@ in ns-or-nses, specified as a symbol or a seq of symbols."
           [(c/keys (registry)) (opt-syms opts)])))))
 
 (defn unstrument-ns
-  "Like unstrument, but works on all symbols whose namespace is
-in ns-or-nses, specified as a symbol or a seq of symbols."
+  "Like unstrument, but works on all symbols whose namespace name is
+in ns-or-nses, a symbol or a collection of symbols."
   [ns-or-nses]
   (let [ns-match? (ns-matcher (as-seqable ns-or-nses))]
     (locking instrumented-vars

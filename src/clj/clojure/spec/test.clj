@@ -153,7 +153,7 @@ with explain-data under ::check-call."
       (test-1 {:f f :spec spec} opts))))
 
 (defn test
-  "Checks specs for fns named by sym-or-syms using test.check.
+  "Checks specs for fns named by sym-or-syms (a symbol or collection of symbols) using test.check.
 
 The opts map includes the following optional keys:
 
