@@ -7,140 +7,210 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.spec.test
+  (:refer-clojure :exclude [test])
   (:require
-   [clojure.spec :as spec]
+   [clojure.pprint :as pp]
+   [clojure.spec :as s]
    [clojure.spec.gen :as gen]))
 
-;; wrap spec/explain-data until specs always return nil for ok data
-(defn- explain-data*
-  [spec v]
-  (when-not (spec/valid? spec v nil)
-    (spec/explain-data spec v)))
+(in-ns 'clojure.spec.test.check)
+(in-ns 'clojure.spec.test)
+(alias 'stc 'clojure.spec.test.check)
 
-;; wrap and unwrap spec failure data in an exception so that
-;; quick-check will treat it as a failure.
-(defn- wrap-failing
-  [explain-data step]
-  (ex-info "Wrapper" {::check-call (assoc explain-data :failed-on step)}))
-
-(defn- unwrap-failing
-  [ret]
-  (let [ret (if-let [explain (-> ret :result ex-data ::check-call)]
-              (assoc ret :result explain)
-              ret)]
-    (if-let [shrunk-explain (-> ret :shrunk :result ex-data ::check-call)]
-      (assoc-in ret [:shrunk :result] shrunk-explain)
-      ret)))
+(defn- explain-test
+  [args spec v role]
+  (ex-info
+   "Specification-based test failed"
+   (when-not (s/valid? spec v nil)
+     (assoc (s/explain-data* spec [role] [] [] v)
+       ::args args
+       ::val v))))
 
 (defn- check-call
   "Returns true if call passes specs, otherwise *returns* an exception
-with explain-data plus a :failed-on key under ::check-call."
+with explain-data under ::check-call."
   [f specs args]
-  (let [cargs (when (:args specs) (spec/conform (:args specs) args))]
-    (if (= cargs ::spec/invalid)
-      (wrap-failing (explain-data* (:args specs) args) :args)
+  (let [cargs (when (:args specs) (s/conform (:args specs) args))]
+    (if (= cargs ::s/invalid)
+      (explain-test args (:args specs) args :args)
       (let [ret (apply f args)
-            cret (when (:ret specs) (spec/conform (:ret specs) ret))]
-        (if (= cret ::spec/invalid)
-          (wrap-failing (explain-data* (:ret specs) ret) :ret)
+            cret (when (:ret specs) (s/conform (:ret specs) ret))]
+        (if (= cret ::s/invalid)
+          (explain-test args (:ret specs) ret :ret)
           (if (and (:args specs) (:ret specs) (:fn specs))
-            (if (spec/valid? (:fn specs) {:args cargs :ret cret})
+            (if (s/valid? (:fn specs) {:args cargs :ret cret})
               true
-              (wrap-failing (explain-data* (:fn specs) {:args cargs :ret cret}) :fn))
+              (explain-test args (:fn specs) {:args cargs :ret cret} :fn))
             true))))))
 
-(defn check-fn
-  "Check a function using provided specs and test.check.
-Same options and return as check-var"
-  [f specs
-   & {:keys [num-tests seed max-size reporter-fn]
-      :or {num-tests 100 max-size 200 reporter-fn (constantly nil)}}]
-  (let [g (spec/gen (:args specs))
-        prop (gen/for-all* [g] #(check-call f specs %))]
-    (let [ret (gen/quick-check num-tests prop :seed seed :max-size max-size :reporter-fn reporter-fn)]
-      (if-let [[smallest] (-> ret :shrunk :smallest)]
-        (unwrap-failing ret)
-        ret))))
+(defn- throwable?
+  [x]
+  (instance? Throwable x))
 
-(defn check-var
-  "Checks a var's specs using test.check. Optional args are
-passed through to test.check/quick-check:
+(defn- check-fn
+  [f specs {gen :gen opts ::stc/opts}]
+  (let [{:keys [num-tests] :or {num-tests 100}} opts
+        g (try (s/gen (:args specs) gen) (catch Throwable t t))]
+    (if (throwable? g)
+      {:result g}
+      (let [prop (gen/for-all* [g] #(check-call f specs %))]
+        (apply gen/quick-check num-tests prop (mapcat identity opts))))))
 
-  num-tests     number of tests to run, default 100
-  seed          random seed
-  max-size      how large an input to generate, max 200
-  reporter-fn   reporting fn
+(defn- unwrap-return
+  "Unwraps exceptions used to flow information through test.check."
+  [x]
+  (let [data (ex-data x)]
+    (if (or (::args data) (::s/args data) (::s/no-gen-for data))
+      data
+      x)))
 
-Returns a map as quick-check, with :explain-data added if
-:result is false."
-  [v & opts]
-  (let [specs (spec/get-spec v)]
-    (if (:args specs)
-      (apply check-fn @v specs opts)
-      (throw (IllegalArgumentException. (str  "No :args spec for " v))))))
+(defn- result-type
+  [result]
+  (let [ret (::return result)]
+    (cond
+     (true? ret) :pass
+     (::s/args ret) :instrument-fail
+     (::s/no-gen-for ret) :no-gen
+     (::args ret) :fail
+     :default :error)))
 
-(defn- run-var-tests
-  "Helper for run-tests, run-all-tests."
-  [vs]
-  (let [reporter-fn println]
-    (reduce
-     (fn [totals v]
-       (let [_  (println "Checking" v)
-             ret (check-var v :reporter-fn reporter-fn)]
-         (prn ret)
-         (cond-> totals
-                 true (update :test inc)
-                 (true? (:result ret)) (update :pass inc)
-                 (::spec/problems (:result ret)) (update :fail inc)
-                 (instance? Throwable (:result ret)) (update :error inc))))
-     {:test 0, :pass 0, :fail 0, :error 0}
-     vs)))
+(defn- make-test-result
+  "Builds spec result map."
+  [test-sym spec test-check-ret]
+  (let [result (merge {::sym test-sym
+                       ::spec spec
+                       ::stc/ret test-check-ret}
+                      (when-let [result (-> test-check-ret :result)]
+                        {::return (unwrap-return result)})
+                      (when-let [shrunk (-> test-check-ret :shrunk)]
+                        {::return (unwrap-return (:result shrunk))}))]
+    (assoc result ::result-type (result-type result))))
 
-(defn run-tests
-  "Like run-all-tests, but scoped to specific namespaces, or to
-*ns* if no ns-sym are specified."
-  [& ns-syms]
-  (if (seq ns-syms)
-    (run-var-tests (->> (apply spec/speced-vars ns-syms)
-                        (filter (fn [v] (:args (spec/get-spec v))))))
-    (run-tests (.name ^clojure.lang.Namespace *ns*))))
+(defn- abbrev-result
+  [x]
+  (if (true? (::return x))
+    (dissoc x ::spec ::stc/ret ::return)
+    (update (dissoc x ::stc/ret) ::spec s/describe)))
 
-(defn run-all-tests
-  "Like clojure.test/run-all-tests, but runs test.check tests
-for all speced vars. Prints per-test results to *out*, and
-returns a map with :test,:pass,:fail, and :error counts."
-  []
-  (run-var-tests (spec/speced-vars)))
+(defn- default-result-callback
+  [x]
+  (pp/pprint (abbrev-result x))
+  (flush))
 
-(comment
-  (require '[clojure.pprint :as pp]
-           '[clojure.spec :as s]
-           '[clojure.spec.gen :as gen]
-           '[clojure.test :as ctest])
+(defn- test-1
+  [{:keys [s f spec]}
+   {:keys [result-callback] :as opts
+    :or {result-callback default-result-callback}}]
+  (let [result (cond
+                (nil? f)
+                {::result-type :no-fn ::sym s ::spec spec}
+                
+                (:args spec)
+                (let [tcret (check-fn f spec opts)]
+                  (make-test-result s spec tcret))
+                
+                :default
+                {::result-type :no-args ::sym s ::spec spec})]
+    (result-callback result)
+    result))
 
-  (require :reload '[clojure.spec.test :as test])
+;; duped from spec to avoid introducing public API
+(defn- as-seqable
+  [x]
+  (if (seqable? x) x (list x)))
 
-  (load-file "examples/broken_specs.clj")
-  (load-file "examples/correct_specs.clj")
+;; duped from spec to avoid introducing public API
+(defn- ns-matcher
+  [ns-syms]
+  (let [ns-names (into #{} (map str) ns-syms)]
+    (fn [s]
+      (contains? ns-names (namespace s)))))
 
-  ;; discover speced vars for your own test runner
-  (s/speced-vars)
+(defn- update-result-map
+  ([]
+     {:test 0 :pass 0 :fail 0 :error 0
+      :no-fn 0 :no-args 0 :no-gen 0})
+  ([m] m)
+  ([results result]
+     (-> results
+         (update :test inc)
+         (update (::result-type result) inc))))
 
-  ;; check a single var
-  (test/check-var #'-)
-  (test/check-var #'+)
-  (test/check-var #'clojure.spec.broken-specs/throwing-fn)
+(defn- sym->test-map
+  [s]
+  (let [v (resolve s)]
+    {:s s
+     :f (when v @v)
+     :spec (when v (s/get-spec v))}))
 
-  ;; old style example tests
-  (ctest/run-all-tests)
+(defn test-fn
+  "Runs generative tests for fn f using spec and opts. See
+'test' for options and return."
+  ([f spec] (test-fn f spec nil))
+  ([f spec opts]
+     (update-result-map
+      (update-result-map)
+      (test-1 {:f f :spec spec} opts))))
 
-  (s/speced-vars 'clojure.spec.correct-specs)
-  ;; new style spec tests return same kind of map
-  (test/check-var #'subs)
-  (clojure.spec.test/run-tests 'clojure.core)
-  (test/run-all-tests)
+(defn test
+  "Checks specs for fns named by sym-or-syms using test.check.
 
-  )
+The opts map includes the following optional keys:
+
+:clojure.spec.test.check/opts  opts to flow through test.check
+:result-callback               callback fn to handle test results
+:gen                           overrides map for spec/gen
+
+The c.s.t.c/opts include :num-tests in addition to the keys
+documented by test.check.
+
+The result-callback defaults to default-result-callback.
+
+Returns a map with the following keys:
+
+:test     # of syms tested
+:pass     # of passing tests
+:fail     # of failing tests
+:error    # of throwing tests
+:no-fn    # of syms with no fn
+:no-args  # of syms with no argspec
+:no-gen   # of syms for which arg data gen failed"
+  ([sym-or-syms] (test sym-or-syms nil))
+  ([sym-or-syms opts]
+     (transduce
+      (comp
+       (map sym->test-map)
+       (map #(test-1 % opts)))
+      update-result-map
+      (as-seqable sym-or-syms))))
+
+(defn test-ns
+  "Like test, but scoped to specific namespaces, or to
+*ns* if no arg specified."
+  ([] (test-ns (.name ^clojure.lang.Namespace *ns*)))
+  ([ns-or-nses] (test-ns ns-or-nses nil))
+  ([ns-or-nses opts]
+     (let [ns-match? (ns-matcher (as-seqable ns-or-nses))]
+       (transduce
+        (comp (filter symbol?)
+              (filter ns-match?)
+              (map sym->test-map)
+              (map #(test-1 % opts)))
+        update-result-map
+        (keys (s/registry))))))
+
+(defn test-all
+  "Like test, but tests all vars named by fn-specs in the spec
+registry."
+  ([] (test-all nil))
+  ([opts]
+     (transduce
+      (comp (filter symbol?)
+            (map sym->test-map)
+            (map #(test-1 % opts)))
+      update-result-map
+      (keys (s/registry)))))
+
 
 
   
