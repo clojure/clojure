@@ -221,9 +221,10 @@
 (defn- gensub
   [spec overrides path rmap form]
   ;;(prn {:spec spec :over overrides :path path :form form})
-  (let [spec (c/or (get overrides spec) spec)
-        spec (specize spec)]
-    (if-let [g (c/or (get overrides path) (gen* spec overrides path rmap))]
+  (let [spec (specize spec)]
+    (if-let [g (c/or (get overrides (c/or (spec-name spec) spec))
+                     (get overrides path)
+                     (gen* spec overrides path rmap))]
       (gen/such-that #(valid? spec %) g 100)
       (let [abbr (abbrev form)]
         (throw (ex-info (str "Unable to construct gen at: " path " for: " abbr)
@@ -1634,12 +1635,12 @@ in ns-or-nses, a symbol or a collection of symbols."
                                (let [cargs (conform argspec args)]
                                  (explain-1 fform fnspec (conj path :fn) via in {:args cargs :ret cret})))))))))
                  {path {:pred 'ifn? :val f :via via :in in}}))
-     (gen* [_ _ _ _] (if gfn
+     (gen* [_ overrides _ _] (if gfn
              (gfn)
              (gen/return
               (fn [& args]
                 (assert (valid? argspec args) (with-out-str (explain argspec args)))
-                (gen/generate (gen retspec))))))
+                (gen/generate (gen retspec overrides))))))
      (with-gen* [_ gfn] (fspec-impl argspec aform retspec rform fnspec fform gfn))
      (describe* [_] `(fspec :args ~aform :ret ~rform :fn ~fform)))))
 
