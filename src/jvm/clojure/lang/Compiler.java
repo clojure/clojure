@@ -6771,20 +6771,24 @@ public static Object macroexpand1(Object x) {
 		Var v = isMacro(op);
 		if(v != null)
 			{
-				try
+				// Do not check specs while inside clojure.spec
+				if(! "clojure/spec.clj".equals(SOURCE_PATH.deref()))
 					{
-						final Namespace checkns = Namespace.find(Symbol.intern("clojure.spec"));
-						if (checkns != null)
-							{
-								final Var check = Var.find(Symbol.intern("clojure.spec/macroexpand-check"));
-								if ((check != null) && (check.isBound()))
-								    check.applyTo(RT.cons(v, RT.list(form.next())));
-							}
-						Symbol.intern("clojure.spec");
-					}
-				catch(IllegalArgumentException e)
-					{
-					throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), e);
+					try
+						{
+							final Namespace checkns = Namespace.find(Symbol.intern("clojure.spec"));
+							if (checkns != null)
+								{
+									final Var check = Var.find(Symbol.intern("clojure.spec/macroexpand-check"));
+									if ((check != null) && (check.isBound()))
+										check.applyTo(RT.cons(v, RT.list(form.next())));
+								}
+							Symbol.intern("clojure.spec");
+						}
+					catch(IllegalArgumentException e)
+						{
+						throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), e);
+						}
 					}
 				try
 					{

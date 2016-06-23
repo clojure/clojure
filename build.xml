@@ -59,6 +59,7 @@
       <arg value="clojure.core"/>
       <arg value="clojure.core.protocols"/>
       <arg value="clojure.core.server"/>
+      <arg value="clojure.core.specs"/>
       <arg value="clojure.main"/>
       <arg value="clojure.set"/>
       <arg value="clojure.edn"/>
@@ -81,9 +82,13 @@
       <arg value="clojure.string"/>
       <arg value="clojure.data"/>
       <arg value="clojure.reflect"/>
-      <arg value="clojure.spec"/>
       <arg value="clojure.spec.gen"/>
       <arg value="clojure.spec.test"/>
+
+      <!-- clojure.spec must be AOT'ed last because it will reload the Spec protocol,
+      causing spec's macroexpanding checking of clojure.core specs to fail. We exclude
+      that checking inside clojure.spec, so that's ok. -->
+      <arg value="clojure.spec"/>
     </java>
   </target>
 
