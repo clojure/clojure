@@ -1679,6 +1679,18 @@ in ns-or-nses, a symbol or a collection of symbols."
   ([spec n overrides]
      (map #(vector % (conform spec %)) (gen/sample (gen spec overrides) n))))
 
+(defn exercise-fn
+  "exercises the fn named by sym (a symbol) by applying it to
+  n (default 10) generated samples of its args spec. When fspec is
+  supplied its arg spec is used, and sym-or-f can be a fn.  Returns a
+  sequence of tuples of [args ret]. "
+  ([sym] (exercise-fn sym 10))
+  ([sym n] (exercise-fn sym n (get-spec sym)))
+  ([sym-or-f n fspec]
+     (let [f (if (symbol? sym-or-f) (resolve sym-or-f) sym-or-f)]
+       (for [args (gen/sample (gen (:args fspec)) n)]
+         [args (apply f args)]))))
+
 (defn coll-checker
   "returns a predicate function that checks *coll-check-limit* items in a collection with pred"
   [pred]
