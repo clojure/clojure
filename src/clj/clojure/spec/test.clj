@@ -107,12 +107,14 @@ with explain-data under ::check-call."
     (list x)
     x))
 
-;; duped from spec to avoid introducing public API
-(defn- ns-matcher
-  [ns-syms]
-  (let [ns-names (into #{} (map str) ns-syms)]
+(defn- sym-matcher
+  "Returns a fn that matches symbols that are either in syms,
+or whose namespace is in syms."
+  [syms]
+  (let [names (into #{} (map str) syms)]
     (fn [s]
-      (contains? ns-names (namespace s)))))
+      (or (contains? names (namespace s))
+          (contains? names (str s))))))
 
 (defn- sym->test-map
   [s]
@@ -125,6 +127,24 @@ with explain-data under ::check-call."
   [opts]
   (assert (every? ident? (keys (:gen opts))) "test :gen expects ident keys"))
 
+(defn syms-to-test
+  "Returns a coll of registered syms matching ns-or-names (a symbol or
+collection of symbols).
+
+A symbol matches ns-or-names if ns-or-names includes either the symbol
+itself or the symbol's namespace symbol.
+
+If no ns-or-names specified, returns all registered syms."
+  ([] (sequence
+       (filter symbol?)
+       (keys (s/registry))))
+  ([ns-or-names]
+     (let [match? (sym-matcher (collectionize ns-or-names))]
+       (sequence
+        (comp (filter symbol?)
+              (filter match?))
+        (keys (s/registry))))))
+
 (defn test-fn
   "Runs generative tests for fn f using spec and opts. See
 'test' for options and return."
@@ -134,8 +154,7 @@ with explain-data under ::check-call."
      (test-1 {:f f :spec spec} opts)))
 
 (defn test
-  "Checks specs for fns named by sym-or-syms (a symbol or
-collection of symbols) using test.check.
+  "Checks specs for vars named by syms using test.check.
 
 The opts map includes the following optional keys, where stc
 aliases clojure.spec.test.check: 
@@ -171,40 +190,10 @@ Values for the :type key can be one of
 :no-gen     unable to generate :args
 :no-fn      unable to resolve fn to test
 "
-  ([sym-or-syms] (test sym-or-syms nil))
-  ([sym-or-syms opts]
+  ([syms] (test syms nil))
+  ([syms opts]
      (validate-opts opts)
-     (->> (eduction
-           (map sym->test-map)
-           (collectionize sym-or-syms))
-          (pmap #(test-1 % opts)))))
-
-(defn test-ns
-  "Like test, but scoped to specific namespaces, or to
-*ns* if no arg specified."
-  ([] (test-ns (.name ^clojure.lang.Namespace *ns*)))
-  ([ns-or-nses] (test-ns ns-or-nses nil))
-  ([ns-or-nses opts]
-     (validate-opts opts)
-     (let [ns-match? (ns-matcher (collectionize ns-or-nses))]
-       (->> (eduction
-             (filter symbol?)
-             (filter ns-match?)
-             (map sym->test-map)
-             (keys (s/registry)))
-            (pmap #(test-1 % opts))))))
-
-(defn test-all
-  "Like test, but tests all vars named by fn-specs in the spec
-registry."
-  ([] (test-all nil))
-  ([opts]
-     (validate-opts opts)
-     (->> (eduction
-           (filter symbol?)
-           (map sym->test-map)
-           (keys (s/registry)))
-          (pmap #(test-1 % opts)))))
+     (pmap #(test-1 (sym->test-map %) opts) syms)))
 
 (defn abbrev-result
   "Given a test result, returns an abbreviated version
