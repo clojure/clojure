@@ -675,9 +675,9 @@
 
 (defn- instrument-choose-fn
   "Helper for instrument."
-  [f spec sym {:keys [stub replace]}]
+  [f spec sym {over :gen :keys [stub replace]}]
   (if (some #{sym} stub)
-    (-> spec gen gen/generate)
+    (-> spec (gen over) gen/generate)
     (get replace sym f)))
 
 (defn- instrument-choose-spec
@@ -685,9 +685,11 @@
   [spec sym {overrides :spec}]
   (get overrides sym spec))
 
-(defn- as-seqable
+(defn- collectionize
   [x]
-  (if (seqable? x) x (list x)))
+  (if (symbol? x)
+    (list x)
+    x))
 
 (defn- instrument-1
   [s opts]
@@ -721,6 +723,7 @@ The opts map may have the following keys:
 
   :spec     a map from var-name symbols to override specs
   :stub     a collection of var-name symbols to be replaced by stubs
+  :gen      a map from spec names to generator overrides
   :replace  a map from var-name symbols to replacement fns
 
 :spec overrides registered fn-specs with specs your provide. Use
@@ -731,6 +734,8 @@ spec'ed contract.
 :stub replaces a fn with a stub that checks :args, then uses the
 :ret spec to generate a return value.
 
+:gen overrides are used only for :stub generation.
+
 :replace replaces a fn with a fn that checks args conformance, then
 invokes the fn you provide, enabling arbitrary stubbing and mocking.
 
@@ -739,12 +744,13 @@ invokes the fn you provide, enabling arbitrary stubbing and mocking.
 Returns a collection of syms naming the vars instrumented."
   ([sym-or-syms] (instrument sym-or-syms nil))
   ([sym-or-syms opts]
+     (assert (every? ident? (c/keys (:gen opts))) "instrument :gen expects ident keys")
      (locking instrumented-vars
        (into
         []
         (comp (map #(instrument-1 % opts))
               (remove nil?))
-        (as-seqable sym-or-syms)))))
+        (collectionize sym-or-syms)))))
 
 (defn- unstrument-1
   [s]
@@ -765,7 +771,7 @@ Returns a collection of syms naming the vars unstrumented."
      []
      (comp (map #(unstrument-1 %))
            (remove nil?))
-     (as-seqable sym-or-syms))))
+     (collectionize sym-or-syms))))
 
 (defn- opt-syms
   "Returns set of symbols referenced by 'instrument' opts map"
@@ -784,7 +790,7 @@ in ns-or-nses, a symbol or a collection of symbols."
   ([] (instrument-ns (.name ^clojure.lang.Namespace *ns*)))
   ([ns-or-nses] (instrument-ns ns-or-nses nil))
   ([ns-or-nses opts]
-     (let [ns-match? (ns-matcher (as-seqable ns-or-nses))]
+     (let [ns-match? (ns-matcher (collectionize ns-or-nses))]
        (locking instrumented-vars
          (into
           []
@@ -800,7 +806,7 @@ in ns-or-nses, a symbol or a collection of symbols."
   "Like unstrument, but works on all symbols whose namespace name is
 in ns-or-nses, a symbol or a collection of symbols."
   [ns-or-nses]
-  (let [ns-match? (ns-matcher (as-seqable ns-or-nses))]
+  (let [ns-match? (ns-matcher (collectionize ns-or-nses))]
     (locking instrumented-vars
       (into
        []
