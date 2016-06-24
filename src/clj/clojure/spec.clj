@@ -462,6 +462,8 @@
   
   Optionally takes :gen generator-fn, which must be a fn of no args that
   returns a test.check generator
+
+  See also - coll-of, every-kv
 "
   [pred & {:keys [count max-count min-count distinct gen-max gen-into gen] :as opts}]
   `(every-impl '~pred ~pred ~(dissoc opts :gen) ~gen))
@@ -469,10 +471,37 @@
 (defmacro every-kv
   "like 'every' but takes separate key and val preds and works on associative collections.
 
-  Same options as 'every'"
+  Same options as 'every'
+
+  See also - map-of"
 
   [kpred vpred & opts]
-  `(every (tuple ~kpred ~vpred) ::kfn (fn [i# v#] (key v#)) :gen-into {} ~@opts))
+  `(every (tuple ~kpred ~vpred) ::kfn (fn [i# v#] (nth v# 0)) :gen-into {} ~@opts))
+
+(defmacro coll-of
+  "Returns a spec for a collection of items satisfying pred. The
+  generator will fill an empty init-coll.  Unlike 'every', coll-of
+  will exhaustively conform every value.
+
+  Same options as 'every'.
+
+  See also - every, map-of"
+  [pred init-coll & opts]
+  `(every ~pred ::conform-all true :gen-into ~init-coll ~@opts))
+
+(defmacro map-of
+  "Returns a spec for a map whose keys satisfy kpred and vals satisfy
+  vpred. Unlike 'every-kv', map-of will exhaustively conform every
+  value.
+
+  Same options as 'every', with the addition of:
+
+  :conform-keys - conform keys as well as values (default false)
+
+  See also - every-kv"
+  [kpred vpred & opts]
+  `(and (every-kv ~kpred ~vpred ::conform-all true ~@opts) map?))
+
 
 (defmacro *
   "Returns a regex op that matches zero or more values matching
@@ -1153,28 +1182,76 @@ unstrumented."
    (with-gen* [_ gfn] (and-spec-impl forms preds gfn))
    (describe* [_] `(and ~@forms))))
 
+(defn- coll-prob [x distinct count min-count max-count
+                  path via in]
+  (cond
+   (not (seqable? x))
+   {path {:pred 'seqable? :val x :via via :in in}}
+
+   (c/and distinct (not (empty? x)) (not (apply distinct? x)))
+   {path {:pred 'distinct? :val x :via via :in in}}
+
+   (c/and count (not= count (bounded-count count x)))
+   {path {:pred `(= ~count (c/count %)) :val x :via via :in in}}
+
+   (c/and (c/or min-count max-count)
+          (not (<= (c/or min-count 0)
+                   (bounded-count (if max-count (inc max-count) min-count) x)
+                   (c/or max-count Integer/MAX_VALUE))))
+   {path {:pred `(<= ~(c/or min-count 0) (c/count %) ~(c/or max-count 'Integer/MAX_VALUE)) :val x :via via :in in}}))
+
 (defn ^:skip-wiki every-impl
-  "Do not call this directly, use 'every'"
+  "Do not call this directly, use 'every', 'every-kv', 'coll-of' or 'map-of'"
   ([form pred opts] (every-impl form pred opts nil))
-  ([form pred {:keys [count max-count min-count distinct gen-max gen-into ::kfn]
+  ([form pred {:keys [count max-count min-count distinct gen-max gen-into ::kfn
+                      conform-keys ::conform-all]
                :or {gen-max 20, gen-into []}
                :as opts}
     gfn]
      (let [check? #(valid? pred %)
-           kfn (c/or kfn (fn [i v] i))]
+           kfn (c/or kfn (fn [i v] i))
+           addcv (fn [ret i v cv] (conj ret cv))
+           cfns (fn [x]
+                  ;;returns a tuple of [init add complete] fns
+                  (cond
+                   (vector? x)
+                   [identity
+                    (fn [ret i v cv]
+                      (if (identical? v cv)
+                        ret
+                        (assoc ret i cv)))
+                    identity]
+
+                   (map? x)
+                   [(if conform-keys empty identity)
+                    (fn [ret i v cv]
+                      (if (c/and (identical? v cv) (not conform-keys))
+                        ret
+                        (assoc ret (nth (if conform-keys cv v) 0) (nth cv 1))))
+                    identity]
+                  
+                   (list? x) [empty addcv reverse]
+
+                   :else [empty addcv identity]))]
        (reify
         Spec
         (conform* [_ x]
                   (cond
-                   (c/or (not (seqable? x))
-                         (c/and distinct (not (empty? x)) (not (apply distinct? x)))
-                         (c/and count (not= count (bounded-count (inc count) x)))
-                         (c/and (c/or min-count max-count)
-                                (not (<= (c/or min-count 0)
-                                         (bounded-count (if max-count (inc max-count) min-count) x)
-                                         (c/or max-count Integer/MAX_VALUE)))))
+                   (coll-prob x distinct count min-count max-count
+                              nil nil nil)
                    ::invalid
 
+                   conform-all
+                   (let [[init add complete] (cfns x)]
+                     (loop [ret (init x), i 0, [v & vs :as vseq] (seq x)]
+                       (if vseq
+                         (let [cv (dt pred v nil)]
+                           (if (= ::invalid cv)
+                             ::invalid
+                             (recur (add ret i v cv) (inc i) vs)))
+                         (complete ret))))
+                   
+                   
                    :else
                    (if (indexed? x)
                      (let [step (max 1 (long (/ (c/count x) *coll-check-limit*)))]
@@ -1188,25 +1265,10 @@ unstrumented."
                            ::invalid))))
         (unform* [_ x] x)
         (explain* [_ path via in x]
-                  (cond
-                   (not (seqable? x))
-                   {path {:pred 'seqable? :val x :via via :in in}}
-
-                   (c/and distinct (not (empty? x)) (not (apply distinct? x)))
-                   {path {:pred 'distinct? :val x :via via :in in}}
-
-                   (c/and count (not= count (bounded-count count x)))
-                   {path {:pred `(= ~count (c/count %)) :val x :via via :in in}}
-
-                   (c/and (c/or min-count max-count)
-                          (not (<= (c/or min-count 0)
-                                   (bounded-count (if max-count (inc max-count) min-count) x)
-                                   (c/or max-count Integer/MAX_VALUE))))
-                   {path {:pred `(<= ~(c/or min-count 0) (c/count %) ~(c/or max-count 'Integer/MAX_VALUE)) :val x :via via :in in}}
-                   
-                   :else
-                   (apply merge
-                          (take *coll-error-limit*
+                  (c/or (coll-prob x distinct count min-count max-count
+                                   path via in)
+                        (apply merge
+                               ((if conform-all identity (partial take *coll-error-limit*))
                                 (keep identity
                                       (map (fn [i v]
                                              (let [k (kfn i v)]
@@ -1687,37 +1749,6 @@ unstrumented."
      (let [f (if (symbol? sym-or-f) (resolve sym-or-f) sym-or-f)]
        (for [args (gen/sample (gen (:args fspec)) n)]
          [args (apply f args)]))))
-
-(defn coll-checker
-  "returns a predicate function that checks *coll-check-limit* items in a collection with pred"
-  [pred]
-  (let [check? #(valid? pred %)]
-    (fn [coll]
-      (c/or (nil? coll)
-            (c/and
-             (coll? coll)
-             (every? check? (take *coll-check-limit* coll)))))))
-
-(defn coll-gen
-  "returns a function of no args that returns a generator of
-  collections of items conforming to pred, with the same shape as
-  init-coll"
-  [pred init-coll]
-  (let [init (empty init-coll)]
-    (fn []
-      (gen/fmap
-       #(if (vector? init) % (into init %))
-       (gen/vector (gen pred))))))
-
-(defmacro coll-of
-  "Returns a spec for a collection of items satisfying pred. The generator will fill an empty init-coll."
-  [pred init-coll]
-  `(spec (coll-checker ~pred) :gen (coll-gen ~pred ~init-coll)))
-
-(defmacro map-of
-  "Returns a spec for a map whose keys satisfy kpred and vals satisfy vpred."
-  [kpred vpred]
-  `(and (coll-of (tuple ~kpred ~vpred) {}) map?))
 
 (defn inst-in-range?
   "Return true if inst at or after start and before end"

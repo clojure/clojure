@@ -120,7 +120,6 @@
       m nil ::s/invalid '{[] {:pred map?, :val nil, :via []}}
       m {} {} nil
       m {:a "b"} {:a "b"} nil
-      m {:a :b} ::s/invalid '{[] {:pred (coll-checker (tuple keyword? string?)), :val {:a :b}, :via []}}
 
       coll nil nil nil
       coll [] [] nil
