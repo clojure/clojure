@@ -706,18 +706,50 @@
       (swap! instrumented-vars assoc v {:raw to-wrap :wrapped checked}))
     (->sym v)))
 
+(defn- unstrument-1
+  [s]
+  (when-let [v (resolve s)]
+    (when-let [{:keys [raw wrapped]} (get @instrumented-vars v)]
+      (let [current @v]
+        (when (= wrapped current)
+          (alter-var-root v (constantly raw))))
+      (swap! instrumented-vars dissoc v))
+    (->sym v)))
+
+(defn- opt-syms
+  "Returns set of symbols referenced by 'instrument' opts map"
+  [opts]
+  (reduce into #{} [(:stub opts) (c/keys (:replace opts)) (c/keys (:spec opts))]))
+
+(defn- sym-matcher
+  "Returns a fn that matches symbols that are either in syms,
+or whose namespace is in syms."
+  [syms]
+  (let [names (into #{} (map str) syms)]
+    (fn [s]
+      (c/or (contains? names (namespace s))
+            (contains? names (str s))))))
+
+(defn- validate-opts
+  [opts]
+  (assert (every? ident? (c/keys (:gen opts))) "instrument :gen expects ident keys"))
+
 (defn instrument
-  "Instruments the vars named by sym-or-syms, a symbol or a
-collection of symbols. Idempotent.
+  "Instruments the vars matched by ns-or-names, a symbol or a
+collection of symbols. Instruments the current namespace if
+ns-or-names not specified. Idempotent.
+
+A var matches ns-or-names if ns-or-names includes either the var's
+fully qualified name or the var's namespace.
 
 If a var has an :args fn-spec, sets the var's root binding to a
 fn that checks arg conformance (throwing an exception on failure)
 before delegating to the original fn.
 
 The opts map can be used to override registered specs, and/or to
-replace fn implementations entirely. Opts for symbols not named by
-sym-or-syms are ignored. This facilitates sharing a common options map
-across many different calls to instrument.
+replace fn implementations entirely. Opts for symbols not matched
+by ns-or-names are ignored. This facilitates sharing a common
+options map across many different calls to instrument.
 
 The opts map may have the following keys:
 
@@ -742,84 +774,43 @@ invokes the fn you provide, enabling arbitrary stubbing and mocking.
 :spec can be used in combination with :stub or :replace.
 
 Returns a collection of syms naming the vars instrumented."
-  ([sym-or-syms] (instrument sym-or-syms nil))
-  ([sym-or-syms opts]
-     (assert (every? ident? (c/keys (:gen opts))) "instrument :gen expects ident keys")
-     (locking instrumented-vars
-       (into
-        []
-        (comp (map #(instrument-1 % opts))
-              (remove nil?))
-        (collectionize sym-or-syms)))))
-
-(defn- unstrument-1
-  [s]
-  (when-let [v (resolve s)]
-    (when-let [{:keys [raw wrapped]} (get @instrumented-vars v)]
-      (let [current @v]
-        (when (= wrapped current)
-          (alter-var-root v (constantly raw))))
-      (swap! instrumented-vars dissoc v))
-    (->sym v)))
-
-(defn unstrument
-  "Undoes instrument on the vars named by sym-or-syms. Idempotent.
-Returns a collection of syms naming the vars unstrumented."
-  [sym-or-syms]
-  (locking instrumented-vars
-    (into
-     []
-     (comp (map #(unstrument-1 %))
-           (remove nil?))
-     (collectionize sym-or-syms))))
-
-(defn- opt-syms
-  "Returns set of symbols referenced by 'instrument' opts map"
-  [opts]
-  (reduce into #{} [(:stub opts) (c/keys (:replace opts)) (c/keys (:spec opts))]))
-
-(defn- ns-matcher
-  [ns-syms]
-  (let [ns-names (into #{} (map str) ns-syms)]
-    (fn [s]
-      (contains? ns-names (namespace s)))))
-
-(defn instrument-ns
-  "Like instrument, but works on all symbols whose namespace name is
-in ns-or-nses, a symbol or a collection of symbols."
-  ([] (instrument-ns (.name ^clojure.lang.Namespace *ns*)))
-  ([ns-or-nses] (instrument-ns ns-or-nses nil))
-  ([ns-or-nses opts]
-     (let [ns-match? (ns-matcher (collectionize ns-or-nses))]
+  ([] (instrument (.name ^clojure.lang.Namespace *ns*)))
+  ([ns-or-names] (instrument ns-or-names nil))
+  ([ns-or-names opts]
+     (validate-opts opts)
+     (let [match? (sym-matcher (collectionize ns-or-names))]
        (locking instrumented-vars
          (into
           []
           (comp c/cat
                 (filter symbol?)
-                (filter ns-match?)
+                (filter match?)
                 (distinct)
                 (map #(instrument-1 % opts))
                 (remove nil?))
           [(c/keys (registry)) (opt-syms opts)])))))
 
-(defn unstrument-ns
-  "Like unstrument, but works on all symbols whose namespace name is
-in ns-or-nses, a symbol or a collection of symbols."
-  [ns-or-nses]
-  (let [ns-match? (ns-matcher (collectionize ns-or-nses))]
-    (locking instrumented-vars
-      (into
-       []
-       (comp (map ->sym)
-             (filter ns-match?)
-             (map unstrument-1)
-             (remove nil?))
-       (c/keys @instrumented-vars)))))
+(defn unstrument
+  "Undoes instrument on the vars matched by ns-or-names, specified
+as in instrument. Returns a collection of syms naming the vars
+unstrumented."
+  ([] (unstrument (.name ^clojure.lang.Namespace *ns*)))
+  ([ns-or-names]
+     (let [match? (sym-matcher (collectionize ns-or-names))]
+       (locking instrumented-vars
+         (into
+          []
+          (comp (map ->sym)
+                 (filter match?)
+                 (map unstrument-1)
+                 (remove nil?))
+           (c/keys @instrumented-vars))))))
 
 (defn instrument-all
   "Like instrument, but works on all vars."
   ([] (instrument-all nil))
   ([opts]
+     (validate-opts opts)
      (locking instrumented-vars
        (into
         []
