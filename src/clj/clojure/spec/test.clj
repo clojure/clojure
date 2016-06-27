@@ -17,6 +17,223 @@
 (in-ns 'clojure.spec.test)
 (alias 'stc 'clojure.spec.test.check)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; instrument ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def ^:private ^:dynamic *instrument-enabled*
+  "if false, instrumented fns call straight through"
+  true)
+
+(defn- fn-spec?
+  "Fn-spec must include at least :args or :ret specs."
+  [m]
+  (or (:args m) (:ret m)))
+
+(defmacro with-instrument-disabled
+  "Disables instrument's checking of calls, within a scope."
+  [& body]
+  `(binding [*instrument-enabled* nil]
+     ~@body))
+
+(defn- spec-checking-fn
+  [v f fn-spec]
+  (let [fn-spec (@#'s/maybe-spec fn-spec)
+        conform! (fn [v role spec data args]
+                   (let [conformed (s/conform spec data)]
+                     (if (= ::s/invalid conformed)
+                       (let [ed (assoc (s/explain-data* spec [role] [] [] data)
+                                  ::s/args args)]
+                         (throw (ex-info
+                                 (str "Call to " v " did not conform to spec:\n" (with-out-str (s/explain-out ed)))
+                                 ed)))
+                       conformed)))]
+    (fn
+     [& args]
+     (if *instrument-enabled*
+       (with-instrument-disabled
+         (when (:args fn-spec) (conform! v :args (:args fn-spec) args args))
+         (binding [*instrument-enabled* true]
+           (.applyTo ^clojure.lang.IFn f args)))
+       (.applyTo ^clojure.lang.IFn f args)))))
+
+
+(defn- no-fn-spec
+  [v spec]
+  (ex-info (str "Fn at " v " is not spec'ed.")
+           {:var v :spec spec}))
+
+(def ^:private instrumented-vars
+     "Map for instrumented vars to :raw/:wrapped fns"
+     (atom {}))
+
+(defn- ->var
+  [s-or-v]
+  (if (var? s-or-v)
+    s-or-v
+    (let [v (and (symbol? s-or-v) (resolve s-or-v))]
+      (if (var? v)
+        v
+        (throw (IllegalArgumentException. (str (pr-str s-or-v) " does not name a var")))))))
+
+(defn- instrument-choose-fn
+  "Helper for instrument."
+  [f spec sym {over :gen :keys [stub replace]}]
+  (if (some #{sym} stub)
+    (-> spec (s/gen over) gen/generate)
+    (get replace sym f)))
+
+(defn- instrument-choose-spec
+  "Helper for instrument"
+  [spec sym {overrides :spec}]
+  (get overrides sym spec))
+
+(defn- collectionize
+  [x]
+  (if (symbol? x)
+    (list x)
+    x))
+
+(def ->sym @#'s/->sym)
+
+(defn- instrument-1
+  [s opts]
+  (when-let [v (resolve s)]
+    (let [spec (s/get-spec v)
+          {:keys [raw wrapped]} (get @instrumented-vars v)
+          current @v
+          to-wrap (if (= wrapped current) raw current)
+          ospec (or (instrument-choose-spec spec s opts)
+                      (throw (no-fn-spec v spec)))
+          ofn (instrument-choose-fn to-wrap ospec s opts)
+          checked (spec-checking-fn v ofn ospec)]
+      (alter-var-root v (constantly checked))
+      (swap! instrumented-vars assoc v {:raw to-wrap :wrapped checked}))
+    (->sym v)))
+
+(defn- unstrument-1
+  [s]
+  (when-let [v (resolve s)]
+    (when-let [{:keys [raw wrapped]} (get @instrumented-vars v)]
+      (let [current @v]
+        (when (= wrapped current)
+          (alter-var-root v (constantly raw))))
+      (swap! instrumented-vars dissoc v))
+    (->sym v)))
+
+(defn- opt-syms
+  "Returns set of symbols referenced by 'instrument' opts map"
+  [opts]
+  (reduce into #{} [(:stub opts) (keys (:replace opts)) (keys (:spec opts))]))
+
+(defn- sym-matcher
+  "Returns a fn that matches symbols that are either in syms,
+or whose namespace is in syms."
+  [syms]
+  (let [names (into #{} (map str) syms)]
+    (fn [s]
+      (or (contains? names (namespace s))
+          (contains? names (str s))))))
+
+(defn- validate-opts
+  [opts]
+  (assert (every? ident? (keys (:gen opts))) "instrument :gen expects ident keys"))
+
+(defn instrument
+  "Instruments the vars matched by ns-or-names, a symbol or a
+collection of symbols. Instruments the current namespace if
+ns-or-names not specified. Idempotent.
+
+A var matches ns-or-names if ns-or-names includes either the var's
+fully qualified name or the var's namespace.
+
+If a var has an :args fn-spec, sets the var's root binding to a
+fn that checks arg conformance (throwing an exception on failure)
+before delegating to the original fn.
+
+The opts map can be used to override registered specs, and/or to
+replace fn implementations entirely. Opts for symbols not matched
+by ns-or-names are ignored. This facilitates sharing a common
+options map across many different calls to instrument.
+
+The opts map may have the following keys:
+
+  :spec     a map from var-name symbols to override specs
+  :stub     a collection of var-name symbols to be replaced by stubs
+  :gen      a map from spec names to generator overrides
+  :replace  a map from var-name symbols to replacement fns
+
+:spec overrides registered fn-specs with specs your provide. Use
+:spec overrides to provide specs for libraries that do not have
+them, or to constrain your own use of a fn to a subset of its
+spec'ed contract.
+
+:stub replaces a fn with a stub that checks :args, then uses the
+:ret spec to generate a return value.
+
+:gen overrides are used only for :stub generation.
+
+:replace replaces a fn with a fn that checks args conformance, then
+invokes the fn you provide, enabling arbitrary stubbing and mocking.
+
+:spec can be used in combination with :stub or :replace.
+
+Returns a collection of syms naming the vars instrumented."
+  ([] (instrument (.name ^clojure.lang.Namespace *ns*)))
+  ([ns-or-names] (instrument ns-or-names nil))
+  ([ns-or-names opts]
+     (validate-opts opts)
+     (let [match? (sym-matcher (collectionize ns-or-names))]
+       (locking instrumented-vars
+         (into
+          []
+          (comp cat
+                (filter symbol?)
+                (filter match?)
+                (distinct)
+                (map #(instrument-1 % opts))
+                (remove nil?))
+          [(keys (s/registry)) (opt-syms opts)])))))
+
+(defn unstrument
+  "Undoes instrument on the vars matched by ns-or-names, specified
+as in instrument. Returns a collection of syms naming the vars
+unstrumented."
+  ([] (unstrument (.name ^clojure.lang.Namespace *ns*)))
+  ([ns-or-names]
+     (let [match? (sym-matcher (collectionize ns-or-names))]
+       (locking instrumented-vars
+         (into
+          []
+          (comp (map ->sym)
+                 (filter match?)
+                 (map unstrument-1)
+                 (remove nil?))
+           (keys @instrumented-vars))))))
+
+(defn instrument-all
+  "Like instrument, but works on all vars."
+  ([] (instrument-all nil))
+  ([opts]
+     (validate-opts opts)
+     (locking instrumented-vars
+       (into
+        []
+        (comp cat
+              (filter symbol?)
+              (distinct)
+              (map #(instrument-1 % opts))
+              (remove nil?))
+        [(keys (s/registry)) (opt-syms opts)]))))
+
+(defn unstrument-all
+  "Like unstrument, but works on all vars."
+  []
+  (locking instrumented-vars
+    (into
+     []
+     (comp (map ->sym)
+           (map unstrument-1)
+           (remove nil?))
+     (keys @instrumented-vars))))
+
 (defn- explain-test
   [args spec v role]
   (ex-info
