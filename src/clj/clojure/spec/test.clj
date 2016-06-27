@@ -17,7 +17,44 @@
 (in-ns 'clojure.spec.test)
 (alias 'stc 'clojure.spec.test.check)
 
+(defn- throwable?
+  [x]
+  (instance? Throwable x))
+
+(defn ->sym
+  [x]
+  (@#'s/->sym x))
+
+(defn- ->var
+  [s-or-v]
+  (if (var? s-or-v)
+    s-or-v
+    (let [v (and (symbol? s-or-v) (resolve s-or-v))]
+      (if (var? v)
+        v
+        (throw (IllegalArgumentException. (str (pr-str s-or-v) " does not name a var")))))))
+
+(defn- collectionize
+  [x]
+  (if (symbol? x)
+    (list x)
+    x))
+
+(defn enumerate-namespace
+  "Given a symbol naming an ns, or a collection of such symbols,
+returns the set of all symbols naming vars in those nses."
+  [ns-sym-or-syms]
+  (into
+   #{}
+   (mapcat (fn [ns-sym]
+             (map
+              (fn [name-sym]
+                (symbol (name ns-sym) (name name-sym)))
+              (keys (ns-interns ns-sym)))))
+   (collectionize ns-sym-or-syms)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; instrument ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (def ^:private ^:dynamic *instrument-enabled*
   "if false, instrumented fns call straight through"
   true)
@@ -54,7 +91,6 @@
            (.applyTo ^clojure.lang.IFn f args)))
        (.applyTo ^clojure.lang.IFn f args)))))
 
-
 (defn- no-fn-spec
   [v spec]
   (ex-info (str "Fn at " v " is not spec'ed.")
@@ -63,15 +99,6 @@
 (def ^:private instrumented-vars
      "Map for instrumented vars to :raw/:wrapped fns"
      (atom {}))
-
-(defn- ->var
-  [s-or-v]
-  (if (var? s-or-v)
-    s-or-v
-    (let [v (and (symbol? s-or-v) (resolve s-or-v))]
-      (if (var? v)
-        v
-        (throw (IllegalArgumentException. (str (pr-str s-or-v) " does not name a var")))))))
 
 (defn- instrument-choose-fn
   "Helper for instrument."
@@ -84,14 +111,6 @@
   "Helper for instrument"
   [spec sym {overrides :spec}]
   (get overrides sym spec))
-
-(defn- collectionize
-  [x]
-  (if (symbol? x)
-    (list x)
-    x))
-
-(def ->sym @#'s/->sym)
 
 (defn- instrument-1
   [s opts]
@@ -123,40 +142,39 @@
   [opts]
   (reduce into #{} [(:stub opts) (keys (:replace opts)) (keys (:spec opts))]))
 
-(defn- sym-matcher
-  "Returns a fn that matches symbols that are either in syms,
-or whose namespace is in syms."
-  [syms]
-  (let [names (into #{} (map str) syms)]
-    (fn [s]
-      (or (contains? names (namespace s))
-          (contains? names (str s))))))
+(defn- fn-spec-name?
+  [s]
+  (symbol? s))
 
-(defn- validate-opts
-  [opts]
-  (assert (every? ident? (keys (:gen opts))) "instrument :gen expects ident keys"))
+(defn instrumentable-syms
+  "Given an opts map as per instrument, returns the set of syms
+that can be instrumented."
+  ([] (instrumentable-syms nil))
+  ([opts]
+     (assert (every? ident? (keys (:gen opts))) "instrument :gen expects ident keys")
+     (reduce into #{} [(filter fn-spec-name? (keys (s/registry)))
+                       (keys (:spec opts))
+                       (:stub opts)
+                       (keys (:replace opts))])))
 
 (defn instrument
-  "Instruments the vars matched by ns-or-names, a symbol or a
-collection of symbols. Instruments the current namespace if
-ns-or-names not specified. Idempotent.
-
-A var matches ns-or-names if ns-or-names includes either the var's
-fully qualified name or the var's namespace.
+  "Instruments the vars named by sym-or-syms, a symbol or collection
+of symbols, or all instrumentable vars if sym-or-syms is not
+specified.
 
 If a var has an :args fn-spec, sets the var's root binding to a
 fn that checks arg conformance (throwing an exception on failure)
 before delegating to the original fn.
 
 The opts map can be used to override registered specs, and/or to
-replace fn implementations entirely. Opts for symbols not matched
-by ns-or-names are ignored. This facilitates sharing a common
+replace fn implementations entirely. Opts for symbols not included
+in sym-or-syms are ignored. This facilitates sharing a common
 options map across many different calls to instrument.
 
 The opts map may have the following keys:
 
   :spec     a map from var-name symbols to override specs
-  :stub     a collection of var-name symbols to be replaced by stubs
+  :stub     a set of var-name symbols to be replaced by stubs
   :gen      a map from spec names to generator overrides
   :replace  a map from var-name symbols to replacement fns
 
@@ -176,63 +194,33 @@ invokes the fn you provide, enabling arbitrary stubbing and mocking.
 :spec can be used in combination with :stub or :replace.
 
 Returns a collection of syms naming the vars instrumented."
-  ([] (instrument (.name ^clojure.lang.Namespace *ns*)))
-  ([ns-or-names] (instrument ns-or-names nil))
-  ([ns-or-names opts]
-     (validate-opts opts)
-     (let [match? (sym-matcher (collectionize ns-or-names))]
-       (locking instrumented-vars
-         (into
-          []
-          (comp cat
-                (filter symbol?)
-                (filter match?)
-                (distinct)
-                (map #(instrument-1 % opts))
-                (remove nil?))
-          [(keys (s/registry)) (opt-syms opts)])))))
-
-(defn unstrument
-  "Undoes instrument on the vars matched by ns-or-names, specified
-as in instrument. Returns a collection of syms naming the vars
-unstrumented."
-  ([] (unstrument (.name ^clojure.lang.Namespace *ns*)))
-  ([ns-or-names]
-     (let [match? (sym-matcher (collectionize ns-or-names))]
-       (locking instrumented-vars
-         (into
-          []
-          (comp (map ->sym)
-                 (filter match?)
-                 (map unstrument-1)
-                 (remove nil?))
-           (keys @instrumented-vars))))))
-
-(defn instrument-all
-  "Like instrument, but works on all vars."
-  ([] (instrument-all nil))
-  ([opts]
-     (validate-opts opts)
+  ([] (instrument (instrumentable-syms)))
+  ([sym-or-syms] (instrument sym-or-syms nil))
+  ([sym-or-syms opts]
      (locking instrumented-vars
        (into
         []
-        (comp cat
-              (filter symbol?)
+        (comp (filter (instrumentable-syms opts))
               (distinct)
               (map #(instrument-1 % opts))
               (remove nil?))
-        [(keys (s/registry)) (opt-syms opts)]))))
+        (collectionize sym-or-syms)))))
 
-(defn unstrument-all
-  "Like unstrument, but works on all vars."
-  []
-  (locking instrumented-vars
-    (into
-     []
-     (comp (map ->sym)
-           (map unstrument-1)
-           (remove nil?))
-     (keys @instrumented-vars))))
+(defn unstrument
+  "Undoes instrument on the vars named by sym-or-syms, specified
+as in instrument. With no args, unstruments all instrumented vars.
+Returns a collection of syms naming the vars unstrumented."
+  ([] (unstrument (map ->sym (keys @instrumented-vars))))
+  ([sym-or-syms]
+     (locking instrumented-vars
+       (into
+        []
+        (comp (filter symbol?)
+              (map unstrument-1)
+              (remove nil?))
+        (collectionize sym-or-syms)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; testing  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- explain-test
   [args spec v role]
@@ -259,10 +247,6 @@ with explain-data under ::check-call."
               true
               (explain-test args (:fn specs) {:args cargs :ret cret} :fn))
             true))))))
-
-(defn- throwable?
-  [x]
-  (instance? Throwable x))
 
 (defn- check-fn
   [f specs {gen :gen opts ::stc/opts}]
@@ -308,34 +292,19 @@ with explain-data under ::check-call."
   [{:keys [s f v spec]} {:keys [result-callback] :as opts}]
   (when v (unstrument s))
   (try
-   (cond
-    (nil? f)
-    {:type :no-fn :sym s :spec spec}
+   (let [f (or f (when v @v))]
+     (cond
+      (nil? f)
+      {:type :no-fn :sym s :spec spec}
     
-    (:args spec)
-    (let [tcret (check-fn f spec opts)]
-      (make-test-result s spec tcret))
+      (:args spec)
+      (let [tcret (check-fn f spec opts)]
+        (make-test-result s spec tcret))
     
-    :default
-    {:type :no-argspec :sym s :spec spec})
+      :default
+      {:type :no-argspec :sym s :spec spec}))
    (finally
     (when v (instrument s)))))
-
-;; duped from spec to avoid introducing public API
-(defn- collectionize
-  [x]
-  (if (symbol? x)
-    (list x)
-    x))
-
-(defn- sym-matcher
-  "Returns a fn that matches symbols that are either in syms,
-or whose namespace is in syms."
-  [syms]
-  (let [names (into #{} (map str) syms)]
-    (fn [s]
-      (or (contains? names (namespace s))
-          (contains? names (str s))))))
 
 (defn- sym->test-map
   [s]
@@ -344,38 +313,31 @@ or whose namespace is in syms."
      :v v
      :spec (when v (s/get-spec v))}))
 
-(defn- validate-opts
+(defn- validate-test-opts
   [opts]
   (assert (every? ident? (keys (:gen opts))) "test :gen expects ident keys"))
-
-(defn syms-to-test
-  "Returns a coll of registered syms matching ns-or-names (a symbol or
-collection of symbols).
-
-A symbol matches ns-or-names if ns-or-names includes either the symbol
-itself or the symbol's namespace symbol.
-
-If no ns-or-names specified, returns all registered syms."
-  ([] (sequence
-       (filter symbol?)
-       (keys (s/registry))))
-  ([ns-or-names]
-     (let [match? (sym-matcher (collectionize ns-or-names))]
-       (sequence
-        (comp (filter symbol?)
-              (filter match?))
-        (keys (s/registry))))))
 
 (defn test-fn
   "Runs generative tests for fn f using spec and opts. See
 'test' for options and return."
   ([f spec] (test-fn f spec nil))
   ([f spec opts]
-     (validate-opts opts)
+     (validate-test-opts opts)
      (test-1 {:f f :spec spec} opts)))
 
+(defn testable-syms
+  "Given an opts map as per test, returns the set of syms that
+can be tested."
+  ([] (testable-syms nil))
+  ([opts]
+     (validate-test-opts opts)
+     (reduce into #{} [(filter fn-spec-name? (keys (s/registry)))
+                       (keys (:spec opts))])))
+
 (defn test
-  "Checks specs for vars named by syms using test.check.
+  "Run generative tests for spec conformance on vars named by
+sym-or-syms, a symbol or collection of symbols. If sym-or-syms
+is not specified, test all testable vars.
 
 The opts map includes the following optional keys, where stc
 aliases clojure.spec.test.check: 
@@ -411,10 +373,15 @@ Values for the :type key can be one of
 :no-gen     unable to generate :args
 :no-fn      unable to resolve fn to test
 "
-  ([syms] (test syms nil))
-  ([syms opts]
-     (validate-opts opts)
-     (pmap #(test-1 (sym->test-map %) opts) syms)))
+  ([] (test (testable-syms)))
+  ([sym-or-syms] (test sym-or-syms nil))
+  ([sym-or-syms opts]
+     (->> (collectionize sym-or-syms)
+          (filter (testable-syms opts))
+          (pmap
+           #(test-1 (sym->test-map %) opts)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; test reporting  ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn abbrev-result
   "Given a test result, returns an abbreviated version
@@ -425,20 +392,21 @@ suitable for summary use."
     (update (dissoc x ::stc/ret) :spec s/describe)))
 
 (defn summarize-results
-  "Given a collection of test-results, e.g. from 'test',
-pretty prints the abbrev-result of each.
+  "Given a collection of test-results, e.g. from 'test', pretty
+prints the summary-result (default abbrev-result) of each.
 
 Returns a map with :total, the total number of results, plus a
 key with a count for each different :type of result."
-  [test-results]
-  (reduce
-   (fn [summary result]
-     (pp/pprint (abbrev-result result))
-     (-> summary
-         (update :total inc)
-         (update (:type result) (fnil inc 0))))
-   {:total 0}
-   test-results))
+  ([test-results] (summarize-results test-results abbrev-result))
+  ([test-results summary-result]
+     (reduce
+      (fn [summary result]
+        (pp/pprint (summary-result result))
+        (-> summary
+            (update :total inc)
+            (update (:type result) (fnil inc 0))))
+      {:total 0}
+       test-results)))
 
 
 
