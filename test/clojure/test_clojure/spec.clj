@@ -23,7 +23,11 @@
       m1)
     (= m1 m2)))
 
-(deftest conform-explain
+(defn- ne [probs]
+  (let [[path prob] (first probs)]
+    [(assoc prob :path path)]))
+
+#_(deftest conform-explain
   (let [a (s/and #(> % 5) #(< % 10))
         o (s/or :s string? :k keyword?)
         c (s/cat :a string? :b keyword?)
@@ -47,77 +51,77 @@
 
       lrange 7 7 nil
       lrange 8 8 nil
-      lrange 42 ::s/invalid {[] {:pred '(int-in-range? 7 42 %), :val 42, :via [], :in []}}
+      lrange 42 ::s/invalid [{:path [] :pred '(int-in-range? 7 42 %), :val 42, :via [], :in []}]
 
-      irange #inst "1938" ::s/invalid {[] {:pred '(inst-in-range? #inst "1939-01-01T00:00:00.000-00:00" #inst "1946-01-01T00:00:00.000-00:00" %), :val #inst "1938", :via [], :in []}}
+      irange #inst "1938" ::s/invalid [{:path [] :pred '(inst-in-range? #inst "1939-01-01T00:00:00.000-00:00" #inst "1946-01-01T00:00:00.000-00:00" %), :val #inst "1938", :via [], :in []}]
       irange #inst "1942" #inst "1942" nil
-      irange #inst "1946" ::s/invalid {[] {:pred '(inst-in-range? #inst "1939-01-01T00:00:00.000-00:00" #inst "1946-01-01T00:00:00.000-00:00" %), :val #inst "1946", :via [], :in []}}
+      irange #inst "1946" ::s/invalid [{:path [] :pred '(inst-in-range? #inst "1939-01-01T00:00:00.000-00:00" #inst "1946-01-01T00:00:00.000-00:00" %), :val #inst "1946", :via [], :in []}]
 
-      drange 3.0 ::s/invalid {[] {:pred '(<= 3.1 %), :val 3.0, :via [], :in []}}
+      drange 3.0 ::s/invalid [{:path [] :pred '(<= 3.1 %), :val 3.0, :via [], :in []}]
       drange 3.1 3.1 nil
       drange 3.2 3.2 nil
-      drange Double/POSITIVE_INFINITY ::s/invalid {[] {:pred '(not (isInfinite %)), :val Double/POSITIVE_INFINITY, :via [], :in []}}
+      drange Double/POSITIVE_INFINITY ::s/invalid [ {:path [] :pred '(not (isInfinite %)), :val Double/POSITIVE_INFINITY, :via [], :in []}]
       ;; can't use equality-based test for Double/NaN
       ;; drange Double/NaN ::s/invalid {[] {:pred '(not (isNaN %)), :val Double/NaN, :via [], :in []}}
 
       keyword? :k :k nil
-      keyword? nil ::s/invalid {[] {:pred ::s/unknown :val nil :via []}}
-      keyword? "abc" ::s/invalid {[] {:pred ::s/unknown :val "abc" :via []}}
+      keyword? nil ::s/invalid (ne {[] {:pred ::s/unknown :val nil :via []}})
+      keyword? "abc" ::s/invalid (ne {[] {:pred ::s/unknown :val "abc" :via []}})
 
       a 6 6 nil
-      a 3 ::s/invalid '{[] {:pred (> % 5), :val 3 :via []}}
-      a 20 ::s/invalid '{[] {:pred (< % 10), :val 20 :via []}}
+      a 3 ::s/invalid (ne '{[] {:pred (> % 5), :val 3 :via []}})
+      a 20 ::s/invalid (ne '{[] {:pred (< % 10), :val 20 :via []}})
       a nil "java.lang.NullPointerException" "java.lang.NullPointerException"
       a :k "java.lang.ClassCastException" "java.lang.ClassCastException"
 
       o "a" [:s "a"] nil
       o :a [:k :a] nil
-      o 'a ::s/invalid '{[:s] {:pred string?, :val a :via []}, [:k] {:pred keyword?, :val a :via []}}
+      o 'a ::s/invalid (ne '{[:s] {:pred string?, :val a :via []}, [:k] {:pred keyword?, :val a :via []}})
 
-      c nil ::s/invalid '{[:a] {:reason "Insufficient input", :pred string?, :val (), :via []}}
-      c [] ::s/invalid '{[:a] {:reason "Insufficient input", :pred string?, :val (), :via []}}
-      c [:a] ::s/invalid '{[:a] {:pred string?, :val :a, :via []}}
-      c ["a"] ::s/invalid '{[:b] {:reason "Insufficient input", :pred keyword?, :val (), :via []}}
+      c nil ::s/invalid (ne '{[:a] {:reason "Insufficient input", :pred string?, :val (), :via []}})
+      c [] ::s/invalid (ne '{[:a] {:reason "Insufficient input", :pred string?, :val (), :via []}})
+      c [:a] ::s/invalid (ne '{[:a] {:pred string?, :val :a, :via []}})
+      c ["a"] ::s/invalid (ne '{[:b] {:reason "Insufficient input", :pred keyword?, :val (), :via []}})
       c ["s" :k] '{:a "s" :b :k} nil
-      c ["s" :k 5] ::s/invalid '{[] {:reason "Extra input", :pred (cat :a string? :b keyword?), :val (5), :via []}}
+      c ["s" :k 5] ::s/invalid (ne '{[] {:reason "Extra input", :pred (cat :a string? :b keyword?), :val (5), :via []}})
       (s/cat) nil {} nil
-      (s/cat) [5] ::s/invalid '{[] {:reason "Extra input", :pred (cat), :val (5), :via [], :in [0]}}
+      (s/cat) [5] ::s/invalid (ne '{[] {:reason "Extra input", :pred (cat), :val (5), :via [], :in [0]}})
 
-      either nil ::s/invalid '{[] {:reason "Insufficient input", :pred (alt :a string? :b keyword?), :val () :via []}}
-      either [] ::s/invalid '{[] {:reason "Insufficient input", :pred (alt :a string? :b keyword?), :val () :via []}}
+      either nil ::s/invalid (ne '{[] {:reason "Insufficient input", :pred (alt :a string? :b keyword?), :val () :via []}})
+      either [] ::s/invalid (ne '{[] {:reason "Insufficient input", :pred (alt :a string? :b keyword?), :val () :via []}})
       either [:k] [:b :k] nil
       either ["s"] [:a "s"] nil
-      either [:b "s"] ::s/invalid '{[] {:reason "Extra input", :pred (alt :a string? :b keyword?), :val ("s") :via []}}
+      either [:b "s"] ::s/invalid (ne '{[] {:reason "Extra input", :pred (alt :a string? :b keyword?), :val ("s") :via []}})
 
       star nil [] nil
       star [] [] nil
       star [:k] [:k] nil
       star [:k1 :k2] [:k1 :k2] nil
-      star [:k1 :k2 "x"] ::s/invalid '{[] {:pred keyword?, :val "x" :via []}}
-      star ["a"] ::s/invalid {[] '{:pred keyword?, :val "a" :via []}}
+      star [:k1 :k2 "x"] ::s/invalid (ne '{[] {:pred keyword?, :val "x" :via []}})
+      star ["a"] ::s/invalid (ne {[] '{:pred keyword?, :val "a" :via []}})
 
-      plus nil ::s/invalid '{[] {:reason "Insufficient input", :pred keyword?, :val () :via []}}
-      plus [] ::s/invalid '{[] {:reason "Insufficient input", :pred keyword?, :val () :via []}}
+      plus nil ::s/invalid (ne '{[] {:reason "Insufficient input", :pred keyword?, :val () :via []}})
+      plus [] ::s/invalid (ne '{[] {:reason "Insufficient input", :pred keyword?, :val () :via []}})
       plus [:k] [:k] nil
       plus [:k1 :k2] [:k1 :k2] nil
-      plus [:k1 :k2 "x"] ::s/invalid '{[] {:pred keyword?, :val "x", :via [], :in [2]}}
-      plus ["a"] ::s/invalid '{[] {:pred keyword?, :val "a" :via []}}
+      plus [:k1 :k2 "x"] ::s/invalid (ne '{[] {:pred keyword?, :val "x", :via [], :in [2]}})
+      plus ["a"] ::s/invalid (ne '{[] {:pred keyword?, :val "a" :via []}})
 
       opt nil nil nil
       opt [] nil nil
-      opt :k ::s/invalid '{[] {:pred (? keyword?), :val :k, :via []}}
+      opt :k ::s/invalid (ne '{[] {:pred (? keyword?), :val :k, :via []}})
       opt [:k] :k nil
-      opt [:k1 :k2] ::s/invalid '{[] {:reason "Extra input", :pred (? keyword?), :val (:k2), :via []}}
-      opt [:k1 :k2 "x"] ::s/invalid '{[] {:reason "Extra input", :pred (? keyword?), :val (:k2 "x"), :via []}}
-      opt ["a"] ::s/invalid '{[] {:pred keyword?, :val "a", :via []}}
+      opt [:k1 :k2] ::s/invalid (ne '{[] {:reason "Extra input", :pred (? keyword?), :val (:k2), :via []}})
+      opt [:k1 :k2 "x"] ::s/invalid (ne '{[] {:reason "Extra input", :pred (? keyword?), :val (:k2 "x"), :via []}})
+      opt ["a"] ::s/invalid (ne '{[] {:pred keyword?, :val "a", :via []}})
 
       andre nil nil nil
       andre [] nil nil
-      andre :k :clojure.spec/invalid '{[] {:pred (& (* keyword?) even-count?), :val :k, :via []}}
-      andre [:k] ::s/invalid '{[] {:pred even-count?, :val [:k], :via []}}
+      andre :k :clojure.spec/invalid (ne '{[] {:pred (& (* keyword?) even-count?), :val :k, :via []}})
+      andre [:k] ::s/invalid (ne '{[] {:pred even-count?, :val [:k], :via []}})
       andre [:j :k] [:j :k] nil
 
-      m nil ::s/invalid '{[] {:pred map?, :val nil, :via []}}
+      m nil ::s/invalid (ne '{[] {:pred map?, :val nil, :via []}})
       m {} {} nil
       m {:a "b"} {:a "b"} nil
 

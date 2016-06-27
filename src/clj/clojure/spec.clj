@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.spec
-  (:refer-clojure :exclude [+ * and or cat def keys])
+  (:refer-clojure :exclude [+ * and or cat def keys merge])
   (:require [clojure.walk :as walk]
             [clojure.spec.gen :as gen]
             [clojure.string :as str]))
@@ -169,7 +169,7 @@
 (defn explain-data
   "Given a spec and a value x which ought to conform, returns nil if x
   conforms, else a map with at least the key ::problems whose value is
-  a path->problem-map, where problem-map has at least :pred and :val
+  a collection of problem-maps, where problem-map has at least :path :pred and :val
   keys describing the predicate and the value that failed at that
   path."
   [spec x]
@@ -181,7 +181,7 @@
   (if ed
     (do
       ;;(prn {:ed ed})
-      (doseq [[path {:keys [pred val reason via in] :as prob}]  (::problems ed)]
+      (doseq [{:keys [path pred val reason via in] :as prob}  (::problems ed)]
         (when-not (empty? in)
           (print "In:" (pr-str in) ""))
         (print "val: ")
@@ -195,7 +195,7 @@
         (pr pred)
         (when reason (print ", " reason))
         (doseq [[k v] prob]
-          (when-not (#{:pred :val :reason :via :in} k)
+          (when-not (#{:path :pred :val :reason :via :in} k)
             (print "\n\t" (pr-str k) " ")
             (pr v)))
         (newline))
@@ -440,6 +440,15 @@
   [& pred-forms]
   `(and-spec-impl '~(mapv res pred-forms) ~(vec pred-forms) nil))
 
+(defmacro merge
+  "Takes map-validating specs (e.g. 'keys' specs) and
+  returns a spec that returns a conformed map satisfying all of the
+  specs.  Successive conformed values propagate through rest of
+  predicates. Unlike 'and', merge can generate maps satisfying the
+  union of the predicates."
+  [& pred-forms]
+  `(merge-spec-impl '~(mapv res pred-forms) ~(vec pred-forms) nil))
+
 (defmacro every
   "takes a pred and validates collection elements against that pred.
 
@@ -451,6 +460,7 @@
 
   Takes several kwargs options that further constrain the collection:
 
+  :kind - one of [], (), {}, #{} - must be this kind of collection - (default nil)
   :count - specifies coll has exactly this count (default nil)
   :min-count, :max-count - coll has count (<= min-count count max-count) (defaults nil)
   :distinct - all the elements are distinct (default nil)
@@ -458,49 +468,50 @@
   And additional args that control gen
 
   :gen-max - the maximum coll size to generate (default 20)
-  :gen-into - the default colection to generate into (will be emptied) (default [])
+  :into - one of [], (), {}, #{} - the default collection to generate into (default same as :kind if supplied, else [])
   
   Optionally takes :gen generator-fn, which must be a fn of no args that
   returns a test.check generator
 
   See also - coll-of, every-kv
 "
-  [pred & {:keys [count max-count min-count distinct gen-max gen-into gen] :as opts}]
+  [pred & {:keys [into kind count max-count min-count distinct gen-max gen] :as opts}]
   `(every-impl '~pred ~pred ~(dissoc opts :gen) ~gen))
 
 (defmacro every-kv
   "like 'every' but takes separate key and val preds and works on associative collections.
 
-  Same options as 'every'
+  Same options as 'every', :into defaults to {}
 
   See also - map-of"
 
   [kpred vpred & opts]
-  `(every (tuple ~kpred ~vpred) ::kfn (fn [i# v#] (nth v# 0)) :gen-into {} ~@opts))
+  `(every (tuple ~kpred ~vpred) ::kfn (fn [i# v#] (nth v# 0)) :into {} ~@opts))
 
 (defmacro coll-of
-  "Returns a spec for a collection of items satisfying pred. The
-  generator will fill an empty init-coll.  Unlike 'every', coll-of
-  will exhaustively conform every value.
+  "Returns a spec for a collection of items satisfying pred. Unlike
+  'every', coll-of will exhaustively conform every value.
 
-  Same options as 'every'.
+  Same options as 'every'. conform will produce a collection
+  corresponding to :into if supplied, else will match the input collection,
+  avoiding rebuilding when possible.
 
   See also - every, map-of"
-  [pred init-coll & opts]
-  `(every ~pred ::conform-all true :gen-into ~init-coll ~@opts))
+  [pred & opts]
+  `(every ~pred ::conform-all true ~@opts))
 
 (defmacro map-of
   "Returns a spec for a map whose keys satisfy kpred and vals satisfy
   vpred. Unlike 'every-kv', map-of will exhaustively conform every
   value.
 
-  Same options as 'every', with the addition of:
+  Same options as 'every', :kind set to {}, with the addition of:
 
   :conform-keys - conform keys as well as values (default false)
 
   See also - every-kv"
   [kpred vpred & opts]
-  `(and (every-kv ~kpred ~vpred ::conform-all true ~@opts) map?))
+  `(every-kv ~kpred ~vpred ::conform-all true ~@opts :kind {}))
 
 
 (defmacro *
@@ -894,7 +905,7 @@ unstrumented."
   (let [pred (maybe-spec pred)]
     (if (spec? pred)
       (explain* pred path (if-let [name (spec-name pred)] (conj via name) via) in v)
-      {path {:pred (abbrev form) :val v :via via :in in}})))
+      [{:path path :pred (abbrev form) :val v :via via :in in}])))
 
 (defn ^:skip-wiki map-spec-impl
   "Do not call this directly, use 'spec' with a map argument"
@@ -934,14 +945,14 @@ unstrumented."
                     ret))))
      (explain* [_ path via in x]
                (if-not (map? x)
-                 {path {:pred 'map? :val x :via via :in in}}
+                 [{:path path :pred 'map? :val x :via via :in in}]
                  (let [reg (registry)]
-                   (apply merge
+                   (apply concat
                           (when-let [probs (->> (map (fn [pred form] (when-not (pred x) (abbrev form)))
                                                      pred-exprs pred-forms)
                                                 (keep identity)
                                                 seq)]
-                            {path {:pred (vec probs) :val x :via via :in in}})
+                            [{:path path :pred (vec probs) :val x :via via :in in}])
                           (map (fn [[k v]]
                                  (when-not (c/or (not (contains? reg (keys->specs k)))
                                                  (valid? (keys->specs k) v k))
@@ -996,7 +1007,7 @@ unstrumented."
                         x))
        (explain* [_ path via in x]
                  (when (= ::invalid (dt pred x form cpred?))
-                   {path {:pred (abbrev form) :val x :via via :in in}}))
+                   [{:path path :pred (abbrev form) :val x :via via :in in}]))
        (gen* [_ _ _ _] (if gfn
                          (gfn)
                          (gen/gen-for-pred pred)))
@@ -1029,7 +1040,7 @@ unstrumented."
                         path (conj path dv)]
                     (if-let [pred (predx x)]
                       (explain-1 form pred path via in x)
-                      {path {:pred form :val x :reason "no method" :via via :in in}})))
+                      [{:path path :pred form :val x :reason "no method" :via via :in in}])))
         (gen* [_ overrides path rmap]
               (if gfn
                 (gfn)
@@ -1082,13 +1093,13 @@ unstrumented."
       (explain* [_ path via in x]
                 (cond
                  (not (vector? x))
-                 {path {:pred 'vector? :val x :via via :in in}}
+                 [{:path path :pred 'vector? :val x :via via :in in}]
 
                  (not= (count x) (count preds))
-                 {path {:pred `(= (count ~'%) ~(count preds)) :val x :via via :in in}}
+                 [{:path path :pred `(= (count ~'%) ~(count preds)) :val x :via via :in in}]
 
                  :else
-                 (apply merge
+                 (apply concat
                         (map (fn [i form pred]
                                (let [v (x i)]
                                  (when-not (valid? pred v)
@@ -1128,7 +1139,7 @@ unstrumented."
      (unform* [_ [k x]] (unform (kps k) x))
      (explain* [this path via in x]
                (when-not (valid? this x)
-                 (apply merge
+                 (apply concat
                         (map (fn [k form pred]
                                (when-not (valid? pred x)
                                  (explain-1 form pred (conj path k) via in x)))
@@ -1182,39 +1193,70 @@ unstrumented."
    (with-gen* [_ gfn] (and-spec-impl forms preds gfn))
    (describe* [_] `(and ~@forms))))
 
-(defn- coll-prob [x distinct count min-count max-count
+(defn ^:skip-wiki merge-spec-impl
+  "Do not call this directly, use 'merge'"
+  [forms preds gfn]
+  (reify
+   Spec
+   (conform* [_ x] (and-preds x preds forms))
+   (unform* [_ x] (reduce #(unform %2 %1) x (reverse preds)))
+   (explain* [_ path via in x]
+             (apply concat
+                    (map #(explain-1 %1 %2 path via in x)
+                         forms preds)))
+   (gen* [_ overrides path rmap]
+         (if gfn
+           (gfn)
+           (gen/fmap
+            #(apply c/merge %)
+            (apply gen/tuple (map #(gensub %1 overrides path rmap %2)
+                                  preds forms)))))
+   (with-gen* [_ gfn] (merge-spec-impl forms preds gfn))
+   (describe* [_] `(merge ~@forms))))
+
+(defn- coll-prob [x kfn kform distinct count min-count max-count
                   path via in]
-  (cond
-   (not (seqable? x))
-   {path {:pred 'seqable? :val x :via via :in in}}
+  (let []
+    (cond
+     (not (kfn x))
+     [{:path path :pred kform :val x :via via :in in}]
 
-   (c/and distinct (not (empty? x)) (not (apply distinct? x)))
-   {path {:pred 'distinct? :val x :via via :in in}}
+     (c/and distinct (not (empty? x)) (not (apply distinct? x)))
+     [{:path path :pred 'distinct? :val x :via via :in in}]
 
-   (c/and count (not= count (bounded-count count x)))
-   {path {:pred `(= ~count ~(c/count x)) :val x :via via :in in}}
+     (c/and count (not= count (bounded-count count x)))
+     [{:path path :pred `(= ~count (c/count ~'%)) :val x :via via :in in}]
 
-   (c/and (c/or min-count max-count)
-          (not (<= (c/or min-count 0)
-                   (bounded-count (if max-count (inc max-count) min-count) x)
-                   (c/or max-count Integer/MAX_VALUE))))
-   {path {:pred `(<= ~(c/or min-count 0) ~(c/count x) ~(c/or max-count 'Integer/MAX_VALUE)) :val x :via via :in in}}))
+     (c/and (c/or min-count max-count)
+            (not (<= (c/or min-count 0)
+                     (bounded-count (if max-count (inc max-count) min-count) x)
+                     (c/or max-count Integer/MAX_VALUE))))
+     [{:path path :pred `(<= ~(c/or min-count 0) (c/count ~'%) ~(c/or max-count 'Integer/MAX_VALUE)) :val x :via via :in in}])))
 
 (defn ^:skip-wiki every-impl
   "Do not call this directly, use 'every', 'every-kv', 'coll-of' or 'map-of'"
   ([form pred opts] (every-impl form pred opts nil))
-  ([form pred {:keys [count max-count min-count distinct gen-max gen-into ::kfn
+  ([form pred {gen-into :into
+               :keys [kind count max-count min-count distinct gen-max ::kfn
                       conform-keys ::conform-all]
-               :or {gen-max 20, gen-into []}
+               :or {gen-max 20}
                :as opts}
     gfn]
-     (let [check? #(valid? pred %)
+     (let [conform-into (c/or gen-into kind)
+           gen-into (c/or gen-into kind [])
+           check? #(valid? pred %)
            kfn (c/or kfn (fn [i v] i))
            addcv (fn [ret i v cv] (conj ret cv))
+           [kindfn kindform] (cond 
+                              (map? kind)  [map? `map?]
+                              (vector? kind)  [vector? `vector?]
+                              (list? kind)  [list? `list?]
+                              (set? kind) [set? `set?]
+                              :else [seqable? `seqable?])
            cfns (fn [x]
                   ;;returns a tuple of [init add complete] fns
                   (cond
-                   (vector? x)
+                   (c/and (vector? x) (c/or (not conform-into) (vector? conform-into)))
                    [identity
                     (fn [ret i v cv]
                       (if (identical? v cv)
@@ -1222,7 +1264,7 @@ unstrumented."
                         (assoc ret i cv)))
                     identity]
 
-                   (c/and (map? x) (map? gen-into))
+                   (c/and (map? x) (map? conform-into))
                    [(if conform-keys empty identity)
                     (fn [ret i v cv]
                       (if (c/and (identical? v cv) (not conform-keys))
@@ -1230,14 +1272,15 @@ unstrumented."
                         (assoc ret (nth (if conform-keys cv v) 0) (nth cv 1))))
                     identity]
                   
-                   (list? x) [empty addcv reverse]
+                   (c/or (list? conform-into) (c/and (not conform-into) (list? x)))
+                   [(constantly ()) addcv reverse]
 
-                   :else [empty addcv identity]))]
+                   :else [#(empty (c/or conform-into %)) addcv identity]))]
        (reify
         Spec
         (conform* [_ x]
                   (cond
-                   (coll-prob x distinct count min-count max-count
+                   (coll-prob x kindfn kindform distinct count min-count max-count
                               nil nil nil)
                    ::invalid
 
@@ -1265,15 +1308,15 @@ unstrumented."
                            ::invalid))))
         (unform* [_ x] x)
         (explain* [_ path via in x]
-                  (c/or (coll-prob x distinct count min-count max-count
+                  (c/or (coll-prob x kindfn kindform distinct count min-count max-count
                                    path via in)
-                        (apply merge
+                        (apply concat
                                ((if conform-all identity (partial take *coll-error-limit*))
                                 (keep identity
                                       (map (fn [i v]
                                              (let [k (kfn i v)]
                                                (when-not (check? v)
-                                                 (let [prob (explain-1 form pred (conj path k) via (conj in k) v)]
+                                                 (let [prob (explain-1 form pred path via (conj in k) v)]
                                                    prob))))
                                            (range) x))))))
         (gen* [_ overrides path rmap]
@@ -1498,11 +1541,12 @@ unstrumented."
         {:keys [::op ps ks forms splice p1 p2] :as p} (reg-resolve! p)
         via (if-let [name (spec-name p)] (conj via name) via)
         insufficient (fn [path form]
-                       {path {:reason "Insufficient input"
-                              :pred (abbrev form)
-                              :val ()
-                              :via via
-                              :in in}})]
+                       [{:path path
+                         :reason "Insufficient input"
+                         :pred (abbrev form)
+                         :val ()
+                         :via via
+                         :in in}])]
     (when p
       (case op
             ::accept nil
@@ -1530,7 +1574,7 @@ unstrumented."
                        (op-explain form pred path via in input)))
             ::alt (if (empty? input)
                     (insufficient path (op-describe p))
-                    (apply merge
+                    (apply concat
                            (map (fn [k form pred]
                                   (op-explain (c/or form (op-describe pred))
                                               pred
@@ -1607,17 +1651,19 @@ unstrumented."
         (if (accept? p)
           (if (= (::op p) ::pcat)
             (op-explain (op-describe p) p path via (conj in i) (seq data))
-            {path {:reason "Extra input"
-                   :pred (abbrev (op-describe re))
-                   :val data
-                   :via via
-                   :in (conj in i)}})
+            [{:path path
+              :reason "Extra input"
+              :pred (abbrev (op-describe re))
+              :val data
+              :via via
+              :in (conj in i)}])
           (c/or (op-explain (op-describe p) p path via (conj in i) (seq data))
-                {path {:reason "Extra input"
-                       :pred (abbrev (op-describe p))
-                       :val data
-                       :via via
-                       :in (conj in i)}}))))))
+                [{:path path
+                  :reason "Extra input"
+                  :pred (abbrev (op-describe p))
+                  :val data
+                  :via via
+                  :in (conj in i)}]))))))
 
 (defn ^:skip-wiki regex-spec-impl
   "Do not call this directly, use 'spec' with a regex op argument"
@@ -1632,7 +1678,7 @@ unstrumented."
    (explain* [_ path via in x]
              (if (c/or (nil? x) (coll? x))
                (re-explain path via in re (seq x))
-               {path {:pred (abbrev (op-describe re)) :val x :via via :in in}}))
+               [{:path path :pred (abbrev (op-describe re)) :val x :via via :in in}]))
    (gen* [_ overrides path rmap]
          (if gfn
            (gfn)
@@ -1685,7 +1731,7 @@ unstrumented."
                      (let [ret (try (apply f args) (catch Throwable t t))]
                        (if (instance? Throwable ret)
                          ;;TODO add exception data
-                         {path {:pred '(apply fn) :val args :reason (.getMessage ^Throwable ret) :via via :in in}}
+                         [{:path path :pred '(apply fn) :val args :reason (.getMessage ^Throwable ret) :via via :in in}]
 
                          (let [cret (dt retspec ret rform)]
                            (if (= ::invalid cret)
@@ -1693,7 +1739,7 @@ unstrumented."
                              (when fnspec
                                (let [cargs (conform argspec args)]
                                  (explain-1 fform fnspec (conj path :fn) via in {:args cargs :ret cret})))))))))
-                 {path {:pred 'ifn? :val f :via via :in in}}))
+                 [{:path path :pred 'ifn? :val f :via via :in in}]))
      (gen* [_ overrides _ _] (if gfn
              (gfn)
              (gen/return
