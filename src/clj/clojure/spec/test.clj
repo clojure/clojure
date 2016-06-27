@@ -305,17 +305,21 @@ with explain-data under ::check-call."
     (assoc result :type (result-type result))))
 
 (defn- test-1
-  [{:keys [s f spec]} {:keys [result-callback] :as opts}]
-  (cond
-   (nil? f)
-   {:type :no-fn :sym s :spec spec}
-                
-   (:args spec)
-   (let [tcret (check-fn f spec opts)]
-     (make-test-result s spec tcret))
-                
-   :default
-   {:type :no-argspec :sym s :spec spec}))
+  [{:keys [s f v spec]} {:keys [result-callback] :as opts}]
+  (when v (unstrument s))
+  (try
+   (cond
+    (nil? f)
+    {:type :no-fn :sym s :spec spec}
+    
+    (:args spec)
+    (let [tcret (check-fn f spec opts)]
+      (make-test-result s spec tcret))
+    
+    :default
+    {:type :no-argspec :sym s :spec spec})
+   (finally
+    (when v (instrument s)))))
 
 ;; duped from spec to avoid introducing public API
 (defn- collectionize
@@ -337,7 +341,7 @@ or whose namespace is in syms."
   [s]
   (let [v (resolve s)]
     {:s s
-     :f (when v @v)
+     :v v
      :spec (when v (s/get-spec v))}))
 
 (defn- validate-opts
