@@ -132,82 +132,9 @@
       ;;coll [:a "b"] ::s/invalid '{[] {:pred (coll-checker keyword?), :val [:a b], :via []}}
       )))
 
-(s/fdef flip-nums
-        :args (s/cat :arg1 integer? :arg2 integer?)
-        :ret vector?
-        :fn (fn [{:keys [args ret]}]
-              (= ret [(:arg2 args) (:arg1 args)])))
-
-(def ^:dynamic *break-flip-nums* false)
-(defn flip-nums
-  "Set *break-flip-nums* to break this fns compatibility with
-its spec for test purposes."
-  [a b]
-  (if *break-flip-nums*
-    (when-not (= a b)
-      (vec (sort [a b])))
-    [b a]))
-
-(defmacro get-ex-data
-  [x]
-  `(try
-    ~x
-    nil
-    (catch Throwable t#
-      (ex-data t#))))
-
-;; Note the the complicated equality comparisons below are exactly the
-;; kind of thing that spec helps you avoid, used here only because we
-;; are near the bottom, testing spec itself.
-(deftest test-instrument-flip-nums
-  (when-not (= "true" (System/getProperty "clojure.compiler.direct-linking"))
-    (binding [*break-flip-nums* true]
-      (try
-       (= [1 2] (flip-nums 2 1))
-       (= [:a :b] (flip-nums :a :b))
-       (= [1 2] (flip-nums 1 2))
-       (is (nil? (flip-nums 1 1)))
-       (s/instrument `flip-nums)
-       (is (= [1 2] (flip-nums 2 1)))
-       (is (submap? '{:clojure.spec/problems {[:args :arg1] {:pred integer?, :val :a, :via []}}, :clojure.spec/args (:a :b)}
-              (get-ex-data (flip-nums :a :b))))
-       (is (submap? '{:clojure.spec/problems {[:fn] {:pred (fn [{:keys [args ret]}] (= ret [(:arg2 args) (:arg1 args)])), :val {:args {:arg1 1, :arg2 2}, :ret [1 2]}, :via []}}, :clojure.spec/args (1 2)}
-              (get-ex-data (flip-nums 1 2))))
-       (is (submap? '{:clojure.spec/problems {[:ret] {:pred vector?, :val nil, :via []}}, :clojure.spec/args (1 1)}
-              (get-ex-data (flip-nums 1 1))))
-       (s/unstrument `flip-nums)
-       (= [1 2] (flip-nums 2 1))
-       (= [:a :b] (flip-nums :a :b))
-       (= [1 2] (flip-nums 1 2))
-       (is (nil? (flip-nums 1 1)))
-       (s/unstrument `flip-nums)))))
-
-(def core-pred-syms
-  (into #{}
-        (comp (map first) (filter (fn [s] (.endsWith (name s) "?"))))
-        (ns-publics 'clojure.core)))
-
-(def generatable-core-pred-syms
-  (into #{}
-        (filter #(gen/gen-for-pred @ (resolve %)))
-        core-pred-syms))
-
-(s/fdef generate-from-core-pred
-        :args (s/cat :s generatable-core-pred-syms)
-        :ret ::s/any
-        :fn (fn [{:keys [args ret]}]
-              (@(resolve (:s args)) ret)))
-
-(defn generate-from-core-pred
-  [s]
-  (gen/generate (gen/gen-for-pred @(resolve s))))
-
 (comment
   (require '[clojure.test :refer (run-tests)])
   (in-ns 'clojure.test-clojure.spec)
   (run-tests)
-
-  (stest/run-all-tests)
-  (stest/check-var #'generate-from-core-pred :num-tests 10000)
 
   )
