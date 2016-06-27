@@ -452,7 +452,7 @@
   Takes several kwargs options that further constrain the collection:
 
   :count - specifies coll has exactly this count (default nil)
-  :min-count, :max-count - coll has count (<= min count max) (default nil)
+  :min-count, :max-count - coll has count (<= min-count count max-count) (defaults nil)
   :distinct - all the elements are distinct (default nil)
 
   And additional args that control gen
@@ -1173,11 +1173,11 @@ unstrumented."
 (defn ^:skip-wiki and-spec-impl
   "Do not call this directly, use 'and'"
   [forms preds gfn]
-     (reify
-      Spec
-      (conform* [_ x] (and-preds x preds forms))
-      (unform* [_ x] (reduce #(unform %2 %1) x (reverse preds)))
-      (explain* [_ path via in x] (explain-pred-list forms preds path via in x))
+  (reify
+   Spec
+   (conform* [_ x] (and-preds x preds forms))
+   (unform* [_ x] (reduce #(unform %2 %1) x (reverse preds)))
+   (explain* [_ path via in x] (explain-pred-list forms preds path via in x))
    (gen* [_ overrides path rmap] (if gfn (gfn) (gensub (first preds) overrides path rmap (first forms))))
    (with-gen* [_ gfn] (and-spec-impl forms preds gfn))
    (describe* [_] `(and ~@forms))))
@@ -1192,13 +1192,13 @@ unstrumented."
    {path {:pred 'distinct? :val x :via via :in in}}
 
    (c/and count (not= count (bounded-count count x)))
-   {path {:pred `(= ~count (c/count %)) :val x :via via :in in}}
+   {path {:pred `(= ~count ~(c/count x)) :val x :via via :in in}}
 
    (c/and (c/or min-count max-count)
           (not (<= (c/or min-count 0)
                    (bounded-count (if max-count (inc max-count) min-count) x)
                    (c/or max-count Integer/MAX_VALUE))))
-   {path {:pred `(<= ~(c/or min-count 0) (c/count %) ~(c/or max-count 'Integer/MAX_VALUE)) :val x :via via :in in}}))
+   {path {:pred `(<= ~(c/or min-count 0) ~(c/count x) ~(c/or max-count 'Integer/MAX_VALUE)) :val x :via via :in in}}))
 
 (defn ^:skip-wiki every-impl
   "Do not call this directly, use 'every', 'every-kv', 'coll-of' or 'map-of'"
