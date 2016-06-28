@@ -77,7 +77,8 @@ returns the set of all symbols naming vars in those nses."
                    (let [conformed (s/conform spec data)]
                      (if (= ::s/invalid conformed)
                        (let [ed (assoc (s/explain-data* spec [role] [] [] data)
-                                  ::s/args args)]
+                                  ::s/args args
+                                  ::s/failure :instrument-check-failed)]
                          (throw (ex-info
                                  (str "Call to " v " did not conform to spec:\n" (with-out-str (s/explain-out ed)))
                                  ed)))
@@ -94,7 +95,7 @@ returns the set of all symbols naming vars in those nses."
 (defn- no-fn-spec
   [v spec]
   (ex-info (str "Fn at " v " is not spec'ed.")
-           {:var v :spec spec}))
+           {:var v :spec spec ::s/failure :no-fn-spec}))
 
 (def ^:private instrumented-vars
      "Map for instrumented vars to :raw/:wrapped fns"
@@ -229,7 +230,8 @@ Returns a collection of syms naming the vars unstrumented."
    (when-not (s/valid? spec v nil)
      (assoc (s/explain-data* spec [role] [] [] v)
        ::args args
-       ::val v))))
+       ::val v
+       ::s/failure :test-failed))))
 
 (defn- check-call
   "Returns true if call passes specs, otherwise *returns* an exception
@@ -257,36 +259,21 @@ with explain-data under ::check-call."
       (let [prop (gen/for-all* [g] #(check-call f specs %))]
         (apply gen/quick-check num-tests prop (mapcat identity opts))))))
 
-(defn- unwrap-return
-  "Unwraps exceptions used to flow information through test.check."
+(defn- failure-type
   [x]
-  (let [data (ex-data x)]
-    (if (or (::args data) (::s/args data) (::s/no-gen-for data))
-      data
-      x)))
-
-(defn- result-type
-  [result]
-  (let [ret (:result result)]
-    (cond
-     (true? ret) :pass
-     (::s/args ret) :no-argspec
-     (::s/no-gen-for ret) :no-gen
-     (::args ret) :fail
-     :default :error)))
+  (::s/failure (ex-data x)))
 
 (defn- make-test-result
   "Builds spec result map."
   [test-sym spec test-check-ret]
-  (let [result (merge {:spec spec
-                       ::stc/ret test-check-ret}
-                      (when test-sym
-                        {:sym test-sym})
-                      (when-let [result (-> test-check-ret :result)]
-                        {:result (unwrap-return result)})
-                      (when-let [shrunk (-> test-check-ret :shrunk)]
-                        {:result (unwrap-return (:result shrunk))}))]
-    (assoc result :type (result-type result))))
+  (merge {:spec spec
+          ::stc/ret test-check-ret}
+         (when test-sym
+           {:sym test-sym})
+         (when-let [result (-> test-check-ret :result)]
+           {:result result})
+         (when-let [shrunk (-> test-check-ret :shrunk)]
+           {:result (:result shrunk)})))
 
 (defn- test-1
   [{:keys [s f v spec]} {:keys [result-callback] :as opts}]
@@ -295,14 +282,14 @@ with explain-data under ::check-call."
    (let [f (or f (when v @v))]
      (cond
       (nil? f)
-      {:type :no-fn :sym s :spec spec}
+      {::s/failure :no-fn :sym s :spec spec}
     
       (:args spec)
       (let [tcret (check-fn f spec opts)]
         (make-test-result s spec tcret))
     
       :default
-      {:type :no-argspec :sym s :spec spec}))
+      {::s/failure :no-args-spec :sym s :spec spec}))
    (finally
     (when v (instrument s)))))
 
@@ -383,13 +370,29 @@ Values for the :type key can be one of
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; test reporting  ;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn- unwrap-failure
+  [x]
+  (if (failure-type x)
+    (ex-data x)
+    x))
+
+(defn- result-type
+  [ret]
+  (let [result (:result ret)]
+    (cond
+     (true? result) :test-passed
+     (failure-type result) (failure-type result)
+     :default :test-threw)))
+
 (defn abbrev-result
   "Given a test result, returns an abbreviated version
 suitable for summary use."
   [x]
   (if (true? (:result x))
     (dissoc x :spec ::stc/ret :result)
-    (update (dissoc x ::stc/ret) :spec s/describe)))
+    (-> (dissoc x ::stc/ret)
+        (update :spec s/describe)
+        (update :result unwrap-failure))))
 
 (defn summarize-results
   "Given a collection of test-results, e.g. from 'test', pretty
@@ -404,7 +407,7 @@ key with a count for each different :type of result."
         (pp/pprint (summary-result result))
         (-> summary
             (update :total inc)
-            (update (:type result) (fnil inc 0))))
+            (update (result-type result) (fnil inc 0))))
       {:total 0}
        test-results)))
 

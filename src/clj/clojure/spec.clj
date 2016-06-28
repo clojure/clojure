@@ -224,7 +224,7 @@
       (gen/such-that #(valid? spec %) g 100)
       (let [abbr (abbrev form)]
         (throw (ex-info (str "Unable to construct gen at: " path " for: " abbr)
-                        {::path path ::no-gen-for form}))))))
+                        {::path path ::form form ::failure :no-gen}))))))
 
 (defn gen
   "Given a spec, returns the generator for it, or throws if none can
