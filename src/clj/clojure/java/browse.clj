@@ -39,6 +39,11 @@
 
 (def ^:dynamic *open-url-script* (atom :uninitialized))
 
+(defn- success?
+  "Check that a shell command executed successfully"
+  [result]
+  (= 0 (:exit result)))
+
 (defn- open-url-by-script
   "Open url through script"
   [url]
@@ -46,7 +51,7 @@
         script (if (= :uninitialized script)
                  (reset! *open-url-script* (open-url-script-val))
                  script)]
-    (when script (= 0 (:exit (sh/sh script (str url)))))))
+    (when script (success? (sh/sh script (str url))))))
 
 (defn- open-url-in-browser
   "Opens url (a string) in the default system web browser.  May not
