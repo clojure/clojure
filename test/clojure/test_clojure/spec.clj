@@ -35,8 +35,8 @@
         m (s/map-of keyword? string?)
         mkeys (s/map-of (s/and keyword? (s/conformer name)) ::s/any)
         mkeys2 (s/map-of (s/and keyword? (s/conformer name)) ::s/any :conform-keys true)
-        s (s/coll-of (s/spec (s/cat :tag keyword? :val ::s/any)) :kind ())
-        v (s/coll-of keyword? :kind [])
+        s (s/coll-of (s/spec (s/cat :tag keyword? :val ::s/any)) :kind list?)
+        v (s/coll-of keyword? :kind vector?)
         coll (s/coll-of keyword?)
         lrange (s/int-in 7 42)
         drange (s/double-in :infinite? false :NaN? false :min 3.1 :max 3.2)
@@ -122,24 +122,24 @@
       andre [:k] ::s/invalid '[{:pred even-count?, :val [:k]}]
       andre [:j :k] [:j :k] nil
 
-      m nil ::s/invalid '[{:pred clojure.core/map?, :val nil}]
+      m nil ::s/invalid '[{:pred map?, :val nil}]
       m {} {} nil
       m {:a "b"} {:a "b"} nil
 
-      mkeys nil ::s/invalid '[{:pred clojure.core/map?, :val nil}]
+      mkeys nil ::s/invalid '[{:pred map?, :val nil}]
       mkeys {} {} nil
       mkeys {:a 1 :b 2} {:a 1 :b 2} nil
 
-      mkeys2 nil ::s/invalid '[{:pred clojure.core/map?, :val nil}]
+      mkeys2 nil ::s/invalid '[{:pred map?, :val nil}]
       mkeys2 {} {} nil
       mkeys2 {:a 1 :b 2} {"a" 1 "b" 2} nil
 
       s '([:a 1] [:b "2"]) '({:tag :a :val 1} {:tag :b :val "2"}) nil
 
       v [:a :b] [:a :b] nil
-      v '(:a :b) ::s/invalid '[{:pred clojure.core/vector? :val (:a :b)}]
+      v '(:a :b) ::s/invalid '[{:pred vector? :val (:a :b)}]
 
-      coll nil nil nil
+      coll nil ::s/invalid '[{:path [], :pred coll?, :val nil, :via [], :in []}]
       coll [] [] nil
       coll [:a] [:a] nil
       coll [:a :b] [:a :b] nil
