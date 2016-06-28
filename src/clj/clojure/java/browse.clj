@@ -39,6 +39,15 @@
 
 (def ^:dynamic *open-url-script* (atom :uninitialized))
 
+(defn- open-url-by-script
+  "Open url through script"
+  [url]
+  (let [script @*open-url-script*
+        script (if (= :uninitialized script)
+                 (reset! *open-url-script* (open-url-script-val))
+                 script)]
+    (when script (= 0 (:exit (sh/sh script (str url)))))))
+
 (defn- open-url-in-browser
   "Opens url (a string) in the default system web browser.  May not
   work on all platforms.  Returns url on success, nil if not
@@ -67,10 +76,7 @@
   "Open url in a browser"
   {:added "1.2"}
   [url]
-  (let [script @*open-url-script*
-        script (if (= :uninitialized script)
-                 (reset! *open-url-script* (open-url-script-val))
-                 script)]
-    (or (when script (= 0 (:exit (sh/sh script (str url)))))
-        (open-url-in-browser url)
-        (open-url-in-swing url))))
+  (or (open-url-by-script url)
+      (open-url-in-browser url)
+      (open-url-in-swing url))
+  )
