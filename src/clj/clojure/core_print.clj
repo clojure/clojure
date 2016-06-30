@@ -440,14 +440,20 @@
 (defmethod print-method StackTraceElement [^StackTraceElement o ^Writer w]
   (print-method [(symbol (.getClassName o)) (symbol (.getMethodName o)) (.getFileName o) (.getLineNumber o)] w))
 
+(defn StackTraceElement->vec
+  "Constructs a data representation for a StackTraceElement"
+  {:added "1.9"}
+  [^StackTraceElement o]
+  [(symbol (.getClassName o)) (symbol (.getMethodName o)) (.getFileName o) (.getLineNumber o)])
+
 (defn Throwable->map
   "Constructs a data representation for a Throwable."
   {:added "1.7"}
   [^Throwable o]
   (let [base (fn [^Throwable t]
-               (let [m {:type (class t)
+               (let [m {:type (symbol (.getName (class t)))
                         :message (.getLocalizedMessage t)
-                        :at (get (.getStackTrace t) 0)}
+                        :at (StackTraceElement->vec (get (.getStackTrace t) 0))}
                      data (ex-data t)]
                  (if data
                    (assoc m :data data)
@@ -459,7 +465,8 @@
         ^Throwable root (peek via)
         m {:cause (.getLocalizedMessage root)
            :via (vec (map base via))
-           :trace (vec (.getStackTrace ^Throwable (or root o)))}
+           :trace (vec (map StackTraceElement->vec
+                            (.getStackTrace ^Throwable (or root o))))}
         data (ex-data root)]
     (if data
       (assoc m :data data)
