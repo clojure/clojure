@@ -73,6 +73,9 @@ namespace.
       <a href="#clojure.spec/*coll-check-limit*" class="toc-entry-anchor">*coll-check-limit*</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec/*coll-error-limit*" class="toc-entry-anchor">*coll-error-limit*</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/*fspec-iterations*" class="toc-entry-anchor">*fspec-iterations*</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
@@ -94,12 +97,6 @@ namespace.
       <a href="#clojure.spec/cat" class="toc-entry-anchor">cat</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/coll-checker" class="toc-entry-anchor">coll-checker</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/coll-gen" class="toc-entry-anchor">coll-gen</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/coll-of" class="toc-entry-anchor">coll-of</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
@@ -118,7 +115,16 @@ namespace.
       <a href="#clojure.spec/double-in" class="toc-entry-anchor">double-in</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec/every" class="toc-entry-anchor">every</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec/every-kv" class="toc-entry-anchor">every-kv</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/exercise" class="toc-entry-anchor">exercise</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec/exercise-fn" class="toc-entry-anchor">exercise-fn</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/explain" class="toc-entry-anchor">explain</a>
@@ -127,13 +133,13 @@ namespace.
       <a href="#clojure.spec/explain-data" class="toc-entry-anchor">explain-data</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec/explain-out" class="toc-entry-anchor">explain-out</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/explain-str" class="toc-entry-anchor">explain-str</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/fdef" class="toc-entry-anchor">fdef</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/fn-specs" class="toc-entry-anchor">fn-specs</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/form" class="toc-entry-anchor">form</a>
@@ -145,19 +151,19 @@ namespace.
       <a href="#clojure.spec/gen" class="toc-entry-anchor">gen</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec/get-spec" class="toc-entry-anchor">get-spec</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/inst-in" class="toc-entry-anchor">inst-in</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/inst-in-range?" class="toc-entry-anchor">inst-in-range?</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/instrument" class="toc-entry-anchor">instrument</a>
+      <a href="#clojure.spec/int-in" class="toc-entry-anchor">int-in</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/instrument-all" class="toc-entry-anchor">instrument-all</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/instrument-ns" class="toc-entry-anchor">instrument-ns</a>
+      <a href="#clojure.spec/int-in-range?" class="toc-entry-anchor">int-in-range?</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/keys" class="toc-entry-anchor">keys</a>
@@ -166,13 +172,10 @@ namespace.
       <a href="#clojure.spec/keys*" class="toc-entry-anchor">keys*</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/long-in" class="toc-entry-anchor">long-in</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/long-in-range?" class="toc-entry-anchor">long-in-range?</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/map-of" class="toc-entry-anchor">map-of</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec/merge" class="toc-entry-anchor">merge</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/multi-spec" class="toc-entry-anchor">multi-spec</a>
@@ -196,31 +199,16 @@ namespace.
       <a href="#clojure.spec/spec?" class="toc-entry-anchor">spec?</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/speced-vars" class="toc-entry-anchor">speced-vars</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/tuple" class="toc-entry-anchor">tuple</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/unform" class="toc-entry-anchor">unform</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/unstrument" class="toc-entry-anchor">unstrument</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/unstrument-all" class="toc-entry-anchor">unstrument-all</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/unstrument-ns" class="toc-entry-anchor">unstrument-ns</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/valid?" class="toc-entry-anchor">valid?</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec/with-gen" class="toc-entry-anchor">with-gen</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec/with-instrument-disabled" class="toc-entry-anchor">with-instrument-disabled</a>
       
     </div>
   </div><div class="toc-section" style="margin-left: 1em;">
@@ -245,6 +233,9 @@ namespace.
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec.gen/boolean" class="toc-entry-anchor">boolean</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec.gen/bytes" class="toc-entry-anchor">bytes</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec.gen/cat" class="toc-entry-anchor">cat</a>
@@ -366,20 +357,41 @@ namespace.
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.spec.gen/vector" class="toc-entry-anchor">vector</a>
       
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec.gen/vector-distinct" class="toc-entry-anchor">vector-distinct</a>
+      
     </div>
   </div><div class="toc-section" style="margin-left: 1em;">
     <a style="margin-top: 3px;" href="#clojure.spec.test">clojure.spec.test</a>
     <div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec.test/check-fn" class="toc-entry-anchor">check-fn</a>
+      <a href="#clojure.spec.test/abbrev-result" class="toc-entry-anchor">abbrev-result</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec.test/check-var" class="toc-entry-anchor">check-var</a>
+      <a href="#clojure.spec.test/enumerate-namespace" class="toc-entry-anchor">enumerate-namespace</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec.test/run-all-tests" class="toc-entry-anchor">run-all-tests</a>
+      <a href="#clojure.spec.test/instrument" class="toc-entry-anchor">instrument</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.spec.test/run-tests" class="toc-entry-anchor">run-tests</a>
+      <a href="#clojure.spec.test/instrumentable-syms" class="toc-entry-anchor">instrumentable-syms</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec.test/summarize-results" class="toc-entry-anchor">summarize-results</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec.test/test" class="toc-entry-anchor">test</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec.test/test-fn" class="toc-entry-anchor">test-fn</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec.test/testable-syms" class="toc-entry-anchor">testable-syms</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec.test/unstrument" class="toc-entry-anchor">unstrument</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.spec.test/with-instrument-disabled" class="toc-entry-anchor">with-instrument-disabled</a>
       
     </div>
   </div>
@@ -416,7 +428,7 @@ conjunction of the predicates, and any conforming they might perform.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L470">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L569">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -429,18 +441,29 @@ pred. Produces a vector of matches iff there is at least one match</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L419">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L518">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
     <h2 id="clojure.spec/*coll-check-limit*">*coll-check-limit*</h2>
     <span id="var-type">dynamic var</span><br />
     <pre id="var-usage"></pre>
-    <pre id="var-docstr">The number of items validated in a collection spec'ed with 'coll'</pre>
+    <pre id="var-docstr">The number of elements validated in a collection spec'ed with 'every'</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L29">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L29">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec/*coll-error-limit*">*coll-error-limit*</h2>
+    <span id="var-type">dynamic var</span><br />
+    <pre id="var-usage"></pre>
+    <pre id="var-docstr">The number of errors reported by explain in a collection spec'ed with 'every'</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L33">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -451,7 +474,7 @@ pred. Produces a vector of matches iff there is at least one match</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L25">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L25">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -464,7 +487,7 @@ non-recursive branch will be chosen.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L19">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L19">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -477,7 +500,7 @@ pred. Produces a vector of matches</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L425">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L524">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -490,7 +513,7 @@ pred. Produces a single value (not a collection) if matched.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L431">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L530">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -509,7 +532,7 @@ components of the tagged return</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L437">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L536">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -526,7 +549,7 @@ conformed values propagate through rest of predicates.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L409">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L430">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -543,45 +566,26 @@ containing the keys of each pred and the corresponding value.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L454">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/coll-checker">coll-checker</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (coll-checker pred)
-</pre>
-    <pre id="var-docstr">returns a predicate function that checks *coll-check-limit* items in a collection with pred</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1505">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/coll-gen">coll-gen</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (coll-gen pred init-coll)
-</pre>
-    <pre id="var-docstr">returns a function of no args that returns a generator of
-collections of items conforming to pred, with the same shape as
-init-coll</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1515">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L553">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
     <h2 id="clojure.spec/coll-of">coll-of</h2>
     <span id="var-type">macro</span><br />
-    <pre id="var-usage">Usage: (coll-of pred init-coll)
+    <pre id="var-usage">Usage: (coll-of pred &amp; opts)
 </pre>
-    <pre id="var-docstr">Returns a spec for a collection of items satisfying pred. The generator will fill an empty init-coll.</pre>
+    <pre id="var-docstr">Returns a spec for a collection of items satisfying pred. Unlike
+'every', coll-of will exhaustively conform every value.
+
+Same options as 'every'. conform will produce a collection
+corresponding to :into if supplied, else will match the input collection,
+avoiding rebuilding when possible.
+
+See also - every, map-of</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1526">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L492">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -594,7 +598,7 @@ else the (possibly destructured) value.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L113">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L113">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -610,7 +614,7 @@ second fn that does unform of result of first</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L478">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L577">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -618,12 +622,13 @@ second fn that does unform of result of first</pre>
     <span id="var-type">macro</span><br />
     <pre id="var-usage">Usage: (def k spec-form)
 </pre>
-    <pre id="var-docstr">Given a namespace-qualified keyword or symbol k, and a spec, spec-name, predicate or regex-op
-makes an entry in the registry mapping k to the spec</pre>
+    <pre id="var-docstr">Given a namespace-qualified keyword or resolvable symbol k, and a
+spec, spec-name, predicate or regex-op makes an entry in the
+registry mapping k to the spec</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L271">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L285">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -635,7 +640,7 @@ makes an entry in the registry mapping k to the spec</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L151">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L151">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -652,7 +657,61 @@ makes an entry in the registry mapping k to the spec</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1567">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L1618">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec/every">every</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (every pred &amp; {:keys [into kind count max-count min-count distinct gen-max gen], :as opts})
+</pre>
+    <pre id="var-docstr">takes a pred and validates collection elements against that pred.
+
+Note that 'every' does not do exhaustive checking, rather it samples
+*coll-check-limit* elements. Nor (as a result) does it do any
+conforming of elements. 'explain' will report at most *coll-error-limit*
+problems.  Thus 'every' should be suitable for potentially large
+collections.
+
+Takes several kwargs options that further constrain the collection:
+
+:kind - a pred/spec that the collection type must satisfy, e.g. vector?
+      (default nil) Note that if :kind is specified and :into is
+      not, this pred must generate in order for every to generate.
+:count - specifies coll has exactly this count (default nil)
+:min-count, :max-count - coll has count (&lt;= min-count count max-count) (defaults nil)
+:distinct - all the elements are distinct (default nil)
+
+And additional args that control gen
+
+:gen-max - the maximum coll size to generate (default 20)
+:into - one of [], (), {}, #{} - the default collection to generate into
+    (default: empty coll as generated by :kind pred if supplied, else [])
+
+Optionally takes :gen generator-fn, which must be a fn of no args that
+returns a test.check generator
+
+See also - coll-of, every-kv</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L449">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec/every-kv">every-kv</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (every-kv kpred vpred &amp; opts)
+</pre>
+    <pre id="var-docstr">like 'every' but takes separate key and val preds and works on associative collections.
+
+Same options as 'every', :into defaults to {}
+
+See also - map-of</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L482">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -668,7 +727,24 @@ a generator overrides map as per gen</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1496">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L1566">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec/exercise-fn">exercise-fn</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (exercise-fn sym)
+       (exercise-fn sym n)
+       (exercise-fn sym-or-f n fspec)
+</pre>
+    <pre id="var-docstr">exercises the fn named by sym (a symbol) by applying it to
+n (default 10) generated samples of its args spec. When fspec is
+supplied its arg spec is used, and sym-or-f can be a fn.  Returns a
+sequence of tuples of [args ret]. </pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L1575">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -680,7 +756,7 @@ a generator overrides map as per gen</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L205">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L206">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -690,13 +766,25 @@ a generator overrides map as per gen</pre>
 </pre>
     <pre id="var-docstr">Given a spec and a value x which ought to conform, returns nil if x
 conforms, else a map with at least the key ::problems whose value is
-a path-&gt;problem-map, where problem-map has at least :pred and :val
+a collection of problem-maps, where problem-map has at least :path :pred and :val
 keys describing the predicate and the value that failed at that
 path.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L165">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L166">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec/explain-out">explain-out</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (explain-out ed)
+</pre>
+    <pre id="var-docstr">prints explanation data (per 'explain-data') to *out*.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L175">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -708,13 +796,13 @@ path.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L210">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L211">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
     <h2 id="clojure.spec/fdef">fdef</h2>
     <span id="var-type">macro</span><br />
-    <pre id="var-usage">Usage: (fdef fn-sym &amp; {:keys [args ret fn], :as m})
+    <pre id="var-usage">Usage: (fdef fn-sym &amp; specs)
 </pre>
     <pre id="var-docstr">Takes a symbol naming a function, and one or more of the following:
 
@@ -727,8 +815,8 @@ path.</pre>
   expected to contain predicates that relate those values
 
 Qualifies fn-sym with resolve, or using *ns* if no resolution found.
-Registers specs in the global registry, where they can be retrieved
-by calling fn-specs.
+Registers an fspec in the global registry, where it can be retrieved
+by calling get-spec with the var or fully-qualified symbol.
 
 Once registered, function specs are included in doc, checked by
 instrument, tested by the runner clojure.spec.test/run-tests, and (if
@@ -750,19 +838,7 @@ For example, to register function specs for the symbol function:
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L587">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/fn-specs">fn-specs</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (fn-specs v)
-</pre>
-    <pre id="var-docstr">Returns :args/:ret/:fn map of specs for var or symbol v.</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L532">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L626">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -774,7 +850,7 @@ For example, to register function specs for the symbol function:
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L126">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L126">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -786,12 +862,19 @@ For example, to register function specs for the symbol function:
 and returns a spec whose conform/explain take a fn and validates it
 using generative testing. The conformed value is always the fn itself.
 
+See 'fdef' for a single operation that creates an fspec and
+registers it, as well as a full description of :args, :ret and :fn
+
+fspecs can generate functions that validate the arguments and
+fabricate a return value compliant with the :ret spec, ignoring
+the :fn spec if present.
+
 Optionally takes :gen generator-fn, which must be a fn of no args
 that returns a test.check generator.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L486">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L585">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -802,16 +885,29 @@ that returns a test.check generator.</pre>
 </pre>
     <pre id="var-docstr">Given a spec, returns the generator for it, or throws if none can
 be constructed. Optionally an overrides map can be provided which
-should map paths (vectors of keywords) to generators. These will be
-used instead of the generators at those paths. Note that parent
-generator (in the spec or overrides map) will supersede those of any
-subtrees. A generator for a regex op must always return a
-sequential collection (i.e. a generator for s/? should return either
-an empty sequence/vector or a sequence/vector with one item in it)</pre>
+should map spec names or paths (vectors of keywords) to
+generators. These will be used instead of the generators at those
+names/paths. Note that parent generator (in the spec or overrides
+map) will supersede those of any subtrees. A generator for a regex
+op must always return a sequential collection (i.e. a generator for
+s/? should return either an empty sequence/vector or a
+sequence/vector with one item in it)</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L225">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L230">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec/get-spec">get-spec</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (get-spec k)
+</pre>
+    <pre id="var-docstr">Returns spec registered for keyword/symbol/var k, or nil.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L298">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -824,7 +920,7 @@ an empty sequence/vector or a sequence/vector with one item in it)</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1543">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L1594">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -836,47 +932,32 @@ an empty sequence/vector or a sequence/vector with one item in it)</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1536">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L1587">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
-    <h2 id="clojure.spec/instrument">instrument</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (instrument v)
+    <h2 id="clojure.spec/int-in">int-in</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (int-in start end)
 </pre>
-    <pre id="var-docstr">Instruments the var at v, a var or symbol, to check specs
-registered with fdef. Wraps the fn at v to check :args/:ret/:fn
-specs, if they exist, throwing an ex-info with explain-data if a
-check fails. Idempotent.</pre>
+    <pre id="var-docstr">Returns a spec that validates ints in the range from start
+(inclusive) to end (exclusive).</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L648">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L1611">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
-    <h2 id="clojure.spec/instrument-all">instrument-all</h2>
+    <h2 id="clojure.spec/int-in-range?">int-in-range?</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (instrument-all)
+    <pre id="var-usage">Usage: (int-in-range? start end val)
 </pre>
-    <pre id="var-docstr">Call instrument for all speced-vars. Idempotent.</pre>
+    <pre id="var-docstr">Return true if start &lt;= val and val &lt; end</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L717">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/instrument-ns">instrument-ns</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (instrument-ns &amp; ns-syms)
-</pre>
-    <pre id="var-docstr">Call instrument for all speced-vars in namespaces named
-by ns-syms. Idempotent.</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L699">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L1606">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -914,7 +995,7 @@ returns a test.check generator.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L332">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L353">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -938,44 +1019,43 @@ user=&gt; (s/conform (s/cat :i1 integer? :m (s/keys* :req-un [::a ::c]) :i2 inte
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1474">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/long-in">long-in</h2>
-    <span id="var-type">macro</span><br />
-    <pre id="var-usage">Usage: (long-in start end)
-</pre>
-    <pre id="var-docstr">Returns a spec that validates longs in the range from start
-(inclusive) to end (exclusive).</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1560">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/long-in-range?">long-in-range?</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (long-in-range? start end val)
-</pre>
-    <pre id="var-docstr">Return true if start &lt;= val and val &lt; end</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1555">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L1544">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
     <h2 id="clojure.spec/map-of">map-of</h2>
     <span id="var-type">macro</span><br />
-    <pre id="var-usage">Usage: (map-of kpred vpred)
+    <pre id="var-usage">Usage: (map-of kpred vpred &amp; opts)
 </pre>
-    <pre id="var-docstr">Returns a spec for a map whose keys satisfy kpred and vals satisfy vpred.</pre>
+    <pre id="var-docstr">Returns a spec for a map whose keys satisfy kpred and vals satisfy
+vpred. Unlike 'every-kv', map-of will exhaustively conform every
+value.
+
+Same options as 'every', :kind defaults to map?, with the addition of:
+
+:conform-keys - conform keys as well as values (default false)
+
+See also - every-kv</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1531">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L504">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec/merge">merge</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (merge &amp; pred-forms)
+</pre>
+    <pre id="var-docstr">Takes map-validating specs (e.g. 'keys' specs) and
+returns a spec that returns a conformed map satisfying all of the
+specs.  Successive conformed values propagate through rest of
+predicates. Unlike 'and', merge can generate maps satisfying the
+union of the predicates.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L440">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1010,7 +1090,7 @@ though those values are not evident in the spec.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L303">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L324">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1022,7 +1102,7 @@ though those values are not evident in the spec.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L1491">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L1561">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1041,7 +1121,7 @@ components of the tagged return.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L392">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L413">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1053,7 +1133,7 @@ components of the tagged return.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L84">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L84">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1061,11 +1141,11 @@ components of the tagged return.</pre>
     <span id="var-type">function</span><br />
     <pre id="var-usage">Usage: (registry)
 </pre>
-    <pre id="var-docstr">returns the registry map</pre>
+    <pre id="var-docstr">returns the registry map, prefer 'get-spec' to lookup a spec by name</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L277">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L293">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1090,7 +1170,7 @@ Returns a spec.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L284">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L305">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1102,21 +1182,7 @@ Returns a spec.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L79">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/speced-vars">speced-vars</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (speced-vars &amp; ns-syms)
-</pre>
-    <pre id="var-docstr">Returns the set of vars whose namespace is in ns-syms AND
-whose vars have been speced with fdef. If no ns-syms are
-specified, return speced vars from all namespaces.</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L679">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L79">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1130,7 +1196,7 @@ will be referred to in paths using its ordinal.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L498">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L605">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1144,44 +1210,7 @@ destructuring undone.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L119">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/unstrument">unstrument</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (unstrument v)
-</pre>
-    <pre id="var-docstr">Undoes instrument on the var at v, a var or symbol. Idempotent.</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L667">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/unstrument-all">unstrument-all</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (unstrument-all)
-</pre>
-    <pre id="var-docstr">Call unstrument for all speced-vars. Idempotent</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L724">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/unstrument-ns">unstrument-ns</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (unstrument-ns &amp; ns-syms)
-</pre>
-    <pre id="var-docstr">Call unstrument for all speced-vars in namespaces named
-by ns-syms. Idempotent.</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L708">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L119">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1194,7 +1223,7 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L752">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L682">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1206,19 +1235,7 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L156">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.spec/with-instrument-disabled">with-instrument-disabled</h2>
-    <span id="var-type">macro</span><br />
-    <pre id="var-usage">Usage: (with-instrument-disabled &amp; body)
-</pre>
-    <pre id="var-docstr">Disables instrument's checking of calls, within a scope.</pre>
-    <pre id="var-specs"></pre>
-    
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/69dd29d2c8c1593bb283f9bfcd47b1ec280520e9/src/clj/clojure/spec.clj#L543">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/386e7e63485bcb7bed050df2c2b54a6ceca05e5f/src/clj/clojure/spec.clj#L156">Source</a>
   </div>
 </div>
 <div id="spec-section">
@@ -1260,7 +1277,7 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1272,7 +1289,7 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1284,7 +1301,7 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1296,7 +1313,19 @@ by ns-syms. Idempotent.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec.gen/bytes">bytes</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (bytes &amp; args)
+</pre>
+    <pre id="var-docstr">Fn returning clojure.test.check.generators/bytes</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1309,7 +1338,7 @@ gens, each of which should generate something sequential.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L119">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L119">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1321,7 +1350,7 @@ gens, each of which should generate something sequential.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1333,7 +1362,7 @@ gens, each of which should generate something sequential.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1345,7 +1374,7 @@ gens, each of which should generate something sequential.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1357,7 +1386,7 @@ gens, each of which should generate something sequential.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1369,7 +1398,7 @@ gens, each of which should generate something sequential.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1383,7 +1412,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L58">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L58">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1395,7 +1424,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1407,7 +1436,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1419,7 +1448,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1431,7 +1460,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1443,7 +1472,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L33">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L33">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1455,7 +1484,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L65">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L65">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1467,7 +1496,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L183">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L185">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1479,7 +1508,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L47">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L47">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1491,7 +1520,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1503,7 +1532,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1515,7 +1544,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1527,7 +1556,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1539,7 +1568,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1551,7 +1580,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1563,7 +1592,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1575,7 +1604,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1587,7 +1616,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1599,7 +1628,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1611,7 +1640,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1623,7 +1652,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1635,7 +1664,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1647,7 +1676,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1659,7 +1688,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1671,7 +1700,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1683,7 +1712,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1695,7 +1724,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1707,7 +1736,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1719,7 +1748,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1731,7 +1760,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1743,7 +1772,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1755,7 +1784,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1767,7 +1796,7 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L115">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L115">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -1779,7 +1808,19 @@ creation until used.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/58227c5de080110cb2ce5bc9f987d995a911b13e/src/clj/clojure/spec/gen.clj#L92">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec.gen/vector-distinct">vector-distinct</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (vector-distinct &amp; args)
+</pre>
+    <pre id="var-docstr">Lazy loaded version of clojure.test.check.generators/vector-distinct</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/03496c03735cea634b5f448e966ed01d82f8f7ea/src/clj/clojure/spec/gen.clj#L92">Source</a>
   </div>
 </div>
 
@@ -1797,64 +1838,214 @@ creation until used.</pre>
   <div id="var-entry">
     <br />
     <hr />
-    <h2 id="clojure.spec.test/check-fn">check-fn</h2>
+    <h2 id="clojure.spec.test/abbrev-result">abbrev-result</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (check-fn f specs &amp; {:keys [num-tests seed max-size reporter-fn], :or {num-tests 100, max-size 200, reporter-fn (constantly nil)}})
+    <pre id="var-usage">Usage: (abbrev-result x)
 </pre>
-    <pre id="var-docstr">Check a function using provided specs and test.check.
-Same options and return as check-var</pre>
+    <pre id="var-docstr">Given a test result, returns an abbreviated version
+suitable for summary use.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/c3abff893a8def21cb1dca969816dae83de9828b/src/clj/clojure/spec/test.clj#L52">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L387">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
-    <h2 id="clojure.spec.test/check-var">check-var</h2>
+    <h2 id="clojure.spec.test/enumerate-namespace">enumerate-namespace</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (check-var v &amp; opts)
+    <pre id="var-usage">Usage: (enumerate-namespace ns-sym-or-syms)
 </pre>
-    <pre id="var-docstr">Checks a var's specs using test.check. Optional args are
-passed through to test.check/quick-check:
+    <pre id="var-docstr">Given a symbol naming an ns, or a collection of such symbols,
+returns the set of all symbols naming vars in those nses.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L43">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec.test/instrument">instrument</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (instrument)
+       (instrument sym-or-syms)
+       (instrument sym-or-syms opts)
+</pre>
+    <pre id="var-docstr">Instruments the vars named by sym-or-syms, a symbol or collection
+of symbols, or all instrumentable vars if sym-or-syms is not
+specified.
 
-  num-tests     number of tests to run, default 100
-  seed          random seed
-  max-size      how large an input to generate, max 200
-  reporter-fn   reporting fn
+If a var has an :args fn-spec, sets the var's root binding to a
+fn that checks arg conformance (throwing an exception on failure)
+before delegating to the original fn.
 
-Returns a map as quick-check, with :explain-data added if
-:result is false.</pre>
+The opts map can be used to override registered specs, and/or to
+replace fn implementations entirely. Opts for symbols not included
+in sym-or-syms are ignored. This facilitates sharing a common
+options map across many different calls to instrument.
+
+The opts map may have the following keys:
+
+  :spec     a map from var-name symbols to override specs
+  :stub     a set of var-name symbols to be replaced by stubs
+  :gen      a map from spec names to generator overrides
+  :replace  a map from var-name symbols to replacement fns
+
+:spec overrides registered fn-specs with specs your provide. Use
+:spec overrides to provide specs for libraries that do not have
+them, or to constrain your own use of a fn to a subset of its
+spec'ed contract.
+
+:stub replaces a fn with a stub that checks :args, then uses the
+:ret spec to generate a return value.
+
+:gen overrides are used only for :stub generation.
+
+:replace replaces a fn with a fn that checks args conformance, then
+invokes the fn you provide, enabling arbitrary stubbing and mocking.
+
+:spec can be used in combination with :stub or :replace.
+
+Returns a collection of syms naming the vars instrumented.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/c3abff893a8def21cb1dca969816dae83de9828b/src/clj/clojure/spec/test.clj#L65">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L161">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
-    <h2 id="clojure.spec.test/run-all-tests">run-all-tests</h2>
+    <h2 id="clojure.spec.test/instrumentable-syms">instrumentable-syms</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (run-all-tests)
+    <pre id="var-usage">Usage: (instrumentable-syms)
+       (instrumentable-syms opts)
 </pre>
-    <pre id="var-docstr">Like clojure.test/run-all-tests, but runs test.check tests
-for all speced vars. Prints per-test results to *out*, and
-returns a map with :test,:pass,:fail, and :error counts.</pre>
+    <pre id="var-docstr">Given an opts map as per instrument, returns the set of syms
+that can be instrumented.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/c3abff893a8def21cb1dca969816dae83de9828b/src/clj/clojure/spec/test.clj#L108">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L150">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
-    <h2 id="clojure.spec.test/run-tests">run-tests</h2>
+    <h2 id="clojure.spec.test/summarize-results">summarize-results</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (run-tests &amp; ns-syms)
+    <pre id="var-usage">Usage: (summarize-results test-results)
+       (summarize-results test-results summary-result)
 </pre>
-    <pre id="var-docstr">Like run-all-tests, but scoped to specific namespaces, or to
-*ns* if no ns-sym are specified.</pre>
+    <pre id="var-docstr">Given a collection of test-results, e.g. from 'test', pretty
+prints the summary-result (default abbrev-result) of each.
+
+Returns a map with :total, the total number of results, plus a
+key with a count for each different :type of result.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/c3abff893a8def21cb1dca969816dae83de9828b/src/clj/clojure/spec/test.clj#L99">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L397">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec.test/test">test</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (test)
+       (test sym-or-syms)
+       (test sym-or-syms opts)
+</pre>
+    <pre id="var-docstr">Run generative tests for spec conformance on vars named by
+sym-or-syms, a symbol or collection of symbols. If sym-or-syms
+is not specified, test all testable vars.
+
+The opts map includes the following optional keys, where stc
+aliases clojure.spec.test.check: 
+
+::stc/opts  opts to flow through test.check/quick-check
+:gen        map from spec names to generator overrides
+
+The ::stc/opts include :num-tests in addition to the keys
+documented by test.check. Generator overrides are passed to
+spec/gen when generating function args.
+
+Returns a lazy sequence of test result maps with the following
+keys
+
+:spec       the spec tested
+:type       the type of the test result
+:sym        optional symbol naming the var tested
+:result     optional test result
+::stc/ret   optional value returned by test.check/quick-check
+
+Values for the :result key can be one of
+
+true        passing test
+exception   code under test threw
+map         with explain-data under :clojure.spec/problems
+
+Values for the :type key can be one of
+
+:pass       test passed
+:fail       test failed
+:error      test threw
+:no-argspec no :args in fn-spec
+:no-gen     unable to generate :args
+:no-fn      unable to resolve fn to test</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L324">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec.test/test-fn">test-fn</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (test-fn f spec)
+       (test-fn f spec opts)
+</pre>
+    <pre id="var-docstr">Runs generative tests for fn f using spec and opts. See
+'test' for options and return.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L307">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec.test/testable-syms">testable-syms</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (testable-syms)
+       (testable-syms opts)
+</pre>
+    <pre id="var-docstr">Given an opts map as per test, returns the set of syms that
+can be tested.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L315">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec.test/unstrument">unstrument</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (unstrument)
+       (unstrument sym-or-syms)
+</pre>
+    <pre id="var-docstr">Undoes instrument on the vars named by sym-or-syms, specified
+as in instrument. With no args, unstruments all instrumented vars.
+Returns a collection of syms naming the vars unstrumented.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L210">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.spec.test/with-instrument-disabled">with-instrument-disabled</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-instrument-disabled &amp; body)
+</pre>
+    <pre id="var-docstr">Disables instrument's checking of calls, within a scope.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L67">Source</a>
   </div>
 </div>
 
