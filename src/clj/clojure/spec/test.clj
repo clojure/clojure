@@ -11,7 +11,8 @@
   (:require
    [clojure.pprint :as pp]
    [clojure.spec :as s]
-   [clojure.spec.gen :as gen]))
+   [clojure.spec.gen :as gen]
+   [clojure.string :as str]))
 
 (in-ns 'clojure.spec.test.check)
 (in-ns 'clojure.spec.test)
@@ -70,15 +71,63 @@ returns the set of all symbols naming vars in those nses."
   `(binding [*instrument-enabled* nil]
      ~@body))
 
+(defn- interpret-stack-trace-element
+  "Given the vector-of-syms form of a stacktrace element produced
+by e.g. Throwable->map, returns a map form that adds some keys
+guessing the original Clojure names. Returns a map with
+
+  :class         class name symbol from stack trace
+  :method        method symbol from stack trace
+  :file          filename from stack trace
+  :line          line number from stack trace
+  :var-scope     optional Clojure var symbol scoping fn def
+  :local-fn      optional local Clojure symbol scoping fn def
+
+For non-Clojure fns, :scope and :local-fn will be absent."
+  [[cls method file line]]
+  (let [clojure? (contains? '#{invoke invokeStatic} method)
+        demunge #(clojure.lang.Compiler/demunge %)
+        degensym #(str/replace % #"--.*" "")
+        [ns-sym name-sym local] (when clojure?
+                                  (->> (str/split (str cls) #"\$" 3)
+                                       (map demunge)))]
+    (merge {:file file
+            :line line
+            :method method
+            :class cls}
+           (when (and ns-sym name-sym)
+             {:var-scope (symbol ns-sym name-sym)})
+           (when local
+             {:local-fn (symbol (degensym local))}))))
+
+(defn- stacktrace-relevant-to-instrument
+  "Takes a coll of stack trace elements (as returned by
+StackTraceElement->vec) and returns a coll of maps as per
+interpret-stack-trace-element that are relevant to a
+failure in instrument."
+  [elems]
+  (let [plumbing? (fn [{:keys [var-scope]}]
+                    (contains? '#{clojure.spec.test/spec-checking-fn} var-scope))]
+    (sequence (comp (map StackTraceElement->vec)
+                    (map interpret-stack-trace-element)
+                    (filter :var-scope)
+                    (drop-while plumbing?))
+              elems)))
+
 (defn- spec-checking-fn
   [v f fn-spec]
   (let [fn-spec (@#'s/maybe-spec fn-spec)
         conform! (fn [v role spec data args]
                    (let [conformed (s/conform spec data)]
                      (if (= ::s/invalid conformed)
-                       (let [ed (assoc (s/explain-data* spec [role] [] [] data)
-                                  ::s/args args
-                                  ::s/failure :instrument-check-failed)]
+                       (let [caller (->> (.getStackTrace (Thread/currentThread))
+                                         stacktrace-relevant-to-instrument
+                                         first)
+                             ed (merge (assoc (s/explain-data* spec [role] [] [] data)
+                                         ::s/args args
+                                         ::s/failure :instrument-check-failed)
+                                       (when caller
+                                         {::caller (dissoc caller :class :method)}))]
                          (throw (ex-info
                                  (str "Call to " v " did not conform to spec:\n" (with-out-str (s/explain-out ed)))
                                  ed)))
@@ -252,7 +301,7 @@ with explain-data under ::check-call."
 
 (defn- check-fn
   [f specs {gen :gen opts ::stc/opts}]
-  (let [{:keys [num-tests] :or {num-tests 100}} opts
+  (let [{:keys [num-tests] :or {num-tests 1000}} opts
         g (try (s/gen (:args specs) gen) (catch Throwable t t))]
     (if (throwable? g)
       {:result g}
