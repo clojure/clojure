@@ -183,7 +183,7 @@
    :wiki-url
    "http://clojure.github.io/clojure/clojure.spec-api.html#clojure.spec.test",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj"}
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj"}
   {:doc
    "clojure.test extension for JUnit-compatible XML output.\n\nJUnit (http://junit.org/) is the most popular unit-testing library\nfor Java.  As such, tool support for JUnit output formats is\ncommon.  By producing compatible output from tests, this tool\nsupport can be exploited.\n\nTo use, wrap any calls to clojure.test/run-tests in the\nwith-junit-output macro, like this:\n\n  (use 'clojure.test)\n  (use 'clojure.test.junit)\n\n  (with-junit-output\n    (run-tests 'my.cool.library))\n\nTo write the output to a file, rebind clojure.test/*test-out* to\nyour own PrintWriter (perhaps opened using\nclojure.java.io/writer).",
    :author "Jason Sankey",
@@ -498,12 +498,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/*print-dup*"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/6d48ae372a540903173be2974b66b8911371e05d/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
    :added "1.0",
    :name "*print-length*",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/6d48ae372a540903173be2974b66b8911371e05d/src/clj/clojure/core_print.clj#L16",
+   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L16",
    :dynamic true,
    :line 16,
    :var-type "var",
@@ -514,12 +514,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/*print-length*"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/6d48ae372a540903173be2974b66b8911371e05d/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
    :added "1.0",
    :name "*print-level*",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/6d48ae372a540903173be2974b66b8911371e05d/src/clj/clojure/core_print.clj#L27",
+   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L27",
    :dynamic true,
    :line 27,
    :var-type "var",
@@ -883,13 +883,27 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/>="}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/6d48ae372a540903173be2974b66b8911371e05d/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
+   :added "1.9",
+   :name "StackTraceElement->vec",
+   :file "src/clj/clojure/core_print.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L443",
+   :line 443,
+   :var-type "function",
+   :arglists ([o]),
+   :doc "Constructs a data representation for a StackTraceElement",
+   :namespace "clojure.core",
+   :wiki-url
+   "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/StackTraceElement->vec"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
    :added "1.7",
    :name "Throwable->map",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/6d48ae372a540903173be2974b66b8911371e05d/src/clj/clojure/core_print.clj#L443",
-   :line 443,
+   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L449",
+   :line 449,
    :var-type "function",
    :arglists ([o]),
    :doc "Constructs a data representation for a Throwable.",
@@ -1998,12 +2012,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/char-array"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/6d48ae372a540903173be2974b66b8911371e05d/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
    :added "1.0",
    :name "char-escape-string",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/6d48ae372a540903173be2974b66b8911371e05d/src/clj/clojure/core_print.clj#L179",
+   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L179",
    :line 179,
    :var-type "var",
    :arglists nil,
@@ -2012,12 +2026,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/char-escape-string"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/6d48ae372a540903173be2974b66b8911371e05d/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
    :added "1.0",
    :name "char-name-string",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/6d48ae372a540903173be2974b66b8911371e05d/src/clj/clojure/core_print.clj#L320",
+   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L320",
    :line 320,
    :var-type "var",
    :arglists nil,
@@ -11863,10 +11877,10 @@
   {:keyword :clojure.spec/kvs->map,
    :spec
    (fn*
-    [p1__6653#]
+    [p1__6654#]
     (zipmap
-     (map :clojure.spec/k p1__6653#)
-     (map :clojure.spec/v p1__6653#))),
+     (map :clojure.spec/k p1__6654#)
+     (map :clojure.spec/v p1__6654#))),
    :var-type "spec",
    :namespace "clojure.spec",
    :wiki-url
@@ -14366,12 +14380,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.spec-api.html#clojure.spec.gen/vector-distinct"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj",
+   "https://github.com/clojure/clojure/raw/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj",
    :name "abbrev-result",
    :file "src/clj/clojure/spec/test.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L387",
-   :line 387,
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj#L436",
+   :line 436,
    :var-type "function",
    :arglists ([x]),
    :doc
@@ -14380,12 +14394,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.spec-api.html#clojure.spec.test/abbrev-result"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj",
+   "https://github.com/clojure/clojure/raw/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj",
    :name "enumerate-namespace",
    :file "src/clj/clojure/spec/test.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L43",
-   :line 43,
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj#L44",
+   :line 44,
    :var-type "function",
    :arglists ([ns-sym-or-syms]),
    :doc
@@ -14394,12 +14408,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.spec-api.html#clojure.spec.test/enumerate-namespace"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj",
+   "https://github.com/clojure/clojure/raw/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj",
    :name "instrument",
    :file "src/clj/clojure/spec/test.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L161",
-   :line 161,
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj#L210",
+   :line 210,
    :var-type "function",
    :arglists ([] [sym-or-syms] [sym-or-syms opts]),
    :doc
@@ -14408,12 +14422,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.spec-api.html#clojure.spec.test/instrument"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj",
+   "https://github.com/clojure/clojure/raw/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj",
    :name "instrumentable-syms",
    :file "src/clj/clojure/spec/test.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L150",
-   :line 150,
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj#L199",
+   :line 199,
    :var-type "function",
    :arglists ([] [opts]),
    :doc
@@ -14422,12 +14436,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.spec-api.html#clojure.spec.test/instrumentable-syms"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj",
+   "https://github.com/clojure/clojure/raw/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj",
    :name "summarize-results",
    :file "src/clj/clojure/spec/test.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L397",
-   :line 397,
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj#L446",
+   :line 446,
    :var-type "function",
    :arglists ([test-results] [test-results summary-result]),
    :doc
@@ -14436,12 +14450,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.spec-api.html#clojure.spec.test/summarize-results"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj",
+   "https://github.com/clojure/clojure/raw/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj",
    :name "test",
    :file "src/clj/clojure/spec/test.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L324",
-   :line 324,
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj#L373",
+   :line 373,
    :var-type "function",
    :arglists ([] [sym-or-syms] [sym-or-syms opts]),
    :doc
@@ -14450,12 +14464,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.spec-api.html#clojure.spec.test/test"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj",
+   "https://github.com/clojure/clojure/raw/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj",
    :name "test-fn",
    :file "src/clj/clojure/spec/test.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L307",
-   :line 307,
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj#L356",
+   :line 356,
    :var-type "function",
    :arglists ([f spec] [f spec opts]),
    :doc
@@ -14464,12 +14478,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.spec-api.html#clojure.spec.test/test-fn"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj",
+   "https://github.com/clojure/clojure/raw/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj",
    :name "testable-syms",
    :file "src/clj/clojure/spec/test.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L315",
-   :line 315,
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj#L364",
+   :line 364,
    :var-type "function",
    :arglists ([] [opts]),
    :doc
@@ -14478,12 +14492,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.spec-api.html#clojure.spec.test/testable-syms"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj",
+   "https://github.com/clojure/clojure/raw/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj",
    :name "unstrument",
    :file "src/clj/clojure/spec/test.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L210",
-   :line 210,
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj#L259",
+   :line 259,
    :var-type "function",
    :arglists ([] [sym-or-syms]),
    :doc
@@ -14492,12 +14506,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.spec-api.html#clojure.spec.test/unstrument"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj",
+   "https://github.com/clojure/clojure/raw/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj",
    :name "with-instrument-disabled",
    :file "src/clj/clojure/spec/test.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/baa6c45b103dcdc8f8e551ace12943886b59f397/src/clj/clojure/spec/test.clj#L67",
-   :line 67,
+   "https://github.com/clojure/clojure/blob/99d10ceb26a3078698a5b970a912ed88f95e688a/src/clj/clojure/spec/test.clj#L68",
+   :line 68,
    :var-type "macro",
    :arglists ([& body]),
    :doc "Disables instrument's checking of calls, within a scope.",
