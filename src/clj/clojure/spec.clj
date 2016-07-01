@@ -986,8 +986,11 @@
   [forms preds gfn]
   (reify
    Spec
-   (conform* [_ x] (and-preds x preds forms))
-   (unform* [_ x] (reduce #(unform %2 %1) x (reverse preds)))
+   (conform* [_ x] (let [ms (map #(dt %1 x %2) preds forms)]
+                     (if (some #{::invalid} ms)
+                       ::invalid
+                       (apply c/merge ms))))
+   (unform* [_ x] (apply c/merge (map #(unform % x) (reverse preds))))
    (explain* [_ path via in x]
              (apply concat
                     (map #(explain-1 %1 %2 path via in x)
