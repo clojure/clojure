@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.spec
-  (:refer-clojure :exclude [+ * and or cat def keys merge])
+  (:refer-clojure :exclude [+ * and assert or cat def keys merge])
   (:require [clojure.walk :as walk]
             [clojure.spec.gen :as gen]
             [clojure.string :as str]))
@@ -267,7 +267,7 @@
 (defn ^:skip-wiki def-impl
   "Do not call this directly, use 'def'"
   [k form spec]
-  (assert (c/and (named? k) (namespace k)) "k must be namespaced keyword or resolvable symbol")
+  (c/assert (c/and (named? k) (namespace k)) "k must be namespaced keyword or resolvable symbol")
   (let [spec (if (c/or (spec? spec) (regex? spec) (get @registry-ref spec))
                spec
                (spec-impl form spec nil nil))]
@@ -382,8 +382,8 @@
   (let [unk #(-> % name keyword)
         req-keys (filterv keyword? (flatten req))
         req-un-specs (filterv keyword? (flatten req-un))
-        _ (assert (every? #(c/and (keyword? %) (namespace %)) (concat req-keys req-un-specs opt opt-un))
-                  "all keys must be namespace-qualified keywords")
+        _ (c/assert (every? #(c/and (keyword? %) (namespace %)) (concat req-keys req-un-specs opt opt-un))
+                    "all keys must be namespace-qualified keywords")
         req-specs (into req-keys req-un-specs)
         req-keys (into req-keys (map unk req-un-specs))
         opt-keys (into (vec opt) (map unk opt-un))
@@ -424,7 +424,7 @@
         keys (mapv first pairs)
         pred-forms (mapv second pairs)
         pf (mapv res pred-forms)]
-    (assert (c/and (even? (count key-pred-forms)) (every? keyword? keys)) "spec/or expects k1 p1 k2 p2..., where ks are keywords")
+    (c/assert (c/and (even? (count key-pred-forms)) (every? keyword? keys)) "spec/or expects k1 p1 k2 p2..., where ks are keywords")
     `(or-spec-impl ~keys '~pf ~pred-forms nil)))
 
 (defmacro and
@@ -547,7 +547,7 @@
         keys (mapv first pairs)
         pred-forms (mapv second pairs)
         pf (mapv res pred-forms)]
-    (assert (c/and (even? (count key-pred-forms)) (every? keyword? keys)) "alt expects k1 p1 k2 p2..., where ks are keywords")
+    (c/assert (c/and (even? (count key-pred-forms)) (every? keyword? keys)) "alt expects k1 p1 k2 p2..., where ks are keywords")
     `(alt-impl ~keys ~pred-forms '~pf)))
 
 (defmacro cat
@@ -563,7 +563,7 @@
         pred-forms (mapv second pairs)
         pf (mapv res pred-forms)]
     ;;(prn key-pred-forms)
-    (assert (c/and (even? (count key-pred-forms)) (every? keyword? keys)) "cat expects k1 p1 k2 p2..., where ks are keywords")
+    (c/assert (c/and (even? (count key-pred-forms)) (every? keyword? keys)) "cat expects k1 p1 k2 p2..., where ks are keywords")
     `(cat-impl ~keys ~pred-forms '~pf)))
 
 (defmacro &
@@ -607,7 +607,7 @@
   where each element conforms to the corresponding pred. Each element
   will be referred to in paths using its ordinal."
   [& preds]
-  (assert (not (empty? preds)))
+  (c/assert (not (empty? preds)))
   `(tuple-impl '~(mapv res preds) ~(vec preds)))
 
 (defn- macroexpand-check
@@ -869,7 +869,7 @@
                           (recur (if (identical? cv v) ret (assoc ret i cv))
                                  (inc i))))))))
       (unform* [_ x]
-               (assert (c/and (vector? x)
+               (c/assert (c/and (vector? x)
                               (= (count x) (count preds))))
                (loop [ret x, i 0]
                  (if (= i (count x))
@@ -1535,7 +1535,7 @@
              (gfn)
              (gen/return
               (fn [& args]
-                (assert (valid? argspec args) (with-out-str (explain argspec args)))
+                (c/assert (valid? argspec args) (with-out-str (explain argspec args)))
                 (gen/generate (gen retspec overrides))))))
      (with-gen* [_ gfn] (fspec-impl argspec aform retspec rform fnspec fform gfn))
      (describe* [_] `(fspec :args ~aform :ret ~rform :fn ~fform)))))
@@ -1634,3 +1634,63 @@
               ~@(when max `[#(<= % ~max)])
               ~@(when min `[#(<= ~min %)]))
          :gen #(gen/double* ~m)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; assert ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defonce
+  ^{:dynamic true
+    :doc "If true, compiler will enable spec asserts, which are then
+subject to runtime control via check-asserts? If false, compiler
+will eliminate all spec assert overhead. See 'assert'.
+
+Initially set to boolean value of clojure.spec.compile-asserts
+system property. Defaults to true."}
+  *compile-asserts*
+  (not= "false" (System/getProperty "clojure.spec.compile-asserts")))
+
+(defn check-asserts?
+  "Returns the value set by check-asserts."
+  []
+  clojure.lang.RT/checkSpecAsserts)
+
+(defn check-asserts
+  "Checktime enable/disable of spec asserts that have been compiled
+with '*compile-asserts*' true.  See 'assert'.
+
+Initially set to boolean value of clojure.spec.check-asserts
+system property. Defaults to false."
+  [flag]
+  (set! (. clojure.lang.RT checkSpecAsserts) flag))
+
+(defn assert*
+  "Do not call this directly, use 'assert'."
+  [spec x]
+  (if (valid? spec x)
+    x
+    (let [ed (c/merge (assoc (explain-data* spec [] [] [] x)
+                        ::failure :assertion-failed))]
+      (throw (ex-info
+              (str "Spec assertion failed\n" (with-out-str (explain-out ed)))
+              ed)))))
+
+(defmacro assert
+  "spec-checking assert expression. Returns x if x is valid? according
+to spec, else throws an ex-info with explain-data plus ::failure of
+:assertion-failed.
+
+Can be disabled at either compile time or runtime:
+
+If *compile-asserts* is false at compile time, compiles to x. Defaults
+to value of 'clojure.spec.compile-asserts' system property, or true if
+not set.
+
+If (check-asserts?) is false at runtime, always returns x. Defaults to
+value of 'clojure.spec.check-asserts' system property, or false if not
+set. You can toggle check-asserts? with (check-asserts bool)."
+  [spec x]
+  (if *compile-asserts*
+    `(if clojure.lang.RT/checkSpecAsserts
+       (assert* ~spec ~x)
+       ~x)
+    x))
+
+

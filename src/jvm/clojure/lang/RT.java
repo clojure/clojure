@@ -169,6 +169,14 @@ Symbol.intern("SuppressWarnings"), SuppressWarnings.class
 // single instance of UTF-8 Charset, so as to avoid catching UnsupportedCharsetExceptions everywhere
 static public Charset UTF8 = Charset.forName("UTF-8");
 
+static boolean readTrueFalseDefault(String s, boolean def){
+	if("true".equals(s))
+		return Boolean.TRUE;
+	else if("false".equals(s))
+		return Boolean.FALSE;
+	return def;
+}
+
 static Object readTrueFalseUnknown(String s){
 	if(s.equals("true"))
 		return Boolean.TRUE;
@@ -297,6 +305,9 @@ static public void addURL(Object url) throws MalformedURLException{
 	else
 		throw new IllegalAccessError("Context classloader is not a DynamicClassLoader");
 }
+
+public static boolean checkSpecAsserts = readTrueFalseDefault(
+		System.getProperty("clojure.spec.check-asserts"), false);
 
 static{
 	Keyword arglistskw = Keyword.intern(null, "arglists");
