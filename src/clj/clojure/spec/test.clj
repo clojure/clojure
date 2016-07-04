@@ -125,7 +125,7 @@ failure in instrument."
                                          first)
                              ed (merge (assoc (s/explain-data* spec [role] [] [] data)
                                          ::s/args args
-                                         ::s/failure :instrument-check-failed)
+                                         ::s/failure :instrument)
                                        (when caller
                                          {::caller (dissoc caller :class :method)}))]
                          (throw (ex-info
@@ -141,14 +141,12 @@ failure in instrument."
            (.applyTo ^clojure.lang.IFn f args)))
        (.applyTo ^clojure.lang.IFn f args)))))
 
-(defn- no-fn-spec
+(defn- no-fspec
   [v spec]
   (ex-info (str "Fn at " v " is not spec'ed.")
-           {:var v :spec spec ::s/failure :no-fn-spec}))
+           {:var v :spec spec ::s/failure :no-fspec}))
 
-(def ^:private instrumented-vars
-     "Map for instrumented vars to :raw/:wrapped fns"
-     (atom {}))
+(defonce ^:private instrumented-vars (atom {}))
 
 (defn- instrument-choose-fn
   "Helper for instrument."
@@ -170,7 +168,7 @@ failure in instrument."
           current @v
           to-wrap (if (= wrapped current) raw current)
           ospec (or (instrument-choose-spec spec s opts)
-                      (throw (no-fn-spec v spec)))
+                      (throw (no-fspec v spec)))
           ofn (instrument-choose-fn to-wrap ospec s opts)
           checked (spec-checking-fn v ofn ospec)]
       (alter-var-root v (constantly checked))
@@ -272,15 +270,15 @@ Returns a collection of syms naming the vars unstrumented."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; testing  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- explain-test
+(defn- explain-check
   [args spec v role]
   (ex-info
-   "Specification-based test failed"
+   "Specification-based check failed"
    (when-not (s/valid? spec v nil)
      (assoc (s/explain-data* spec [role] [] [] v)
        ::args args
        ::val v
-       ::s/failure :test-failed))))
+       ::s/failure :check-failed))))
 
 (defn- check-call
   "Returns true if call passes specs, otherwise *returns* an exception
@@ -288,18 +286,18 @@ with explain-data under ::check-call."
   [f specs args]
   (let [cargs (when (:args specs) (s/conform (:args specs) args))]
     (if (= cargs ::s/invalid)
-      (explain-test args (:args specs) args :args)
+      (explain-check args (:args specs) args :args)
       (let [ret (apply f args)
             cret (when (:ret specs) (s/conform (:ret specs) ret))]
         (if (= cret ::s/invalid)
-          (explain-test args (:ret specs) ret :ret)
+          (explain-check args (:ret specs) ret :ret)
           (if (and (:args specs) (:ret specs) (:fn specs))
             (if (s/valid? (:fn specs) {:args cargs :ret cret})
               true
-              (explain-test args (:fn specs) {:args cargs :ret cret} :fn))
+              (explain-check args (:fn specs) {:args cargs :ret cret} :fn))
             true))))))
 
-(defn- check-fn
+(defn- quick-check
   [f specs {gen :gen opts ::stc/opts}]
   (let [{:keys [num-tests] :or {num-tests 1000}} opts
         g (try (s/gen (:args specs) gen) (catch Throwable t t))]
@@ -312,19 +310,19 @@ with explain-data under ::check-call."
   [x]
   (::s/failure (ex-data x)))
 
-(defn- make-test-result
+(defn- make-check-result
   "Builds spec result map."
-  [test-sym spec test-check-ret]
+  [check-sym spec test-check-ret]
   (merge {:spec spec
           ::stc/ret test-check-ret}
-         (when test-sym
-           {:sym test-sym})
+         (when check-sym
+           {:sym check-sym})
          (when-let [result (-> test-check-ret :result)]
            {:result result})
          (when-let [shrunk (-> test-check-ret :shrunk)]
            {:result (:result shrunk)})))
 
-(defn- test-1
+(defn- check-1
   [{:keys [s f v spec]} {:keys [result-callback] :as opts}]
   (when v (unstrument s))
   (try
@@ -334,46 +332,46 @@ with explain-data under ::check-call."
       {::s/failure :no-fn :sym s :spec spec}
     
       (:args spec)
-      (let [tcret (check-fn f spec opts)]
-        (make-test-result s spec tcret))
+      (let [tcret (quick-check f spec opts)]
+        (make-check-result s spec tcret))
     
       :default
       {::s/failure :no-args-spec :sym s :spec spec}))
    (finally
     (when v (instrument s)))))
 
-(defn- sym->test-map
+(defn- sym->check-map
   [s]
   (let [v (resolve s)]
     {:s s
      :v v
      :spec (when v (s/get-spec v))}))
 
-(defn- validate-test-opts
+(defn- validate-check-opts
   [opts]
-  (assert (every? ident? (keys (:gen opts))) "test :gen expects ident keys"))
+  (assert (every? ident? (keys (:gen opts))) "check :gen expects ident keys"))
 
-(defn test-fn
+(defn check-fn
   "Runs generative tests for fn f using spec and opts. See
-'test' for options and return."
-  ([f spec] (test-fn f spec nil))
+'check' for options and return."
+  ([f spec] (check-fn f spec nil))
   ([f spec opts]
-     (validate-test-opts opts)
-     (test-1 {:f f :spec spec} opts)))
+     (validate-check-opts opts)
+     (check-1 {:f f :spec spec} opts)))
 
 (defn testable-syms
-  "Given an opts map as per test, returns the set of syms that
+  "Given an opts map as per check, returns the set of syms that
 can be tested."
   ([] (testable-syms nil))
   ([opts]
-     (validate-test-opts opts)
+     (validate-check-opts opts)
      (reduce into #{} [(filter fn-spec-name? (keys (s/registry)))
                        (keys (:spec opts))])))
 
-(defn test
+(defn check
   "Run generative tests for spec conformance on vars named by
 sym-or-syms, a symbol or collection of symbols. If sym-or-syms
-is not specified, test all testable vars.
+is not specified, check all testable vars.
 
 The opts map includes the following optional keys, where stc
 aliases clojure.spec.test.check: 
@@ -385,39 +383,41 @@ The ::stc/opts include :num-tests in addition to the keys
 documented by test.check. Generator overrides are passed to
 spec/gen when generating function args.
 
-Returns a lazy sequence of test result maps with the following
+Returns a lazy sequence of check result maps with the following
 keys
 
 :spec       the spec tested
-:type       the type of the test result
+:type       the type of the check result
 :sym        optional symbol naming the var tested
-:result     optional test result
+:result     optional check result
 ::stc/ret   optional value returned by test.check/quick-check
 
 Values for the :result key can be one of
 
-true        passing test
-exception   code under test threw
+true        passing check
+exception   code under check threw
 map         with explain-data under :clojure.spec/problems
 
 Values for the :type key can be one of
 
-:pass       test passed
-:fail       test failed
-:error      test threw
-:no-argspec no :args in fn-spec
-:no-gen     unable to generate :args
-:no-fn      unable to resolve fn to test
+:check-passed   all checked fn returns conformed
+:check-failed   at least one checked return did not conform
+:check-threw    checked fn threw an exception
+:no-args-spec   no :args spec provided
+:no-fn          no fn provided
+:no-fspec       no fspec provided
+:no-gen         unable to generate :args
+:instrument     invalid args detected by instrument
 "
-  ([] (test (testable-syms)))
-  ([sym-or-syms] (test sym-or-syms nil))
+  ([] (check (testable-syms)))
+  ([sym-or-syms] (check sym-or-syms nil))
   ([sym-or-syms opts]
      (->> (collectionize sym-or-syms)
           (filter (testable-syms opts))
           (pmap
-           #(test-1 (sym->test-map %) opts)))))
+           #(check-1 (sym->check-map %) opts)))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; test reporting  ;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; check reporting  ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- unwrap-failure
   [x]
@@ -429,12 +429,12 @@ Values for the :type key can be one of
   [ret]
   (let [result (:result ret)]
     (cond
-     (true? result) :test-passed
+     (true? result) :check-passed
      (failure-type result) (failure-type result)
-     :default :test-threw)))
+     :default :check-threw)))
 
 (defn abbrev-result
-  "Given a test result, returns an abbreviated version
+  "Given a check result, returns an abbreviated version
 suitable for summary use."
   [x]
   (if (true? (:result x))
@@ -444,13 +444,13 @@ suitable for summary use."
         (update :result unwrap-failure))))
 
 (defn summarize-results
-  "Given a collection of test-results, e.g. from 'test', pretty
+  "Given a collection of check-results, e.g. from 'check', pretty
 prints the summary-result (default abbrev-result) of each.
 
 Returns a map with :total, the total number of results, plus a
 key with a count for each different :type of result."
-  ([test-results] (summarize-results test-results abbrev-result))
-  ([test-results summary-result]
+  ([check-results] (summarize-results check-results abbrev-result))
+  ([check-results summary-result]
      (reduce
       (fn [summary result]
         (pp/pprint (summary-result result))
@@ -458,7 +458,7 @@ key with a count for each different :type of result."
             (update :total inc)
             (update (result-type result) (fnil inc 0))))
       {:total 0}
-       test-results)))
+       check-results)))
 
 
 
