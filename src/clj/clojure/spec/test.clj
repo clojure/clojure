@@ -319,8 +319,8 @@ with explain-data + ::s/failure."
            {:failure (:result shrunk)})))
 
 (defn- check-1
-  [{:keys [s f v spec] :as foo} {:keys [result-callback] :as opts}]
-  (let [f (or v (when v @v))
+  [{:keys [s f v spec]} opts]
+  (let [f (or f (when v @v))
         re-inst? (and v (seq (unstrument s)) true)]
     (try
      (cond
@@ -359,7 +359,7 @@ with explain-data + ::s/failure."
 
 (defn checkable-syms
   "Given an opts map as per check, returns the set of syms that
-can be tested."
+can be checked."
   ([] (checkable-syms nil))
   ([opts]
      (validate-check-opts opts)

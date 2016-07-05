@@ -1653,7 +1653,7 @@ system property. Defaults to true."}
   clojure.lang.RT/checkSpecAsserts)
 
 (defn check-asserts
-  "Checktime enable/disable of spec asserts that have been compiled
+  "Enable or disable spec asserts that have been compiled
 with '*compile-asserts*' true.  See 'assert'.
 
 Initially set to boolean value of clojure.spec.check-asserts
