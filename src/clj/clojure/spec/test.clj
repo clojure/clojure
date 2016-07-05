@@ -163,17 +163,18 @@ failure in instrument."
 (defn- instrument-1
   [s opts]
   (when-let [v (resolve s)]
-    (let [spec (s/get-spec v)
-          {:keys [raw wrapped]} (get @instrumented-vars v)
-          current @v
-          to-wrap (if (= wrapped current) raw current)
-          ospec (or (instrument-choose-spec spec s opts)
+    (when-not (-> v meta :macro)
+      (let [spec (s/get-spec v)
+            {:keys [raw wrapped]} (get @instrumented-vars v)
+            current @v
+            to-wrap (if (= wrapped current) raw current)
+            ospec (or (instrument-choose-spec spec s opts)
                       (throw (no-fspec v spec)))
-          ofn (instrument-choose-fn to-wrap ospec s opts)
-          checked (spec-checking-fn v ofn ospec)]
-      (alter-var-root v (constantly checked))
-      (swap! instrumented-vars assoc v {:raw to-wrap :wrapped checked}))
-    (->sym v)))
+            ofn (instrument-choose-fn to-wrap ospec s opts)
+            checked (spec-checking-fn v ofn ospec)]
+        (alter-var-root v (constantly checked))
+        (swap! instrumented-vars assoc v {:raw to-wrap :wrapped checked})
+        (->sym v)))))
 
 (defn- unstrument-1
   [s]
@@ -320,8 +321,8 @@ with explain-data + ::s/failure."
 
 (defn- check-1
   [{:keys [s f v spec]} opts]
-  (let [f (or f (when v @v))
-        re-inst? (and v (seq (unstrument s)) true)]
+  (let [re-inst? (and v (seq (unstrument s)) true)
+        f (or f (when v @v))]
     (try
      (cond
       (nil? f)
