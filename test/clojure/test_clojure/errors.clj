@@ -79,7 +79,19 @@
            data-top-level :data}
           (Throwable->map (ex-info "ex-info"
                                    {:some "data"}))]
-      (is (= data data-top-level {:some "data"})))))
+      (is (= data data-top-level {:some "data"}))))
+  (testing "nil stack handled"
+    (let [t (Throwable. "abc")]
+      ;; simulate what can happen when Java omits stack traces
+      (.setStackTrace t (into-array StackTraceElement []))
+      (let [{:keys [cause via trace]} (Throwable->map t)]
+        (is (= cause "abc"))
+        (is (= trace []))
+
+        ;; fail if printing throws an exception
+        (try
+          (with-out-str (pr t))
+          (catch Throwable t (is nil)))))))
 
 (deftest ex-info-disallows-nil-data
   (is (thrown? IllegalArgumentException (ex-info "message" nil)))

@@ -451,13 +451,13 @@
   {:added "1.7"}
   [^Throwable o]
   (let [base (fn [^Throwable t]
-               (let [m {:type (symbol (.getName (class t)))
-                        :message (.getLocalizedMessage t)
-                        :at (StackTraceElement->vec (get (.getStackTrace t) 0))}
-                     data (ex-data t)]
-                 (if data
-                   (assoc m :data data)
-                   m)))
+               (merge {:type (symbol (.getName (class t)))
+                       :message (.getLocalizedMessage t)}
+                 (when-let [ed (ex-data t)]
+                   {:data ed})
+                 (let [st (.getStackTrace t)]
+                   (when (pos? (alength st))
+                     {:at (StackTraceElement->vec (aget st 0))}))))
         via (loop [via [], ^Throwable t o]
               (if t
                 (recur (conj via t) (.getCause t))
@@ -482,9 +482,10 @@
              (when-let [data (:data %)]
                (.write w "\n   :data ")
                (print-method data w))
-					   (.write w "\n   :at ")
-					   (print-method (:at %) w)
-					   (.write w "}"))]
+             (when-let [at (:at %)]
+               (.write w "\n   :at ")
+               (print-method (:at %) w))
+             (.write w "}"))]
     (print-method cause w)
     (when data
       (.write w "\n :data ")
