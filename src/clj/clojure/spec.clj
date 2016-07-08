@@ -1541,7 +1541,6 @@
      (describe* [_] `(fspec :args ~aform :ret ~rform :fn ~fform)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; non-primitives ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(clojure.spec/def ::any (spec (constantly true) :gen gen/any))
 (clojure.spec/def ::kvs->map (conformer #(zipmap (map ::k %) (map ::v %)) #(map (fn [[k v]] {::k k ::v v}) %)))
 
 (defmacro keys*
@@ -1559,7 +1558,7 @@
   user=> (s/conform (s/cat :i1 integer? :m (s/keys* :req-un [::a ::c]) :i2 integer?) [42 :a 1 :c 2 :d 4 99])
   {:i1 42, :m {:a 1, :c 2, :d 4}, :i2 99}"
   [& kspecs]
-  `(clojure.spec/& (* (cat ::k keyword? ::v ::any)) ::kvs->map (keys ~@kspecs)))
+  `(clojure.spec/& (* (cat ::k keyword? ::v any?)) ::kvs->map (keys ~@kspecs)))
 
 (defmacro nilable
   "returns a spec that accepts nil and values satisfiying pred"
