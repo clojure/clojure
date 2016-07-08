@@ -156,7 +156,10 @@
 (defn with-gen
   "Takes a spec and a no-arg, generator-returning fn and returns a version of that spec that uses that generator"
   [spec gen-fn]
-  (with-gen* (specize spec) gen-fn))
+  (let [spec (reg-resolve spec)]
+    (if (regex? spec)
+      (assoc spec ::gfn gen-fn)
+      (with-gen* (specize spec) gen-fn))))
 
 (defn explain-data* [spec path via in x]
   (let [probs (explain* (specize spec) path via in x)]
@@ -1384,7 +1387,7 @@
 
 (defn- re-gen [p overrides path rmap f]
   ;;(prn {:op op :ks ks :forms forms})
-  (let [{:keys [::op ps ks p1 p2 forms splice ret id] :as p} (reg-resolve! p)
+  (let [{:keys [::op ps ks p1 p2 forms splice ret id ::gfn] :as p} (reg-resolve! p)
         rmap (if id (inck rmap id) rmap)
         ggens (fn [ps ks forms]
                 (let [gen (fn [p k f]
@@ -1398,6 +1401,8 @@
             (case op
                   (:accept nil) (gen/fmap vector g)
                   g))
+          (when gfn
+            (gfn))
           (when p
             (case op
                   ::accept (if (= ret ::nil)
@@ -1559,7 +1564,9 @@
   user=> (s/conform (s/cat :i1 integer? :m (s/keys* :req-un [::a ::c]) :i2 integer?) [42 :a 1 :c 2 :d 4 99])
   {:i1 42, :m {:a 1, :c 2, :d 4}, :i2 99}"
   [& kspecs]
-  `(clojure.spec/& (* (cat ::k keyword? ::v any?)) ::kvs->map (keys ~@kspecs)))
+  `(let [mspec# (keys ~@kspecs)]
+     (with-gen (clojure.spec/& (* (cat ::k keyword? ::v any?)) ::kvs->map mspec#)
+       (fn [] (gen/fmap (fn [m#] (apply concat m#)) (gen mspec#))))))
 
 (defmacro nilable
   "returns a spec that accepts nil and values satisfiying pred"
