@@ -498,12 +498,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/*print-dup*"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj",
    :added "1.0",
    :name "*print-length*",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L16",
+   "https://github.com/clojure/clojure/blob/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj#L16",
    :dynamic true,
    :line 16,
    :var-type "var",
@@ -514,12 +514,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/*print-length*"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj",
    :added "1.0",
    :name "*print-level*",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L27",
+   "https://github.com/clojure/clojure/blob/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj#L27",
    :dynamic true,
    :line 27,
    :var-type "var",
@@ -883,12 +883,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/>="}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj",
    :added "1.9",
    :name "StackTraceElement->vec",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L443",
+   "https://github.com/clojure/clojure/blob/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj#L443",
    :line 443,
    :var-type "function",
    :arglists ([o]),
@@ -897,12 +897,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/StackTraceElement->vec"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj",
    :added "1.7",
    :name "Throwable->map",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L449",
+   "https://github.com/clojure/clojure/blob/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj#L449",
    :line 449,
    :var-type "function",
    :arglists ([o]),
@@ -2026,12 +2026,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/char-array"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj",
    :added "1.0",
    :name "char-escape-string",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L179",
+   "https://github.com/clojure/clojure/blob/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj#L179",
    :line 179,
    :var-type "var",
    :arglists nil,
@@ -2040,12 +2040,12 @@
    :wiki-url
    "http://clojure.github.io/clojure//clojure.core-api.html#clojure.core/char-escape-string"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj",
+   "https://github.com/clojure/clojure/raw/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj",
    :added "1.0",
    :name "char-name-string",
    :file "src/clj/clojure/core_print.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd64b71ddb297c10e459537f818cf2cba9a743ec/src/clj/clojure/core_print.clj#L320",
+   "https://github.com/clojure/clojure/blob/88fc01f43b5bb09068e01d967c15b4528614e058/src/clj/clojure/core_print.clj#L320",
    :line 320,
    :var-type "var",
    :arglists nil,
@@ -11954,10 +11954,10 @@
   {:keyword :clojure.spec/kvs->map,
    :spec
    (fn*
-    [p1__6659#]
+    [p1__6661#]
     (zipmap
-     (map :clojure.spec/k p1__6659#)
-     (map :clojure.spec/v p1__6659#))),
+     (map :clojure.spec/k p1__6661#)
+     (map :clojure.spec/v p1__6661#))),
    :var-type "spec",
    :namespace "clojure.spec",
    :wiki-url
