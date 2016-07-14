@@ -444,8 +444,7 @@
 (defmacro merge
   "Takes map-validating specs (e.g. 'keys' specs) and
   returns a spec that returns a conformed map satisfying all of the
-  specs.  Successive conformed values propagate through rest of
-  predicates. Unlike 'and', merge can generate maps satisfying the
+  specs.  Unlike 'and', merge can generate maps satisfying the
   union of the predicates."
   [& pred-forms]
   `(merge-spec-impl '~(mapv res pred-forms) ~(vec pred-forms) nil))
