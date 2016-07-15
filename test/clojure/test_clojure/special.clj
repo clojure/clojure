@@ -13,7 +13,8 @@
 ;;
 
 (ns clojure.test-clojure.special
-  (:use clojure.test))
+  (:use clojure.test)
+  (:require [clojure.test-helper :refer [should-not-reflect]]))
 
 ; http://clojure.org/special_forms
 
@@ -98,3 +99,9 @@
                (.getCause)
                (ex-data)
                (:form))))))
+
+(deftest typehints-retained-destructuring
+  (should-not-reflect
+    (defn foo
+      [{:keys [^String s]}]
+      (.indexOf s "boo"))))

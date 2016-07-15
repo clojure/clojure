@@ -4410,7 +4410,7 @@
                          (if (seq bes)
                            (let [bb (key (first bes))
                                  bk (val (first bes))
-                                 local (if (instance? clojure.lang.Named bb) (symbol nil (name bb)) bb)
+                                 local (if (instance? clojure.lang.Named bb) (with-meta (symbol nil (name bb)) (meta bb)) bb)
                                  bv (if (contains? defaults local)
                                       (list `get gmap bk (defaults local))
                                       (list `get gmap bk))]
