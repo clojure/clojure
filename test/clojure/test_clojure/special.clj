@@ -67,19 +67,19 @@
     (is (= [1 2 3] [b c d]))))
 
 (deftest keywords-not-allowed-in-let-bindings
-  (is (thrown-with-msg? Exception #"Unsupported binding form: :a"
+  (is (thrown-with-msg? Exception #"did not conform to spec"
                         (eval '(let [:a 1] a))))
-  (is (thrown-with-msg? Exception #"Unsupported binding form: :a/b"
+  (is (thrown-with-msg? Exception #"did not conform to spec"
                         (eval '(let [:a/b 1] b))))
-  (is (thrown-with-msg? Exception #"Unsupported binding form: :a"
+  (is (thrown-with-msg? Exception #"did not conform to spec"
                         (eval '(let [[:a] [1]] a))))
-  (is (thrown-with-msg? Exception #"Unsupported binding form: :a/b"
+  (is (thrown-with-msg? Exception #"did not conform to spec"
                         (eval '(let [[:a/b] [1]] b)))))
 
 (deftest namespaced-syms-only-allowed-in-map-destructuring
-  (is (thrown-with-msg? Exception #"Can't let qualified name: a/x"
+  (is (thrown-with-msg? Exception #"did not conform to spec"
                         (eval '(let [a/x 1, [y] [1]] x))))
-  (is (thrown-with-msg? Exception #"Can't let qualified name: a/x"
+  (is (thrown-with-msg? Exception #"did not conform to spec"
                         (eval '(let [[a/x] [1]] x)))))
 
 (deftest or-doesnt-create-bindings
