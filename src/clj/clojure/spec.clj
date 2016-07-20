@@ -802,7 +802,7 @@
        (gen* [_ _ _ _] (if gfn
                          (gfn)
                          (gen/gen-for-pred pred)))
-       (with-gen* [_ gfn] (spec-impl form pred gfn cpred?))
+       (with-gen* [_ gfn] (spec-impl form pred gfn cpred? unc))
        (describe* [_] form)))))
 
 (defn ^:skip-wiki multi-spec-impl
