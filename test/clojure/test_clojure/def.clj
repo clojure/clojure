@@ -14,13 +14,13 @@
   (testing "multiarity syntax invalid parameter declaration"
     (is (fails-with-cause? 
           IllegalArgumentException 
-          #"Parameter declaration \"arg1\" should be a vector"
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn foo (arg1 arg2))))))
 
   (testing "multiarity syntax invalid signature"
     (is (fails-with-cause? 
           IllegalArgumentException 
-          #"Invalid signature \"\[a b\]\" should be a list"
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn foo 
                              ([a] 1)
                              [a b])))))
@@ -28,19 +28,19 @@
   (testing "assume single arity syntax"
     (is (fails-with-cause? 
           IllegalArgumentException 
-          #"Parameter declaration \"a\" should be a vector"
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn foo a)))))
 
   (testing "bad name"
     (is (fails-with-cause? 
           IllegalArgumentException 
-          #"First argument to defn must be a symbol"
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn "bad docstring" testname [arg1 arg2])))))
          
   (testing "missing parameter/signature"
     (is (fails-with-cause? 
           IllegalArgumentException 
-          #"Parameter declaration missing"
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn testname)))))
 
   (testing "allow trailing map"
@@ -49,7 +49,7 @@
   (testing "don't allow interleaved map"
     (is (fails-with-cause? 
           IllegalArgumentException 
-          #"Invalid signature \"\{:a :b\}\" should be a list"
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn a "asdf" ([a] 1) {:a :b} ([] 1)))))))
 
 (deftest non-dynamic-warnings

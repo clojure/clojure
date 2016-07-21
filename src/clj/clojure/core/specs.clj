@@ -61,3 +61,38 @@
 (s/fdef clojure.core/when-let
   :args (s/cat :bindings (s/and vector? ::binding)
                :body (s/* any?)))
+
+;; defn, defn-, fn
+
+(s/def ::arg-list
+  (s/and
+    vector?
+    (s/cat :args (s/* ::binding-form)
+           :varargs (s/? (s/cat :amp #{'&} :form ::binding-form)))))
+
+(s/def ::args+body
+  (s/cat :args ::arg-list
+         :prepost (s/? map?)
+         :body (s/* any?)))
+
+(def defn-args
+  (s/cat :name simple-symbol?
+         :docstring (s/? string?)
+         :meta (s/? map?)
+         :bs (s/alt :arity-1 ::args+body
+                    :arity-n (s/cat :bodies (s/+ (s/spec ::args+body))
+                                    :attr (s/? map?)))))
+
+(s/fdef clojure.core/defn
+  :args defn-args
+  :ret any?)
+
+(s/fdef clojure.core/defn-
+  :args defn-args
+  :ret any?)
+
+(s/fdef clojure.core/fn
+  :args (s/cat :name (s/? simple-symbol?)
+               :bs (s/alt :arity-1 ::args+body
+                          :arity-n (s/+ (s/spec ::args+body))))
+  :ret any?)
