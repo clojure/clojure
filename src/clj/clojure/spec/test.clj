@@ -325,7 +325,7 @@ with explain-data + ::s/failure."
         f (or f (when v @v))]
     (try
      (cond
-      (nil? f)
+      (or (nil? f) (some-> v meta :macro))
       {:failure (ex-info "No fn to spec" {::s/failure :no-fn})
        :sym s :spec spec}
     
