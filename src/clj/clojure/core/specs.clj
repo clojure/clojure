@@ -75,7 +75,7 @@
          :prepost (s/? map?)
          :body (s/* any?)))
 
-(def defn-args
+(s/def ::defn-args
   (s/cat :name simple-symbol?
          :docstring (s/? string?)
          :meta (s/? map?)
@@ -84,11 +84,11 @@
                                     :attr (s/? map?)))))
 
 (s/fdef clojure.core/defn
-  :args defn-args
+  :args ::defn-args
   :ret any?)
 
 (s/fdef clojure.core/defn-
-  :args defn-args
+  :args ::defn-args
   :ret any?)
 
 (s/fdef clojure.core/fn
