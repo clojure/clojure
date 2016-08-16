@@ -40,7 +40,8 @@
 
 (def ^:dynamic
  ^{:doc "*print-namespace-maps* controls whether the printer will print
-  namespace map literal syntax. It defaults to true."
+  namespace map literal syntax. It defaults to false, but the REPL binds
+  to true."
    :added "1.9"}
  *print-namespace-maps* false)
 
