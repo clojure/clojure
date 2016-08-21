@@ -444,8 +444,7 @@
 (defmacro merge
   "Takes map-validating specs (e.g. 'keys' specs) and
   returns a spec that returns a conformed map satisfying all of the
-  specs.  Successive conformed values propagate through rest of
-  predicates. Unlike 'and', merge can generate maps satisfying the
+  specs.  Unlike 'and', merge can generate maps satisfying the
   union of the predicates."
   [& pred-forms]
   `(merge-spec-impl '~(mapv res pred-forms) ~(vec pred-forms) nil))
@@ -1387,7 +1386,8 @@
 
 (defn- re-gen [p overrides path rmap f]
   ;;(prn {:op op :ks ks :forms forms})
-  (let [{:keys [::op ps ks p1 p2 forms splice ret id ::gfn] :as p} (reg-resolve! p)
+  (let [origp p
+        {:keys [::op ps ks p1 p2 forms splice ret id ::gfn] :as p} (reg-resolve! p)
         rmap (if id (inck rmap id) rmap)
         ggens (fn [ps ks forms]
                 (let [gen (fn [p k f]
@@ -1397,10 +1397,12 @@
                                 (gen/delay (re-gen p overrides (if k (conj path k) path) rmap (c/or f p)))
                                 (re-gen p overrides (if k (conj path k) path) rmap (c/or f p)))))]
                   (map gen ps (c/or (seq ks) (repeat nil)) (c/or (seq forms) (repeat nil)))))]
-    (c/or (when-let [g (get overrides path)]
+    (c/or (when-let [gfn (c/or (get overrides (spec-name origp))
+                               (get overrides (spec-name p) )
+                               (get overrides path))]
             (case op
-                  (:accept nil) (gen/fmap vector g)
-                  g))
+                  (:accept nil) (gen/fmap vector (gfn))
+                  (gfn)))
           (when gfn
             (gfn))
           (when p
