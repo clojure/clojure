@@ -233,26 +233,25 @@
 (defn- lift-ns
   "Returns [lifted-ns lifted-map] or nil if m can't be lifted."
   [m]
-  (loop [ns nil
-         [[k v :as entry] & entries] (seq m)
-         lm (empty m)]
-    (if entry
-      (when (or (keyword? k) (symbol? k))
-        (if ns
-          (when (= ns (namespace k))
-            (recur ns entries (assoc lm (strip-ns k) v)))
-          (when-let [new-ns (namespace k)]
-            (recur new-ns entries (assoc lm (strip-ns k) v)))))
-      [ns lm])))
+  (when *print-namespace-maps*
+    (loop [ns nil
+           [[k v :as entry] & entries] (seq m)
+           lm (empty m)]
+      (if entry
+        (when (or (keyword? k) (symbol? k))
+          (if ns
+            (when (= ns (namespace k))
+              (recur ns entries (assoc lm (strip-ns k) v)))
+            (when-let [new-ns (namespace k)]
+              (recur new-ns entries (assoc lm (strip-ns k) v)))))
+        [ns lm]))))
 
 (defmethod print-method clojure.lang.IPersistentMap [m, ^Writer w]
   (print-meta m w)
-  (if *print-namespace-maps*
-    (let [[ns lift-map] (lift-ns m)]
-      (if ns
-        (print-prefix-map (str "#:" ns) lift-map pr-on w)
-        (print-map m pr-on w)))
-    (print-map m pr-on w)))
+  (let [[ns lift-map] (lift-ns m)]
+    (if ns
+      (print-prefix-map (str "#:" ns) lift-map pr-on w)
+      (print-map m pr-on w))))
 
 (defmethod print-dup java.util.Map [m, ^Writer w]
   (print-ctor m #(print-map (seq %1) print-dup %2) w))

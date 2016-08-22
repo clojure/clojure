@@ -92,19 +92,23 @@
 
 ;;; (def pprint-map (formatter-out "~<{~;~@{~<~w~^ ~_~w~:>~^, ~_~}~;}~:>"))
 (defn- pprint-map [amap]
-  (pprint-logical-block :prefix "{" :suffix "}"
-    (print-length-loop [aseq (seq amap)]
-      (when aseq
-	(pprint-logical-block 
-          (write-out (ffirst aseq))
-          (.write ^java.io.Writer *out* " ")
-          (pprint-newline :linear)
-          (set! *current-length* 0)     ; always print both parts of the [k v] pair
-          (write-out (fnext (first aseq))))
-        (when (next aseq)
-          (.write ^java.io.Writer *out* ", ")
-          (pprint-newline :linear)
-          (recur (next aseq)))))))
+  (let [[ns lift-map] (when (not (record? amap))
+                        (#'clojure.core/lift-ns amap))
+        amap (or lift-map amap)
+        prefix (if ns (str "#:" ns "{") "{")]
+    (pprint-logical-block :prefix prefix :suffix "}"
+      (print-length-loop [aseq (seq amap)]
+        (when aseq
+          (pprint-logical-block
+            (write-out (ffirst aseq))
+            (.write ^java.io.Writer *out* " ")
+            (pprint-newline :linear)
+            (set! *current-length* 0) ; always print both parts of the [k v] pair
+            (write-out (fnext (first aseq))))
+          (when (next aseq)
+            (.write ^java.io.Writer *out* ", ")
+            (pprint-newline :linear)
+            (recur (next aseq))))))))
 
 (def ^{:private true} pprint-set (formatter-out "~<#{~;~@{~w~^ ~:_~}~;}~:>"))
 
