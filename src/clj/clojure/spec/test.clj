@@ -193,7 +193,8 @@ failure in instrument."
 
 (defn- fn-spec-name?
   [s]
-  (symbol? s))
+  (and (symbol? s)
+       (not (some-> (resolve s) meta :macro))))
 
 (defn instrumentable-syms
   "Given an opts map as per instrument, returns the set of syms
