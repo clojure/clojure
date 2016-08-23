@@ -697,7 +697,7 @@
   by calling get-spec with the var or fully-qualified symbol.
 
   Once registered, function specs are included in doc, checked by
-  instrument, tested by the runner clojure.spec.test/run-tests, and (if
+  instrument, tested by the runner clojure.spec.test/check, and (if
   a macro) used to explain errors during macroexpansion.
 
   Note that :fn specs require the presence of :args and :ret specs to
