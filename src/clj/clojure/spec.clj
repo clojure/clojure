@@ -1209,8 +1209,8 @@
                         ret
                         (assoc ret (nth (if conform-keys cv v) 0) (nth cv 1))))
                     identity]
-                  
-                   (c/or (list? conform-into) (c/and (not conform-into) (list? x)))
+
+                   (c/or (list? conform-into) (seq? conform-into) (c/and (not conform-into) (c/or (list? x) (seq? x))))
                    [(constantly ()) addcv reverse]
 
                    :else [#(empty (c/or conform-into %)) addcv identity]))]

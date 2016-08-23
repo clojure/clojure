@@ -143,6 +143,7 @@
       coll [] [] nil
       coll [:a] [:a] nil
       coll [:a :b] [:a :b] nil
+      coll (map identity [:a :b]) '(:a :b) nil
       ;;coll [:a "b"] ::s/invalid '[{:pred (coll-checker keyword?), :val [:a b]}]
       )))
 
