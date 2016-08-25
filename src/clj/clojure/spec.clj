@@ -621,10 +621,11 @@
         (let [ed (assoc (explain-data* arg-spec [:args]
                                        (if-let [name (spec-name arg-spec)] [name] []) [] args)
                    ::args args)]
-          (throw (IllegalArgumentException.
+          (throw (ex-info
                    (str
                      "Call to " (->sym v) " did not conform to spec:\n"
-                     (with-out-str (explain-out ed))))))))))
+                     (with-out-str (explain-out ed)))
+                   ed)))))))
 
 (defmacro fdef
   "Takes a symbol naming a function, and one or more of the following:
