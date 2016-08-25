@@ -175,8 +175,8 @@
   [spec x]
   (explain-data* spec [] (if-let [name (spec-name spec)] [name] []) [] x))
 
-(defn explain-out
-  "prints explanation data (per 'explain-data') to *out*."
+(defn explain-printer
+  "Default printer for explain-data. nil indicates a successful validation."
   [ed]
   (if ed
     (do
@@ -205,6 +205,14 @@
           (pr v)
           (newline))))
     (println "Success!")))
+
+(def ^:dynamic *explain-out* explain-printer)
+
+(defn explain-out
+  "Prints explanation data (per 'explain-data') to *out* using the printer in *explain-out*,
+   by default explain-printer."
+  [ed]
+  (*explain-out* ed))
 
 (defn explain
   "Given a spec and a value that fails to conform, prints an explanation to *out*."
