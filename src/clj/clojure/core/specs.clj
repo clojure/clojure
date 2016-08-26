@@ -158,7 +158,8 @@
 (s/def ::extends simple-symbol?)
 (s/def ::implements (s/coll-of simple-symbol? :kind vector?))
 (s/def ::init symbol?)
-(s/def ::signature (s/coll-of simple-symbol? :kind vector?))
+(s/def ::class-ident (s/or :class simple-symbol? :class-name string?))
+(s/def ::signature (s/coll-of ::class-ident :kind vector?))
 (s/def ::constructors (s/map-of ::signature ::signature))
 (s/def ::post-init symbol?)
 (s/def ::method (s/and vector?
