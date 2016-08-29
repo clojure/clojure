@@ -103,57 +103,61 @@
 (s/def ::exclude (s/coll-of simple-symbol?))
 (s/def ::only (s/coll-of simple-symbol?))
 (s/def ::rename (s/map-of simple-symbol? simple-symbol?))
+(s/def ::filters (s/keys* :opt-un [::exclude ::only ::rename]))
 
 (s/def ::ns-refer-clojure
   (s/spec (s/cat :clause #{:refer-clojure}
-            :filters (s/keys* :opt-un [::exclude ::only ::rename]))))
+                 :filters ::filters)))
 
 (s/def ::refer (s/or :all #{:all}
-                 :syms  (s/coll-of simple-symbol?)))
+                     :syms (s/coll-of simple-symbol?)))
 
 (s/def ::prefix-list
   (s/spec
     (s/cat :prefix simple-symbol?
-      :suffix (s/* (s/alt :lib simple-symbol? :prefix-list ::prefix-list))
-      :refer (s/keys* :opt-un [::as ::refer]))))
+           :suffix (s/* (s/alt :lib simple-symbol? :prefix-list ::prefix-list))
+           :refer (s/keys* :opt-un [::as ::refer]))))
 
 (s/def ::ns-require
   (s/spec (s/cat :clause #{:require}
-            :libs (s/* (s/alt :lib simple-symbol?
-                         :prefix-list ::prefix-list
-                         :flag #{:reload :reload-all :verbose})))))
+                 :libs (s/* (s/alt :lib simple-symbol?
+                                   :prefix-list ::prefix-list
+                                   :flag #{:reload :reload-all :verbose})))))
 
 (s/def ::package-list
   (s/spec
     (s/cat :package simple-symbol?
-      :classes (s/* simple-symbol?))))
+           :classes (s/* simple-symbol?))))
+
+(s/def ::import-list
+  (s/* (s/alt :class simple-symbol?
+              :package-list ::package-list)))
 
 (s/def ::ns-import
   (s/spec
     (s/cat :clause #{:import}
-      :classes (s/* (s/alt :class simple-symbol?
-                      :package-list ::package-list)))))
+           :classes ::import-list)))
 
 (s/def ::ns-refer
   (s/spec (s/cat :clause #{:refer}
-            :lib simple-symbol?
-            :filters (s/keys* :opt-un [::exclude ::only ::rename]))))
+                 :lib simple-symbol?
+                 :filters ::filters)))
 
 (s/def ::use-prefix-list
   (s/spec
     (s/cat :prefix simple-symbol?
-      :suffix (s/* (s/alt :lib simple-symbol? :prefix-list ::use-prefix-list))
-      :filters (s/keys* :opt-un [::exclude ::only ::rename]))))
+           :suffix (s/* (s/alt :lib simple-symbol? :prefix-list ::use-prefix-list))
+           :filters ::filters)))
 
 (s/def ::ns-use
   (s/spec (s/cat :clause #{:use}
             :libs (s/* (s/alt :lib simple-symbol?
-                         :prefix-list ::use-prefix-list
-                         :flag #{:reload :reload-all :verbose})))))
+                              :prefix-list ::use-prefix-list
+                              :flag #{:reload :reload-all :verbose})))))
 
 (s/def ::ns-load
   (s/spec (s/cat :clause #{:load}
-            :libs (s/* string?))))
+                 :libs (s/* string?))))
 
 (s/def ::name simple-symbol?)
 (s/def ::extends simple-symbol?)
@@ -165,8 +169,8 @@
 (s/def ::post-init symbol?)
 (s/def ::method (s/and vector?
                   (s/cat :name simple-symbol?
-                    :param-types ::signature
-                    :return-type simple-symbol?)))
+                         :param-types ::signature
+                         :return-type simple-symbol?)))
 (s/def ::methods (s/coll-of ::method :kind vector?))
 (s/def ::main boolean?)
 (s/def ::factory simple-symbol?)
@@ -181,23 +185,40 @@
 
 (s/def ::ns-gen-class
   (s/spec (s/cat :clause #{:gen-class}
-            :options (s/keys* :opt-un [::name ::extends ::implements
-                                       ::init ::constructors ::post-init
-                                       ::methods ::main ::factory ::state
-                                       ::exposes ::prefix ::impl-ns ::load-impl-ns]))))
+                 :options (s/keys* :opt-un [::name ::extends ::implements
+                                            ::init ::constructors ::post-init
+                                            ::methods ::main ::factory ::state
+                                            ::exposes ::prefix ::impl-ns ::load-impl-ns]))))
 
 (s/def ::ns-clauses
   (s/* (s/alt :refer-clojure ::ns-refer-clojure
-         :require ::ns-require
-         :import ::ns-import
-         :use ::ns-use
-         :refer ::ns-refer
-         :load ::ns-load
-         :gen-class ::ns-gen-class)))
+              :require ::ns-require
+              :import ::ns-import
+              :use ::ns-use
+              :refer ::ns-refer
+              :load ::ns-load
+              :gen-class ::ns-gen-class)))
 
 (s/fdef clojure.core/ns
   :args (s/cat :name simple-symbol?
-          :docstring (s/? string?)
-          :attr-map (s/? map?)
-          :clauses ::ns-clauses)
-  :ret any?)
+               :docstring (s/? string?)
+               :attr-map (s/? map?)
+               :clauses ::ns-clauses))
+
+(defmacro ^:private quotable
+  "Returns a spec that accepts both the spec and a (quote ...) form of the spec"
+  [spec]
+  `(s/or :spec ~spec :quoted-spec (s/cat :quote #{'quote} :spec ~spec)))
+
+(s/def ::quotable-import-list
+  (s/* (s/alt :class (quotable simple-symbol?)
+              :package-list (quotable ::package-list))))
+
+(s/fdef clojure.core/import
+  :args ::quotable-import-list)
+
+(s/fdef clojure.core/refer-clojure
+  :args (s/* (s/alt
+               :exclude (s/cat :op (quotable #{:exclude}) :arg (quotable ::exclude))
+               :only (s/cat :op (quotable #{:only}) :arg (quotable ::only))
+               :rename (s/cat :op (quotable #{:rename}) :arg (quotable ::rename)))))
