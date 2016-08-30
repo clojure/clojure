@@ -952,17 +952,39 @@
   [keys forms preds gfn]
   (let [id (java.util.UUID/randomUUID)
         kps (zipmap keys preds)
-        cform (let [specs (delay (mapv specize preds))]
-                (fn [x]
-                  (let [specs @specs]
-                    (loop [i 0]
-                      (if (< i (count specs))
-                        (let [spec (specs i)]
-                          (let [ret (conform* spec x)]
-                            (if (= ::invalid ret)
-                              (recur (inc i))
-                              (tagged-ret (keys i) ret))))
-                        ::invalid)))))]
+        specs (delay (mapv specize preds))
+        cform (case (count preds)
+                    2 (fn [x]
+                        (let [specs @specs
+                              ret (conform* (specs 0) x)]
+                          (if (= ::invalid ret)
+                            (let [ret (conform* (specs 1) x)]
+                              (if (= ::invalid ret)
+                                ::invalid
+                                (tagged-ret (keys 1) ret)))
+                            (tagged-ret (keys 0) ret))))
+                    3 (fn [x]
+                        (let [specs @specs
+                              ret (conform* (specs 0) x)]
+                          (if (= ::invalid ret)
+                            (let [ret (conform* (specs 1) x)]
+                              (if (= ::invalid ret)
+                                (let [ret (conform* (specs 2) x)]
+                                  (if (= ::invalid ret)
+                                    ::invalid
+                                    (tagged-ret (keys 2) ret)))
+                                (tagged-ret (keys 1) ret)))
+                            (tagged-ret (keys 0) ret))))
+                    (fn [x]
+                      (let [specs @specs]
+                        (loop [i 0]
+                          (if (< i (count specs))
+                            (let [spec (specs i)]
+                              (let [ret (conform* spec x)]
+                                (if (= ::invalid ret)
+                                  (recur (inc i))
+                                  (tagged-ret (keys i) ret))))
+                            ::invalid)))))]
     (reify
      Spec
      (conform* [_ x] (cform x))
@@ -1014,14 +1036,42 @@
 (defn ^:skip-wiki and-spec-impl
   "Do not call this directly, use 'and'"
   [forms preds gfn]
-  (reify
-   Spec
-   (conform* [_ x] (and-preds x preds forms))
-   (unform* [_ x] (reduce #(unform %2 %1) x (reverse preds)))
-   (explain* [_ path via in x] (explain-pred-list forms preds path via in x))
-   (gen* [_ overrides path rmap] (if gfn (gfn) (gensub (first preds) overrides path rmap (first forms))))
-   (with-gen* [_ gfn] (and-spec-impl forms preds gfn))
-   (describe* [_] `(and ~@forms))))
+  (let [specs (delay (mapv specize preds))
+        cform
+        (case (count preds)
+              2 (fn [x]
+                  (let [specs @specs
+                        ret (conform* (specs 0) x)]
+                    (if (= ::invalid ret)
+                      ::invalid
+                      (conform* (specs 1) ret))))
+              3 (fn [x]
+                  (let [specs @specs
+                        ret (conform* (specs 0) x)]
+                    (if (= ::invalid ret)
+                      ::invalid
+                      (let [ret (conform* (specs 1) ret)]
+                        (if (= ::invalid ret)
+                          ::invalid
+                          (conform* (specs 2) ret))))))
+              (fn [x]
+                (let [specs @specs]
+                  (loop [ret x i 0]
+                    (if (< i (count specs))
+                      (let [nret (conform* (specs i) ret)]
+                        (if (= ::invalid nret)
+                          ::invalid
+                          ;;propagate conformed values
+                          (recur nret (inc i))))
+                      ret)))))]
+    (reify
+     Spec
+     (conform* [_ x] (cform x))
+     (unform* [_ x] (reduce #(unform %2 %1) x (reverse preds)))
+     (explain* [_ path via in x] (explain-pred-list forms preds path via in x))
+     (gen* [_ overrides path rmap] (if gfn (gfn) (gensub (first preds) overrides path rmap (first forms))))
+     (with-gen* [_ gfn] (and-spec-impl forms preds gfn))
+     (describe* [_] `(and ~@forms)))))
 
 (defn ^:skip-wiki merge-spec-impl
   "Do not call this directly, use 'merge'"
@@ -1609,10 +1659,27 @@
      (with-gen (clojure.spec/& (* (cat ::k keyword? ::v any?)) ::kvs->map mspec#)
        (fn [] (gen/fmap (fn [m#] (apply concat m#)) (gen mspec#))))))
 
+(defn nonconforming
+  "takes a spec and returns a spec that has the same properties except
+  'conform' returns the original (not the conformed) value. Note, will specize regex ops."
+  [spec]
+  (let [spec (specize spec)]
+    (reify
+     Spec
+     (conform* [_ x] (let [ret (conform* spec x)]
+                       (if (= ::invalid ret)
+                         ::invalid
+                         x)))
+     (unform* [_ x] (unform* spec x))
+     (explain* [_ path via in x] (explain* spec path via in x))
+     (gen* [_ overrides path rmap] (gen* spec overrides path rmap))
+     (with-gen* [_ gfn] (nonconforming (with-gen* spec gfn)))
+     (describe* [_] `(nonconforming ~(describe* spec))))))
+
 (defmacro nilable
-  "returns a spec that accepts nil and values satisfiying pred"
+  "returns a spec that accepts nil and values satisfying pred"
   [pred]
-  `(and (or ::nil nil? ::pred ~pred) (conformer second #(if (nil? %) [::nil nil] [::pred %]))))
+  `(nonconforming (or ::nil nil? ::pred ~pred)))
 
 (defn exercise
   "generates a number (default 10) of values compatible with spec and maps conform over them,
