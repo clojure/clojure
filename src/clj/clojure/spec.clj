@@ -928,7 +928,7 @@
                   (when (every? identity gs)
                     (gen/one-of gs)))))
         (with-gen* [_ gfn] (multi-spec-impl form mmvar retag gfn))
-        (describe* [_] `(multi-spec ~form))))))
+        (describe* [_] `(multi-spec ~form ~retag))))))
 
 (defn ^:skip-wiki tuple-impl
   "Do not call this directly, use 'tuple'"
