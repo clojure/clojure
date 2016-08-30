@@ -44,28 +44,21 @@
 
 (defonce ^:private registry-ref (atom {}))
 
-(defn- named? [x] (instance? clojure.lang.Named x))
-
-(defn- with-name [spec name]
-  (with-meta spec (assoc (meta spec) ::name name)))
-
-(defn- spec-name [spec]
-  (cond
-   (keyword? spec) spec
-
-   (instance? clojure.lang.IObj spec)
-   (-> (meta spec) ::name)))
+(defn- deep-resolve [reg k]
+  (loop [spec k]
+    (if (ident? spec)
+      (recur (get reg spec))
+      spec)))
 
 (defn- reg-resolve
-  "returns the spec/regex at end of alias chain starting with k, nil if not found, k if k not Named"
+  "returns the spec/regex at end of alias chain starting with k, nil if not found, k if k not ident"
   [k]
-  (if (named? k)
-    (let [reg @registry-ref]
-      (loop [spec k]
-        (if (named? spec)
-          (recur (get reg spec))
-          (when spec
-            (with-name spec k)))))
+  (if (ident? k)
+    (let [reg @registry-ref
+          spec (get reg k)]
+      (if-not (ident? spec)
+        spec
+        (deep-resolve reg spec)))
     k))
 
 (defn- reg-resolve!
@@ -86,15 +79,32 @@
   [x]
   (c/and (::op x) x))
 
+(defn- with-name [spec name]
+  (cond
+   (ident? spec) spec
+   (regex? spec) (assoc spec ::name name)
+
+   (instance? clojure.lang.IObj spec)
+   (with-meta spec (assoc (meta spec) ::name name))))
+
+(defn- spec-name [spec]
+  (cond
+   (ident? spec) spec
+
+   (regex? spec) (::name spec)
+   
+   (instance? clojure.lang.IObj spec)
+   (-> (meta spec) ::name)))
+
 (declare spec-impl)
 (declare regex-spec-impl)
 
 (defn- maybe-spec
   "spec-or-k must be a spec, regex or resolvable kw/sym, else returns nil."
   [spec-or-k]
-  (let [s (c/or (spec? spec-or-k)
+  (let [s (c/or (c/and (ident? spec-or-k) (reg-resolve spec-or-k))
+                (spec? spec-or-k)
                 (regex? spec-or-k)
-                (c/and (named? spec-or-k) (reg-resolve spec-or-k))
                 nil)]
     (if (regex? s)
       (with-name (regex-spec-impl s nil) (spec-name s))
@@ -104,11 +114,27 @@
   "spec-or-k must be a spec, regex or kw/sym, else returns nil. Throws if unresolvable kw/sym"
   [spec-or-k]
   (c/or (maybe-spec spec-or-k)
-        (when (named? spec-or-k)
+        (when (ident? spec-or-k)
           (throw (Exception. (str "Unable to resolve spec: " spec-or-k))))))
 
+(defprotocol Specize
+  (specize* [_]))
+
+(extend-protocol Specize
+  clojure.lang.Keyword
+  (specize* [k] (specize* (reg-resolve! k)))
+
+  clojure.lang.Symbol
+  (specize* [s] (specize* (reg-resolve! s)))
+
+  clojure.spec.Spec
+  (specize* [s] s)
+
+  Object
+  (specize* [o] (spec-impl ::unknown o nil nil)))
+
 (defn- specize [s]
-  (c/or (the-spec s) (spec-impl ::unknown s nil nil)))
+  (specize* s))
 
 (defn conform
   "Given a spec and a value, returns :clojure.spec/invalid if value does not match spec,
@@ -279,11 +305,11 @@
 (defn ^:skip-wiki def-impl
   "Do not call this directly, use 'def'"
   [k form spec]
-  (c/assert (c/and (named? k) (namespace k)) "k must be namespaced keyword or resolvable symbol")
+  (c/assert (c/and (ident? k) (namespace k)) "k must be namespaced keyword or resolvable symbol")
   (let [spec (if (c/or (spec? spec) (regex? spec) (get @registry-ref spec))
                spec
                (spec-impl form spec nil nil))]
-    (swap! registry-ref assoc k spec)
+    (swap! registry-ref assoc k (with-name spec k))
     k))
 
 (defn- ns-qualify
@@ -795,11 +821,13 @@
      (cond
       (spec? pred) (cond-> pred gfn (with-gen gfn))
       (regex? pred) (regex-spec-impl pred gfn)
-      (named? pred) (cond-> (the-spec pred) gfn (with-gen gfn))
+      (ident? pred) (cond-> (the-spec pred) gfn (with-gen gfn))
       :else
       (reify
        Spec
-       (conform* [_ x] (dt pred x form cpred?))
+       (conform* [_ x] (if cpred?
+                         (pred x)
+                         (if (pred x) x ::invalid)))
        (unform* [_ x] (if cpred?
                         (if unc
                           (unc x)
@@ -924,15 +952,17 @@
   [keys forms preds gfn]
   (let [id (java.util.UUID/randomUUID)
         kps (zipmap keys preds)
-        cform (fn [x]
-                (loop [i 0]
-                  (if (< i (count preds))
-                    (let [pred (preds i)]
-                      (let [ret (dt pred x (nth forms i))]
-                        (if (= ::invalid ret)
-                          (recur (inc i))
-                          (tagged-ret (keys i) ret))))
-                    ::invalid)))]
+        cform (let [specs (delay (mapv specize preds))]
+                (fn [x]
+                  (let [specs @specs]
+                    (loop [i 0]
+                      (if (< i (count specs))
+                        (let [spec (specs i)]
+                          (let [ret (conform* spec x)]
+                            (if (= ::invalid ret)
+                              (recur (inc i))
+                              (tagged-ret (keys i) ret))))
+                        ::invalid)))))]
     (reify
      Spec
      (conform* [_ x] (cform x))
