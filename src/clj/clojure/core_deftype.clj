@@ -156,7 +156,9 @@
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))
         base-fields fields
-        fields (conj fields '__meta '__extmap)
+        fields (conj fields '__meta '__extmap
+                     '^:unsynchronized-mutable __hash
+                     '^:unsynchronized-mutable __hasheq)
         type-hash (hash classname)]
     (when (some #{:volatile-mutable :unsynchronized-mutable} (mapcat (comp keys meta) hinted-fields))
       (throw (IllegalArgumentException. ":volatile-mutable or :unsynchronized-mutable not supported for record fields")))
@@ -168,8 +170,18 @@
       (eqhash [[i m]] 
         [(conj i 'clojure.lang.IHashEq)
          (conj m
-               `(hasheq [this#] (bit-xor ~type-hash (clojure.lang.APersistentMap/mapHasheq this#)))
-               `(hashCode [this#] (clojure.lang.APersistentMap/mapHash this#))
+               `(hasheq [this#] (let [hq# ~'__hasheq]
+                                  (if (zero? hq#)
+                                    (let [h# (int (bit-xor ~type-hash (clojure.lang.APersistentMap/mapHasheq this#)))]
+                                      (set! ~'__hasheq h#)
+                                      h#)
+                                    hq#)))
+               `(hashCode [this#] (let [hash# ~'__hash]
+                                    (if (zero? hash#)
+                                      (let [h# (clojure.lang.APersistentMap/mapHash this#)]
+                                        (set! ~'__hash h#)
+                                        h#)
+                                      hash#)))
                `(equals [this# ~gs] (clojure.lang.APersistentMap/mapEquals this# ~gs)))])
       (iobj [[i m]] 
             [(conj i 'clojure.lang.IObj)
@@ -220,12 +232,12 @@
                    `(assoc [this# k# ~gs]
                      (condp identical? k#
                        ~@(mapcat (fn [fld]
-                                   [(keyword fld) (list* `new tagname (replace {fld gs} fields))])
+                                   [(keyword fld) (list* `new tagname (replace {fld gs} (remove '#{__hash __hasheq} fields)))])
                                  base-fields)
-                       (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap k# ~gs))))
+                       (new ~tagname ~@(remove '#{__extmap __hash __hasheq} fields) (assoc ~'__extmap k# ~gs))))
                    `(without [this# k#] (if (contains? #{~@(map keyword base-fields)} k#)
                                             (dissoc (with-meta (into {} this#) ~'__meta) k#)
-                                            (new ~tagname ~@(remove #{'__extmap} fields) 
+                                            (new ~tagname ~@(remove '#{__extmap __hash __hasheq} fields)
                                                  (not-empty (dissoc ~'__extmap k#))))))])
       (ijavamap [[i m]]
                 [(conj i 'java.util.Map 'java.io.Serializable)
@@ -243,8 +255,11 @@
                        `(entrySet [this#] (set this#)))])
       ]
      (let [[i m] (-> [interfaces methods] irecord eqhash iobj ilookup imap ijavamap)]
-       `(deftype* ~(symbol (name (ns-name *ns*)) (name tagname)) ~classname ~(conj hinted-fields '__meta '__extmap)
-          :implements ~(vec i) 
+       `(deftype* ~(symbol (name (ns-name *ns*)) (name tagname)) ~classname
+          ~(conj hinted-fields '__meta '__extmap
+                 '^int ^:unsynchronized-mutable __hash
+                 '^int ^:unsynchronized-mutable __hasheq)
+          :implements ~(vec i)
           ~@(mapcat identity opts)
           ~@m))))))
 
@@ -280,7 +295,7 @@
   [fields name]
   (when-not (vector? fields)
     (throw (AssertionError. "No fields vector given.")))
-  (let [specials #{'__meta '__extmap}]
+  (let [specials '#{__meta __hash __hasheq __extmap}]
     (when (some specials fields)
       (throw (AssertionError. (str "The names in " specials " cannot be used as field names for types or records.")))))
   (let [non-syms (remove symbol? fields)]
@@ -357,9 +372,9 @@
   Two constructors will be defined, one taking the designated fields
   followed by a metadata map (nil for none) and an extension field
   map (nil for none), and one taking only the fields (using nil for
-  meta and extension fields). Note that the field names __meta
-  and __extmap are currently reserved and should not be used when
-  defining your own records.
+  meta and extension fields). Note that the field names __meta,
+  __extmap, __hash and __hasheq are currently reserved and should not
+  be used when defining your own records.
 
   Given (defrecord TypeName ...), two factory functions will be
   defined: ->TypeName, taking positional parameters for the fields,
@@ -465,8 +480,8 @@
   writes the .class file to the *compile-path* directory.
 
   One constructor will be defined, taking the designated fields.  Note
-  that the field names __meta and __extmap are currently reserved and
-  should not be used when defining your own types.
+  that the field names __meta, __extmap, __hash and __hasheq are currently
+  reserved and should not be used when defining your own types.
 
   Given (deftype TypeName ...), a factory function called ->TypeName
   will be defined, taking positional parameters for the fields"

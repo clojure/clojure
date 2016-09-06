@@ -1288,3 +1288,16 @@
          identity
          [^{:tag clojure.test-clojure.data-structures/gen-struct} s]
          (seq-iter-match s s))
+
+(deftest record-hashing
+  (let [r (->Rec 1 1)
+        _ (hash r)
+        r2 (assoc r :c 2)]
+    (is (= (hash (->Rec 1 1)) (hash r)))
+    (is (= (hash r) (hash (with-meta r {:foo 2}))))
+    (is (not= (hash (->Rec 1 1)) (hash (assoc (->Rec 1 1) :a 2))))
+    (is (not= (hash (->Rec 1 1)) (hash r2)))
+    (is (not= (hash (->Rec 1 1)) (hash (assoc r :a 2))))
+    (is (= (hash (->Rec 1 1)) (hash (assoc r :a 1))))
+    (is (= (hash (->Rec 1 1)) (hash (dissoc r2 :c))))
+    (is (= (hash (->Rec 1 1)) (hash (dissoc (assoc r :c 1) :c))))))
