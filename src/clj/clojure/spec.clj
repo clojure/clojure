@@ -72,7 +72,8 @@
 (defn spec?
   "returns x if x is a spec object, else logical false"
   [x]
-  (c/and (extends? Spec (class x)) x))
+  (when (instance? clojure.spec.Spec x)
+    x))
 
 (defn regex?
   "returns x if x is a (clojure.spec) regex op, else logical false"
@@ -129,17 +130,13 @@
   (specize* ([s] (specize* (reg-resolve! s)))
             ([s _] (specize* (reg-resolve! s))))
 
-  clojure.spec.Spec
-  (specize* ([s] s)
-            ([s _] s))
-
   Object
   (specize* ([o] (spec-impl ::unknown o nil nil))
             ([o form] (spec-impl form o nil nil))))
 
 (defn- specize
-  ([s] (specize* s))
-  ([s form] (specize* s form)))
+  ([s] (c/or (spec? s) (specize* s)))
+  ([s form] (c/or (spec? s) (specize* s form))))
 
 (defn invalid?
   "tests the validity of a conform return value"
@@ -525,8 +522,19 @@
   See also - coll-of, every-kv
 "
   [pred & {:keys [into kind count max-count min-count distinct gen-max gen] :as opts}]
-  (let [nopts (-> opts (dissoc :gen) (assoc ::kind-form `'~(res (:kind opts))))]
-    `(every-impl '~pred ~pred ~nopts ~gen)))
+  (let [nopts (-> opts (dissoc :gen) (assoc ::kind-form `'~(res (:kind opts))))
+        gx (gensym)
+        cpreds (cond-> [(list (c/or kind `coll?) gx)]
+                       count (conj `(= ~count (bounded-count ~count ~gx)))
+                       
+                       (c/or min-count max-count)
+                       (conj `(<= (c/or ~min-count 0)
+                                   (bounded-count (if ~max-count (inc ~max-count) ~min-count) ~gx)
+                                   (c/or ~max-count Integer/MAX_VALUE)))
+
+                       distinct
+                       (conj `(c/or (empty? ~gx) (apply distinct? ~gx))))]
+    `(every-impl '~pred ~pred ~(assoc nopts ::cpred `(fn* [~gx] (c/and ~@cpreds))) ~gen)))
 
 (defmacro every-kv
   "like 'every' but takes separate key and val preds and works on associative collections.
@@ -760,6 +768,10 @@
         keys->specnames #(c/or (k->s %) %)
         id (java.util.UUID/randomUUID)]
     (reify
+     Specize
+     (specize* [s] s)
+     (specize* [s _] s)
+     
      Spec
      (conform* [_ m]
                (if (keys-pred m)
@@ -844,6 +856,10 @@
       (ident? pred) (cond-> (the-spec pred) gfn (with-gen gfn))
       :else
       (reify
+       Specize
+       (specize* [s] s)
+       (specize* [s _] s)
+       
        Spec
        (conform* [_ x] (let [ret (pred x)]
                          (if cpred?
@@ -877,6 +893,10 @@
                  #(assoc %1 retag %2)
                  retag)]
        (reify
+        Specize
+        (specize* [s] s)
+        (specize* [s _] s)
+        
         Spec
         (conform* [_ x] (if-let [pred (predx x)]
                           (dt pred x form)
@@ -914,9 +934,13 @@
   "Do not call this directly, use 'tuple'"
   ([forms preds] (tuple-impl forms preds nil))
   ([forms preds gfn]
-     (let [specs (delay (mapv specize* preds forms))
+     (let [specs (delay (mapv specize preds forms))
            cnt (count preds)]
        (reify
+        Specize
+        (specize* [s] s)
+        (specize* [s _] s)
+        
         Spec
         (conform* [_ x]
                   (let [specs @specs]
@@ -1010,6 +1034,10 @@
                                   (tagged-ret (keys i) ret))))
                             ::invalid)))))]
     (reify
+     Specize
+     (specize* [s] s)
+     (specize* [s _] s)
+       
      Spec
      (conform* [_ x] (cform x))
      (unform* [_ [k x]] (unform (kps k) x))
@@ -1089,6 +1117,10 @@
                           (recur nret (inc i))))
                       ret)))))]
     (reify
+     Specize
+     (specize* [s] s)
+     (specize* [s _] s)
+     
      Spec
      (conform* [_ x] (cform x))
      (unform* [_ x] (reduce #(unform %2 %1) x (reverse preds)))
@@ -1101,6 +1133,10 @@
   "Do not call this directly, use 'merge'"
   [forms preds gfn]
   (reify
+   Specize
+   (specize* [s] s)
+   (specize* [s _] s)
+   
    Spec
    (conform* [_ x] (let [ms (map #(dt %1 x %2) preds forms)]
                      (if (some invalid? ms)
@@ -1129,9 +1165,6 @@
      (not (pvalid? pred x))
      (explain-1 kform pred path via in x)
 
-     (c/and distinct (not (empty? x)) (not (apply distinct? x)))
-     [{:path path :pred 'distinct? :val x :via via :in in}]
-
      (c/and count (not= count (bounded-count count x)))
      [{:path path :pred `(= ~count (c/count ~'%)) :val x :via via :in in}]
 
@@ -1139,19 +1172,23 @@
             (not (<= (c/or min-count 0)
                      (bounded-count (if max-count (inc max-count) min-count) x)
                      (c/or max-count Integer/MAX_VALUE))))
-     [{:path path :pred `(<= ~(c/or min-count 0) (c/count ~'%) ~(c/or max-count 'Integer/MAX_VALUE)) :val x :via via :in in}])))
+     [{:path path :pred `(<= ~(c/or min-count 0) (c/count ~'%) ~(c/or max-count 'Integer/MAX_VALUE)) :val x :via via :in in}]
+     
+     (c/and distinct (not (empty? x)) (not (apply distinct? x)))
+     [{:path path :pred 'distinct? :val x :via via :in in}])))
 
 (defn ^:skip-wiki every-impl
   "Do not call this directly, use 'every', 'every-kv', 'coll-of' or 'map-of'"
   ([form pred opts] (every-impl form pred opts nil))
   ([form pred {gen-into :into
-               :keys [kind ::kind-form count max-count min-count distinct gen-max ::kfn
+               :keys [kind ::kind-form count max-count min-count distinct gen-max ::kfn ::cpred
                       conform-keys ::conform-all]
                :or {gen-max 20}
                :as opts}
     gfn]
      (let [conform-into gen-into
-           check? #(pvalid? pred %)
+           spec (delay (specize pred))
+           check? #(valid? @spec %)
            kfn (c/or kfn (fn [i v] i))
            addcv (fn [ret i v cv] (conj ret cv))
            cfns (fn [x]
@@ -1178,35 +1215,42 @@
 
                    :else [#(empty (c/or conform-into %)) addcv identity]))]
        (reify
+        Specize
+        (specize* [s] s)
+        (specize* [s _] s)
+        
         Spec
         (conform* [_ x]
-                  (cond
-                   (coll-prob x kind kind-form distinct count min-count max-count
-                              nil nil nil)
-                   ::invalid
+                  (let [spec @spec]
+                    (cond
+                     (not (cpred x)) ::invalid
 
-                   conform-all
-                   (let [[init add complete] (cfns x)]
-                     (loop [ret (init x), i 0, [v & vs :as vseq] (seq x)]
-                       (if vseq
-                         (let [cv (dt pred v nil)]
-                           (if (invalid? cv)
-                             ::invalid
-                             (recur (add ret i v cv) (inc i) vs)))
-                         (complete ret))))
-                   
-                   
-                   :else
-                   (if (indexed? x)
-                     (let [step (max 1 (long (/ (c/count x) *coll-check-limit*)))]
-                       (loop [i 0]
-                         (if (>= i (c/count x))
-                           x
-                           (if (check? (nth x i))
-                             (recur (c/+ i step))
-                             ::invalid))))
-                     (c/or (c/and (every? check? (take *coll-check-limit* x)) x)
-                           ::invalid))))
+                     conform-all
+                     (let [[init add complete] (cfns x)]
+                       (loop [ret (init x), i 0, [v & vs :as vseq] (seq x)]
+                         (if vseq
+                           (let [cv (conform* spec v)]
+                             (if (invalid? cv)
+                               ::invalid
+                               (recur (add ret i v cv) (inc i) vs)))
+                           (complete ret))))
+                     
+                     
+                     :else
+                     (if (indexed? x)
+                       (let [step (max 1 (long (/ (c/count x) *coll-check-limit*)))]
+                         (loop [i 0]
+                           (if (>= i (c/count x))
+                             x
+                             (if (valid? spec (nth x i))
+                               (recur (c/+ i step))
+                               ::invalid))))
+                       (let [limit *coll-check-limit*]
+                         (loop [i 0 [v & vs :as vseq] (seq x)]
+                           (cond
+                            (c/or (nil? vseq) (= i limit)) x
+                            (valid? spec v) (recur (inc i) vs)
+                            :else ::invalid)))))))
         (unform* [_ x] x)
         (explain* [_ path via in x]
                   (c/or (coll-prob x kind kind-form distinct count min-count max-count
@@ -1581,6 +1625,10 @@
   "Do not call this directly, use 'spec' with a regex op argument"
   [re gfn]
   (reify
+   Specize
+   (specize* [s] s)
+   (specize* [s _] s)
+   
    Spec
    (conform* [_ x]
              (if (c/or (nil? x) (coll? x))
@@ -1630,6 +1678,10 @@
      (valAt [this k] (get specs k))
      (valAt [_ k not-found] (get specs k not-found))
 
+     Specize
+     (specize* [s] s)
+     (specize* [s _] s)
+       
      Spec
      (conform* [_ f] (if (ifn? f)
                        (if (identical? f (validate-fn f specs *fspec-iterations*)) f ::invalid)
@@ -1689,6 +1741,10 @@
   [spec]
   (let [spec (specize spec)]
     (reify
+     Specize
+     (specize* [s] s)
+     (specize* [s _] s)
+     
      Spec
      (conform* [_ x] (let [ret (conform* spec x)]
                        (if (invalid? ret)
