@@ -147,6 +147,28 @@
       ;;coll [:a "b"] ::s/invalid '[{:pred (coll-checker keyword?), :val [:a b]}]
       )))
 
+(defn check-conform-unform [spec vals expected-conforms]
+  (let [actual-conforms (map #(s/conform spec %) vals)
+        unforms (map #(s/unform spec %) actual-conforms)]
+    (is (= actual-conforms expected-conforms))
+    (is (= vals unforms))))
+
+(deftest nilable-conform-unform
+  (check-conform-unform
+    (s/nilable int?)
+    [5 nil]
+    [5 nil])
+  (check-conform-unform
+    (s/nilable (s/or :i int? :s string?))
+    [5 "x" nil]
+    [[:i 5] [:s "x"] nil]))
+
+(deftest nonconforming-conform-unform
+  (check-conform-unform
+    (s/nonconforming (s/or :i int? :s string?))
+    [5 "x"]
+    [5 "x"]))
+
 (comment
   (require '[clojure.test :refer (run-tests)])
   (in-ns 'clojure.test-clojure.spec)

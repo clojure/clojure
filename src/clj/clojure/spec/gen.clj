@@ -91,7 +91,7 @@
 
 (lazy-combinators hash-map list map not-empty set vector vector-distinct fmap elements
                   bind choose fmap one-of such-that tuple sample return
-                  large-integer* double*)
+                  large-integer* double* frequency)
 
 (defmacro ^:skip-wiki lazy-prim
   "Implementation macro, do not call directly."
