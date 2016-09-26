@@ -236,7 +236,7 @@
   (when *print-namespace-maps*
     (loop [ns nil
            [[k v :as entry] & entries] (seq m)
-           lm (empty m)]
+           lm {}]
       (if entry
         (when (or (keyword? k) (symbol? k))
           (if ns
@@ -244,7 +244,7 @@
               (recur ns entries (assoc lm (strip-ns k) v)))
             (when-let [new-ns (namespace k)]
               (recur new-ns entries (assoc lm (strip-ns k) v)))))
-        [ns lm]))))
+        [ns (apply conj (empty m) lm)]))))
 
 (defmethod print-method clojure.lang.IPersistentMap [m, ^Writer w]
   (print-meta m w)

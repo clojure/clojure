@@ -136,4 +136,7 @@
 
 (deftest print-ns-maps
   (is (= "#:user{:a 1}" (binding [*print-namespace-maps* true] (pr-str {:user/a 1}))))
-  (is (= "{:user/a 1}" (binding [*print-namespace-maps* false] (pr-str {:user/a 1})))))
+  (is (= "{:user/a 1}" (binding [*print-namespace-maps* false] (pr-str {:user/a 1}))))
+  (let [date-map (bean (java.util.Date. 0))]
+    (is (= (binding [*print-namespace-maps* true] (pr-str date-map))
+           (binding [*print-namespace-maps* false] (pr-str date-map))))))
