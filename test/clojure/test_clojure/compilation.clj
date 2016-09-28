@@ -422,3 +422,9 @@
       ;; eventually call `load` and reset called?.
       (require 'clojure.repl :reload))
     (is @called?)))
+
+(deftest clj-1714
+  (testing "CLJ-1714 Classes shouldn't have their static initialisers called simply by type hinting or importing"
+    ;; ClassWithFailingStaticInitialiser will throw if its static initialiser is called
+    (is (eval '(fn [^compilation.ClassWithFailingStaticInitialiser c])))
+    (is (eval '(import (compilation ClassWithFailingStaticInitialiser))))))
