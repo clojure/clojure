@@ -6765,6 +6765,8 @@
   from-coll conjoined. A transducer may be supplied."
   {:added "1.0"
    :static true}
+  ([] [])
+  ([to] to)
   ([to from]
      (if (instance? clojure.lang.IEditableCollection to)
        (with-meta (persistent! (reduce conj! (transient to) from)) (meta to))
