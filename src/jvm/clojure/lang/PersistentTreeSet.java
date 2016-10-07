@@ -42,6 +42,22 @@ PersistentTreeSet(IPersistentMap meta, IPersistentMap impl){
 	this._meta = meta;
 }
 
+public boolean equals(Object obj){
+    try {
+        return super.equals(obj);
+    } catch (ClassCastException e) {
+        return false;
+    }
+}
+
+public boolean equiv(Object obj){
+    try {
+        return super.equiv(obj);
+    } catch (ClassCastException e) {
+        return false;
+    }
+}
+
 public IPersistentSet disjoin(Object key) {
 	if(contains(key))
 		return new PersistentTreeSet(meta(),impl.without(key));

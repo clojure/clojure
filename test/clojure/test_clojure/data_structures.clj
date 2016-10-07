@@ -202,6 +202,8 @@
       (hash-map   :a 1 :b 2)
       (array-map  :a 1 :b 2))
 
+  (is (not= (sorted-set :a) (sorted-set 1)))
+
   ; sorted-set vs. hash-set
   (is (not= (class (sorted-set 1)) (class (hash-set 1))))
   (are [x y] (= x y)

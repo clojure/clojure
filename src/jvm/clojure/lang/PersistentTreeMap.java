@@ -94,6 +94,22 @@ public boolean containsKey(Object key){
 	return entryAt(key) != null;
 }
 
+public boolean equals(Object obj){
+    try {
+        return super.equals(obj);
+    } catch (ClassCastException e) {
+        return false;
+    }
+}
+
+public boolean equiv(Object obj){
+    try {
+        return super.equiv(obj);
+    } catch (ClassCastException e) {
+        return false;
+    }
+}
+
 public PersistentTreeMap assocEx(Object key, Object val) {
 	Box found = new Box(null);
 	Node t = add(tree, key, val, found);
