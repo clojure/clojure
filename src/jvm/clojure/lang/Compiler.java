@@ -4295,12 +4295,12 @@ static public class ObjExpr implements Expr{
 		//with name current_ns.defname[$letname]+
 		//anonymous fns get names fn__id
 		//derived from AFn/RestFn
-		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+	        ClassWriter cw = classWriter();
 //		ClassWriter cw = new ClassWriter(0);
 		ClassVisitor cv = cw;
 //		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER + ACC_FINAL, internalName, null,superName,interfaceNames);
+		cv.visit(V1_8, ACC_PUBLIC + ACC_SUPER + ACC_FINAL, internalName, null,superName,interfaceNames);
 //		         superName != null ? superName :
 //		         (isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction"), null);
 		String source = (String) SOURCE.deref();
@@ -7655,9 +7655,9 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		                  + RT.LOADER_SUFFIX;
 
 		objx.objtype = Type.getObjectType(objx.internalName);
-		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+		ClassWriter cw = classWriter();
 		ClassVisitor cv = cw;
-		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, objx.internalName, null, "java/lang/Object", null);
+		cv.visit(V1_8, ACC_PUBLIC + ACC_SUPER, objx.internalName, null, "java/lang/Object", null);
 
 		//static load method
 		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
@@ -7975,9 +7975,9 @@ static public class NewInstanceExpr extends ObjExpr{
 	 * Unmunge the name (using a magic prefix) on any code gen for classes
 	 */
 	static Class compileStub(String superName, NewInstanceExpr ret, String[] interfaceNames, Object frm){
-		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-		ClassVisitor cv = cw;
-		cv.visit(V1_5, ACC_PUBLIC + ACC_SUPER, COMPILE_STUB_PREFIX + "/" + ret.internalName,
+	    ClassWriter cw = classWriter();
+	    ClassVisitor cv = cw;
+		cv.visit(V1_8, ACC_PUBLIC + ACC_SUPER, COMPILE_STUB_PREFIX + "/" + ret.internalName,
 		         null,superName,interfaceNames);
 
 		//instance fields for closed-overs
@@ -8950,4 +8950,17 @@ public static class CaseExpr implements Expr, MaybePrimitiveExpr{
 
 static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;}
 
+    static public ClassWriter classWriter() {
+	return new ClassWriter(ClassWriter.COMPUTE_MAXS + ClassWriter.COMPUTE_FRAMES) {
+			protected String getCommonSuperClass (final String type1, final String type2) {
+				return "java/lang/Object";
+//		    	if (!(type1.equals("java/lang/Object") || type2.equals("java/lang/Object"))) {
+//					RT.errPrintWriter()
+//							.format("stack map frame \"%s\" and \"%s\" on %s:%d:%d \n",
+//									type1, type2,
+//									SOURCE_PATH.deref(), LINE.deref(), COLUMN.deref());
+//				}
+		    }
+		};
+    }
 }

@@ -133,7 +133,7 @@
         interfaces (map the-class implements)
         supers (cons super interfaces)
         ctor-sig-map (or constructors (zipmap (ctor-sigs super) (ctor-sigs super)))
-        cv (new ClassWriter (. ClassWriter COMPUTE_MAXS))
+        cv (clojure.lang.Compiler/classWriter)
         cname (. name (replace "." "/"))
         pkg-name name
         impl-pkg-name (str impl-ns)
@@ -254,7 +254,7 @@
             (. gen (endMethod))))
         ]
                                         ;start class definition
-    (. cv (visit (. Opcodes V1_5) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
+    (. cv (visit (. Opcodes V1_8) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
                  cname nil (iname super)
                  (when-let [ifc (seq interfaces)]
                    (into-array (map iname ifc)))))
@@ -661,8 +661,8 @@
     (throw
       (IllegalArgumentException. "Interface methods must not contain '-'")))
   (let [iname (.replace (str name) "." "/")
-        cv (ClassWriter. ClassWriter/COMPUTE_MAXS)]
-    (. cv visit Opcodes/V1_5 (+ Opcodes/ACC_PUBLIC 
+        cv (clojure.lang.Compiler/classWriter)]
+    (. cv visit Opcodes/V1_8 (+ Opcodes/ACC_PUBLIC 
                                 Opcodes/ACC_ABSTRACT
                                 Opcodes/ACC_INTERFACE)
        iname nil "java/lang/Object"
