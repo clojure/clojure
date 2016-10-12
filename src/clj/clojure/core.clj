@@ -7503,6 +7503,30 @@
       ([result input]
          (reduce rrf result input)))))
 
+(defn halt-when
+  "Returns a transducer that ends transduction when pred returns true
+  for an input. When retf is supplied it must be a fn of 2 arguments -
+  it will be passed the (completed) result so far and the input that
+  triggered the predicate, and its return value (if it does not throw
+  an exception) will be the return value of the transducer. If retf
+  is not supplied, the input that triggered the predicate will be
+  returned. If the predicate never returns true the transduction is
+  unaffected."
+  {:added "1.9"}
+  ([pred] (halt-when pred nil))
+  ([pred retf]
+     (fn [rf]
+       (fn
+         ([] (rf))
+         ([result]
+            (if (and (map? result) (contains? result ::halt))
+              (::halt result)
+              (rf result)))
+         ([result input]
+            (if (pred input)
+              (reduced {::halt (if retf (retf (rf result) input) input)})
+              (rf result input)))))))
+
 (defn dedupe
   "Returns a lazy sequence removing consecutive duplicates in coll.
   Returns a transducer when no collection is provided."
