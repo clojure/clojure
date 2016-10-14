@@ -169,6 +169,30 @@
     [5 "x"]
     [5 "x"]))
 
+(deftest coll-form
+  (are [spec form]
+    (= (s/form spec) form)
+    (s/map-of int? any?)
+    '(clojure.spec/map-of clojure.core/int? clojure.core/any?)
+
+    (s/coll-of int?)
+    '(clojure.spec/coll-of clojure.core/int?)
+
+    (s/every-kv int? int?)
+    '(clojure.spec/every-kv clojure.core/int? clojure.core/int?)
+
+    (s/every int?)
+    '(clojure.spec/every clojure.core/int?)
+
+    (s/coll-of (s/tuple (s/tuple int?)))
+    '(clojure.spec/coll-of (clojure.spec/tuple (clojure.spec/tuple clojure.core/int?)))
+
+    (s/coll-of int? :kind vector?)
+    '(clojure.spec/coll-of clojure.core/int? :kind clojure.core/vector?)
+
+    (s/coll-of int? :gen #(gen/return [1 2]))
+    '(clojure.spec/coll-of clojure.core/int? :gen (fn* [] (gen/return [1 2])))))
+
 (comment
   (require '[clojure.test :refer (run-tests)])
   (in-ns 'clojure.test-clojure.spec)

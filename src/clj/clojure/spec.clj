@@ -492,6 +492,15 @@
   [& pred-forms]
   `(merge-spec-impl '~(mapv res pred-forms) ~(vec pred-forms) nil))
 
+(defn- res-kind
+  [opts]
+  (let [{kind :kind :as mopts} opts]
+    (->>
+      (if kind
+        (assoc mopts :kind `~(res kind))
+        mopts)
+      (mapcat identity))))
+
 (defmacro every
   "takes a pred and validates collection elements against that pred.
 
@@ -522,7 +531,11 @@
   See also - coll-of, every-kv
 "
   [pred & {:keys [into kind count max-count min-count distinct gen-max gen] :as opts}]
-  (let [nopts (-> opts (dissoc :gen) (assoc ::kind-form `'~(res (:kind opts))))
+  (let [desc (::describe opts)
+        nopts (-> opts
+                (dissoc :gen ::describe)
+                (assoc ::kind-form `'~(res (:kind opts))
+                       ::describe (c/or desc `'(every ~(res pred) ~@(res-kind opts)))))
         gx (gensym)
         cpreds (cond-> [(list (c/or kind `coll?) gx)]
                        count (conj `(= ~count (bounded-count ~count ~gx)))
@@ -544,7 +557,8 @@
   See also - map-of"
 
   [kpred vpred & opts]
-  `(every (tuple ~kpred ~vpred) ::kfn (fn [i# v#] (nth v# 0)) :into {} ~@opts))
+  (let [desc `(every-kv ~(res kpred) ~(res vpred) ~@(res-kind opts))]
+    `(every (tuple ~kpred ~vpred) ::kfn (fn [i# v#] (nth v# 0)) :into {} ::describe '~desc ~@opts)))
 
 (defmacro coll-of
   "Returns a spec for a collection of items satisfying pred. Unlike
@@ -556,7 +570,8 @@
 
   See also - every, map-of"
   [pred & opts]
-  `(every ~pred ::conform-all true ~@opts))
+  (let [desc `(coll-of ~(res pred) ~@(res-kind opts))]
+    `(every ~pred ::conform-all true ::describe '~desc ~@opts)))
 
 (defmacro map-of
   "Returns a spec for a map whose keys satisfy kpred and vals satisfy
@@ -569,7 +584,8 @@
 
   See also - every-kv"
   [kpred vpred & opts]
-  `(every-kv ~kpred ~vpred ::conform-all true :kind map? ~@opts))
+  (let [desc `(map-of ~(res kpred) ~(res vpred) ~@(res-kind opts))]
+    `(every-kv ~kpred ~vpred ::conform-all true :kind map? ::describe '~desc ~@opts)))
 
 
 (defmacro *
@@ -1180,6 +1196,7 @@
   "Do not call this directly, use 'every', 'every-kv', 'coll-of' or 'map-of'"
   ([form pred opts] (every-impl form pred opts nil))
   ([form pred {gen-into :into
+               describe-form ::describe
                :keys [kind ::kind-form count max-count min-count distinct gen-max ::kfn ::cpred
                       conform-keys ::conform-all]
                :or {gen-max 20}
@@ -1294,7 +1311,7 @@
                        (gen/vector pgen 0 gen-max))))))))
         
         (with-gen* [_ gfn] (every-impl form pred opts gfn))
-        (describe* [_] `(every ~form ~@(mapcat identity opts)))))))
+        (describe* [_] (c/or describe-form `(every ~(res form) ~@(mapcat identity opts))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;; regex ;;;;;;;;;;;;;;;;;;;
 ;;See:
