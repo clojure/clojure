@@ -652,8 +652,8 @@
   (possibly converted) value or :clojure.spec/invalid, and returns a
   spec that uses it as a predicate/conformer. Optionally takes a
   second fn that does unform of result of first"
-  ([f] `(spec-impl '~f ~f nil true))
-  ([f unf] `(spec-impl '~f ~f nil true ~unf)))
+  ([f] `(spec-impl '(conformer ~(res f)) ~f nil true))
+  ([f unf] `(spec-impl '(conformer ~(res f) ~(res unf)) ~f nil true ~unf)))
 
 (defmacro fspec
   "takes :args :ret and (optional) :fn kwargs whose values are preds
