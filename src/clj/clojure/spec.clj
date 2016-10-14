@@ -1481,7 +1481,7 @@
                      (list `+ rep+)
                      (cons `cat (mapcat vector (c/or (seq ks) (repeat :_)) forms)))
             ::alt (if maybe
-                    (list `? maybe)
+                    (list `? (res maybe))
                     (cons `alt (mapcat vector ks forms)))
             ::rep (list (if splice `+ `*) forms)))))
 
