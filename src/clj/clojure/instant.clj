@@ -47,7 +47,10 @@
                   (recur (.append b \0))
                   (.toString b)))))
 
-(def parse-timestamp
+(def ^:private timestamp
+  #"(\d\d\d\d)(?:-(\d\d)(?:-(\d\d)(?:[T](\d\d)(?::(\d\d)(?::(\d\d)(?:[.](\d+))?)?)?)?)?)?(?:[Z]|([-+])(\d\d):(\d\d))?")
+
+(defn parse-timestamp
      "Parse a string containing an RFC3339-like like timestamp.
 
 The function new-instant is called with the following arguments.
@@ -98,9 +101,7 @@ Though time-offset is syntactically optional, a missing time-offset
 will be treated as if the time-offset zero (+00:00) had been
 specified.
 "
-     (let [timestamp #"(\d\d\d\d)(?:-(\d\d)(?:-(\d\d)(?:[T](\d\d)(?::(\d\d)(?::(\d\d)(?:[.](\d+))?)?)?)?)?)?(?:[Z]|([-+])(\d\d):(\d\d))?"]
-
-       (fn [new-instant ^CharSequence cs]
+    [new-instant ^CharSequence cs]
          (if-let [[_ years months days hours minutes seconds fraction
                    offset-sign offset-hours offset-minutes]
                   (re-matches timestamp cs)]
@@ -117,7 +118,7 @@ specified.
                   :else                0)
             (if-not offset-hours   0 (parse-int offset-hours))
             (if-not offset-minutes 0 (parse-int offset-minutes)))
-           (fail (str "Unrecognized date/time syntax: " cs))))))
+           (fail (str "Unrecognized date/time syntax: " cs))))
 
 
 ;;; ------------------------------------------------------------------------
@@ -270,22 +271,24 @@ milliseconds since the epoch, UTC."
     ;; nanos must be set separately, pass 0 above for the base calendar
     (.setNanos nanoseconds)))
 
-(def read-instant-date
+(defn read-instant-date
   "To read an instant as a java.util.Date, bind *data-readers* to a map with
 this var as the value for the 'inst key. The timezone offset will be used
 to convert into UTC."
-  (partial parse-timestamp (validated construct-date)))
+  [^CharSequence cs]
+  (parse-timestamp (validated construct-date) cs))
 
-(def read-instant-calendar
+(defn read-instant-calendar
   "To read an instant as a java.util.Calendar, bind *data-readers* to a map with
 this var as the value for the 'inst key.  Calendar preserves the timezone
 offset."
-  (partial parse-timestamp (validated construct-calendar)))
+  [^CharSequence cs]
+  (parse-timestamp (validated construct-calendar) cs))
 
-(def read-instant-timestamp
+(defn read-instant-timestamp
   "To read an instant as a java.sql.Timestamp, bind *data-readers* to a
 map with this var as the value for the 'inst key. Timestamp preserves
 fractional seconds with nanosecond precision. The timezone offset will
 be used to convert into UTC."
-  (partial parse-timestamp (validated construct-timestamp)))
-
+  [^CharSequence cs]
+  (parse-timestamp (validated construct-timestamp) cs))
