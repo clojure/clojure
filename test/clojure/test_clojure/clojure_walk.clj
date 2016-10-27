@@ -58,3 +58,8 @@
                          (instance? clojure.lang.PersistentTreeSet c))
                  (is (= (.comparator c) (.comparator walked))))))))
 
+(deftest walk-mapentry
+  "Checks that walk preserves the MapEntry type. See CLJ-2031."
+  (let [coll [:html {:a ["b" 1]} ""]
+        f (fn [e] (if (and (vector? e) (not (map-entry? e))) (apply list e) e))]
+    (is (= (list :html {:a (list "b" 1)} "") (w/postwalk f coll)))))
