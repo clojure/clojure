@@ -323,15 +323,16 @@ with explain-data + ::s/failure."
 (defn- check-1
   [{:keys [s f v spec]} opts]
   (let [re-inst? (and v (seq (unstrument s)) true)
-        f (or f (when v @v))]
+        f (or f (when v @v))
+        specd (s/spec spec)]
     (try
      (cond
       (or (nil? f) (some-> v meta :macro))
       {:failure (ex-info "No fn to spec" {::s/failure :no-fn})
        :sym s :spec spec}
     
-      (:args spec)
-      (let [tcret (quick-check f spec opts)]
+      (:args specd)
+      (let [tcret (quick-check f specd opts)]
         (make-check-result s spec tcret))
     
       :default
