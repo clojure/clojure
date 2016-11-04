@@ -328,6 +328,38 @@ static public Number rationalize(Number x){
 	return x;
 }
 
+static public BigInteger numerator(Ratio x){
+	return x.numerator;
+}
+
+static public BigInteger numerator(long x){
+	return BigInteger.valueOf(x);
+}
+
+static public BigInteger numerator(BigInt x){
+	return x.toBigInteger();
+}
+
+static public BigInteger numerator(BigInteger x){
+	return x;
+}
+
+static public BigInteger denominator(Ratio x){
+	return x.denominator;
+}
+
+static public BigInteger denominator(long x){
+	return BigInteger.ONE;
+}
+
+static public BigInteger denominator(BigInt x){
+	return BigInteger.ONE;
+}
+
+static public BigInteger denominator(BigInteger x){
+	return BigInteger.ONE;
+}
+
 //static  Number box(int val){
 //		return Integer.valueOf(val);
 //}

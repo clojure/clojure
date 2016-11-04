@@ -597,6 +597,14 @@ Math/pow overflows to Infinity."
   (is (= (bigint (/ 100000000000000000000 3)) 33333333333333333333))
   (is (= (long 10000000000000000000/3) 3333333333333333333)))
 
+(deftest test-ints-as-ratios
+  (is (= (denominator 1) 1N))
+  (is (= (denominator 1N) 1N))
+  (is (= (numerator 1) 1N))
+  (is (= (numerator 1N) 1N))
+  (is (= (numerator (+ 1/3 2/3)) 1N))
+  (is (= (denominator (+ 1/3 2/3)) 1N)))
+
 (deftest test-arbitrary-precision-subtract
   (are [x y] (= x y)
        9223372036854775808N (-' 0 -9223372036854775808)

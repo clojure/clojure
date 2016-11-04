@@ -3572,20 +3572,20 @@
   [n] (instance? clojure.lang.Ratio n))
 
 (defn numerator
-  "Returns the numerator part of a Ratio."
+  "Returns the numerator part of a Ratio or integer."
   {:tag BigInteger
    :added "1.2"
    :static true}
   [r]
-  (.numerator ^clojure.lang.Ratio r))
+  (clojure.lang.Numbers/numerator r))
 
 (defn denominator
-  "Returns the denominator part of a Ratio."
+  "Returns the denominator part of a Ratio or integer."
   {:tag BigInteger
    :added "1.2"
    :static true}
   [r]
-  (.denominator ^clojure.lang.Ratio r))
+  (clojure.lang.Numbers/denominator r))
 
 (defn decimal?
   "Returns true if n is a BigDecimal"
