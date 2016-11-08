@@ -13,9 +13,10 @@
 ;; sequential destructuring
 
 (s/def ::seq-binding-form
-  (s/cat :elems (s/* ::binding-form)
-         :rest (s/? (s/cat :amp #{'&} :form ::binding-form))
-         :as (s/? (s/cat :as #{:as} :sym ::local-name))))
+  (s/and vector?
+         (s/cat :elems (s/* ::binding-form)
+                :rest (s/? (s/cat :amp #{'&} :form ::binding-form))
+                :as (s/? (s/cat :as #{:as} :sym ::local-name)))))
 
 ;; map destructuring
 
