@@ -13,9 +13,9 @@
 package clojure.lang;
 
 public class Delay implements IDeref, IPending{
-Object val;
-Throwable exception;
-IFn fn;
+volatile Object val;
+volatile Throwable exception;
+volatile IFn fn;
 
 public Delay(IFn fn){
 	this.fn = fn;
@@ -29,18 +29,25 @@ static public Object force(Object x) {
 	       : x;
 }
 
-synchronized public Object deref() {
+public Object deref() {
 	if(fn != null)
 		{
-		try
-			{
-			val = fn.invoke();
-			}
-		catch(Throwable t)
-			{
-			exception = t;
-			}
-		fn = null;
+	        synchronized(this)
+	        {
+	        //double check
+	        if(fn!=null)
+	            {
+	                try
+	                    {
+	                    val = fn.invoke();
+	                    }
+	                catch(Throwable t)
+	                    {
+	                    exception = t;
+	                    }
+	                fn = null;
+	            }
+	        }
 		}
 	if(exception != null)
 		throw Util.sneakyThrow(exception);
