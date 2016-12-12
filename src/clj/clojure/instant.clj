@@ -8,7 +8,7 @@
 
 (ns clojure.instant
   (:import [java.util Calendar Date GregorianCalendar TimeZone]
-           [java.sql Timestamp]))
+           [clojure.lang TimeStamp]))
 
 
 (set! *warn-on-reflection* true)
@@ -214,8 +214,8 @@ with invalid arguments."
         (.setTimeZone (java.util.TimeZone/getTimeZone "GMT"))))))
 
 (defn- print-timestamp
-  "Print a java.sql.Timestamp as RFC3339 timestamp, always in UTC."
-  [^java.sql.Timestamp ts, ^java.io.Writer w]
+  "Print a clojure.lang.TimeStamp as RFC3339 timestamp, always in UTC."
+  [^clojure.lang.TimeStamp ts, ^java.io.Writer w]
   (let [^java.text.DateFormat utc-format (.get thread-local-utc-timestamp-format)]
     (.write w "#inst \"")
     (.write w (.format utc-format ts))
@@ -224,12 +224,12 @@ with invalid arguments."
     (.write w (format ".%09d-00:00" (.getNanos ts)))
     (.write w "\"")))
 
-(defmethod print-method java.sql.Timestamp
-  [^java.sql.Timestamp ts, ^java.io.Writer w]
+(defmethod print-method clojure.lang.TimeStamp
+  [^clojure.lang.TimeStamp ts, ^java.io.Writer w]
   (print-timestamp ts w))
 
-(defmethod print-dup java.sql.Timestamp
-  [^java.sql.Timestamp ts, ^java.io.Writer w]
+(defmethod print-dup clojure.lang.TimeStamp
+  [^clojure.lang.TimeStamp ts, ^java.io.Writer w]
   (print-timestamp ts w))
 
 
@@ -259,16 +259,15 @@ milliseconds since the epoch, UTC."
                                 offset-sign offset-hours offset-minutes)))
 
 (defn- construct-timestamp
-  "Construct a java.sql.Timestamp, which has nanosecond precision."
+  "Construct a clojure.lang.TimeStamp, which has nanosecond precision."
   [years months days hours minutes seconds nanoseconds
    offset-sign offset-hours offset-minutes]
-  (doto (Timestamp.
-         (.getTimeInMillis
+  (.. (TimeStamp.
+        (.getTimeInMillis
           (construct-calendar years months days
                               hours minutes seconds 0
                               offset-sign offset-hours offset-minutes)))
-    ;; nanos must be set separately, pass 0 above for the base calendar
-    (.setNanos nanoseconds)))
+      (setNanos nanoseconds)))
 
 (def read-instant-date
   "To read an instant as a java.util.Date, bind *data-readers* to a map with
@@ -283,9 +282,8 @@ offset."
   (partial parse-timestamp (validated construct-calendar)))
 
 (def read-instant-timestamp
-  "To read an instant as a java.sql.Timestamp, bind *data-readers* to a
-map with this var as the value for the 'inst key. Timestamp preserves
+  "To read an instant as a clojure.lang.TimeStamp, bind *data-readers* to a
+map with this var as the value for the 'inst key. TimeStamp preserves
 fractional seconds with nanosecond precision. The timezone offset will
 be used to convert into UTC."
   (partial parse-timestamp (validated construct-timestamp)))
-

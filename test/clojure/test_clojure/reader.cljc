@@ -521,14 +521,14 @@
         s2 "#inst \"2010-11-12T13:14:15.123\""
         s3 "#inst \"2010-11-12T13:14:15.123456789123\""]
     (binding [*data-readers* {'inst read-instant-timestamp}]
-      (testing "read-instant-timestamp produces java.sql.Timestamp"
-        (is (= java.sql.Timestamp (class (read-string s)))))
-      (testing "java.sql.Timestamp preserves nanoseconds"
+      (testing "read-instant-timestamp produces clojure.lang.TimeStamp"
+        (is (= clojure.lang.TimeStamp (class (read-string s)))))
+      (testing "clojure.lang.TimeStamp preserves nanoseconds"
         (is (= 123456789 (-> s read-string .getNanos)))
         (is (= 123456789 (-> s read-string pr-str read-string .getNanos)))
         ;; truncate at nanos for s3
         (is (= 123456789 (-> s3 read-string pr-str read-string .getNanos))))
-      (testing "java.sql.Timestamp should compare nanos"
+      (testing "clojure.lang.TimeStamp should compare nanos"
         (is (= (read-string s) (read-string s3)))
         (is (not= (read-string s) (read-string s2)))))
     (binding [*data-readers* {'inst read-instant-date}]
