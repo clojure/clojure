@@ -184,6 +184,7 @@ public class TimeStamp extends java.util.Date
      * This method sets the nanosecond value for this object.
      *
      * @param nanos The nanosecond value for this object. ! it will discard time < 1 sec
+     * @return this, to able it in a functional flux.
      */
     public TimeStamp setNanos(int nanos)
     {
@@ -208,10 +209,8 @@ public class TimeStamp extends java.util.Date
      */
     public boolean equals(Object obj)
     {
-        if (!(obj instanceof TimeStamp))
-            return false;
-
-        return equals((TimeStamp) obj);
+        return (obj instanceof TimeStamp) &&
+               equals((TimeStamp) obj);
     }
 
     /**
@@ -227,16 +226,9 @@ public class TimeStamp extends java.util.Date
      */
     public boolean equals(TimeStamp ts)
     {
-        if (ts == null)
-            return false;
-
-        if (ts.getTime() != getTime())
-            return false;
-
-        if (ts.getNanos() != getNanos())
-            return false;
-
-        return true;
+        return ts != null &&
+               ts.getTime() == getTime() &&
+               ts.getNanos() == getNanos();
     }
 
     /**
