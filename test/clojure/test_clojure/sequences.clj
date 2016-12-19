@@ -323,7 +323,7 @@
     (first (sorted-set 1 nil)) nil
     (first (sorted-set nil 2)) nil
     (first #{#{}}) #{}
-    (first (sorted-set #{} nil)) nil
+    (first (sorted-set [] nil)) nil
     ;(first (sorted-set #{} 2 nil)) nil
 
     ; map
@@ -392,7 +392,7 @@
     (next (sorted-set 1 nil)) '(1)
     (next (sorted-set nil 2)) '(2)
     (next #{#{}}) nil
-    (next (sorted-set #{} nil)) '(#{})
+    (next (sorted-set [] nil)) '([])
     ;(next (sorted-set #{} 2 nil)) #{}
 
     ; map
@@ -451,7 +451,7 @@
       (last (sorted-set 1 nil)) 1
       (last (sorted-set nil 2)) 2
       (last #{#{}}) #{}
-      (last (sorted-set #{} nil)) #{}
+      (last (sorted-set [] nil)) []
       ;(last (sorted-set #{} 2 nil)) nil
 
       ; map

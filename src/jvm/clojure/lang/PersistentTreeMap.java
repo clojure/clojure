@@ -333,6 +333,8 @@ public int doCompare(Object k1, Object k2){
 Node add(Node t, Object key, Object val, Box found){
 	if(t == null)
 		{
+		if(comp == RT.DEFAULT_COMPARATOR && !( key == null || (key instanceof Number) || (key instanceof Comparable)))
+			throw new ClassCastException("Default comparator requires nil, Number, or Comparable: " + key);
 		if(val == null)
 			return new Red(key);
 		return new RedVal(key, val);

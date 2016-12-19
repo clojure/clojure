@@ -627,6 +627,22 @@
     (is (= {:hi :there} (meta (with-meta v {:hi :there}))))))
 
 
+(deftest test-sorted-map-keys
+  (is (thrown? ClassCastException (sorted-map () 1)))
+  (is (thrown? ClassCastException (sorted-map #{} 1)))
+  (is (thrown? ClassCastException (sorted-map {} 1)))
+
+  (is (thrown? ClassCastException (assoc (sorted-map) () 1)))
+  (is (thrown? ClassCastException (assoc (sorted-map) #{} 1)))
+  (is (thrown? ClassCastException (assoc (sorted-map) {} 1)))
+
+  ;; doesn't throw
+  (let [cmp #(compare (count %1) (count %2))]
+    (assoc (sorted-map-by cmp) () 1)
+    (assoc (sorted-map-by cmp) #{} 1)
+    (assoc (sorted-map-by cmp) {} 1)))
+
+
 (deftest test-key
   (are [x]  (= (key (first (hash-map x :value))) x)
       nil
@@ -792,12 +808,12 @@
       "" "abc"
       'sym
       :kw
-      ()  ; '(1 2)
       [] [1 2]
-      {}  ; {:a 1 :b 2}
-      #{} ; #{1 2}
   )
   ; cannot be cast to java.lang.Comparable
+  (is (thrown? ClassCastException (sorted-set ())))
+  (is (thrown? ClassCastException (sorted-set {})))
+  (is (thrown? ClassCastException (sorted-set #{})))
   (is (thrown? ClassCastException (sorted-set '(1 2) '(1 2))))
   (is (thrown? ClassCastException (sorted-set {:a 1 :b 2} {:a 1 :b 2})))
   (is (thrown? ClassCastException (sorted-set #{1 2} #{1 2})))
@@ -815,7 +831,7 @@
       (sorted-set nil) #{nil}
       (sorted-set 1 nil) #{nil 1}
       (sorted-set nil 2) #{nil 2}
-      (sorted-set #{}) #{#{}} ))
+      (sorted-set []) #{[]} ))
 
 
 (deftest test-sorted-set-by
