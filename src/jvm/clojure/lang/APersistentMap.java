@@ -14,8 +14,8 @@ import java.io.Serializable;
 import java.util.*;
 
 public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable, Serializable, MapEquivalence, IHashEq {
-int _hash = -1;
-int _hasheq = -1;
+int _hash;
+int _hasheq;
 
 public String toString(){
 	return RT.printString(this);
@@ -93,11 +93,12 @@ public boolean equiv(Object obj){
 	return true;
 }
 public int hashCode(){
-	if(_hash == -1)
+    int cached = this._hash;
+	if(cached == 0)
 		{
-		this._hash = mapHash(this);
+		this._hash = cached = mapHash(this);
 		}
-	return _hash;
+	return cached;
 }
 
 static public int mapHash(IPersistentMap m){
@@ -112,12 +113,13 @@ static public int mapHash(IPersistentMap m){
 }
 
 public int hasheq(){
-	if(_hasheq == -1)
+    int cached = this._hasheq;
+	if(cached == 0)
 		{
 		//this._hasheq = mapHasheq(this);
-		_hasheq = Murmur3.hashUnordered(this);
+		this._hasheq = cached = Murmur3.hashUnordered(this);
 		}
-	return _hasheq;
+	return cached;
 }
 
 static public int mapHasheq(IPersistentMap m) {

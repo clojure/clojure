@@ -18,8 +18,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 public abstract class APersistentSet extends AFn implements IPersistentSet, Collection, Set, Serializable, IHashEq {
-int _hash = -1;
-int _hasheq = -1;
+int _hash;
+int _hasheq;
 final IPersistentMap impl;
 
 protected APersistentSet(IPersistentMap impl){
@@ -91,10 +91,10 @@ public boolean equiv(Object obj){
 }
 
 public int hashCode(){
-	if(_hash == -1)
+    int hash = this._hash;
+	if(hash == 0)
 		{
 		//int hash = count();
-		int hash = 0;
 		for(ISeq s = seq(); s != null; s = s.next())
 			{
 			Object e = s.first();
@@ -103,11 +103,12 @@ public int hashCode(){
 			}
 		this._hash = hash;
 		}
-	return _hash;
+	return hash;
 }
 
 public int hasheq(){
-	if(_hasheq == -1){
+    int cached = this._hasheq;
+	if(cached == 0){
 //		int hash = 0;
 //		for(ISeq s = seq(); s != null; s = s.next())
 //			{
@@ -115,9 +116,9 @@ public int hasheq(){
 //			hash +=  Util.hasheq(e);
 //			}
 //		this._hasheq = hash;
-		_hasheq = Murmur3.hashUnordered(this);
+		this._hasheq = cached = Murmur3.hashUnordered(this);
 	}
-	return _hasheq;		
+	return cached;
 }
 
 public Object[] toArray(){

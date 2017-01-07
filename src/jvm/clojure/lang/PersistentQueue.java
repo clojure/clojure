@@ -31,8 +31,8 @@ final int cnt;
 final ISeq f;
 final PersistentVector r;
 //static final int INITIAL_REAR_SIZE = 4;
-int _hash = -1;
-int _hasheq = -1;
+int _hash;
+int _hasheq;
 
 PersistentQueue(IPersistentMap meta, int cnt, ISeq f, PersistentVector r){
 	super(meta);
@@ -70,30 +70,32 @@ public boolean equals(Object obj){
 }
 
 public int hashCode(){
-	if(_hash == -1)
+    int hash = this._hash;
+	if(hash == 0)
 		{
-		int hash = 1;
+		hash = 1;
 		for(ISeq s = seq(); s != null; s = s.next())
 			{
 			hash = 31 * hash + (s.first() == null ? 0 : s.first().hashCode());
 			}
 		this._hash = hash;
 		}
-	return _hash;
+	return hash;
 }
 
 public int hasheq() {
-	if(_hasheq == -1)
-		{
+    int cached = this._hasheq;
+    if(cached == 0)
+    {
 //		int hash = 1;
 //		for(ISeq s = seq(); s != null; s = s.next())
 //			{
 //			hash = 31 * hash + Util.hasheq(s.first());
 //			}
 //		this._hasheq = hash;
-		_hasheq  = Murmur3.hashOrdered(this);
+		this._hasheq  = cached = Murmur3.hashOrdered(this);
 		}
-    return _hasheq;
+    return cached;
 }
 
 public Object peek(){
