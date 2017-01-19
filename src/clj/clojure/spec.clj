@@ -1798,7 +1798,7 @@
                [[1 (gen/delay (gen/return nil))]
                 [9 (gen/delay (gensub pred overrides (conj path ::pred) rmap form))]])))
      (with-gen* [_ gfn] (nilable-impl form pred gfn))
-     (describe* [_] `(nilable ~(describe* @spec))))))
+     (describe* [_] `(nilable ~(res form))))))
 
 (defmacro nilable
   "returns a spec that accepts nil and values satisfying pred"
