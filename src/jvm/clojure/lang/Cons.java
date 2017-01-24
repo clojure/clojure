@@ -19,8 +19,8 @@ final public class Cons extends ASeq implements Serializable {
 private final Object _first;
 private final ISeq _more;
 
-public Cons(Object first, ISeq _more){
-	this._first = first;
+public Cons(Object _first, ISeq _more){
+	this._first = _first;
 	this._more = _more;
 }
 
