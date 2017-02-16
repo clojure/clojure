@@ -73,8 +73,9 @@
 
 (s/def ::args+body
   (s/cat :args ::arg-list
-         :prepost (s/? map?)
-         :body (s/* any?)))
+         :body (s/alt :prepost+body (s/cat :prepost map?
+                                           :body (s/+ any?))
+                      :body (s/* any?))))
 
 (s/def ::defn-args
   (s/cat :name simple-symbol?
