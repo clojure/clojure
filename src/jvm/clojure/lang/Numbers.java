@@ -1033,21 +1033,18 @@ static Ops ops(Object x){
 }
 
 @WarnBoxedMath(false)
-static int hasheq(Number x){
-	Class xc = x.getClass();
-
-	if(xc == Long.class
-		|| xc == Integer.class
-		|| xc == Short.class
-		|| xc == Byte.class
-		|| (xc == BigInteger.class && lte(x, Long.MAX_VALUE) && gte(x,Long.MIN_VALUE)))
-		{
+static int hasheqFrom(Number x, Class xc){
+	if(xc == Integer.class
+			|| xc == Short.class
+			|| xc == Byte.class
+			|| (xc == BigInteger.class && lte(x, Long.MAX_VALUE) && gte(x,Long.MIN_VALUE)))
+	{
 		long lpart = x.longValue();
 		return Murmur3.hashLong(lpart);
 		//return (int) (lpart ^ (lpart >>> 32));
-		}
+	}
 	if(xc == BigDecimal.class)
-		{
+	{
 		// stripTrailingZeros() to make all numerically equal
 		// BigDecimal values come out the same before calling
 		// hashCode.  Special check for 0 because
@@ -1056,12 +1053,35 @@ static int hasheq(Number x){
 		if (isZero(x))
 			return BigDecimal.ZERO.hashCode();
 		else
-			{
+		{
 			BigDecimal tmp = ((BigDecimal) x).stripTrailingZeros();
 			return tmp.hashCode();
-			}
 		}
+	}
+	if(xc == Float.class && x.equals(-0.0f))
+	{
+		return 0;  // match 0.0f
+	}
 	return x.hashCode();
+}
+
+@WarnBoxedMath(false)
+static int hasheq(Number x){
+	Class xc = x.getClass();
+
+	if(xc == Long.class)
+	{
+		long lpart = x.longValue();
+		return Murmur3.hashLong(lpart);
+		//return (int) (lpart ^ (lpart >>> 32));
+	}
+	if(xc == Double.class)
+	{
+		if(x.equals(-0.0))
+			return 0;  // match 0.0
+		return x.hashCode();
+	}
+	return hasheqFrom(x, xc);
 }
 
 static Category category(Object x){
