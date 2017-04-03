@@ -505,35 +505,31 @@ public static class NamespaceMapReader extends AFn{
 			throw Util.runtimeException("Namespaced map literal must contain an even number of forms");
 
 		// Construct output map
-		IPersistentMap m = RT.map();
+		Object[] a = new Object[kvs.size()];
 		Iterator iter = kvs.iterator();
-		while(iter.hasNext()) {
+		for(int i = 0; iter.hasNext(); i += 2) {
 			Object key = iter.next();
 			Object val = iter.next();
 
 			if(key instanceof Keyword) {
 				Keyword kw = (Keyword) key;
 				if (kw.getNamespace() == null) {
-					m = m.assoc(Keyword.intern(ns, kw.getName()), val);
+					key = Keyword.intern(ns, kw.getName());
 				} else if (kw.getNamespace().equals("_")) {
-					m = m.assoc(Keyword.intern(null, kw.getName()), val);
-				} else {
-					m = m.assoc(kw, val);
+					key = Keyword.intern(null, kw.getName());
 				}
 			} else if(key instanceof Symbol) {
 				Symbol s = (Symbol) key;
 				if (s.getNamespace() == null) {
-					m = m.assoc(Symbol.intern(ns, s.getName()), val);
+					key = Symbol.intern(ns, s.getName());
 				} else if (s.getNamespace().equals("_")) {
-					m = m.assoc(Symbol.intern(null, s.getName()), val);
-				} else {
-					m = m.assoc(s, val);
+					key = Symbol.intern(null, s.getName());
 				}
-			} else {
-				m = m.assoc(key, val);
 			}
+			a[i] = key;
+			a[i+1] = val;
 		}
-		return m;
+		return RT.map(a);
 	}
 }
 

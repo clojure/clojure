@@ -742,7 +742,11 @@
                       Exception #"Namespaced map must specify a valid namespace" "#::clojure.core/t{1 2}"
                       Exception #"Unknown auto-resolved namespace alias" "#::BOGUS{1 2}"
                       Exception #"Namespaced map must specify a namespace" "#:: clojure.core{:a 1}"
-                      Exception #"Namespaced map must specify a namespace" "#: clojure.core{:a 1}"))
+                      Exception #"Namespaced map must specify a namespace" "#: clojure.core{:a 1}"
+                      Exception #"Duplicate key: :user/a" "#::{:a 1 :a 2}"
+                      Exception #"Duplicate key: :clojure.core/a" "#::clojure.core{:a 1 :a 2}"
+                      Exception #"Duplicate key: user/a" "#::{a 1 a 2}"
+                      Exception #"Duplicate key: clojure.core/+" "#::clojure.core{+ 1 + 2}"))
 
 (deftest namespaced-map-edn
   (is (= {1 1, :a/b 2, :b/c 3, :d 4}
