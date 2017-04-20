@@ -169,7 +169,7 @@
     (atom nil)
     (ref nil)
     (agent nil)
-    #'+
+    ;;#'+
 
     ;; stateful seqs
     (enumeration-seq (java.util.Collections/enumeration (range 50)))
