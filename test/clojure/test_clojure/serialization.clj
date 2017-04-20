@@ -143,10 +143,21 @@
 (deftest interned-serializations
   (are [v] (identical? v (-> v serialize deserialize))
     clojure.lang.RT/DEFAULT_COMPARATOR
-    
+
     ; namespaces just get deserialized back into the same-named ns in the present runtime
     ; (they're referred to by defrecord instances)
-    *ns*))
+    *ns*
+
+    ; vars get serialized back into the same var in the present runtime
+    #'clojure.core/conj))
+
+(deftest new-var-unbound-on-read
+  (let [v (intern 'user 'foobarbaz 10)
+        sv (serialize v)]
+    (ns-unmap 'user 'foobarbaz) ;; unmap #'user.V
+    (let [v2 (deserialize sv)] ;; deserialize re-interns var
+      ;; but it is unbound
+      (is (not (.hasRoot v2))))))
 
 (deftest function-serialization
   (let [capture 5]
@@ -169,7 +180,6 @@
     (atom nil)
     (ref nil)
     (agent nil)
-    ;;#'+
 
     ;; stateful seqs
     (enumeration-seq (java.util.Collections/enumeration (range 50)))
