@@ -30,8 +30,16 @@ private LazySeq(IPersistentMap meta, ISeq s){
 	this.s = s;
 }
 
+private LazySeq(IPersistentMap meta, IFn fn){
+	super(meta);
+	this.fn = fn;
+}
+
 public Obj withMeta(IPersistentMap meta){
-	return new LazySeq(meta, seq());
+	if(fn != null)
+		return new LazySeq(meta, this.fn);
+	else
+		return new LazySeq(meta, seq());
 }
 
 final synchronized Object sval(){

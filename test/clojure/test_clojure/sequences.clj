@@ -144,6 +144,14 @@
       (lazy-seq (into-array [1 2])) '(1 2) ))
 
 
+(deftest test-laziness
+  (let [x (atom nil)
+        s (lazy-seq (do (swap! x (fn [_] true))
+                      []))
+        s* (with-meta s {:a 1})]
+    (is (= nil @x))))
+
+
 (deftest test-seq
   (is (not (seq? (seq []))))
   (is (seq? (seq [1 2])))
