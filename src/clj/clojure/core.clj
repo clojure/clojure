@@ -4809,6 +4809,16 @@
        (when (. m (find))
          (cons (re-groups m) (lazy-seq (step))))))))
 
+(defn re-count
+  "Returns the total number of matches of pattern in string."
+  [re s]
+  (count (re-seq re s)))
+
+(defn re-count-uniq
+  "Returns the total number of unique matches of pattern in string."
+  [re s]
+  (count (set (re-seq re s))))
+
 (defn re-matches
   "Returns the match, if any, of string to pattern, using
   java.util.regex.Matcher.matches().  Uses re-groups to return the
