@@ -79,7 +79,7 @@ Design notes for clojure.string:
 
    string / string
    char / char
-   pattern / (string or function of match).
+   pattern / (string or function of match groups).
 
    See also replace-first.
 
@@ -142,7 +142,7 @@ Design notes for clojure.string:
 
    char / char
    string / string
-   pattern / (string or function of match).
+   pattern / (string or function of match groups).
 
    See also replace.
 
