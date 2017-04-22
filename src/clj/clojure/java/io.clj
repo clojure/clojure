@@ -390,7 +390,7 @@
 
 (defn copy
   "Copies input to output.  Returns nil or throws IOException.
-  Input may be an InputStream, Reader, File, byte[], or String.
+  Input may be an InputStream, Reader, File, byte[], char[], or String.
   Output may be an OutputStream, Writer, or File.
 
   Options are key/value pairs and may be one of
