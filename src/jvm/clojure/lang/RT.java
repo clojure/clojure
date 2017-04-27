@@ -461,8 +461,8 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 
 static void doInit() throws ClassNotFoundException, IOException{
 	load("clojure/core");
-	load("clojure/spec");
-	load("clojure/core/specs");
+	load("clojure/spec/alpha");
+	load("clojure/core/specs/alpha");
 
 	Var.pushThreadBindings(
 			RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),

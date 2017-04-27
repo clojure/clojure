@@ -12,7 +12,7 @@
   ^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim"
     :doc "Utilities meant to be used interactively at the REPL"}
   clojure.repl
-  (:require [clojure.spec :as spec])
+  (:require [clojure.spec.alpha :as spec])
   (:import (java.io LineNumberReader InputStreamReader PushbackReader)
            (clojure.lang RT Reflector)))
 
