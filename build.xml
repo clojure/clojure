@@ -91,9 +91,8 @@
     <javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes"
            debug="true" source="1.6" target="1.6" includeantruntime="no"/>
     <echo>Direct linking = ${directlinking}</echo>
-    <echo>${test-classes}:${test}:${build}:${cljsrc}:${maven.compile.classpath}</echo>
     <java classname="clojure.lang.Compile"
-          classpath="${test-classes}:${test}:${build}:${cljsrc}:${maven.compile.classpath}"
+          classpath="${test-classes}:${test}:${build}:${cljsrc}:${maven.test.classpath}"
           failonerror="true"
 	  fork="true">
       <sysproperty key="clojure.compile.path" value="${test-classes}"/>
