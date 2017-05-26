@@ -6844,7 +6844,7 @@ public static Object macroexpand1(Object x) {
 										check.applyTo(RT.cons(v, RT.list(form.next())));
 								}
 						}
-					catch(IllegalArgumentException e)
+					catch(Exception e)
 						{
 						throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), e);
 						}
