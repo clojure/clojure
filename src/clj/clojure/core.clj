@@ -1599,6 +1599,13 @@
   [^clojure.lang.Named x]
     (. x (getNamespace)))
 
+(defn boolean
+  "Coerce to boolean"
+  {
+   :inline (fn  [x] `(. clojure.lang.RT (booleanCast ~x)))
+   :added "1.0"}
+  [x] (clojure.lang.RT/booleanCast x))
+
 (defn ident?
   "Return true if x is a symbol or keyword"
   {:added "1.9"}
@@ -1612,7 +1619,7 @@
 (defn qualified-ident?
   "Return true if x is a symbol or keyword with a namespace"
   {:added "1.9"}
-  [x] (and (ident? x) (namespace x) true))
+  [x] (boolean (and (ident? x) (namespace x) true)))
 
 (defn simple-symbol?
   "Return true if x is a symbol without a namespace"
@@ -1622,7 +1629,7 @@
 (defn qualified-symbol?
   "Return true if x is a symbol with a namespace"
   {:added "1.9"}
-  [x] (and (symbol? x) (namespace x) true))
+  [x] (boolean (and (symbol? x) (namespace x) true)))
 
 (defn simple-keyword?
   "Return true if x is a keyword without a namespace"
@@ -1632,7 +1639,7 @@
 (defn qualified-keyword?
   "Return true if x is a keyword with a namespace"
   {:added "1.9"}
-  [x] (and (keyword? x) (namespace x) true))
+  [x] (boolean (and (keyword? x) (namespace x) true)))
 
 (defmacro locking
   "Executes exprs in an implicit do, while holding the monitor of x.
@@ -3485,13 +3492,6 @@
   {:inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedCharCast 'charCast) ~x)))
    :added "1.1"}
   [x] (. clojure.lang.RT (charCast x)))
-
-(defn boolean
-  "Coerce to boolean"
-  {
-   :inline (fn  [x] `(. clojure.lang.RT (booleanCast ~x)))
-   :added "1.0"}
-  [x] (clojure.lang.RT/booleanCast x))
 
 (defn unchecked-byte
   "Coerce to byte. Subject to rounding or truncation."
