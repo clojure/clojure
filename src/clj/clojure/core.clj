@@ -1703,6 +1703,15 @@
         (recur threaded (next forms)))
       x)))
 
+(defmacro where
+  "Synonym of let. Use with ->> to provide binding after expressions (Haskell binding style)
+  Example:
+  (->> (+ x y) (where [x 3 y 2]))
+  which would expand to:
+  (let* [x 3 y 2] (+ x y))"
+  {:added "1.5"}
+  [& body] `(let ~@body))
+
 (def map)
 
 (defn ^:private check-valid-options
