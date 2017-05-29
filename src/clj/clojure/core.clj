@@ -10,9 +10,6 @@
        :author "Rich Hickey"}
   clojure.core)
 
-(def unquote)
-(def unquote-splicing)
-
 (def
  ^{:arglists '([& items])
    :doc "Creates a new list containing the items."
