@@ -241,7 +241,7 @@
        (loop [p loc]
          (if (up p)
            (or (right (up p)) (recur (up p)))
-           [(node p) :end])))))
+           (with-meta [(node p) :end] (meta p)))))))
 
 (defn prev
   "Moves to the previous loc in the hierarchy, depth-first. If already
