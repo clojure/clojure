@@ -149,7 +149,7 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
                    m)))
 
 (defn- pretty-writer? 
-  "Return true iff x is a PrettyWriter"
+  "Return true if x is a PrettyWriter"
   [x] (and (instance? clojure.lang.IDeref x) (:pretty-writer @@x)))
 
 (defn- make-pretty-writer 
