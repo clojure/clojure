@@ -697,12 +697,12 @@
 ;  (foo-g 3.14L1200) "*********|?????????|%%%%%%%%%|3.14L+1200"
 )
 
-(defn type-clash-error [fun nargs argnum right-type wrong-type]
+(defn type-clash-error [f nargs argnum right-type wrong-type]
   (format nil ;; CLtL has this format string slightly wrong
           "~&Function ~S requires its ~:[~:R ~;~*~]~
            argument to be of type ~S,~%but it was called ~
            with an argument of type ~S.~%" 
-          fun (= nargs 1) argnum right-type wrong-type)) 
+          f (= nargs 1) argnum right-type wrong-type)) 
 
 (simple-tests cltl-Newline-tests
   (type-clash-error 'aref nil 2 'integer 'vector)
