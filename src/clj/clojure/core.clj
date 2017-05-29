@@ -2622,6 +2622,19 @@
   ([f arg1 arg2 arg3 & more]
    (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
 
+(defn flip
+  "Flips the given function arguments."
+  {:added "1.4"}
+  [f]
+  (comp (partial apply f) reverse list))
+
+(defn partial*
+  "Flips the given function arguments and returns a new function
+  partially applied to a variable number of arguments."
+  {:added "1.4"}
+  [f & args]
+  (apply partial (flip f) args))
+
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn sequence
