@@ -6098,6 +6098,12 @@
    :static true}
   [x] (instance? clojure.lang.IPersistentCollection x))
 
+(defn regex?
+  "Returns true if x implements regex.Pattern"
+  {:added "1.7"
+   :static true}
+  [x] (instance? java.util.regex.Pattern r))
+
 (defn list?
   "Returns true if x implements IPersistentList"
   {:added "1.0"
