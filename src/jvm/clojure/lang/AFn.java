@@ -22,8 +22,6 @@ public void run(){
         invoke();
 }
 
-
-
 public Object invoke() {
 	return throwArity(0);
 }
@@ -52,8 +50,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 	return throwArity(6);
 }
 
-public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7)
-		{
+public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
 	return throwArity(7);
 }
 
@@ -83,14 +80,12 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13)
-		{
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13) {
 	return throwArity(13);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
-                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14)
-		{
+                     Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14) {
 	return throwArity(14);
 }
 
@@ -126,8 +121,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
-                     Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20)
-		{
+                     Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20) {
 	return throwArity(20);
 }
 
@@ -135,8 +129,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20,
-                     Object... args)
-		{
+                     Object... args) {
 	return throwArity(21);
 }
 
@@ -145,8 +138,7 @@ public Object applyTo(ISeq arglist) {
 }
 
 static public Object applyToHelper(IFn ifn, ISeq arglist) {
-	switch(RT.boundedLength(arglist, 20))
-		{
+	switch(RT.boundedLength(arglist, 20)) {
 		case 0:
 			arglist = null;
 			return ifn.invoke();
