@@ -7015,7 +7015,7 @@
   {:added "1.2"
    :static true}
   [x]
-  (filter (complement sequential?)
+  (remove sequential?
           (rest (tree-seq sequential? seq x))))
 
 (defn group-by 
