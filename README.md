@@ -73,13 +73,13 @@ This program uses the Guava Murmur3 hash implementation which is distributed
 under the Apache License:
 
 
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
 
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
-   1. Definitions.
+1. Definitions.
 
       "License" shall mean the terms and conditions for use, reproduction,
       and distribution as defined by Sections 1 through 9 of this document.
