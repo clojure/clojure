@@ -699,6 +699,7 @@ The following features are no longer marked Alpha in Clojure:
 
 The clojure.java.api package provides a minimal interface to bootstrap
 Clojure access from other JVM languages. It does this by providing:
+
 1. The ability to use Clojure's namespaces to locate an arbitrary var,
    returning the var's clojure.lang.IFn interface.
 2. A convenience method read for reading data using Clojure's edn
