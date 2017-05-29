@@ -24,8 +24,10 @@
   (or (some (fn [t] (when (every? #(isa? t %) rtypes) t)) rtypes)
     (throw (Exception. "Incompatible return types"))))
 
-(defn- group-by-sig [coll]
- "takes a collection of [msig meth] and returns a seq of maps from return-types to meths."
+(defn- group-by-sig
+  "Takes a collection of [msig meth] and returns a seq of maps from
+   return-types to meths."
+  [coll]
   (vals (reduce1 (fn [m [msig meth]]
                   (let [rtype (peek msig)
                         argsig (pop msig)]
