@@ -6,12 +6,12 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns 
+(ns
   ^{:author "Stuart Sierra, Chas Emerick, Stuart Halloway",
      :doc "This file defines polymorphic I/O utility functions for Clojure."}
     clojure.java.io
     (:require clojure.string)
-    (:import 
+    (:import
      (java.io Reader InputStream InputStreamReader PushbackReader
               BufferedReader File OutputStream
               OutputStreamWriter BufferedWriter Writer
@@ -45,11 +45,11 @@
   nil
   (as-file [_] nil)
   (as-url [_] nil)
-  
+
   String
   (as-file [s] (File. s))
-  (as-url [s] (URL. s))  
-  
+  (as-url [s] (URL. s))
+
   File
   (as-file [f] f)
   (as-url [f] (.toURL (.toURI f)))
@@ -72,7 +72,7 @@
    be unequivocally converted to the requested kind of stream.
 
    Common options include
-   
+
      :append    true to open stream in append mode
      :encoding  string name of encoding to use, e.g. \"UTF-8\".
 
@@ -397,9 +397,9 @@
 
     :buffer-size  buffer size to use, default is 1024.
     :encoding     encoding to use if converting between
-                  byte and char streams.   
+                  byte and char streams.
 
-  Does not close any streams except those it opens itself 
+  Does not close any streams except those it opens itself
   (on a File)."
   {:added "1.2"}
   [input output & opts]
@@ -420,9 +420,9 @@
    versions treat the first argument as parent and subsequent args as
    children relative to the parent."
   {:added "1.2"}
-  ([arg]                      
+  ([arg]
      (as-file arg))
-  ([parent child]             
+  ([parent child]
      (File. ^File (as-file parent) ^String (as-relative-path child)))
   ([parent child & more]
      (reduce file (file parent child) more)))
