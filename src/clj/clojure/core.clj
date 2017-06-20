@@ -3831,9 +3831,11 @@
     (let [gx (gensym)]
       `(let [~gx ~x]
          ~@(map (fn [f]
-                  (if (seq? f)
-                    `(~(first f) ~gx ~@(next f))
-                    `(~f ~gx)))
+                  (with-meta
+                    (if (seq? f)
+                      `(~(first f) ~gx ~@(next f))
+                      `(~f ~gx))
+                    (meta f)))
                 forms)
          ~gx)))
 
