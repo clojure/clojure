@@ -6857,7 +6857,8 @@
 (defn slurp
   "Opens a reader on f and reads all its contents, returning a string.
   See clojure.java.io/reader for a complete list of supported arguments."
-  {:added "1.0"}
+  {:added "1.0"
+   :tag String}
   ([f & opts]
      (let [opts (normalize-slurp-opts opts)
            sw (java.io.StringWriter.)]
