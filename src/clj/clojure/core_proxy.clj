@@ -13,6 +13,7 @@
 (import
  '(clojure.asm ClassWriter ClassVisitor Opcodes Type) 
  '(java.lang.reflect Modifier Constructor)
+ '(java.io Serializable NotSerializableException)
  '(clojure.asm.commons Method GeneratorAdapter)
  '(clojure.lang IProxy Reflector DynamicClassLoader IPersistentMap PersistentHashMap RT))
 
@@ -44,7 +45,8 @@
 
 (defn- generate-proxy [^Class super interfaces]
   (let [cv (new ClassWriter (. ClassWriter COMPUTE_MAXS))
-        cname (.replace (proxy-name super interfaces) \. \/) ;(str "clojure/lang/" (gensym "Proxy__"))
+        pname (proxy-name super interfaces)
+        cname (.replace pname \. \/) ;(str "clojure/lang/" (gensym "Proxy__"))
         ctype (. Type (getObjectType cname))
         iname (fn [^Class c] (.. Type (getType c) (getInternalName)))
         fmap "__clojureFnMap"
@@ -148,6 +150,22 @@
             
             (. gen (returnValue))
             (. gen (endMethod)))))
+                                        ;disable serialization
+    (when (some #(isa? % Serializable) (cons super interfaces))
+      (let [m (. Method (getMethod "void writeObject(java.io.ObjectOutputStream)"))
+            gen (new GeneratorAdapter (. Opcodes ACC_PRIVATE) m nil nil cv)]
+        (. gen (visitCode))
+        (. gen (loadThis))
+        (. gen (loadArgs))
+        (. gen (throwException (totype NotSerializableException) pname))
+        (. gen (endMethod)))
+      (let [m (. Method (getMethod "void readObject(java.io.ObjectInputStream)"))
+            gen (new GeneratorAdapter (. Opcodes ACC_PRIVATE) m nil nil cv)]
+        (. gen (visitCode))
+        (. gen (loadThis))
+        (. gen (loadArgs))
+        (. gen (throwException (totype NotSerializableException) pname))
+        (. gen (endMethod))))
                                         ;add IProxy methods
     (let [m (. Method (getMethod "void __initClojureFnMappings(clojure.lang.IPersistentMap)"))
           gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)]

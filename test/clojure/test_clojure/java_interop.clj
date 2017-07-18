@@ -10,7 +10,8 @@
 
 
 (ns clojure.test-clojure.java-interop
-  (:use clojure.test))
+  (:use clojure.test)
+  (:require [clojure.inspector]))
 
 ; http://clojure.org/java_interop
 ; http://clojure.org/compilation
@@ -170,6 +171,34 @@
             str)
         "chain chain chain")))
 
+
+;; serialized-proxy can be regenerated using a modified version of
+;; Clojure with the proxy serialization prohibition disabled and the
+;; following code:
+#_(let [baos (java.io.ByteArrayOutputStream.) ]
+    (with-open [baos baos]
+      (.writeObject (java.io.ObjectOutputStream. baos) (clojure.inspector/list-model nil)))
+    (println (apply str (for [c (String. (.toByteArray baos) "ISO-8859-1")]
+                          (if (<= 32 (int c) (int \z)) c (format "\\%03o" (int c)))))))
+(def serialized-proxy "\254\355\000\005sr\000Eclojure.inspector.proxy$javax.swing.table.AbstractTableModel$ff19274art\330\266_\010ME\002\000\001L\000\016__clojureFnMapt\000\035Lclojure/lang/IPersistentMap;xr\000$javax.swing.table.AbstractTableModelr\313\3538\256\001\377\276\002\000\001L\000\014listenerListt\000%Ljavax/swing/event/EventListenerList;xpsr\000#javax.swing.event.EventListenerList\2616\306\175\204\352\326D\003\000\000xppxsr\000\037clojure.lang.PersistentArrayMap\3437p\017\230\305\364\337\002\000\002L\000\005_metaq\000\176\000\001[\000\005arrayt\000\023[Ljava/lang/Object;xr\000\033clojure.lang.APersistentMap]\174/\003t r\173\002\000\002I\000\005_hashI\000\007_hasheqxp\000\000\000\000\000\000\000\000pur\000\023[Ljava.lang.Object;\220\316X\237\020s)l\002\000\000xp\000\000\000\006t\000\016getColumnCountsr\000%clojure.inspector$list_model$fn__8816H\252\320\325b\371!+\002\000\000xr\000\026clojure.lang.AFunction>\006p\234\236F\375\313\002\000\001L\000\021__methodImplCachet\000\036Lclojure/lang/MethodImplCache;xppt\000\013getRowCountsr\000%clojure.inspector$list_model$fn__8818-\037I\247\234/U\226\002\000\001L\000\005nrowst\000\022Ljava/lang/Object;xq\000\176\000\017ppt\000\012getValueAtsr\000%clojure.inspector$list_model$fn__8820\323\331\174ke\233\370\034\002\000\002L\000\011get_labelq\000\176\000\024L\000\011get_valueq\000\176\000\024xq\000\176\000\017ppp")
+
+(deftest test-proxy-non-serializable
+  (testing "That proxy classes refuse serialization and deserialization"
+    ;; Serializable listed directly in interface list:
+    (is (thrown? java.io.NotSerializableException
+                 (-> (java.io.ByteArrayOutputStream.)
+                     (java.io.ObjectOutputStream.)
+                     (.writeObject (proxy [Object java.io.Serializable] [])))))
+    ;; Serializable included via inheritence:
+    (is (thrown? java.io.NotSerializableException
+                 (-> (java.io.ByteArrayOutputStream.)
+                     (java.io.ObjectOutputStream.)
+                     (.writeObject (clojure.inspector/list-model nil)))))
+    ;; Deserialization also prohibited:
+    (is (thrown? java.io.NotSerializableException
+                 (-> serialized-proxy (.getBytes "ISO-8859-1")
+                     java.io.ByteArrayInputStream. java.io.ObjectInputStream.
+                     .readObject)))))
 
 (deftest test-bases
   (are [x y] (= x y)
