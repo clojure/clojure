@@ -643,6 +643,8 @@ public static class VarExpr implements Expr, AssignableExpr{
 	final static Method getMethod = Method.getMethod("Object get()");
 	final static Method setMethod = Method.getMethod("Object set(Object)");
 
+    Class jc;
+
 	public VarExpr(Var var, Symbol tag){
 		this.var = var;
 		this.tag = tag != null ? tag : var.getTag();
@@ -665,7 +667,9 @@ public static class VarExpr implements Expr, AssignableExpr{
 	}
 
 	public Class getJavaClass() {
-		return HostExpr.tagToClass(tag);
+        if (jc == null)
+            jc = HostExpr.tagToClass(tag);
+		return jc;
 	}
 
 	public Object evalAssign(Expr val) {
@@ -1141,6 +1145,7 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	final static Method invokeNoArgInstanceMember = Method.getMethod("Object invokeNoArgInstanceMember(Object,String,boolean)");
 	final static Method setInstanceFieldMethod = Method.getMethod("Object setInstanceField(Object,String,Object)");
 
+    Class jc;
 
 	public InstanceFieldExpr(int line, int column, Expr target, String fieldName, Symbol tag, boolean requireField) {
 		this.target = target;
@@ -1220,7 +1225,9 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 	}
 
 	public Class getJavaClass() {
-		return tag != null ? HostExpr.tagToClass(tag) : field.getType();
+        if (jc == null)
+            jc = tag != null ? HostExpr.tagToClass(tag) : field.getType();
+        return jc;
 	}
 
 	public Object evalAssign(Expr val) {
@@ -1262,6 +1269,8 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 //	final static Method setStaticFieldMethod = Method.getMethod("Object setStaticField(String,String,Object)");
 	final int line;
 	final int column;
+
+    Class jc;
 
 	public StaticFieldExpr(int line, int column, Class c, String fieldName, Symbol tag) {
 		//this.className = className;
@@ -1316,7 +1325,9 @@ static class StaticFieldExpr extends FieldExpr implements AssignableExpr{
 	public Class getJavaClass() {
 		//Class c = Class.forName(className);
 		//java.lang.reflect.Field field = c.getField(fieldName);
-		return tag != null ? HostExpr.tagToClass(tag) : field.getType();
+		if (jc == null)
+            jc =tag != null ? HostExpr.tagToClass(tag) : field.getType();
+        return jc;
 	}
 
 	public Object evalAssign(Expr val) {
@@ -1449,6 +1460,7 @@ static class InstanceMethodExpr extends MethodExpr{
 	public final Symbol tag;
 	public final boolean tailPosition;
 	public final java.lang.reflect.Method method;
+    Class jc;
 
 	final static Method invokeInstanceMethodMethod =
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
@@ -1617,7 +1629,9 @@ static class InstanceMethodExpr extends MethodExpr{
 	}
 
 	public Class getJavaClass() {
-        return retType((tag!=null)?HostExpr.tagToClass(tag):null, (method!=null)?method.getReturnType():null);
+        if (jc == null)
+            jc = retType((tag!=null)?HostExpr.tagToClass(tag):null, (method!=null)?method.getReturnType():null);
+        return jc;
 	}
 }
 
@@ -1637,6 +1651,7 @@ static class StaticMethodExpr extends MethodExpr{
 	final static Method invokeStaticMethodMethod =
 			Method.getMethod("Object invokeStaticMethod(Class,String,Object[])");
 	final static Keyword warnOnBoxedKeyword = Keyword.intern("warn-on-boxed");
+    Class jc;
 
 	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c,
 				String methodName, IPersistentVector args, boolean tailPosition)
@@ -1833,7 +1848,9 @@ static class StaticMethodExpr extends MethodExpr{
 	}
 
 	public Class getJavaClass() {
-        return retType((tag!=null)?HostExpr.tagToClass(tag):null, (method!=null)?method.getReturnType():null);
+        if (jc == null)
+            jc = retType((tag!=null)?HostExpr.tagToClass(tag):null, (method!=null)?method.getReturnType():null);
+        return jc;
 	}
 }
 
@@ -3268,6 +3285,7 @@ static class KeywordInvokeExpr implements Expr{
 	public final int siteIndex;
 	public final String source;
 	static Type ILOOKUP_TYPE = Type.getType(ILookup.class);
+    Class jc;
 
 	public KeywordInvokeExpr(String source, int line, int column, Symbol tag, KeywordExpr kw, Expr target){
 		this.source = source;
@@ -3332,7 +3350,9 @@ static class KeywordInvokeExpr implements Expr{
 	}
 
 	public Class getJavaClass() {
-		return HostExpr.tagToClass(tag);
+		if(jc == null)
+            jc = HostExpr.tagToClass(tag);
+        return jc;
 	}
 
 }
@@ -3441,6 +3461,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 	public final boolean variadic;
 	public final boolean tailPosition;
 	public final Object tag;
+    Class jc;
 
 	StaticInvokeExpr(Type target, Class retClass, Class[] paramclasses, Type[] paramtypes, boolean variadic,
 	                 IPersistentVector args,Object tag, boolean tailPosition){
@@ -3476,7 +3497,9 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	public Class getJavaClass() {
-        return retType((tag!=null)?HostExpr.tagToClass(tag):null, retClass);
+        if(jc == null)
+            jc =retType((tag!=null)?HostExpr.tagToClass(tag):null, retClass);
+        return jc;
 	}
 
 	public boolean canEmitPrimitive(){
@@ -3596,6 +3619,7 @@ static class InvokeExpr implements Expr{
 	public java.lang.reflect.Method onMethod;
 	static Keyword onKey = Keyword.intern("on");
 	static Keyword methodMapKey = Keyword.intern("method-map");
+    Class jc;
 
     static Object sigTag(int argcount, Var v){
         Object arglists = RT.get(RT.meta(v), arglistsKey);
@@ -3777,7 +3801,9 @@ static class InvokeExpr implements Expr{
 	}
 
 	public Class getJavaClass() {
-		return HostExpr.tagToClass(tag);
+        if (jc == null)
+            jc = HostExpr.tagToClass(tag);
+        return jc;
 	}
 
 	static public Expr parse(C context, ISeq form) {
@@ -3883,6 +3909,7 @@ static public class FnExpr extends ObjExpr{
 	private boolean hasMeta;
     private boolean hasEnclosingMethod;
 	//	String superName = null;
+    Class jc;
 
 	public FnExpr(Object tag){
 		super(tag);
@@ -3897,7 +3924,9 @@ static public class FnExpr extends ObjExpr{
 	}
 
 	public Class getJavaClass() {
-		return tag != null ? HostExpr.tagToClass(tag) : AFunction.class;
+        if (jc == null)
+            jc = tag != null ? HostExpr.tagToClass(tag) : AFunction.class;
+        return jc;
 	}
 
 	protected void emitMethods(ClassVisitor cv){
@@ -5025,10 +5054,13 @@ static public class ObjExpr implements Expr{
 		return true;
 	}
 
+    Class jc;
 	public Class getJavaClass() {
-		return (compiledClass != null) ? compiledClass
-			: (tag != null) ? HostExpr.tagToClass(tag)
-			: IFn.class;
+		if (jc == null)
+            jc = (compiledClass != null) ? compiledClass
+                : (tag != null) ? HostExpr.tagToClass(tag)
+                : IFn.class;
+        return jc;
 	}
 
 	public void emitAssignLocal(GeneratorAdapter gen, LocalBinding lb,Expr val){
@@ -5926,18 +5958,25 @@ public static class LocalBinding{
 		name = munge(sym.name);
 	}
 
+    Boolean hjc;
+
 	public boolean hasJavaClass() {
-		if(init != null && init.hasJavaClass()
-		   && Util.isPrimitive(init.getJavaClass())
-		   && !(init instanceof MaybePrimitiveExpr))
-			return false;
-		return tag != null
-		       || (init != null && init.hasJavaClass());
-	}
+        if (hjc == null)
+            {
+                if(init != null && init.hasJavaClass() && Util.isPrimitive(init.getJavaClass()) && !(init instanceof MaybePrimitiveExpr))
+                   hjc =  false;
+                else
+                    hjc = tag != null || (init != null && init.hasJavaClass());
+            }
+        return hjc;
+    }
+
+    Class jc;
 
 	public Class getJavaClass() {
-		return tag != null ? HostExpr.tagToClass(tag)
-		                   : init.getJavaClass();
+		if (jc == null)
+            jc = tag != null ? HostExpr.tagToClass(tag) : init.getJavaClass();
+        return jc;
 	}
 
 	public Class getPrimitiveType(){
@@ -6025,10 +6064,15 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
 		return tag != null || b.hasJavaClass();
 	}
 
+    Class jc;
 	public Class getJavaClass() {
-		if(tag != null)
-			return HostExpr.tagToClass(tag);
-		return b.getJavaClass();
+        if (jc == null) {
+            if(tag != null)
+                jc = HostExpr.tagToClass(tag);
+            else
+                jc = b.getJavaClass();
+        }
+        return jc;
 	}
 
 
