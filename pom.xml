@@ -52,7 +52,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>core.specs.alpha</artifactId>
-      <version>0.1.10</version>
+      <version>0.1.24</version>
       <exclusions>
         <exclusion>
           <groupId>org.clojure</groupId>
