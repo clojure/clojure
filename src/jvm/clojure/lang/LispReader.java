@@ -1009,7 +1009,7 @@ public static class SyntaxQuoteReader extends AFn{
             else if(resolver != null)
                 {
                 Symbol nsym = null;
-                if(sym.ns != null && sym.ns.indexOf('.') == -1){
+                if(sym.ns != null){
                     Symbol alias = Symbol.intern(null, sym.ns);
                     nsym = resolver.resolveClass(alias);
                     if(nsym == null)
