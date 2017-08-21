@@ -1025,8 +1025,10 @@ public static class SyntaxQuoteReader extends AFn{
                         rsym = resolver.resolveVar(sym);
                     if(rsym != null)
                         sym = rsym;
+                    else
+                        sym = Symbol.intern(resolver.currentNS().name,sym.name);
                 }
-                //leave alone if no resolution
+                //leave alone if qualified
                 }
 			else
 				{
