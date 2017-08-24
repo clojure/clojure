@@ -36,7 +36,7 @@ static final public Boolean F = Boolean.FALSE;//Keyword.intern(Symbol.intern(nul
 static final public String LOADER_SUFFIX = "__init";
 
 //simple-symbol->class
-final static IPersistentMap DEFAULT_IMPORTS = map(
+final static public IPersistentMap DEFAULT_IMPORTS = map(
 //												  Symbol.intern("RT"), "clojure.lang.RT",
 //                                                  Symbol.intern("Num"), "clojure.lang.Num",
 //                                                  Symbol.intern("Symbol"), "clojure.lang.Symbol",
