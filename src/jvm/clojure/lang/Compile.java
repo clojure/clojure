@@ -31,7 +31,7 @@ private static final Var compile = RT.var("clojure.core", "compile");
 private static final Var warn_on_reflection = RT.var("clojure.core", "*warn-on-reflection*");
 private static final Var unchecked_math = RT.var("clojure.core", "*unchecked-math*");
 
-public static void main(String[] args) throws IOException{
+public static void main(String[] args) throws IOException, ClassNotFoundException{
 
 	OutputStreamWriter out = (OutputStreamWriter) RT.OUT.deref();
 	PrintWriter err = RT.errPrintWriter();
@@ -53,6 +53,9 @@ public static void main(String[] args) throws IOException{
         uncheckedMath = Boolean.TRUE;
     else if("warn-on-boxed".equals(uncheckedMathProp))
         uncheckedMath = Keyword.intern("warn-on-boxed");
+
+    // force load to avoid transitive compilation during lazy load
+    RT.load("clojure/core/specs/alpha");
 
 	try
 		{

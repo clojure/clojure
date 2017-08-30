@@ -6864,6 +6864,35 @@ public static Object preserveTag(ISeq src, Object dst) {
 	return dst;
 }
 
+private static volatile Var MACRO_CHECK = null;
+private static volatile boolean MACRO_CHECK_LOADING = false;
+private static final Object MACRO_CHECK_LOCK = new Object();
+
+private static Var ensureMacroCheck() throws ClassNotFoundException, IOException {
+	if(MACRO_CHECK == null) {
+		synchronized(MACRO_CHECK_LOCK) {
+			if(MACRO_CHECK == null) {
+				MACRO_CHECK_LOADING = true;
+				RT.load("clojure/spec/alpha");
+				RT.load("clojure/core/specs/alpha");
+				MACRO_CHECK = Var.find(Symbol.intern("clojure.spec.alpha", "macroexpand-check"));
+				MACRO_CHECK_LOADING = false;
+			}
+		}
+	}
+	return MACRO_CHECK;
+}
+
+public static void checkSpecs(Var v, ISeq form) {
+	if(RT.CHECK_SPECS && !MACRO_CHECK_LOADING) {
+		try {
+			ensureMacroCheck().applyTo(RT.cons(v, RT.list(form.next())));
+		} catch(Exception e) {
+			throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), e);
+		}
+	}
+}
+
 public static Object macroexpand1(Object x) {
 	if(x instanceof ISeq)
 		{
@@ -6875,24 +6904,8 @@ public static Object macroexpand1(Object x) {
 		Var v = isMacro(op);
 		if(v != null)
 			{
-				// Do not check specs while inside clojure.spec.alpha
-				if(! "clojure/spec/alpha.clj".equals(SOURCE_PATH.deref()))
-					{
-					try
-						{
-							final Namespace checkns = Namespace.find(Symbol.intern("clojure.spec.alpha"));
-							if (checkns != null)
-								{
-									final Var check = Var.find(Symbol.intern("clojure.spec.alpha/macroexpand-check"));
-									if ((check != null) && (check.isBound()))
-										check.applyTo(RT.cons(v, RT.list(form.next())));
-								}
-						}
-					catch(Exception e)
-						{
-						throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), e);
-						}
-					}
+				checkSpecs(v, form);
+
 				try
 					{
                     ISeq args = RT.cons(form, RT.cons(Compiler.LOCAL_ENV.get(), form.next()));

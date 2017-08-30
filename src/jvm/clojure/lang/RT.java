@@ -301,6 +301,8 @@ static public void addURL(Object url) throws MalformedURLException{
 
 public static boolean checkSpecAsserts = Boolean.getBoolean("clojure.spec.check-asserts");
 
+static volatile boolean CHECK_SPECS = false;
+
 static{
 	Keyword arglistskw = Keyword.intern(null, "arglists");
 	Symbol namesym = Symbol.intern("name");
@@ -336,6 +338,8 @@ static{
 	catch(Exception e) {
 		throw Util.sneakyThrow(e);
 	}
+
+	CHECK_SPECS = true;
 }
 
 static public Keyword keyword(String ns, String name){
@@ -462,8 +466,6 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 
 static void doInit() throws ClassNotFoundException, IOException{
 	load("clojure/core");
-	load("clojure/spec/alpha");
-	load("clojure/core/specs/alpha");
 
 	Var.pushThreadBindings(
 			RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
