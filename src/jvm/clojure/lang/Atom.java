@@ -14,7 +14,7 @@ package clojure.lang;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-final public class Atom extends ARef implements IAtom{
+final public class Atom extends ARef implements IAtom2{
 final AtomicReference state;
 
 public Atom(Object state){
@@ -86,6 +86,62 @@ public Object swap(IFn f, Object x, Object y, ISeq args) {
 		}
 }
 
+public IPersistentVector swapVals(IFn f) {
+	for(; ;)
+		{
+		Object oldv = deref();
+		Object newv = f.invoke(oldv);
+		validate(newv);
+		if(state.compareAndSet(oldv, newv))
+			{
+			notifyWatches(oldv, newv);
+			return LazilyPersistentVector.createOwning(oldv, newv);
+			}
+		}
+}
+
+public IPersistentVector swapVals(IFn f, Object arg) {
+	for(; ;)
+		{
+		Object oldv = deref();
+		Object newv = f.invoke(oldv, arg);
+		validate(newv);
+		if(state.compareAndSet(oldv, newv))
+			{
+			notifyWatches(oldv, newv);
+			return LazilyPersistentVector.createOwning(oldv, newv);
+			}
+		}
+}
+
+public IPersistentVector swapVals(IFn f, Object arg1, Object arg2) {
+	for(; ;)
+		{
+		Object oldv = deref();
+		Object newv = f.invoke(oldv, arg1, arg2);
+		validate(newv);
+		if(state.compareAndSet(oldv, newv))
+			{
+			notifyWatches(oldv, newv);
+			return LazilyPersistentVector.createOwning(oldv, newv);
+			}
+		}
+}
+
+public IPersistentVector swapVals(IFn f, Object x, Object y, ISeq args) {
+	for(; ;)
+		{
+		Object oldv = deref();
+		Object newv = f.applyTo(RT.listStar(oldv, x, y, args));
+		validate(newv);
+		if(state.compareAndSet(oldv, newv))
+			{
+			notifyWatches(oldv, newv);
+			return LazilyPersistentVector.createOwning(oldv, newv);
+			}
+		}
+}
+
 public boolean compareAndSet(Object oldv, Object newv){
 	validate(newv);
 	boolean ret = state.compareAndSet(oldv, newv);
@@ -101,4 +157,18 @@ public Object reset(Object newval){
 	notifyWatches(oldval, newval);
 	return newval;
 }
+
+public IPersistentVector resetVals(Object newv){
+	validate(newv);
+	for(; ;)
+	{
+		Object oldv = deref();
+		if(state.compareAndSet(oldv, newv))
+		{
+			notifyWatches(oldv, newv);
+			return LazilyPersistentVector.createOwning(oldv, newv);
+		}
+	}
+}
+
 }
