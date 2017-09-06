@@ -153,6 +153,11 @@ static public Number multiplyP(Object x, Object y){
 }
 
 static public Number divide(Object x, Object y){
+	if (isNaN(x)){
+		return (Number)x;
+	} else if(isNaN(y)){
+		return (Number)y;
+	}
 	Ops yops = ops(y);
 	if(yops.isZero((Number)y))
 		throw new ArithmeticException("Divide by zero");
