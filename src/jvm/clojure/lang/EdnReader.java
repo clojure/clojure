@@ -49,6 +49,7 @@ static
 	macros['#'] = new DispatchReader();
 
 
+	dispatchMacros['#'] = new SymbolicValueReader();
 	dispatchMacros['^'] = new MetaReader();
 	//dispatchMacros['"'] = new RegexReader();
 	dispatchMacros['{'] = new SetReader();
@@ -705,6 +706,26 @@ public static class UnreadableReader extends AFn{
 	}
 }
 
+
+public static class SymbolicValueReader extends AFn{
+
+    static IPersistentMap specials = PersistentHashMap.create(Symbol.intern("Inf"), Double.POSITIVE_INFINITY,
+                                                              Symbol.intern("-Inf"), Double.NEGATIVE_INFINITY,
+                                                              Symbol.intern("NaN"), Double.NaN);
+
+	public Object invoke(Object reader, Object quote, Object opts) {
+		PushbackReader r = (PushbackReader) reader;
+		Object o = read(r, true, null, true, opts);
+
+		if (!(o instanceof Symbol))
+			throw Util.runtimeException("Invalid token: ##" + o);
+		if (!(specials.containsKey(o)))
+			throw Util.runtimeException("Unknown symbolic value: ##" + o);
+
+		return specials.valAt(o);
+	}
+}
+
 public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive, Object opts) {
 	final int firstline =
 			(r instanceof LineNumberingPushbackReader) ?
@@ -785,4 +806,3 @@ public static class TaggedReader extends AFn{
 
 }
 }
-

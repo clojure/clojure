@@ -140,3 +140,12 @@
   (let [date-map (bean (java.util.Date. 0))]
     (is (= (binding [*print-namespace-maps* true] (pr-str date-map))
            (binding [*print-namespace-maps* false] (pr-str date-map))))))
+
+(deftest print-symbol-values
+  (are [s v] (= s (pr-str v))
+             "##Inf" Double/POSITIVE_INFINITY
+             "##-Inf" Double/NEGATIVE_INFINITY
+             "##NaN" Double/NaN
+             "##Inf" Float/POSITIVE_INFINITY
+             "##-Inf" Float/NEGATIVE_INFINITY
+             "##NaN" Float/NaN))

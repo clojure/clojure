@@ -213,6 +213,10 @@
   (is (instance? Double -1.0))
   (is (instance? Double -1.))
 
+  (is (= Double/POSITIVE_INFINITY ##Inf))
+  (is (= Double/NEGATIVE_INFINITY ##-Inf))
+  (is (and (instance? Double ##NaN) (.isNaN ##NaN)))
+
   ; Read BigDecimal
   (is (instance? BigDecimal 9223372036854775808M))
   (is (instance? BigDecimal -9223372036854775809M))
@@ -745,3 +749,9 @@
   (is (= {1 1, :a/b 2, :b/c 3, :d 4}
          (edn/read-string "#:a{1 1, :b 2, :b/c 3, :_/d 4}")
          (edn/read-string "#:a {1 1, :b 2, :b/c 3, :_/d 4}"))))
+
+(deftest invalid-symbol-value
+  (is (thrown-with-msg? Exception #"Invalid token" (read-string "##5")))
+  (is (thrown-with-msg? Exception #"Invalid token" (edn/read-string "##5")))
+  (is (thrown-with-msg? Exception #"Unknown symbolic value" (read-string "##Foo")))
+  (is (thrown-with-msg? Exception #"Unknown symbolic value" (edn/read-string "##Foo"))))

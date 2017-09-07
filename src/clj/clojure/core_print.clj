@@ -128,6 +128,20 @@
 (defmethod print-method Number [o, ^Writer w]
   (.write w (str o)))
 
+(defmethod print-method Double [o, ^Writer w]
+  (cond
+    (= Double/POSITIVE_INFINITY o) (.write w "##Inf")
+    (= Double/NEGATIVE_INFINITY o) (.write w "##-Inf")
+    (.isNaN ^Double o) (.write w "##NaN")
+    :else (.write w (str o))))
+
+(defmethod print-method Float [o, ^Writer w]
+  (cond
+    (= Float/POSITIVE_INFINITY o) (.write w "##Inf")
+    (= Float/NEGATIVE_INFINITY o) (.write w "##-Inf")
+    (.isNaN ^Float o) (.write w "##NaN")
+    :else (.write w (str o))))
+
 (defmethod print-dup Number [o, ^Writer w]
   (print-ctor o
               (fn [o w]

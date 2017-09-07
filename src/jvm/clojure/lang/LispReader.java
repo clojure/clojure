@@ -107,6 +107,7 @@ static
 
 
 	dispatchMacros['^'] = new MetaReader();
+	dispatchMacros['#'] = new SymbolicValueReader();
 	dispatchMacros['\''] = new VarReader();
 	dispatchMacros['"'] = new RegexReader();
 	dispatchMacros['('] = new FnReader();
@@ -725,6 +726,26 @@ public static class NamespaceMapReader extends AFn{
 			a[i+1] = val;
 		}
 		return RT.map(a);
+	}
+}
+
+
+public static class SymbolicValueReader extends AFn{
+
+    static IPersistentMap  specials = PersistentHashMap.create(Symbol.intern("Inf"), Double.POSITIVE_INFINITY,
+                                                               Symbol.intern("-Inf"), Double.NEGATIVE_INFINITY,
+                                                               Symbol.intern("NaN"), Double.NaN);
+
+	public Object invoke(Object reader, Object quote, Object opts, Object pendingForms) {
+		PushbackReader r = (PushbackReader) reader;
+		Object o = read(r, true, null, true, opts, ensurePending(pendingForms));
+
+		if (!(o instanceof Symbol))
+			throw Util.runtimeException("Invalid token: ##" + o);
+		if (!(specials.containsKey(o)))
+			throw Util.runtimeException("Unknown symbolic value: ##" + o);
+
+		return specials.valAt(o);
 	}
 }
 
