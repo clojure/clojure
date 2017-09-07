@@ -32,7 +32,7 @@ cl-format, it supports very concise custom dispatch. It also provides
 a more powerful alternative to Clojure's standard format function.
 
 See documentation for pprint and cl-format for more information or 
-complete documentation on the clojure web site on github.",
+complete documentation on the Clojure web site on GitHub.",
        :added "1.2"}
     clojure.pprint
     (:refer-clojure :exclude (deftype))

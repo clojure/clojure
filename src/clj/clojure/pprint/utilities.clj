@@ -50,19 +50,22 @@
         [acc context]
       (recur new-context (conj acc result))))))
 
-(defn- unzip-map [m]
-  "Take a  map that has pairs in the value slots and produce a pair of maps, 
-   the first having all the first elements of the pairs and the second all 
-   the second elements of the pairs"
+(defn- unzip-map
+  "Take a map that has pairs in the value slots and produce a pair of
+  maps, the first having all the first elements of the pairs and the
+  second all the second elements of the pairs"
+  [m]
   [(into {} (for [[k [v1 v2]] m] [k v1]))
    (into {} (for [[k [v1 v2]] m] [k v2]))])
 
-(defn- tuple-map [m v1]
+(defn- tuple-map
   "For all the values, v, in the map, replace them with [v v1]"
+  [m v1]
   (into {} (for [[k v] m] [k [v v1]])))
 
-(defn- rtrim [s c]
+(defn- rtrim
   "Trim all instances of c from the end of sequence s"
+  [s c]
   (let [len (count s)]
     (if (and (pos? len) (= (nth s (dec (count s))) c))
       (loop [n (dec len)]
@@ -72,8 +75,9 @@
          true (recur (dec n))))
       s)))
 
-(defn- ltrim [s c]
+(defn- ltrim
   "Trim all instances of c from the beginning of sequence s"
+  [s c]
   (let [len (count s)]
     (if (and (pos? len) (= (nth s 0) c))
       (loop [n 0]
@@ -82,24 +86,27 @@
           (recur (inc n))))
       s)))
 
-(defn- prefix-count [aseq val]
-  "Return the number of times that val occurs at the start of sequence aseq, 
-if val is a seq itself, count the number of times any element of val occurs at the
-beginning of aseq"
+(defn- prefix-count
+  "Return the number of times that val occurs at the start of sequence aseq,
+  if val is a seq itself, count the number of times any element of val
+  occurs at the beginning of aseq"
+  [aseq val]
   (let [test (if (coll? val) (set val) #{val})]
     (loop [pos 0]
      (if (or (= pos (count aseq)) (not (test (nth aseq pos))))
        pos
        (recur (inc pos))))))
 
-(defn- prerr [& args]
+(defn- prerr
   "Println to *err*"
+  [& args]
   (binding [*out* *err*]
     (apply println args)))
-       
-(defmacro ^{:private true} prlabel [prefix arg & more-args]
+
+(defmacro ^{:private true} prlabel
   "Print args to *err* in name = value format"
-  `(prerr ~@(cons (list 'quote prefix) (mapcat #(list (list 'quote %) "=" %) 
+  [prefix arg & more-args]
+  `(prerr ~@(cons (list 'quote prefix) (mapcat #(list (list 'quote %) "=" %)
                                                   (cons arg (seq more-args))))))
 
 ;; Flush the pretty-print buffer without flushing the underlying stream

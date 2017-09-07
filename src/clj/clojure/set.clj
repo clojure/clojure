@@ -10,9 +10,10 @@
        :author "Rich Hickey"}
        clojure.set)
 
-(defn- bubble-max-key [k coll]
-  "Move a maximal element of coll according to fn k (which returns a number) 
-   to the front of coll."
+(defn- bubble-max-key
+  "Move a maximal element of coll according to fn k (which returns a
+  number) to the front of coll."
+  [k coll]
   (let [max (apply max-key k coll)]
     (cons max (remove #(identical? max %) coll))))
 

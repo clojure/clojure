@@ -40,9 +40,10 @@
   [sym]
   `(~sym @@~'this))
 
-(defmacro ^{:private true} 
-  setf [sym new-val] 
+(defmacro ^{:private true}
+  setf
   "Set the value of the field SYM to NEW-VAL"
+  [sym new-val]
   `(alter @~'this assoc ~sym ~new-val))
 
 (defmacro ^{:private true} 
