@@ -1,5 +1,179 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.9
+
+## 1 New and Improved Features
+
+### 1.1 spec
+
+spec is a new core library for describing, validating, and testing the structure of data and functions.
+
+For more information, see:
+
+* [About spec](https://clojure.org/about/spec)
+* [spec Guide](https://clojure.org/guides/spec)
+
+Note that spec is in alpha state and API compatibility is not guaranteed. Also, spec and the specs for the Clojure core API are distributed as external libraries that must be included to use Clojure.
+
+### 1.2 Support for working with maps with qualified keys
+
+Several enhancements have been made to add support for working with maps with qualified keys:
+
+* Map namespace syntax - specify the default namespace context for the keys (or symbols) in a map once - `#:car{:make "Jeep" :model "Wrangler"}`. For more information see https://clojure.org/reference/reader#_maps ([CLJ-1910](http://dev.clojure.org/jira/browse/CLJ-1910))
+* Destructuring support - namespaced map keys can now specified once as a namespace for :keys or :syms. For more information see https://clojure.org/reference/special_forms#_map_binding_destructuring ([CLJ-1919](http://dev.clojure.org/jira/browse/CLJ-1919))
+* `*print-namespace-maps*` - by default maps will not print with the map namespace syntax except in the clojure.main repl. This dynamic var is a flag to allow you to control whether the namespace map syntax is used.
+
+### 1.3 New predicates
+
+Specs rely heavily on predicates and many new type and value oriented predicates have been added to clojure.core:
+
+* `boolean?`
+* `int?` `pos-int?` `neg-int?` `nat-int?`
+* `double?` `bigdec?`
+* `ident?` `simple-ident?` `qualified-ident?`
+* `simple-symbol?` `qualified-symbol?`
+* `simple-keyword?` `qualified-keyword?`
+* `bytes?` (for `byte[]`)
+* `indexed?`
+* `uuid?` `uri?`
+* `seqable?`
+* `any?`
+
+### 1.4 More support for instants
+
+More support has been added for the notion of instants in time:
+
+* Added a new protocol `Inst` for instant types
+* `Inst` is extended for `java.util.Date`
+* `Inst` is optionally extended for `java.time.Instant` in Java 1.8+
+* New functions that work for instants: `inst?`, `inst-ms`
+
+### 1.5 Other new core functions
+
+These are some other new functions in clojure.core:
+
+* `bounded-count` - a count that avoids realizing the entire collection beyond a bound
+* `swap-vals!` and `reset-vals!` - new atom functions that return both the old and new values ([CLJ-1454](http://dev.clojure.org/jira/browse/CLJ-1454))
+* `halt-when` - new transducer that ends transduction when pred is satisfied
+
+### 1.6 Other reader enhancements
+
+* Can now bind `*reader-resolver*` to an impl of LispReader$Resolver to control the reader’s use of namespace interactions when resolving autoresolved keywords and maps.
+* Add new ## reader macro for symbolic values, and read/print support for double vals ##Inf, ##-Inf, ##NaN ([CLJ-1074](http://dev.clojure.org/jira/browse/CLJ-1074))
+
+## 2 Enhancements
+
+### 2.1 Spec syntax checking
+
+If a macro has a spec defined via fdef, that spec will be checked at compile time. Specs have been defined for many clojure.core macros and errors will be reported for these based on the specs at compile time.
+
+### 2.2 Documentation
+
+* `doc` will now report specs for functions with specs defined using `fdef`
+* `doc` can now be invoked with a fully-qualified keyword representing a spec name
+
+### 2.3 Performance
+
+* Improved update-in performance
+* Optimized seq & destructuring
+* [CLJ-2210](http://dev.clojure.org/jira/browse/CLJ-2210)
+  Cache class derivation in compiler to improve compiler performance
+* [CLJ-2188](http://dev.clojure.org/jira/browse/CLJ-2188)
+  `slurp` - mark return type as String
+* [CLJ-2070](http://dev.clojure.org/jira/browse/CLJ-2070)
+  `clojure.core/delay` - improve performance
+* [CLJ-1917](http://dev.clojure.org/jira/browse/CLJ-1917)
+  Reducing seq over string should call String/length outside of loop
+* [CLJ-1901](http://dev.clojure.org/jira/browse/CLJ-1901)
+  `amap` - should call alength only once
+* [CLJ-1224](http://dev.clojure.org/jira/browse/CLJ-1935)
+  Record instances now cache hasheq and hashCode like maps
+* [CLJ-99](http://dev.clojure.org/jira/browse/CLJ-99)
+  `min-key` and `max-key` - evaluate k on each arg at most once
+
+### 2.4 Other enhancements
+
+* Added Var serialization for identity, not value
+* `into` now has a 0-arity (returns `[]`) and 1-arity (returns the coll that's passed)
+* [CLJ-2184](http://dev.clojure.org/jira/browse/CLJ-2184)
+  Propagate meta in doto forms to improve error reporting
+* [CLJ-1744](http://dev.clojure.org/jira/browse/CLJ-1744)
+  Clear unused locals, which can prevent memory leaks in some cases
+* [CLJ-1673](http://dev.clojure.org/jira/browse/CLJ-1673)
+  `clojure.repl/dir-fn` now works on namespace aliases
+* [CLJ-1423](http://dev.clojure.org/jira/browse/CLJ-1423)
+  Allow vars to be invoked with infinite arglists (also, faster)
+
+## 3 Fixes
+
+### 3.1 Security
+
+* [CLJ-2204](http://dev.clojure.org/jira/browse/CLJ-2204)
+  Disable serialization of proxy classes to avoid potential issue when deserializing
+
+### 3.2 Docs
+
+* [CLJ-2170](http://dev.clojure.org/jira/browse/CLJ-2170)
+  fix improperly located docstrings
+* [CLJ-2156](http://dev.clojure.org/jira/browse/CLJ-2156)
+  `clojure.java.io/copy` - doc char[] support
+* [CLJ-2104](http://dev.clojure.org/jira/browse/CLJ-2104)
+  `clojure.pprint` docstring - fix typo
+* [CLJ-2051](http://dev.clojure.org/jira/browse/CLJ-2051)
+  `clojure.instant/validated` docstring - fix typo
+* [CLJ-2039](http://dev.clojure.org/jira/browse/CLJ-2039)
+  `deftype` - fix typo in docstring
+* [CLJ-2028](http://dev.clojure.org/jira/browse/CLJ-2028)
+  `filter`, `filterv`, `remove`, `take-while` - fix docstrings
+* [CLJ-1918](http://dev.clojure.org/jira/browse/CLJ-1918)
+  `await` - improve docstring re `shutdown-agents`
+* [CLJ-1873](http://dev.clojure.org/jira/browse/CLJ-1873)
+  `require`, `*data-readers*` - add .cljc files to docstrings
+* [CLJ-1859](http://dev.clojure.org/jira/browse/CLJ-1859)
+  `zero?`, `pos?`, `neg?` - fix docstrings
+* [CLJ-1837](http://dev.clojure.org/jira/browse/CLJ-1837)
+  `index-of`, `last-index-of` - clarify docstrings
+* [CLJ-1826](http://dev.clojure.org/jira/browse/CLJ-1826)
+  `drop-last` - fix docstring
+* [CLJ-1159](http://dev.clojure.org/jira/browse/CLJ-1159)
+  `clojure.java.io/delete-file` - improve docstring
+
+### 3.3 Other fixes
+
+* `clojure.core/Throwable->map` formerly returned `StackTraceElement`s which were later handled by the printer. Now the StackTraceElements are converted to data such that the return value is pure Clojure data, as intended.
+* [CLJ-2091](http://dev.clojure.org/jira/browse/CLJ-2091)
+  `clojure.lang.APersistentVector#hashCode` is not thread-safe
+* [CLJ-2077](http://dev.clojure.org/jira/browse/CLJ-2077)
+  Clojure can't be loaded from the boot classpath under java 9
+* [CLJ-2048](http://dev.clojure.org/jira/browse/CLJ-2048)
+  Specify type to avoid ClassCastException when stack trace is elided by JVM
+* [CLJ-1914](http://dev.clojure.org/jira/browse/CLJ-1914)
+  Fixed race condition in concurrent `range` realization
+* [CLJ-1887](http://dev.clojure.org/jira/browse/CLJ-1887)
+  `IPersistentVector.length()` - implement missing method
+* [CLJ-1870](http://dev.clojure.org/jira/browse/CLJ-1870)
+  Fixed reloading a `defmulti` removes metadata on the var
+* [CLJ-1860](http://dev.clojure.org/jira/browse/CLJ-1860)
+  Make -0.0 hash consistent with 0.0
+* [CLJ-1841](http://dev.clojure.org/jira/browse/CLJ-1841)
+  `bean` - iterator was broken
+* [CLJ-1793](http://dev.clojure.org/jira/browse/CLJ-1793)
+  Clear 'this' before calls in tail position
+* [CLJ-1790](http://dev.clojure.org/jira/browse/CLJ-1790)
+  Fixed error extending protocols to Java arrays
+* [CLJ-1714](http://dev.clojure.org/jira/browse/CLJ-1714)
+  using a class in a type hint shouldn’t load the class
+* [CLJ-1705](http://dev.clojure.org/jira/browse/CLJ-1705)
+  `vector-of` - fix NullPointerException if given unrecognized type
+* [CLJ-1398](http://dev.clojure.org/jira/browse/CLJ-1398)
+  `clojure.java.javadoc/javadoc` - update doc urls
+* [CLJ-1371](http://dev.clojure.org/jira/browse/CLJ-1371)
+  `Numbers.divide(Object, Object)` - add checks for NaN
+* [CLJ-1358](http://dev.clojure.org/jira/browse/CLJ-1358)
+  `doc` - does not expand special cases properly (try, catch)
+* [CLJ-1242](http://dev.clojure.org/jira/browse/CLJ-1242)
+  equals doesn't throw on sorted collections
+
 # Changes to Clojure in Version 1.8
 
 ## 1 New and Improved Features
