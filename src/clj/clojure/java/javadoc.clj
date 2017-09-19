@@ -27,7 +27,7 @@
 
 (def ^:dynamic *remote-javadocs*
  (ref (sorted-map
-       "com.google.common." "http://docs.guava-libraries.googlecode.com/git/javadoc/"
+       "com.google.common." "http://google.github.io/guava/releases/23.0/api/docs/"
        "java." *core-java-api*
        "javax." *core-java-api*
        "org.ietf.jgss." *core-java-api*
