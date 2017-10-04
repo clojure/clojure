@@ -4944,7 +4944,7 @@
        (if more
          (let [w (first more)
                kw (k w)]
-           (if (> kw kv)
+           (if (>= kw kv)
              (recur w kw (next more))
              (recur v kv (next more))))
          v)))))
@@ -4962,7 +4962,7 @@
        (if more
          (let [w (first more)
                kw (k w)]
-           (if (< kw kv)
+           (if (<= kw kv)
              (recur w kw (next more))
              (recur v kv (next more))))
          v)))))
