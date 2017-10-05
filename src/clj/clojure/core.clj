@@ -4932,7 +4932,9 @@
   (^String [^String s start end] (. s (substring start end))))
 
 (defn max-key
-  "Returns the x for which (k x), a number, is greatest."
+  "Returns the x for which (k x), a number, is greatest.
+
+  If there are multiple such xs, the last one is returned."
   {:added "1.0"
    :static true}
   ([k x] x)
@@ -4950,7 +4952,9 @@
          v)))))
 
 (defn min-key
-  "Returns the x for which (k x), a number, is least."
+  "Returns the x for which (k x), a number, is least.
+
+  If there are multiple such xs, the last one is returned."
   {:added "1.0"
    :static true}
   ([k x] x)
