@@ -53,3 +53,30 @@
         t2 @(future (conj! t 4))
         p (persistent! t2)]
     (is (= [1 2 3 4] p))))
+
+(deftest transient-lookups
+  (let [tv (transient [1 2 3])]
+    (is (= 1 (get tv 0)))
+    (is (= :foo (get tv 4 :foo)))
+    (is (= true (contains? tv 0)))
+    (is (= [0 1] (find tv 0)))
+    (is (= nil (find tv -1))))
+  (let [ts (transient #{1 2})]
+    (is (= true (contains? ts 1)))
+    (is (= false (contains? ts 99)))
+    (is (= 1 (get ts 1)))
+    (is (= nil (get ts 99))))
+  (let [tam (transient (array-map :a 1 :b 2))]
+    (is (= true (contains? tam :a)))
+    (is (= false (contains? tam :x)))
+    (is (= 1 (get tam :a)))
+    (is (= nil (get tam :x)))
+    (is (= [:a 1] (find tam :a)))
+    (is (= nil (find tam :x))))
+  (let [thm (transient (hash-map :a 1 :b 2))]
+    (is (= true (contains? thm :a)))
+    (is (= false (contains? thm :x)))
+    (is (= 1 (get thm :a)))
+    (is (= nil (get thm :x)))
+    (is (= [:a 1] (find thm :a)))
+    (is (= nil (find thm :x)))))

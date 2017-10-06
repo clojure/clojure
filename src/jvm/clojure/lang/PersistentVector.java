@@ -515,7 +515,7 @@ private Node popTail(int level, Node node){
 		}
 }
 
-static final class TransientVector extends AFn implements ITransientVector, Counted{
+static final class TransientVector extends AFn implements ITransientVector, ITransientAssociative2, Counted{
 	volatile int cnt;
 	volatile int shift;
 	volatile Node root;
@@ -676,6 +676,18 @@ static final class TransientVector extends AFn implements ITransientVector, Coun
 				return nth(i);
 			}
 		return notFound;
+	}
+
+	private static final Object NOT_FOUND = new Object();
+	public final boolean containsKey(Object key){
+		return valAt(key, NOT_FOUND) != NOT_FOUND;
+	}
+
+	public final IMapEntry entryAt(Object key){
+		Object v = valAt(key, NOT_FOUND);
+		if(v != NOT_FOUND)
+			return MapEntry.create(key, v);
+		return null;
 	}
 
 	public Object invoke(Object arg1) {

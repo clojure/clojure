@@ -771,6 +771,10 @@ static Object getFrom(Object coll, Object key){
 			return nth(coll, n);
 		return null;
 	}
+	else if(coll instanceof ITransientSet) {
+		ITransientSet set = (ITransientSet) coll;
+		return set.get(key);
+	}
 
 	return null;
 }
@@ -799,6 +803,12 @@ static Object getFrom(Object coll, Object key, Object notFound){
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray())) {
 		int n = ((Number) key).intValue();
 		return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
+	}
+	else if(coll instanceof ITransientSet) {
+		ITransientSet set = (ITransientSet) coll;
+		if(set.contains(key))
+			return set.get(key);
+		return notFound;
 	}
 	return notFound;
 
@@ -829,6 +839,10 @@ static public Object contains(Object coll, Object key){
 		int n = ((Number) key).intValue();
 		return n >= 0 && n < count(coll);
 	}
+	else if(coll instanceof ITransientSet)
+		return ((ITransientSet)coll).contains(key) ? T : F;
+	else if(coll instanceof ITransientAssociative2)
+		return (((ITransientAssociative2)coll).containsKey(key)) ? T : F;
 	throw new IllegalArgumentException("contains? not supported on type: " + coll.getClass().getName());
 }
 
@@ -837,12 +851,16 @@ static public Object find(Object coll, Object key){
 		return null;
 	else if(coll instanceof Associative)
 		return ((Associative) coll).entryAt(key);
-	else {
+	else if(coll instanceof Map) {
 		Map m = (Map) coll;
 		if(m.containsKey(key))
 			return MapEntry.create(key, m.get(key));
 		return null;
 	}
+	else if(coll instanceof ITransientAssociative2) {
+		return ((ITransientAssociative2) coll).entryAt(key);
+	}
+	throw new IllegalArgumentException("find not supported on type: " + coll.getClass().getName());
 }
 
 //takes a seq of key,val,key,val
