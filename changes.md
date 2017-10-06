@@ -173,6 +173,8 @@ If a macro has a spec defined via fdef, that spec will be checked at compile tim
   `doc` - does not expand special cases properly (try, catch)
 * [CLJ-1242](http://dev.clojure.org/jira/browse/CLJ-1242)
   equals doesn't throw on sorted collections
+* [CLJ-700](http://dev.clojure.org/jira/browse/CLJ-700)
+  `contains?`, `get`, and `find` broken for transient collections
 
 # Changes to Clojure in Version 1.8
 
