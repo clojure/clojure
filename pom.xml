@@ -41,28 +41,12 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>spec.alpha</artifactId>
-      <version>0.1.123</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.clojure</groupId>
-          <artifactId>clojure</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>0.1.134</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>core.specs.alpha</artifactId>
       <version>0.1.24</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.clojure</groupId>
-          <artifactId>clojure</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.clojure</groupId>
-          <artifactId>spec.alpha</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.codehaus.jsr166-mirror</groupId>
