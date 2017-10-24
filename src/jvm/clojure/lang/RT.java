@@ -300,7 +300,7 @@ static public void addURL(Object url) throws MalformedURLException{
 }
 
 public static boolean checkSpecAsserts = Boolean.getBoolean("clojure.spec.check-asserts");
-
+public static boolean instrumentMacros = ! Boolean.getBoolean("clojure.spec.skip-macros");
 static volatile boolean CHECK_SPECS = false;
 
 static{
@@ -339,7 +339,7 @@ static{
 		throw Util.sneakyThrow(e);
 	}
 
-	CHECK_SPECS = true;
+	CHECK_SPECS = RT.instrumentMacros;
 }
 
 static public Keyword keyword(String ns, String name){
