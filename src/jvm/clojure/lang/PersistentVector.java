@@ -13,11 +13,13 @@
 package clojure.lang;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PersistentVector extends APersistentVector implements IObj, IEditableCollection{
+public class PersistentVector extends APersistentVector implements IObj, IEditableCollection, IReduce, IKVReduce{
 
 public static class Node implements Serializable {
 	transient public final AtomicReference<Thread> edit;
@@ -46,18 +48,67 @@ final IPersistentMap _meta;
 
 public final static PersistentVector EMPTY = new PersistentVector(0, 5, EMPTY_NODE, new Object[]{});
 
-static public PersistentVector create(ISeq items){
-	TransientVector ret = EMPTY.asTransient();
-	for(; items != null; items = items.next())
-		ret = ret.conj(items.first());
-	return ret.persistent();
+private static final IFn TRANSIENT_VECTOR_CONJ = new AFn() {
+    public Object invoke(Object coll, Object val) {
+        return ((ITransientVector)coll).conj(val);
+    }
+    public Object invoke(Object coll) {
+        return coll;
+    }
+};
+
+static public PersistentVector adopt(Object [] items){
+	return new PersistentVector(items.length, 5, EMPTY_NODE, items);
 }
 
-static public PersistentVector create(List items){
-	TransientVector ret = EMPTY.asTransient();
-	for(Object item : items)
-		ret = ret.conj(item);
-	return ret.persistent();
+static public PersistentVector create(IReduceInit items) {
+    TransientVector ret = EMPTY.asTransient();
+    items.reduce(TRANSIENT_VECTOR_CONJ, ret);
+    return ret.persistent();
+}
+
+static public PersistentVector create(ISeq items){
+    Object[] arr = new Object[32];
+    int i = 0;
+    for(;items != null && i < 32; items = items.next())
+        arr[i++] = items.first();
+
+    if(items != null) {  // >32, construct with array directly
+        PersistentVector start = new PersistentVector(32, 5, EMPTY_NODE, arr);
+        TransientVector ret = start.asTransient();
+        for (; items != null; items = items.next())
+            ret = ret.conj(items.first());
+        return ret.persistent();
+    } else if(i == 32) {   // exactly 32, skip copy
+        return new PersistentVector(32, 5, EMPTY_NODE, arr);
+    } else {  // <32, copy to minimum array and construct
+        Object[] arr2 = new Object[i];
+        System.arraycopy(arr, 0, arr2, 0, i);
+        return new PersistentVector(i, 5, EMPTY_NODE, arr2);
+    }
+}
+
+static public PersistentVector create(List list){
+    int size = list.size();
+    if (size <= 32)
+        return new PersistentVector(size, 5, PersistentVector.EMPTY_NODE, list.toArray());
+
+    TransientVector ret = EMPTY.asTransient();
+    for(int i=0; i<size; i++)
+        ret = ret.conj(list.get(i));
+    return ret.persistent();
+}
+
+static public PersistentVector create(Iterable items){
+    // optimize common case
+    if(items instanceof ArrayList)
+        return create((ArrayList)items);
+
+    Iterator iter = items.iterator();
+    TransientVector ret = EMPTY.asTransient();
+    while(iter.hasNext())
+        ret = ret.conj(iter.next());
+    return ret.persistent();
 }
 
 static public PersistentVector create(Object... items){
@@ -165,7 +216,6 @@ public IPersistentMap meta(){
 
 
 public PersistentVector cons(Object val){
-	int i = cnt;
 	//room in tail?
 //	if(tail.length < 32)
 	if(cnt - tailoff() < 32)
@@ -233,6 +283,7 @@ public ISeq seq(){
 	return chunkedSeq();
 }
 
+@Override
 Iterator rangedIterator(final int start, final int end){
 	return new Iterator(){
 		int i = start;
@@ -244,12 +295,16 @@ Iterator rangedIterator(final int start, final int end){
 			}
 
 		public Object next(){
-			if(i-base == 32){
-				array = arrayFor(i);
-				base += 32;
+			if(i < end) {
+				if(i-base == 32){
+					array = arrayFor(i);
+					base += 32;
 				}
-			return array[i++ & 0x01f];
+				return array[i++ & 0x01f];
+			} else {
+				throw new NoSuchElementException();
 			}
+		}
 
 		public void remove(){
 			throw new UnsupportedOperationException();
@@ -258,6 +313,39 @@ Iterator rangedIterator(final int start, final int end){
 }
 
 public Iterator iterator(){return rangedIterator(0,count());}
+
+public Object reduce(IFn f){
+    Object init;
+    if (cnt > 0)
+        init = arrayFor(0)[0];
+    else
+        return f.invoke();
+    int step = 0;
+    for(int i=0;i<cnt;i+=step){
+        Object[] array = arrayFor(i);
+        for(int j = (i==0)?1:0;j<array.length;++j){
+            init = f.invoke(init,array[j]);
+            if(RT.isReduced(init))
+	            return ((IDeref)init).deref();
+            }
+        step = array.length;
+    }
+    return init;
+}
+
+public Object reduce(IFn f, Object init){
+    int step = 0;
+    for(int i=0;i<cnt;i+=step){
+        Object[] array = arrayFor(i);
+        for(int j =0;j<array.length;++j){
+            init = f.invoke(init,array[j]);
+            if(RT.isReduced(init))
+	            return ((IDeref)init).deref();
+            }
+        step = array.length;
+    }
+    return init;
+}
 
 public Object kvreduce(IFn f, Object init){
     int step = 0;
@@ -428,10 +516,10 @@ private Node popTail(int level, Node node){
 }
 
 static final class TransientVector extends AFn implements ITransientVector, Counted{
-	int cnt;
-	int shift;
-	Node root;
-	Object[] tail;
+	volatile int cnt;
+	volatile int shift;
+	volatile Node root;
+	volatile Object[] tail;
 
 	TransientVector(int cnt, int shift, Node root, Object[] tail){
 		this.cnt = cnt;
@@ -456,12 +544,8 @@ static final class TransientVector extends AFn implements ITransientVector, Coun
 	}
 
 	void ensureEditable(){
-		Thread owner = root.edit.get();
-		if(owner == Thread.currentThread())
-			return;
-		if(owner != null)
-			throw new IllegalAccessError("Transient used by non-owner thread");
-		throw new IllegalAccessError("Transient used after persistent! call");
+		if(root.edit.get() == null)
+			throw new IllegalAccessError("Transient used after persistent! call");
 
 //		root = editableRoot(root);
 //		tail = editableTail(tail);

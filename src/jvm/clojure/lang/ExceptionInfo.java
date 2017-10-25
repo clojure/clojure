@@ -19,17 +19,17 @@ public class ExceptionInfo extends RuntimeException implements IExceptionInfo {
     public final IPersistentMap data;
 
     public ExceptionInfo(String s, IPersistentMap data) {
-        super(s);
-        if (data instanceof IPersistentMap) {
-            this.data = data;
-        }  else {
-            throw new IllegalArgumentException("Additional data must be a persistent map: " + data);
-        }
+        this(s, data, null);
     }
 
     public ExceptionInfo(String s, IPersistentMap data, Throwable throwable) {
+        // null cause is equivalent to not passing a cause
         super(s, throwable);
-        this.data = data;
+        if (data != null) {
+            this.data = data;
+        }  else {
+            throw new IllegalArgumentException("Additional data must be non-nil.");
+        }
     }
 
     public IPersistentMap getData() {

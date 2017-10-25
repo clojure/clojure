@@ -233,7 +233,8 @@
 "}
   clojure.test
   (:require [clojure.template :as temp]
-            [clojure.stacktrace :as stack]))
+            [clojure.stacktrace :as stack]
+            [clojure.string :as str]))
 
 ;; Nothing is marked "private" here, so you can rebind things to plug
 ;; in your own testing or reporting frameworks.
@@ -316,8 +317,7 @@
   {:added "1.1"}
   [name]
   (when *report-counters*
-    (dosync (commute *report-counters* assoc name
-                     (inc (or (*report-counters* name) 0))))))
+    (dosync (commute *report-counters* update-in [name] (fnil inc 0)))))
 
 ;;; TEST RESULT REPORTING
 
@@ -332,10 +332,21 @@
      :added "1.1"}
   report :type)
 
-(defn- file-and-line 
-  [exception depth]
-  (let [^StackTraceElement s (nth (.getStackTrace exception) depth)]
-    {:file (.getFileName s) :line (.getLineNumber s)}))
+(defn- file-and-line
+  {:deprecated "1.8"}
+  [^Throwable exception depth]
+  (let [stacktrace (.getStackTrace exception)]
+    (if (< depth (count stacktrace))
+      (let [^StackTraceElement s (nth stacktrace depth)]
+        {:file (.getFileName s) :line (.getLineNumber s)})
+      {:file nil :line nil})))
+
+(defn- stacktrace-file-and-line
+  [stacktrace]
+  (if (seq stacktrace)
+    (let [^StackTraceElement s (first stacktrace)]
+      {:file (.getFileName s) :line (.getLineNumber s)})
+    {:file nil :line nil}))
 
 (defn do-report
   "Add file and line information to a test result and call report.
@@ -346,8 +357,12 @@
   (report
    (case
     (:type m)
-    :fail (merge (file-and-line (new java.lang.Throwable) 1) m)
-    :error (merge (file-and-line (:actual m) 0) m) 
+    :fail (merge (stacktrace-file-and-line (drop-while
+                                             #(let [cl-name (.getClassName ^StackTraceElement %)]
+                                                (or (str/starts-with? cl-name "java.lang.")
+                                                    (str/starts-with? cl-name "clojure.test$")))
+                                             (.getStackTrace (Thread/currentThread)))) m)
+    :error (merge (stacktrace-file-and-line (.getStackTrace ^Throwable (:actual m))) m)
     m)))
 
 (defmethod report :default [m]
@@ -654,7 +669,7 @@
 (defmulti use-fixtures
   "Wrap test runs in a fixture function to perform setup and
   teardown. Using a fixture-type of :each wraps every test
-  individually, while:once wraps the whole run in a single function."
+  individually, while :once wraps the whole run in a single function."
   {:added "1.1"}
   (fn [fixture-type & args] fixture-type))
 
@@ -704,17 +719,25 @@
                       :expected nil, :actual e})))
       (do-report {:type :end-test-var, :var v}))))
 
+(defn test-vars
+  "Groups vars by their namespace and runs test-vars on them with
+   appropriate fixtures applied."
+  {:added "1.6"}
+  [vars]
+  (doseq [[ns vars] (group-by (comp :ns meta) vars)]
+    (let [once-fixture-fn (join-fixtures (::once-fixtures (meta ns)))
+          each-fixture-fn (join-fixtures (::each-fixtures (meta ns)))]
+      (once-fixture-fn
+       (fn []
+         (doseq [v vars]
+           (when (:test (meta v))
+             (each-fixture-fn (fn [] (test-var v))))))))))
+
 (defn test-all-vars
-  "Calls test-var on every var interned in the namespace, with fixtures."
+  "Calls test-vars on every var interned in the namespace, with fixtures."
   {:added "1.1"}
   [ns]
-  (let [once-fixture-fn (join-fixtures (::once-fixtures (meta ns)))
-        each-fixture-fn (join-fixtures (::each-fixtures (meta ns)))]
-    (once-fixture-fn
-     (fn []
-       (doseq [v (vals (ns-interns ns))]
-         (when (:test (meta v))
-           (each-fixture-fn (fn [] (test-var v)))))))))
+  (test-vars (vals (ns-interns ns))))
 
 (defn test-ns
   "If the namespace defines a function named test-ns-hook, calls that.
@@ -722,7 +745,7 @@
   namespace object or a symbol.
 
   Internally binds *report-counters* to a ref initialized to
-  *inital-report-counters*.  Returns the final, dereferenced state of
+  *initial-report-counters*.  Returns the final, dereferenced state of
   *report-counters*."
   {:added "1.1"}
   [ns]

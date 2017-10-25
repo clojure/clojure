@@ -335,3 +335,21 @@
 ; Regex Support
 ; re-matcher re-find re-matches re-groups re-seq
 
+; update
+
+(deftest test-update
+  (are [result expr] (= result expr)
+    {:a [1 2]}   (update {:a [1]} :a conj 2)
+    [1]          (update [0] 0 inc)
+    ;; higher-order usage
+    {:a {:b 2}}  (update-in {:a {:b 1}} [:a] update :b inc)
+    ;; missing field = nil
+    {:a 1 :b nil} (update {:a 1} :b identity)
+    ;; 4 hard-coded arities
+    {:a 1} (update {:a 1} :a +)
+    {:a 2} (update {:a 1} :a + 1)
+    {:a 3} (update {:a 1} :a + 1 1)
+    {:a 4} (update {:a 1} :a + 1 1 1)
+    ;; rest arity
+    {:a 5} (update {:a 1} :a + 1 1 1 1)
+    {:a 6} (update {:a 1} :a + 1 1 1 1 1)))

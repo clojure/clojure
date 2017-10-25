@@ -61,6 +61,8 @@ Usage: *hello*
     (cl-format nil "~<{~;LIST ~@_~W ~@_~W ~@_~W~;}~:>" '(first second third)))
   "{LIST\n first\n second\n third}")
 
+(defprotocol Foo (foo-you [this]))
+
 (simple-tests pprint-test
   (binding [*print-pprint-dispatch* simple-dispatch]
     (write '(defn foo [x y] 
@@ -103,7 +105,11 @@ Usage: *hello*
        '(add-to-buffer this (make-buffer-blob (str (char c)) nil))
        :stream nil)))
   "(add-to-buffer\n  this\n  (make-buffer-blob (str (char c)) nil))"
-  )
+
+  (binding [*print-pprint-dispatch* simple-dispatch]
+    (write (var Foo) :stream nil))
+  "#'clojure.test-clojure.pprint/Foo"
+)
 
 
 
@@ -130,10 +136,11 @@ Usage: *hello*
   `(simple-tests ~test-name
      ~@(apply concat
               (for [block blocks]
-                `[(with-out-str
-                    (with-pprint-dispatch code-dispatch
-                      (pprint (read-string ~block))))
-                  (str ~block "\n")]))))
+                `[(str/split-lines
+                   (with-out-str
+                     (with-pprint-dispatch code-dispatch
+                       (pprint (read-string ~block)))))
+                  (str/split-lines ~block)]))))
 
 (code-block code-block-tests
   "(defn cl-format
@@ -171,6 +178,7 @@ Usage: *hello*
     (pprint-simple-code-list writer alis)))")
 
 (code-block ns-macro-test
+  "(ns foobarbaz)"
   "(ns slam.hound.stitch
   (:use [slam.hound.prettify :only [prettify]]))"
   
@@ -293,26 +301,22 @@ It is implemented with a number of custom enlive templates.\"
   (binding [*print-length* 8] (with-out-str (pprint [1 2 3 4 5 6])))
   "[1 2 3 4 5 6]\n"
 
-  ;; This set of tests isn't that great cause it assumes that the set remains
-  ;; ordered for printing. This is currently (1.3) true, but no future
-  ;; guarantees
-  (binding [*print-length* 1] (with-out-str (pprint #{1 2 3 4 5 6})))
+  (binding [*print-length* 1] (with-out-str (pprint (sorted-set 1 2 3 4 5 6))))
   "#{1 ...}\n"
-  (binding [*print-length* 2] (with-out-str (pprint #{1 2 3 4 5 6})))
+  (binding [*print-length* 2] (with-out-str (pprint (sorted-set 1 2 3 4 5 6))))
   "#{1 2 ...}\n"
-  (binding [*print-length* 6] (with-out-str (pprint #{1 2 3 4 5 6})))
+  (binding [*print-length* 6] (with-out-str (pprint (sorted-set 1 2 3 4 5 6))))
   "#{1 2 3 4 5 6}\n"
-  (binding [*print-length* 8] (with-out-str (pprint #{1 2 3 4 5 6})))
+  (binding [*print-length* 8] (with-out-str (pprint (sorted-set 1 2 3 4 5 6))))
   "#{1 2 3 4 5 6}\n"
 
-  ;; See above comment and apply to this map :)
-  (binding [*print-length* 1] (with-out-str (pprint {1 2, 3 4, 5 6, 7 8, 9 10, 11 12})))
+  (binding [*print-length* 1] (with-out-str (pprint (sorted-map 1 2, 3 4, 5 6, 7 8, 9 10, 11 12))))
   "{1 2, ...}\n"
-  (binding [*print-length* 2] (with-out-str (pprint {1 2, 3 4, 5 6, 7 8, 9 10, 11 12})))
+  (binding [*print-length* 2] (with-out-str (pprint (sorted-map 1 2, 3 4, 5 6, 7 8, 9 10, 11 12))))
   "{1 2, 3 4, ...}\n"
-  (binding [*print-length* 6] (with-out-str (pprint {1 2, 3 4, 5 6, 7 8, 9 10, 11 12})))
+  (binding [*print-length* 6] (with-out-str (pprint (sorted-map 1 2, 3 4, 5 6, 7 8, 9 10, 11 12))))
   "{1 2, 3 4, 5 6, 7 8, 9 10, 11 12}\n"
-  (binding [*print-length* 8] (with-out-str (pprint {1 2, 3 4, 5 6, 7 8, 9 10, 11 12})))
+  (binding [*print-length* 8] (with-out-str (pprint (sorted-map 1 2, 3 4, 5 6, 7 8, 9 10, 11 12))))
   "{1 2, 3 4, 5 6, 7 8, 9 10, 11 12}\n"
 
 
@@ -371,4 +375,12 @@ It is implemented with a number of custom enlive templates.\"
       (pprint (range 50))
       (pprint (range 50)))
     (is (= @flush-count-atom 0) "pprint flushes on newline")))
+
+(deftest test-pprint-calendar
+  (let [calendar (doto (java.util.GregorianCalendar. 2014 3 29 14 0 0)
+                   (.setTimeZone (java.util.TimeZone/getTimeZone "GMT")))
+        calendar-str (with-out-str (pprint calendar))]
+    (is (= (str/split-lines calendar-str)
+           ["#inst \"2014-04-29T14:00:00.000+00:00\""])
+        "calendar object pretty prints")))
 

@@ -15,7 +15,8 @@
   (:use clojure.test
         [clojure.test.generative :exclude (is)]
         clojure.template)
-  (:require [clojure.data.generators :as gen]))
+  (:require [clojure.data.generators :as gen]
+            [clojure.test-helper :as helper]))
 
 
 ; TODO:
@@ -35,10 +36,66 @@
      (not (float? v)))))
 
 (deftest BigInteger-conversions
-  (are [x] (biginteger x)
-    Long/MAX_VALUE
-    13178456923875639284562345789M
-    13178456923875639284562345789N))
+  (doseq [coerce-fn [bigint biginteger]]
+    (doseq [v (map coerce-fn [ Long/MAX_VALUE
+                              13178456923875639284562345789M
+                              13178456923875639284562345789N
+                              Float/MAX_VALUE
+                              (- Float/MAX_VALUE)
+                              Double/MAX_VALUE
+                              (- Double/MAX_VALUE)
+                              (* 2 (bigdec Double/MAX_VALUE)) ])]
+      (are [x] (true? x)
+        (integer? v)
+        (number? v)
+        (not (decimal? v))
+        (not (float? v))))))
+
+(defn all-pairs-equal [equal-var vals]
+  (doseq [val1 vals]
+    (doseq [val2 vals]
+      (is (equal-var val1 val2)
+          (str "Test that " val1 " (" (class val1) ") "
+               equal-var " " val2 " (" (class val2) ")")))))
+
+(defn all-pairs-hash-consistent-with-= [vals]
+  (doseq [val1 vals]
+    (doseq [val2 vals]
+      (when (= val1 val2)
+        (is (= (hash val1) (hash val2))
+            (str "Test that (hash " val1 ") (" (class val1) ") "
+                 " = (hash " val2 ") (" (class val2) ")"))))))
+
+(deftest equality-tests
+  ;; = only returns true for numbers that are in the same category,
+  ;; where category is one of INTEGER, FLOATING, DECIMAL, RATIO.
+  (all-pairs-equal #'= [(byte 2) (short 2) (int 2) (long 2)
+                        (bigint 2) (biginteger 2)])
+  (all-pairs-equal #'= [(float 2.0) (double 2.0)])
+  (all-pairs-equal #'= [2.0M 2.00M])
+  (all-pairs-equal #'= [(float 1.5) (double 1.5)])
+  (all-pairs-equal #'= [1.50M 1.500M])
+  (all-pairs-equal #'= [0.0M 0.00M])
+  (all-pairs-equal #'= [(/ 1 2) (/ 2 4)])
+
+  ;; No BigIntegers or floats in following tests, because hash
+  ;; consistency with = for them is out of scope for Clojure
+  ;; (CLJ-1036).
+  (all-pairs-hash-consistent-with-= [(byte 2) (short 2) (int 2) (long 2)
+                                     (bigint 2)
+                                     (double 2.0) 2.0M 2.00M])
+  (all-pairs-hash-consistent-with-= [(/ 3 2) (double 1.5) 1.50M 1.500M])
+  (all-pairs-hash-consistent-with-= [(double 0.0) 0.0M 0.00M])
+
+  ;; == tests for numerical equality, returning true even for numbers
+  ;; in different categories.
+  (all-pairs-equal #'== [(byte 0) (short 0) (int 0) (long 0)
+                         (bigint 0) (biginteger 0)
+                         (float 0.0) (double 0.0) 0.0M 0.00M])
+  (all-pairs-equal #'== [(byte 2) (short 2) (int 2) (long 2)
+                         (bigint 2) (biginteger 2)
+                         (float 2.0) (double 2.0) 2.0M 2.00M])
+  (all-pairs-equal #'== [(/ 3 2) (float 1.5) (double 1.5) 1.50M 1.500M]))
 
 (deftest unchecked-cast-num-obj
   (do-template [prim-array cast]
@@ -204,6 +261,17 @@
 
   (is (> (* 3 (int (/ Integer/MAX_VALUE 2.0))) Integer/MAX_VALUE)) )  ; no overflow
 
+(deftest test-multiply-longs-at-edge
+  (are [x] (= x 9223372036854775808N)
+       (*' -1 Long/MIN_VALUE)
+       (*' Long/MIN_VALUE -1)
+       (* -1N Long/MIN_VALUE)
+       (* Long/MIN_VALUE -1N)
+       (* -1 (bigint Long/MIN_VALUE))
+       (* (bigint Long/MIN_VALUE) -1))
+  (is (thrown? ArithmeticException (* Long/MIN_VALUE -1)))
+  (is (thrown? ArithmeticException (* -1 Long/MIN_VALUE))))
+
 (deftest test-ratios-simplify-to-ints-where-appropriate
   (testing "negative denominator (assembla #275)"
     (is (integer? (/ 1 -1/2)))
@@ -232,6 +300,14 @@
   (is (thrown? ArithmeticException (/ 2 0)))
   (is (thrown? IllegalArgumentException (/))) )
 
+(deftest test-divide-bigint-at-edge
+  (are [x] (= x (-' Long/MIN_VALUE))
+       (/ Long/MIN_VALUE -1N)
+       (/ (bigint Long/MIN_VALUE) -1)
+       (/ (bigint Long/MIN_VALUE) -1N)
+       (quot Long/MIN_VALUE -1N)
+       (quot (bigint Long/MIN_VALUE) -1)
+       (quot (bigint Long/MIN_VALUE) -1N)))
 
 ;; mod
 ;; http://en.wikipedia.org/wiki/Modulo_operation
@@ -465,8 +541,24 @@ Math/pow overflows to Infinity."
        0 (bit-shift-right 2r10 -1) ; truncated to least 6-bits, 63
        1 (bit-shift-right (expt 2 32) 32)
        1 (bit-shift-right (expt 2 16) 10000) ; truncated to least 6-bits, 16
+       -1 (bit-shift-right -2r10 1)
        )
   (is (thrown? IllegalArgumentException (bit-shift-right 1N 1))))
+
+(deftest test-unsigned-bit-shift-right
+  (are [x y] (= x y)
+       2r0 (unsigned-bit-shift-right 2r1 1)
+       2r010 (unsigned-bit-shift-right 2r100 1)
+       2r001 (unsigned-bit-shift-right 2r100 2)
+       2r000 (unsigned-bit-shift-right 2r100 3)
+       2r0001011 (unsigned-bit-shift-right 2r00010111 1)
+       2r0001011 (apply unsigned-bit-shift-right [2r00010111 1])
+       0 (unsigned-bit-shift-right 2r10 -1) ; truncated to least 6-bits, 63
+       1 (unsigned-bit-shift-right (expt 2 32) 32)
+       1 (unsigned-bit-shift-right (expt 2 16) 10000) ; truncated to least 6-bits, 16
+       9223372036854775807 (unsigned-bit-shift-right -2r10 1)
+       )
+  (is (thrown? IllegalArgumentException (unsigned-bit-shift-right 1N 1))))
 
 (deftest test-bit-clear
   (is (= 2r1101 (bit-clear 2r1111 1)))
@@ -639,3 +731,79 @@ Math/pow overflows to Infinity."
       (assert (= a
                  (+ (* q d) r)
                  (unchecked-add (unchecked-multiply q d) r))))))
+
+(defmacro check-warn-on-box [warn? form]
+  `(do (binding [*unchecked-math* :warn-on-boxed]
+                (is (= ~warn?
+                       (boolean
+                         (re-find #"^Boxed math warning"
+                                  (helper/with-err-string-writer
+                                    (helper/eval-in-temp-ns ~form)))))))
+       (binding [*unchecked-math* true]
+                (is (false?
+                      (boolean
+                        (re-find #"^Boxed math warning"
+                                 (helper/with-err-string-writer
+                                   (helper/eval-in-temp-ns ~form)))))))
+       (binding [*unchecked-math* false]
+                (is (false?
+                      (boolean
+                        (re-find #"^Boxed math warning"
+                                 (helper/with-err-string-writer
+                                   (helper/eval-in-temp-ns ~form)))))))))
+
+(deftest warn-on-boxed
+  (check-warn-on-box true (#(inc %) 2))
+  (check-warn-on-box false (#(inc ^long %) 2))
+  (check-warn-on-box false (long-array 5))
+  (check-warn-on-box true (> (first (range 3)) 0))
+  (check-warn-on-box false (> ^long (first (range 3)) 0)))
+
+
+(deftest comparisons
+  (let [small-numbers [1 1.0 (Integer. 1) (Float. 1.0) 9/10 1N 1M]
+        big-numbers [10 10.0 (Integer. 10) (Float. 10.0) 99/10 10N 10N]]
+    (doseq [small small-numbers big big-numbers]
+      (is (< small big))
+      (is (not (< big small)))
+      (is (not (< small small)))
+      (is (< (int small) (int big)))
+      (is (not (< (int big) (int small))))
+      (is (not (< (int small) (int small))))
+      (is (< (double small) (double big)))
+      (is (not (< (double big) (double small))))
+      (is (not (< (double small) (double small))))
+      (is (<= small big))
+      (is (<= small small))
+      (is (not (<= big small)))
+      (is (<= (int small) (int big)))
+      (is (<= (int small) (int small)))
+      (is (not (<= (int big) (int small))))
+      (is (<= (double small) (double big)))
+      (is (<= (double small) (double small)))
+      (is (not (<= (double big) (double small))))
+      (is (> big small))
+      (is (not (> small big)))
+      (is (not (> small small)))
+      (is (> (int big) (int small)))
+      (is (not (> (int small) (int big))))
+      (is (not (> (int small) (int small))))
+      (is (> (double big) (double small)))
+      (is (not (> (double small) (double big))))
+      (is (not (> (double small) (double small))))
+      (is (>= big small))
+      (is (>= small small))
+      (is (not (>= small big)))
+      (is (>= (int big) (int small)))
+      (is (>= (int small) (int small)))
+      (is (not (>= (int small) (int big))))
+      (is (>= (double big) (double small)))
+      (is (>= (double small) (double small)))
+      (is (not (>= (double small) (double big)))))))
+
+(deftest test-nan-comparison
+  (are [x y] (= x y)
+       (< 1000 Double/NaN) (< 1000 (Double. Double/NaN))
+       (<= 1000 Double/NaN) (<= 1000 (Double. Double/NaN))
+       (> 1000 Double/NaN) (> 1000 (Double. Double/NaN))
+       (>= 1000 Double/NaN) (>= 1000 (Double. Double/NaN))))

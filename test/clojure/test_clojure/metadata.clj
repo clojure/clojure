@@ -209,3 +209,24 @@
      ;; join, index, map-invert: Currently always returns a value with
      ;; no metadata.  This seems reasonable.
      ))
+
+(deftest defn-primitive-args
+  (testing "Hinting the arg vector of a primitive-taking fn with a non-primitive type should not result in AbstractMethodError when invoked."
+    (testing "CLJ-850 is fixed when this case passes."
+      (is (= "foo"
+             (eval-in-temp-ns
+              (defn f ^String [^String s ^long i] s)
+              (f "foo" 1)))))
+    (testing "These cases should pass, even without a fix for CLJ-850."
+      (is (= "foo"
+             (eval-in-temp-ns
+              (defn f ^String [^String s] s)
+              (f "foo"))))
+      (is (= 1
+             (eval-in-temp-ns
+              (defn f ^long [^String s ^long i] i)
+              (f "foo" 1))))
+      (is (= 1
+             (eval-in-temp-ns
+              (defn f ^long [^long i] i)
+              (f 1)))))))

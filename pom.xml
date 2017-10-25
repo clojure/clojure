@@ -5,7 +5,7 @@
   <artifactId>clojure</artifactId>
   <name>clojure</name>
   <packaging>jar</packaging>
-  <version>1.5.2-SNAPSHOT</version>
+  <version>1.9.0-master-SNAPSHOT</version>
 
   <url>http://clojure.org/</url>
   <description>Clojure core environment and runtime library.</description>
@@ -38,6 +38,10 @@
     <url>git@github.com:clojure/clojure.git</url>
   </scm>
 
+  <properties>
+    <directlinking>true</directlinking>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.codehaus.jsr166-mirror</groupId>
@@ -48,7 +52,19 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>test.generative</artifactId>
-      <version>0.4.0</version>
+      <version>0.5.2</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.clojure</groupId>
+          <artifactId>clojure</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>test.check</artifactId>
+      <version>0.9.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -76,8 +92,8 @@
 	<artifactId>maven-compiler-plugin</artifactId>
 	<version>2.3.2</version>
 	<configuration>
-	  <source>1.5</source>
-	  <target>1.5</target>
+	  <source>1.6</source>
+	  <target>1.6</target>
 	  <encoding>${project.build.sourceEncoding}</encoding>
 	</configuration>
       </plugin>
@@ -171,7 +187,7 @@
 	<version>2.1.2</version>
 	<executions>
 	  <execution>
-	    <id>sources-jar</id>
+	    <id>attach-sources</id>
 	    <phase>package</phase>
 	    <goals>
 	      <goal>jar</goal>
@@ -209,6 +225,19 @@
   </build>
 
   <profiles>
+    <!-- Use "mvn -Ptest-direct" or "mvn -Ptest-no-direct" to choose testing with direct linking -->
+    <profile>
+      <id>test-direct</id>
+      <properties>
+        <directlinking>true</directlinking>
+      </properties>
+    </profile>
+    <profile>
+      <id>test-no-direct</id>
+      <properties>
+        <directlinking>false</directlinking>
+      </properties>
+    </profile>
     <profile>
       <!-- "mvn -Pdistribution package" builds a .zip file -->
       <id>distribution</id>

@@ -71,6 +71,15 @@
                      (baz [a b] "two-arg baz!"))]
       (is (= "two-arg baz!" (baz obj nil)))
       (is (thrown? AbstractMethodError (baz obj)))))
+  (testing "error conditions checked when defining protocols"
+    (is (thrown-with-msg?
+         Exception
+         #"Definition of function m in protocol badprotdef must take at least one arg."
+         (eval '(defprotocol badprotdef (m [])))))
+    (is (thrown-with-msg?
+         Exception
+         #"Function m in protocol badprotdef was redefined. Specify all arities in single definition."
+         (eval '(defprotocol badprotdef (m [this arg]) (m [this arg1 arg2]))))))
   (testing "you can redefine a protocol with different methods"
     (eval '(defprotocol Elusive (old-method [x])))
     (eval '(defprotocol Elusive (new-method [x])))
@@ -119,6 +128,11 @@
      ExampleProtocol
      {:foo (fn [this] (str "widget " (.name this)))})
     (is (= "widget z" (foo (ExtendTestWidget. "z"))))))
+
+(deftest record-marker-interfaces
+  (testing "record? and type? return expected result for IRecord and IType"
+    (let [r (TestRecord. 1 2)]
+      (is (record? r)))))
 
 (deftest illegal-extending
   (testing "you cannot extend a protocol to a type that implements the protocol inline"
@@ -298,19 +312,59 @@
         (is (nil? (:tag (meta (tbh 2)))))))))
 
 (defrecord RecordToTestFactories [a b c])
+(defrecord RecordToTestA [a])
+(defrecord RecordToTestB [b])
 (defrecord RecordToTestHugeFactories [a b c d e f g h i j k l m n o p q r s t u v w x y z])
+(defrecord RecordToTestDegenerateFactories [])
 
 (deftest test-record-factory-fns
   (testing "if the definition of a defrecord generates the appropriate factory functions"
     (let [r    (RecordToTestFactories. 1 2 3)
           r-n  (RecordToTestFactories. nil nil nil)
-          huge (RecordToTestHugeFactories. 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26)]
+          huge (RecordToTestHugeFactories. 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26)
+          r-a  (map->RecordToTestA {:a 1 :b 2})
+          r-b  (map->RecordToTestB {:a 1 :b 2})
+          r-d  (RecordToTestDegenerateFactories.)]
       (testing "that a record created with the ctor equals one by the positional factory fn"
         (is (= r    (->RecordToTestFactories 1 2 3)))
         (is (= huge (->RecordToTestHugeFactories 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26))))
       (testing "that a record created with the ctor equals one by the map-> factory fn"
         (is (= r    (map->RecordToTestFactories {:a 1 :b 2 :c 3})))
-        (is (= r-n  (map->RecordToTestFactories {}))))
+        (is (= r-n  (map->RecordToTestFactories {})))
+        (is (= r    (map->RecordToTestFactories (map->RecordToTestFactories {:a 1 :b 2 :c 3}))))
+        (is (= r-n  (map->RecordToTestFactories (map->RecordToTestFactories {}))))
+        (is (= r-d  (map->RecordToTestDegenerateFactories {})))
+        (is (= r-d  (map->RecordToTestDegenerateFactories
+                     (map->RecordToTestDegenerateFactories {})))))
+      (testing "that ext maps work correctly"
+        (is (= (assoc r :xxx 42)  (map->RecordToTestFactories {:a 1 :b 2 :c 3 :xxx 42})))
+        (is (= (assoc r :xxx 42)  (map->RecordToTestFactories (map->RecordToTestFactories
+                                                               {:a 1 :b 2 :c 3 :xxx 42}))))
+        (is (= (assoc r-n :xxx 42) (map->RecordToTestFactories {:xxx 42})))
+        (is (= (assoc r-n :xxx 42) (map->RecordToTestFactories (map->RecordToTestFactories
+  {:xxx 42}))))
+        (is (= (assoc r-d :xxx 42) (map->RecordToTestDegenerateFactories {:xxx 42})))
+        (is (= (assoc r-d :xxx 42) (map->RecordToTestDegenerateFactories
+                                    (map->RecordToTestDegenerateFactories {:xxx 42})))))
+      (testing "record equality"
+        (is (not= r-a r-b))
+        (is (= (into {} r-a) (into {} r-b)))
+        (is (not= (into {} r-a) r-b))
+        (is (= (map->RecordToTestA {:a 1 :b 2})
+               (map->RecordToTestA (map->RecordToTestB {:a 1 :b 2}))))
+        (is (= (map->RecordToTestA {:a 1 :b 2 :c 3})
+               (map->RecordToTestA (map->RecordToTestB {:a 1 :b 2 :c 3}))))
+        (is (= (map->RecordToTestA {:a 1 :d 4})
+               (map->RecordToTestA (map->RecordToTestDegenerateFactories {:a 1 :d 4}))))
+        (is (= r-n (map->RecordToTestFactories (java.util.HashMap.))))
+        (is (= r-a (map->RecordToTestA (into {} r-b))))
+        (is (= r-a (map->RecordToTestA r-b)))
+        (is (not= r-a (map->RecordToTestB r-a)))
+        (is (= r (assoc r-n :a 1 :b 2 :c 3)))
+        (is (not= r-a (assoc r-n :a 1 :b 2)))
+        (is (not= (assoc r-b :c 3 :d 4) (assoc r-n :a 1 :b 2 :c 3 :d 4)))
+        (is (= (into {} (assoc r-b :c 3 :d 4)) (into {} (assoc r-n :a 1 :b 2 :c 3 :d 4))))
+        (is (= (assoc r :d 4) (assoc r-n :a 1 :b 2 :c 3 :d 4))))
       (testing "that factory functions have docstrings"
         ;; just test non-nil to avoid overspecifiying what's in the docstring
         (is (false? (-> ->RecordToTestFactories var meta :doc nil?)))
@@ -436,6 +490,10 @@
     (is (thrown? Exception (read-string "(let [s \"en\"] #java.util.Locale[(str 'en)])")))
     (is (thrown? Exception (read-string "#clojure.test_clojure.protocols.RecordToTestLiterals{(keyword \"a\") 42}"))))
   
+  (testing "that ctors can have whitespace after class name but before {"
+    (is (= (RecordToTestLiterals. 42)
+           (read-string "#clojure.test_clojure.protocols.RecordToTestLiterals   {:a 42}"))))
+
   (testing "that the correct errors are thrown with malformed literals"
     (is (thrown-with-msg?
           Exception
@@ -607,3 +665,12 @@
   (is (= :foo (sqtp :foo))))
 
 
+(defprotocol Dasherizer
+  (-do-dashed [this]))
+(deftype Dashed []
+  Dasherizer
+  (-do-dashed [this] 10))
+
+(deftest test-leading-dashes
+  (is (= 10 (-do-dashed (Dashed.))))
+  (is (= [10] (map -do-dashed [(Dashed.)]))))

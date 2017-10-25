@@ -9,7 +9,9 @@
 ;; Author: Tassilo Horn
 
 (ns clojure.test-clojure.reducers
-  (:require [clojure.core.reducers :as r])
+  (:require [clojure.core.reducers :as r]
+            [clojure.test.generative :refer (defspec)]
+            [clojure.data.generators :as gen])
   (:use clojure.test))
 
 (defmacro defequivtest
@@ -31,6 +33,13 @@
   [(fn [x] [x])
    (fn [x] [x (inc x)])
    (fn [x] [x (inc x) x])])
+
+(deftest test-mapcat-obeys-reduced
+  (is (= [1 "0" 2 "1" 3]
+        (->> (concat (range 100) (lazy-seq (throw (Exception. "Too eager"))))
+          (r/mapcat (juxt inc str))
+          (r/take 5)
+          (into [])))))
 
 (defequivtest test-reduce
   [reduce r/reduce identity]
@@ -54,3 +63,29 @@
 (deftest test-nil
   (is (= {:k :v} (reduce-kv assoc {:k :v} nil)))
   (is (= 0 (r/fold + nil))))
+
+(defn gen-num []
+  (gen/uniform 0 2000))
+
+(defn reduced-at-probe
+  [m p]
+  (reduce-kv (fn [_ k v] (when (== p k) (reduced :foo))) nil m))
+
+(defspec reduced-always-returns
+  (fn [probe to-end]
+    (let [len (+ probe to-end 1)
+          nums (range len)
+          m (zipmap nums nums)]
+      (reduced-at-probe m probe)))
+  [^{:tag `gen-num} probe ^{:tag `gen-num} to-end]
+  (assert (= :foo %)))
+
+(deftest test-fold-runtime-exception
+  (is (thrown? IndexOutOfBoundsException
+               (let [test-map-count 1234
+                     k-fail (rand-int test-map-count)]
+                 (r/fold (fn ([])
+                           ([ret [k v]])
+                           ([ret k v] (when (= k k-fail)
+                                        (throw (IndexOutOfBoundsException.)))))
+                         (zipmap (range test-map-count) (repeat :dummy)))))))

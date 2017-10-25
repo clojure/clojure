@@ -22,7 +22,7 @@ import java.util.*;
  * See Okasaki, Kahrs, Larsen et al
  */
 
-public class PersistentTreeMap extends APersistentMap implements IObj, Reversible, Sorted{
+public class PersistentTreeMap extends APersistentMap implements IObj, Reversible, Sorted, IKVReduce{
 
 public final Comparator comp;
 public final Node tree;
@@ -855,9 +855,13 @@ static public class NodeIterator implements Iterator{
 	}
 
 	public Object next(){
-		Node t = (Node) stack.pop();
-		push(asc ? t.right() : t.left());
-		return t;
+		try {
+			Node t = (Node) stack.pop();
+			push(asc ? t.right() : t.left());
+			return t;
+		} catch(EmptyStackException e) {
+			throw new NoSuchElementException();
+		}
 	}
 
 	public void remove(){

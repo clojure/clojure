@@ -12,7 +12,9 @@
 (ns clojure.test-clojure.data-structures
   (:use clojure.test
         [clojure.test.generative :exclude (is)])
-  (:require [clojure.test-clojure.generators :as cgen]))
+  (:require [clojure.test-clojure.generators :as cgen]
+            [clojure.data.generators :as gen]
+            [clojure.string :as string]))
 
 
 ;; *** Helper functions ***
@@ -30,6 +32,96 @@
       (is (= n
              (+ i (count (nthnext coll i)))
              (+ i (count (drop i coll))))))))
+
+(defn- transient? [x]
+  (instance? clojure.lang.ITransientCollection x))
+
+(defn gen-transient-set-action []
+  (gen/rand-nth [[#(conj! %1 %2) #(conj %1 %2) (gen/uniform -100 100)]
+                 [#(disj! %1 %2) #(disj %1 %2) (gen/uniform -100 100)]
+                 [#(deref (future (conj! %1 %2))) #(conj %1 %2) (gen/uniform -100 100)]
+                 [#(deref (future (disj! %1 %2))) #(disj %1 %2) (gen/uniform -100 100)]
+                 [persistent! identity]
+                 [identity transient]]))
+
+(defn gen-transient-set-actions []
+  (gen/reps #(gen/uniform 0 100) gen-transient-set-action))
+
+(defn tempty? [t]
+  (= (count t) 0))
+
+(defn gen-transient-vector-action []
+  (gen/rand-nth [[#(conj! %1 %2) #(conj %1 %2) (gen/uniform -100 100)]
+                 [(fn [v _] (if (tempty? v) v (pop! v)))
+                  (fn [v _] (if (tempty? v) v (pop v)))
+                  (gen/uniform -100 100)]
+                 [#(deref (future (conj! %1 %2))) #(conj %1 %2) (gen/uniform -100 100)]
+                 [(fn [v _] (if (tempty? v) v (deref (future (pop! v)))))
+                  (fn [v _] (if (tempty? v) v (pop v)))
+                  (gen/uniform -100 100)]
+                 [persistent! identity]
+                 [identity transient]]))
+
+(defn gen-transient-vector-actions []
+  (gen/reps #(gen/uniform 0 100) gen-transient-vector-action))
+
+(defn gen-transient-map-action []
+  (gen/rand-nth [[#(assoc! %1 %2 %2) #(assoc %1 %2 %2) (gen/uniform -100 100)]
+                 [#(dissoc! %1 %2) #(dissoc %1 %2) (gen/uniform -100 100)]
+                 [#(deref (future (assoc! %1 %2 %2))) #(assoc %1 %2 %2) (gen/uniform -100 100)]
+                 [#(deref (future (dissoc! %1 %2))) #(dissoc %1 %2) (gen/uniform -100 100)]
+                 [persistent! identity]
+                 [identity transient]]))
+
+(defn gen-transient-map-actions []
+  (gen/reps #(gen/uniform 0 100) gen-transient-map-action))
+
+(defn assert-same-collection [a b]
+  (assert (= (count a) (count b) (.size a) (.size b)))
+  (assert (= a b))
+  (assert (= b a))
+  (assert (.equals ^Object a b))
+  (assert (.equals ^Object b a))
+  (assert (= (hash a) (hash b)))
+  (assert (= (.hashCode ^Object a) (.hashCode ^Object b)))
+  (assert (= a
+             (into (empty a) a)
+             (into (empty b) b)
+             (into (empty a) b)
+             (into (empty b) a))))
+
+(defn apply-actions [coll actions]
+  (reduce (fn [c [tfunc pfunc & args]]
+            (apply (if (transient? c) tfunc pfunc) c args))
+          coll
+          actions))
+
+(defn to-persistent [c]
+  (if (transient? c) (persistent! c) c))
+
+(defspec same-output-persistent-transient-set
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-transient-set-actions} actions]
+  (assert-same-collection
+   (to-persistent (apply-actions #{} actions))
+   (to-persistent (apply-actions #{} actions))))
+
+(defspec same-output-persistent-transient-vector
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-transient-vector-actions} actions]
+  (assert-same-collection
+   (to-persistent (apply-actions [] actions))
+   (to-persistent (apply-actions [] actions))))
+
+(defspec same-output-persistent-transient-map
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-transient-map-actions} actions]
+  (assert-same-collection
+   (to-persistent (apply-actions clojure.lang.PersistentArrayMap/EMPTY actions))
+   (to-persistent (apply-actions clojure.lang.PersistentArrayMap/EMPTY actions)))
+  (assert-same-collection
+   (to-persistent (apply-actions clojure.lang.PersistentHashMap/EMPTY actions))
+   (to-persistent (apply-actions clojure.lang.PersistentHashMap/EMPTY actions))))
 
 ;; *** General ***
 
@@ -372,6 +464,7 @@
 
       (find {:a 1} :a) [:a 1]
       (find {:a 1} :b) nil
+      (find {nil 1} nil) [nil 1]
 
       (find {:a 1 :b 2} :a) [:a 1]
       (find {:a 1 :b 2} :b) [:b 2]
@@ -391,6 +484,7 @@
       (contains? {:a 1} :a) true
       (contains? {:a 1} :b) false
       (contains? {:a 1} nil) false
+      (contains? {nil 1} nil) true
 
       (contains? {:a 1 :b 2} :a) true
       (contains? {:a 1 :b 2} :b) true
@@ -484,6 +578,7 @@
       ; (class {:a 1}) => clojure.lang.PersistentArrayMap
       (keys {}) nil
       (keys {:a 1}) '(:a)
+      (keys {nil 1}) '(nil)
       (diff (keys {:a 1 :b 2}) '(:a :b)) nil              ; (keys {:a 1 :b 2}) '(:a :b)
 
       ; (class (sorted-map :a 1)) => clojure.lang.PersistentTreeMap
@@ -494,7 +589,11 @@
       ; (class (hash-map :a 1)) => clojure.lang.PersistentHashMap
       (keys (hash-map)) nil
       (keys (hash-map :a 1)) '(:a)
-      (diff (keys (hash-map :a 1 :b 2)) '(:a :b)) nil ))  ; (keys (hash-map :a 1 :b 2)) '(:a :b)
+      (diff (keys (hash-map :a 1 :b 2)) '(:a :b)) nil )   ; (keys (hash-map :a 1 :b 2)) '(:a :b)
+
+  (let [m {:a 1 :b 2}
+        k (keys m)]
+    (is (= {:hi :there} (meta (with-meta k {:hi :there}))))))
 
 
 (deftest test-vals
@@ -508,6 +607,7 @@
       ; (class {:a 1}) => clojure.lang.PersistentArrayMap
       (vals {}) nil
       (vals {:a 1}) '(1)
+      (vals {nil 1}) '(1)
       (diff (vals {:a 1 :b 2}) '(1 2)) nil              ; (vals {:a 1 :b 2}) '(1 2)
 
       ; (class (sorted-map :a 1)) => clojure.lang.PersistentTreeMap
@@ -518,7 +618,11 @@
       ; (class (hash-map :a 1)) => clojure.lang.PersistentHashMap
       (vals (hash-map)) nil
       (vals (hash-map :a 1)) '(1)
-      (diff (vals (hash-map :a 1 :b 2)) '(1 2)) nil ))  ; (vals (hash-map :a 1 :b 2)) '(1 2)
+      (diff (vals (hash-map :a 1 :b 2)) '(1 2)) nil )   ; (vals (hash-map :a 1 :b 2)) '(1 2)
+
+  (let [m {:a 1 :b 2}
+        v (vals m)]
+    (is (= {:hi :there} (meta (with-meta v {:hi :there}))))))
 
 
 (deftest test-key
@@ -563,6 +667,7 @@
          (get m :a) 1
          (get m :e) nil
          (get m :e 0) 0
+         (get m nil) {:h 5}
          (get m :b 0) 2
          (get m :f 0) nil
 
@@ -598,6 +703,16 @@
          ai2 ao2
          ai3 ao3
          ai4 ao4)))
+
+(deftest test-map-entry?
+  (testing "map-entry? = false"
+    (are [entry]
+      (false? (map-entry? entry))
+      nil 5 #{1 2} '(1 2) {:a 1} [] [0] [1 2 3]))
+  (testing "map-entry? = true"
+    (are [entry]
+      (true? (map-entry? entry))
+      (first (doto (java.util.HashMap.) (.put "x" 1))))))
 
 ;; *** Sets ***
 
@@ -957,12 +1072,232 @@
       {x1 v4a, w5a v4c, v4a z3b, y2 2} [x1 v4a, w5a v4a, w5b v4b,
                                         v4a z3a, y2 2, v4b z3b, w5c v4c])))
 
+(deftest test-array-map-arity
+  (is (thrown? IllegalArgumentException
+               (array-map 1 2 3))))
 
 (deftest test-assoc
   (are [x y] (= x y)
        [4] (assoc [] 0 4)
        [5 -7] (assoc [] 0 5 1 -7)
        {:a 1} (assoc {} :a 1)
+       {nil 1} (assoc {} nil 1)
        {:a 2 :b -2} (assoc {} :b -2 :a 2))
   (is (thrown? IllegalArgumentException (assoc [] 0 5 1)))
   (is (thrown? IllegalArgumentException (assoc {} :b -2 :a))))
+
+(defn is-same-collection [a b]
+  (let [msg (format "(class a)=%s (class b)=%s a=%s b=%s"
+                    (.getName (class a)) (.getName (class b)) a b)]
+    (is (= (count a) (count b) (.size a) (.size b)) msg)
+    (is (= a b) msg)
+    (is (= b a) msg)
+    (is (.equals ^Object a b) msg)
+    (is (.equals ^Object b a) msg)
+    (is (= (hash a) (hash b)) msg)
+    (is (= (.hashCode ^Object a) (.hashCode ^Object b)) msg)))
+
+(deftest ordered-collection-equality-test
+  (let [empty-colls [ []
+                      '()
+                      (lazy-seq)
+                      clojure.lang.PersistentQueue/EMPTY
+                      (vector-of :long) ]]
+    (doseq [c1 empty-colls, c2 empty-colls]
+      (is-same-collection c1 c2)))
+  (let [colls1 [ [-3 :a "7th"]
+                 '(-3 :a "7th")
+                 (lazy-seq (cons -3
+                   (lazy-seq (cons :a
+                     (lazy-seq (cons "7th" nil))))))
+                 (into clojure.lang.PersistentQueue/EMPTY
+                       [-3 :a "7th"])
+                 (sequence (map identity) [-3 :a "7th"]) ]]
+    (doseq [c1 colls1, c2 colls1]
+      (is-same-collection c1 c2)))
+  (is-same-collection [-3 1 7] (vector-of :long -3 1 7)))
+
+(defn case-indendent-string-cmp [s1 s2]
+  (compare (string/lower-case s1) (string/lower-case s2)))
+
+(deftest set-equality-test
+  (let [empty-sets [ #{}
+                     (hash-set)
+                     (sorted-set)
+                     (sorted-set-by case-indendent-string-cmp) ]]
+    (doseq [s1 empty-sets, s2 empty-sets]
+      (is-same-collection s1 s2)))
+  (let [sets1 [ #{"Banana" "apple" "7th"}
+                (hash-set "Banana" "apple" "7th")
+                (sorted-set "Banana" "apple" "7th")
+                (sorted-set-by case-indendent-string-cmp "Banana" "apple" "7th") ]]
+    (doseq [s1 sets1, s2 sets1]
+      (is-same-collection s1 s2))))
+
+(deftest map-equality-test
+  (let [empty-maps [ {}
+                     (hash-map)
+                     (array-map)
+                     (sorted-map)
+                     (sorted-map-by case-indendent-string-cmp) ]]
+    (doseq [m1 empty-maps, m2 empty-maps]
+      (is-same-collection m1 m2)))
+  (let [maps1 [ {"Banana" "like", "apple" "love", "7th" "indifferent"}
+                (hash-map "Banana" "like", "apple" "love", "7th" "indifferent")
+                (array-map "Banana" "like", "apple" "love", "7th" "indifferent")
+                (sorted-map "Banana" "like", "apple" "love", "7th" "indifferent")
+                (sorted-map-by case-indendent-string-cmp
+                               "Banana" "like", "apple" "love", "7th" "indifferent") ]]
+    (doseq [m1 maps1, m2 maps1]
+      (is-same-collection m1 m2))))
+
+;; *** Collection hashes ***
+;; See: http://clojure.org/data_structures#hash
+
+(defn hash-ordered [collection]
+  (-> (reduce (fn [acc e] (unchecked-add-int (unchecked-multiply-int 31 acc) (hash e)))
+              1
+              collection)
+      (mix-collection-hash (count collection))))
+
+(defn hash-unordered [collection]
+  (-> (reduce unchecked-add-int 0 (map hash collection))
+      (mix-collection-hash (count collection))))
+
+(defn gen-elements
+  []
+  (gen/vec gen/anything))
+
+(defspec ordered-collection-hashes-match
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-elements} elem]
+  (let [v (vec elem)
+        l (apply list elem)]
+    (is (= (hash v)
+           (hash l)
+           (hash (map identity elem))
+           (hash-ordered elem)))))
+
+(defspec unordered-set-hashes-match
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-elements} elem]
+  (let [unique-elem (distinct elem)
+        s (into #{} unique-elem)]
+    (is (= (hash s)
+           (hash-unordered unique-elem)))))
+
+(deftest ireduce-reduced
+  (let [f (fn [_ a] (if (= a 5) (reduced "foo")))]
+    (is (= "foo" (.reduce ^clojure.lang.IReduce (list 1 2 3 4 5) f)))
+    (is (= "foo" (.reduce ^clojure.lang.IReduce (seq (long-array [1 2 3 4 5])) f)))))
+
+(defn seq-iter-match
+  [^clojure.lang.Seqable seqable ^Iterable iterable]
+  (if (nil? iterable)
+    (when (not (nil? (seq seqable)))
+      (throw (ex-info "Null iterable but seq has elements"
+                      {:pos 0 :seqable seqable :iterable iterable})))
+    (let [i (.iterator iterable)]
+      (loop [s (seq seqable)
+             n 0]
+        (if (seq s)
+          (do
+            (when-not (.hasNext i)
+              (throw (ex-info "Iterator exhausted before seq"
+                              {:pos n :seqable seqable :iterable iterable})))
+              (when-not (= (.next i) (first s))
+                (throw (ex-info "Iterator and seq did not match"
+                                {:pos n :seqable seqable :iterable iterable})))
+                (recur (rest s) (inc n)))
+          (when (.hasNext i)
+            (throw (ex-info "Seq exhausted before iterator"
+                            {:pos n :seqable seqable :iterable iterable}))))))))
+
+(deftest test-seq-iter-match
+  (let [maps (mapcat #(vector (apply array-map %)
+                              (apply hash-map %)
+                              (apply sorted-map %))
+                     [[] [nil 1] [nil 1 2 3] [1 2 3 4]])]
+    (doseq [m maps]
+      (seq-iter-match m m)
+      (seq-iter-match (keys m) (keys m))
+      (seq-iter-match (vals m) (vals m))
+      (seq-iter-match (rest (keys m)) (rest (keys m)))
+      (seq-iter-match (rest (vals m)) (rest (vals m))))))
+
+(defn gen-map
+  []
+  (gen/hash-map (rand-nth cgen/ednable-scalars) (rand-nth cgen/ednable-scalars)))
+
+(defspec seq-and-iter-match-for-maps
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-map} m]
+  (seq-iter-match m m))
+
+(defn gen-set
+  []
+  (gen/set (rand-nth cgen/ednable-scalars)))
+
+(defspec seq-and-iter-match-for-sets
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-set} s]
+  (seq-iter-match s s))
+
+(defn gen-queue
+  []
+  (into clojure.lang.PersistentQueue/EMPTY
+        (gen/vec (rand-nth cgen/ednable-scalars))))
+
+(defspec seq-and-iter-match-for-queues
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-queue} q]
+  (seq-iter-match q q))
+
+(defrecord Rec [a b])
+
+(defn gen-record
+  []
+  (let [r (->Rec (gen/int) (gen/int))]
+       (gen/one-of r
+                   (merge r (gen-map)))))
+
+(defspec seq-and-iter-match-for-records
+         identity
+         [^{:tag clojure.test-clojure.data-structures/gen-record} r]
+         (seq-iter-match r r))
+
+(defspec seq-and-iter-match-for-keys
+         identity
+         [^{:tag clojure.test-clojure.data-structures/gen-map} m]
+         (seq-iter-match (keys m) (keys m)))
+
+(defspec seq-and-iter-match-for-vals
+         identity
+         [^{:tag clojure.test-clojure.data-structures/gen-map} m]
+         (seq-iter-match (vals m) (vals m)))
+
+(defstruct test-struct :a :b)
+
+(defn gen-struct
+  []
+  (let [s (struct test-struct (gen/int) (gen/int))]
+    (gen/one-of s
+                (assoc s (rand-nth cgen/ednable-scalars) (rand-nth cgen/ednable-scalars)))))
+
+(defspec seq-and-iter-match-for-structs
+         identity
+         [^{:tag clojure.test-clojure.data-structures/gen-struct} s]
+         (seq-iter-match s s))
+
+(deftest record-hashing
+  (let [r (->Rec 1 1)
+        _ (hash r)
+        r2 (assoc r :c 2)]
+    (is (= (hash (->Rec 1 1)) (hash r)))
+    (is (= (hash r) (hash (with-meta r {:foo 2}))))
+    (is (not= (hash (->Rec 1 1)) (hash (assoc (->Rec 1 1) :a 2))))
+    (is (not= (hash (->Rec 1 1)) (hash r2)))
+    (is (not= (hash (->Rec 1 1)) (hash (assoc r :a 2))))
+    (is (= (hash (->Rec 1 1)) (hash (assoc r :a 1))))
+    (is (= (hash (->Rec 1 1)) (hash (dissoc r2 :c))))
+    (is (= (hash (->Rec 1 1)) (hash (dissoc (assoc r :c 1) :c))))))

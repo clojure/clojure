@@ -1,6 +1,6 @@
 /***
  * ASM: a very small and fast Java bytecode manipulation framework
- * Copyright (c) 2000-2005 INRIA, France Telecom
+ * Copyright (c) 2000-2011 INRIA, France Telecom
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,74 +29,68 @@
  */
 package clojure.asm.commons;
 
-import clojure.asm.ClassAdapter;
 import clojure.asm.ClassVisitor;
 import clojure.asm.MethodVisitor;
 import clojure.asm.Opcodes;
 
 /**
- * A {@link ClassAdapter} that merges clinit methods into a single one.
+ * A {@link ClassVisitor} that merges clinit methods into a single one.
  *
  * @author Eric Bruneton
  */
-public class StaticInitMerger extends ClassAdapter{
+public class StaticInitMerger extends ClassVisitor {
 
-private String name;
+    private String name;
 
-private MethodVisitor clinit;
+    private MethodVisitor clinit;
 
-private String prefix;
+    private final String prefix;
 
-private int counter;
+    private int counter;
 
-public StaticInitMerger(final String prefix, final ClassVisitor cv){
-	super(cv);
-	this.prefix = prefix;
-}
+    public StaticInitMerger(final String prefix, final ClassVisitor cv) {
+        this(Opcodes.ASM4, prefix, cv);
+    }
 
-public void visit(
-		final int version,
-		final int access,
-		final String name,
-		final String signature,
-		final String superName,
-		final String[] interfaces){
-	cv.visit(version, access, name, signature, superName, interfaces);
-	this.name = name;
-}
+    protected StaticInitMerger(final int api, final String prefix,
+            final ClassVisitor cv) {
+        super(api, cv);
+        this.prefix = prefix;
+    }
 
-public MethodVisitor visitMethod(
-		final int access,
-		final String name,
-		final String desc,
-		final String signature,
-		final String[] exceptions){
-	MethodVisitor mv;
-	if(name.equals("<clinit>"))
-		{
-		int a = Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC;
-		String n = prefix + counter++;
-		mv = cv.visitMethod(a, n, desc, signature, exceptions);
+    @Override
+    public void visit(final int version, final int access, final String name,
+            final String signature, final String superName,
+            final String[] interfaces) {
+        cv.visit(version, access, name, signature, superName, interfaces);
+        this.name = name;
+    }
 
-		if(clinit == null)
-			{
-			clinit = cv.visitMethod(a, name, desc, null, null);
-			}
-		clinit.visitMethodInsn(Opcodes.INVOKESTATIC, this.name, n, desc);
-		}
-	else
-		{
-		mv = cv.visitMethod(access, name, desc, signature, exceptions);
-		}
-	return mv;
-}
+    @Override
+    public MethodVisitor visitMethod(final int access, final String name,
+            final String desc, final String signature, final String[] exceptions) {
+        MethodVisitor mv;
+        if ("<clinit>".equals(name)) {
+            int a = Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC;
+            String n = prefix + counter++;
+            mv = cv.visitMethod(a, n, desc, signature, exceptions);
 
-public void visitEnd(){
-	if(clinit != null)
-		{
-		clinit.visitInsn(Opcodes.RETURN);
-		clinit.visitMaxs(0, 0);
-		}
-	cv.visitEnd();
-}
+            if (clinit == null) {
+                clinit = cv.visitMethod(a, name, desc, null, null);
+            }
+            clinit.visitMethodInsn(Opcodes.INVOKESTATIC, this.name, n, desc);
+        } else {
+            mv = cv.visitMethod(access, name, desc, signature, exceptions);
+        }
+        return mv;
+    }
+
+    @Override
+    public void visitEnd() {
+        if (clinit != null) {
+            clinit.visitInsn(Opcodes.RETURN);
+            clinit.visitMaxs(0, 0);
+        }
+        cv.visitEnd();
+    }
 }

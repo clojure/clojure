@@ -1,6 +1,7 @@
 (ns clojure.test-clojure.reflect
   (:use clojure.data [clojure.reflect :as reflect] clojure.test clojure.pprint)
-  (:import [clojure.reflect AsmReflector JavaReflector]))
+  (:import [clojure.reflect AsmReflector JavaReflector]
+           [reflector IBar$Factory]))
 
 (defn nodiff
   [x y]
@@ -10,7 +11,7 @@
                                        :y-only y-only
                                        :common common}))))))
 
-(deftest compare-reflect-and-asm
+#_(deftest compare-reflect-and-asm
   (let [cl (.getContextClassLoader (Thread/currentThread))
         asm-reflector (AsmReflector. cl)
         java-reflector (JavaReflector. cl)]
@@ -18,7 +19,8 @@
                         java.lang.Object
                         java.io.FileInputStream
                         clojure.lang.Compiler
-                        clojure.lang.PersistentVector]]
+                        clojure.lang.PersistentVector
+                        java.lang.SuppressWarnings]]
       (nodiff (type-reflect classname :reflector asm-reflector)
               (type-reflect classname :reflector java-reflector)))))
 
@@ -31,3 +33,7 @@
 (deftest internal-name->class-symbol-test
   (are [s n] (= s (@#'reflect/internal-name->class-symbol n))
        'java.lang.Exception "java/lang/Exception"))
+
+(def inst (IBar$Factory/get))
+(deftest invoking-nonpublic-super
+  (is (= "stuff" (.stuff inst))))

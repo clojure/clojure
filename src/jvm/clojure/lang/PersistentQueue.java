@@ -12,6 +12,7 @@ package clojure.lang;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 //import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -84,12 +85,13 @@ public int hashCode(){
 public int hasheq() {
 	if(_hasheq == -1)
 		{
-		int hash = 1;
-		for(ISeq s = seq(); s != null; s = s.next())
-			{
-			hash = 31 * hash + Util.hasheq(s.first());
-			}
-		this._hasheq = hash;
+//		int hash = 1;
+//		for(ISeq s = seq(); s != null; s = s.next())
+//			{
+//			hash = 31 * hash + Util.hasheq(s.first());
+//			}
+//		this._hasheq = hash;
+		_hasheq  = Murmur3.hashOrdered(this);
 		}
     return _hasheq;
 }
@@ -239,7 +241,31 @@ public boolean contains(Object o){
 }
 
 public Iterator iterator(){
-	return new SeqIterator(seq());
+    return new Iterator(){
+        private ISeq fseq = f;
+        private final Iterator riter = r != null ? r.iterator() : null;
+
+        public boolean hasNext(){
+            return ((fseq != null && fseq.seq() != null) || (riter != null && riter.hasNext()));
+        }
+
+        public Object next(){
+            if(fseq != null)
+            {
+                Object ret = fseq.first();
+                fseq = fseq.next();
+                return ret;
+            }
+            else if(riter != null && riter.hasNext())
+                return riter.next();
+            else
+                throw new NoSuchElementException();
+        }
+
+        public void remove(){
+            throw new UnsupportedOperationException();
+        }
+    };
 }
 
 /*

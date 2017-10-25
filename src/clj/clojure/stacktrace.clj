@@ -47,12 +47,14 @@
   Does not print chained exceptions (causes)."
   {:added "1.1"}
   ([tr] (print-stack-trace tr nil))
-  ([tr n]
+  ([^Throwable tr n]
      (let [st (.getStackTrace tr)]
        (print-throwable tr)
        (newline)
        (print " at ") 
-       (print-trace-element (first st))
+       (if-let [e (first st)]
+         (print-trace-element e)
+         (print "[empty stack trace]"))
        (newline)
        (doseq [e (if (nil? n)
 		   (rest st)

@@ -66,15 +66,15 @@
 
 (deftest naming-types
   (testing "you cannot use a name already referred from another namespace"
-    (is (thrown? IllegalStateException
-                 #"String already refers to: class java.lang.String"
-                 (definterface String)))
-    (is (thrown? IllegalStateException
-                 #"StringBuffer already refers to: class java.lang.StringBuffer"
-                 (deftype StringBuffer [])))
-    (is (thrown? IllegalStateException
-                 #"Integer already refers to: class java.lang.Integer"
-                 (defrecord Integer [])))))
+    (is (thrown-with-msg? IllegalStateException
+                          #"String already refers to: class java.lang.String"
+                          (definterface String)))
+    (is (thrown-with-msg? IllegalStateException
+                          #"StringBuffer already refers to: class java.lang.StringBuffer"
+                          (deftype StringBuffer [])))
+    (is (thrown-with-msg? IllegalStateException
+                          #"Integer already refers to: class java.lang.Integer"
+                          (defrecord Integer [])))))
 
 (deftest resolution
   (let [s (gensym)]
@@ -95,3 +95,11 @@
     (testing "referring to something non-public"
       (is (thrown-with-msg? IllegalAccessError #"hidden-var is not public"
             (refer temp-ns :only '(hidden-var)))))))
+
+(deftest test-defrecord-deftype-err-msg
+  (is (thrown-with-msg? clojure.lang.Compiler$CompilerException
+                        #"defrecord and deftype fields must be symbols, user\.MyRecord had: :shutdown-fn, compiling:"
+                        (eval '(defrecord MyRecord [:shutdown-fn]))))
+  (is (thrown-with-msg? clojure.lang.Compiler$CompilerException
+                        #"defrecord and deftype fields must be symbols, user\.MyType had: :key1, compiling:"
+                        (eval '(deftype MyType [:key1])))))

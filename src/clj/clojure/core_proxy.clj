@@ -210,6 +210,12 @@
                          (for [^Class iface interfaces meth (. iface (getMethods))
                                :let [msig (method-sig meth)] :when (not (considered msig))]
                            {msig meth}))
+          ;; Treat abstract methods as interface methods
+          [mm ifaces-meths] (let [abstract? (fn [[_ ^Method meth]]
+                                              (Modifier/isAbstract (. meth (getModifiers))))
+                                  mm-no-abstract (remove abstract? mm)
+                                  abstract-meths (filter abstract? mm)]
+                              [mm-no-abstract (concat ifaces-meths abstract-meths)])
           mgroups (group-by-sig (concat mm ifaces-meths))
           rtypes (map #(most-specific (keys %)) mgroups)
           mb (map #(vector (%1 %2) (vals (dissoc %1 %2))) mgroups rtypes)
@@ -358,9 +364,9 @@
 (defn proxy-call-with-super [call this meth]
  (let [m (proxy-mappings this)]
     (update-proxy this (assoc m meth nil))
-    (let [ret (call)]
-      (update-proxy this m)
-      ret)))
+    (try
+      (call)
+      (finally (update-proxy this m)))))
 
 (defmacro proxy-super 
   "Use to call a superclass method in the body of a proxy method. 
@@ -392,8 +398,9 @@
                            {} (seq pmap)))]
     (proxy [clojure.lang.APersistentMap]
            []
+      (iterator [] (.iterator ^Iterable pmap))
       (containsKey [k] (contains? pmap k))
-      (entryAt [k] (when (contains? pmap k) (new clojure.lang.MapEntry k (v k))))
+      (entryAt [k] (when (contains? pmap k) (clojure.lang.MapEntry/create k (v k))))
       (valAt ([k] (when (contains? pmap k) (v k)))
 	     ([k default] (if (contains? pmap k) (v k) default)))
       (cons [m] (conj (snapshot) m))
@@ -403,7 +410,7 @@
       (seq [] ((fn thisfn [plseq]
 		  (lazy-seq
                    (when-let [pseq (seq plseq)]
-                     (cons (new clojure.lang.MapEntry (first pseq) (v (first pseq)))
+                     (cons (clojure.lang.MapEntry/create (first pseq) (v (first pseq)))
                            (thisfn (rest pseq)))))) (keys pmap))))))
 
 

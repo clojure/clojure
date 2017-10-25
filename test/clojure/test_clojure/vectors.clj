@@ -77,7 +77,14 @@
            vs-1 vs
            vs vs-32
            vs-32 vs
-           vs nil))))
+           vs nil))
+    (testing "internal-reduce"
+      (is (= [99] (into [] (drop 99 vs)))))))
+
+(deftest test-primitive-subvector-reduce
+  ;; regression test for CLJ-1082
+  (is (== 60 (let [prim-vec (into (vector-of :long) (range 1000))]
+               (reduce + (subvec prim-vec 10 15))))))
 
 (deftest test-vec-compare
   (let [nums      (range 1 100)
@@ -322,7 +329,9 @@
            (vector-of ""))))
   (testing "vector-like (vector-of :type x1 x2 x3 … xn)"
     (are [vec gvec] (and (instance? clojure.core.Vec gvec)
-                         (= (into (vector-of :int) vec) gvec))
+                         (= (into (vector-of :int) vec) gvec)
+                         (= vec gvec)
+                         (= (hash vec) (hash gvec)))
          [1] (vector-of :int 1)
          [1 2] (vector-of :int 1 2)
          [1 2 3] (vector-of :int 1 2 3)
@@ -353,6 +362,12 @@
            (vector-of :int 1 2 "3")
            (vector-of :int "1" "2" "3")))))
 
+(deftest empty-vector-equality
+  (let [colls [[] (vector-of :long) '()]]
+    (doseq [c1 colls, c2 colls]
+      (is (= c1 c2))
+      (is (.equals c1 c2)))))
+
 (defn =vec
   [expected v] (and (vector? v) (= expected v)))
 
@@ -378,3 +393,17 @@
     (is (thrown? IndexOutOfBoundsException (v2 7)))
     (is (= (v1 50) (v2 0)))
     (is (= (v1 56) (v2 6)))))
+
+(deftest test-vec
+  (is (= [1 2] (vec (first {1 2}))))
+  (is (= [0 1 2 3] (vec [0 1 2 3])))
+  (is (= [0 1 2 3] (vec (list 0 1 2 3))))
+  (is (= [0 1 2 3] (vec (sorted-set 0 1 2 3))))
+  (is (= [[1 2] [3 4]] (vec (sorted-map 1 2 3 4))))
+  (is (= [0 1 2 3] (vec (range 4))))
+  (is (= [\a \b \c \d] (vec "abcd")))
+  (is (= [0 1 2 3] (vec (object-array (range 4)))))
+  (is (= [1 2 3 4] (vec (eduction (map inc) (range 4)))))
+  (is (= [0 1 2 3] (vec (reify clojure.lang.IReduceInit
+                          (reduce [_ f start]
+                            (reduce f start (range 4))))))))

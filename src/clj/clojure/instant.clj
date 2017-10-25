@@ -11,6 +11,8 @@
            [java.sql Timestamp]))
 
 
+(set! *warn-on-reflection* true)
+
 ;;; ------------------------------------------------------------------------
 ;;; convenience macros
 
@@ -135,7 +137,7 @@ specified.
 
 (defn validated
   "Return a function which constructs and instant by calling constructor
-after first validting that those arguments are in range and otherwise
+after first validating that those arguments are in range and otherwise
 plausible. The resulting function will throw an exception if called
 with invalid arguments."
   [new-instance]
@@ -157,7 +159,7 @@ with invalid arguments."
 ;;; ------------------------------------------------------------------------
 ;;; print integration
 
-(def ^:private thread-local-utc-date-format
+(def ^:private ^ThreadLocal thread-local-utc-date-format
   ;; SimpleDateFormat is not thread-safe, so we use a ThreadLocal proxy for access.
   ;; http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4228335
   (proxy [ThreadLocal] []
@@ -169,7 +171,7 @@ with invalid arguments."
 (defn- print-date
   "Print a java.util.Date as RFC3339 timestamp, always in UTC."
   [^java.util.Date d, ^java.io.Writer w]
-  (let [utc-format (.get thread-local-utc-date-format)]
+  (let [^java.text.DateFormat utc-format (.get thread-local-utc-date-format)]
     (.write w "#inst \"")
     (.write w (.format utc-format d))
     (.write w "\"")))
@@ -203,7 +205,7 @@ with invalid arguments."
   (print-calendar c w))
 
 
-(def ^:private thread-local-utc-timestamp-format
+(def ^:private ^ThreadLocal thread-local-utc-timestamp-format
   ;; SimpleDateFormat is not thread-safe, so we use a ThreadLocal proxy for access.
   ;; http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4228335
   (proxy [ThreadLocal] []
@@ -214,7 +216,7 @@ with invalid arguments."
 (defn- print-timestamp
   "Print a java.sql.Timestamp as RFC3339 timestamp, always in UTC."
   [^java.sql.Timestamp ts, ^java.io.Writer w]
-  (let [utc-format (.get thread-local-utc-timestamp-format)]
+  (let [^java.text.DateFormat utc-format (.get thread-local-utc-timestamp-format)]
     (.write w "#inst \"")
     (.write w (.format utc-format ts))
     ;; add on nanos and offset
@@ -235,7 +237,7 @@ with invalid arguments."
 ;;; reader integration
 
 (defn- construct-calendar
-  "Construct a java.util.Calendar, which preserves, preserving the timezone
+  "Construct a java.util.Calendar, preserving the timezone
 offset, but truncating the subsecond fraction to milliseconds."
   ^GregorianCalendar
   [years months days hours minutes seconds nanoseconds
@@ -249,7 +251,7 @@ offset, but truncating the subsecond fraction to milliseconds."
 
 (defn- construct-date
   "Construct a java.util.Date, which expresses the original instant as
-milliseconds since the epoch, GMT."
+milliseconds since the epoch, UTC."
   [years months days hours minutes seconds nanoseconds
    offset-sign offset-hours offset-minutes]
   (.getTime (construct-calendar years months days

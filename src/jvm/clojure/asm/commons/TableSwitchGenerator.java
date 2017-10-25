@@ -1,6 +1,6 @@
 /***
  * ASM: a very small and fast Java bytecode manipulation framework
- * Copyright (c) 2000-2005 INRIA, France Telecom
+ * Copyright (c) 2000-2011 INRIA, France Telecom
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,18 +38,20 @@ import clojure.asm.Label;
  * @author Chris Nokleberg
  * @author Eric Bruneton
  */
-public interface TableSwitchGenerator{
+public interface TableSwitchGenerator {
 
-/**
- * Generates the code for a switch case.
- *
- * @param key the switch case key.
- * @param end a label that corresponds to the end of the switch statement.
- */
-void generateCase(int key, Label end);
+    /**
+     * Generates the code for a switch case.
+     *
+     * @param key
+     *            the switch case key.
+     * @param end
+     *            a label that corresponds to the end of the switch statement.
+     */
+    void generateCase(int key, Label end);
 
-/**
- * Generates the code for the default switch case.
- */
-void generateDefault();
+    /**
+     * Generates the code for the default switch case.
+     */
+    void generateDefault();
 }

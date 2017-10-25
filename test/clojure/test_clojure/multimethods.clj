@@ -196,7 +196,7 @@
     (is (thrown? java.lang.IllegalArgumentException
                  (bar ::rect ::rect))))
  (testing "The prefers method returns empty table w/ no prefs"
-   (= {} (prefers bar)))
+   (is (= {} (prefers bar))))
  (testing "Adding a preference to resolve it dispatches correctly"
    (prefer-method bar [::rect ::shape] [::shape ::rect])
    (is (= :rect-shape (bar ::rect ::rect))))
@@ -205,30 +205,30 @@
 
 (deftest remove-all-methods-test
   (testing "Core function remove-all-methods works"
-    (defmulti simple identity)
-    (defmethod simple :a [x] :a)
-    (defmethod simple :b [x] :b)
-    (is (= {} (methods (remove-all-methods simple))))))
+    (defmulti simple1 identity)
+    (defmethod simple1 :a [x] :a)
+    (defmethod simple1 :b [x] :b)
+    (is (= {} (methods (remove-all-methods simple1))))))
 
 (deftest methods-test
   (testing "Core function methods works"
-    (defmulti simple identity)
-    (defmethod simple :a [x] :a)
-    (defmethod simple :b [x] :b)
-    (is (= #{:a :b} (into #{} (keys (methods simple)))))
-    (is (= :a ((:a (methods simple)) 1)))
-    (defmethod simple :c [x] :c)
-    (is (= #{:a :b :c} (into #{} (keys (methods simple)))))
-    (remove-method simple :a)
-    (is (= #{:b :c} (into #{} (keys (methods simple)))))))
+    (defmulti simple2 identity)
+    (defmethod simple2 :a [x] :a)
+    (defmethod simple2 :b [x] :b)
+    (is (= #{:a :b} (into #{} (keys (methods simple2)))))
+    (is (= :a ((:a (methods simple2)) 1)))
+    (defmethod simple2 :c [x] :c)
+    (is (= #{:a :b :c} (into #{} (keys (methods simple2)))))
+    (remove-method simple2 :a)
+    (is (= #{:b :c} (into #{} (keys (methods simple2)))))))
 
 (deftest get-method-test
   (testing "Core function get-method works"
-    (defmulti simple identity)
-    (defmethod simple :a [x] :a)
-    (defmethod simple :b [x] :b)
-    (is (fn? (get-method simple :a)))
-    (= (:a ((get-method simple :a) 1)))
-    (is (fn? (get-method simple :b)))
-    (= (:b ((get-method simple :b) 1)))
-    (is (nil? (get-method simple :c)))))
+    (defmulti simple3 identity)
+    (defmethod simple3 :a [x] :a)
+    (defmethod simple3 :b [x] :b)
+    (is (fn? (get-method simple3 :a)))
+    (is (= :a ((get-method simple3 :a) 1)))
+    (is (fn? (get-method simple3 :b)))
+    (is (= :b ((get-method simple3 :b) 1)))
+    (is (nil? (get-method simple3 :c)))))

@@ -10,7 +10,9 @@
 
 (in-ns 'clojure.core)
 
-;(set! *warn-on-reflection* true)
+(import '(clojure.lang Murmur3))
+
+(set! *warn-on-reflection* true)
 
 (deftype VecNode [edit arr])
 
@@ -47,9 +49,11 @@
   (reduce [_ f init]
     (loop [ret init i off]
       (if (< i end)
-        (recur (f ret (.aget am arr i)) (inc i))
-        ret)))
-  )
+        (let [ret (f ret (.aget am arr i))]
+          (if (reduced? ret)
+            ret
+            (recur ret (inc i))))
+        ret))))
 
 (deftype VecSeq [^clojure.core.ArrayManager am ^clojure.core.IVecImpl vec anode ^int i ^int offset] 
   :no-print true
@@ -58,15 +62,20 @@
   (internal-reduce
    [_ f val]
    (loop [result val
-          aidx offset]
+          aidx (+ i offset)]
      (if (< aidx (count vec))
        (let [node (.arrayFor vec aidx)
              result (loop [result result
                            node-idx (bit-and 0x1f aidx)]
                       (if (< node-idx (.alength am node))
-                        (recur (f result (.aget am node node-idx)) (inc node-idx))
+                        (let [result (f result (.aget am node node-idx))]
+                          (if (reduced? result)
+                            result
+                            (recur result (inc node-idx))))
                         result))]
-         (recur result (bit-and 0xffe0 (+ aidx 32))))
+         (if (reduced? result)
+           @result
+           (recur result (bit-and 0xffe0 (+ aidx 32)))))
        result)))
   
   clojure.lang.ISeq
@@ -132,7 +141,9 @@
                (.equals (.nth this i) (nth o i)) (recur (inc i))
                :else false)))
      (or (instance? clojure.lang.Sequential o) (instance? java.util.List o))
-       (.equals (seq this) (seq o))
+       (if-let [st (seq this)]
+         (.equals st (seq o))
+         (nil? (seq o)))
      :else false))
 
   ;todo - cache
@@ -144,6 +155,11 @@
           (recur (unchecked-add-int (unchecked-multiply-int 31 hash) 
                                 (clojure.lang.Util/hash val)) 
                  (inc i))))))
+
+  ;todo - cache
+  clojure.lang.IHashEq
+  (hasheq [this]
+    (Murmur3/hashOrdered this))
 
   clojure.lang.Counted
   (count [_] cnt)
@@ -251,7 +267,7 @@
          (< (int k) cnt)))
   (entryAt [this k]
     (if (.containsKey this k)
-      (clojure.lang.MapEntry. k (.nth this (int k)))
+      (clojure.lang.MapEntry/create k (.nth this (int k)))
       nil))
 
   clojure.lang.ILookup
@@ -350,7 +366,7 @@
   (compareTo [this o]
     (if (identical? this o)
       0
-      (let [#^clojure.lang.IPersistentVector v (cast clojure.lang.IPersistentVector o)
+      (let [^clojure.lang.IPersistentVector v (cast clojure.lang.IPersistentVector o)
             vcnt (.count v)]
         (cond
           (< cnt vcnt) -1
@@ -369,7 +385,10 @@
     (let [i (java.util.concurrent.atomic.AtomicInteger. 0)]
       (reify java.util.Iterator
         (hasNext [_] (< (.get i) cnt))
-        (next [_] (.nth this (dec (.incrementAndGet i))))
+        (next [_] (try
+                    (.nth this (dec (.incrementAndGet i)))
+                    (catch IndexOutOfBoundsException _
+                      (throw (java.util.NoSuchElementException.)))))
         (remove [_] (throw (UnsupportedOperationException.))))))
 
   java.util.Collection
@@ -412,9 +431,15 @@
       (reify java.util.ListIterator
         (hasNext [_] (< (.get i) cnt))
         (hasPrevious [_] (pos? i))
-        (next [_] (.nth this (dec (.incrementAndGet i))))
+        (next [_] (try
+                    (.nth this (dec (.incrementAndGet i)))
+                    (catch IndexOutOfBoundsException _
+                      (throw (java.util.NoSuchElementException.)))))
         (nextIndex [_] (.get i))
-        (previous [_] (.nth this (.decrementAndGet i)))
+        (previous [_] (try
+                        (.nth this (.decrementAndGet i))
+                        (catch IndexOutOfBoundsException _
+                          (throw (java.util.NoSuchElementException.)))))
         (previousIndex [_] (dec (.get i)))
         (add [_ e] (throw (UnsupportedOperationException.)))
         (remove [_] (throw (UnsupportedOperationException.)))
@@ -491,5 +516,5 @@
    (loop [v  (vector-of t x1 x2 x3 x4)
           xn xn]
      (if xn
-       (recur (.cons v (first xn)) (next xn))
+       (recur (conj v (first xn)) (next xn))
        v))))

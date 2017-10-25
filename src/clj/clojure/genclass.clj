@@ -161,6 +161,7 @@
         ifn-type (totype clojure.lang.IFn)
         iseq-type (totype clojure.lang.ISeq)
         ex-type  (totype java.lang.UnsupportedOperationException)
+        util-type (totype clojure.lang.Util)
         all-sigs (distinct (concat (map #(let[[m p] (key %)] {m [p]}) (mapcat non-private-methods supers))
                                    (map (fn [[m p]] {(str m) [p]}) methods)))
         sigs-by-name (apply merge-with concat {} all-sigs)
@@ -287,11 +288,9 @@
         (. gen putStatic ctype (var-name v) var-type))
       
       (when load-impl-ns
-        (. gen push "clojure.core")
-        (. gen push "load")
-        (. gen (invokeStatic rt-type (. Method (getMethod "clojure.lang.Var var(String,String)"))))
         (. gen push (str "/" impl-cname))
-        (. gen (invokeInterface ifn-type (new Method "invoke" obj-type (to-types [Object]))))
+        (. gen push ctype)
+        (. gen (invokeStatic util-type (. Method (getMethod "Object loadWithClass(String,Class)"))))
 ;        (. gen push (str (.replace impl-pkg-name \- \_) "__init"))
 ;        (. gen (invokeStatic class-type (. Method (getMethod "Class forName(String)"))))
         (. gen pop))
@@ -569,7 +568,7 @@
   the first argument, followed by the arguments to the constructor.
   It will be called every time an object of this class is created,
   immediately after all the inherited constructors have completed.
-  It's return value is ignored.
+  Its return value is ignored.
 
   :methods [ [name [param-types] return-type], ...]
 
@@ -669,6 +668,7 @@
        iname nil "java/lang/Object"
        (when (seq extends)
          (into-array (map #(.getInternalName (asm-type %)) extends))))
+    (when (not= "NO_SOURCE_FILE" *source-path*) (. cv visitSource *source-path* nil))
     (add-annotations cv (meta name))
     (doseq [[mname pclasses rclass pmetas] methods]
       (let [mv (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
@@ -717,10 +717,10 @@
   [& options]
     (let [options-map (apply hash-map options)
           [cname bytecode] (generate-interface options-map)]
-      (if *compile-files*
-        (clojure.lang.Compiler/writeClassFile cname bytecode)
-        (.defineClass ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) 
-                      (str (:name options-map)) bytecode options)))) 
+      (when *compile-files*
+        (clojure.lang.Compiler/writeClassFile cname bytecode))
+      (.defineClass ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER)
+                    (str (:name options-map)) bytecode options)))
 
 (comment
 

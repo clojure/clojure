@@ -8,7 +8,7 @@
 
 (ns clojure.test-clojure.data
   (:use clojure.data clojure.test)
-  (import java.util.HashSet))
+  (:import java.util.HashSet))
 
 (deftest diff-test
   (are [d x y] (= d (diff x y))

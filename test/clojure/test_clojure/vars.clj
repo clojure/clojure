@@ -98,3 +98,12 @@
     (with-redefs [dynamic-var 3]
       (is (= 2 dynamic-var))))
   (is (= 1 dynamic-var)))
+
+(defn sample [& args]
+  0)
+
+(deftest test-vars-apply-lazily
+  (is (= 0 (deref (future (apply sample (range)))
+                  1000 :timeout)))
+  (is (= 0 (deref (future (apply #'sample (range)))
+                  1000 :timeout))))

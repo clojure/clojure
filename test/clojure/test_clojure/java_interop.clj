@@ -55,6 +55,16 @@
       Integer/MAX_VALUE
       (. Integer MAX_VALUE) ))
 
+(definterface I (a []))
+(deftype T [a] I (a [_] "method"))
+
+(deftest test-reflective-field-name-ambiguous
+  (let [t (->T "field")]
+    (is (= "method" (. ^T t a)))
+    (is (= "field" (. ^T t -a)))
+    (is (= "method" (. t a)))
+    (is (= "field" (. t -a)))
+    (is (thrown? IllegalArgumentException (. t -BOGUS)))))
 
 (deftest test-double-dot
   (is (= (.. System (getProperties) (get "os.name"))
@@ -102,10 +112,19 @@
       java.lang.Integer false
       java.lang.Long true
       java.lang.Character false
-      java.lang.String false ))
+      java.lang.String false )
 
+  ; test compiler macro
+  (is (let [Long String] (instance? Long "abc")))
+  (is (thrown? clojure.lang.ArityException (instance? Long))))
 
 ; set!
+
+(defprotocol p (f [_]))
+(deftype t [^:unsynchronized-mutable x] p (f [_] (set! (.x _) 1)))
+
+(deftest test-set!
+  (is (= 1 (f (t. 1)))))
 
 ; memfn
 
@@ -130,6 +149,9 @@
 
         (:class b) java.awt.Color )))
 
+(deftest test-iterable-bean
+  (is (.iterator ^Iterable (bean (java.util.Date.))))
+  (is (hash (bean (java.util.Date.)))))
 
 ; proxy, proxy-super
 
@@ -170,6 +192,24 @@
         #{java.lang.Number java.lang.Object
           java.lang.Comparable java.io.Serializable} ))
 
+(deftest test-proxy-super
+  (let [d (proxy [java.util.BitSet] []
+            (flip [bitIndex]
+              (try
+                (proxy-super flip bitIndex)
+                (catch IndexOutOfBoundsException e
+                  (throw (IllegalArgumentException. "replaced"))))))]
+    ;; normal call
+    (is (nil? (.flip d 0)))
+    ;; exception should use proxied form and return IllegalArg
+    (is (thrown? IllegalArgumentException (.flip d -1)))
+    ;; same behavior on second call
+    (is (thrown? IllegalArgumentException (.flip d -1)))))
+
+;; http://dev.clojure.org/jira/browse/CLJ-1657
+(deftest test-proxy-abstract-super
+  (let [p (proxy [java.io.Writer] [])]
+    (is (thrown? UnsupportedOperationException (.close p)))))
 
 ; Arrays: [alength] aget aset [make-array to-array into-array to-array-2d aclone]
 ;   [float-array, int-array, etc]
@@ -305,7 +345,7 @@
 
 (test-to-passed-array-for vector)
 (test-to-passed-array-for list)
-(test-to-passed-array-for hash-set)
+;;(test-to-passed-array-for hash-set)
 (test-to-passed-array-for queue)
 
 (deftest test-into-array
@@ -324,6 +364,8 @@
         (class (first a)) (class (first v)) ))
 
   (is (= \a (aget (into-array Character/TYPE [\a \b \c]) 0)))
+
+  (is (= [nil 1 2] (seq (into-array [nil 1 2]))))
   
   (let [types [Integer/TYPE
                Byte/TYPE
@@ -448,8 +490,12 @@
       (double-array [1 2 3])
       (boolean-array [true false])
       (byte-array [(byte 1) (byte 2)])
+      (byte-array [1 2])
+      (byte-array 2 [1 2])
       (char-array [\a \b \c])
       (short-array [(short 1) (short 2)])
+      (short-array [1 2])
+      (short-array 2 [1 2])
       (make-array Integer/TYPE 3)
       (to-array [1 "a" :k])
       (into-array [1 2 3]) )

@@ -1,0 +1,79 @@
+<html>
+
+<!--
+Copyright (c) Rich Hickey and Contributors. All rights reserved.
+The use and distribution terms for this software are covered by the
+Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+which can be found in the file epl-v10.html at the root of this distribution.
+By using this software in any fashion, you are agreeing to be bound by
+the terms of this license.
+You must not remove this notice, or any other, from this software.
+-->
+
+<body>Clojure interop from Java.
+
+<p>The clojure.java.api package provides a minimal interface to bootstrap
+  Clojure access from other JVM languages.  It does this by providing:
+</p>
+
+<ol>
+  <li>The ability to use Clojure's namespaces to locate an arbitrary
+  <a href="http://clojure.org/vars">var</a>, returning the
+  var's <code>clojure.lang.IFn</code> interface.</li>
+  <li>A convenience method <code>read</code> for reading data using
+  Clojure's edn reader</li>
+</ol>
+
+<p><code>IFn</code>s provide complete access to
+  Clojure's <a href="http://clojure.github.io/clojure/">API</a>s.
+  You can also access any other library written in Clojure, after adding
+  either its source or compiled form to the classpath.</p>
+
+<p>The public Java API for Clojure consists of the following classes
+  and interfaces:
+</p>
+
+<ol>
+<li>clojure.java.api.Clojure</li>
+<li>clojure.lang.IFn</li>
+</ol>
+
+<p>All other Java classes should be treated as implementation details,
+  and applications should avoid relying on them.</p>
+
+<p>To lookup and call a Clojure function:
+<pre>
+IFn plus = Clojure.var("clojure.core", "+");
+plus.invoke(1, 2);
+</pre>
+</p>
+
+<p>Functions in <code>clojure.core</code> are automatically loaded. Other
+  namespaces can be loaded via <code>require</code>:
+<pre>
+IFn require = Clojure.var("clojure.core", "require");
+require.invoke(Clojure.read("clojure.set"));
+</pre>
+</p>
+
+<p><code>IFn</code>s can be passed to higher order functions, e.g. the
+  example below passes <code>plus</code> to <code>read</code>:
+<pre>
+IFn map = Clojure.var("clojure.core", "map");
+IFn inc = Clojure.var("clojure.core", "inc");
+map.invoke(inc, Clojure.read("[1 2 3]"));
+</pre>
+</p>
+
+<p>Most IFns in Clojure refer to functions. A few, however, refer to
+  non-function data values. To access these, use <code>deref</code>
+  instead of <code>fn</code>:</p>
+
+<pre>
+IFn printLength = Clojure.var("clojure.core", "*print-length*");
+IFn deref = Clojure.var("clojure.core", "deref");
+deref.invoke(printLength);
+</pre>
+
+</body>
+</html>

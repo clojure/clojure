@@ -14,11 +14,13 @@ package clojure.lang;
 
 public class Delay implements IDeref, IPending{
 Object val;
+Throwable exception;
 IFn fn;
 
 public Delay(IFn fn){
 	this.fn = fn;
 	this.val = null;
+        this.exception = null;
 }
 
 static public Object force(Object x) {
@@ -30,9 +32,18 @@ static public Object force(Object x) {
 synchronized public Object deref() {
 	if(fn != null)
 		{
-		val = fn.invoke();
+		try
+			{
+			val = fn.invoke();
+			}
+		catch(Throwable t)
+			{
+			exception = t;
+			}
 		fn = null;
 		}
+	if(exception != null)
+		throw Util.sneakyThrow(exception);
 	return val;
 }
 

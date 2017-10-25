@@ -14,7 +14,7 @@ import java.util.Map;
 
 import clojure.lang.PersistentHashMap.INode;
 
-abstract class ATransientMap extends AFn implements ITransientMap {
+public abstract class ATransientMap extends AFn implements ITransientMap {
 	abstract void ensureEditable();
 	abstract ITransientMap doAssoc(Object key, Object val);
 	abstract ITransientMap doWithout(Object key);

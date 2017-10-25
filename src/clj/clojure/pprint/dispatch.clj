@@ -19,7 +19,7 @@
 
 (defn- use-method
   "Installs a function as a new method of multimethod associated with dispatch-value. "
-  [multifn dispatch-val func]
+  [^clojure.lang.MultiFn multifn dispatch-val func]
   (. multifn addMethod dispatch-val func))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -29,7 +29,7 @@
 ;;; Handle forms that can be "back-translated" to reader macros
 ;;; Not all reader macros can be dealt with this way or at all. 
 ;;; Macros that we can't deal with at all are:
-;;; ;  - The comment character is aborbed by the reader and never is part of the form
+;;; ;  - The comment character is absorbed by the reader and never is part of the form
 ;;; `  - Is fully processed at read time into a lisp expression (which will contain concats
 ;;;      and regular quotes).
 ;;; ~@ - Also fully eaten by the processing of ` and can't be used outside.
@@ -92,19 +92,23 @@
 
 ;;; (def pprint-map (formatter-out "~<{~;~@{~<~w~^ ~_~w~:>~^, ~_~}~;}~:>"))
 (defn- pprint-map [amap]
-  (pprint-logical-block :prefix "{" :suffix "}"
-    (print-length-loop [aseq (seq amap)]
-      (when aseq
-	(pprint-logical-block 
-          (write-out (ffirst aseq))
-          (.write ^java.io.Writer *out* " ")
-          (pprint-newline :linear)
-          (set! *current-length* 0)     ; always print both parts of the [k v] pair
-          (write-out (fnext (first aseq))))
-        (when (next aseq)
-          (.write ^java.io.Writer *out* ", ")
-          (pprint-newline :linear)
-          (recur (next aseq)))))))
+  (let [[ns lift-map] (when (not (record? amap))
+                        (#'clojure.core/lift-ns amap))
+        amap (or lift-map amap)
+        prefix (if ns (str "#:" ns "{") "{")]
+    (pprint-logical-block :prefix prefix :suffix "}"
+      (print-length-loop [aseq (seq amap)]
+        (when aseq
+          (pprint-logical-block
+            (write-out (ffirst aseq))
+            (.write ^java.io.Writer *out* " ")
+            (pprint-newline :linear)
+            (set! *current-length* 0) ; always print both parts of the [k v] pair
+            (write-out (fnext (first aseq))))
+          (when (next aseq)
+            (.write ^java.io.Writer *out* ", ")
+            (pprint-newline :linear)
+            (recur (next aseq))))))))
 
 (def ^{:private true} pprint-set (formatter-out "~<#{~;~@{~w~^ ~:_~}~;}~:>"))
 
@@ -132,7 +136,7 @@
                            (pprint-newline :linear)
                            (write-out (cond 
                                        (and (future? o) (not (future-done? o))) :pending
-                                       (and (instance? clojure.lang.IPending o) (not (.isRealized o))) :not-delivered
+                                       (and (instance? clojure.lang.IPending o) (not (.isRealized ^clojure.lang.IPending o))) :not-delivered
                                        :else @o)))))
 
 (def ^{:private true} pprint-pqueue (formatter-out "~<<-(~;~@{~w~^ ~_~}~;)-<~:>"))
@@ -155,6 +159,7 @@
 (use-method simple-dispatch clojure.lang.IPersistentMap pprint-map)
 (use-method simple-dispatch clojure.lang.IPersistentSet pprint-set)
 (use-method simple-dispatch clojure.lang.PersistentQueue pprint-pqueue)
+(use-method simple-dispatch clojure.lang.Var pprint-simple-default)
 (use-method simple-dispatch clojure.lang.IDeref pprint-ideref)
 (use-method simple-dispatch nil pr)
 (use-method simple-dispatch :default pprint-simple-default)
@@ -210,7 +215,7 @@
                   (when (next args)
                     ((formatter-out "~:_"))))))
             (recur (next args))))))
-    (write-out reference)))
+    (when reference (write-out reference))))
 
 (defn- pprint-ns
   "The pretty print dispatch chunk for the ns macro"

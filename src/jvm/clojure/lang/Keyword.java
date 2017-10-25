@@ -26,15 +26,20 @@ public class Keyword implements IFn, Comparable, Named, Serializable, IHashEq {
 private static ConcurrentHashMap<Symbol, Reference<Keyword>> table = new ConcurrentHashMap();
 static final ReferenceQueue rq = new ReferenceQueue();
 public final Symbol sym;
-final int hash;
-String _str;
+final int hasheq;
+transient String _str;
 
 public static Keyword intern(Symbol sym){
-	if(sym.meta() != null)
-		sym = (Symbol) sym.withMeta(null);
-	Util.clearCache(rq, table);
-	Keyword k = new Keyword(sym);
-	Reference<Keyword> existingRef = table.putIfAbsent(sym, new WeakReference<Keyword>(k,rq));
+	Keyword k = null;
+	Reference<Keyword> existingRef = table.get(sym);
+	if(existingRef == null)
+		{
+		Util.clearCache(rq, table);
+		if(sym.meta() != null)
+			sym = (Symbol) sym.withMeta(null);
+		k = new Keyword(sym);
+		existingRef = table.putIfAbsent(sym, new WeakReference<Keyword>(k, rq));
+		}
 	if(existingRef == null)
 		return k;
 	Keyword existingk = existingRef.get();
@@ -55,7 +60,7 @@ public static Keyword intern(String nsname){
 
 private Keyword(Symbol sym){
 	this.sym = sym;
-	hash = sym.hashCode() + 0x9e3779b9;
+	hasheq = sym.hasheq() + 0x9e3779b9;
 }
 
 public static Keyword find(Symbol sym){
@@ -75,16 +80,16 @@ public static Keyword find(String nsname){
 }
 
 public final int hashCode(){
-	return hash;
+	return sym.hashCode() + 0x9e3779b9;
 }
 
 public int hasheq() {
-	return hash;
+	return hasheq;
 }
 
 public String toString(){
 	if(_str == null)
-		_str = (":" + sym).intern();
+		_str = (":" + sym);
 	return _str;
 }
 

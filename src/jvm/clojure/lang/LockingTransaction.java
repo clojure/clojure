@@ -222,13 +222,23 @@ static LockingTransaction getRunning(){
 
 static public Object runInTransaction(Callable fn) throws Exception{
 	LockingTransaction t = transaction.get();
-	if(t == null)
+	Object ret;
+	if(t == null) {
 		transaction.set(t = new LockingTransaction());
+		try {
+			ret = t.run(fn);
+		} finally {
+			transaction.remove();
+		}
+	} else {
+		if(t.info != null) {
+			ret = fn.call();
+		} else {
+			ret = t.run(fn);
+		}
+	}
 
-	if(t.info != null)
-		return fn.call();
-
-	return t.run(fn);
+	return ret;
 }
 
 static class Notify{
@@ -305,7 +315,6 @@ Object run(Callable fn) throws Exception{
 
 				//at this point, all values calced, all refs to be written locked
 				//no more client code to be called
-				long msecs = System.currentTimeMillis();
 				long commitPoint = getCommitPoint();
 				for(Map.Entry<Ref, Object> e : vals.entrySet())
 					{
@@ -316,12 +325,12 @@ Object run(Callable fn) throws Exception{
 
 					if(ref.tvals == null)
 						{
-						ref.tvals = new Ref.TVal(newval, commitPoint, msecs);
+						ref.tvals = new Ref.TVal(newval, commitPoint);
 						}
 					else if((ref.faults.get() > 0 && hcount < ref.maxHistory)
 							|| hcount < ref.minHistory)
 						{
-						ref.tvals = new Ref.TVal(newval, commitPoint, msecs, ref.tvals);
+						ref.tvals = new Ref.TVal(newval, commitPoint, ref.tvals);
 						ref.faults.set(0);
 						}
 					else
@@ -329,7 +338,6 @@ Object run(Callable fn) throws Exception{
 						ref.tvals = ref.tvals.next;
 						ref.tvals.val = newval;
 						ref.tvals.point = commitPoint;
-						ref.tvals.msecs = msecs;
 						}
 					if(ref.getWatches().count() > 0)
 						notify.add(new Notify(ref, oldval, newval));

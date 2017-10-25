@@ -11,7 +11,7 @@ This implementation for clojure has the following goals:
  * Support the full feature set of the Common Lisp format function (including the X3J13 extensions) with the only exception being concepts that make no sense or are differently interpreted in Clojure.
  * Make porting code from Common Lisp easier.
  * Provide a more native feeling solution for Clojure programmers than the Java format method and its relatives.
- * Be fast. This includes the ability to precompile formats that are going to be used reptitively.
+ * Be fast. This includes the ability to precompile formats that are going to be used repetitively.
  * Include useful error handling and comprehensive documentation.
 
 ## Why would I use cl-format?
@@ -180,7 +180,7 @@ There are some more examples in the pretty print examples gallery at
 http://github.com/tomfaulhaber/pprint-examples:
 
  * hexdump - a program that uses cl-format to create a standard formatted hexdump of the requested stream.
- * multiply - a function to show a formatted multipication table in a very "first-order" way.
+ * multiply - a function to show a formatted multiplication table in a very "first-order" way.
  * props - the show-props example shown above.
  * show_doc - some utilities for showing documentation from various name spaces.
 

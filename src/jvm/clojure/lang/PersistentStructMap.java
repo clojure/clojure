@@ -15,6 +15,7 @@ package clojure.lang;
 import java.util.Iterator;
 import java.util.Map;
 import java.io.Serializable;
+import java.util.NoSuchElementException;
 
 public class PersistentStructMap extends APersistentMap implements IObj{
 
@@ -131,7 +132,7 @@ public IMapEntry entryAt(Object key){
 	Map.Entry e = def.keyslots.entryAt(key);
 	if(e != null)
 		{
-		return new MapEntry(e.getKey(), vals[(Integer) e.getValue()]);
+		return (IMapEntry) MapEntry.create(e.getKey(), vals[(Integer) e.getValue()]);
 		}
 	return ext.entryAt(key);
 }
@@ -183,9 +184,32 @@ public IPersistentMap without(Object key) {
 }
 
 public Iterator iterator(){
-	return new SeqIterator(seq());
-}
+    return new Iterator(){
+        private ISeq ks = def.keys;
+        private Iterator extIter = ext == null ? null : ext.iterator();
 
+        public boolean hasNext(){
+            return ((ks != null && ks.seq() != null) || (extIter != null && extIter.hasNext()));
+        }
+
+        public Object next(){
+            if(ks != null)
+            {
+                Object key = ks.first();
+                ks = ks.next();
+                return entryAt(key);
+            }
+            else if(extIter != null && extIter.hasNext())
+                return extIter.next();
+            else
+                throw new NoSuchElementException();
+        }
+
+        public void remove(){
+            throw new UnsupportedOperationException();
+        }
+    };
+}
 
 public int count(){
 	return vals.length + RT.count(ext);
@@ -221,7 +245,7 @@ static class Seq extends ASeq{
 	}
 
 	public Object first(){
-		return new MapEntry(keys.first(), vals[i]);
+		return MapEntry.create(keys.first(), vals[i]);
 	}
 
 	public ISeq next(){

@@ -13,7 +13,7 @@
       dependency info."
       :author "Rich Hickey"}
   clojure.core.reducers
-  (:refer-clojure :exclude [reduce map mapcat filter remove take take-while drop flatten])
+  (:refer-clojure :exclude [reduce map mapcat filter remove take take-while drop flatten cat])
   (:require [clojure.walk :as walk]))
 
 (alias 'core 'clojure.core)
@@ -175,9 +175,14 @@
   [f coll]
   (folder coll
    (fn [f1]
-     (rfn [f1 k]
-          ([ret k v]
-             (reduce f1 ret (f k v)))))))
+     (let [f1 (fn
+                ([ret v]
+                  (let [x (f1 ret v)] (if (reduced? x) (reduced x) x)))
+                ([ret k v]
+                  (let [x (f1 ret k v)] (if (reduced? x) (reduced x) x))))]
+       (rfn [f1 k]
+            ([ret k v]
+               (reduce f1 ret (f k v))))))))
 
 (defcurried filter
   "Retains values in the reduction of coll for which (pred val)

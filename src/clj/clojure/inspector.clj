@@ -21,9 +21,11 @@
 
 (defn collection-tag [x]
   (cond 
-   (instance? java.util.Map$Entry x) :entry
-   (instance? java.util.Map x) :map
+   (map-entry? x) :entry
+   (instance? java.util.Map x) :seqable
+   (instance? java.util.Set x) :seqable
    (sequential? x) :seq
+   (instance? clojure.lang.Seqable x) :seqable
    :else :atom))
 
 (defmulti is-leaf collection-tag)
@@ -44,10 +46,12 @@
 (defmethod get-child-count :entry [e]
   (count (val e)))
 
-(defmethod is-leaf :map [m]
+(defmethod is-leaf :seqable [parent]
   false)
-(defmethod get-child :map [m index]
-  (nth (seq m) index))
+(defmethod get-child :seqable [parent index]
+  (nth (seq parent) index))
+(defmethod get-child-count :seqable [parent]
+  (count (seq parent)))
 
 (defn tree-model [data]
   (proxy [TreeModel] []

@@ -13,34 +13,34 @@
 (deftest defn-error-messages
   (testing "multiarity syntax invalid parameter declaration"
     (is (fails-with-cause? 
-          IllegalArgumentException 
-          #"Parameter declaration arg1 should be a vector"
+          clojure.lang.ExceptionInfo
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn foo (arg1 arg2))))))
 
   (testing "multiarity syntax invalid signature"
     (is (fails-with-cause? 
-          IllegalArgumentException 
-          #"Invalid signature \[a b\] should be a list"
+          clojure.lang.ExceptionInfo
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn foo 
                              ([a] 1)
                              [a b])))))
 
   (testing "assume single arity syntax"
     (is (fails-with-cause? 
-          IllegalArgumentException 
-          #"Parameter declaration a should be a vector"
+          clojure.lang.ExceptionInfo
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn foo a)))))
 
   (testing "bad name"
     (is (fails-with-cause? 
-          IllegalArgumentException 
-          #"First argument to defn must be a symbol"
+          clojure.lang.ExceptionInfo
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn "bad docstring" testname [arg1 arg2])))))
          
   (testing "missing parameter/signature"
     (is (fails-with-cause? 
-          IllegalArgumentException 
-          #"Parameter declaration missing"
+          clojure.lang.ExceptionInfo
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn testname)))))
 
   (testing "allow trailing map"
@@ -48,9 +48,17 @@
 
   (testing "don't allow interleaved map"
     (is (fails-with-cause? 
-          IllegalArgumentException 
-          #"Invalid signature \{:a :b\} should be a list"
+          clojure.lang.ExceptionInfo
+          #"Call to clojure.core/defn did not conform to spec"
           (eval-in-temp-ns (defn a "asdf" ([a] 1) {:a :b} ([] 1)))))))
+
+(deftest non-dynamic-warnings
+  (testing "no warning for **"
+    (is (empty? (with-err-print-writer
+                  (eval-in-temp-ns (defn ** ([a b] (Math/pow (double a) (double b)))))))))
+  (testing "warning for *hello*"
+    (is (not (empty? (with-err-print-writer
+                       (eval-in-temp-ns (def *hello* "hi"))))))))
 
 (deftest dynamic-redefinition
   ;; too many contextual things for this kind of caching to work...

@@ -164,7 +164,7 @@ radix specifier is in the form #XXr where XX is the decimal value of *print-base
                       (make-pretty-writer base-writer# *print-right-margin* *print-miser-width*)
                       base-writer#)]
        ~@body
-       (.ppflush *out*))))
+       (.ppflush ^PrettyFlush *out*))))
 
 
 ;;;TODO: if pretty print is not set, don't use pr but rather something that respects *print-base*, etc.

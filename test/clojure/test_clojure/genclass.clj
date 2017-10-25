@@ -10,6 +10,7 @@
       :author "Stuart Halloway, Daniel Solano Gómez"}
   clojure.test-clojure.genclass
   (:use clojure.test clojure.test-helper)
+  (:require clojure.test_clojure.genclass.examples)
   (:import [clojure.test_clojure.genclass.examples
             ExampleClass
             ExampleAnnotationClass
@@ -140,3 +141,11 @@
                "returnsFloatArray"   :floats
                "returnsDoubleArray"  :doubles
                "returnsBooleanArray" :booleans))))))
+
+(deftest gen-interface-source-file
+  (let [classReader (clojure.asm.ClassReader. "clojure.test_clojure.genclass.examples.ArrayGenInterface")
+        sourceFile (StringBuilder.)
+        sourceVisitor (proxy [clojure.asm.ClassVisitor] [clojure.asm.Opcodes/ASM4 nil]
+                        (visitSource [source debug] (.append sourceFile source)))]
+    (.accept classReader sourceVisitor 0)
+    (is (= "examples.clj" (str sourceFile)))))

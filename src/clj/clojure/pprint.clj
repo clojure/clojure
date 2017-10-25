@@ -38,6 +38,7 @@ complete documentation on the the clojure web site on github.",
     (:refer-clojure :exclude (deftype))
     (:use [clojure.walk :only [walk]]))
 
+(set! *warn-on-reflection* true)
 
 (load "pprint/utilities")
 (load "pprint/column_writer")

@@ -14,8 +14,8 @@ import java.io.Serializable;
 import java.util.*;
 
 public abstract class ASeq extends Obj implements ISeq, Sequential, List, Serializable, IHashEq {
-transient int _hash = -1;
-transient int _hasheq = -1;
+transient int _hash;
+transient int _hasheq;
 
 public String toString(){
 	return RT.printString(this);
@@ -62,7 +62,7 @@ public boolean equals(Object obj){
 }
 
 public int hashCode(){
-	if(_hash == -1)
+	if(_hash == 0)
 		{
 		int hash = 1;
 		for(ISeq s = seq(); s != null; s = s.next())
@@ -75,14 +75,15 @@ public int hashCode(){
 }
 
 public int hasheq(){
-	if(_hasheq == -1)
+	if(_hasheq == 0)
 		{
-		int hash = 1;
-		for(ISeq s = seq(); s != null; s = s.next())
-			{
-			hash = 31 * hash + Util.hasheq(s.first());
-			}
-		this._hasheq = hash;
+//		int hash = 1;
+//		for(ISeq s = seq(); s != null; s = s.next())
+//			{
+//			hash = 31 * hash + Util.hasheq(s.first());
+//			}
+//		this._hasheq = hash;
+		_hasheq  = Murmur3.hashOrdered(this);
 		}
 	return _hasheq;
 }

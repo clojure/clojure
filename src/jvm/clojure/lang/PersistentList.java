@@ -19,7 +19,7 @@ private final Object _first;
 private final IPersistentList _rest;
 private final int _count;
 
-public static IFn creator = new RestFn(){
+static public class Primordial extends RestFn{
 	final public int getRequiredArity(){
 		return 0;
 	}
@@ -27,7 +27,22 @@ public static IFn creator = new RestFn(){
 	final protected Object doInvoke(Object args) {
 		if(args instanceof ArraySeq)
 			{
-			Object[] argsarray = (Object[]) ((ArraySeq) args).array;
+			Object[] argsarray = ((ArraySeq) args).array;
+			IPersistentList ret = EMPTY;
+			for(int i = argsarray.length - 1; i >= ((ArraySeq)args).i; --i)
+				ret = (IPersistentList) ret.cons(argsarray[i]);
+			return ret;
+			}
+		LinkedList list = new LinkedList();
+		for(ISeq s = RT.seq(args); s != null; s = s.next())
+			list.add(s.first());
+		return create(list);
+	}
+
+	static public Object invokeStatic(ISeq args) {
+		if(args instanceof ArraySeq)
+			{
+			Object[] argsarray = ((ArraySeq) args).array;
 			IPersistentList ret = EMPTY;
 			for(int i = argsarray.length - 1; i >= 0; --i)
 				ret = (IPersistentList) ret.cons(argsarray[i]);
@@ -46,7 +61,9 @@ public static IFn creator = new RestFn(){
 	public IPersistentMap meta(){
 		return null;
 	}
-};
+}
+
+public static IFn creator = new Primordial();
 
 final public static EmptyList EMPTY = new EmptyList(null);
 
@@ -113,24 +130,38 @@ public PersistentList withMeta(IPersistentMap meta){
 
 public Object reduce(IFn f) {
 	Object ret = first();
-	for(ISeq s = next(); s != null; s = s.next())
-		ret = f.invoke(ret, s.first());
+	for(ISeq s = next(); s != null; s = s.next()) {
+        ret = f.invoke(ret, s.first());
+        if (RT.isReduced(ret)) return ((IDeref)ret).deref();;
+    }
 	return ret;
 }
 
 public Object reduce(IFn f, Object start) {
 	Object ret = f.invoke(start, first());
-	for(ISeq s = next(); s != null; s = s.next())
+	for(ISeq s = next(); s != null; s = s.next()) {
+        if (RT.isReduced(ret)) return ((IDeref)ret).deref();
 		ret = f.invoke(ret, s.first());
+    }
+	if (RT.isReduced(ret)) return ((IDeref)ret).deref();
 	return ret;
 }
 
 
-    static class EmptyList extends Obj implements IPersistentList, List, ISeq, Counted{
+    static class EmptyList extends Obj implements IPersistentList, List, ISeq, Counted, IHashEq{
+	static final int hasheq = Murmur3.hashOrdered(Collections.EMPTY_LIST);
 
 	public int hashCode(){
 		return 1;
 	}
+
+	public int hasheq(){
+		return hasheq;
+	}
+
+    public String toString() {
+        return "()";
+    }
 
     public boolean equals(Object o) {
         return (o instanceof Sequential || o instanceof List) && RT.seq(o) == null;

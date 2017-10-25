@@ -203,3 +203,10 @@
       ; Java objects
       (new java.util.Date) ))
 
+(deftest test-some?
+  (are [expected x] (= expected (some? x))
+       false nil
+       true false
+       true 0
+       true "abc"
+       true []))

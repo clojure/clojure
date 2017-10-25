@@ -82,7 +82,7 @@ private void warnOrFailOnReplace(Symbol sym, Object o, Object v){
     if (o instanceof Var)
         {
         Namespace ns = ((Var)o).ns;
-        if (ns == this)
+        if (ns == this || (v instanceof Var && ((Var)v).ns  == RT.CLOJURE_NS))
             return;
         if (ns != RT.CLOJURE_NS)
             throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);

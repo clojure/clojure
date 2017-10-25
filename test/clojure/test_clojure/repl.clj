@@ -15,25 +15,33 @@
   (is (= (platform-newlines "(defn foo [])\n") (with-out-str (source clojure.test-clojure.repl.example/foo))))
   (is (nil? (source-fn 'non-existent-fn))))
 
+(deftest test-source-read-eval-unknown
+  (is (thrown? IllegalStateException (binding [*read-eval* :unknown] (source reduce)))))
+
+(deftest test-source-read-eval-false
+  (is (binding [*read-eval* false] (with-out-str (source reduce)))))
+
 (deftest test-dir
   (is (thrown? Exception (dir-fn 'non-existent-ns)))
   (is (= '[bar foo] (dir-fn 'clojure.test-clojure.repl.example)))
+  (binding [*ns* (the-ns 'clojure.test-clojure.repl)]
+    (is (= (dir-fn 'clojure.string) (dir-fn 'str))))
   (is (= (platform-newlines "bar\nfoo\n") (with-out-str (dir clojure.test-clojure.repl.example)))))
 
 (deftest test-apropos
   (testing "with a regular expression"
-    (is (= '[defmacro] (apropos #"^defmacro$")))
-    (is (some #{'defmacro} (apropos #"def.acr.")))
+    (is (= '[clojure.core/defmacro] (apropos #"^defmacro$")))
+    (is (some #{'clojure.core/defmacro} (apropos #"def.acr.")))
     (is (= [] (apropos #"nothing-has-this-name"))))
 
   (testing "with a string"
-    (is (some #{'defmacro} (apropos "defmacro")))
-    (is (some #{'defmacro} (apropos "efmac")))
+    (is (some #{'clojure.core/defmacro} (apropos "defmacro")))
+    (is (some #{'clojure.core/defmacro} (apropos "efmac")))
     (is (= [] (apropos "nothing-has-this-name"))))
 
   (testing "with a symbol"
-    (is (some #{'defmacro} (apropos 'defmacro)))
-    (is (some #{'defmacro} (apropos 'efmac)))
+    (is (some #{'clojure.core/defmacro} (apropos 'defmacro)))
+    (is (some #{'clojure.core/defmacro} (apropos 'efmac)))
     (is (= [] (apropos 'nothing-has-this-name)))))
 
 

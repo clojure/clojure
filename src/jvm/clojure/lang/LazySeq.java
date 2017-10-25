@@ -37,19 +37,8 @@ public Obj withMeta(IPersistentMap meta){
 final synchronized Object sval(){
 	if(fn != null)
 		{
-		try
-			{
-			sv = fn.invoke();
-			fn = null;
-			}
-		catch(RuntimeException e)
-			{
-			throw e;
-			}
-		catch(Exception e)
-			{
-			throw Util.sneakyThrow(e);
-			}
+                sv = fn.invoke();
+                fn = null;
 		}
 	if(sv != null)
 		return sv;
@@ -108,27 +97,28 @@ public IPersistentCollection empty(){
 }
 
 public boolean equiv(Object o){
-	return equals(o);
+	ISeq s = seq();
+	if(s != null)
+		return s.equiv(o);
+	else
+		return (o instanceof Sequential || o instanceof List) && RT.seq(o) == null;
 }
 
 public int hashCode(){
 	ISeq s = seq();
 	if(s == null)
 		return 1;
-	return Util.hash(seq());
+	return Util.hash(s);
 }
 
 public int hasheq(){
-	ISeq s = seq();
-	if(s == null)
-		return 1;
-	return Util.hasheq(seq());
+	return Murmur3.hashOrdered(this);
 }
 
 public boolean equals(Object o){
 	ISeq s = seq();
 	if(s != null)
-		return s.equiv(o);
+		return s.equals(o);
 	else
 		return (o instanceof Sequential || o instanceof List) && RT.seq(o) == null;
 }
@@ -195,7 +185,7 @@ public boolean contains(Object o){
 }
 
 public Iterator iterator(){
-	return new SeqIterator(seq());
+	return new SeqIterator(this);
 }
 
 //////////// List stuff /////////////////

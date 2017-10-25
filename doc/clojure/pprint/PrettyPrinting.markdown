@@ -93,7 +93,7 @@ The pretty printer comes with two pre-defined dispatch tables to cover
 the most common situations:
 
 `*`simple-dispatch`*` - supports basic representation of data in various
-Clojure structures: seqs, maps, vectors, etc. in a fairly statndard
+Clojure structures: seqs, maps, vectors, etc. in a fairly standard
 way. When structures need to be broken across lines, following lines
 are indented to line up with the first element. `*`simple-dispatch`*` is
 the default and is good for showing the output of most operations.
@@ -124,7 +124,7 @@ An example formatted with code dispatch:
     user=> 
 
 There are three ways to set the current dispatch: set it to a specific
-table permanantly with set-pprint-dispatch, bind it with
+table permanently with set-pprint-dispatch, bind it with
 with-pprint-dispatch (as shown in the example above), or use the
 :dispatch keyword argument to write.
 
@@ -174,7 +174,7 @@ For example:
 
 As with the regular Clojure print function, this variable controls the 
 number of items that are printed at each layer of structure. When a
-layer has too many items, elipses (...) are displayed. 
+layer has too many items, ellipses (...) are displayed.
 
 For example:
 

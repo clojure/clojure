@@ -11,7 +11,7 @@
 
 (require '[clojure.set :as set]
          '[clojure.string :as str])
-(import '[clojure.asm ClassReader ClassVisitor Type]
+(import '[clojure.asm ClassReader ClassVisitor Type Opcodes]
          '[java.lang.reflect Modifier]
          java.io.InputStream)
 
@@ -166,7 +166,7 @@ the kinds of objects to which they can apply."}
 (deftype JavaReflector [classloader]
   Reflector
   (do-reflect [_ typeref]
-           (let [cls (Class/forName (typename typeref) false classloader)]
+           (let [cls (clojure.lang.RT/classForName (typename typeref) false classloader)]
              {:bases (not-empty (set (map typesym (bases cls))))
               :flags (parse-flags (.getModifiers cls) :class)
               :members (set/union (declared-fields cls)
@@ -202,9 +202,10 @@ the kinds of objects to which they can apply."}
             result (atom {:bases #{} :flags #{} :members #{}})]
         (.accept
          r
-         (reify
-          ClassVisitor
-          (visit [_ version access name signature superName interfaces]
+         (proxy
+          [ClassVisitor]
+          [Opcodes/ASM4]
+          (visit [version access name signature superName interfaces]
                  (let [flags (parse-flags access :class)
                        ;; ignore java.lang.Object on interfaces to match reflection
                        superName (if (and (flags :interface)
@@ -219,19 +220,20 @@ the kinds of objects to which they can apply."}
                                   (not-empty))]
                    (swap! result merge {:bases bases 
                                         :flags flags})))
-          (visitSource [_ name debug])
-          (visitInnerClass [_ name outerName innerName access])
-          (visitField [_ access name desc signature value]
-                      (swap! result update-in [:members] (fnil conj #{})
+          (visitAnnotation [desc visible])
+          (visitSource [name debug])
+          (visitInnerClass [name outerName innerName access])
+          (visitField [access name desc signature value]
+                      (swap! result update :members (fnil conj #{})
                              (Field. (symbol name)
                                      (field-descriptor->class-symbol desc)
                                      class-symbol
                                      (parse-flags access :field)))
                       nil)
-          (visitMethod [_ access name desc signature exceptions]
+          (visitMethod [access name desc signature exceptions]
                        (when-not (= name "<clinit>")
                          (let [constructor? (= name "<init>")]
-                           (swap! result update-in [:members] (fnil conj #{})
+                           (swap! result update :members (fnil conj #{})
                                   (let [{:keys [parameter-types return-type]} (parse-method-descriptor desc)
                                         flags (parse-flags access :method)]
                                     (if constructor?
@@ -247,7 +249,7 @@ the kinds of objects to which they can apply."}
                                                (vec (map internal-name->class-symbol exceptions))
                                                flags))))))
                        nil)
-          (visitEnd [_])
+          (visitEnd [])
           ) 0)
         @result))))
 

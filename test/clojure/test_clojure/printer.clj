@@ -99,3 +99,41 @@
        1N
        1M
        "hi"))
+
+(def ^{:foo :anything} var-with-meta 42)
+(def ^{:type :anything} var-with-type 666)
+
+(deftest print-var
+  (are [x s] (= s (pr-str x))
+       #'pr-str  "#'clojure.core/pr-str"
+       #'var-with-meta "#'clojure.test-clojure.printer/var-with-meta"
+       #'var-with-type "#'clojure.test-clojure.printer/var-with-type"))
+
+(deftest print-meta
+  (are [x s] (binding [*print-meta* true] 
+               (let [pstr (pr-str x)]
+                 (and (.endsWith pstr s)
+                      (.startsWith pstr "^")
+                      (.contains pstr (pr-str (meta x))))))
+       #'pr-str  "#'clojure.core/pr-str"
+       #'var-with-meta "#'clojure.test-clojure.printer/var-with-meta"
+       #'var-with-type "#'clojure.test-clojure.printer/var-with-type"))
+
+(deftest print-throwable
+  (binding [*data-readers* {'error identity}]
+    (are [e] (= (-> e Throwable->map)
+                (-> e pr-str read-string))
+         (Exception. "heyo")
+         (Throwable. "I can a throwable"
+                     (Exception. "chain 1"
+                                 (Exception. "chan 2")))
+         (ex-info "an ex-info" {:with "its" :data 29})
+         (Exception. "outer"
+                     (ex-info "an ex-info" {:with "data"}
+                              (Error. "less outer"
+                                      (ex-info "the root"
+                                               {:with "even" :more 'data})))))))
+
+(deftest print-ns-maps
+  (is (= "#:user{:a 1}" (binding [*print-namespace-maps* true] (pr-str {:user/a 1}))))
+  (is (= "{:user/a 1}" (binding [*print-namespace-maps* false] (pr-str {:user/a 1})))))

@@ -16,7 +16,8 @@
 
 
 (ns clojure.test-clojure.test
-  (:use clojure.test))
+  (:use clojure.test)
+  (:require [clojure.stacktrace :as stack]))
 
 (deftest can-test-symbol
   (let [x true]
@@ -72,6 +73,14 @@
   (is (re-find #"ab" "abbabba") "Should pass")
   (is (re-find #"cd" "abbabba") "Should fail"))
 
+(deftest clj-1102-empty-stack-trace-should-not-throw-exceptions
+  (let [empty-stack (into-array (Class/forName "java.lang.StackTraceElement")
+                                [])
+        t (doto (Exception.) (.setStackTrace empty-stack))]
+    (is (map? (#'clojure.test/file-and-line t 0)) "Should pass")
+    (is (map? (#'clojure.test/stacktrace-file-and-line empty-stack)) "Should pass")
+    (is (string? (with-out-str (stack/print-stack-trace t))) "Should pass")))
+
 (deftest #^{:has-meta true} can-add-metadata-to-tests
   (is (:has-meta (meta #'can-add-metadata-to-tests)) "Should pass"))
 
@@ -113,3 +122,8 @@
   (binding [original-report report
             report custom-report]
     (test-all-vars (find-ns 'clojure.test-clojure.test))))
+
+(deftest clj-1588-symbols-in-are-isolated-from-test-clauses
+  (binding [report original-report]
+    (are [x y] (= x y)
+      ((fn [x] (inc x)) 1) 2)))

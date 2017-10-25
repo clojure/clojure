@@ -16,6 +16,7 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,13 +25,12 @@ public class EdnReader{
 
 static IFn[] macros = new IFn[256];
 static IFn[] dispatchMacros = new IFn[256];
-static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?([\\D&&[^/]][^/]*)");
+static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
 static Pattern intPat =
 		Pattern.compile(
 				"([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?");
 static Pattern ratioPat = Pattern.compile("([-+]?[0-9]+)/([0-9]+)");
 static Pattern floatPat = Pattern.compile("([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?");
-static final Symbol SLASH = Symbol.intern("/");
 
 static IFn taggedReader = new TaggedReader();
 
@@ -54,6 +54,7 @@ static
 	dispatchMacros['{'] = new SetReader();
 	dispatchMacros['<'] = new UnreadableReader();
 	dispatchMacros['_'] = new DiscardReader();
+	dispatchMacros[':'] = new NamespaceMapReader();
 	}
 
 static boolean nonConstituent(int ch){
@@ -62,12 +63,7 @@ static boolean nonConstituent(int ch){
 
 static public Object readString(String s, IPersistentMap opts){
 	PushbackReader r = new PushbackReader(new java.io.StringReader(s));
-	try {
 	return read(r, opts);
-	}
-	catch(Exception e) {
-	throw Util.sneakyThrow(e);
-	}
 }
 
 static boolean isWhitespace(int ch){
@@ -278,10 +274,6 @@ static private Object interpretToken(String s) {
 		{
 		return RT.F;
 		}
-	else if(s.equals("/"))
-		{
-		return SLASH;
-		}
 
 	Object ret = null;
 
@@ -489,6 +481,59 @@ public static class DiscardReader extends AFn{
 		PushbackReader r = (PushbackReader) reader;
 		read(r, true, null, true, opts);
 		return r;
+	}
+}
+
+public static class NamespaceMapReader extends AFn{
+	public Object invoke(Object reader, Object colon, Object opts) {
+		PushbackReader r = (PushbackReader) reader;
+
+		// Read ns symbol
+		Object sym = read(r, true, null, false, opts);
+		if (!(sym instanceof Symbol) || ((Symbol)sym).getNamespace() != null)
+			throw new RuntimeException("Namespaced map must specify a valid namespace: " + sym);
+		String ns = ((Symbol)sym).getName();
+
+		// Read map
+		int nextChar = read1(r);
+		while(isWhitespace(nextChar))
+			nextChar = read1(r);
+		if('{' != nextChar)
+			throw new RuntimeException("Namespaced map must specify a map");
+		List kvs = readDelimitedList('}', r, true, opts);
+		if((kvs.size() & 1) == 1)
+			throw Util.runtimeException("Namespaced map literal must contain an even number of forms");
+
+		// Construct output map
+		IPersistentMap m = RT.map();
+		Iterator iter = kvs.iterator();
+		while(iter.hasNext()) {
+			Object key = iter.next();
+			Object val = iter.next();
+
+			if(key instanceof Keyword) {
+				Keyword kw = (Keyword) key;
+				if (kw.getNamespace() == null) {
+					m = m.assoc(Keyword.intern(ns, kw.getName()), val);
+				} else if (kw.getNamespace().equals("_")) {
+					m = m.assoc(Keyword.intern(null, kw.getName()), val);
+				} else {
+					m = m.assoc(kw, val);
+				}
+			} else if(key instanceof Symbol) {
+				Symbol s = (Symbol) key;
+				if (s.getNamespace() == null) {
+					m = m.assoc(Symbol.intern(ns, s.getName()), val);
+				} else if (s.getNamespace().equals("_")) {
+					m = m.assoc(Symbol.intern(null, s.getName()), val);
+				} else {
+					m = m.assoc(s, val);
+				}
+			} else {
+				m = m.assoc(key, val);
+			}
+		}
+		return m;
 	}
 }
 

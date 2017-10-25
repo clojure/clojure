@@ -114,38 +114,52 @@ static public int mapHash(IPersistentMap m){
 public int hasheq(){
 	if(_hasheq == -1)
 		{
-		this._hasheq = mapHasheq(this);
+		//this._hasheq = mapHasheq(this);
+		_hasheq = Murmur3.hashUnordered(this);
 		}
 	return _hasheq;
 }
 
 static public int mapHasheq(IPersistentMap m) {
-	int hash = 0;
-	for(ISeq s = m.seq(); s != null; s = s.next())
-		{
-		Map.Entry e = (Map.Entry) s.first();
-		hash += Util.hasheq(e.getKey()) ^
-				Util.hasheq(e.getValue());
-		}
-	return hash;
+	return Murmur3.hashUnordered(m);
+//	int hash = 0;
+//	for(ISeq s = m.seq(); s != null; s = s.next())
+//		{
+//		Map.Entry e = (Map.Entry) s.first();
+//		hash += Util.hasheq(e.getKey()) ^
+//				Util.hasheq(e.getValue());
+//		}
+//	return hash;
 }
 
 static public class KeySeq extends ASeq{
-	ISeq seq;
+	final ISeq seq;
+	final Iterable iterable;
 
 	static public KeySeq create(ISeq seq){
 		if(seq == null)
 			return null;
-		return new KeySeq(seq);
+		return new KeySeq(seq, null);
 	}
 
-	private KeySeq(ISeq seq){
+	static public KeySeq createFromMap(IPersistentMap map){
+		if(map == null)
+			return null;
+		ISeq seq = map.seq();
+		if(seq == null)
+			return null;
+		return new KeySeq(seq, map);
+	}
+
+	private KeySeq(ISeq seq, Iterable iterable){
 		this.seq = seq;
+		this.iterable = iterable;
 	}
 
-	private KeySeq(IPersistentMap meta, ISeq seq){
+	private KeySeq(IPersistentMap meta, ISeq seq, Iterable iterable){
 		super(meta);
 		this.seq = seq;
+		this.iterable = iterable;
 	}
 
 	public Object first(){
@@ -157,26 +171,61 @@ static public class KeySeq extends ASeq{
 	}
 
 	public KeySeq withMeta(IPersistentMap meta){
-		return new KeySeq(meta, seq);
+		return new KeySeq(meta, seq, iterable);
+	}
+
+	public Iterator iterator(){
+		if(iterable == null)
+			return super.iterator();
+
+		if(iterable instanceof IMapIterable)
+			return ((IMapIterable)iterable).keyIterator();
+
+		final Iterator mapIter = iterable.iterator();
+		return new Iterator() {
+			public boolean hasNext() {
+				return mapIter.hasNext();
+			}
+
+			public Object next() {
+				return ((Map.Entry)mapIter.next()).getKey();
+			}
+
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 }
 
 static public class ValSeq extends ASeq{
-	ISeq seq;
+	final ISeq seq;
+	final Iterable iterable;
 
 	static public ValSeq create(ISeq seq){
 		if(seq == null)
 			return null;
-		return new ValSeq(seq);
+		return new ValSeq(seq, null);
 	}
 
-	private ValSeq(ISeq seq){
+	static public ValSeq createFromMap(IPersistentMap map) {
+		if(map == null)
+			return null;
+		ISeq seq = map.seq();
+		if(seq == null)
+			return null;
+		return new ValSeq(seq, map);
+	}
+
+	private ValSeq(ISeq seq, Iterable iterable){
 		this.seq = seq;
+		this.iterable = iterable;
 	}
 
-	private ValSeq(IPersistentMap meta, ISeq seq){
+	private ValSeq(IPersistentMap meta, ISeq seq, Iterable iterable){
 		super(meta);
 		this.seq = seq;
+		this.iterable = iterable;
 	}
 
 	public Object first(){
@@ -188,10 +237,50 @@ static public class ValSeq extends ASeq{
 	}
 
 	public ValSeq withMeta(IPersistentMap meta){
-		return new ValSeq(meta, seq);
+		return new ValSeq(meta, seq, iterable);
+	}
+
+	public Iterator iterator(){
+		if(iterable == null)
+			return super.iterator();
+
+		if(iterable instanceof IMapIterable)
+			return ((IMapIterable)iterable).valIterator();
+
+		final Iterator mapIter = iterable.iterator();
+		return new Iterator() {
+			public boolean hasNext() {
+				return mapIter.hasNext();
+			}
+
+			public Object next() {
+				return ((Map.Entry)mapIter.next()).getValue();
+			}
+
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 }
 
+static final IFn MAKE_ENTRY = new AFn() {
+    public Object invoke(Object key, Object val) {
+        return MapEntry.create(key, val);
+    }
+};
+
+static final IFn MAKE_KEY = new AFn() {
+    public Object invoke(Object key, Object val) {
+        return key;
+    }
+};
+
+static final IFn MAKE_VAL = new AFn() {
+    public Object invoke(Object key, Object val) {
+        return val;
+    }
+};
 
 public Object invoke(Object arg1) {
 	return valAt(arg1);

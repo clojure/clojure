@@ -63,7 +63,7 @@ Platform implementers must:
    :bases            a set of names of the type's bases
    :flags            a set of keywords naming the boolean attributes
                      of the type.
-   :members          a set of the type's members. Each membrer is a map
+   :members          a set of the type's members. Each member is a map
                      and can be a constructor, method, or field.
 
    Keys common to all members:

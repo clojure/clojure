@@ -9,9 +9,10 @@
 ; Utilities meant to be used interactively at the REPL
 
 (ns
-  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim"
-     :doc "Utilities meant to be used interactively at the REPL"}
+  ^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim"
+    :doc "Utilities meant to be used interactively at the REPL"}
   clojure.repl
+  (:require [clojure.spec :as spec])
   (:import (java.io LineNumberReader InputStreamReader PushbackReader)
            (clojure.lang RT Reflector)))
 
@@ -79,27 +80,38 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
 (defn- namespace-doc [nspace]
   (assoc (meta nspace) :name (ns-name nspace)))
 
-(defn- print-doc [m]
+(defn- print-doc [{n :ns
+                   nm :name
+                   :keys [forms arglists special-form doc url macro spec]
+                   :as m}]
   (println "-------------------------")
-  (println (str (when-let [ns (:ns m)] (str (ns-name ns) "/")) (:name m)))
+  (println (or spec (str (when n (str (ns-name n) "/")) nm)))
+  (when forms
+    (doseq [f forms]
+      (print "  ")
+      (prn f)))
+  (when arglists
+    (prn arglists))
   (cond
-    (:forms m) (doseq [f (:forms m)]
-                 (print "  ")
-                 (prn f))
-    (:arglists m) (prn (:arglists m)))
-  (if (:special-form m)
+    special-form
     (do
       (println "Special Form")
-      (println " " (:doc m)) 
+      (println " " doc)
       (if (contains? m :url)
-        (when (:url m)
-          (println (str "\n  Please see http://clojure.org/" (:url m))))
-        (println (str "\n  Please see http://clojure.org/special_forms#"
-                      (:name m)))))
-    (do
-      (when (:macro m)
-        (println "Macro")) 
-      (println " " (:doc m)))))
+        (when url
+          (println (str "\n  Please see http://clojure.org/" url)))
+        (println (str "\n  Please see http://clojure.org/special_forms#" nm))))
+    macro
+    (println "Macro")
+    spec
+    (println "Spec"))
+  (when doc (println " " doc))
+  (when n
+    (when-let [fnspec (spec/get-spec (symbol (str (ns-name n)) (name nm)))]
+      (println "Spec")
+      (doseq [role [:args :ret :fn]]
+        (when-let [spec (get fnspec role)]
+          (println " " (str (name role) ":") (spec/describe spec)))))))
 
 (defn find-doc
   "Prints documentation for any var whose documentation or name
@@ -118,13 +130,15 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
                (print-doc m))))
 
 (defmacro doc
-  "Prints documentation for a var or special form given its name"
+  "Prints documentation for a var or special form given its name,
+   or for a spec if given a keyword"
   {:added "1.0"}
   [name]
   (if-let [special-name ('{& fn catch try finally try} name)]
     (#'print-doc (#'special-doc special-name))
     (cond
       (special-doc-map name) `(#'print-doc (#'special-doc '~name))
+      (keyword? name) `(#'print-doc {:spec '~name :doc '~(spec/describe name)})
       (find-ns name) `(#'print-doc (#'namespace-doc (find-ns '~name)))
       (resolve name) `(#'print-doc (meta (var ~name))))))
 
@@ -149,8 +163,11 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
                 pbr (proxy [PushbackReader] [rdr]
                       (read [] (let [i (proxy-super read)]
                                  (.append text (char i))
-                                 i)))]
-            (read (PushbackReader. pbr))
+                                 i)))
+                read-opts (if (.endsWith ^String filepath "cljc") {:read-cond :allow} {})]
+            (if (= :unknown *read-eval*)
+              (throw (IllegalStateException. "Unable to read source while *read-eval* is :unknown."))
+              (read read-opts (PushbackReader. pbr)))
             (str text)))))))
 
 (defmacro source
@@ -163,22 +180,24 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
   `(println (or (source-fn '~n) (str "Source not found"))))
 
 (defn apropos
-  "Given a regular expression or stringable thing, return a seq of
-all definitions in all currently-loaded namespaces that match the
+  "Given a regular expression or stringable thing, return a seq of all
+public definitions in all currently-loaded namespaces that match the
 str-or-pattern."
   [str-or-pattern]
   (let [matches? (if (instance? java.util.regex.Pattern str-or-pattern)
                    #(re-find str-or-pattern (str %))
                    #(.contains (str %) (str str-or-pattern)))]
-    (mapcat (fn [ns]
-              (filter matches? (keys (ns-publics ns))))
-            (all-ns))))
+    (sort (mapcat (fn [ns]
+                    (let [ns-name (str ns)]
+                      (map #(symbol ns-name (str %))
+                           (filter matches? (keys (ns-publics ns))))))
+                  (all-ns)))))
 
 (defn dir-fn
   "Returns a sorted seq of symbols naming public vars in
-  a namespace"
+  a namespace or namespace alias. Looks for aliases in *ns*"
   [ns]
-  (sort (map first (ns-publics (the-ns ns)))))
+  (sort (map first (ns-publics (the-ns (get (ns-aliases *ns*) ns ns))))))
 
 (defmacro dir
   "Prints a sorted directory of public vars in a namespace"
@@ -186,33 +205,12 @@ str-or-pattern."
   `(doseq [v# (dir-fn '~nsname)]
      (println v#)))
 
-(def ^:private demunge-map
-  (into {"$" "/"} (map (fn [[k v]] [v k]) clojure.lang.Compiler/CHAR_MAP)))
-
-(def ^:private demunge-pattern
-  (re-pattern (apply str (interpose "|" (map #(str "\\Q" % "\\E")
-                                             (keys demunge-map))))))
-
-(defn- re-replace [re s f]
-  (let [m (re-matcher re s)
-        mseq (take-while identity
-                         (repeatedly #(when (re-find m)
-                                        [(re-groups m) (.start m) (.end m)])))]
-    (apply str
-           (concat
-             (mapcat (fn [[_ _ start] [groups end]]
-                       (if end
-                         [(subs s start end) (f groups)]
-                         [(subs s start)]))
-                     (cons [0 0 0] mseq)
-                     (concat mseq [nil]))))))
-
 (defn demunge
   "Given a string representation of a fn class,
   as in a stack trace element, returns a readable version."
   {:added "1.3"}
   [fn-name]
-  (re-replace demunge-pattern fn-name demunge-map))
+  (clojure.lang.Compiler/demunge fn-name))
 
 (defn root-cause
   "Returns the initial cause of an exception or error by peeling off all of
@@ -233,6 +231,7 @@ str-or-pattern."
   [^StackTraceElement el]
   (let [file (.getFileName el)
         clojure-fn? (and file (or (.endsWith file ".clj")
+                                  (.endsWith file ".cljc")
                                   (= file "NO_SOURCE_FILE")))]
     (str (if clojure-fn?
            (demunge (.getClassName el))

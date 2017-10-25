@@ -17,17 +17,16 @@ import java.io.ObjectStreamException;
 
 
 public class Symbol extends AFn implements IObj, Comparable, Named, Serializable, IHashEq{
-//these must be interned strings!
 final String ns;
 final String name;
-final int hash;
+private int _hasheq;
 final IPersistentMap _meta;
-String _str;
+transient String _str;
 
 public String toString(){
 	if(_str == null){
 		if(ns != null)
-			_str = (ns + "/" + name).intern();
+			_str = (ns + "/" + name);
 		else
 			_str = name;
 	}
@@ -53,21 +52,20 @@ static public Symbol create(String nsname) {
 }
     
 static public Symbol intern(String ns, String name){
-	return new Symbol(ns == null ? null : ns.intern(), name.intern());
+	return new Symbol(ns, name);
 }
 
 static public Symbol intern(String nsname){
-	int i = nsname.lastIndexOf('/');
+	int i = nsname.indexOf('/');
 	if(i == -1 || nsname.equals("/"))
-		return new Symbol(null, nsname.intern());
+		return new Symbol(null, nsname);
 	else
-		return new Symbol(nsname.substring(0, i).intern(), nsname.substring(i + 1).intern());
+		return new Symbol(nsname.substring(0, i), nsname.substring(i + 1));
 }
 
 private Symbol(String ns_interned, String name_interned){
 	this.name = name_interned;
 	this.ns = ns_interned;
-	this.hash = Util.hashCombine(name.hashCode(), Util.hash(ns));
 	this._meta = null;
 }
 
@@ -79,16 +77,18 @@ public boolean equals(Object o){
 
 	Symbol symbol = (Symbol) o;
 
-	//identity compares intended, names are interned
-	return name == symbol.name && ns == symbol.ns;
+	return Util.equals(ns,symbol.ns) && name.equals(symbol.name);
 }
 
 public int hashCode(){
-	return hash;
+	return Util.hashCombine(name.hashCode(), Util.hash(ns));
 }
 
 public int hasheq() {
-	return hash;
+	if(_hasheq == 0){
+		_hasheq = Util.hashCombine(Murmur3.hashUnencodedChars(name), Util.hash(ns));
+	}
+	return _hasheq;
 }
 
 public IObj withMeta(IPersistentMap meta){
@@ -99,7 +99,6 @@ private Symbol(IPersistentMap meta, String ns, String name){
 	this.name = name;
 	this.ns = ns;
 	this._meta = meta;
-	this.hash = Util.hashCombine(name.hashCode(), Util.hash(ns));
 }
 
 public int compareTo(Object o){

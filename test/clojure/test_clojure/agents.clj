@@ -165,7 +165,7 @@
                        x))
         small-lbq (java.util.concurrent.LinkedBlockingQueue. queue-size)
         worker (seque small-lbq slow-seq)]
-    (doall worker)
+    (dorun worker)
     (is (= worker slow-seq))
     (Thread/sleep 250) ;; make sure agents have time to run or get blocked
     (let [queue-backlog (.size small-lbq)]
@@ -175,6 +175,13 @@
         (Thread/sleep 250) ;; see if agent was blocking, indicating a thread leak
         (is (= (.size small-lbq)
                (dec queue-backlog)))))))
+
+;; Check for a deadlock condition when one seque was fed into another
+;; seque.  Note that this test does not throw an exception or
+;; otherwise fail if the issue is not fixed -- it simply deadlocks and
+;; hangs until killed.
+(deftest seque-into-seque-deadlock
+  (is (= (range 10) (seque 3 (seque 3 (range 10))))))
 
 ; http://clojure.org/agents
 

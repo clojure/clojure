@@ -22,8 +22,10 @@
                                 read-instant-calendar
                                 read-instant-timestamp]])
   (:require clojure.walk
+            [clojure.edn :as edn]
             [clojure.test.generative :refer (defspec)]
-            [clojure.test-clojure.generators :as cgen])
+            [clojure.test-clojure.generators :as cgen]
+            [clojure.edn :as edn])
   (:import [clojure.lang BigInt Ratio]
            java.io.File
            java.util.TimeZone))
@@ -433,6 +435,11 @@
     ;; sanity check against e.g. reading returning ()
     (is (= (count expected-metadata) @verified-forms))))
 
+(deftest set-line-number
+  (let [r (clojure.lang.LineNumberingPushbackReader. *in*)]
+    (.setLineNumber r 100)
+    (is (= 100 (.getLineNumber r)))))
+
 (deftest t-Metadata
   (is (= (meta '^:static ^:awesome ^{:static false :bar :baz} sym) {:awesome true, :bar :baz, :static true})))
 
@@ -459,6 +466,14 @@
 ;; (read stream eof-is-error eof-value is-recursive)
 
 (deftest t-read)
+
+(deftest division
+  (is (= clojure.core// /))
+  (binding [*ns* *ns*]
+    (eval '(do (ns foo
+                 (:require [clojure.core :as bar])
+                 (:use [clojure.test]))
+               (is (= clojure.core// bar//))))))
 
 (deftest Instants
   (testing "Instants are read as java.util.Date by default"
@@ -530,7 +545,7 @@
     (binding [*data-readers* {'inst read-instant-calendar}]
       (testing "read-instant-calendar should preserve timezone"
         (is (not= (read-string s) (read-string s2)))))))
-      
+
 ;; UUID Literals
 ;; #uuid "550e8400-e29b-41d4-a716-446655440000"
 
@@ -608,3 +623,128 @@
   [^{:tag cgen/dup-readable} o]
   (when-not (= o %)
     (throw (ex-info "Value cannot roundtrip, see ex-data" {:printed o :read %}))))
+
+(defrecord TestRecord [x y])
+
+(deftest preserve-read-cond-test
+  (let [x (read-string {:read-cond :preserve} "#?(:clj foo :cljs bar)" )]
+       (is (reader-conditional? x))
+       (is (not (:splicing? x)))
+       (is (= :foo (get x :no-such-key :foo)))
+       (is (= (:form x) '(:clj foo :cljs bar)))
+       (is (= x (reader-conditional '(:clj foo :cljs bar) false))))
+  (let [x (read-string {:read-cond :preserve} "#?@(:clj [foo])" )]
+       (is (reader-conditional? x))
+       (is (:splicing? x))
+       (is (= :foo (get x :no-such-key :foo)))
+       (is (= (:form x) '(:clj [foo])))
+       (is (= x (reader-conditional '(:clj [foo]) true))))
+  (is (thrown-with-msg? RuntimeException #"No reader function for tag"
+                        (read-string {:read-cond :preserve} "#js {:x 1 :y 2}" )))
+  (let [x (read-string {:read-cond :preserve} "#?(:cljs #js {:x 1 :y 2})")
+        [platform tl] (:form x)]
+       (is (reader-conditional? x))
+       (is (tagged-literal? tl))
+       (is (= 'js (:tag tl)))
+       (is (= {:x 1 :y 2} (:form tl)))
+       (is (= :foo (get tl :no-such-key :foo)))
+       (is (= tl (tagged-literal 'js {:x 1 :y 2}))))
+  (testing "print form roundtrips"
+           (doseq [s ["#?(:clj foo :cljs bar)"
+                      "#?(:cljs #js {:x 1, :y 2})"
+                      "#?(:clj #clojure.test_clojure.reader.TestRecord [42 85])"]]
+                  (is (= s (pr-str (read-string {:read-cond :preserve} s)))))))
+
+(deftest reader-conditionals
+  (testing "basic read-cond"
+    (is (= '[foo-form]
+           (read-string {:read-cond :allow :features #{:foo}} "[#?(:foo foo-form :bar bar-form)]")))
+    (is (= '[bar-form]
+           (read-string {:read-cond :allow :features #{:bar}} "[#?(:foo foo-form :bar bar-form)]")))
+    (is (= '[foo-form]
+           (read-string {:read-cond :allow :features #{:foo :bar}} "[#?(:foo foo-form :bar bar-form)]")))
+    (is (= '[]
+           (read-string {:read-cond :allow :features #{:baz}} "[#?( :foo foo-form :bar bar-form)]"))))
+  (testing "environmental features"
+    (is (= "clojure" #?(:clj "clojure" :cljs "clojurescript" :default "default"))))
+  (testing "default features"
+    (is (= "default" #?(:clj-clr "clr" :cljs "cljs" :default "default"))))
+  (testing "splicing"
+    (is (= [] [#?@(:clj [])]))
+    (is (= [:a] [#?@(:clj [:a])]))
+    (is (= [:a :b] [#?@(:clj [:a :b])]))
+    (is (= [:a :b :c] [#?@(:clj [:a :b :c])]))
+    (is (= [:a :b :c] [#?@(:clj [:a :b :c])])))
+  (testing "nested splicing"
+    (is (= [:a :b :c :d :e]
+           [#?@(:clj [:a #?@(:clj [:b #?@(:clj [:c]) :d]):e])]))
+    (is (= '(+ 1 (+ 2 3))
+           '(+ #?@(:clj [1 (+ #?@(:clj [2 3]))]))))
+    (is (= '(+ (+ 2 3) 1)
+           '(+ #?@(:clj [(+ #?@(:clj [2 3])) 1]))))
+    (is (= [:a [:b [:c] :d] :e]
+           [#?@(:clj [:a [#?@(:clj [:b #?@(:clj [[:c]]) :d])] :e])])))
+  (testing "bypass unknown tagged literals"
+    (is (= [1 2 3] #?(:cljs #js [1 2 3] :clj [1 2 3])))
+    (is (= :clojure #?(:foo #some.nonexistent.Record {:x 1} :clj :clojure))))
+  (testing "error cases"
+    (is (thrown-with-msg? RuntimeException #"Feature should be a keyword" (read-string {:read-cond :allow} "#?((+ 1 2) :a)")))
+    (is (thrown-with-msg? RuntimeException #"even number of forms" (read-string {:read-cond :allow} "#?(:cljs :a :clj)")))
+    (is (thrown-with-msg? RuntimeException #"read-cond-splicing must implement" (read-string {:read-cond :allow} "#?@(:clj :a)")))
+    (is (thrown-with-msg? RuntimeException #"is reserved" (read-string {:read-cond :allow} "#?@(:foo :a :else :b)")))
+    (is (thrown-with-msg? RuntimeException #"must be a list" (read-string {:read-cond :allow} "#?[:foo :a :else :b]")))
+    (is (thrown-with-msg? RuntimeException #"Conditional read not allowed" (read-string {:read-cond :BOGUS} "#?[:clj :a :default nil]")))
+    (is (thrown-with-msg? RuntimeException #"Conditional read not allowed" (read-string "#?[:clj :a :default nil]")))
+    (is (thrown-with-msg? RuntimeException #"Reader conditional splicing not allowed at the top level" (read-string {:read-cond :allow} "#?@(:clj [1 2])")))
+    (is (thrown-with-msg? RuntimeException #"Reader conditional splicing not allowed at the top level" (read-string {:read-cond :allow} "#?@(:clj [1])")))
+    (is (thrown-with-msg? RuntimeException #"Reader conditional splicing not allowed at the top level" (read-string {:read-cond :allow} "#?@(:clj []) 1"))))
+  (testing "clj-1698-regression"
+    (let [opts {:features #{:clj} :read-cond :allow}]
+      (is (= 1 (read-string opts "#?(:cljs {'a 1 'b 2} :clj 1)")))
+      (is (= 1 (read-string opts "#?(:cljs (let [{{b :b} :a {d :d} :c} {}]) :clj 1)")))
+      (is (= '(def m {}) (read-string opts "(def m #?(:cljs ^{:a :b} {} :clj  ^{:a :b} {}))")))
+      (is (= '(def m {}) (read-string opts "(def m #?(:cljs ^{:a :b} {} :clj ^{:a :b} {}))")))
+      (is (= 1 (read-string opts "#?(:cljs {:a #_:b :c} :clj 1)")))))
+  (testing "nil expressions"
+    (is (nil? #?(:default nil)))
+    (is (nil? #?(:foo :bar :clj nil)))
+    (is (nil? #?(:clj nil :foo :bar)))
+    (is (nil? #?(:foo :bar :default nil)))))
+
+(deftest eof-option
+  (is (= 23 (read-string {:eof 23} "")))
+  (is (= 23 (read {:eof 23} (clojure.lang.LineNumberingPushbackReader.
+                             (java.io.StringReader. ""))))))
+
+(require '[clojure.string :as s])
+(deftest namespaced-maps
+  (is (= #:a{1 nil, :b nil, :b/c nil, :_/d nil}
+         #:a {1 nil, :b nil, :b/c nil, :_/d nil}
+         {1 nil, :a/b nil, :b/c nil, :d nil}))
+  (is (= #::{1 nil, :a nil, :a/b nil, :_/d nil}
+         #::  {1 nil, :a nil, :a/b nil, :_/d nil}
+         {1 nil, :clojure.test-clojure.reader/a nil, :a/b nil, :d nil} ))
+  (is (= #::s{1 nil, :a nil, :a/b nil, :_/d nil}
+         #::s  {1 nil, :a nil, :a/b nil, :_/d nil}
+         {1 nil, :clojure.string/a nil, :a/b nil, :d nil}))
+  (is (= #::clojure.core{1 nil, :a nil, :a/b nil, :_/d nil} {1 nil, :clojure.core/a nil, :a/b nil, :d nil}))
+  (is (= (read-string "#:a{b 1 b/c 2}") {'a/b 1, 'b/c 2}))
+  (is (= (binding [*ns* (the-ns 'clojure.test-clojure.reader)] (read-string "#::{b 1, b/c 2, _/d 3}")) {'clojure.test-clojure.reader/b 1, 'b/c 2, 'd 3}))
+  (is (= (binding [*ns* (the-ns 'clojure.test-clojure.reader)] (read-string "#::s{b 1, b/c 2, _/d 3}")) {'clojure.string/b 1, 'b/c 2, 'd 3}))
+  (is (= (read-string "#::clojure.core{b 1, b/c 2, _/d 3}") {'clojure.core/b 1, 'b/c 2, 'd 3})))
+
+(deftest namespaced-map-errors
+  (are [err msg form] (thrown-with-msg? err msg (read-string form))
+                      Exception #"Invalid token" "#:::"
+                      Exception #"Namespaced map literal must contain an even number of forms" "#:s{1}"
+                      Exception #"Namespaced map must specify a valid namespace" "#:s/t{1 2}"
+                      Exception #"Namespaced map literal must contain an even number of forms" "#::clojure.core{1}"
+                      Exception #"Namespaced map must specify a valid namespace" "#::clojure.core/t{1 2}"
+                      Exception #"Unknown auto-resolved namespace alias" "#::BOGUS{1 2}"
+                      Exception #"Namespaced map must specify a namespace" "#:: clojure.core{:a 1}"
+                      Exception #"Namespaced map must specify a namespace" "#: clojure.core{:a 1}"))
+
+(deftest namespaced-map-edn
+  (is (= {1 1, :a/b 2, :b/c 3, :d 4}
+         (edn/read-string "#:a{1 1, :b 2, :b/c 3, :_/d 4}")
+         (edn/read-string "#:a {1 1, :b 2, :b/c 3, :_/d 4}"))))
