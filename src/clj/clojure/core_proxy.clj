@@ -341,7 +341,7 @@
   defaults to Object.
 
   The interfaces names must be valid interface types. If a method fn
-  is not provided for a class method, the superclass methd will be
+  is not provided for a class method, the superclass method will be
   called. If a method fn is not provided for an interface method, an
   UnsupportedOperationException will be thrown should it be
   called. Method fns are closures and can capture the environment in
