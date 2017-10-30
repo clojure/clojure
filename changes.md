@@ -29,7 +29,7 @@ Specs rely heavily on predicates and many new type and value oriented predicates
 
 * `boolean?`
 * `int?` `pos-int?` `neg-int?` `nat-int?`
-* `double?` `bigdec?`
+* `double?`
 * `ident?` `simple-ident?` `qualified-ident?`
 * `simple-symbol?` `qualified-symbol?`
 * `simple-keyword?` `qualified-keyword?`
