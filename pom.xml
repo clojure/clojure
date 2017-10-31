@@ -5,7 +5,7 @@
   <artifactId>clojure</artifactId>
   <name>clojure</name>
   <packaging>jar</packaging>
-  <version>1.9.0-beta4</version>
+  <version>1.9.0-master-SNAPSHOT</version>
 
   <url>http://clojure.org/</url>
   <description>Clojure core environment and runtime library.</description>
@@ -30,7 +30,7 @@
     <connection>scm:git:git@github.com:clojure/clojure.git</connection>
     <developerConnection>scm:git:git@github.com:clojure/clojure.git</developerConnection>
     <url>git@github.com:clojure/clojure.git</url>
-    <tag>clojure-1.9.0-beta4</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
