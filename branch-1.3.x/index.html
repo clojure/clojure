@@ -39,10 +39,10 @@ namespace.
     <div class="BranchTOC">
       <span class="toc-header">Other Versions</span>
       <ul id="left-sidebar-branch-list">
-        <li><a class="wiki_link" href="../index.html">v1.8 (stable)</a></li><li><a class="wiki_link" href="../branch-master/index.html">v1.9 (in development)</a></li><li><a class="wiki_link" href="../branch-clojure-1.7.0/index.html">v1.7 (stable)</a></li><li><a class="wiki_link" href="../branch-clojure-1.6.0/index.html">v1.6 (stable)</a></li><li><a class="wiki_link" href="../branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+        <li><a class="wiki_link" href="../index.html">v1.8 (stable)</a></li><li><a class="wiki_link" href="../branch-master/index.html">v1.9 (in development)</a></li><li><a class="wiki_link" href="../branch-clojure-1.7.0/index.html">v1.7 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.6.0/index.html">v1.6 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.1.x/index.html">v1.1 (legacy)</a></li>
       </ul>
     </div>
-    <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
+    <a class="wiki_link" href="https://clojure.org">Clojure Home</a>
   </div>
 </div>
 </div>
@@ -117,33 +117,36 @@ namespace.
 <div id="project-description"><h3>Important Clojure resources</h3>
 <ul>
   <li>The official source code for clojure is on the
-    <a href="http://github.com/clojure/clojure/">
+    <a href="https://github.com/clojure/clojure/">
       Clojure GitHub source page</a>.
   </li>
-  <li>Issues related to clojure and the various pieces of functionality
+  <li>Clojure provides a Java API for invoking Clojure from Java. You can browse the javadoc for the API at
+      <a href="https://clojure.github.io/clojure/javadoc">https://clojure.github.io/clojure/javadoc</a>.
+  </li>
+  <li>Issues related to Clojure and the various pieces of functionality
     within it are discussed in the
-    <a href="http://groups.google.com/group/clojure">
+    <a href="https://groups.google.com/group/clojure">
       Clojure Google group</a>.
   </li>
-  <li>Discussions among clojure developers take place in the
-    <a href="http://groups.google.com/group/clojure-dev">
+  <li>Discussions among Clojure developers take place in the
+    <a href="https://groups.google.com/group/clojure-dev">
       Clojure Dev Google group</a>.
   </li>
   <li>Development planning, design, and documentation happen in
-    <a href="http://dev.clojure.org">
+    <a href="https://dev.clojure.org">
       the Confluence Clojure space</a>.
   </li>
   <li>Issue tracking happens on the
-    <a href="http://dev.clojure.org/jira/browse/CLJ">
+    <a href="https://dev.clojure.org/jira/browse/CLJ">
       the Clojure JIRA site</a>.
   </li>
-  <li>This documentation is maintained in the gh-pages branch of clojure
+  <li>This documentation is maintained in the gh-pages branch of Clojure
     on GitHub and is always available online
-    <a href="http://clojure.github.com/clojure">
+    <a href="https://clojure.github.io/clojure">
       GitHub pages for Clojure</a>.
     If you wish to have a version for off-line use you can use the download
     button on the
-    <a href="http://github.com/clojure/clojure/tree/gh-pages">
+    <a href="https://github.com/clojure/clojure/tree/gh-pages">
       gh-pages branch page at GitHub</a>.
   </li>
 </ul>
@@ -214,9 +217,9 @@ namespace.
   <br />
   <hr />
   <h2 id="clojure.java.io">clojure.java.io</h2>
-  
+  <span id="author-line">by <span id="author-name">Stuart Sierra, Chas Emerick, Stuart Halloway</span><br /></span>
   <a id="api-link" href="clojure.java.io-api.html">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">This file defines polymorphic I/O utility functions for Clojure.</pre>
   
   
   
@@ -240,9 +243,10 @@ namespace.
   <br />
   <hr />
   <h2 id="clojure.java.shell">clojure.java.shell</h2>
-  
+  <span id="author-line">by <span id="author-name">Chris Houser, Stuart Halloway</span><br /></span>
   <a id="api-link" href="clojure.java.shell-api.html">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">Conveniently launch a sub-process providing its stdin and
+collecting its stdout</pre>
   
   
   
@@ -353,9 +357,9 @@ Platform implementers must:
   <br />
   <hr />
   <h2 id="clojure.set">clojure.set</h2>
-  
+  <span id="author-line">by <span id="author-name">Rich Hickey</span><br /></span>
   <a id="api-link" href="clojure.set-api.html">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">Set operations such as union/intersection.</pre>
   
   
   
@@ -379,9 +383,39 @@ Platform implementers must:
   <br />
   <hr />
   <h2 id="clojure.string">clojure.string</h2>
-  
+  <span id="author-line">by <span id="author-name">Stuart Sierra, Stuart Halloway, David Liebke</span><br /></span>
   <a id="api-link" href="clojure.string-api.html">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">Clojure String utilities
+
+It is poor form to (:use clojure.string). Instead, use require
+with :as to specify a prefix, e.g.
+
+(ns your.namespace.here
+  (:require [clojure.string :as str]))
+
+Design notes for clojure.string:
+
+1. Strings are objects (as opposed to sequences). As such, the
+   string being manipulated is the first argument to a function;
+   passing nil will result in a NullPointerException unless
+   documented otherwise. If you want sequence-y behavior instead,
+   use a sequence.
+
+2. Functions are generally not lazy, and call straight to host
+   methods where those are available and efficient.
+
+3. Functions take advantage of String implementation details to
+   write high-performing loop/recurs instead of using higher-order
+   functions. (This is not idiomatic in general-purpose application
+   code.)
+
+4. When a function is documented to accept a string argument, it
+   will take any implementation of the correct *interface* on the
+   host platform. In Java, this is CharSequence, which is more
+   general than String. In ordinary usage you will almost always
+   pass concrete strings. If you are doing something unusual,
+   e.g. passing a mutable implementation of CharSequence, then
+   thead-safety is your responsibility.</pre>
   
   
   
@@ -651,9 +685,18 @@ For additional event types, see the examples in the code.</pre>
   <br />
   <hr />
   <h2 id="clojure.walk">clojure.walk</h2>
-  
+  <span id="author-line">by <span id="author-name">Stuart Sierra</span><br /></span>
   <a id="api-link" href="clojure.walk-api.html">Detailed API documentation</a><br />
-  <pre id="namespace-docstr"></pre>
+  <pre id="namespace-docstr">This file defines a generic tree walker for Clojure data
+structures.  It takes any data structure (list, vector, map, set,
+seq), calls a function on every element, and uses the return value
+of the function in place of the original.  This makes it fairly
+easy to write recursive search-and-replace functions, as shown in
+the examples.
+
+Note: "walk" supports all Clojure data structures EXCEPT maps
+created with sorted-map-by.  There is no (obvious) way to retrieve
+the sorting function.</pre>
   
   
   
@@ -694,7 +737,7 @@ and enumeration.  See Huet</pre>
           </div>
 	</div>
 	<div id="foot">
-	  <div id="copyright" style="text-align: center;">Copyright 2007-2016 by Rich Hickey</div>
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2017 by Rich Hickey</div>
 	</div>
       </div>
       <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
