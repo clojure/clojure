@@ -7,29 +7,32 @@
  * 	 the terms of this license.
  *   You must not remove this notice, or any other, from this software.
 
-Docs: http://clojure.org
+Docs: https://clojure.org
 Feedback: http://groups.google.com/group/clojure
-Getting Started: http://dev.clojure.org/display/doc/Getting+Started
+Getting Started: https://clojure.org/guides/getting_started
 
-To run:  java -cp clojure-${VERSION}.jar clojure.main
-
-To build locally with Ant:  
+To build and run locally with Ant:
 
    One-time setup:    ./antsetup.sh
-   To build:          ant
+   To build:          ant local
+   To run:            java -jar clojure.jar
 
-Maven 2 build instructions:
+To build locally with Maven:
 
-  To build:  mvn package 
-  The built JARs will be in target/
+  To build (output JARs in target/):
+    mvn package
 
-  To build without testing:  mvn package -Dmaven.test.skip=true
+  To build without testing:
+    mvn package -Dmaven.test.skip=true
 
-  To build and install in local Maven repository:  mvn install
+  To build and install in local Maven repository:
+    mvn install
 
-  To build a ZIP distribution:  mvn package -Pdistribution
-  The built .zip will be in target/
+  To build a standalone jar with dependencies included:
+    mvn -Plocal -Dmaven.test.skip=true package
 
+  To run with the standalone jar:
+    java -jar clojure.jar
 
 --------------------------------------------------------------------------
 This program uses the ASM bytecode engineering library which is distributed

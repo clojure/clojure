@@ -194,4 +194,11 @@
     </delete>
   </target>
 
+  <target name="local">
+    <exec executable="mvn">
+      <arg value="-Plocal"/>
+      <arg value="-Dmaven.test.skip=true"/>
+      <arg value="package"/>
+    </exec>
+  </target>
 </project>

@@ -315,5 +315,46 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>local</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.clojure</groupId>
+          <artifactId>test.check</artifactId>
+          <version>0.9.0</version>
+          <exclusions>
+            <exclusion>
+              <groupId>org.clojure</groupId>
+              <artifactId>clojure</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
+                <configuration>
+                  <transformers>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                      <mainClass>clojure.main</mainClass>
+                    </transformer>
+                  </transformers>
+		  <outputFile>clojure.jar</outputFile>
+		</configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>
