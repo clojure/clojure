@@ -1,0 +1,280 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>clojure.walk - Clojure v1.8 API documentation</title>
+    <link rel="icon" href="../static/favicon.png" />
+    <link rel="shortcut icon" href="../static/favicon.png" />
+    <link rel="stylesheet" href="../static/clojure.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/wiki.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/internal.css" type="text/css" media="all" />
+    <style>.menuWrapper{height: 36px;}</style>
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a href="index.html" id="Logo"><img src="../static/clojure-icon.gif" width="100" height="100" alt="Clojure" /></a>
+	<h1><a href="index.html" id="page-header" title="page header title">Clojure Core API Reference</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.8</span> API</span><br />
+    <ul>
+      <li><a href="index.html" class="wiki_link">Overview</a></li>
+      <li><a href="api-index.html" class="wiki_link">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
+      </ul>
+    </div>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a class="wiki_link" href="../index.html">v1.9 (stable)</a></li><li><a class="wiki_link" href="../branch-master/index.html">v1.10 (in development)</a></li><li><a class="wiki_link" href="../branch-clojure-1.7.0/index.html">v1.7 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.6.0/index.html">v1.6 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+      </ul>
+    </div>
+    <a class="wiki_link" href="https://clojure.org">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div class="wiki wikiPage" id="content_view">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#toc0">Overview</a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.walk/keywordize-keys" class="toc-entry-anchor">keywordize-keys</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.walk/macroexpand-all" class="toc-entry-anchor">macroexpand-all</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.walk/postwalk" class="toc-entry-anchor">postwalk</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.walk/postwalk-demo" class="toc-entry-anchor">postwalk-demo</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.walk/postwalk-replace" class="toc-entry-anchor">postwalk-replace</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.walk/prewalk" class="toc-entry-anchor">prewalk</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.walk/prewalk-demo" class="toc-entry-anchor">prewalk-demo</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.walk/prewalk-replace" class="toc-entry-anchor">prewalk-replace</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.walk/stringify-keys" class="toc-entry-anchor">stringify-keys</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.walk/walk" class="toc-entry-anchor">walk</a>
+      
+    </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.walk">clojure.walk</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.8</span><span id="header-status-block"> (<span id="header-status">legacy</span>)</span>
+  </h1>
+<span id="author-line">by <span id="author-name">Stuart Sierra</span><br /></span>
+<br />Full namespace name: <span id="long-name">clojure.walk</span>
+<p></p>
+<h2>Overview</h2>
+
+<pre id="namespace-docstr">This file defines a generic tree walker for Clojure data
+structures.  It takes any data structure (list, vector, map, set,
+seq), calls a function on every element, and uses the return value
+of the function in place of the original.  This makes it fairly
+easy to write recursive search-and-replace functions, as shown in
+the examples.
+
+Note: "walk" supports all Clojure data structures EXCEPT maps
+created with sorted-map-by.  There is no (obvious) way to retrieve
+the sorting function.</pre>
+
+
+<br />
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.walk/keywordize-keys">keywordize-keys</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (keywordize-keys m)
+</pre>
+    <pre id="var-docstr">Recursively transforms all map keys from strings to keywords.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L93">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.walk/macroexpand-all">macroexpand-all</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (macroexpand-all form)
+</pre>
+    <pre id="var-docstr">Recursively performs all possible macroexpansions in form.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L125">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.walk/postwalk">postwalk</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (postwalk f form)
+</pre>
+    <pre id="var-docstr">Performs a depth-first, post-order traversal of form.  Calls f on
+each sub-form, uses f's return value in place of the original.
+Recognizes all Clojure data structures. Consumes seqs as with doall.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L52">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.walk/postwalk-demo">postwalk-demo</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (postwalk-demo form)
+</pre>
+    <pre id="var-docstr">Demonstrates the behavior of postwalk by printing each form as it is
+walked.  Returns form.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L79">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.walk/postwalk-replace">postwalk-replace</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (postwalk-replace smap form)
+</pre>
+    <pre id="var-docstr">Recursively transforms form by replacing keys in smap with their
+values.  Like clojure/replace but works on any data structure.  Does
+replacement at the leaves of the tree first.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L117">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.walk/prewalk">prewalk</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (prewalk f form)
+</pre>
+    <pre id="var-docstr">Like postwalk, but does pre-order traversal.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L60">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.walk/prewalk-demo">prewalk-demo</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (prewalk-demo form)
+</pre>
+    <pre id="var-docstr">Demonstrates the behavior of prewalk by printing each form as it is
+walked.  Returns form.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L86">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.walk/prewalk-replace">prewalk-replace</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (prewalk-replace smap form)
+</pre>
+    <pre id="var-docstr">Recursively transforms form by replacing keys in smap with their
+values.  Like clojure/replace but works on any data structure.  Does
+replacement at the root of the tree first.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L109">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.walk/stringify-keys">stringify-keys</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (stringify-keys m)
+</pre>
+    <pre id="var-docstr">Recursively transforms all map keys from keywords to strings.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L101">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.walk/walk">walk</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (walk inner outer form)
+</pre>
+    <pre id="var-docstr">Traverses form, an arbitrary data structure.  inner and outer are
+functions.  Applies inner to each element of form, building up a
+data structure of the same type, then applies outer to the result.
+Recognizes all Clojure data structures. Consumes seqs as with doall.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.1</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2224dbad5534ff23d3653b07d9dc0a60ba076dd7/src/clj/clojure/walk.clj#L35">Source</a>
+  </div>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2017 by Rich Hickey</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>

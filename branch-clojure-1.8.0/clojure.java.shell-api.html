@@ -1,0 +1,185 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>clojure.java.shell - Clojure v1.8 API documentation</title>
+    <link rel="icon" href="../static/favicon.png" />
+    <link rel="shortcut icon" href="../static/favicon.png" />
+    <link rel="stylesheet" href="../static/clojure.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/wiki.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../static/internal.css" type="text/css" media="all" />
+    <style>.menuWrapper{height: 36px;}</style>
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a href="index.html" id="Logo"><img src="../static/clojure-icon.gif" width="100" height="100" alt="Clojure" /></a>
+	<h1><a href="index.html" id="page-header" title="page header title">Clojure Core API Reference</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.8</span> API</span><br />
+    <ul>
+      <li><a href="index.html" class="wiki_link">Overview</a></li>
+      <li><a href="api-index.html" class="wiki_link">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
+      </ul>
+    </div>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a class="wiki_link" href="../index.html">v1.9 (stable)</a></li><li><a class="wiki_link" href="../branch-master/index.html">v1.10 (in development)</a></li><li><a class="wiki_link" href="../branch-clojure-1.7.0/index.html">v1.7 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.6.0/index.html">v1.6 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="../branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="../branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+      </ul>
+    </div>
+    <a class="wiki_link" href="https://clojure.org">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div class="wiki wikiPage" id="content_view">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#toc0">Overview</a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.shell/sh" class="toc-entry-anchor">sh</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.shell/with-sh-dir" class="toc-entry-anchor">with-sh-dir</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.shell/with-sh-env" class="toc-entry-anchor">with-sh-env</a>
+      
+    </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.java.shell">clojure.java.shell</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.8</span><span id="header-status-block"> (<span id="header-status">legacy</span>)</span>
+  </h1>
+<span id="author-line">by <span id="author-name">Chris Houser, Stuart Halloway</span><br /></span>
+<br />Full namespace name: <span id="long-name">clojure.java.shell</span>
+<p></p>
+<h2>Overview</h2>
+
+<pre id="namespace-docstr">Conveniently launch a sub-process providing its stdin and
+collecting its stdout</pre>
+
+
+<br />
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.shell/sh">sh</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (sh &amp; args)
+</pre>
+    <pre id="var-docstr">Passes the given strings to Runtime.exec() to launch a sub-process.
+
+Options are
+
+:in      may be given followed by any legal input source for
+         clojure.java.io/copy, e.g. InputStream, Reader, File, byte[],
+         or String, to be fed to the sub-process's stdin.
+:in-enc  option may be given followed by a String, used as a character
+         encoding name (for example "UTF-8" or "ISO-8859-1") to
+         convert the input string specified by the :in option to the
+         sub-process's stdin.  Defaults to UTF-8.
+         If the :in option provides a byte array, then the bytes are passed
+         unencoded, and this option is ignored.
+:out-enc option may be given followed by :bytes or a String. If a
+         String is given, it will be used as a character encoding
+         name (for example "UTF-8" or "ISO-8859-1") to convert
+         the sub-process's stdout to a String which is returned.
+         If :bytes is given, the sub-process's stdout will be stored
+         in a byte array and returned.  Defaults to UTF-8.
+:env     override the process env with a map (or the underlying Java
+         String[] if you are a masochist).
+:dir     override the process dir with a String or java.io.File.
+
+You can bind :env or :dir for multiple operations using with-sh-env
+and with-sh-dir.
+
+sh returns a map of
+  :exit =&gt; sub-process's exit code
+  :out  =&gt; sub-process's stdout (as byte[] or String)
+  :err  =&gt; sub-process's stderr (String via platform default encoding)</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/fe0cfc71e6ec7b546066188c555b01dae0e368e8/src/clj/clojure/java/shell.clj#L79">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.shell/with-sh-dir">with-sh-dir</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-sh-dir dir &amp; forms)
+</pre>
+    <pre id="var-docstr">Sets the directory for use with sh, see sh for details.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/fe0cfc71e6ec7b546066188c555b01dae0e368e8/src/clj/clojure/java/shell.clj#L21">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.shell/with-sh-env">with-sh-env</h2>
+    <span id="var-type">macro</span><br />
+    <pre id="var-usage">Usage: (with-sh-env env &amp; forms)
+</pre>
+    <pre id="var-docstr">Sets the environment for use with sh, see sh for details.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/fe0cfc71e6ec7b546066188c555b01dae0e368e8/src/clj/clojure/java/shell.clj#L28">Source</a>
+  </div>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2017 by Rich Hickey</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>
