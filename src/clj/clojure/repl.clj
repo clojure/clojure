@@ -94,18 +94,17 @@ itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
     (prn arglists))
   (cond
     special-form
-    (do
-      (println "Special Form")
-      (println " " doc)
-      (if (contains? m :url)
-        (when url
-          (println (str "\n  Please see http://clojure.org/" url)))
-        (println (str "\n  Please see http://clojure.org/special_forms#" nm))))
+    (println "Special Form")
     macro
     (println "Macro")
     spec
     (println "Spec"))
   (when doc (println " " doc))
+  (when special-form
+    (if (contains? m :url)
+      (when url
+        (println (str "\n  Please see http://clojure.org/" url)))
+      (println (str "\n  Please see http://clojure.org/special_forms#" nm))))
   (when n
     (when-let [fnspec (spec/get-spec (symbol (str (ns-name n)) (name nm)))]
       (println "Spec")
