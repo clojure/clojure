@@ -754,9 +754,11 @@ final static class BitmapIndexedNode implements INode{
 				return null;
 			return new BitmapIndexedNode(null, bitmap ^ bit, removePair(array, idx));
 		}
-		if(Util.equiv(key, keyOrNull))
-			// TODO: collapse
+		if(Util.equiv(key, keyOrNull)) {
+			if (bitmap == bit)
+				return null;
 			return new BitmapIndexedNode(null, bitmap ^ bit, removePair(array, idx));
+		}
 		return this;
 	}
 	
