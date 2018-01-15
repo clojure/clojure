@@ -2936,7 +2936,7 @@
   {:added "1.1"
    :static true}
   [n coll]
-  (drop (count (drop n coll)) coll)
+  (drop (- (count coll) n) coll)
 
 (defn drop-while
   "Returns a lazy sequence of the items in coll starting from the
