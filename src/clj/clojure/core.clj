@@ -2936,10 +2936,7 @@
   {:added "1.1"
    :static true}
   [n coll]
-  (loop [s (seq coll), lead (seq (drop n coll))]
-    (if lead
-      (recur (next s) (next lead))
-      s)))
+  (drop (- (count coll) n) coll)
 
 (defn drop-while
   "Returns a lazy sequence of the items in coll starting from the
