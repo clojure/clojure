@@ -101,6 +101,8 @@ public String readLine() throws IOException{
     default:
         String first = String.valueOf((char) c);
         String rest = ((LineNumberReader)in).readLine();
+        if (sb != null)
+          sb.append(rest+"\n");
         line = (rest == null) ? first : first + rest;
         _prev = false;
         _atLineStart = true;
