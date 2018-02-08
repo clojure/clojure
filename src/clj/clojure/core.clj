@@ -3759,6 +3759,21 @@
   ([opts stream]
    (. clojure.lang.LispReader (read stream opts))))
 
+(defn read+string
+  "Like read, and taking the same args. stream must be a LineNumberingPushbackReader.
+  Returns a vector containing the object read and the (whitespace-trimmed) string read."
+  {:added "1.10"}
+  ([] (read+string *out*))
+  ([^clojure.lang.LineNumberingPushbackReader stream & args]
+     (try
+       (.captureString stream)
+       (let [o (apply read stream args)
+             s (.trim (.getString stream))]
+         [o s])       
+       (catch Throwable ex
+         (.getString stream)
+         (throw ex)))))
+
 (defn read-line
   "Reads the next line from stream that is the current value of *in* ."
   {:added "1.0"
@@ -7766,3 +7781,43 @@
   "Return true if x is a java.net.URI"
   {:added "1.9"}
   [x] (instance? java.net.URI x))
+
+(defonce ^:private tapset (atom #{}))
+(defonce ^:private ^java.util.concurrent.ArrayBlockingQueue tapq (java.util.concurrent.ArrayBlockingQueue. 1024))
+
+(defn add-tap
+  "adds f, a fn of one argument, to the tap set. This function will be called with anything sent via tap>.
+  This function may (briefly) block (e.g. for streams), and will never impede calls to tap>,
+  but blocking indefinitely may cause tap values to be dropped.
+  Remember f in order to remove-tap"
+  {:added "1.10"}
+  [f]
+  (swap! tapset conj f)
+  nil)
+
+(defn remove-tap
+  "remove f from the tap set the tap set."
+  {:added "1.10"}
+  [f]
+  (swap! tapset disj f)
+  nil)
+
+(defn tap>
+  "sends x to any taps. Will not block. Returns true if there was room in the queue,
+  false if not (dropped)."
+  {:added "1.10"}
+  [x]
+  (.offer tapq x))
+
+(defonce ^:private tap-loop
+  (doto (Thread.
+         #(let [x (.take tapq)
+                taps @tapset]
+            (doseq [tap taps]
+              (try
+                (tap x)
+                (catch Throwable ex)))
+            (recur))
+         "clojure.core/tap-loop")
+    (.setDaemon true)
+    (.start)))

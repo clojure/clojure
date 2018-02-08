@@ -75,7 +75,7 @@ public int read() throws IOException{
         _atLineStart = false;
         _columnNumber++;
         }
-    if(sb != null)
+    if(sb != null && c != -1)
         sb.append((char)c);
     return c;
 }
