@@ -3763,7 +3763,7 @@
   "Like read, and taking the same args. stream must be a LineNumberingPushbackReader.
   Returns a vector containing the object read and the (whitespace-trimmed) string read."
   {:added "1.10"}
-  ([] (read+string *out*))
+  ([] (read+string *in*))
   ([^clojure.lang.LineNumberingPushbackReader stream & args]
      (try
        (.captureString stream)
