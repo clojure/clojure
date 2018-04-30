@@ -360,7 +360,8 @@
     :fail (merge (stacktrace-file-and-line (drop-while
                                              #(let [cl-name (.getClassName ^StackTraceElement %)]
                                                 (or (str/starts-with? cl-name "java.lang.")
-                                                    (str/starts-with? cl-name "clojure.test$")))
+                                                    (str/starts-with? cl-name "clojure.test$")
+                                                    (str/starts-with? cl-name "clojure.core$ex_info")))
                                              (.getStackTrace (Thread/currentThread)))) m)
     :error (merge (stacktrace-file-and-line (.getStackTrace ^Throwable (:actual m))) m)
     m)))
