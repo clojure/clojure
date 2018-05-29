@@ -7807,11 +7807,12 @@
   false if not (dropped)."
   {:added "1.10"}
   [x]
-  (.offer tapq x))
+  (.offer tapq (if (nil? x) ::tap-nil x)))
 
 (defonce ^:private tap-loop
   (doto (Thread.
-         #(let [x (.take tapq)
+         #(let [t (.take tapq)
+                x (if (identical? ::tap-nil t) nil t)
                 taps @tapset]
             (doseq [tap taps]
               (try
