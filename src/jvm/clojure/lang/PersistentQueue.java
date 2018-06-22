@@ -138,6 +138,8 @@ public IPersistentCollection empty(){
 }
 
 public PersistentQueue withMeta(IPersistentMap meta){
+	if(meta() == meta)
+		return this;
 	return new PersistentQueue(meta, cnt, f, r);
 }
 
@@ -178,6 +180,8 @@ static class Seq extends ASeq{
 	}
 
 	public Seq withMeta(IPersistentMap meta){
+		if(meta() == meta)
+			return this;
 		return new Seq(meta, f, rseq);
 	}
 }

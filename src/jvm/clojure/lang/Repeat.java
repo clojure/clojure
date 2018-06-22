@@ -56,6 +56,8 @@ public ISeq next() {
 }
 
 public Repeat withMeta(IPersistentMap meta){
+    if(meta() == meta)
+        return this;
     return new Repeat(meta, count, val);
 }
 

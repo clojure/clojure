@@ -51,6 +51,8 @@ protected PersistentArrayMap(){
 }
 
 public PersistentArrayMap withMeta(IPersistentMap meta){
+	if(meta() == meta)
+		return this;
 	return new PersistentArrayMap(meta, array);
 }
 
@@ -328,6 +330,8 @@ static class Seq extends ASeq implements Counted{
 	}
 
 	public Obj withMeta(IPersistentMap meta){
+		if(meta() == meta)
+			return this;
 		return new Seq(meta, array, i);
 	}
 }

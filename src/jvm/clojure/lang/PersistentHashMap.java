@@ -277,6 +277,8 @@ static int mask(int hash, int shift){
 }
 
 public PersistentHashMap withMeta(IPersistentMap meta){
+	if(_meta == meta)
+		return this;
 	return new PersistentHashMap(meta, count, root, hasNull, nullValue);
 }
 
@@ -609,6 +611,8 @@ final static class ArrayNode implements INode{
 		}
 
 		public Obj withMeta(IPersistentMap meta) {
+			if(meta() == meta)
+				return this;
 			return new Seq(meta, nodes, i, s);
 		}
 
@@ -1337,6 +1341,8 @@ static final class NodeSeq extends ASeq {
 	}
 
 	public Obj withMeta(IPersistentMap meta) {
+		if(meta() == meta)
+			return this;
 		return new NodeSeq(meta, array, i, s);
 	}
 

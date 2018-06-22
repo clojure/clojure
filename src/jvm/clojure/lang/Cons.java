@@ -50,6 +50,8 @@ public int count(){
 }
 
 public Cons withMeta(IPersistentMap meta){
+	if(meta() == meta)
+		return this;
 	return new Cons(meta, _first, _more);
 }
 }

@@ -24,6 +24,8 @@ public IPersistentMap meta(){
 }
 
 public IObj withMeta(final IPersistentMap meta){
+	if(meta == null)
+		return this;
 	return new RestFn(){
 		protected Object doInvoke(Object args) {
 			return AFunction.this.applyTo((ISeq) args);
@@ -33,8 +35,10 @@ public IObj withMeta(final IPersistentMap meta){
 			return meta;
 		}
 
-		public IObj withMeta(IPersistentMap meta){
-			return AFunction.this.withMeta(meta);
+		public IObj withMeta(IPersistentMap newMeta){
+			if(meta == newMeta)
+				return this;
+			return AFunction.this.withMeta(newMeta);
 		}
 
 		public int getRequiredArity(){

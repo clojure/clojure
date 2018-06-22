@@ -92,6 +92,8 @@ public int hasheq() {
 }
 
 public IObj withMeta(IPersistentMap meta){
+	if(meta() == meta)
+		return this;
 	return new Symbol(meta, ns, name);
 }
 

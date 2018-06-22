@@ -46,6 +46,8 @@ public PersistentTreeMap(){
 }
 
 public PersistentTreeMap withMeta(IPersistentMap meta){
+	if(_meta == meta)
+		return this;
 	return new PersistentTreeMap(meta, comp, tree, _count);
 }
 
@@ -845,6 +847,8 @@ static public class Seq extends ASeq{
 	}
 
 	public Obj withMeta(IPersistentMap meta){
+		if(meta() == meta)
+			return this;
 		return new Seq(meta, stack, asc, cnt);
 	}
 }

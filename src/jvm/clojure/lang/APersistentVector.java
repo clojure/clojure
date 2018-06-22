@@ -479,6 +479,8 @@ static class Seq extends ASeq implements IndexedSeq, IReduce{
 	}
 
 	public APersistentVector.Seq withMeta(IPersistentMap meta){
+		if(meta() == meta)
+			return this;
 		return new APersistentVector.Seq(meta, v, i);
 	}
 
@@ -536,6 +538,8 @@ public static class RSeq extends ASeq implements IndexedSeq, Counted{
 	}
 
 	public APersistentVector.RSeq withMeta(IPersistentMap meta){
+		if(meta() == meta)
+			return this;
 		return new APersistentVector.RSeq(meta, v, i);
 	}
 }

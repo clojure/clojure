@@ -63,6 +63,8 @@ public ISeq next(){
 }
 
 public Cycle withMeta(IPersistentMap meta){
+    if(meta() == meta)
+        return this;
     return new Cycle(meta, all, prev, _current, _next);
 }
 

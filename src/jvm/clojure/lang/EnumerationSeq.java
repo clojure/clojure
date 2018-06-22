@@ -68,6 +68,8 @@ public ISeq next(){
 }
 
 public EnumerationSeq withMeta(IPersistentMap meta){
+	if(meta() == meta)
+		return this;
 	return new EnumerationSeq(meta, iter, state);
 }
 

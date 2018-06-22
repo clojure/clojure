@@ -57,6 +57,8 @@ public ISeq next(){
 }
 
 public Iterate withMeta(IPersistentMap meta){
+    if(meta() == meta)
+        return this;
     return new Iterate(meta, f, prevSeed, _seed, _next);
 }
 

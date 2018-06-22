@@ -79,6 +79,8 @@ public ISeq rseq() {
 }
 
 public PersistentTreeSet withMeta(IPersistentMap meta){
+	if(meta() == meta)
+		return this;
 	return new PersistentTreeSet(meta, impl);
 }
 

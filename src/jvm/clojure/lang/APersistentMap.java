@@ -173,6 +173,8 @@ static public class KeySeq extends ASeq{
 	}
 
 	public KeySeq withMeta(IPersistentMap meta){
+		if(meta() == meta)
+			return this;
 		return new KeySeq(meta, seq, iterable);
 	}
 
@@ -239,6 +241,8 @@ static public class ValSeq extends ASeq{
 	}
 
 	public ValSeq withMeta(IPersistentMap meta){
+		if(meta() == meta)
+			return this;
 		return new ValSeq(meta, seq, iterable);
 	}
 
