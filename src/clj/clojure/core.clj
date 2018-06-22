@@ -6719,10 +6719,6 @@
   java.util.Date
   (inst-ms* [inst] (.getTime ^java.util.Date inst)))
 
-;; conditionally extend to Instant on Java 8+
-(when-class "java.time.Instant"
-  (load "core_instant18"))
-
 (defn inst-ms
   "Return the number of milliseconds since January 1, 1970, 00:00:00 GMT"
   {:added "1.9"}
@@ -6734,6 +6730,10 @@
   {:added "1.9"}
   [x]
   (satisfies? Inst x))
+
+(extend-protocol clojure.core/Inst
+  java.time.Instant
+  (inst-ms* [inst] (.toEpochMilli ^java.time.Instant inst)))
 
 (load "uuid")
 

@@ -12,6 +12,8 @@
   (:use clojure.test))
 
 (case (System/getProperty "java.specification.version")
-      "1.6" (load "annotations/java_6")
+      "1.8" (load "annotations/java_8")
+      "9" (load "annotations/java_9")
+      "10" (load "annotations/java_9")
       nil)
 

@@ -1,17 +1,32 @@
-;; java 5 annotation tests
+;; java 8 annotation tests
 (in-ns 'clojure.test-clojure.annotations)
 
-(import [java.lang.annotation Annotation Retention RetentionPolicy Target ElementType])
+(import [java.lang.annotation Annotation Retention RetentionPolicy Target ElementType]
+        [javax.xml.ws WebServiceRef WebServiceRefs]
+        [javax.xml.ws.soap AddressingFeature$Responses])
 (definterface Foo (foo []))
 
 (deftype #^{Deprecated true
-            Retention RetentionPolicy/RUNTIME}
+            Retention RetentionPolicy/RUNTIME
+            javax.annotation.processing.SupportedOptions ["foo" "bar" "baz"]
+            javax.xml.ws.soap.Addressing {:enabled false :required true}
+            WebServiceRefs [(WebServiceRef {:name "fred" :type String})
+                            (WebServiceRef {:name "ethel" :mappedName "lucy"})]}
   Bar [#^int a
        #^{:tag int
           Deprecated true
-          Retention RetentionPolicy/RUNTIME} b]
+          Retention RetentionPolicy/RUNTIME
+          javax.annotation.processing.SupportedOptions ["foo" "bar" "baz"]
+            javax.xml.ws.soap.Addressing {:enabled false :required true}
+          WebServiceRefs [(WebServiceRef {:name "fred" :type String})
+                            (WebServiceRef {:name "ethel" :mappedName "lucy"})]}
+       b]
   Foo (#^{Deprecated true
-          Retention RetentionPolicy/RUNTIME}
+          Retention RetentionPolicy/RUNTIME
+          javax.annotation.processing.SupportedOptions ["foo" "bar" "baz"]
+          javax.xml.ws.soap.Addressing {:enabled false :required true}
+          WebServiceRefs [(WebServiceRef {:name "fred" :type String})
+                          (WebServiceRef {:name "ethel" :mappedName "lucy"})]}
        foo [this] 42))
 
 (defn annotation->map
@@ -35,6 +50,11 @@
 
 (def expected-annotations
   #{{:annotationType java.lang.annotation.Retention, :value RetentionPolicy/RUNTIME}
+    {:annotationType javax.xml.ws.WebServiceRefs,
+     :value [{:annotationType javax.xml.ws.WebServiceRef, :name "fred", :mappedName "", :type java.lang.String, :wsdlLocation "", :value javax.xml.ws.Service, :lookup ""}
+             {:annotationType javax.xml.ws.WebServiceRef, :name "ethel", :mappedName "lucy", :type java.lang.Object, :wsdlLocation "", :value javax.xml.ws.Service, :lookup ""}]}
+    {:annotationType javax.xml.ws.soap.Addressing, :enabled false, :required true, :responses AddressingFeature$Responses/ALL}
+    {:annotationType javax.annotation.processing.SupportedOptions, :value ["foo" "bar" "baz"]}
     {:annotationType java.lang.Deprecated}})
 
 (deftest test-annotations-on-type
