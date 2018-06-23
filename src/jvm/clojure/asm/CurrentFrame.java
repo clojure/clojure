@@ -25,27 +25,32 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
-package clojure.asm.commons;
 
-import clojure.asm.Label;
+package clojure.asm;
 
 /**
- * A code generator for switch statements.
+ * Information about the input stack map frame at the "current" instruction of a method. This is
+ * implemented as a Frame subclass for a "basic block" containing only one instruction.
  *
- * @author Juozas Baliuka
- * @author Chris Nokleberg
  * @author Eric Bruneton
  */
-public interface TableSwitchGenerator {
+final class CurrentFrame extends Frame {
+
+  CurrentFrame(final Label owner) {
+    super(owner);
+  }
 
   /**
-   * Generates the code for a switch case.
-   *
-   * @param key the switch case key.
-   * @param end a label that corresponds to the end of the switch statement.
+   * Sets this CurrentFrame to the input stack map frame of the next "current" instruction, i.e. the
+   * instruction just after the given one. It is assumed that the value of this object when this
+   * method is called is the stack map frame status just before the given instruction is executed.
    */
-  void generateCase(int key, Label end);
-
-  /** Generates the code for the default switch case. */
-  void generateDefault();
+  @Override
+  void execute(
+      final int opcode, final int arg, final Symbol symbolArg, final SymbolTable symbolTable) {
+    super.execute(opcode, arg, symbolArg, symbolTable);
+    Frame successor = new Frame(null);
+    merge(symbolTable, successor, 0);
+    copyFrom(successor);
+  }
 }
