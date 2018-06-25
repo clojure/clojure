@@ -428,3 +428,8 @@
     ;; ClassWithFailingStaticInitialiser will throw if its static initialiser is called
     (is (eval '(fn [^compilation.ClassWithFailingStaticInitialiser c])))
     (is (eval '(import (compilation ClassWithFailingStaticInitialiser))))))
+
+(deftest CLJ-2284
+  (testing "CLJ-2284 Can call static methods on interfaces"
+    (is (= 42 (compilation.JDK8InterfaceMethods/staticMethod0 42)))
+    (is (= "test" (compilation.JDK8InterfaceMethods/staticMethod1 "test")))))
