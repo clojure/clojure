@@ -11,10 +11,9 @@
 package clojure.lang;
 
 /**
- * A persistent, functional, sequence interface
- * <p/>
- * ISeqs are immutable values, i.e. neither first(), nor rest() changes
- * or invalidates the ISeq
+ * <p>A persistent, functional, sequence interface</p>
+ * <p>ISeqs are immutable values, i.e. neither first(), nor rest() changes
+ * or invalidates the ISeq</p>
  */
 public interface ISeq extends IPersistentCollection {
 

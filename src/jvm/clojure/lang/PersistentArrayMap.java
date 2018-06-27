@@ -17,14 +17,14 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * Simple implementation of persistent map on an array
- * <p/>
- * Note that instances of this class are constant values
- * i.e. add/remove etc return new values
- * <p/>
- * Copies array on every change, so only appropriate for _very_small_ maps
- * <p/>
- * null keys and values are ok, but you won't be able to distinguish a null value via valAt - use contains/entryAt
+ * <p>Simple implementation of persistent map on an array</p>
+ *
+ * <p>Note that instances of this class are constant values
+ * i.e. add/remove etc return new values</p>
+ *
+ * <p>Copies array on every change, so only appropriate for _very_small_ maps</p>
+ *
+ * <p>null keys and values are ok, but you won't be able to distinguish a null value via valAt - use contains/entryAt</p>
  */
 
 public class PersistentArrayMap extends APersistentMap implements IObj, IEditableCollection, IMapIterable, IKVReduce{

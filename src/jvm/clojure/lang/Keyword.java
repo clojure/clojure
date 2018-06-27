@@ -132,7 +132,6 @@ private Object readResolve() throws ObjectStreamException{
  *
  * @param obj - must be IPersistentMap
  * @return the value at the key or nil if not found
- * @
  */
 final public Object invoke(Object obj) {
 	if(obj instanceof ILookup)

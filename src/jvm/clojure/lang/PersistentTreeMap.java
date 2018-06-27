@@ -16,10 +16,11 @@ import java.util.*;
 
 /**
  * Persistent Red Black Tree
- * Note that instances of this class are constant values
- * i.e. add/remove etc return new values
- * <p/>
- * See Okasaki, Kahrs, Larsen et al
+ *
+ * <p>Note that instances of this class are constant values
+ * i.e. add/remove etc return new values</p>
+ *
+ * <p>See Okasaki, Kahrs, Larsen et al</p>
  */
 
 public class PersistentTreeMap extends APersistentMap implements IObj, Reversible, Sorted, IKVReduce{
