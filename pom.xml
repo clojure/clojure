@@ -41,12 +41,12 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>spec.alpha</artifactId>
-      <version>0.1.143</version>
+      <version>0.2.168</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>core.specs.alpha</artifactId>
-      <version>0.1.24</version>
+      <version>0.2.36</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
