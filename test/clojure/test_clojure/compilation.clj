@@ -427,6 +427,10 @@
       (require 'clojure.repl :reload))
     (is @called?)))
 
+(deftest CLJ-1550-dcl-package
+  (let [pkg (.getPackage clojure.test_clojure.compilation.load_ns.x)]
+    (is (= "clojure.test_clojure.compilation.load_ns" (and pkg (.getName pkg))))))
+
 (deftest clj-1714
   (testing "CLJ-1714 Classes shouldn't have their static initialisers called simply by type hinting or importing"
     ;; ClassWithFailingStaticInitialiser will throw if its static initialiser is called
