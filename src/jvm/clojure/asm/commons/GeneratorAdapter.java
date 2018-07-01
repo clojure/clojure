@@ -741,6 +741,12 @@ public class GeneratorAdapter extends LocalVariablesSorter {
    */
   public void cast(final Type from, final Type to) {
     if (from != to) {
+      if (from.getSort() < Type.BOOLEAN
+          || from.getSort() > Type.DOUBLE
+          || to.getSort() < Type.BOOLEAN
+          || to.getSort() > Type.DOUBLE) {
+        throw new IllegalArgumentException();
+      }
       if (from == Type.DOUBLE_TYPE) {
         if (to == Type.FLOAT_TYPE) {
           mv.visitInsn(Opcodes.D2F);
@@ -781,8 +787,6 @@ public class GeneratorAdapter extends LocalVariablesSorter {
           mv.visitInsn(Opcodes.I2L);
         } else if (to == Type.SHORT_TYPE) {
           mv.visitInsn(Opcodes.I2S);
-        } else {
-          throw new IllegalArgumentException();
         }
       }
     }

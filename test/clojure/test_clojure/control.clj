@@ -362,6 +362,9 @@
   (testing "test emits return types"
     (should-not-reflect (Long. (case 1 1 1))) ; new Long(long)
     (should-not-reflect (Long. (case 1 1 "1")))) ; new Long(String)
+  (testing "short or byte expr compiles and matches"
+    (is (= 3 (case (short 4) 1 2 3)))
+    (is (= 3 (case (byte 4) 1 2 3))))
   (testing "non-equivalence of chars and nums"
     (are [result input] (= result (case input 97 :97 :else))
       :else \a
