@@ -7822,6 +7822,21 @@
 (defonce ^:private tapset (atom #{}))
 (defonce ^:private ^java.util.concurrent.ArrayBlockingQueue tapq (java.util.concurrent.ArrayBlockingQueue. 1024))
 
+(defonce ^:private tap-loop
+  (delay
+   (doto (Thread.
+          #(let [t (.take tapq)
+                 x (if (identical? ::tap-nil t) nil t)
+                 taps @tapset]
+             (doseq [tap taps]
+               (try
+                 (tap x)
+                 (catch Throwable ex)))
+             (recur))
+          "clojure.core/tap-loop")
+     (.setDaemon true)
+     (.start))))
+
 (defn add-tap
   "adds f, a fn of one argument, to the tap set. This function will be called with anything sent via tap>.
   This function may (briefly) block (e.g. for streams), and will never impede calls to tap>,
@@ -7829,6 +7844,7 @@
   Remember f in order to remove-tap"
   {:added "1.10"}
   [f]
+  (force tap-loop)
   (swap! tapset conj f)
   nil)
 
@@ -7844,18 +7860,5 @@
   false if not (dropped)."
   {:added "1.10"}
   [x]
+  (force tap-loop)
   (.offer tapq (if (nil? x) ::tap-nil x)))
-
-(defonce ^:private tap-loop
-  (doto (Thread.
-         #(let [t (.take tapq)
-                x (if (identical? ::tap-nil t) nil t)
-                taps @tapset]
-            (doseq [tap taps]
-              (try
-                (tap x)
-                (catch Throwable ex)))
-            (recur))
-         "clojure.core/tap-loop")
-    (.setDaemon true)
-    (.start)))
