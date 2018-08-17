@@ -51,7 +51,7 @@
   "Validate server config options"
   [{:keys [name port accept] :as opts}]
   (doseq [prop [:name :port :accept]] (required opts prop))
-  (when (or (not (integer? port)) (not (< -1 port 65535)))
+  (when (or (not (integer? port)) (not (<= 0 port 65535)))
     (throw (ex-info (str "Invalid socket server port: " port) opts))))
 
 (defn- accept-connection
