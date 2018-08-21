@@ -4751,14 +4751,24 @@
      (apply println xs)))
 
 (import clojure.lang.ExceptionInfo clojure.lang.IExceptionInfo)
+
+(defn ^:private elide-top-frames
+  [^Throwable ex class-name]
+  (let [tr (.getStackTrace ex)]
+    (doto ex
+      (.setStackTrace
+        (when tr
+          (into-array StackTraceElement
+            (drop-while #(= class-name (.getClassName ^StackTraceElement %1)) tr)))))))
+
 (defn ex-info
   "Create an instance of ExceptionInfo, a RuntimeException subclass
    that carries a map of additional data."
   {:added "1.4"}
   ([msg map]
-     (ExceptionInfo. msg map))
+    (elide-top-frames (ExceptionInfo. msg map) "clojure.core$ex_info"))
   ([msg map cause]
-     (ExceptionInfo. msg map cause)))
+    (elide-top-frames (ExceptionInfo. msg map cause) "clojure.core$ex_info")))
 
 (defn ex-data
   "Returns exception data (a map) if ex is an IExceptionInfo.
