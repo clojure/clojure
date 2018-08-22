@@ -6993,7 +6993,11 @@ public static Object macroexpand1(Object x) {
 				catch(ArityException e)
 					{
 						// hide the 2 extra params for a macro
-						throw new ArityException(e.actual - 2, e.name);
+						if(e.name.equals(munge(v.ns.name.name) + "$" + munge(v.sym.name))) {
+							throw new ArityException(e.actual - 2, e.name);
+						} else {
+							throw e;
+						}
 					}
 				catch(Throwable e)
 				    {

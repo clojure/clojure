@@ -23,6 +23,8 @@
 
 (defmacro m1 [a] `(inc ~a))
 
+(defmacro m2 [] (assoc))
+
 (deftest arity-exception
   ;; IllegalArgumentException is pre-1.3
   (is (thrown-with-msg? IllegalArgumentException #"Wrong number of args \(1\) passed to"
@@ -35,7 +37,17 @@
         (macroexpand `(m1 1 2))))
   (is (thrown-with-msg? ArityException #"\Q/f2:+><->!#%&*|b\E"
         (f2:+><->!#%&*|b 1 2))
-        "ArityException messages should demunge function names"))
+      "ArityException messages should demunge function names")
+  (is (try
+        (macroexpand `(m2))
+        (throw (RuntimeException. "fail"))
+        (catch ArityException e
+          (is (= 0 (.-actual e))))))
+ (is (try
+       (macroexpand `(m2 5))
+       (throw (RuntimeException. "fail"))
+       (catch ArityException e
+         (is (= 1 (.-actual e)))))))
 
 (deftest compile-error-examples
   (are [form errtype re] (thrown-with-cause-msg? errtype re (eval form))
