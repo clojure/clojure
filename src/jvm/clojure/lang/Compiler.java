@@ -467,7 +467,7 @@ static class DefExpr implements Expr{
 		catch(Throwable e)
 			{
 			if(!(e instanceof CompilerException))
-				throw new CompilerException(source, line, column, e);
+				throw new CompilerException(source, line, column, Compiler.DEF, e);
 			else
 				throw (CompilerException) e;
 			}
@@ -6802,19 +6802,91 @@ private static Expr analyze(C context, Object form, String name) {
 		}
 }
 
-static public class CompilerException extends RuntimeException{
+static public class CompilerException extends RuntimeException implements IExceptionInfo{
 	final public String source;
 	
 	final public int line;
 
+	final public Object data;
+
+    // Error keys
+    final static public String ERR_NS = "clojure.error";
+    final static public Keyword ERR_SOURCE = Keyword.intern(ERR_NS, "source"); // :clojure.error/source
+    final static public Keyword ERR_LINE = Keyword.intern(ERR_NS, "line");     // :clojure.error/line
+    final static public Keyword ERR_COLUMN = Keyword.intern(ERR_NS, "column"); // :clojure.error/column
+    final static public Keyword ERR_PHASE = Keyword.intern(ERR_NS, "phase");   // :clojure.error/phase
+    final static public Keyword ERR_SYMBOL = Keyword.intern(ERR_NS, "symbol"); // :clojure.error/symbol
+
+    // Compile error phases
+    final static public Keyword PHASE_READ = Keyword.intern(null, "read");                // :read
+    final static public Keyword PHASE_MACROEXPAND = Keyword.intern(null, "macroexpand");  // :macroexpand
+    final static public Keyword PHASE_COMPILE = Keyword.intern(null, "compile");          // :compile
+
+	final static public Keyword SPEC_PROBLEMS = Keyword.intern("clojure.spec.alpha", "problems");
+
+    // Class compile exception
 	public CompilerException(String source, int line, int column, Throwable cause){
-		super(errorMsg(source, line, column, cause.toString()), cause);
+		this(source, line, column, null, cause);
+	}
+
+	public CompilerException(String source, int line, int column, Symbol sym, Throwable cause){
+		this(source, line, column, sym, PHASE_COMPILE, cause);
+	}
+
+	public CompilerException(String source, int line, int column, Symbol sym, Keyword phase, Throwable cause){
+		super(makeMsg(source, line, column, sym, phase, cause), cause);
 		this.source = source;
 		this.line = line;
+		Associative m = RT.map(ERR_LINE, line, ERR_COLUMN, column, ERR_PHASE, phase);
+		if(source != null) m = RT.assoc(m, ERR_SOURCE, source);
+		if(sym != null) m = RT.assoc(m, ERR_SYMBOL, sym);
+		this.data = m;
+	}
+
+	public IPersistentMap getData(){
+		return (IPersistentMap)data;
+	}
+
+	private static String verb(Keyword phase) {
+		if(PHASE_COMPILE.equals(phase)){
+			return "compiling";
+		} else if(PHASE_READ.equals(phase)){
+			return "reading source";
+		} else {
+			return "macroexpanding";
+		}
+	}
+
+	private static boolean isMacroSyntaxCheck(Throwable e) {
+		return e instanceof IllegalArgumentException ||
+				e instanceof IllegalStateException ||
+				e instanceof ExceptionInfo ||
+				e.getClass().equals(Exception.class);
+	}
+
+	public static String makeMsg(String source, int line, int column, Symbol sym, Keyword phase, Throwable cause){
+		return (phase == PHASE_MACROEXPAND && ! isMacroSyntaxCheck(cause) ? "Unexpected error " : "Syntax error ") +
+				verb(phase) + " " + (sym != null ? sym + " " : "") +
+				"at (" + (source != null && !source.equals("NO_SOURCE_PATH") ? (source + ":") : "") +
+				line + ":" + column + ").";
+	}
+
+	private static boolean isSpecError(Throwable t) {
+		return (t instanceof IExceptionInfo) && RT.get(((IExceptionInfo) t).getData(), SPEC_PROBLEMS) != null;
 	}
 
 	public String toString(){
-		return getMessage();
+		Throwable cause = getCause();
+		if(cause != null) {
+			final String delim = (RT.get(data, ERR_PHASE) == PHASE_MACROEXPAND && isSpecError(cause)) ? " " : "\n";
+			if(RT.get(data, ERR_PHASE) == PHASE_MACROEXPAND && ! isMacroSyntaxCheck(cause)) {
+				return String.format("%s%sCause: %s %s", getMessage(), delim, cause.getClass().getSimpleName(), cause.getMessage());
+			} else {
+				return String.format("%s%sCause: %s", getMessage(), delim, cause.getMessage());
+			}
+		} else {
+			return getMessage();
+		}
 	}
 }
 
@@ -6895,7 +6967,7 @@ public static void checkSpecs(Var v, ISeq form) {
 		try {
 			ensureMacroCheck().applyTo(RT.cons(v, RT.list(form.next())));
 		} catch(Exception e) {
-			throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), e);
+			throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), v.toSymbol(), CompilerException.PHASE_MACROEXPAND, e);
 		}
 	}
 }
@@ -6922,6 +6994,17 @@ public static Object macroexpand1(Object x) {
 					{
 						// hide the 2 extra params for a macro
 						throw new ArityException(e.actual - 2, e.name);
+					}
+				catch(Throwable e)
+				    {
+						if(e instanceof CompilerException) {
+							throw (CompilerException)e;
+						} else {
+							throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(),
+									(op instanceof Symbol ? (Symbol) op : null),
+									CompilerException.PHASE_MACROEXPAND,
+									e);
+						}
 					}
 			} else
 			{
@@ -6991,13 +7074,14 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 		column = RT.meta(form).valAt(RT.COLUMN_KEY);
 	Var.pushThreadBindings(
 			RT.map(LINE, line, COLUMN, column));
+	Object op = null;
 	try
 		{
 		Object me = macroexpand1(form);
 		if(me != form)
 			return analyze(context, me, name);
 
-		Object op = RT.first(form);
+		op = RT.first(form);
 		if(op == null)
 			throw new IllegalArgumentException("Can't call nil, form: " + form);
 		IFn inline = isInline(op, RT.count(RT.next(form)));
@@ -7013,8 +7097,10 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 		}
 	catch(Throwable e)
 		{
-		if(!(e instanceof CompilerException))
-			throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), e);
+		Symbol s = (op != null && op instanceof Symbol) ? (Symbol)op : null;
+		if(!(e instanceof CompilerException)) {
+			throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), s, e);
+		}
 		else
 			throw (CompilerException) e;
 		}
@@ -7024,6 +7110,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 		}
 }
 
+// DEPRECATED
 static String errorMsg(String source, int line, int column, String s){
 	return String.format("%s, compiling:(%s:%d:%d)", s, source, line, column);
 }
@@ -7525,7 +7612,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) {
 		}
 	catch(LispReader.ReaderException e)
 		{
-		throw new CompilerException(sourcePath, e.line, e.column, e.getCause());
+		throw new CompilerException(sourcePath, e.line, e.column, null, CompilerException.PHASE_READ, e.getCause());
 		}
 	catch(Throwable e)
 		{

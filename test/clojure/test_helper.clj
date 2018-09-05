@@ -130,3 +130,22 @@
   `(binding [*warn-on-reflection* true]
      (is (nil? (re-find #"^Reflection warning" (with-err-string-writer (eval-in-temp-ns ~form)))))
      (is (nil? (re-find #"^Reflection warning" (with-err-print-writer (eval-in-temp-ns ~form)))))))
+
+(defmethod clojure.test/assert-expr 'thrown-with-cause-msg? [msg form]
+  ;; (is (thrown-with-cause-msg? c re expr))
+  ;; Asserts that evaluating expr throws an exception of class c.
+  ;; Also asserts that the message string of the *cause* exception matches
+  ;; (with re-find) the regular expression re.
+  (let [klass (nth form 1)
+        re (nth form 2)
+        body (nthnext form 3)]
+    `(try ~@body
+          (do-report {:type :fail, :message ~msg, :expected '~form, :actual nil})
+          (catch ~klass e#
+            (let [m# (if (.getCause e#) (.. e# getCause getMessage) (.getMessage e#))]
+              (if (re-find ~re m#)
+                (do-report {:type :pass, :message ~msg,
+                            :expected '~form, :actual e#})
+                (do-report {:type :fail, :message ~msg,
+                            :expected '~form, :actual e#})))
+            e#))))

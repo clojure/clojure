@@ -67,23 +67,23 @@
     (is (= [1 2 3] [b c d]))))
 
 (deftest keywords-not-allowed-in-let-bindings
-  (is (thrown-with-msg? Exception #"did not conform to spec"
+  (is (thrown-with-cause-msg? Exception #"did not conform to spec"
                         (eval '(let [:a 1] a))))
-  (is (thrown-with-msg? Exception #"did not conform to spec"
+  (is (thrown-with-cause-msg? Exception #"did not conform to spec"
                         (eval '(let [:a/b 1] b))))
-  (is (thrown-with-msg? Exception #"did not conform to spec"
+  (is (thrown-with-cause-msg? Exception #"did not conform to spec"
                         (eval '(let [[:a] [1]] a))))
-  (is (thrown-with-msg? Exception #"did not conform to spec"
+  (is (thrown-with-cause-msg? Exception #"did not conform to spec"
                         (eval '(let [[:a/b] [1]] b)))))
 
 (deftest namespaced-syms-only-allowed-in-map-destructuring
-  (is (thrown-with-msg? Exception #"did not conform to spec"
+  (is (thrown-with-cause-msg? Exception #"did not conform to spec"
                         (eval '(let [a/x 1, [y] [1]] x))))
-  (is (thrown-with-msg? Exception #"did not conform to spec"
+  (is (thrown-with-cause-msg? Exception #"did not conform to spec"
                         (eval '(let [[a/x] [1]] x)))))
 
 (deftest or-doesnt-create-bindings
-  (is (thrown-with-msg? Exception #"Unable to resolve symbol: b"
+  (is (thrown-with-cause-msg? Exception #"Unable to resolve symbol: b"
                         (eval '(let [{:keys [a] :or {b 2}} {:a 1}] [a b])))))
 
 (require '[clojure.string :as s])

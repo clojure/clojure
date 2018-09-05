@@ -38,9 +38,10 @@
         "ArityException messages should demunge function names"))
 
 (deftest compile-error-examples
-  (are [form errtype re] (thrown-with-msg? errtype re (eval form))
+  (are [form errtype re] (thrown-with-cause-msg? errtype re (eval form))
        '(Long/parseLong) Exception #"No matching method.*taking 0 args"
-       '(Long/parseLong :a :b :c) Exception #"No matching method.*taking 3 args"
+       '(Long/parseLong :a :b :c) Exception #"No matching method.*taking 3 args")
+  (are [form errtype re] (thrown-with-msg? errtype re (eval form))
        '(.jump "foo" 1) Exception #"No matching method.*taking 1 arg"))
 
 (deftest assert-arg-messages
@@ -49,9 +50,9 @@
   
   ; would have used `are` here, but :line meta on &form doesn't survive successive macroexpansions
   (doseq [[msg-regex-str form] [["renamed-with-open" "(renamed-with-open [a])"]]]
-    (is (thrown-with-msg? IllegalArgumentException
-                          (re-pattern (format msg-regex-str *ns*))
-                          (macroexpand (read-string form))))))
+    (is (thrown-with-cause-msg? clojure.lang.Compiler$CompilerException
+                                (re-pattern (format msg-regex-str *ns*))
+                                (macroexpand (read-string form))))))
 
 (deftest extract-ex-data
   (try

@@ -146,10 +146,10 @@
     (is (= 'java.lang.Integer (-> arglists second meta :tag)))))
 
 (deftest CLJ-1232-return-type-not-imported
-  (is (thrown-with-msg? Compiler$CompilerException #"Unable to resolve classname: Closeable"
-                        (eval '(defn a ^Closeable []))))
-  (is (thrown-with-msg? Compiler$CompilerException #"Unable to resolve classname: Closeable"
-                        (eval '(defn a (^Closeable []))))))
+  (is (thrown-with-cause-msg? Compiler$CompilerException #"Unable to resolve classname: Closeable"
+                              (eval '(defn a ^Closeable []))))
+  (is (thrown-with-cause-msg? Compiler$CompilerException #"Unable to resolve classname: Closeable"
+                              (eval '(defn a (^Closeable []))))))
 
 (defn ^String hinting-conflict ^Integer [])
 
@@ -325,12 +325,14 @@
 (deftest clj-1568
   (let [compiler-fails-at?
           (fn [row col source]
-            (try
-              (Compiler/load (java.io.StringReader. source) (name (gensym "clj-1568.example-")) "clj-1568.example")
-              nil
-              (catch Compiler$CompilerException e
-                (re-find (re-pattern (str "^.*:" row ":" col "\\)$"))
-                         (.getMessage e)))))]
+            (let [path (name (gensym "clj-1568.example-"))]
+              (try
+                (Compiler/load (java.io.StringReader. source) path "clj-1568.example")
+                nil
+                (catch Compiler$CompilerException e
+                  (let [data (ex-data e)]
+                    (= [path row col]
+                      [(:clojure.error/source data) (:clojure.error/line data) (:clojure.error/column data)]))))))]
     (testing "with error in the initial form"
       (are [row col source] (compiler-fails-at? row col source)
            ;; note that the spacing of the following string is important
@@ -399,7 +401,7 @@
 ;; See CLJ-1846
 (deftest incorrect-primitive-type-hint-throws
   ;; invalid primitive type hint
-  (is (thrown-with-msg? Compiler$CompilerException #"Cannot coerce long to int"
+  (is (thrown-with-cause-msg? Compiler$CompilerException #"Cannot coerce long to int"
         (load-string "(defn returns-long ^long [] 1) (Integer/bitCount ^int (returns-long))")))
   ;; correct casting instead
   (is (= 1 (load-string "(defn returns-long ^long [] 1) (Integer/bitCount (int (returns-long)))"))))

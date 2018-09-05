@@ -101,7 +101,7 @@
              [0xffff] "\\uffff"
              [4 49] "\\u00041"))
       (testing (str "Errors reading string literals from " (name source))
-        (are [err msg form] (thrown-with-msg? err msg
+        (are [err msg form] (thrown-with-cause-msg? err msg
                               (read-from source f (str "\"" form "\"")))
              Exception #"EOF while reading string" "\\"
              Exception #"Unsupported escape character: \\o" "\\o"
@@ -308,7 +308,7 @@
              (char 0xe000) "\\ue000"
              (char 0xffff) "\\uffff"))
       (testing (str "Errors reading char literals from " (name source))
-        (are [err msg form] (thrown-with-msg? err msg (read-from source f form))
+        (are [err msg form] (thrown-with-cause-msg? err msg (read-from source f form))
              Exception #"EOF while reading character" "\\"
              Exception #"Unsupported character: \\00" "\\00"
              Exception #"Unsupported character: \\0009" "\\0009"

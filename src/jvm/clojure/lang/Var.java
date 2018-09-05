@@ -128,6 +128,9 @@ public static Var intern(Namespace ns, Symbol sym, Object root, boolean replaceR
 	return dvout;
 }
 
+public Symbol toSymbol(){
+	return Symbol.create((ns == null ? null : ns.name.name), sym.name);
+}
 
 public String toString(){
 	if(ns != null)

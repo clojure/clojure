@@ -117,13 +117,13 @@
   (test-that
     "It is an error if there is no global var named by the symbol"
     (throws-with-msg
-      #".*Unable to resolve symbol: bar.*" (eval 'bar)))
+      #"(?s).*Unable to resolve symbol: bar.*" (eval 'bar)))
 
   (test-that
     "It is an error if the symbol reference is to a non-public var in a
     different namespace"
     (throws-with-msg
-      #".*resolution-test/baz is not public.*"
+      #"(?s).*resolution-test/baz is not public.*"
       (eval 'resolution-test/baz)
       Compiler$CompilerException))
 

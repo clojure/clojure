@@ -144,8 +144,8 @@ static void unread(PushbackReader r, int ch) {
 }
 
 public static class ReaderException extends RuntimeException{
-	final int line;
-	final int column;
+	public final int line;
+	public final int column;
 
 	public ReaderException(int line, int column, Throwable cause){
 		super(cause);
