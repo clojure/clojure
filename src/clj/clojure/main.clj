@@ -192,7 +192,13 @@
 
       (if data
         (if (contains? data :clojure.spec.alpha/problems)
-          (format "%n%s" (with-out-str (spec/explain-out data)))
+          (format "%n%s"
+            (with-out-str
+              (spec/explain-out
+                (if (= spec/*explain-out* spec/explain-printer)
+                  (update-in data [:clojure.spec.alpha/problems]
+                    (fn [probs] (map #(dissoc % :in) probs)))
+                  data))))
           (System/lineSeparator))
         (System/lineSeparator)))))
 
