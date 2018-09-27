@@ -537,7 +537,7 @@
         (is (not= (read-string s) (read-string s2)))))
     (binding [*data-readers* {'inst read-instant-date}]
       (testing "read-instant-date should truncate at milliseconds"
-        (is (= (read-string s) (read-string s2)) (read-string s3)))))
+        (is (= (read-string s) (read-string s2) (read-string s3))))))
   (let [s "#inst \"2010-11-12T03:14:15.123+05:00\""
         s2 "#inst \"2010-11-11T22:14:15.123Z\""]
     (binding [*data-readers* {'inst read-instant-date}]

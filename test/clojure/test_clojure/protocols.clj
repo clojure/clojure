@@ -613,14 +613,14 @@
              (bar [this o] o)
              (baz [this] 1)
              (baz [this o] 2))]
-      (= :foo (.bar r :foo))
-      (= 1 (.baz r))
-      (= 2 (.baz r nil))))
+      (is (= :foo (.bar r :foo)))
+      (is (= 1 (.baz r)))
+      (is (= 2 (.baz r nil)))))
   (testing "destructuring in method def"
     (let [r (reify
              ExampleProtocol
              (bar [this [_ _ item]] item))]
-      (= :c (.bar r [:a :b :c]))))
+      (is (= :c (.bar r [:a :b :c])))))
   (testing "methods can recur"
     (let [r (reify
              java.util.List
