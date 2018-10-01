@@ -397,7 +397,7 @@
   (containsAll [this c] (every? #(.contains this %) c))
   (isEmpty [_] (zero? cnt))
   (toArray [this] (into-array Object this))
-  (toArray [this arr]
+  (^objects toArray [this ^objects arr]
     (if (>= (count arr) cnt)
       (do
         (dotimes [i cnt]
