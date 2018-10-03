@@ -12,6 +12,9 @@
 
 package clojure.lang;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -19,12 +22,61 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Reflector{
 
+private static final MethodHandle CAN_ACCESS_PRED;
+
+// Java 8 is oldest JDK supported
+private static boolean isJava8() {
+	return System.getProperty("java.vm.specification.version").equals("1.8");
+}
+
+static {
+	MethodHandle pred = null;
+	try {
+		if (! isJava8())
+			pred = MethodHandles.lookup().findVirtual(Method.class, "canAccess", MethodType.methodType(boolean.class, Object.class));
+	} catch (Throwable t) {
+		Util.sneakyThrow(t);
+	}
+	CAN_ACCESS_PRED = pred;
+}
+
+private static boolean canAccess(Method m, Object target) {
+	if (CAN_ACCESS_PRED != null) {
+		// JDK9+ use j.l.r.AccessibleObject::canAccess, which respects module rules
+		try {
+			return (boolean) CAN_ACCESS_PRED.invoke(m, target);
+		} catch (Throwable t) {
+			throw Util.sneakyThrow(t);
+		}
+	} else {
+		// JDK 8
+		return true;
+	}
+}
+
+private static Method toAccessibleSuperMethod(Method m, Object target) {
+	Method selected = m;
+	while(selected != null && !canAccess(selected, target)) {
+		Class<?> s = selected.getDeclaringClass().getSuperclass();
+		try {
+			selected = s.getMethod(m.getName(), m.getParameterTypes());
+		} catch(NoSuchMethodException e) {
+			// ignore
+		}
+	}
+	return selected;
+}
+
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) {
 	Class c = target.getClass();
-	List methods = getMethods(c, args.length, methodName, false);
+	List methods = getMethods(c, args.length, methodName, false).stream()
+					.map(method -> toAccessibleSuperMethod(method, target))
+					.filter(method -> (method != null))
+					.collect(Collectors.toList());
 	return invokeMatchingMethod(methodName, methods, target, args);
 }
 
@@ -369,7 +421,7 @@ static public Field getField(Class c, String name, boolean getStatics){
 	return null;
 }
 
-static public List getMethods(Class c, int arity, String name, boolean getStatics){
+static public List<Method> getMethods(Class c, int arity, String name, boolean getStatics){
 	Method[] allmethods = c.getMethods();
 	ArrayList methods = new ArrayList();
 	ArrayList bridgeMethods = new ArrayList();
