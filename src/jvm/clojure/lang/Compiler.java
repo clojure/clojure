@@ -5553,7 +5553,11 @@ public static class FnMethod extends ObjMethod{
 		Label callLabel = gen.mark();
 		gen.visitLineNumber(line, callLabel);
 		gen.invokeStatic(objx.objtype, ms);
-		gen.box(returnType);
+		if(Type.LONG_TYPE.equals(returnType) || Type.DOUBLE_TYPE.equals(returnType)) {
+			gen.valueOf(returnType);
+		} else {
+			gen.box(returnType);
+		}
 
 
 		gen.returnValue();
@@ -5651,7 +5655,12 @@ public static class FnMethod extends ObjMethod{
 			HostExpr.emitUnboxArg(fn, gen, argclasses[i]);
 			}
 		gen.invokeInterface(Type.getType("L"+prim+";"), ms);
-		gen.box(getReturnType());
+		Type targetReturnType = getReturnType();
+		if(Type.LONG_TYPE.equals(targetReturnType) || Type.DOUBLE_TYPE.equals(targetReturnType)) {
+			gen.valueOf(targetReturnType);
+		} else {
+			gen.box(targetReturnType);
+		}
 
 
 		gen.returnValue();

@@ -1649,7 +1649,7 @@ not a pretty writer (which keeps track of columns), this function always outputs
     (and (= (.length p) 1) (contains? #{\v \V} (nth p 0))) :parameter-from-args
     (and (= (.length p) 1) (= \# (nth p 0))) :remaining-arg-count
     (and (= (.length p) 2) (= \' (nth p 0))) (nth p 1)
-    true (new Integer p))
+    true (Integer/parseInt p))
    offset])
  
 (def ^{:private true}
