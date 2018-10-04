@@ -3764,15 +3764,26 @@
   Returns a vector containing the object read and the (whitespace-trimmed) string read."
   {:added "1.10"}
   ([] (read+string *in*))
-  ([^clojure.lang.LineNumberingPushbackReader stream & args]
-     (try
-       (.captureString stream)
-       (let [o (apply read stream args)
-             s (.trim (.getString stream))]
-         [o s])       
-       (catch Throwable ex
-         (.getString stream)
-         (throw ex)))))
+  ([stream] (read+string stream true nil))
+  ([stream eof-error? eof-value] (read+string stream eof-error? eof-value false))
+  ([^clojure.lang.LineNumberingPushbackReader stream eof-error? eof-value recursive?]
+   (try
+     (.captureString stream)
+     (let [o (read stream eof-error? eof-value recursive?)
+           s (.trim (.getString stream))]
+       [o s])
+     (catch Throwable ex
+       (.getString stream)
+       (throw ex))))
+  ([opts ^clojure.lang.LineNumberingPushbackReader stream]
+   (try
+     (.captureString stream)
+     (let [o (read opts stream)
+           s (.trim (.getString stream))]
+       [o s])
+     (catch Throwable ex
+       (.getString stream)
+       (throw ex)))))
 
 (defn read-line
   "Reads the next line from stream that is the current value of *in* ."
