@@ -206,7 +206,9 @@
   You might get more than one :out or :err per eval, but exactly one :ret
   tap output can happen at any time (i.e. between evals)
   If during eval an attempt is made to read *in* it will read from in-reader unless :stdin is supplied
-"
+
+  Alpha, subject to change."
+  {:added "1.10"}
   [in-reader out-fn & {:keys [stdin]}]
   (let [EOF (Object.)
         tapfn #(out-fn {:tag :tap :val %1})]
@@ -261,7 +263,10 @@
 (defn io-prepl
   "prepl bound to *in* and *out*, suitable for use with e.g. server/repl (socket-repl).
   :ret and :tap vals will be processed by valf, a fn of one argument
-  or a symbol naming same (default pr-str)"
+  or a symbol naming same (default pr-str)
+
+  Alpha, subject to change."
+  {:added "1.10"}
   [& {:keys [valf] :or {valf pr-str}}]
   (let [valf (resolve-fn valf)
         out *out*
@@ -280,7 +285,10 @@
   same (default #(read %1 false %2)),
   :ret and :tap vals will be processed by valf, a fn of one argument
   or a symbol naming same (default read-string). If that function
-  throws, :val will be unprocessed."
+  throws, :val will be unprocessed.
+
+  Alpha, subject to change."
+  {:added "1.10"}
   [^String host port ^Reader
   in-reader out-fn & {:keys [valf readf] :or {valf read-string, readf #(read %1 false %2)}}]
   (let [valf (resolve-fn valf)
