@@ -1,5 +1,165 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.10
+
+## 1 Compatibility and Dependencies
+
+### 2.1 Java
+
+Clojure 1.10 now requires Java 8 or above. There were a number of updates related to this change and/or Java compatibility fixes for Java 8, 9, 10, and 11:
+
+* [CLJ-2363](http://dev.clojure.org/jira/browse/CLJ-2363)
+  Bump to Java 8 as minimum requirement, update embedded ASM to 6.2,
+  remove reliance on jdk166 jar, update javadoc links, and removed
+  conditional logic.
+* [CLJ-2367](http://dev.clojure.org/jira/browse/CLJ-2367)
+  ASM regression fix
+* [CLJ-2284](http://dev.clojure.org/jira/browse/CLJ-2284)
+  Fix invalid bytecode generation for static interface method calls in Java 9+
+* [CLJ-2066](http://dev.clojure.org/jira/browse/CLJ-2066)
+  Add reflection fallback for --illegal-access warnings in Java 9+
+* [CLJ-2330](http://dev.clojure.org/jira/browse/CLJ-2330)
+  Fix brittle test that fails on Java 10 build due to serialization drift
+* [CLJ-2374](http://dev.clojure.org/jira/browse/CLJ-2374)
+  Add type hint to address reflection ambiguity in JDK 11
+* [CLJ-2375](http://dev.clojure.org/jira/browse/CLJ-2375)
+  Fix usage of deprecated JDK apis
+
+### 2.2 Dependencies
+
+Updated dependencies:
+
+* spec.alpha dependency to 0.2.176 - [changes](https://github.com/clojure/spec.alpha/blob/master/CHANGES.md)
+* core.specs.alpha dependency to 0.2.44 - [changes](https://github.com/clojure/core.specs.alpha/blob/master/CHANGES.md)
+
+## 2 Features and major changes
+
+### 2.1 Error messages
+
+Clojure errors can occur in several distinct "phases" - read, macroexpand, compile, eval, and print. Clojure (and the REPL) now identify these phases in the exception and/or the message.
+
+The read/macroexpand/compile phases produce a CompilerException and indicate the location in the caller source code where the problem occurred (previously macroexpansion reported the error in the macroexpansion stack). CompilerException now implements IExceptionInfo and ex-data will report exception data including the optional keys:
+
+* :clojure.error/source - name of the source file
+* :clojure.error/line - line in source file
+* :clojure.error/column - column of line in source file
+* :clojure.error/phase - phase (:read, :macroexpand, :compile)
+* :clojure.error/symbol - symbol being macroexpanded or compiled
+
+clojure.main also contains a new function `ex-str` that can be used by external tools to get a repl message for a CompilerException to match the clojure.main repl behavior.
+
+* [CLJ-2373](http://dev.clojure.org/jira/browse/CLJ-2373)
+  Detect phase and overhaul exception message and printing
+
+### 2.2 tap
+
+tap is a shared, globally accessible system for distributing a series of informational or diagnostic values to a set of (presumably effectful) handler functions. It can be used as a better debug prn, or for facilities like logging etc.
+
+`tap>` sends a value to the set of taps. Taps can be added with `add-tap` and will be called with any value sent to `tap>`. The tap function may (briefly) block (e.g. for streams) and will never impede calls to `tap>`, but blocking indefinitely may cause tap values to be dropped. If no taps are registered, `tap>` discards. Remove taps with `remove-tap`.
+
+
+### 2.3 Read string capture mode
+
+`read+string` is a new function that mimics `read` but also capture the string that is read and returns both the read value and the (whitespace-trimmed) read string. `read+string` requires a LineNumberingPushbackReader.
+
+### 2.4 prepl (alpha)
+
+prepl is a new stream-based REPL with structured output (suitable for programmatic use). Forms are read from the reader, evaluated, and return data maps for the return value (if successful), output to `*out*` (possibly many), output to `*err*` (possibly many), or tap> values (possibly many).
+
+New functions in clojure.core.server:
+
+* `prepl` - the repl
+* `io-prepl` - a prepl bound to `*in*` and `*out*` suitable for use with the Clojure socket server
+* `remote-prepl` - a prepl that can be connected to a remote prepl over a socket
+
+prepl is alpha and subject to change.
+
+### 2.5 Other new functions in core
+
+These functions have been added to match existing functions in ClojureScript to increase the portability of error-handling code:
+
+* `ex-cause` - extract the cause exception
+* `ex-message` - extract the cause message
+
+This function has been added to construct a PrintWriter implementation whose behavior on flush and close is provided as functions:
+
+* `PrintWriter-on` - create a PrintWriter from flush-fn and close-fn
+
+## 3 Enhancements
+
+### 3.1 Error messages
+
+* [CLJ-1279](http://dev.clojure.org/jira/browse/CLJ-1279)
+  Report correct arity count for function arity errors inside macros
+* [CLJ-2386](http://dev.clojure.org/jira/browse/CLJ-2386)
+  Omit ex-info construction frames
+* [CLJ-2394](http://dev.clojure.org/jira/browse/CLJ-2394)
+  Warn in pst that stack trace for syntax error failed before execution
+* [CLJ-2396](http://dev.clojure.org/jira/browse/CLJ-2396)
+  Omit :in clauses when printing spec function errors if using default explain printer
+* [CLJ-1797](http://dev.clojure.org/jira/browse/CLJ-1797)
+  Mention cljc in error when require fails
+* [CLJ-1130](http://dev.clojure.org/jira/browse/CLJ-1130)
+  Improve error message when unable to match static method
+
+### 3.2 Documentation
+
+* [CLJ-2044](http://dev.clojure.org/jira/browse/CLJ-2044)
+  clojure.instant - add arglist meta for functions
+* [CLJ-2257](http://dev.clojure.org/jira/browse/CLJ-2257)
+  `proxy` - fix typo
+* [CLJ-2332](http://dev.clojure.org/jira/browse/CLJ-2332)
+  `remove-tap` - fix repetition
+* [CLJ-2122](http://dev.clojure.org/jira/browse/CLJ-2122)
+  `flatten` - describe result as lazy
+
+### 3.3 Performance
+
+* [CLJ-1654](http://dev.clojure.org/jira/browse/CLJ-1654)
+  Reuse seq in some
+* [CLJ-1366](http://dev.clojure.org/jira/browse/CLJ-1366)
+  The empty map literal is read as a different map each time
+* [CLJ-2362](http://dev.clojure.org/jira/browse/CLJ-2362)
+  with-meta should return identity when new meta is identical to prior
+
+### 3.4 Other enhancements
+
+* [CLJ-1209](http://dev.clojure.org/jira/browse/CLJ-1209)
+  Print ex-data in clojure.test error reports
+* [CLJ-2163](http://dev.clojure.org/jira/browse/CLJ-2163)
+  Add test for var serialization
+
+## 3 Fixes
+
+### 3.1 Collections
+
+* [CLJ-2297](http://dev.clojure.org/jira/browse/CLJ-2297)
+  PersistentHashMap leaks memory when keys are removed with `without`
+* [CLJ-1587](http://dev.clojure.org/jira/browse/CLJ-1587)
+  PersistentArrayMap’s assoc doesn’t respect HASHTABLE_THRESHOLD
+* [CLJ-2050](http://dev.clojure.org/jira/browse/CLJ-2050)
+  Remove redundant key comparisons in HashCollisionNode
+* [CLJ-2089](http://dev.clojure.org/jira/browse/CLJ-2089)
+  Sorted colls with default comparator don’t check that first element is Comparable
+
+### 3.2 API
+
+* [CLJ-2031](http://dev.clojure.org/jira/browse/CLJ-2031)
+  clojure.walk/postwalk does not preserve MapEntry type objects
+* [CLJ-2349](http://dev.clojure.org/jira/browse/CLJ-2349)
+  Report correct line number for uncaught ExceptionInfo in clojure.test
+* [CLJ-1764](http://dev.clojure.org/jira/browse/CLJ-1764)
+  partition-by runs infinite loop when one element of infinite partition is accessed
+* [CLJ-1832](http://dev.clojure.org/jira/browse/CLJ-1832)
+  unchecked-* functions have different behavior on primitive longs vs boxed Longs
+
+### 3.3 Other
+
+* [CLJ-1403](http://dev.clojure.org/jira/browse/CLJ-1403)
+  ns-resolve might throw ClassNotFoundException but should return nil
+* [CLJ-2407](http://dev.clojure.org/jira/browse/CLJ-2407)
+  Fix bugs in Clojure unit tests
+
 # Changes to Clojure in Version 1.9
 
 ## 1 New and Improved Features
