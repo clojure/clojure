@@ -41,18 +41,7 @@ public DynamicClassLoader(ClassLoader parent){
 	super(EMPTY_URLS,parent);
 }
 
-void installPackage(String className) {
-	int offset = className.lastIndexOf('.');
-	if(offset != -1)
-		{
-		String pkgname = className.substring(0, offset);
-		if (getPackage(pkgname) == null)
-			definePackage(pkgname, null, null, null, null, null, null, null);
-		}
-}
-
 public Class defineClass(String name, byte[] bytes, Object srcForm){
-	installPackage(name);
 	Util.clearCache(rq, classCache);
 	Class c = defineClass(name, bytes, 0, bytes.length);
     classCache.put(name, new SoftReference(c,rq));
