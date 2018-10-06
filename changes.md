@@ -10,7 +10,7 @@ Clojure 1.10 now requires Java 8 or above. There were a number of updates relate
 
 * [CLJ-2363](http://dev.clojure.org/jira/browse/CLJ-2363)
   Bump to Java 8 as minimum requirement, update embedded ASM to 6.2,
-  remove reliance on jdk166 jar, update javadoc links, and removed
+  remove reliance on jdk166 jar, update javadoc links, and remove
   conditional logic.
 * [CLJ-2367](http://dev.clojure.org/jira/browse/CLJ-2367)
   ASM regression fix
@@ -60,7 +60,7 @@ tap is a shared, globally accessible system for distributing a series of informa
 
 ### 2.3 Read string capture mode
 
-`read+string` is a new function that mimics `read` but also capture the string that is read and returns both the read value and the (whitespace-trimmed) read string. `read+string` requires a LineNumberingPushbackReader.
+`read+string` is a new function that mimics `read` but also captures the string that is read and returns both the read value and the (whitespace-trimmed) read string. `read+string` requires a LineNumberingPushbackReader.
 
 ### 2.4 prepl (alpha)
 
