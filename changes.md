@@ -4,7 +4,7 @@
 
 ## 1 Compatibility and Dependencies
 
-### 2.1 Java
+### 1.1 Java
 
 Clojure 1.10 now requires Java 8 or above. There were a number of updates related to this change and/or Java compatibility fixes for Java 8, 9, 10, and 11:
 
@@ -25,7 +25,7 @@ Clojure 1.10 now requires Java 8 or above. There were a number of updates relate
 * [CLJ-2375](http://dev.clojure.org/jira/browse/CLJ-2375)
   Fix usage of deprecated JDK apis
 
-### 2.2 Dependencies
+### 1.2 Dependencies
 
 Updated dependencies:
 
