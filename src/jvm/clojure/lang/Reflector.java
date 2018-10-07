@@ -19,9 +19,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Reflector{
@@ -58,17 +56,41 @@ private static boolean canAccess(Method m, Object target) {
 	}
 }
 
+private static Collection<Class> interfaces(Class c) {
+	Set<Class> interfaces = new HashSet<Class>();
+	Deque<Class> toWalk = new ArrayDeque<Class>();
+	toWalk.addAll(Arrays.asList(c.getInterfaces()));
+	Class iface = toWalk.poll();
+	while (iface != null) {
+		interfaces.add(iface);
+		toWalk.addAll(Arrays.asList(iface.getInterfaces()));
+		iface = toWalk.poll();
+	}
+	return interfaces;
+}
+
+private static Method tryFindMethod(Class c, Method m) {
+	if(c == null) return null;
+	try {
+		return c.getMethod(m.getName(), m.getParameterTypes());
+	} catch(NoSuchMethodException e) {
+		return null;
+	}
+}
+
 private static Method toAccessibleSuperMethod(Method m, Object target) {
 	Method selected = m;
-	while(selected != null && !canAccess(selected, target)) {
-		Class<?> s = selected.getDeclaringClass().getSuperclass();
-		try {
-			selected = s.getMethod(m.getName(), m.getParameterTypes());
-		} catch(NoSuchMethodException e) {
-			// ignore
-		}
+	while(selected != null) {
+		if(canAccess(selected, target)) return selected;
+		selected = tryFindMethod(selected.getDeclaringClass().getSuperclass(), m);
 	}
-	return selected;
+
+	Collection<Class> interfaces = interfaces(m.getDeclaringClass());
+	for(Class c : interfaces) {
+		selected = tryFindMethod(c, m);
+		if(selected != null) return selected;
+	}
+	return null;
 }
 
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) {

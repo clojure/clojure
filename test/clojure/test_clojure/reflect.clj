@@ -37,3 +37,18 @@
 (def inst (IBar$Factory/get))
 (deftest invoking-nonpublic-super
   (is (= "stuff" (.stuff inst))))
+
+(defn- checkCLJ2066 [f]
+  ;; intentionally reflective call
+  (is (not (nil? (.createXMLStreamReader f (java.io.StringReader. ""))))))
+
+(defn- checkCLJ2414 [p]
+  ;; intentionally reflective call
+  (is (false? (.startsWith p "s"))))
+
+(deftest invoke-checks-accessibility
+  ;; CLJ-2066 - reflector finds method in private class. this is invokable, but an illegal access per modules
+  (checkCLJ2066 (javax.xml.stream.XMLInputFactory/newInstance))
+
+  ;; CLJ-2414 - find default method on interface of inaccessible class
+  (checkCLJ2414 (java.nio.file.Paths/get "src" (into-array String []))))
