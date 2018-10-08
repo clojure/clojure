@@ -33,7 +33,7 @@ namespace.
     <div class="NamespaceTOC">
       <span class="toc-header">Namespaces</span>
       <ul id="left-sidebar-list">
-        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.datafy-api.html">clojure.datafy</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
       </ul>
     </div>
     <div class="BranchTOC">
@@ -1995,6 +1995,11 @@ namespace.
         <a href="#clojure.core.protocols/coll-reduce" class="toc-subentry-anchor">coll-reduce</a>
       </div>
     </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.core.protocols/Datafiable" class="toc-entry-anchor">Datafiable</a>
+      <div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.core.protocols/datafy" class="toc-subentry-anchor">datafy</a>
+      </div>
+    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.core.protocols/IKVReduce" class="toc-entry-anchor">IKVReduce</a>
       <div class="toc-subentry" style="margin-left: 1em;">
         <a href="#clojure.core.protocols/kv-reduce" class="toc-subentry-anchor">kv-reduce</a>
@@ -2003,6 +2008,11 @@ namespace.
       <a href="#clojure.core.protocols/InternalReduce" class="toc-entry-anchor">InternalReduce</a>
       <div class="toc-subentry" style="margin-left: 1em;">
         <a href="#clojure.core.protocols/internal-reduce" class="toc-subentry-anchor">internal-reduce</a>
+      </div>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.core.protocols/Navigable" class="toc-entry-anchor">Navigable</a>
+      <div class="toc-subentry" style="margin-left: 1em;">
+        <a href="#clojure.core.protocols/nav" class="toc-subentry-anchor">nav</a>
       </div>
     </div>
   </div><div class="toc-section" style="margin-left: 1em;">
@@ -11754,7 +11764,29 @@ implementation defined in terms of Iterable.</pre>
     </div>
     
     
-    <a id="proto-source" href="https://github.com/clojure/clojure/blob/2b242f943b9a74e753b7ee1b951a8699966ea560/src/clj/clojure/core/protocols.clj#L13">Source</a>
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L13">Source</a>
+  </div><div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.protocols/Datafiable">Datafiable</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr"></pre>
+    Known implementations: <span id="proto-impls">clojure.lang.IRef, clojure.lang.Namespace, java.lang.Class, nil, Object</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.core.protocols/datafy">datafy</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (datafy o)
+</pre>
+      <pre id="var-docstr">return a representation of o as data (default identity)</pre>
+      <pre id="var-specs"></pre>
+      
+      
+      
+    </div>
+    
+    
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L182">Source</a>
   </div><div id="proto-entry">
     <br />
     <hr />
@@ -11779,7 +11811,7 @@ semantics (just different arg order).</pre>
     </div>
     
     
-    <a id="proto-source" href="https://github.com/clojure/clojure/blob/2b242f943b9a74e753b7ee1b951a8699966ea560/src/clj/clojure/core/protocols.clj#L175">Source</a>
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L175">Source</a>
   </div><div id="proto-entry">
     <br />
     <hr />
@@ -11802,7 +11834,30 @@ faster than first/next recursion. Called by clojure.core/reduce.</pre>
     </div>
     
     
-    <a id="proto-source" href="https://github.com/clojure/clojure/blob/2b242f943b9a74e753b7ee1b951a8699966ea560/src/clj/clojure/core/protocols.clj#L19">Source</a>
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L19">Source</a>
+  </div><div id="proto-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.protocols/Navigable">Navigable</h2>
+    <span id="proto-type">Protocol</span><br />
+    <pre id="proto-docstr"></pre>
+    Known implementations: <span id="proto-impls">Object</span>
+    <div id="proto-var-entry">
+      <br />
+      <h3 id="clojure.core.protocols/nav">nav</h3>
+      <span id="var-type">function</span><br />
+      <pre id="var-usage">Usage: (nav coll k v)
+</pre>
+      <pre id="var-docstr">return (possibly transformed) v in the context of coll and k (a key/index or nil),
+defaults to returning v.</pre>
+      <pre id="var-specs"></pre>
+      
+      
+      
+    </div>
+    
+    
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L192">Source</a>
   </div>
 </div>
 
@@ -12147,7 +12202,7 @@ Alpha, subject to change.</pre>
     <hr />
     <h2 id="clojure.core.server/remote-prepl">remote-prepl</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (remote-prepl host port in-reader out-fn &amp; {:keys [valf readf], :or {valf read-string, readf (fn* [p1__6474# p2__6475#] (read p1__6474# false p2__6475#))}})
+    <pre id="var-usage">Usage: (remote-prepl host port in-reader out-fn &amp; {:keys [valf readf], :or {valf read-string, readf (fn* [p1__6610# p2__6611#] (read p1__6610# false p2__6611#))}})
 </pre>
     <pre id="var-docstr">Implements a prepl on in-reader and out-fn by forwarding to a
 remote [io-]prepl over a socket.  Messages will be read by readf, a

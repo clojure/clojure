@@ -10,6 +10,12 @@
    :wiki-url "https://clojure.github.io/clojure/clojure.data-api.html",
    :source-url
    "https://github.com/clojure/clojure/blob/9baebd091b1301aecaaac3b5f9c7ede5dcc58f8c/src/clj/clojure/data.clj"}
+  {:doc nil,
+   :name "clojure.datafy",
+   :wiki-url
+   "https://clojure.github.io/clojure/clojure.datafy-api.html",
+   :source-url
+   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/datafy.clj"}
   {:doc "edn reading.",
    :author "Rich Hickey",
    :name "clojure.edn",
@@ -150,7 +156,7 @@
    :wiki-url
    "https://clojure.github.io/clojure/clojure.core-api.html#clojure.core.protocols",
    :source-url
-   "https://github.com/clojure/clojure/blob/2b242f943b9a74e753b7ee1b951a8699966ea560/src/clj/clojure/core/protocols.clj"}
+   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj"}
   {:doc
    "A library for reduction and parallel folding. Alpha and subject\nto change.",
    :author "Rich Hickey",
@@ -9599,6 +9605,34 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.data-api.html#clojure.data/equality-partition"}
   {:raw-source-url
+   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/datafy.clj",
+   :name "datafy",
+   :file "src/clj/clojure/datafy.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/datafy.clj#L14",
+   :line 14,
+   :var-type "function",
+   :arglists ([x]),
+   :doc
+   "Attempts to return x as data. If :clojure.datafy/datafy is present\nas metadata of x, it will be called with x as an argument, else\ndatafy will return the value of clojure.protocols/datafy. If the\nvalue has been transformed and the result supports\nmetadata, :clojure.datafy/obj will be set on the metadata to the\noriginal value of x.",
+   :namespace "clojure.datafy",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.datafy-api.html#clojure.datafy/datafy"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/datafy.clj",
+   :name "nav",
+   :file "src/clj/clojure/datafy.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/datafy.clj#L29",
+   :line 29,
+   :var-type "function",
+   :arglists ([coll k v]),
+   :doc
+   "Returns (possibly transformed) v in the context of coll and k (a\nkey/index or nil). Callers should attempt to provide the key/index\ncontext k for Indexed/Associative/ILookup colls if possible, but not\nto fabricate one e.g. for sequences (pass nil). If :clojure.datafy/nav is\npresent as metadata on coll, it will be called with coll, k and v as\narguments, else nav will call :clojure.protocols/nav.",
+   :namespace "clojure.datafy",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.datafy-api.html#clojure.datafy/nav"}
+  {:raw-source-url
    "https://github.com/clojure/clojure/raw/c6756a8bab137128c8119add29a25b0a88509900/src/clj/clojure/edn.clj",
    :added "1.5",
    :name "read",
@@ -12810,11 +12844,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.zip-api.html#clojure.zip/zipper"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/2b242f943b9a74e753b7ee1b951a8699966ea560/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj",
    :name "CollReduce",
    :file "src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/2b242f943b9a74e753b7ee1b951a8699966ea560/src/clj/clojure/core/protocols.clj#L13",
+   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L13",
    :line 13,
    :var-type "protocol",
    :arglists nil,
@@ -12824,11 +12858,24 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/CollReduce"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/2b242f943b9a74e753b7ee1b951a8699966ea560/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj",
+   :name "Datafiable",
+   :file "src/clj/clojure/core/protocols.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L182",
+   :line 182,
+   :var-type "protocol",
+   :arglists nil,
+   :doc nil,
+   :namespace "clojure.core.protocols",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/Datafiable"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj",
    :name "IKVReduce",
    :file "src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/2b242f943b9a74e753b7ee1b951a8699966ea560/src/clj/clojure/core/protocols.clj#L175",
+   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L175",
    :line 175,
    :var-type "protocol",
    :arglists nil,
@@ -12838,11 +12885,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/IKVReduce"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/2b242f943b9a74e753b7ee1b951a8699966ea560/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj",
    :name "InternalReduce",
    :file "src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/2b242f943b9a74e753b7ee1b951a8699966ea560/src/clj/clojure/core/protocols.clj#L19",
+   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L19",
    :line 19,
    :var-type "protocol",
    :arglists nil,
@@ -12851,6 +12898,19 @@
    :namespace "clojure.core.protocols",
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/InternalReduce"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj",
+   :name "Navigable",
+   :file "src/clj/clojure/core/protocols.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L192",
+   :line 192,
+   :var-type "protocol",
+   :arglists nil,
+   :doc nil,
+   :namespace "clojure.core.protocols",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/Navigable"}
   {:name "coll-reduce",
    :doc nil,
    :var-type "function",
@@ -12858,6 +12918,16 @@
    :arglists ([coll f] [coll f val]),
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/coll-reduce",
+   :source-url nil,
+   :raw-source-url nil,
+   :file nil}
+  {:name "datafy",
+   :doc "return a representation of o as data (default identity)",
+   :var-type "function",
+   :namespace "clojure.core.protocols",
+   :arglists ([o]),
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/datafy",
    :source-url nil,
    :raw-source-url nil,
    :file nil}
@@ -12878,6 +12948,17 @@
    :arglists ([seq f start]),
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/internal-reduce",
+   :source-url nil,
+   :raw-source-url nil,
+   :file nil}
+  {:name "nav",
+   :doc
+   "return (possibly transformed) v in the context of coll and k (a key/index or nil),\ndefaults to returning v.",
+   :var-type "function",
+   :namespace "clojure.core.protocols",
+   :arglists ([coll k v]),
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/nav",
    :source-url nil,
    :raw-source-url nil,
    :file nil}
@@ -13189,8 +13270,8 @@
       {valf read-string,
        readf
        (fn*
-        [p1__6474# p2__6475#]
-        (read p1__6474# false p2__6475#))}}]),
+        [p1__6610# p2__6611#]
+        (read p1__6610# false p2__6611#))}}]),
    :doc
    "Implements a prepl on in-reader and out-fn by forwarding to a\nremote [io-]prepl over a socket.  Messages will be read by readf, a\nfn of a LineNumberingPushbackReader and EOF value or a symbol naming\nsame (default #(read %1 false %2)),\n:ret and :tap vals will be processed by valf, a fn of one argument\nor a symbol naming same (default read-string). If that function\nthrows, :val will be unprocessed.\n\nAlpha, subject to change.",
    :namespace "clojure.core.server",
