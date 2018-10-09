@@ -4,13 +4,13 @@
 
 ## 1 Compatibility and Dependencies
 
-### 2.1 Java
+### 1.1 Java
 
 Clojure 1.10 now requires Java 8 or above. There were a number of updates related to this change and/or Java compatibility fixes for Java 8, 9, 10, and 11:
 
 * [CLJ-2363](http://dev.clojure.org/jira/browse/CLJ-2363)
   Bump to Java 8 as minimum requirement, update embedded ASM to 6.2,
-  remove reliance on jdk166 jar, update javadoc links, and remove
+  remove reliance on jsr166 jar, update javadoc links, and remove
   conditional logic.
 * [CLJ-2367](http://dev.clojure.org/jira/browse/CLJ-2367)
   ASM regression fix
@@ -25,7 +25,7 @@ Clojure 1.10 now requires Java 8 or above. There were a number of updates relate
 * [CLJ-2375](http://dev.clojure.org/jira/browse/CLJ-2375)
   Fix usage of deprecated JDK apis
 
-### 2.2 Dependencies
+### 1.2 Dependencies
 
 Updated dependencies:
 
@@ -50,13 +50,14 @@ clojure.main also contains a new function `ex-str` that can be used by external 
 
 * [CLJ-2373](http://dev.clojure.org/jira/browse/CLJ-2373)
   Detect phase and overhaul exception message and printing
+* [CLJ-2414](http://dev.clojure.org/jira/browse/CLJ-2414)
+  Detect phase and overhaul exception message and printing
 
 ### 2.2 tap
 
 tap is a shared, globally accessible system for distributing a series of informational or diagnostic values to a set of (presumably effectful) handler functions. It can be used as a better debug prn, or for facilities like logging etc.
 
 `tap>` sends a value to the set of taps. Taps can be added with `add-tap` and will be called with any value sent to `tap>`. The tap function may (briefly) block (e.g. for streams) and will never impede calls to `tap>`, but blocking indefinitely may cause tap values to be dropped. If no taps are registered, `tap>` discards. Remove taps with `remove-tap`.
-
 
 ### 2.3 Read string capture mode
 
@@ -74,7 +75,13 @@ New functions in clojure.core.server:
 
 prepl is alpha and subject to change.
 
-### 2.5 Other new functions in core
+### 2.5 datafy and nav
+
+clojure.datafy is a facility for object to data transformation. The `datafy` and `nav` functions can be used used to transform and (lazily) navigate through object graphs. The data transformation process can be influenced by consumers using protocols or metadata.
+
+datafy is alpha and subject to change.
+
+### 2.6 Other new functions in core
 
 These functions have been added to match existing functions in ClojureScript to increase the portability of error-handling code:
 
@@ -101,6 +108,8 @@ This function has been added to construct a PrintWriter implementation whose beh
   Mention cljc in error when require fails
 * [CLJ-1130](http://dev.clojure.org/jira/browse/CLJ-1130)
   Improve error message when unable to match static method
+* [CLJ-2415](http://dev.clojure.org/jira/browse/CLJ-2415)
+  Error cause should always be on 2nd line of error message
 
 ### 3.2 Documentation
 
