@@ -166,6 +166,7 @@
         cause (init-cause e)
         tr (.getStackTrace cause)
         el (when-not (zero? (count tr)) (aget tr 0))
+        st (if el (stack-element-str el) "[trace missing]") ;; jvm may omit stack
         top-data (ex-data e)
         data (ex-data cause)]
     (str
@@ -173,22 +174,29 @@
         :read
         (if (instance? Compiler$CompilerException e)
           (.toString e)
-          (format "%s. Cause: %s" (.getMessage e) (.getMessage (init-cause e))))
+          (format "%s.%n%s" (.getMessage e) (.getMessage (init-cause e))))
 
         (:compile :macroexpand)
         (.toString e)
 
         :print
-        (format "Error printing return value at %s. %s %s"
-          (if el (stack-element-str el) "[trace missing]") ;; jvm may omit stack
+        (format "Error printing return value (%s) at %s.%n%s"
           (.. cause getClass getSimpleName)
+          st
           (.getMessage cause))
 
         ;; eval
-        (format "Evaluation error at %s. %s %s"
-          (if el (stack-element-str el) "[trace missing]") ;; jvm may omit stack
-          (.. cause getClass getSimpleName)
-          (.getMessage cause)))
+        (if (and data (contains? data :clojure.spec.alpha/problems))
+          (let [{:clojure.spec.alpha/keys [fn]} data]
+            (format "Evaluation error - invalid arguments to %s at %s."
+              fn
+              (if-let [{:keys [file line]} (:clojure.spec.test.alpha/caller data)]
+                (format "(%s:%s)" file line)
+                st)))
+          (format "Evaluation error (%s) at %s.%n%s"
+            (.. cause getClass getSimpleName)
+            st
+            (.getMessage cause))))
 
       (if data
         (if (contains? data :clojure.spec.alpha/problems)

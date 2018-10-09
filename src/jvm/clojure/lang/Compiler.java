@@ -6887,11 +6887,14 @@ static public class CompilerException extends RuntimeException implements IExcep
 	public String toString(){
 		Throwable cause = getCause();
 		if(cause != null) {
-			final String delim = (RT.get(data, ERR_PHASE) == PHASE_MACROEXPAND && isSpecError(cause)) ? " " : "\n";
-			if(RT.get(data, ERR_PHASE) == PHASE_MACROEXPAND && ! isMacroSyntaxCheck(cause)) {
-				return String.format("%s%sCause: %s %s", getMessage(), delim, cause.getClass().getSimpleName(), cause.getMessage());
+			if(RT.get(data, ERR_PHASE) == PHASE_MACROEXPAND) {
+				if(isSpecError(cause)) {
+					return String.format("%s", getMessage());
+				} else {
+					return String.format("%s%n%s", getMessage(), cause.getMessage());
+				}
 			} else {
-				return String.format("%s%sCause: %s", getMessage(), delim, cause.getMessage());
+				return String.format("%s%n%s", getMessage(), cause.getMessage());
 			}
 		} else {
 			return getMessage();
