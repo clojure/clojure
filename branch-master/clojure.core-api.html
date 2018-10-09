@@ -11771,7 +11771,7 @@ implementation defined in terms of Iterable.</pre>
     <h2 id="clojure.core.protocols/Datafiable">Datafiable</h2>
     <span id="proto-type">Protocol</span><br />
     <pre id="proto-docstr"></pre>
-    Known implementations: <span id="proto-impls">clojure.lang.IRef, clojure.lang.Namespace, java.lang.Class, nil, Object</span>
+    Known implementations: <span id="proto-impls">clojure.lang.IRef, clojure.lang.Namespace, java.lang.Class, java.lang.Throwable, nil, Object</span>
     <div id="proto-var-entry">
       <br />
       <h3 id="clojure.core.protocols/datafy">datafy</h3>
@@ -12202,7 +12202,7 @@ Alpha, subject to change.</pre>
     <hr />
     <h2 id="clojure.core.server/remote-prepl">remote-prepl</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (remote-prepl host port in-reader out-fn &amp; {:keys [valf readf], :or {valf read-string, readf (fn* [p1__6610# p2__6611#] (read p1__6610# false p2__6611#))}})
+    <pre id="var-usage">Usage: (remote-prepl host port in-reader out-fn &amp; {:keys [valf readf], :or {valf read-string, readf (fn* [p1__6614# p2__6615#] (read p1__6614# false p2__6615#))}})
 </pre>
     <pre id="var-docstr">Implements a prepl on in-reader and out-fn by forwarding to a
 remote [io-]prepl over a socket.  Messages will be read by readf, a
