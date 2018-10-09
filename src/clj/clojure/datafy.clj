@@ -40,6 +40,9 @@
   (into (sorted-map) m))
 
 (extend-protocol p/Datafiable
+  Throwable
+  (datafy [x] (Throwable->map x))
+  
   clojure.lang.IRef
   (datafy [r] (with-meta [(deref r)] (meta r)))
 
