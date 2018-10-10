@@ -24,6 +24,8 @@ Clojure 1.10 now requires Java 8 or above. There were a number of updates relate
   Add type hint to address reflection ambiguity in JDK 11
 * [CLJ-2375](http://dev.clojure.org/jira/browse/CLJ-2375)
   Fix usage of deprecated JDK apis
+* [CLJ-2414](http://dev.clojure.org/jira/browse/CLJ-2414)
+  Regression in reflectively finding default methods
 
 ### 1.2 Dependencies
 
@@ -50,8 +52,8 @@ clojure.main also contains a new function `ex-str` that can be used by external 
 
 * [CLJ-2373](http://dev.clojure.org/jira/browse/CLJ-2373)
   Detect phase and overhaul exception message and printing
-* [CLJ-2414](http://dev.clojure.org/jira/browse/CLJ-2414)
-  Detect phase and overhaul exception message and printing
+* [CLJ-2415](http://dev.clojure.org/jira/browse/CLJ-2415)
+  Error cause should always be on 2nd line of error message
 
 ### 2.2 tap
 
@@ -108,8 +110,6 @@ This function has been added to construct a PrintWriter implementation whose beh
   Mention cljc in error when require fails
 * [CLJ-1130](http://dev.clojure.org/jira/browse/CLJ-1130)
   Improve error message when unable to match static method
-* [CLJ-2415](http://dev.clojure.org/jira/browse/CLJ-2415)
-  Error cause should always be on 2nd line of error message
 
 ### 3.2 Documentation
 
