@@ -168,6 +168,8 @@ This function has been added to construct a PrintWriter implementation whose beh
   ns-resolve might throw ClassNotFoundException but should return nil
 * [CLJ-2407](http://dev.clojure.org/jira/browse/CLJ-2407)
   Fix bugs in Clojure unit tests
+* [CLJ-1079](http://dev.clojure.org/jira/browse/CLJ-1079)
+  In reader, don't ignore explicit :line :col meta
 
 # Changes to Clojure in Version 1.9
 
