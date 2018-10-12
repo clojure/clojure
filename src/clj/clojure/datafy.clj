@@ -11,6 +11,8 @@
   (:require [clojure.core.protocols :as p]
             [clojure.reflect :as refl]))
 
+(set! *warn-on-reflection* true)
+
 (defn datafy
   "Attempts to return x as data. If :clojure.datafy/datafy is present
   as metadata of x, it will be called with x as an argument, else
@@ -23,7 +25,7 @@
     (if (identical? v x)
       v
       (if (instance? clojure.lang.IObj v)
-        (vary-meta v assoc ::obj x)
+        (vary-meta v assoc ::obj x ::class (-> x class .getName symbol))
         v))))
 
 (defn nav
@@ -41,17 +43,22 @@
 
 (extend-protocol p/Datafiable
   Throwable
-  (datafy [x] (Throwable->map x))
+  (datafy [x]
+          (Throwable->map x))
   
   clojure.lang.IRef
-  (datafy [r] (with-meta [(deref r)] (meta r)))
+  (datafy [r]
+          (with-meta [(deref r)] (meta r)))
 
   clojure.lang.Namespace
-  (datafy [n] (with-meta {:publics (-> n ns-publics sortmap)
-                          :imports (-> n ns-imports sortmap)
-                          :interns (-> n ns-interns sortmap)}
-                (meta n)))
+  (datafy [n]
+          (with-meta {:name (.getName n)
+                      :publics (-> n ns-publics sortmap)
+                      :imports (-> n ns-imports sortmap)
+                      :interns (-> n ns-interns sortmap)}
+            (meta n)))
 
   java.lang.Class
-  (datafy [c] (let [{:keys [members] :as ret} (refl/reflect c)]
-                (assoc ret :members (->> members (group-by :name) sortmap)))))
+  (datafy [c]
+          (let [{:keys [members] :as ret} (refl/reflect c)]
+            (assoc ret :name (-> c .getName symbol) :members (->> members (group-by :name) sortmap)))))
