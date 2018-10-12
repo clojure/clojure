@@ -954,7 +954,8 @@ public static class MetaReader extends AFn{
 			{
 			if(line != -1 && o instanceof ISeq)
 				{
-				meta = ((IPersistentMap) meta).assoc(RT.LINE_KEY, line).assoc(RT.COLUMN_KEY, column);
+				meta = RT.assoc(meta, RT.LINE_KEY, RT.get(meta, RT.LINE_KEY, line));
+				meta = RT.assoc(meta, RT.COLUMN_KEY, RT.get(meta,RT.COLUMN_KEY, column));
 				}
 			if(o instanceof IReference)
 				{
@@ -1236,7 +1237,10 @@ public static class ListReader extends AFn{
 //		IObj s = (IObj) RT.seq(list);
 		if(line != -1)
 			{
-			return s.withMeta(RT.map(RT.LINE_KEY, line, RT.COLUMN_KEY, column));
+			Object meta = RT.meta(s);
+			meta = RT.assoc(meta, RT.LINE_KEY, RT.get(meta, RT.LINE_KEY, line));
+			meta = RT.assoc(meta, RT.COLUMN_KEY, RT.get(meta,RT.COLUMN_KEY, column));
+			return s.withMeta((IPersistentMap)meta);
 			}
 		else
 			return s;

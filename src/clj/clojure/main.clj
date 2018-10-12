@@ -304,7 +304,9 @@ by default when a new command-line REPL is started."} repl-requires
                                       :clojure.error/column (.-column e)}
                                      e))))]
              (or (#{request-prompt request-exit} input)
-                 (let [value (binding [*read-eval* read-eval] (eval input))]
+                 (let [value (binding [*read-eval* read-eval
+                                       *file* (get (meta input) :file)]
+                               (eval input))]
                    (set! *3 *2)
                    (set! *2 *1)
                    (set! *1 value)

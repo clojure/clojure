@@ -768,3 +768,15 @@
   (let [[r s] (read+string {:read-cond :allow :features #{:y}} (str->lnpr "#?(:x :foo :y :bar)"))]
     (is (= :bar r))
     (is (= "#?(:x :foo :y :bar)" s))))
+
+(deftest t-Explicit-line-column-numbers
+  (is (= {:line 42 :column 99}
+         (-> "^{:line 42 :column 99} (1 2)" read-string meta (select-keys [:line :column]))))
+
+  (are [l c s] (= {:line l :column c} (-> s str->lnpr read meta (select-keys [:line :column])))
+    42 99 "^{:line 42 :column 99} (1 2)"
+    1 99 "^{:column 99} (1 2)")
+
+  (eval (-> "^{:line 42 :column 99} (defn explicit-line-numbering [])" str->lnpr read))
+  (is (= {:line 42 :column 99}
+         (-> 'explicit-line-numbering resolve meta (select-keys [:line :column])))))
