@@ -3105,7 +3105,7 @@
    (if (seq coll)
      (let [a (to-array coll)]
        (. java.util.Arrays (sort a comp))
-       (seq a))
+       (with-meta (seq a) (meta coll)))
      ())))
 
 (defn sort-by
