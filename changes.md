@@ -138,9 +138,9 @@ This function has been added to construct a PrintWriter implementation whose beh
 * [CLJ-2163](http://dev.clojure.org/jira/browse/CLJ-2163)
   Add test for var serialization
 
-## 3 Fixes
+## 4 Fixes
 
-### 3.1 Collections
+### 4.1 Collections
 
 * [CLJ-2297](http://dev.clojure.org/jira/browse/CLJ-2297)
   PersistentHashMap leaks memory when keys are removed with `without`
@@ -151,7 +151,7 @@ This function has been added to construct a PrintWriter implementation whose beh
 * [CLJ-2089](http://dev.clojure.org/jira/browse/CLJ-2089)
   Sorted colls with default comparator don’t check that first element is Comparable
 
-### 3.2 API
+### 4.2 API
 
 * [CLJ-2031](http://dev.clojure.org/jira/browse/CLJ-2031)
   clojure.walk/postwalk does not preserve MapEntry type objects
@@ -162,7 +162,7 @@ This function has been added to construct a PrintWriter implementation whose beh
 * [CLJ-1832](http://dev.clojure.org/jira/browse/CLJ-1832)
   unchecked-* functions have different behavior on primitive longs vs boxed Longs
 
-### 3.3 Other
+### 4.3 Other
 
 * [CLJ-1403](http://dev.clojure.org/jira/browse/CLJ-1403)
   ns-resolve might throw ClassNotFoundException but should return nil
