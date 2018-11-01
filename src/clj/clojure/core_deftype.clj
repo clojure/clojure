@@ -508,7 +508,7 @@
 (defn- expand-method-impl-cache [^clojure.lang.MethodImplCache cache c f]
   (if (.map cache)
     (let [cs (assoc (.map cache) c (clojure.lang.MethodImplCache$Entry. c f))]
-      (clojure.lang.MethodImplCache. (.protocol cache) (.methodk cache) cs))
+      (clojure.lang.MethodImplCache. (.sym cache) (.protocol cache) (.methodk cache) cs))
     (let [cs (into1 {} (remove (fn [[c e]] (nil? e)) (map vec (partition 2 (.table cache)))))
           cs (assoc cs c (clojure.lang.MethodImplCache$Entry. c f))]
       (if-let [[shift mask] (maybe-min-hash (map hash (keys cs)))]
@@ -519,8 +519,8 @@
                                  (aset t (inc i) e)
                                  t))
                              table cs)]
-          (clojure.lang.MethodImplCache. (.protocol cache) (.methodk cache) shift mask table))
-        (clojure.lang.MethodImplCache. (.protocol cache) (.methodk cache) cs)))))
+          (clojure.lang.MethodImplCache. (.sym cache) (.protocol cache) (.methodk cache) shift mask table))
+        (clojure.lang.MethodImplCache. (.sym cache) (.protocol cache) (.methodk cache) cs)))))
 
 (defn- super-chain [^Class c]
   (when c
@@ -575,11 +575,11 @@
 (defn -cache-protocol-fn [^clojure.lang.AFunction pf x ^Class c ^clojure.lang.IFn interf]
   (let [cache  (.__methodImplCache pf)
         f (if (.isInstance c x)
-            interf 
+            interf
             (find-protocol-method (.protocol cache) (.methodk cache) x))]
     (when-not f
-      (throw (IllegalArgumentException. (str "No implementation of method: " (.methodk cache) 
-                                             " of protocol: " (:var (.protocol cache)) 
+            (throw (IllegalArgumentException. (str "No implementation of method: " (.methodk cache) 
+                                                   " of protocol: " (:var (.protocol cache)) 
                                              " found for class: " (if (nil? x) "nil" (.getName (class x)))))))
     (set! (.__methodImplCache pf) (expand-method-impl-cache cache (class x) f))
     f))
@@ -607,16 +607,19 @@
                       `([~@gargs]
                           (let [cache# (.__methodImplCache ~gthis)
                                 f# (.fnFor cache# (clojure.lang.Util/classOf ~target))]
-                            (if f# 
-                              (f# ~@gargs)
-                              ((-cache-protocol-fn ~gthis ~target ~on-interface ~ginterf) ~@gargs))))))
+                            ((or
+                              (when (identical? f# ~ginterf) f#)
+                              (get (meta ~target) (.sym cache#))
+                              f#
+                              (-cache-protocol-fn ~gthis ~target ~on-interface ~ginterf))
+                             ~@gargs)))))
                   arglists))]
          (set! (.__methodImplCache f#) cache#)
          f#))))
 
 (defn -reset-methods [protocol]
   (doseq [[^clojure.lang.Var v build] (:method-builders protocol)]
-    (let [cache (clojure.lang.MethodImplCache. protocol (keyword (.sym v)))]
+    (let [cache (clojure.lang.MethodImplCache. (symbol v) protocol (keyword (.sym v)))]
       (.bindRoot v (build cache)))))
 
 (defn- assert-same-protocol [protocol-var method-syms]

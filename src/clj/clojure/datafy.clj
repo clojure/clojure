@@ -14,14 +14,14 @@
 (set! *warn-on-reflection* true)
 
 (defn datafy
-  "Attempts to return x as data. If :clojure.datafy/datafy is present
-  as metadata of x, it will be called with x as an argument, else
-  datafy will return the value of clojure.protocols/datafy. If the
-  value has been transformed and the result supports
+  "Attempts to return x as data.
+  datafy will return the value of clojure.core.protocols/datafy. If
+  the value has been transformed and the result supports
   metadata, :clojure.datafy/obj will be set on the metadata to the
-  original value of x."
+  original value of x, and :clojure.datafy/class to the name of the
+  class of x, as a symbol."
   [x]
-  (let [v ((or (-> x meta ::datafy) p/datafy) x)]
+  (let [v (p/datafy x)]
     (if (identical? v x)
       v
       (if (instance? clojure.lang.IObj v)
@@ -32,11 +32,10 @@
   "Returns (possibly transformed) v in the context of coll and k (a
   key/index or nil). Callers should attempt to provide the key/index
   context k for Indexed/Associative/ILookup colls if possible, but not
-  to fabricate one e.g. for sequences (pass nil). If :clojure.datafy/nav is
-  present as metadata on coll, it will be called with coll, k and v as
-  arguments, else nav will call :clojure.protocols/nav."
+  to fabricate one e.g. for sequences (pass nil). nav returns the
+  value of clojure.core.protocols/nav."
   [coll k v]
-  ((or (-> coll meta ::nav) p/nav) coll k v))
+  (p/nav coll k v))
 
 (defn- sortmap [m]
   (into (sorted-map) m))

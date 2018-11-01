@@ -27,6 +27,7 @@ static public class Entry{
 }
 
 public final IPersistentMap protocol;
+public final Symbol sym;
 public final Keyword methodk;
 public final int shift;
 public final int mask;
@@ -35,11 +36,12 @@ public final Map map;
 
 Entry mre = null;
 
-public MethodImplCache(IPersistentMap protocol, Keyword methodk){
-	this(protocol, methodk, 0, 0, RT.EMPTY_ARRAY);
+public MethodImplCache(Symbol sym,IPersistentMap protocol, Keyword methodk){
+	this(sym, protocol, methodk, 0, 0, RT.EMPTY_ARRAY);
 }
 
-public MethodImplCache(IPersistentMap protocol, Keyword methodk, int shift, int mask, Object[] table){
+public MethodImplCache(Symbol sym, IPersistentMap protocol, Keyword methodk, int shift, int mask, Object[] table){
+    this.sym = sym;
     this.protocol = protocol;
     this.methodk = methodk;
     this.shift = shift;
@@ -48,7 +50,8 @@ public MethodImplCache(IPersistentMap protocol, Keyword methodk, int shift, int 
     this.map = null;
 }
 
-public MethodImplCache(IPersistentMap protocol, Keyword methodk, Map map){
+public MethodImplCache(Symbol sym, IPersistentMap protocol, Keyword methodk, Map map){
+    this.sym = sym;
     this.protocol = protocol;
     this.methodk = methodk;
     this.shift = 0;
