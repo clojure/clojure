@@ -571,23 +571,6 @@
    :static true}
   [x] (instance? clojure.lang.Keyword x))
 
-(defn symbol
-  "Returns a Symbol with the given namespace and name."
-  {:tag clojure.lang.Symbol
-   :added "1.0"
-   :static true}
-  ([name] (if (symbol? name) name (clojure.lang.Symbol/intern name)))
-  ([ns name] (clojure.lang.Symbol/intern ns name)))
-
-(defn gensym
-  "Returns a new symbol with a unique name. If a prefix string is
-  supplied, the name is prefix# where # is some unique number. If
-  prefix is not supplied, the prefix is 'G__'."
-  {:added "1.0"
-   :static true}
-  ([] (gensym "G__"))
-  ([prefix-string] (. clojure.lang.Symbol (intern (str prefix-string (str (. clojure.lang.RT (nextID))))))))
-
 (defmacro cond
   "Takes a set of test/expr pairs. It evaluates each test one at a
   time.  If a test returns logical true, cond evaluates and returns
@@ -602,6 +585,31 @@
                 (throw (IllegalArgumentException.
                          "cond requires an even number of forms")))
             (cons 'clojure.core/cond (next (next clauses))))))
+
+(defn symbol
+  "Returns a Symbol with the given namespace and name. Arity-1 works
+  on strings, keywords, and vars."
+  {:tag clojure.lang.Symbol
+   :added "1.0"
+   :static true}
+  ([name]
+     (cond
+      (symbol? name) name
+      (instance? String name) (clojure.lang.Symbol/intern name)
+      (instance? clojure.lang.Var name) (.toSymbol ^clojure.lang.Var name)
+      (instance? clojure.lang.Keyword name) (.sym ^clojure.lang.Keyword name)
+      :else (throw (IllegalArgumentException. "no conversion to symbol"))))
+  ([ns name] (clojure.lang.Symbol/intern ns name)))
+
+(defn gensym
+  "Returns a new symbol with a unique name. If a prefix string is
+  supplied, the name is prefix# where # is some unique number. If
+  prefix is not supplied, the prefix is 'G__'."
+  {:added "1.0"
+   :static true}
+  ([] (gensym "G__"))
+  ([prefix-string] (. clojure.lang.Symbol (intern (str prefix-string (str (. clojure.lang.RT (nextID))))))))
+
 
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :
