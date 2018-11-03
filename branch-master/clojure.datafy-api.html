@@ -101,16 +101,16 @@ namespace.
     <span id="var-type">function</span><br />
     <pre id="var-usage">Usage: (datafy x)
 </pre>
-    <pre id="var-docstr">Attempts to return x as data. If :clojure.datafy/datafy is present
-as metadata of x, it will be called with x as an argument, else
-datafy will return the value of clojure.protocols/datafy. If the
-value has been transformed and the result supports
+    <pre id="var-docstr">Attempts to return x as data.
+datafy will return the value of clojure.core.protocols/datafy. If
+the value has been transformed and the result supports
 metadata, :clojure.datafy/obj will be set on the metadata to the
-original value of x.</pre>
+original value of x, and :clojure.datafy/class to the name of the
+class of x, as a symbol.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/ff081f0810b6a54cb9fc2fa726ae06a3c0ade7f4/src/clj/clojure/datafy.clj#L16">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/datafy.clj#L16">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -121,13 +121,12 @@ original value of x.</pre>
     <pre id="var-docstr">Returns (possibly transformed) v in the context of coll and k (a
 key/index or nil). Callers should attempt to provide the key/index
 context k for Indexed/Associative/ILookup colls if possible, but not
-to fabricate one e.g. for sequences (pass nil). If :clojure.datafy/nav is
-present as metadata on coll, it will be called with coll, k and v as
-arguments, else nav will call :clojure.protocols/nav.</pre>
+to fabricate one e.g. for sequences (pass nil). nav returns the
+value of clojure.core.protocols/nav.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/ff081f0810b6a54cb9fc2fa726ae06a3c0ade7f4/src/clj/clojure/datafy.clj#L31">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/datafy.clj#L31">Source</a>
   </div>
 </div>
 
