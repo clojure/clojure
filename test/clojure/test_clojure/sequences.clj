@@ -1366,5 +1366,5 @@
       (is (= (reverse s1) (concat (rsubseq s2 >= i) (rsubseq s2 < i)))))))
 
 (deftest test-sort-retains-meta
-  (= {:a true} (meta (sort (with-meta (range 10) {:a true}))))
-  (= {:a true} (meta (sort-by :a (with-meta (seq [{:a 5} {:a 2} {:a 3}]) {:a true})))))
+  (is (= {:a true} (meta (sort (with-meta (range 10) {:a true})))))
+  (is (= {:a true} (meta (sort-by :a (with-meta (seq [{:a 5} {:a 2} {:a 3}]) {:a true}))))))
