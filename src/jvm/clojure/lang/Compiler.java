@@ -6820,16 +6820,18 @@ static public class CompilerException extends RuntimeException implements IExcep
 
     // Error keys
     final static public String ERR_NS = "clojure.error";
-    final static public Keyword ERR_SOURCE = Keyword.intern(ERR_NS, "source"); // :clojure.error/source
-    final static public Keyword ERR_LINE = Keyword.intern(ERR_NS, "line");     // :clojure.error/line
-    final static public Keyword ERR_COLUMN = Keyword.intern(ERR_NS, "column"); // :clojure.error/column
-    final static public Keyword ERR_PHASE = Keyword.intern(ERR_NS, "phase");   // :clojure.error/phase
-    final static public Keyword ERR_SYMBOL = Keyword.intern(ERR_NS, "symbol"); // :clojure.error/symbol
+    final static public Keyword ERR_SOURCE = Keyword.intern(ERR_NS, "source");
+    final static public Keyword ERR_LINE = Keyword.intern(ERR_NS, "line");
+    final static public Keyword ERR_COLUMN = Keyword.intern(ERR_NS, "column");
+    final static public Keyword ERR_PHASE = Keyword.intern(ERR_NS, "phase");
+    final static public Keyword ERR_SYMBOL = Keyword.intern(ERR_NS, "symbol");
 
     // Compile error phases
-    final static public Keyword PHASE_READ = Keyword.intern(null, "read");                // :read
-    final static public Keyword PHASE_MACROEXPAND = Keyword.intern(null, "macroexpand");  // :macroexpand
-    final static public Keyword PHASE_COMPILE = Keyword.intern(null, "compile");          // :compile
+    final static public Keyword PHASE_READ = Keyword.intern(null, "read-source");
+    final static public Keyword PHASE_MACRO_SYNTAX_CHECK = Keyword.intern(null, "macro-syntax-check");
+    final static public Keyword PHASE_MACROEXPANSION = Keyword.intern(null, "macroexpansion");
+    final static public Keyword PHASE_COMPILE_SYNTAX_CHECK = Keyword.intern(null, "compile-syntax-check");
+    final static public Keyword PHASE_COMPILATION = Keyword.intern(null, "compilation");
 
 	final static public Keyword SPEC_PROBLEMS = Keyword.intern("clojure.spec.alpha", "problems");
 
@@ -6839,14 +6841,14 @@ static public class CompilerException extends RuntimeException implements IExcep
 	}
 
 	public CompilerException(String source, int line, int column, Symbol sym, Throwable cause){
-		this(source, line, column, sym, PHASE_COMPILE, cause);
+		this(source, line, column, sym, PHASE_COMPILE_SYNTAX_CHECK, cause);
 	}
 
 	public CompilerException(String source, int line, int column, Symbol sym, Keyword phase, Throwable cause){
 		super(makeMsg(source, line, column, sym, phase, cause), cause);
 		this.source = source;
 		this.line = line;
-		Associative m = RT.map(ERR_LINE, line, ERR_COLUMN, column, ERR_PHASE, phase);
+		Associative m = RT.map(ERR_PHASE, phase, ERR_LINE, line, ERR_COLUMN, column);
 		if(source != null) m = RT.assoc(m, ERR_SOURCE, source);
 		if(sym != null) m = RT.assoc(m, ERR_SYMBOL, sym);
 		this.data = m;
@@ -6857,24 +6859,17 @@ static public class CompilerException extends RuntimeException implements IExcep
 	}
 
 	private static String verb(Keyword phase) {
-		if(PHASE_COMPILE.equals(phase)){
-			return "compiling";
-		} else if(PHASE_READ.equals(phase)){
+		if(PHASE_READ.equals(phase)){
 			return "reading source";
+		} else if(PHASE_COMPILE_SYNTAX_CHECK.equals(phase) || PHASE_COMPILATION.equals(phase)){
+			return "compiling";
 		} else {
 			return "macroexpanding";
 		}
 	}
 
-	private static boolean isMacroSyntaxCheck(Throwable e) {
-		return e instanceof IllegalArgumentException ||
-				e instanceof IllegalStateException ||
-				e instanceof ExceptionInfo ||
-				e.getClass().equals(Exception.class);
-	}
-
 	public static String makeMsg(String source, int line, int column, Symbol sym, Keyword phase, Throwable cause){
-		return (phase == PHASE_MACROEXPAND && ! isMacroSyntaxCheck(cause) ? "Unexpected error " : "Syntax error ") +
+		return (PHASE_MACROEXPANSION.equals(phase) ? "Unexpected error " : "Syntax error ") +
 				verb(phase) + " " + (sym != null ? sym + " " : "") +
 				"at (" + (source != null && !source.equals("NO_SOURCE_PATH") ? (source + ":") : "") +
 				line + ":" + column + ").";
@@ -6887,12 +6882,8 @@ static public class CompilerException extends RuntimeException implements IExcep
 	public String toString(){
 		Throwable cause = getCause();
 		if(cause != null) {
-			if(RT.get(data, ERR_PHASE) == PHASE_MACROEXPAND) {
-				if(isSpecError(cause)) {
-					return String.format("%s", getMessage());
-				} else {
-					return String.format("%s%n%s", getMessage(), cause.getMessage());
-				}
+			if(RT.get(data, ERR_PHASE) == PHASE_MACRO_SYNTAX_CHECK && isSpecError(cause)) {
+				return String.format("%s", getMessage());
 			} else {
 				return String.format("%s%n%s", getMessage(), cause.getMessage());
 			}
@@ -6979,7 +6970,7 @@ public static void checkSpecs(Var v, ISeq form) {
 		try {
 			ensureMacroCheck().applyTo(RT.cons(v, RT.list(form.next())));
 		} catch(Exception e) {
-			throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), v.toSymbol(), CompilerException.PHASE_MACROEXPAND, e);
+			throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(), v.toSymbol(), CompilerException.PHASE_MACRO_SYNTAX_CHECK, e);
 		}
 	}
 }
@@ -7011,16 +7002,23 @@ public static Object macroexpand1(Object x) {
 							throw e;
 						}
 					}
+				catch(CompilerException e)
+					{
+						throw e;
+					}
+				catch(IllegalArgumentException | IllegalStateException | ExceptionInfo e)
+					{
+						throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(),
+								(op instanceof Symbol ? (Symbol) op : null),
+								CompilerException.PHASE_MACRO_SYNTAX_CHECK,
+								e);
+					}
 				catch(Throwable e)
 				    {
-						if(e instanceof CompilerException) {
-							throw (CompilerException)e;
-						} else {
-							throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(),
-									(op instanceof Symbol ? (Symbol) op : null),
-									CompilerException.PHASE_MACROEXPAND,
-									e);
-						}
+						throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(),
+								(op instanceof Symbol ? (Symbol) op : null),
+								(e.getClass().equals(Exception.class) ? CompilerException.PHASE_MACRO_SYNTAX_CHECK : CompilerException.PHASE_MACROEXPANSION),
+								e);
 					}
 			} else
 			{
@@ -7144,13 +7142,21 @@ public static Object eval(Object form, boolean freshLoader) {
 		}
 	try
 		{
-		Object line = lineDeref();
-		Object column = columnDeref();
-		if(RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
-			line = RT.meta(form).valAt(RT.LINE_KEY);
-		if(RT.meta(form) != null && RT.meta(form).containsKey(RT.COLUMN_KEY))
-			column = RT.meta(form).valAt(RT.COLUMN_KEY);
-		Var.pushThreadBindings(RT.map(LINE, line, COLUMN, column));
+		IPersistentMap meta = RT.meta(form);
+		Object line = (meta != null ? meta.valAt(RT.LINE_KEY, LINE.deref()) : LINE.deref());
+		Object column = (meta != null ? meta.valAt(RT.COLUMN_KEY, COLUMN.deref()) : COLUMN.deref());
+		IPersistentMap bindings = RT.mapUniqueKeys(LINE, line, COLUMN, column);
+		if(meta != null) {
+			Object eval_file = meta.valAt(RT.EVAL_FILE_KEY);
+			if(eval_file != null) {
+				bindings = bindings.assoc(SOURCE_PATH, eval_file);
+				try {
+					bindings = bindings.assoc(SOURCE, new File((String)eval_file).getName());
+				} catch (Throwable t) {
+				}
+			}
+		}
+		Var.pushThreadBindings(bindings);
 		try
 			{
 			form = macroexpand(form);

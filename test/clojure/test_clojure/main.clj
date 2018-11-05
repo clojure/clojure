@@ -50,3 +50,21 @@
     (is (re-matches #"java\.lang\.NullPointerException\r?\n"
            (run-repl-and-return-err
             "(proxy [Object] [] (equals [o] (.toString nil)))")))))
+
+(deftest null-stack-error-reporting
+  (let [e (doto (Error. "xyz")
+            (.setStackTrace (into-array java.lang.StackTraceElement nil)))
+        tr-data (-> e Throwable->map main/ex-triage)]
+    (is (= tr-data #:clojure.error{:phase :execution, :class 'java.lang.Error, :cause "xyz"}))
+    (is (= (main/ex-str tr-data) "Execution error (Error) at (REPL:1).\nxyz\n"))))
+
+(defn s->lpr
+  [s]
+  (-> s (java.io.StringReader.) (clojure.lang.LineNumberingPushbackReader.)))
+
+(deftest renumbering-read
+  (are [s line-in line-out]
+    (= line-out (-> (main/renumbering-read nil (s->lpr s) line-in) meta :line))
+    "(let [x 1] x)" 100 100
+    "^{:line 20 :clojure.core/eval-file \"a/b.clj\"} (let [x 1] x)" 100 20
+    "^{:line 20} (let [x 1] x)" 100 20))

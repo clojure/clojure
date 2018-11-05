@@ -250,7 +250,8 @@ str-or-pattern."
          (pst (root-cause e) e-or-depth))))
   ([^Throwable e depth]
      (binding [*out* *err*]
-       (when (#{:read :compile :macroexpand} (-> e ex-data :clojure.error/phase))
+       (when (#{:read-source :macro-syntax-check :macroexpansion :compile-syntax-check :compilation}
+               (-> e ex-data :clojure.error/phase))
          (println "Note: The following stack trace applies to the reader or compiler, your code was not executed."))
        (println (str (-> e class .getSimpleName) " "
                      (.getMessage e)
