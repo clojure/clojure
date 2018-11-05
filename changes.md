@@ -38,34 +38,43 @@ Updated dependencies:
 
 ### 2.1 Error messages
 
-Clojure errors can occur in several distinct "phases" - read, macroexpand, compile, eval, and print. Clojure (and the REPL) now identify these phases in the exception and/or the message.
+Clojure errors can occur in several distinct "phases" - reading source, macroexpansion, compilation, execution, and result printing. Clojure (and the REPL) now identify these phases in the exception and the message.
 
-The read/macroexpand/compile phases produce a CompilerException and indicate the location in the caller source code where the problem occurred (previously macroexpansion reported the error in the macroexpansion stack). CompilerException now implements IExceptionInfo and ex-data will report exception data including the optional keys:
+The read/macroexpand/compile phases produce a CompilerException and indicate the location in the caller source code where the problem occurred (previously macroexpansion reported the error in the macroexpansion stack). CompilerException now implements IExceptionInfo and ex-data will report exception data including the following (optional) keys:
 
-* :clojure.error/source - name of the source file
+* :clojure.error/phase - phase (:read-source, :macro-syntax-check, :macroexpansion, :compile-syntax-check, :compilation, :execution, :print-eval-result)
+* :clojure.error/source - source file
 * :clojure.error/line - line in source file
 * :clojure.error/column - column of line in source file
-* :clojure.error/phase - phase (:read, :macroexpand, :compile)
 * :clojure.error/symbol - symbol being macroexpanded or compiled
+* :clojure.error/class - cause exception class symbol
+* :clojure.error/cause - cause exception message
+* :clojure.error/spec - explain-data for spec errors
 
-clojure.main also contains a new function `ex-str` that can be used by external tools to get a repl message for a CompilerException to match the clojure.main repl behavior.
+clojure.main also contains two new functions: `ex-triage` and `ex-str` that can be used by external tools to mimic some or all of the Clojure repl reporting. `ex-triage` takes the output of `Throwable->map` and produces a concise analysis of the error phase, cause, etc (same keys as above). `ex-str` takes that analysis data and produces a message to print at the repl.
 
 * [CLJ-2373](http://dev.clojure.org/jira/browse/CLJ-2373)
   Detect phase and overhaul exception message and printing
 * [CLJ-2415](http://dev.clojure.org/jira/browse/CLJ-2415)
   Error cause should always be on 2nd line of error message
+* [CLJ-2420](http://dev.clojure.org/jira/browse/CLJ-2420)
+  Refinement of error phases, `ex-triage`, execution error line reporting
 
-### 2.2 tap
+### 2.2 Protocol extension by metadata
+
+In addition to prior methods of extension, values can now extend protocols by adding metadata where keys are fully-qualified symbols naming protocol functions and values are function implementations. Protocol implementations are checked first for direct definitions (defrecord, deftype, reify), then metadata definitions, then external extensions (extend, extend-type, extend-protocol).
+
+### 2.3 tap
 
 tap is a shared, globally accessible system for distributing a series of informational or diagnostic values to a set of (presumably effectful) handler functions. It can be used as a better debug prn, or for facilities like logging etc.
 
 `tap>` sends a value to the set of taps. Taps can be added with `add-tap` and will be called with any value sent to `tap>`. The tap function may (briefly) block (e.g. for streams) and will never impede calls to `tap>`, but blocking indefinitely may cause tap values to be dropped. If no taps are registered, `tap>` discards. Remove taps with `remove-tap`.
 
-### 2.3 Read string capture mode
+### 2.4 Read string capture mode
 
 `read+string` is a new function that mimics `read` but also captures the string that is read and returns both the read value and the (whitespace-trimmed) read string. `read+string` requires a LineNumberingPushbackReader.
 
-### 2.4 prepl (alpha)
+### 2.5 prepl (alpha)
 
 prepl is a new stream-based REPL with structured output (suitable for programmatic use). Forms are read from the reader, evaluated, and return data maps for the return value (if successful), output to `*out*` (possibly many), output to `*err*` (possibly many), or tap> values (possibly many).
 
@@ -77,7 +86,7 @@ New functions in clojure.core.server:
 
 prepl is alpha and subject to change.
 
-### 2.5 datafy and nav
+### 2.6 datafy and nav
 
 clojure.datafy is a facility for object to data transformation. The `datafy` and `nav` functions can be used used to transform and (lazily) navigate through object graphs. The data transformation process can be influenced by consumers using protocols or metadata.
 
@@ -125,22 +134,25 @@ This function has been added to construct a PrintWriter implementation whose beh
 ### 3.3 Performance
 
 * [CLJ-1654](http://dev.clojure.org/jira/browse/CLJ-1654)
-  Reuse seq in some
+  Reuse seq in `some`
 * [CLJ-1366](http://dev.clojure.org/jira/browse/CLJ-1366)
   The empty map literal is read as a different map each time
 * [CLJ-2362](http://dev.clojure.org/jira/browse/CLJ-2362)
-  with-meta should return identity when new meta is identical to prior
+  `with-meta` should return identity when new meta is identical to prior
 
 ### 3.4 Other enhancements
 
+* `symbol` can now take a var or a keyword argument
 * [CLJ-1209](http://dev.clojure.org/jira/browse/CLJ-1209)
   Print ex-data in clojure.test error reports
 * [CLJ-2163](http://dev.clojure.org/jira/browse/CLJ-2163)
   Add test for var serialization
+* [CLJ-2417](http://dev.clojure.org/jira/browse/CLJ-2417)
+  `sort` and `sort-by` should retain meta
 
-## 3 Fixes
+## 4 Fixes
 
-### 3.1 Collections
+### 4.1 Collections
 
 * [CLJ-2297](http://dev.clojure.org/jira/browse/CLJ-2297)
   PersistentHashMap leaks memory when keys are removed with `without`
@@ -151,7 +163,7 @@ This function has been added to construct a PrintWriter implementation whose beh
 * [CLJ-2089](http://dev.clojure.org/jira/browse/CLJ-2089)
   Sorted colls with default comparator don’t check that first element is Comparable
 
-### 3.2 API
+### 4.2 API
 
 * [CLJ-2031](http://dev.clojure.org/jira/browse/CLJ-2031)
   clojure.walk/postwalk does not preserve MapEntry type objects
@@ -162,7 +174,7 @@ This function has been added to construct a PrintWriter implementation whose beh
 * [CLJ-1832](http://dev.clojure.org/jira/browse/CLJ-1832)
   unchecked-* functions have different behavior on primitive longs vs boxed Longs
 
-### 3.3 Other
+### 4.3 Other
 
 * [CLJ-1403](http://dev.clojure.org/jira/browse/CLJ-1403)
   ns-resolve might throw ClassNotFoundException but should return nil
