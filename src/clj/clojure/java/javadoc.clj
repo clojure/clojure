@@ -23,6 +23,7 @@
     "1.8" "http://docs.oracle.com/javase/8/docs/api/"
     "9" "http://docs.oracle.com/javase/9/docs/api/"
     "10" "http://docs.oracle.com/javase/10/docs/api/"
+    "11" "https://docs.oracle.com/en/java/javase/11/docs/api/java.base/"
     "http://docs.oracle.com/javase/8/docs/api/"))
 
 (def ^:dynamic *remote-javadocs*
