@@ -56,7 +56,7 @@
    :wiki-url
    "https://clojure.github.io/clojure/clojure.java.javadoc-api.html",
    :source-url
-   "https://github.com/clojure/clojure/blob/c8752b4fbf317e9715b2d94cfb6b6939631a9bcb/src/clj/clojure/java/javadoc.clj"}
+   "https://github.com/clojure/clojure/blob/ead8c1d644dd2f1726aa54fefd0657848b678242/src/clj/clojure/java/javadoc.clj"}
   {:doc
    "Conveniently launch a sub-process providing its stdin and\ncollecting its stdout",
    :author "Chris Houser, Stuart Halloway",
@@ -70,7 +70,7 @@
    :name "clojure.main",
    :wiki-url "https://clojure.github.io/clojure/clojure.main-api.html",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj"}
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj"}
   {:doc
    "A Pretty Printer for Clojure\n\nclojure.pprint implements a flexible system for printing structured data\nin a pleasing, easy-to-understand format. Basic use of the pretty printer is \nsimple, just call pprint instead of println. More advanced users can use \nthe building blocks provided to create custom output formats. \n\nOut of the box, pprint supports a simple structured format for basic data \nand a specialized format for Clojure source code. More advanced formats, \nincluding formats that don't look like Clojure data at all like XML and \nJSON, can be rendered by creating custom dispatch functions. \n\nIn addition to the pprint function, this module contains cl-format, a text \nformatting function which is fully compatible with the format function in \nCommon Lisp. Because pretty printing directives are directly integrated with\ncl-format, it supports very concise custom dispatch. It also provides\na more powerful alternative to Clojure's standard format function.\n\nSee documentation for pprint and cl-format for more information or \ncomplete documentation on the Clojure web site on GitHub.",
    :author "Tom Faulhaber",
@@ -93,7 +93,7 @@
    :name "clojure.repl",
    :wiki-url "https://clojure.github.io/clojure/clojure.repl-api.html",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj"}
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj"}
   {:doc "Set operations such as union/intersection.",
    :author "Rich Hickey",
    :name "clojure.set",
@@ -10037,13 +10037,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.io-api.html#clojure.java.io/make-writer"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/c8752b4fbf317e9715b2d94cfb6b6939631a9bcb/src/clj/clojure/java/javadoc.clj",
+   "https://github.com/clojure/clojure/raw/ead8c1d644dd2f1726aa54fefd0657848b678242/src/clj/clojure/java/javadoc.clj",
    :added "1.2",
    :name "add-local-javadoc",
    :file "src/clj/clojure/java/javadoc.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/c8752b4fbf317e9715b2d94cfb6b6939631a9bcb/src/clj/clojure/java/javadoc.clj#L42",
-   :line 42,
+   "https://github.com/clojure/clojure/blob/ead8c1d644dd2f1726aa54fefd0657848b678242/src/clj/clojure/java/javadoc.clj#L43",
+   :line 43,
    :var-type "function",
    :arglists ([path]),
    :doc "Adds to the list of local Javadoc paths.",
@@ -10051,13 +10051,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.javadoc-api.html#clojure.java.javadoc/add-local-javadoc"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/c8752b4fbf317e9715b2d94cfb6b6939631a9bcb/src/clj/clojure/java/javadoc.clj",
+   "https://github.com/clojure/clojure/raw/ead8c1d644dd2f1726aa54fefd0657848b678242/src/clj/clojure/java/javadoc.clj",
    :added "1.2",
    :name "add-remote-javadoc",
    :file "src/clj/clojure/java/javadoc.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/c8752b4fbf317e9715b2d94cfb6b6939631a9bcb/src/clj/clojure/java/javadoc.clj#L48",
-   :line 48,
+   "https://github.com/clojure/clojure/blob/ead8c1d644dd2f1726aa54fefd0657848b678242/src/clj/clojure/java/javadoc.clj#L49",
+   :line 49,
    :var-type "function",
    :arglists ([package-prefix url]),
    :doc
@@ -10066,13 +10066,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.javadoc-api.html#clojure.java.javadoc/add-remote-javadoc"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/c8752b4fbf317e9715b2d94cfb6b6939631a9bcb/src/clj/clojure/java/javadoc.clj",
+   "https://github.com/clojure/clojure/raw/ead8c1d644dd2f1726aa54fefd0657848b678242/src/clj/clojure/java/javadoc.clj",
    :added "1.2",
    :name "javadoc",
    :file "src/clj/clojure/java/javadoc.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/c8752b4fbf317e9715b2d94cfb6b6939631a9bcb/src/clj/clojure/java/javadoc.clj#L76",
-   :line 76,
+   "https://github.com/clojure/clojure/blob/ead8c1d644dd2f1726aa54fefd0657848b678242/src/clj/clojure/java/javadoc.clj#L77",
+   :line 77,
    :var-type "function",
    :arglists ([class-or-object]),
    :doc
@@ -10124,13 +10124,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.shell-api.html#clojure.java.shell/with-sh-env"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :added "1.3",
    :name "demunge",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L31",
-   :line 31,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L26",
+   :line 26,
    :var-type "function",
    :arglists ([fn-name]),
    :doc
@@ -10139,26 +10139,45 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/demunge"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
+   :added "1.10",
    :name "ex-str",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L160",
-   :line 160,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L231",
+   :line 231,
    :var-type "function",
-   :arglists ([e]),
+   :arglists
+   ([{:clojure.error/keys
+      [phase source line column symbol class cause spec],
+      :as triage-data}]),
    :doc
-   "Returns a string from an exception for printing at the repl.\nThe first line summarizes data from the exception instance: phase, location,\ncause message, etc. The subsequent lines contain ex-data info if available.",
+   "Returns a string from exception data, as produced by ex-triage.\nThe first line summarizes the exception phase and location.\nThe subsequent lines describe the cause.",
    :namespace "clojure.main",
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/ex-str"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
+   :added "1.10",
+   :name "ex-triage",
+   :file "src/clj/clojure/main.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L183",
+   :line 183,
+   :var-type "function",
+   :arglists ([datafied-throwable]),
+   :doc
+   "Returns an analysis of the phase, error, cause, and location of an error that occurred\nbased on Throwable data, as returned by Throwable->map. All attributes other than phase\nare optional:\n  :clojure.error/phase - keyword phase indicator\n  :clojure.error/source - file name (no path)\n  :clojure.error/line - integer line number\n  :clojure.error/column - integer column number\n  :clojure.error/symbol - symbol being expanded/compiled/invoked\n  :clojure.error/class - cause exception class symbol\n  :clojure.error/cause - cause exception message\n  :clojure.error/spec - explain-data for spec error",
+   :namespace "clojure.main",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/ex-triage"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "load-script",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L342",
-   :line 342,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L423",
+   :line 423,
    :var-type "function",
    :arglists ([path]),
    :doc
@@ -10167,12 +10186,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/load-script"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "main",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L458",
-   :line 458,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L539",
+   :line 539,
    :var-type "function",
    :arglists ([& args]),
    :doc
@@ -10181,12 +10200,27 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/main"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
+   :added "1.10",
+   :name "renumbering-read",
+   :file "src/clj/clojure/main.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L138",
+   :line 138,
+   :var-type "function",
+   :arglists ([opts reader line-number]),
+   :doc
+   "Reads from reader, which must be a LineNumberingPushbackReader, while capturing\nthe read string. If the read is successful, reset the line number and re-read.\nThe line number on re-read is the passed line-number unless :line or\n:clojure.core/eval-file meta are explicitly set on the read value.",
+   :namespace "clojure.main",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/renumbering-read"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "repl",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L233",
-   :line 233,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L316",
+   :line 316,
    :var-type "function",
    :arglists ([& options]),
    :doc
@@ -10195,12 +10229,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/repl"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "repl-caught",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L213",
-   :line 213,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L296",
+   :line 296,
    :var-type "function",
    :arglists ([e]),
    :doc "Default :caught hook for repl",
@@ -10208,12 +10242,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/repl-caught"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "repl-exception",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L147",
-   :line 147,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L170",
+   :line 170,
    :var-type "function",
    :arglists ([throwable]),
    :doc "Returns the root cause of throwables",
@@ -10221,12 +10255,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/repl-exception"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "repl-prompt",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L92",
-   :line 92,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L101",
+   :line 101,
    :var-type "function",
    :arglists ([]),
    :doc "Default :prompt hook for repl",
@@ -10234,12 +10268,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/repl-prompt"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "repl-read",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L129",
-   :line 129,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L152",
+   :line 152,
    :var-type "function",
    :arglists ([request-prompt request-exit]),
    :doc
@@ -10248,12 +10282,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/repl-read"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "repl-requires",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L220",
-   :line 220,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L303",
+   :line 303,
    :var-type "var",
    :arglists nil,
    :doc
@@ -10262,13 +10296,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/repl-requires"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :added "1.3",
    :name "root-cause",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L38",
-   :line 38,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L33",
+   :line 33,
    :var-type "function",
    :arglists ([t]),
    :doc
@@ -10277,12 +10311,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/root-cause"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "skip-if-eol",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L97",
-   :line 97,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L106",
+   :line 106,
    :var-type "function",
    :arglists ([s]),
    :doc
@@ -10291,12 +10325,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/skip-if-eol"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "skip-whitespace",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L111",
-   :line 111,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L120",
+   :line 120,
    :var-type "function",
    :arglists ([s]),
    :doc
@@ -10305,13 +10339,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/skip-whitespace"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :added "1.3",
    :name "stack-element-str",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L51",
-   :line 51,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L60",
+   :line 60,
    :var-type "function",
    :arglists ([el]),
    :doc
@@ -10320,12 +10354,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/stack-element-str"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "with-bindings",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L66",
-   :line 66,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L75",
+   :line 75,
    :var-type "macro",
    :arglists ([& body]),
    :doc
@@ -10334,12 +10368,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/with-bindings"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj",
    :name "with-read-known",
    :file "src/clj/clojure/main.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/a780a78a736bd91825d99c0f756d4041935e035c/src/clj/clojure/main.clj#L226",
-   :line 226,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/main.clj#L309",
+   :line 309,
    :var-type "macro",
    :arglists ([& body]),
    :doc
@@ -11022,11 +11056,11 @@
    :raw-source-url nil,
    :file nil}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :name "apropos",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L182",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L182",
    :line 182,
    :var-type "function",
    :arglists ([str-or-pattern]),
@@ -11036,12 +11070,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/apropos"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :added "1.3",
    :name "demunge",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L208",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L208",
    :line 208,
    :var-type "function",
    :arglists ([fn-name]),
@@ -11051,11 +11085,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/demunge"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :name "dir",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L202",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L202",
    :line 202,
    :var-type "macro",
    :arglists ([nsname]),
@@ -11064,11 +11098,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/dir"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :name "dir-fn",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L196",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L196",
    :line 196,
    :var-type "function",
    :arglists ([ns]),
@@ -11078,12 +11112,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/dir-fn"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :added "1.0",
    :name "doc",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L132",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L132",
    :line 132,
    :var-type "macro",
    :arglists ([name]),
@@ -11093,12 +11127,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/doc"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :added "1.0",
    :name "find-doc",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L116",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L116",
    :line 116,
    :var-type "function",
    :arglists ([re-string-or-pattern]),
@@ -11108,12 +11142,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/find-doc"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :added "1.3",
    :name "pst",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L241",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L241",
    :line 241,
    :var-type "function",
    :arglists ([] [e-or-depth] [e depth]),
@@ -11123,12 +11157,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/pst"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :added "1.3",
    :name "root-cause",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L215",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L215",
    :line 215,
    :var-type "function",
    :arglists ([t]),
@@ -11138,12 +11172,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/root-cause"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :name "set-break-handler!",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L279",
-   :line 279,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L280",
+   :line 280,
    :var-type "function",
    :arglists ([] [f]),
    :doc
@@ -11152,11 +11186,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/set-break-handler!"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :name "source",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L173",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L173",
    :line 173,
    :var-type "macro",
    :arglists ([n]),
@@ -11166,11 +11200,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/source"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :name "source-fn",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L148",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L148",
    :line 148,
    :var-type "function",
    :arglists ([x]),
@@ -11180,12 +11214,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/source-fn"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :added "1.3",
    :name "stack-element-str",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L228",
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L228",
    :line 228,
    :var-type "function",
    :arglists ([el]),
@@ -11195,12 +11229,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl/stack-element-str"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj",
+   "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :name "thread-stopper",
    :file "src/clj/clojure/repl.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/cd234bb0f89a13e754cb4a1c0edea92b31f7e577/src/clj/clojure/repl.clj#L273",
-   :line 273,
+   "https://github.com/clojure/clojure/blob/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj#L274",
+   :line 274,
    :var-type "function",
    :arglists ([] [thread]),
    :doc
@@ -13271,8 +13305,8 @@
       {valf read-string,
        readf
        (fn*
-        [p1__6683# p2__6684#]
-        (read p1__6683# false p2__6684#))}}]),
+        [p1__6734# p2__6735#]
+        (read p1__6734# false p2__6735#))}}]),
    :doc
    "Implements a prepl on in-reader and out-fn by forwarding to a\nremote [io-]prepl over a socket.  Messages will be read by readf, a\nfn of a LineNumberingPushbackReader and EOF value or a symbol naming\nsame (default #(read %1 false %2)),\n:ret and :tap vals will be processed by valf, a fn of one argument\nor a symbol naming same (default read-string). If that function\nthrows, :val will be unprocessed.\n\nAlpha, subject to change.",
    :namespace "clojure.core.server",
