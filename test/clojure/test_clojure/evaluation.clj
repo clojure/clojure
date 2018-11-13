@@ -15,7 +15,7 @@
 ;;  Created 22 October 2008
 
 (ns clojure.test-clojure.evaluation
-  (:use clojure.test))
+  (:use clojure.test clojure.test-helper))
 
 (import '(java.lang Boolean)
         '(clojure.lang Compiler Compiler$CompilerException))
@@ -116,16 +116,16 @@
 
   (test-that
     "It is an error if there is no global var named by the symbol"
-    (throws-with-msg
-      #"(?s).*Unable to resolve symbol: bar.*" (eval 'bar)))
+    (is (thrown-with-cause-msg? Compiler$CompilerException
+          #"(?s).*Unable to resolve symbol: bar.*"
+          (eval 'bar))))
 
   (test-that
     "It is an error if the symbol reference is to a non-public var in a
     different namespace"
-    (throws-with-msg
-      #"(?s).*resolution-test/baz is not public.*"
-      (eval 'resolution-test/baz)
-      Compiler$CompilerException))
+    (is (thrown-with-cause-msg? Compiler$CompilerException
+          #"(?s).*resolution-test/baz is not public.*"
+          (eval 'resolution-test/baz))))
 
   (test-that
     "If a symbol is package-qualified, its value is the Java class named by the
