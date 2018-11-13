@@ -584,7 +584,7 @@
     (set! (.__methodImplCache pf) (expand-method-impl-cache cache (class x) f))
     f))
 
-(defn- emit-method-builder [on-interface method on-method arglists]
+(defn- emit-method-builder [on-interface method on-method arglists extend-via-meta]
   (let [methodk (keyword method)
         gthis (with-meta (gensym) {:tag 'clojure.lang.AFunction})
         ginterf (gensym)]
@@ -604,15 +604,23 @@
                   (fn [args]
                     (let [gargs (map #(gensym (str "gf__" % "__")) args)
                           target (first gargs)]
-                      `([~@gargs]
-                          (let [cache# (.__methodImplCache ~gthis)
-                                f# (.fnFor cache# (clojure.lang.Util/classOf ~target))]
-                            ((or
-                              (when (identical? f# ~ginterf) f#)
-                              (get (meta ~target) (.sym cache#))
-                              f#
-                              (-cache-protocol-fn ~gthis ~target ~on-interface ~ginterf))
-                             ~@gargs)))))
+                      (if extend-via-meta
+                        `([~@gargs]
+                            (let [cache# (.__methodImplCache ~gthis)
+                                  f# (.fnFor cache# (clojure.lang.Util/classOf ~target))]
+                              (if (identical? f# ~ginterf)
+                                (f# ~@gargs)
+                                (if-let [meta# (when-let [m# (meta ~target)] ((.sym cache#) m#))]
+                                  (meta# ~@gargs)
+                                  (if f#
+                                    (f# ~@gargs)
+                                    ((-cache-protocol-fn ~gthis ~target ~on-interface ~ginterf) ~@gargs))))))
+                        `([~@gargs]
+                            (let [cache# (.__methodImplCache ~gthis)
+                                  f# (.fnFor cache# (clojure.lang.Util/classOf ~target))]
+                              (if f#
+                                (f# ~@gargs)
+                                ((-cache-protocol-fn ~gthis ~target ~on-interface ~ginterf) ~@gargs)))))))
                   arglists))]
          (set! (.__methodImplCache f#) cache#)
          f#))))
@@ -687,7 +695,8 @@
                                 (mapcat 
                                  (fn [s]
                                    [`(intern *ns* (with-meta '~(:name s) (merge '~s {:protocol (var ~name)})))
-                                    (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s))])
+                                    (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s)
+                                                         (:extend-via-metadata opts))])
                                  (vals sigs)))))
      (-reset-methods ~name)
      '~name)))
@@ -698,6 +707,9 @@
 
     ;optional doc string
     \"A doc string for AProtocol abstraction\"
+
+   ;options
+   :extend-via-metadata true
 
   ;method signatures
     (bar [this a b] \"bar docs\")
@@ -712,6 +724,13 @@
   Java parlance). defprotocol is dynamic, has no special compile-time 
   effect, and defines no new types or classes. Implementations of 
   the protocol methods can be provided using extend.
+
+  When :extend-via-metadata is true, values can extend protocols by
+  adding metadata where keys are fully-qualified protocol function
+  symbols and values are function implementations. Protocol
+  implementations are checked first for direct definitions (defrecord,
+  deftype, reify), then metadata definitions, then external
+  extensions (extend, extend-type, extend-protocol)
 
   defprotocol will automatically generate a corresponding interface,
   with the same name as the protocol, i.e. given a protocol:
