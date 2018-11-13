@@ -6875,21 +6875,19 @@ static public class CompilerException extends RuntimeException implements IExcep
 				line + ":" + column + ").";
 	}
 
-	private static boolean isSpecError(Throwable t) {
-		return (t instanceof IExceptionInfo) && RT.get(((IExceptionInfo) t).getData(), SPEC_PROBLEMS) != null;
-	}
-
 	public String toString(){
 		Throwable cause = getCause();
 		if(cause != null) {
-			if(RT.get(data, ERR_PHASE) == PHASE_MACRO_SYNTAX_CHECK && isSpecError(cause)) {
-				return String.format("%s", getMessage());
-			} else {
-				return String.format("%s%n%s", getMessage(), cause.getMessage());
+			if (cause instanceof IExceptionInfo) {
+				IPersistentMap data = (IPersistentMap)((IExceptionInfo)cause).getData();
+				if(PHASE_MACRO_SYNTAX_CHECK.equals(data.valAt(ERR_PHASE)) && data.valAt(SPEC_PROBLEMS) != null) {
+					return String.format("%s", getMessage());
+				} else {
+					return String.format("%s%n%s", getMessage(), cause.getMessage());
+				}
 			}
-		} else {
-			return getMessage();
 		}
+		return getMessage();
 	}
 }
 
