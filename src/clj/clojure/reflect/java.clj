@@ -9,7 +9,8 @@
 ;; Java-specific parts of clojure.reflect
 (in-ns 'clojure.reflect)
 
-(require '[clojure.set :as set]
+(require '[clojure.datafy :refer (datafy)]
+         '[clojure.set :as set]
          '[clojure.string :as str])
 (import '[clojure.asm ClassReader ClassVisitor Type Opcodes]
          '[java.lang.reflect Modifier]
@@ -34,9 +35,12 @@
   "Given a typeref, create a legal Clojure symbol version of the
    type's name."
   [t]
-  (-> (typename t)
-      (str/replace "[]" "<>")
-      (symbol)))
+  (cond->
+   (-> (typename t)
+       (str/replace "[]" "<>")
+       (symbol))
+   (class? t) (with-meta {'clojure.core.protocols/datafy
+                          (fn [_] (datafy t))})))
 
 (defn- resource-name
   "Given a typeref, return implied resource name. Used by Reflectors
@@ -163,10 +167,16 @@ the kinds of objects to which they can apply."}
         field->map
         (.getDeclaredFields cls))))
 
+(defn- typeref->class
+  [typeref classloader]
+  (if (class? typeref)
+    typeref
+   (clojure.lang.RT/classForName (typename typeref) false classloader)))
+
 (deftype JavaReflector [classloader]
   Reflector
   (do-reflect [_ typeref]
-           (let [cls (clojure.lang.RT/classForName (typename typeref) false classloader)]
+           (let [cls (typeref->class typeref classloader)]
              {:bases (not-empty (set (map typesym (bases cls))))
               :flags (parse-flags (.getModifiers cls) :class)
               :members (set/union (declared-fields cls)
