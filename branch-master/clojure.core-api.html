@@ -4654,7 +4654,7 @@ defaulting to Object if omitted.
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L20">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L20">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4793,6 +4793,9 @@ else expr is unevaluated</pre>
   ;optional doc string
   "A doc string for AProtocol abstraction"
 
+ ;options
+ :extend-via-metadata true
+
 ;method signatures
   (bar [this a b] "bar docs")
   (baz [this a] [this a b] [this a b c] "baz docs"))
@@ -4806,6 +4809,13 @@ required and corresponds to the implicit target object ('this' in
 Java parlance). defprotocol is dynamic, has no special compile-time 
 effect, and defines no new types or classes. Implementations of 
 the protocol methods can be provided using extend.
+
+When :extend-via-metadata is true, values can extend protocols by
+adding metadata where keys are fully-qualified protocol function
+symbols and values are function implementations. Protocol
+implementations are checked first for direct definitions (defrecord,
+deftype, reify), then metadata definitions, then external
+extensions (extend, extend-type, extend-protocol)
 
 defprotocol will automatically generate a corresponding interface,
 with the same name as the protocol, i.e. given a protocol:
@@ -4839,7 +4849,7 @@ reify, as they support the protocol directly:
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L695">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L704">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -4919,7 +4929,7 @@ and map-&gt;TypeName, taking a map of keywords to field values.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L312">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L312">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5007,7 +5017,7 @@ will be defined, taking positional parameters for the fields</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L422">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L422">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5659,7 +5669,7 @@ Otherwise returns nil.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L749">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L768">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5704,7 +5714,7 @@ expands into:
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L849">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L868">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5735,7 +5745,7 @@ expands into:
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L817">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L836">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5747,7 +5757,7 @@ expands into:
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L563">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L563">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -5759,7 +5769,7 @@ expands into:
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L556">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L556">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -7750,7 +7760,7 @@ Please see <a href="https://clojure.org/reference/special_forms#monitor-exit">ht
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L13">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L13">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -9042,7 +9052,7 @@ If true, splicing? indicates read-cond-splicing.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.6</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L405">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L405">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -9329,7 +9339,7 @@ clashes. Use :use in the ns macro in preference to calling this directly.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L70">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L70">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -9736,7 +9746,7 @@ effects, on successive items in the collection. Returns nil</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L569">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L569">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -11765,7 +11775,7 @@ implementation defined in terms of Iterable.</pre>
     </div>
     
     
-    <a id="proto-source" href="https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L13">Source</a>
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj#L13">Source</a>
   </div><div id="proto-entry">
     <br />
     <hr />
@@ -11787,7 +11797,7 @@ implementation defined in terms of Iterable.</pre>
     </div>
     
     
-    <a id="proto-source" href="https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L182">Source</a>
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj#L182">Source</a>
   </div><div id="proto-entry">
     <br />
     <hr />
@@ -11812,7 +11822,7 @@ semantics (just different arg order).</pre>
     </div>
     
     
-    <a id="proto-source" href="https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L175">Source</a>
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj#L175">Source</a>
   </div><div id="proto-entry">
     <br />
     <hr />
@@ -11835,7 +11845,7 @@ faster than first/next recursion. Called by clojure.core/reduce.</pre>
     </div>
     
     
-    <a id="proto-source" href="https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L19">Source</a>
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj#L19">Source</a>
   </div><div id="proto-entry">
     <br />
     <hr />
@@ -11858,7 +11868,7 @@ defaults to returning v.</pre>
     </div>
     
     
-    <a id="proto-source" href="https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L192">Source</a>
+    <a id="proto-source" href="https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj#L194">Source</a>
   </div>
 </div>
 
@@ -12203,7 +12213,7 @@ Alpha, subject to change.</pre>
     <hr />
     <h2 id="clojure.core.server/remote-prepl">remote-prepl</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (remote-prepl host port in-reader out-fn &amp; {:keys [valf readf], :or {valf read-string, readf (fn* [p1__6734# p2__6735#] (read p1__6734# false p2__6735#))}})
+    <pre id="var-usage">Usage: (remote-prepl host port in-reader out-fn &amp; {:keys [valf readf], :or {valf read-string, readf (fn* [p1__6685# p2__6686#] (read p1__6685# false p2__6686#))}})
 </pre>
     <pre id="var-docstr">Implements a prepl on in-reader and out-fn by forwarding to a
 remote [io-]prepl over a socket.  Messages will be read by readf, a

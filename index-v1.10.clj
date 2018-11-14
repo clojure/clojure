@@ -156,7 +156,7 @@
    :wiki-url
    "https://clojure.github.io/clojure/clojure.core-api.html#clojure.core.protocols",
    :source-url
-   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj"}
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj"}
   {:doc
    "A library for reduction and parallel folding. Alpha and subject\nto change.",
    :author "Rich Hickey",
@@ -2663,12 +2663,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/definline"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "definterface",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L20",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L20",
    :line 20,
    :var-type "macro",
    :arglists ([name & sigs]),
@@ -2776,27 +2776,27 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/defonce"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "defprotocol",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L695",
-   :line 695,
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L704",
+   :line 704,
    :var-type "macro",
    :arglists ([name & opts+sigs]),
    :doc
-   "A protocol is a named set of named methods and their signatures:\n(defprotocol AProtocolName\n\n  ;optional doc string\n  \"A doc string for AProtocol abstraction\"\n\n;method signatures\n  (bar [this a b] \"bar docs\")\n  (baz [this a] [this a b] [this a b c] \"baz docs\"))\n\nNo implementations are provided. Docs can be specified for the\nprotocol overall and for each method. The above yields a set of\npolymorphic functions and a protocol object. All are\nnamespace-qualified by the ns enclosing the definition The resulting\nfunctions dispatch on the type of their first argument, which is\nrequired and corresponds to the implicit target object ('this' in \nJava parlance). defprotocol is dynamic, has no special compile-time \neffect, and defines no new types or classes. Implementations of \nthe protocol methods can be provided using extend.\n\ndefprotocol will automatically generate a corresponding interface,\nwith the same name as the protocol, i.e. given a protocol:\nmy.ns/Protocol, an interface: my.ns.Protocol. The interface will\nhave methods corresponding to the protocol functions, and the\nprotocol will automatically work with instances of the interface.\n\nNote that you should not use this interface with deftype or\nreify, as they support the protocol directly:\n\n(defprotocol P \n  (foo [this]) \n  (bar-me [this] [this y]))\n\n(deftype Foo [a b c] \n P\n  (foo [this] a)\n  (bar-me [this] b)\n  (bar-me [this y] (+ c y)))\n\n(bar-me (Foo. 1 2 3) 42)\n=> 45\n\n(foo \n  (let [x 42]\n    (reify P \n      (foo [this] 17)\n      (bar-me [this] x)\n      (bar-me [this y] x))))\n=> 17",
+   "A protocol is a named set of named methods and their signatures:\n(defprotocol AProtocolName\n\n  ;optional doc string\n  \"A doc string for AProtocol abstraction\"\n\n ;options\n :extend-via-metadata true\n\n;method signatures\n  (bar [this a b] \"bar docs\")\n  (baz [this a] [this a b] [this a b c] \"baz docs\"))\n\nNo implementations are provided. Docs can be specified for the\nprotocol overall and for each method. The above yields a set of\npolymorphic functions and a protocol object. All are\nnamespace-qualified by the ns enclosing the definition The resulting\nfunctions dispatch on the type of their first argument, which is\nrequired and corresponds to the implicit target object ('this' in \nJava parlance). defprotocol is dynamic, has no special compile-time \neffect, and defines no new types or classes. Implementations of \nthe protocol methods can be provided using extend.\n\nWhen :extend-via-metadata is true, values can extend protocols by\nadding metadata where keys are fully-qualified protocol function\nsymbols and values are function implementations. Protocol\nimplementations are checked first for direct definitions (defrecord,\ndeftype, reify), then metadata definitions, then external\nextensions (extend, extend-type, extend-protocol)\n\ndefprotocol will automatically generate a corresponding interface,\nwith the same name as the protocol, i.e. given a protocol:\nmy.ns/Protocol, an interface: my.ns.Protocol. The interface will\nhave methods corresponding to the protocol functions, and the\nprotocol will automatically work with instances of the interface.\n\nNote that you should not use this interface with deftype or\nreify, as they support the protocol directly:\n\n(defprotocol P \n  (foo [this]) \n  (bar-me [this] [this y]))\n\n(deftype Foo [a b c] \n P\n  (foo [this] a)\n  (bar-me [this] b)\n  (bar-me [this y] (+ c y)))\n\n(bar-me (Foo. 1 2 3) 42)\n=> 45\n\n(foo \n  (let [x 42]\n    (reify P \n      (foo [this] 17)\n      (bar-me [this] x)\n      (bar-me [this y] x))))\n=> 17",
    :namespace "clojure.core",
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/defprotocol"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "defrecord",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L312",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L312",
    :line 312,
    :var-type "macro",
    :arglists ([name [& fields] & opts+specs]),
@@ -2820,12 +2820,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/defstruct"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "deftype",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L422",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L422",
    :line 422,
    :var-type "macro",
    :arglists ([name [& fields] & opts+specs]),
@@ -3469,13 +3469,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/ex-message"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "extend",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L749",
-   :line 749,
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L768",
+   :line 768,
    :var-type "function",
    :arglists ([atype & proto+mmaps]),
    :doc
@@ -3484,13 +3484,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/extend"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "extend-protocol",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L849",
-   :line 849,
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L868",
+   :line 868,
    :var-type "macro",
    :arglists ([p & specs]),
    :doc
@@ -3499,13 +3499,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/extend-protocol"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "extend-type",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L817",
-   :line 817,
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L836",
+   :line 836,
    :var-type "macro",
    :arglists ([t & specs]),
    :doc
@@ -3514,12 +3514,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/extend-type"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "extenders",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L563",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L563",
    :line 563,
    :var-type "function",
    :arglists ([protocol]),
@@ -3529,12 +3529,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/extenders"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "extends?",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L556",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L556",
    :line 556,
    :var-type "function",
    :arglists ([protocol atype]),
@@ -5447,12 +5447,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/namespace"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "namespace-munge",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L13",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L13",
    :line 13,
    :var-type "function",
    :arglists ([ns]),
@@ -6799,12 +6799,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/realized?"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.6",
    :name "record?",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L405",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L405",
    :line 405,
    :var-type "function",
    :arglists ([x]),
@@ -7003,12 +7003,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/refer-clojure"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "reify",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L70",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L70",
    :line 70,
    :var-type "macro",
    :arglists ([& opts+specs]),
@@ -7390,12 +7390,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/run!"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj",
    :added "1.2",
    :name "satisfies?",
    :file "src/clj/clojure/core_deftype.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/359561886c53252a07c7105fcd1189f3b7a52571/src/clj/clojure/core_deftype.clj#L569",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core_deftype.clj#L569",
    :line 569,
    :var-type "function",
    :arglists ([protocol x]),
@@ -12879,11 +12879,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.zip-api.html#clojure.zip/zipper"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj",
    :name "CollReduce",
    :file "src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L13",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj#L13",
    :line 13,
    :var-type "protocol",
    :arglists nil,
@@ -12893,11 +12893,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/CollReduce"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj",
    :name "Datafiable",
    :file "src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L182",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj#L182",
    :line 182,
    :var-type "protocol",
    :arglists nil,
@@ -12906,11 +12906,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/Datafiable"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj",
    :name "IKVReduce",
    :file "src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L175",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj#L175",
    :line 175,
    :var-type "protocol",
    :arglists nil,
@@ -12920,11 +12920,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/IKVReduce"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj",
    :name "InternalReduce",
    :file "src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L19",
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj#L19",
    :line 19,
    :var-type "protocol",
    :arglists nil,
@@ -12934,12 +12934,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/InternalReduce"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj",
+   "https://github.com/clojure/clojure/raw/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj",
    :name "Navigable",
    :file "src/clj/clojure/core/protocols.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/93841c0dbf9db2f358474408d5e21530f49ef8b3/src/clj/clojure/core/protocols.clj#L192",
-   :line 192,
+   "https://github.com/clojure/clojure/blob/2cc37bb56a9125a1829c73c505e32995e663059a/src/clj/clojure/core/protocols.clj#L194",
+   :line 194,
    :var-type "protocol",
    :arglists nil,
    :doc nil,
@@ -13305,8 +13305,8 @@
       {valf read-string,
        readf
        (fn*
-        [p1__6734# p2__6735#]
-        (read p1__6734# false p2__6735#))}}]),
+        [p1__6685# p2__6686#]
+        (read p1__6685# false p2__6686#))}}]),
    :doc
    "Implements a prepl on in-reader and out-fn by forwarding to a\nremote [io-]prepl over a socket.  Messages will be read by readf, a\nfn of a LineNumberingPushbackReader and EOF value or a symbol naming\nsame (default #(read %1 false %2)),\n:ret and :tap vals will be processed by valf, a fn of one argument\nor a symbol naming same (default read-string). If that function\nthrows, :val will be unprocessed.\n\nAlpha, subject to change.",
    :namespace "clojure.core.server",
