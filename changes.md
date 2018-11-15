@@ -42,7 +42,7 @@ Clojure errors can occur in several distinct "phases" - reading source, macroexp
 
 The read/macroexpand/compile phases produce a CompilerException and indicate the location in the caller source code where the problem occurred (previously macroexpansion reported the error in the macroexpansion stack). CompilerException now implements IExceptionInfo and ex-data will report exception data including the following (optional) keys:
 
-* :clojure.error/phase - phase (:read-source, :macro-syntax-check, :macroexpansion, :compile-syntax-check, :compilation, :execution, :print-eval-result)
+* :clojure.error/phase - phase (:read-source, :macro-syntax-check, :macroexpansion, :compile-syntax-check, :compilation, :execution, :read-eval-result, :print-eval-result)
 * :clojure.error/source - source file
 * :clojure.error/line - line in source file
 * :clojure.error/column - column of line in source file
@@ -59,10 +59,14 @@ clojure.main also contains two new functions: `ex-triage` and `ex-str` that can 
   Error cause should always be on 2nd line of error message
 * [CLJ-2420](http://dev.clojure.org/jira/browse/CLJ-2420)
   Refinement of error phases, `ex-triage`, execution error line reporting
+* [CLJ-2427](http://dev.clojure.org/jira/browse/CLJ-2427)
+  CompilerException.toString() can throw if making message during initialization
+* [CLJ-2430](http://dev.clojure.org/jira/browse/CLJ-2430)
+  Elevate phase in throwable data and conveyance for prepl
 
 ### 2.2 Protocol extension by metadata
 
-In addition to prior methods of extension, values can now extend protocols by adding metadata where keys are fully-qualified symbols naming protocol functions and values are function implementations. Protocol implementations are checked first for direct definitions (defrecord, deftype, reify), then metadata definitions, then external extensions (extend, extend-type, extend-protocol).
+`defprotocol` has a new option `:extend-via-metadata`. When :extend-via-metadata is true, values can extend protocols by adding metadata where keys are fully-qualified protocol function symbols and values are function implementations. Protocol implementations are checked first for direct definitions (defrecord, deftype, reify), then metadata definitions, then external extensions (extend, extend-type, extend-protocol).
 
 ### 2.3 tap
 
@@ -91,6 +95,10 @@ prepl is alpha and subject to change.
 clojure.datafy is a facility for object to data transformation. The `datafy` and `nav` functions can be used used to transform and (lazily) navigate through object graphs. The data transformation process can be influenced by consumers using protocols or metadata.
 
 datafy is alpha and subject to change.
+
+* [CLJ-2429](http://dev.clojure.org/jira/browse/CLJ-2429)
+  Datafy JavaReflector
+
 
 ### 2.6 Other new functions in core
 
