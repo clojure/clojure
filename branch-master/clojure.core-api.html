@@ -12173,7 +12173,7 @@ Alpha, subject to change.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.10</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L263">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L268">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -12191,6 +12191,7 @@ Calls out-fn with data, one of:
  :ns ns-name-string
  :ms long ;;eval time in milliseconds
  :form string ;;iff successfully read
+ :clojure.error/phase (:execution et al per clojure.main/ex-triage) ;;iff error occurred
 }
 {:tag :out
  :val string} ;chars from during-eval *out*
@@ -12207,13 +12208,13 @@ Alpha, subject to change.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.10</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L187">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L187">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
     <h2 id="clojure.core.server/remote-prepl">remote-prepl</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (remote-prepl host port in-reader out-fn &amp; {:keys [valf readf], :or {valf read-string, readf (fn* [p1__6685# p2__6686#] (read p1__6685# false p2__6686#))}})
+    <pre id="var-usage">Usage: (remote-prepl host port in-reader out-fn &amp; {:keys [valf readf], :or {valf read-string, readf (fn* [p1__6684# p2__6685#] (read p1__6684# false p2__6685#))}})
 </pre>
     <pre id="var-docstr">Implements a prepl on in-reader and out-fn by forwarding to a
 remote [io-]prepl over a socket.  Messages will be read by readf, a
@@ -12227,7 +12228,7 @@ Alpha, subject to change.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.10</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L281">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L291">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -12239,7 +12240,7 @@ Alpha, subject to change.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L180">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L180">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -12251,7 +12252,7 @@ Alpha, subject to change.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L163">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L163">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -12263,7 +12264,7 @@ Alpha, subject to change.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L169">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L169">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -12284,7 +12285,7 @@ Returns server socket.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L84">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L84">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -12296,7 +12297,7 @@ Returns server socket.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L157">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L157">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -12311,7 +12312,7 @@ there is an error closing the socket.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L125">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L125">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -12323,7 +12324,7 @@ there is an error closing the socket.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L139">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L139">Source</a>
   </div>
 </div>
 

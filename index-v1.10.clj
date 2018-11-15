@@ -171,7 +171,7 @@
    :wiki-url
    "https://clojure.github.io/clojure/clojure.core-api.html#clojure.core.server",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj"}
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj"}
   {:doc
    "clojure.test extension for JUnit-compatible XML output.\n\nJUnit (http://junit.org/) is the most popular unit-testing library\nfor Java.  As such, tool support for JUnit output formats is\ncommon.  By producing compatible output from tests, this tool\nsupport can be exploited.\n\nTo use, wrap any calls to clojure.test/run-tests in the\nwith-junit-output macro, like this:\n\n  (use 'clojure.test)\n  (use 'clojure.test.junit)\n\n  (with-junit-output\n    (run-tests 'my.cool.library))\n\nTo write the output to a file, rebind clojure.test/*test-out* to\nyour own PrintWriter (perhaps opened using\nclojure.java.io/writer).",
    :author "Jason Sankey",
@@ -13256,13 +13256,13 @@
    :raw-source-url nil,
    :file nil}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj",
    :added "1.10",
    :name "io-prepl",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L263",
-   :line 263,
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L268",
+   :line 268,
    :var-type "function",
    :arglists ([& {:keys [valf], :or {valf pr-str}}]),
    :doc
@@ -13271,28 +13271,28 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.server/io-prepl"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj",
    :added "1.10",
    :name "prepl",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L187",
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L187",
    :line 187,
    :var-type "function",
    :arglists ([in-reader out-fn & {:keys [stdin]}]),
    :doc
-   "a REPL with structured output (for programs)\nreads forms to eval from in-reader (a LineNumberingPushbackReader)\nClosing the input or passing the form :repl/quit will cause it to return\n\nCalls out-fn with data, one of:\n{:tag :ret\n :val val ;;eval result\n :ns ns-name-string\n :ms long ;;eval time in milliseconds\n :form string ;;iff successfully read\n}\n{:tag :out\n :val string} ;chars from during-eval *out*\n{:tag :err\n :val string} ;chars from during-eval *err*\n{:tag :tap\n :val val} ;values from tap>\n\nYou might get more than one :out or :err per eval, but exactly one :ret\ntap output can happen at any time (i.e. between evals)\nIf during eval an attempt is made to read *in* it will read from in-reader unless :stdin is supplied\n\nAlpha, subject to change.",
+   "a REPL with structured output (for programs)\nreads forms to eval from in-reader (a LineNumberingPushbackReader)\nClosing the input or passing the form :repl/quit will cause it to return\n\nCalls out-fn with data, one of:\n{:tag :ret\n :val val ;;eval result\n :ns ns-name-string\n :ms long ;;eval time in milliseconds\n :form string ;;iff successfully read\n :clojure.error/phase (:execution et al per clojure.main/ex-triage) ;;iff error occurred\n}\n{:tag :out\n :val string} ;chars from during-eval *out*\n{:tag :err\n :val string} ;chars from during-eval *err*\n{:tag :tap\n :val val} ;values from tap>\n\nYou might get more than one :out or :err per eval, but exactly one :ret\ntap output can happen at any time (i.e. between evals)\nIf during eval an attempt is made to read *in* it will read from in-reader unless :stdin is supplied\n\nAlpha, subject to change.",
    :namespace "clojure.core.server",
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.server/prepl"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj",
    :added "1.10",
    :name "remote-prepl",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L281",
-   :line 281,
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L291",
+   :line 291,
    :var-type "function",
    :arglists
    ([host
@@ -13305,19 +13305,19 @@
       {valf read-string,
        readf
        (fn*
-        [p1__6685# p2__6686#]
-        (read p1__6685# false p2__6686#))}}]),
+        [p1__6684# p2__6685#]
+        (read p1__6684# false p2__6685#))}}]),
    :doc
    "Implements a prepl on in-reader and out-fn by forwarding to a\nremote [io-]prepl over a socket.  Messages will be read by readf, a\nfn of a LineNumberingPushbackReader and EOF value or a symbol naming\nsame (default #(read %1 false %2)),\n:ret and :tap vals will be processed by valf, a fn of one argument\nor a symbol naming same (default read-string). If that function\nthrows, :val will be unprocessed.\n\nAlpha, subject to change.",
    :namespace "clojure.core.server",
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.server/remote-prepl"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj",
    :name "repl",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L180",
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L180",
    :line 180,
    :var-type "function",
    :arglists ([]),
@@ -13326,11 +13326,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.server/repl"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj",
    :name "repl-init",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L163",
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L163",
    :line 163,
    :var-type "function",
    :arglists ([]),
@@ -13340,11 +13340,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.server/repl-init"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj",
    :name "repl-read",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L169",
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L169",
    :line 169,
    :var-type "function",
    :arglists ([request-prompt request-exit]),
@@ -13353,11 +13353,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.server/repl-read"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj",
    :name "start-server",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L84",
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L84",
    :line 84,
    :var-type "function",
    :arglists ([opts]),
@@ -13367,11 +13367,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.server/start-server"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj",
    :name "start-servers",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L157",
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L157",
    :line 157,
    :var-type "function",
    :arglists ([system-props]),
@@ -13380,11 +13380,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.server/start-servers"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj",
    :name "stop-server",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L125",
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L125",
    :line 125,
    :var-type "function",
    :arglists ([] [name]),
@@ -13394,11 +13394,11 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.server/stop-server"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj",
+   "https://github.com/clojure/clojure/raw/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj",
    :name "stop-servers",
    :file "src/clj/clojure/core/server.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/0193780aadaef2c6bc5d3e4b356698b72e0d1f8c/src/clj/clojure/core/server.clj#L139",
+   "https://github.com/clojure/clojure/blob/4d2a7dbae68036dcc80cb40ca155985ad06aaeb8/src/clj/clojure/core/server.clj#L139",
    :line 139,
    :var-type "function",
    :arglists ([]),
