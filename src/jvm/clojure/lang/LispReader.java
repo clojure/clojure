@@ -143,14 +143,24 @@ static void unread(PushbackReader r, int ch) {
 			}
 }
 
-public static class ReaderException extends RuntimeException{
+public static class ReaderException extends RuntimeException implements IExceptionInfo{
 	public final int line;
 	public final int column;
+	public final Object data;
+
+    final static public String ERR_NS = "clojure.error";
+	final static public Keyword ERR_LINE = Keyword.intern(ERR_NS, "line");
+	final static public Keyword ERR_COLUMN = Keyword.intern(ERR_NS, "column");
 
 	public ReaderException(int line, int column, Throwable cause){
 		super(cause);
 		this.line = line;
 		this.column = column;
+		this.data = RT.map(ERR_LINE, line, ERR_COLUMN, column);
+	}
+
+	public IPersistentMap getData(){
+		return (IPersistentMap)data;
 	}
 }
 

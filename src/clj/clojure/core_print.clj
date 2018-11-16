@@ -463,18 +463,27 @@
   (print-method [(symbol (.getClassName o)) (symbol (.getMethodName o)) (.getFileName o) (.getLineNumber o)] w))
 
 (defn StackTraceElement->vec
-  "Constructs a data representation for a StackTraceElement"
+  "Constructs a data representation for a StackTraceElement: [class method file line]"
   {:added "1.9"}
   [^StackTraceElement o]
   [(symbol (.getClassName o)) (symbol (.getMethodName o)) (.getFileName o) (.getLineNumber o)])
 
 (defn Throwable->map
-  "Constructs a data representation for a Throwable."
+  "Constructs a data representation for a Throwable with keys:
+    :cause - root cause message
+    :phase - error phase
+    :via - cause chain, with cause keys:
+             :type - exception class symbol
+             :message - exception message
+             :data - ex-data
+             :at - top stack element
+    :trace - root cause stack elements"
   {:added "1.7"}
   [^Throwable o]
   (let [base (fn [^Throwable t]
-               (merge {:type (symbol (.getName (class t)))
-                       :message (.getLocalizedMessage t)}
+               (merge {:type (symbol (.getName (class t)))}
+                 (when-let [msg (.getLocalizedMessage t)]
+                   {:message msg})
                  (when-let [ed (ex-data t)]
                    {:data ed})
                  (let [st (.getStackTrace t)]
@@ -484,15 +493,16 @@
               (if t
                 (recur (conj via t) (.getCause t))
                 via))
-        ^Throwable root (peek via)
-        m {:cause (.getLocalizedMessage root)
-           :via (vec (map base via))
-           :trace (vec (map StackTraceElement->vec
-                            (.getStackTrace ^Throwable (or root o))))}
-        data (ex-data root)]
-    (if data
-      (assoc m :data data)
-      m)))
+        ^Throwable root (peek via)]
+    (merge {:via (vec (map base via))
+            :trace (vec (map StackTraceElement->vec
+                             (.getStackTrace ^Throwable (or root o))))}
+      (when-let [root-msg (.getLocalizedMessage root)]
+        {:cause root-msg})
+      (when-let [data (ex-data root)]
+        {:data data})
+      (when-let [phase (-> o ex-data :clojure.error/phase)]
+        {:phase phase}))))
 
 (defn- print-throwable [^Throwable o ^Writer w]
   (.write w "#error {\n :cause ")

@@ -184,6 +184,10 @@
     :init repl-init
     :read repl-read))
 
+(defn- ex->data
+  [ex phase]
+  (assoc (Throwable->map ex) :phase phase))
+
 (defn prepl
   "a REPL with structured output (for programs)
   reads forms to eval from in-reader (a LineNumberingPushbackReader)
@@ -242,15 +246,15 @@
                               true)))
                         (catch Throwable ex
                           (set! *e ex)
-                          (out-fn {:tag :ret :val (Throwable->map ex)
+                          (out-fn {:tag :ret :val (ex->data ex (or (-> ex ex-data :clojure.error/phase) :execution))
                                    :ns (str (.name *ns*)) :form s
-                                   :clojure.error/phase :execution})
+                                   :exception true})
                           true)))
                     (catch Throwable ex
                       (set! *e ex)
-                      (out-fn {:tag :ret :val (Throwable->map ex)
+                      (out-fn {:tag :ret :val (ex->data ex :read-source)
                                :ns (str (.name *ns*))
-                               :clojure.error/phase :read-source})
+                               :exception true})
                       true))
               (recur)))
           (finally
@@ -284,8 +288,8 @@
                         (try
                           (assoc m :val (valf (:val m)))
                           (catch Throwable ex
-                            (assoc m :val (Throwable->map ex)
-                                   :clojure.error/phase :print-eval-result)))
+                            (assoc m :val (ex->data ex :print-eval-result)
+                                     :exception true)))
                         m))))))))
 
 (defn remote-prepl
@@ -317,8 +321,8 @@
                           (try
                             (assoc m :val (valf val))
                             (catch Throwable ex
-                              (assoc m :val (Throwable->map ex)
-                                     :clojure.error/phase :read-eval-result)))
+                              (assoc m :val (ex->data ex :read-eval-result)
+                                       :exception true)))
                           m))
                        (recur))))
                  (finally
