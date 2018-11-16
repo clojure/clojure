@@ -10777,12 +10777,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.pprint-api.html#clojure.pprint/write-out"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj",
+   "https://github.com/clojure/clojure/raw/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj",
    :name "->AsmReflector",
    :file "src/clj/clojure/reflect/java.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L196",
-   :line 196,
+   "https://github.com/clojure/clojure/blob/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj#L206",
+   :line 206,
    :var-type "function",
    :arglists ([class-resolver]),
    :doc
@@ -10791,12 +10791,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/->AsmReflector"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj",
+   "https://github.com/clojure/clojure/raw/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj",
    :name "->Constructor",
    :file "src/clj/clojure/reflect/java.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L109",
-   :line 109,
+   "https://github.com/clojure/clojure/blob/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj#L113",
+   :line 113,
    :var-type "function",
    :arglists
    ([name declaring-class parameter-types exception-types flags]),
@@ -10806,12 +10806,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/->Constructor"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj",
+   "https://github.com/clojure/clojure/raw/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj",
    :name "->Field",
    :file "src/clj/clojure/reflect/java.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L148",
-   :line 148,
+   "https://github.com/clojure/clojure/blob/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj#L152",
+   :line 152,
    :var-type "function",
    :arglists ([name type declaring-class flags]),
    :doc "Positional factory function for class clojure.reflect.Field.",
@@ -10819,12 +10819,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/->Field"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj",
+   "https://github.com/clojure/clojure/raw/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj",
    :name "->JavaReflector",
    :file "src/clj/clojure/reflect/java.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L166",
-   :line 166,
+   "https://github.com/clojure/clojure/blob/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj#L176",
+   :line 176,
    :var-type "function",
    :arglists ([classloader]),
    :doc
@@ -10833,12 +10833,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/->JavaReflector"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj",
+   "https://github.com/clojure/clojure/raw/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj",
    :name "->Method",
    :file "src/clj/clojure/reflect/java.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L128",
-   :line 128,
+   "https://github.com/clojure/clojure/blob/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj#L132",
+   :line 132,
    :var-type "function",
    :arglists
    ([name
@@ -10853,12 +10853,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/->Method"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj",
+   "https://github.com/clojure/clojure/raw/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj",
    :name "flag-descriptors",
    :file "src/clj/clojure/reflect/java.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L71",
-   :line 71,
+   "https://github.com/clojure/clojure/blob/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj#L75",
+   :line 75,
    :var-type "var",
    :arglists nil,
    :doc
@@ -10867,12 +10867,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/flag-descriptors"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj",
+   "https://github.com/clojure/clojure/raw/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj",
    :name "map->Constructor",
    :file "src/clj/clojure/reflect/java.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L109",
-   :line 109,
+   "https://github.com/clojure/clojure/blob/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj#L113",
+   :line 113,
    :var-type "function",
    :arglists ([m#]),
    :doc
@@ -10881,12 +10881,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/map->Constructor"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj",
+   "https://github.com/clojure/clojure/raw/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj",
    :name "map->Field",
    :file "src/clj/clojure/reflect/java.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L148",
-   :line 148,
+   "https://github.com/clojure/clojure/blob/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj#L152",
+   :line 152,
    :var-type "function",
    :arglists ([m#]),
    :doc
@@ -10895,12 +10895,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/map->Field"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj",
+   "https://github.com/clojure/clojure/raw/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj",
    :name "map->Method",
    :file "src/clj/clojure/reflect/java.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L128",
-   :line 128,
+   "https://github.com/clojure/clojure/blob/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj#L132",
+   :line 132,
    :var-type "function",
    :arglists ([m#]),
    :doc
@@ -10984,12 +10984,12 @@
    :raw-source-url nil,
    :file nil}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj",
+   "https://github.com/clojure/clojure/raw/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj",
    :name "ClassResolver",
    :file "src/clj/clojure/reflect/java.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/9f277c80258b3d2951128ce26a07c30ad0b47af0/src/clj/clojure/reflect/java.clj#L184",
-   :line 184,
+   "https://github.com/clojure/clojure/blob/c4ebc0a66f37c958da8fa7009d123ee8bba11d8d/src/clj/clojure/reflect/java.clj#L194",
+   :line 194,
    :var-type "protocol",
    :arglists nil,
    :doc nil,
