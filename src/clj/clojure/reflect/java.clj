@@ -16,6 +16,8 @@
          '[java.lang.reflect Modifier]
          java.io.InputStream)
 
+(set! *warn-on-reflection* true)
+
 (extend-protocol TypeReference
   clojure.lang.Symbol
   (typename [s] (str/replace (str s) "<>" "[]"))
@@ -168,10 +170,10 @@ the kinds of objects to which they can apply."}
         (.getDeclaredFields cls))))
 
 (defn- typeref->class
-  [typeref classloader]
+  ^Class [typeref classloader]
   (if (class? typeref)
     typeref
-   (clojure.lang.RT/classForName (typename typeref) false classloader)))
+    (clojure.lang.RT/classForName (typename typeref) false classloader)))
 
 (deftype JavaReflector [classloader]
   Reflector
