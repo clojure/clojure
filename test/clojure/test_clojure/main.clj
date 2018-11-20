@@ -68,3 +68,12 @@
     "(let [x 1] x)" 100 100
     "^{:line 20 :clojure.core/eval-file \"a/b.clj\"} (let [x 1] x)" 100 20
     "^{:line 20} (let [x 1] x)" 100 20))
+
+(deftest java-loc->source
+  (are [c m out]
+    (= out (#'main/java-loc->source c m))
+    'user$eval1                'invokeStatic 'user/eval1
+    'div$go                    'invokeStatic 'div/go
+    'user$eval186$fn__187      'invoke       'user/eval186$fn
+    'user$ok_fn$broken_fn__164 'invoke       'user/ok-fn$broken-fn
+    'clojure.lang.Numbers      'divide       'clojure.lang.Numbers/divide))
