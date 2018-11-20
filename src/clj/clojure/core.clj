@@ -6070,6 +6070,15 @@
   [& args]
   (apply load-libs :require args))
 
+(defn async-require
+  "Like 'require', but with a lock around loading.
+  Preferred over 'require' for known asynchronous loads.
+  Future changes may make these equivalent."
+  {:added "1.10"}
+  [& args]
+  (locking clojure.lang.RT/REQUIRE_LOCK
+    (apply require args)))
+
 (defn requiring-resolve
   "Resolves namespace-qualified sym per 'resolve'. If initial resolve
 fails, attempts to require sym's namespace and retries."
@@ -6077,7 +6086,7 @@ fails, attempts to require sym's namespace and retries."
   [sym]
   (if (qualified-symbol? sym)
     (or (resolve sym)
-        (do (-> sym namespace symbol require)
+        (do (-> sym namespace symbol async-require)
             (resolve sym)))
     (throw (IllegalArgumentException. (str "Not a qualified symbol: " sym)))))
 

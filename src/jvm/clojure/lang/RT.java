@@ -177,6 +177,7 @@ static Object readTrueFalseUnknown(String s){
 	return Keyword.intern(null, "unknown");
 }
 
+static public final Object REQUIRE_LOCK = new Object();
 static public final Namespace CLOJURE_NS = Namespace.findOrCreate(Symbol.intern("clojure.core"));
 //static final Namespace USER_NS = Namespace.findOrCreate(Symbol.intern("user"));
 final static public Var OUT =
