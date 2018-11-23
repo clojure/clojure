@@ -721,8 +721,8 @@
       (do-report {:type :end-test-var, :var v}))))
 
 (defn test-vars
-  "Groups vars by their namespace and runs test-vars on them with
-   appropriate fixtures applied."
+  "Groups vars by their namespace and runs test-var on them with
+  appropriate fixtures applied."
   {:added "1.6"}
   [vars]
   (doseq [[ns vars] (group-by (comp :ns meta) vars)]
