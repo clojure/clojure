@@ -65,6 +65,9 @@ clojure.main also contains two new functions: `ex-triage` and `ex-str` that can 
   Elevate phase in throwable data and conveyance for prepl
 * [CLJ-2435](http://dev.clojure.org/jira/browse/CLJ-2435)
   Include root cause class name in compilation and macroexpansion error phases
+* [CLJ-2438](http://dev.clojure.org/jira/browse/CLJ-2438)
+  Demunge source symbol in execution error messages
+
 
 ### 2.2 Protocol extension by metadata
 
@@ -116,6 +119,7 @@ This function has been added to construct a PrintWriter implementation whose beh
 The following function has been added, extending `resolve`:
 
 * `requiring-resolve` - resolve or, if needed, require symbol's namespace, then resolve
+* `async-require` - like `require` but for use in asynchronous load uses
 
 ## 3 Enhancements
 
