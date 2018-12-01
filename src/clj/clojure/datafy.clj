@@ -6,8 +6,8 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns clojure.datafy
-  ^{:doc "Functions to turn objects into data. Alpha, subject to change"}
+(ns ^{:doc "Functions to turn objects into data. Alpha, subject to change"}
+  clojure.datafy
   (:require [clojure.core.protocols :as p]))
 
 (set! *warn-on-reflection* true)
