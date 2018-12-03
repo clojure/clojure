@@ -6070,9 +6070,9 @@
   [& args]
   (apply load-libs :require args))
 
-(defn async-require
-  "Like 'require', but with a lock around loading.
-  Preferred over 'require' for known asynchronous loads.
+(defn serialized-require
+  "Like 'require', but serializes loading.
+  Interim function preferred over 'require' for known asynchronous loads.
   Future changes may make these equivalent."
   {:added "1.10"}
   [& args]
@@ -6086,7 +6086,7 @@ fails, attempts to require sym's namespace and retries."
   [sym]
   (if (qualified-symbol? sym)
     (or (resolve sym)
-        (do (-> sym namespace symbol async-require)
+        (do (-> sym namespace symbol serialized-require)
             (resolve sym)))
     (throw (IllegalArgumentException. (str "Not a qualified symbol: " sym)))))
 

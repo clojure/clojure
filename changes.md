@@ -119,7 +119,7 @@ This function has been added to construct a PrintWriter implementation whose beh
 The following function has been added, extending `resolve`:
 
 * `requiring-resolve` - resolve or, if needed, require symbol's namespace, then resolve
-* `async-require` - like `require` but for use in asynchronous load uses
+* `serialized-require` - like `require` but for use in asynchronous load uses
 
 ## 3 Enhancements
 
