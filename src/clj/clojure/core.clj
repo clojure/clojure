@@ -6070,7 +6070,7 @@
   [& args]
   (apply load-libs :require args))
 
-(defn serialized-require
+(defn- serialized-require
   "Like 'require', but serializes loading.
   Interim function preferred over 'require' for known asynchronous loads.
   Future changes may make these equivalent."
