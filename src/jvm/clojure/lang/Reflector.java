@@ -153,11 +153,11 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 	if(m == null)
 		throw new IllegalArgumentException(noMethodReport(methodName,target,args));
 
-	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()))
+	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target))
 		{
 		//public method of non-public class, try to find it in hierarchy
 		Method oldm = m;
-		m = getAsMethodOfPublicBase(target.getClass(), m);
+		m = getAsMethodOfAccessibleBase(target.getClass(), m, target);
 		if(m == null)
 			throw new IllegalArgumentException("Can't call public method of non-public class: " +
 			                                    oldm.toString());
@@ -173,6 +173,7 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 
 }
 
+// DEPRECATED - replaced by getAsMethodOfAccessibleBase()
 public static Method getAsMethodOfPublicBase(Class c, Method m){
 	for(Class iface : c.getInterfaces())
 		{
@@ -197,6 +198,7 @@ public static Method getAsMethodOfPublicBase(Class c, Method m){
 	return getAsMethodOfPublicBase(sc, m);
 }
 
+// DEPRECATED - replaced by isAccessibleMatch()
 public static boolean isMatch(Method lhs, Method rhs) {
 	if(!lhs.getName().equals(rhs.getName())
 			|| !Modifier.isPublic(lhs.getDeclaringClass().getModifiers()))
@@ -219,6 +221,55 @@ public static boolean isMatch(Method lhs, Method rhs) {
 				}
 			}
 		return match;
+}
+
+public static Method getAsMethodOfAccessibleBase(Class c, Method m, Object target){
+	for(Class iface : c.getInterfaces())
+	{
+		for(Method im : iface.getMethods())
+		{
+			if(isAccessibleMatch(im, m, target))
+			{
+				return im;
+			}
+		}
+	}
+	Class sc = c.getSuperclass();
+	if(sc == null)
+		return null;
+	for(Method scm : sc.getMethods())
+	{
+		if(isAccessibleMatch(scm, m, target))
+		{
+			return scm;
+		}
+	}
+	return getAsMethodOfAccessibleBase(sc, m, target);
+}
+
+public static boolean isAccessibleMatch(Method lhs, Method rhs, Object target) {
+	if(!lhs.getName().equals(rhs.getName())
+			|| !Modifier.isPublic(lhs.getDeclaringClass().getModifiers())
+			|| !canAccess(lhs, target))
+	{
+		return false;
+	}
+
+	Class[] types1 = lhs.getParameterTypes();
+	Class[] types2 = rhs.getParameterTypes();
+	if(types1.length != types2.length)
+		return false;
+
+	boolean match = true;
+	for (int i=0; i<types1.length; ++i)
+	{
+		if(!types1[i].isAssignableFrom(types2[i]))
+		{
+			match = false;
+			break;
+		}
+	}
+	return match;
 }
 
 public static Object invokeConstructor(Class c, Object[] args) {
