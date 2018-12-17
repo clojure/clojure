@@ -11041,38 +11041,38 @@
    :namespace "clojure.reflect",
    :wiki-url
    "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/TypeReference"}
-  {:name "resolve-class",
+  {:raw-source-url nil,
+   :name "resolve-class",
+   :file nil,
+   :source-url nil,
+   :var-type "function",
+   :arglists ([this name]),
    :doc
    "Given a class name, return that typeref's class bytes as an InputStream.",
-   :var-type "function",
    :namespace "clojure.reflect",
-   :arglists ([this name]),
    :wiki-url
-   "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/resolve-class",
+   "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/resolve-class"}
+  {:raw-source-url nil,
+   :name "do-reflect",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "do-reflect",
-   :doc nil,
    :var-type "function",
-   :namespace "clojure.reflect",
    :arglists ([reflector typeref]),
+   :doc nil,
+   :namespace "clojure.reflect",
    :wiki-url
-   "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/do-reflect",
+   "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/do-reflect"}
+  {:raw-source-url nil,
+   :name "typename",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "typename",
+   :var-type "function",
+   :arglists ([o]),
    :doc
    "Returns Java name as returned by ASM getClassName, e.g. byte[], java.lang.String[]",
-   :var-type "function",
    :namespace "clojure.reflect",
-   :arglists ([o]),
    :wiki-url
-   "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/typename",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
+   "https://clojure.github.io/clojure//clojure.reflect-api.html#clojure.reflect/typename"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/817abb3d0ca3b7ee80cfe17b5cfe3ea8306f0720/src/clj/clojure/repl.clj",
    :name "apropos",
@@ -12964,57 +12964,57 @@
    :namespace "clojure.core.protocols",
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/Navigable"}
-  {:name "coll-reduce",
-   :doc nil,
+  {:raw-source-url nil,
+   :name "coll-reduce",
+   :file nil,
+   :source-url nil,
    :var-type "function",
-   :namespace "clojure.core.protocols",
    :arglists ([coll f] [coll f val]),
-   :wiki-url
-   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/coll-reduce",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "datafy",
-   :doc "return a representation of o as data (default identity)",
-   :var-type "function",
+   :doc nil,
    :namespace "clojure.core.protocols",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/coll-reduce"}
+  {:raw-source-url nil,
+   :name "datafy",
+   :file nil,
+   :source-url nil,
+   :var-type "function",
    :arglists ([o]),
-   :wiki-url
-   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/datafy",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "kv-reduce",
-   :doc nil,
-   :var-type "function",
+   :doc "return a representation of o as data (default identity)",
    :namespace "clojure.core.protocols",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/datafy"}
+  {:raw-source-url nil,
+   :name "kv-reduce",
+   :file nil,
+   :source-url nil,
+   :var-type "function",
    :arglists ([amap f init]),
-   :wiki-url
-   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/kv-reduce",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "internal-reduce",
    :doc nil,
-   :var-type "function",
    :namespace "clojure.core.protocols",
-   :arglists ([seq f start]),
    :wiki-url
-   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/internal-reduce",
+   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/kv-reduce"}
+  {:raw-source-url nil,
+   :name "internal-reduce",
+   :file nil,
    :source-url nil,
-   :raw-source-url nil,
-   :file nil}
-  {:name "nav",
+   :var-type "function",
+   :arglists ([seq f start]),
+   :doc nil,
+   :namespace "clojure.core.protocols",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/internal-reduce"}
+  {:raw-source-url nil,
+   :name "nav",
+   :file nil,
+   :source-url nil,
+   :var-type "function",
+   :arglists ([coll k v]),
    :doc
    "return (possibly transformed) v in the context of coll and k (a key/index or nil),\ndefaults to returning v.",
-   :var-type "function",
    :namespace "clojure.core.protocols",
-   :arglists ([coll k v]),
    :wiki-url
-   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/nav",
-   :source-url nil,
-   :raw-source-url nil,
-   :file nil}
+   "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core.protocols/nav"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/c8752b4fbf317e9715b2d94cfb6b6939631a9bcb/src/clj/clojure/core/reducers.clj",
    :name "->Cat",
