@@ -226,7 +226,7 @@
           (add-tap tapfn)
           (loop []
             (when (try
-                    (let [[form s] (read+string in-reader false EOF)]
+                    (let [[form s] (read+string {:eof EOF :read-cond :allow} in-reader)]
                       (try
                         (when-not (identical? form EOF)
                           (let [start (System/nanoTime)
