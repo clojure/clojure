@@ -82,6 +82,9 @@
       <arg value="clojure.data"/>
       <arg value="clojure.reflect"/>
       <arg value="clojure.datafy"/>
+      <arg value="clojure.instant"/>
+      <arg value="clojure.uuid"/>
+      <arg value="clojure.core.reducers"/>
     </java>
   </target>
 
