@@ -245,6 +245,7 @@ static private <T extends Throwable> void sneakyThrow0(Throwable t) throws T {
 }
 
 static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws IOException, ClassNotFoundException{
+    RT.init();
     Var.pushThreadBindings(RT.map(new Object[] { Compiler.LOADER, loadFrom.getClassLoader() }));
     try {
         return RT.var("clojure.core", "load").invoke(scriptbase);

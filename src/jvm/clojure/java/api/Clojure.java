@@ -13,6 +13,7 @@ package clojure.java.api;
 import clojure.lang.IFn;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
+import clojure.lang.RT;
 
 /**
  * <p>The Clojure class provides a minimal interface to bootstrap Clojure access
@@ -93,6 +94,7 @@ public class Clojure {
     }
 
     static {
+        RT.init();
         Symbol edn = (Symbol) var("clojure.core", "symbol").invoke("clojure.edn");
         var("clojure.core", "require").invoke(edn);
     }

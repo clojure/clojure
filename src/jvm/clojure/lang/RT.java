@@ -335,7 +335,7 @@ static{
 	v.setMeta(map(DOC_KEY, "Sequentially read and evaluate the set of forms contained in the file.",
 	              arglistskw, list(vector(namesym))));
 	try {
-		doInit();
+		load("clojure/core");
 	}
 	catch(Exception e) {
 		throw Util.sneakyThrow(e);
@@ -387,10 +387,6 @@ public static void loadResourceScript(Class c, String name, boolean failIfNotFou
 	else if(failIfNotFound) {
 		throw new FileNotFoundException("Could not locate Clojure resource on classpath: " + name);
 	}
-}
-
-static public void init() {
-	RT.errPrintWriter().println("No need to call RT.init() anymore");
 }
 
 static public long lastModified(URL url, String libfile) throws IOException{
@@ -467,8 +463,13 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 			scriptbase.contains("_") ? " Please check that namespaces with dashes use underscores in the Clojure file name." : ""));
 }
 
-static void doInit() throws ClassNotFoundException, IOException{
-	load("clojure/core");
+static public void init() {
+	doInit();
+}
+
+private static boolean INIT = false; // init guard
+private synchronized static void doInit() {
+	if(INIT) {return;} else {INIT=true;}
 
 	Var.pushThreadBindings(
 			RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
@@ -490,6 +491,9 @@ static void doInit() throws ClassNotFoundException, IOException{
 		require.invoke(SERVER);
 		Var start_servers = var("clojure.core.server", "start-servers");
 		start_servers.invoke(System.getProperties());
+	}
+	catch(Exception e) {
+		throw Util.sneakyThrow(e);
 	}
 	finally {
 		Var.popThreadBindings();

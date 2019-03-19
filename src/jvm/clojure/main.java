@@ -23,16 +23,19 @@ final static private Var LEGACY_SCRIPT = RT.var("clojure.main", "legacy-script")
 final static private Var MAIN = RT.var("clojure.main", "main");
 
 public static void legacy_repl(String[] args) {
+    RT.init();
     REQUIRE.invoke(CLOJURE_MAIN);
     LEGACY_REPL.invoke(RT.seq(args));
 }
 
 public static void legacy_script(String[] args) {
+    RT.init();
     REQUIRE.invoke(CLOJURE_MAIN);
     LEGACY_SCRIPT.invoke(RT.seq(args));
 }
 
 public static void main(String[] args) {
+    RT.init();
     REQUIRE.invoke(CLOJURE_MAIN);
     MAIN.applyTo(RT.seq(args));
 }
