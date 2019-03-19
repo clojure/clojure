@@ -4997,7 +4997,7 @@ static public class ObjExpr implements Expr{
 			return null;
 		try
 			{
-			return getCompiledClass().newInstance();
+			return getCompiledClass().getDeclaredConstructor().newInstance();
 			}
 		catch(Exception e)
 			{

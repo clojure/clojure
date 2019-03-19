@@ -51,7 +51,7 @@ private void load() {
 		{
 		try
 			{
-			fn = (IFn) Class.forName(fnClassName,true,loader).newInstance();
+			fn = (IFn) Class.forName(fnClassName,true,loader).getDeclaredConstructor().newInstance();
 			}
 		catch(Exception e)
 			{
