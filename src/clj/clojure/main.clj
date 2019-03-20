@@ -13,7 +13,9 @@
   clojure.main
   (:refer-clojure :exclude [with-bindings])
   (:require [clojure.spec.alpha :as spec])
-  (:import (java.io StringReader)
+  (:import (java.io StringReader BufferedWriter FileWriter)
+           (java.nio.file Files)
+           (java.nio.file.attribute FileAttribute)
            (clojure.lang Compiler Compiler$CompilerException
                          LineNumberingPushbackReader RT LispReader$ReaderException))
   ;;(:use [clojure.repl :only (demunge root-cause stack-element-str)])
@@ -180,6 +182,19 @@
       (.getName (java.io.File. full-path))
       (catch Throwable t))))
 
+(defn- file-path
+  "Helper to get the relative path to the source file or nil"
+  [^String full-path]
+  (when full-path
+    (try
+      (let [path (.getPath (java.io.File. full-path))
+            cd-path (str (.getAbsolutePath (java.io.File. "")) "/")]
+        (if (.startsWith path cd-path)
+          (subs path (count cd-path))
+          path))
+      (catch Throwable t
+        full-path))))
+
 (defn- java-loc->source
   "Convert Java class name and method symbol to source symbol, either a
   Clojure function or Java class and method."
@@ -198,6 +213,7 @@
       :read-source :compile-syntax-check :compilation :macro-syntax-check :macroexpansion
       :execution :read-eval-result :print-eval-result
     :clojure.error/source - file name (no path)
+    :clojure.error/path - source path
     :clojure.error/line - integer line number
     :clojure.error/column - integer column number
     :clojure.error/symbol - symbol being expanded/compiled/invoked
@@ -215,14 +231,16 @@
         :read-source
         (let [{:clojure.error/keys [line column]} data]
           (cond-> (merge (-> via second :data) top-data)
-            source (assoc :clojure.error/source (file-name source))
-            (#{"NO_SOURCE_FILE" "NO_SOURCE_PATH"} source) (dissoc :clojure.error/source)
+            source (assoc :clojure.error/source (file-name source)
+                          :clojure.error/path (file-path source))
+            (#{"NO_SOURCE_FILE" "NO_SOURCE_PATH"} source) (dissoc :clojure.error/source :clojure.error/path)
             message (assoc :clojure.error/cause message)))
 
         (:compile-syntax-check :compilation :macro-syntax-check :macroexpansion)
         (cond-> top-data
-          source (assoc :clojure.error/source (file-name source))
-          (#{"NO_SOURCE_FILE" "NO_SOURCE_PATH"} source) (dissoc :clojure.error/source)
+          source (assoc :clojure.error/source (file-name source)
+                        :clojure.error/path (file-path source))
+          (#{"NO_SOURCE_FILE" "NO_SOURCE_PATH"} source) (dissoc :clojure.error/source :clojure.error/path)
           type (assoc :clojure.error/class type)
           message (assoc :clojure.error/cause message)
           problems (assoc :clojure.error/spec data))
@@ -253,9 +271,9 @@
   The first line summarizes the exception phase and location.
   The subsequent lines describe the cause."
   {:added "1.10"}
-  [{:clojure.error/keys [phase source line column symbol class cause spec]
+  [{:clojure.error/keys [phase source path line column symbol class cause spec]
     :as triage-data}]
-  (let [loc (str (or source "REPL") ":" (or line 1) (if column (str ":" column) ""))
+  (let [loc (str (or path source "REPL") ":" (or line 1) (if column (str ":" column) ""))
         class-name (name (or class ""))
         simple-class (if class (or (first (re-find #"([^.])++$" class-name)) class-name))
         cause-type (if (contains? #{"Exception" "RuntimeException"} simple-class)
@@ -322,11 +340,16 @@
                 loc
                 cause)))))
 
+(defn err->msg
+  "Helper to return an error message string from an exception."
+  [^Throwable e]
+  (-> e Throwable->map ex-triage ex-str))
+
 (defn repl-caught
   "Default :caught hook for repl"
   [e]
   (binding [*out* *err*]
-    (print (-> e Throwable->map ex-triage ex-str))
+    (print (err->msg e))
     (flush)))
 
 (def ^{:doc "A sequence of lib specs that are applied to `require`
@@ -558,6 +581,40 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
   (let [[inits [sep & args]] (split-with (complement #{"--"}) args)]
     (null-opt args (map vector (repeat "-i") inits))))
 
+(defn report-error
+  "Create and output an exception report for a Throwable to target,
+  and optionally exit.
+
+  Options:
+    :target - either :temp-file or :stderr, default to :temp-file
+    :exit - if set will System/exit with this code on err, default to 1
+
+  If temp file is specified but cannot be completed, falls back to stderr."
+  [^Throwable t & {:keys [target exit]
+                   :or {target :temp-file, exit 1} :as opts}]
+  (let [trace (Throwable->map t)
+        triage (ex-triage trace)
+        message (ex-str triage)
+        report (array-map :clojure.main/message message
+                          :clojure.main/triage triage
+                          :clojure.main/trace trace)
+        report-str (with-out-str
+                     (binding [*print-namespace-maps* false]
+                       ((requiring-resolve 'clojure.pprint/pprint) report)))
+        err-path (when (= target :temp-file)
+                   (try
+                     (let [f (.toFile (Files/createTempFile "clojure-" ".edn" (into-array FileAttribute [])))]
+                       (with-open [w (BufferedWriter. (FileWriter. f))]
+                         (binding [*out* w] (println report-str)))
+                       (.getAbsolutePath f))
+                     (catch Throwable _)))] ;; ignore, fallback to stderr
+    (binding [*out* *err*]
+      (if err-path
+        (println (str message "Full report at: " err-path))
+        (println (str report-str (System/lineSeparator) message))))
+    (when exit
+      (System/exit exit))))
+
 (defn main
   "Usage: java -cp clojure.jar clojure.main [init-opt*] [main-opt] [arg*]
 
@@ -566,6 +623,7 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
   init options:
     -i, --init path     Load a file or resource
     -e, --eval string   Evaluate expressions in string; print non-nil values
+    --report-stderr     Print uncaught exception report to stderr
 
   main options:
     -m, --main ns-name  Call the -main function from a namespace with args
@@ -592,11 +650,25 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
   [& args]
   (try
    (if args
-     (loop [[opt arg & more :as args] args inits []]
-       (if (init-dispatch opt)
-         (recur more (conj inits [opt arg]))
-         ((main-dispatch opt) args inits)))
-     (repl-opt nil nil))
+     (loop [[opt arg & more :as args] args, inits [], flags nil]
+       (cond
+         ;; flag
+         (contains? #{"--report-stderr"} opt)
+         (recur (rest args) inits (merge flags {(subs opt 2) true}))
+
+         ;; init opt
+         (init-dispatch opt)
+         (recur more (conj inits [opt arg]) flags)
+
+         :main-opt
+         (try
+           ((main-dispatch opt) args inits)
+           (catch Throwable t
+             (report-error t :target (if (contains? flags "report-stderr") :stderr :temp-file))))))
+     (try
+       (repl-opt nil nil)
+       (catch Throwable t
+         (report-error :target :temp-file))))
    (finally 
      (flush))))
 
