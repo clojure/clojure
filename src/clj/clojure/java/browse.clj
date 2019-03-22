@@ -71,6 +71,6 @@
         script (if (= :uninitialized script)
                  (reset! *open-url-script* (open-url-script-val))
                  script)]
-    (or (when script (sh/sh script (str url)) true)
+    (or (when script (sh/launch script (str url)) true)
         (open-url-in-browser url)
         (open-url-in-swing url))))

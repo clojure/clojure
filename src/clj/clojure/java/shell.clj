@@ -127,6 +127,21 @@ collecting its stdout"}
             exit-code (.waitFor proc)]
         {:exit exit-code :out @out :err @err}))))
 
+(defn launch
+  "Same as sh except the I/O channels of the sub-process are ignored.
+
+  Use when you want the sub-process to take an action, but do not want to wait
+  for the I/O channels to close. Example: Launching a browser with xdg-open.
+  "
+  {:added "1.11"}
+  [& args]
+  (let [[cmd opts] (parse-args args)
+        proc (.exec (Runtime/getRuntime)
+               ^"[Ljava.lang.String;" (into-array cmd)
+               (as-env-strings (:env opts))
+               (as-file (:dir opts)))]
+    {:exit (.waitFor proc)}))
+
 (comment
 
 (println (sh "ls" "-l"))
@@ -138,5 +153,10 @@ collecting its stdout"}
 (println (sh "echo" "x\u25bax" :out-enc "ISO-8859-1")) ; reads 4 single-byte chars
 (println (sh "cat" "myimage.png" :out-enc :bytes)) ; reads binary file into bytes[]
 (println (sh "cmd" "/c dir 1>&2"))
+
+(println (launch "touch" "my-test-file"))
+(println (sh "ls" "-l" "my-test-file"))
+(println (launch "rm" "my-test-file"))
+(println (sh "ls" "-l" "my-test-file"))
 
 )
