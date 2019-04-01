@@ -467,7 +467,7 @@ static class DefExpr implements Expr{
 		catch(Throwable e)
 			{
 			if(!(e instanceof CompilerException))
-				throw new CompilerException(source, line, column, Compiler.DEF, e);
+				throw new CompilerException(source, line, column, Compiler.DEF, CompilerException.PHASE_EXECUTION, e);
 			else
 				throw (CompilerException) e;
 			}
@@ -1557,7 +1557,7 @@ static class InstanceMethodExpr extends MethodExpr{
 		catch(Throwable e)
 			{
 			if(!(e instanceof CompilerException))
-				throw new CompilerException(source, line, column, e);
+				throw new CompilerException(source, line, column, null, CompilerException.PHASE_EXECUTION, e);
 			else
 				throw (CompilerException) e;
 			}
@@ -1737,7 +1737,7 @@ static class StaticMethodExpr extends MethodExpr{
 		catch(Throwable e)
 			{
 			if(!(e instanceof CompilerException))
-				throw new CompilerException(source, line, column, e);
+				throw new CompilerException(source, line, column, null, CompilerException.PHASE_EXECUTION, e);
 			else
 				throw (CompilerException) e;
 			}
@@ -3312,7 +3312,7 @@ static class KeywordInvokeExpr implements Expr{
 		catch(Throwable e)
 			{
 			if(!(e instanceof CompilerException))
-				throw new CompilerException(source, line, column, e);
+				throw new CompilerException(source, line, column, null, CompilerException.PHASE_EXECUTION, e);
 			else
 				throw (CompilerException) e;
 			}
@@ -3704,7 +3704,7 @@ static class InvokeExpr implements Expr{
 		catch(Throwable e)
 			{
 			if(!(e instanceof CompilerException))
-				throw new CompilerException(source, line, column, e);
+				throw new CompilerException(source, line, column, null, CompilerException.PHASE_EXECUTION, e);
 			else
 				throw (CompilerException) e;
 			}
@@ -6832,6 +6832,7 @@ static public class CompilerException extends RuntimeException implements IExcep
     final static public Keyword PHASE_MACROEXPANSION = Keyword.intern(null, "macroexpansion");
     final static public Keyword PHASE_COMPILE_SYNTAX_CHECK = Keyword.intern(null, "compile-syntax-check");
     final static public Keyword PHASE_COMPILATION = Keyword.intern(null, "compilation");
+    final static public Keyword PHASE_EXECUTION = Keyword.intern(null, "execution");
 
 	final static public Keyword SPEC_PROBLEMS = Keyword.intern("clojure.spec.alpha", "problems");
 
