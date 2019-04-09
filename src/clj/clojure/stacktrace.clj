@@ -15,10 +15,12 @@
        :author "Stuart Sierra"}
   clojure.stacktrace)
 
+(set! *warn-on-reflection* true)
+
 (defn root-cause
   "Returns the last 'cause' Throwable in a chain of Throwables."
   {:added "1.1"}
-  [tr]
+  [^Throwable tr]
   (if-let [cause (.getCause tr)]
     (recur cause)
     tr))
@@ -26,7 +28,7 @@
 (defn print-trace-element
   "Prints a Clojure-oriented view of one element in a stack trace."
   {:added "1.1"}
-  [e]
+  [^StackTraceElement e]
   (let [class (.getClassName e)
 	method (.getMethodName e)] 
     (let [match (re-matches #"^([A-Za-z0-9_.-]+)\$(\w+)__\d+$" (str class))]
@@ -39,7 +41,7 @@
   "Prints the class and message of a Throwable. Prints the ex-data map
   if present."
   {:added "1.1"}
-  [tr]
+  [^Throwable tr]
   (printf "%s: %s" (.getName (class tr)) (.getMessage tr))
   (when-let [info (ex-data tr)]
     (newline)
@@ -71,7 +73,7 @@
   "Like print-stack-trace but prints chained exceptions (causes)."
   {:added "1.1"}
   ([tr] (print-cause-trace tr nil))
-  ([tr n]
+  ([^Throwable tr n]
      (print-stack-trace tr n)
      (when-let [cause (.getCause tr)]
        (print "Caused by: " )
