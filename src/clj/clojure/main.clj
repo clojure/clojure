@@ -582,38 +582,36 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
     (null-opt args (map vector (repeat "-i") inits))))
 
 (defn report-error
-  "Create and output an exception report for a Throwable to target,
-  and optionally exit.
+  "Create and output an exception report for a Throwable to target.
 
   Options:
-    :target - either :temp-file or :stderr, default to :temp-file
-    :exit - if set will System/exit with this code on err, default to 1
+    :target - \"file\" (default), \"stderr\", \"none\"
 
-  If temp file is specified but cannot be completed, falls back to stderr."
-  [^Throwable t & {:keys [target exit]
-                   :or {target :temp-file, exit 1} :as opts}]
-  (let [trace (Throwable->map t)
-        triage (ex-triage trace)
-        message (ex-str triage)
-        report (array-map :clojure.main/message message
-                          :clojure.main/triage triage
-                          :clojure.main/trace trace)
-        report-str (with-out-str
-                     (binding [*print-namespace-maps* false]
-                       ((requiring-resolve 'clojure.pprint/pprint) report)))
-        err-path (when (= target :temp-file)
-                   (try
-                     (let [f (.toFile (Files/createTempFile "clojure-" ".edn" (into-array FileAttribute [])))]
-                       (with-open [w (BufferedWriter. (FileWriter. f))]
-                         (binding [*out* w] (println report-str)))
-                       (.getAbsolutePath f))
-                     (catch Throwable _)))] ;; ignore, fallback to stderr
-    (binding [*out* *err*]
-      (if err-path
-        (println (str message (System/lineSeparator) "Full report at:" (System/lineSeparator) err-path))
-        (println (str report-str (System/lineSeparator) message))))
-    (when exit
-      (System/exit exit))))
+  If file is specified but cannot be written, falls back to stderr."
+  [^Throwable t & {:keys [target]
+                   :or {target "file"} :as opts}]
+  (when-not (= target "none")
+    (let [trace (Throwable->map t)
+          triage (ex-triage trace)
+          message (ex-str triage)
+          report (array-map
+                   :clojure.main/message message
+                   :clojure.main/triage triage
+                   :clojure.main/trace trace)
+          report-str (with-out-str
+                       (binding [*print-namespace-maps* false]
+                         ((requiring-resolve 'clojure.pprint/pprint) report)))
+          err-path (when (= target "file")
+                     (try
+                       (let [f (.toFile (Files/createTempFile "clojure-" ".edn" (into-array FileAttribute [])))]
+                         (with-open [w (BufferedWriter. (FileWriter. f))]
+                           (binding [*out* w] (println report-str)))
+                         (.getAbsolutePath f))
+                       (catch Throwable _)))] ;; ignore, fallback to stderr
+      (binding [*out* *err*]
+        (if err-path
+          (println (str message (System/lineSeparator) "Full report at:" (System/lineSeparator) err-path))
+          (println (str report-str (System/lineSeparator) message)))))))
 
 (defn main
   "Usage: java -cp clojure.jar clojure.main [init-opt*] [main-opt] [arg*]
@@ -623,7 +621,8 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
   init options:
     -i, --init path     Load a file or resource
     -e, --eval string   Evaluate expressions in string; print non-nil values
-    --report-stderr     Print uncaught exception report to stderr
+    --report target     Report uncaught exception to \"file\" (default), \"stderr\",
+                        or \"none\", overrides System property clojure.main.report
 
   main options:
     -m, --main ns-name  Call the -main function from a namespace with args
@@ -653,8 +652,8 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
      (loop [[opt arg & more :as args] args, inits [], flags nil]
        (cond
          ;; flag
-         (contains? #{"--report-stderr"} opt)
-         (recur (rest args) inits (merge flags {(subs opt 2) true}))
+         (contains? #{"--report"} opt)
+         (recur more inits (merge flags {(subs opt 2) arg}))
 
          ;; init opt
          (init-dispatch opt)
@@ -664,11 +663,13 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
          (try
            ((main-dispatch opt) args inits)
            (catch Throwable t
-             (report-error t :target (if (contains? flags "report-stderr") :stderr :temp-file))))))
+             (report-error t :target (get flags "report" (System/getProperty "clojure.main.report" "file")))
+             (System/exit 1)))))
      (try
        (repl-opt nil nil)
        (catch Throwable t
-         (report-error :target :temp-file))))
+         (report-error t :target "file")
+         (System/exit 1))))
    (finally 
      (flush))))
 
