@@ -1,5 +1,61 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.10.1
+
+## 1 Features and Major Changes
+
+### 1.1 Workaround Java Performance Regression When Loading user.clj
+
+Recent builds of Java 8 (u202), 11 (11.0.2), 12, and 13 included
+some changes that [drastically affect](https://bugs.openjdk.java.net/browse/JDK-8219233)
+optimization performance of calls from static initializers to static fields.
+Clojure provides support for loading code on startup from a user.clj file and this
+occurred in the static initializer of the Clojure runtime (RT) class and was thus
+affected.
+
+This issue may eventually be resolved in Java, but in Clojure we have
+modified runtime initialization to avoid loading user.clj in a static
+initializer, which mitigates the case where this caused a performance
+degradation.
+
+* [CLJ-2484](https://clojure.atlassian.net/browse/CLJ-2484)
+  Significant performance regression of code loaded in user.clj in Java 8u202/11.0.
+
+### 1.2 clojure.main Error Reporting
+
+clojure.main is frequently used as a Clojure program launcher by external tools.
+Previously, uncaught exceptions would be automatically printed by the JVM, which
+would also print the stack trace.
+
+This release will now catch exceptions and use the same error triage and printing
+functionality as the Clojure repl. The full stack trace, ex-info, and other
+information will be printed to a target specified by the configuration.
+
+The three available error targets are:
+
+* file - write to a temp file (default, falls back to stderr)
+* stderr - write to stderr stream
+* none - don't write
+
+These error targets can be specified either as options to clojure.main, or as
+Java system properties (flags take precedence). When invoking clojure.main
+(or using the clj tool), use `--report <target>`. For Java system property,
+use `-Dclojure.main.report=<target>`.
+
+* [CLJ-2463](https://clojure.atlassian.net/browse/CLJ-2463)
+  Improve error printing in clojure.main with -m, -e, etc
+* [CLJ-2497](https://clojure.atlassian.net/browse/CLJ-2497)
+  Put error report location on its own line
+* [CLJ-2504](https://clojure.atlassian.net/browse/CLJ-2504)
+  Provide more options for error reporting in clojure.main
+
+## 2 Fixes
+
+* [CLJ-2499](http://dev.clojure.org/jira/browse/CLJ-2499)
+  Some compiler expr evals report as wrong error phase
+* [CLJ-2491](https://clojure.atlassian.net/browse/CLJ-2491)
+  Updated fragile tests so Clojure test suite runs on Java 12
+
 # Changes to Clojure in Version 1.10
 
 ## 1 Compatibility and Dependencies
