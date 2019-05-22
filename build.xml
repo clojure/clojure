@@ -29,6 +29,7 @@
   <property name="clojure_noversion_jar" location="clojure.jar"/>
 
   <property name="directlinking" value="true"/>
+  <property name="emitindy" value="true"/>
 
   <target name="init" depends="clean">
     <tstamp/>
@@ -55,6 +56,7 @@
          <!--<sysproperty key="clojure.compiler.disable-locals-clearing" value="true"/>-->
        <!--<sysproperty key="clojure.compile.warn-on-reflection" value="true"/>-->
         <sysproperty key="clojure.compiler.direct-linking" value="true"/>
+      <sysproperty key="clojure.compiler.emit-indy" value="true"/>
       <sysproperty key="java.awt.headless" value="true"/>
       <arg value="clojure.core"/>
       <arg value="clojure.core.protocols"/>
@@ -92,6 +94,7 @@
     <javac srcdir="${jtestsrc}" destdir="${test-classes}" includeJavaRuntime="yes"
            debug="true" source="1.8" target="1.8" includeantruntime="no"/>
     <echo>Direct linking = ${directlinking}</echo>
+  	<echo>Emit invokedynamic = ${emitindy}</echo>
     <java classname="clojure.lang.Compile"
           classpath="${test-classes}:${test}:${build}:${cljsrc}:${maven.test.classpath}"
           failonerror="true"
@@ -100,6 +103,7 @@
         <!--<sysproperty key="clojure.compiler.elide-meta" value="[:doc]"/>-->
         <!--<sysproperty key="clojure.compiler.disable-locals-clearing" value="true"/>-->
       <sysproperty key="clojure.compiler.direct-linking" value="${directlinking}"/>
+      <sysproperty key="clojure.compiler.emit-indy" value="${emitindy}"/>
       <arg value="clojure.test-clojure.protocols.examples"/>
       <arg value="clojure.test-clojure.genclass.examples"/>
       <arg value="clojure.test-clojure.compilation.load-ns"/>
@@ -115,6 +119,7 @@
       <sysproperty key="clojure.test-clojure.exclude-namespaces"
                    value="#{clojure.test-clojure.compilation.load-ns}"/>
       <sysproperty key="clojure.compiler.direct-linking" value="${directlinking}"/>
+      <sysproperty key="clojure.compiler.emit-indy" value="${emitindy}"/>
       <classpath>
         <pathelement path="${maven.test.classpath}"/>
         <path location="${test-classes}"/>
@@ -132,6 +137,7 @@
           unless="maven.test.skip">
     <java classname="clojure.main" failonerror="true" fork="true">
       <sysproperty key="clojure.compiler.direct-linking" value="${directlinking}"/>
+      <sysproperty key="clojure.compiler.emit-indy" value="${emitindy}"/>
       <classpath>
         <pathelement path="${maven.test.classpath}"/>
         <path location="${test-classes}"/>

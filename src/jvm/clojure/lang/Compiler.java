@@ -18,6 +18,8 @@ import clojure.asm.*;
 import clojure.asm.commons.GeneratorAdapter;
 import clojure.asm.commons.Method;
 
+import static java.lang.invoke.MethodType.genericMethodType;
+
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -165,6 +167,25 @@ final static Method createTupleMethods[] = {Method.getMethod("clojure.lang.IPers
         Method.getMethod("clojure.lang.IPersistentVector create(Object,Object,Object,Object,Object,Object)")
 };
 
+final static Handle BSM_INVOKE_STATIC;
+final static Handle BSM_INVOKE_CONSTRUCTOR;
+final static Handle BSM_INVOKE_INSTANCE;
+final static Handle BSM_INVOKE_NO_ARG_INSTANCE_MEMBER;
+final static Handle BSM_SET_INSTANCE_FIELD;
+static {
+  String rtInternalName = RT_TYPE.getInternalName();
+  BSM_INVOKE_STATIC = new Handle(Opcodes.H_INVOKESTATIC, rtInternalName,
+      "bsm_invoke_static", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;)Ljava/lang/invoke/CallSite;", false);
+  BSM_INVOKE_CONSTRUCTOR = new Handle(Opcodes.H_INVOKESTATIC, rtInternalName,
+      "bsm_invoke_constructor", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;)Ljava/lang/invoke/CallSite;", false);
+  BSM_INVOKE_INSTANCE = new Handle(Opcodes.H_INVOKESTATIC, rtInternalName,
+      "bsm_invoke_instance", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;", false);
+  BSM_INVOKE_NO_ARG_INSTANCE_MEMBER = new Handle(Opcodes.H_INVOKESTATIC, rtInternalName,
+      "bsm_invoke_no_arg_member", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/Integer;)Ljava/lang/invoke/CallSite;", false);
+  BSM_SET_INSTANCE_FIELD = new Handle(Opcodes.H_INVOKESTATIC, rtInternalName,
+      "bsm_set_instance_field", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;", false);
+}
+
 private static final Type[][] ARG_TYPES;
 //private static final Type[] EXCEPTION_TYPES = {Type.getType(Exception.class)};
 private static final Type[] EXCEPTION_TYPES = {};
@@ -257,6 +278,7 @@ static final public Var ADD_ANNOTATIONS = Var.intern(Namespace.findOrCreate(Symb
 static final public Keyword disableLocalsClearingKey = Keyword.intern("disable-locals-clearing");
 static final public Keyword directLinkingKey = Keyword.intern("direct-linking");
 static final public Keyword elideMetaKey = Keyword.intern("elide-meta");
+static final public Keyword emitInvokeDynamicKey = Keyword.intern("emit-indy");
 
 static final public Var COMPILER_OPTIONS;
 
@@ -1203,21 +1225,24 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			gen.getField(getType(targetClass), fieldName, Type.getType(field.getType()));
 			//if(context != C.STATEMENT)
 			HostExpr.emitBoxReturn(objx, gen, field.getType());
-			if(context == C.STATEMENT)
+			}
+		else if(RT.booleanCast(getCompilerOption(emitInvokeDynamicKey)))
 				{
-				gen.pop();
+				target.emit(C.EXPRESSION, objx, gen);
+				gen.visitLineNumber(line, gen.mark());
+				gen.visitInvokeDynamicInsn(fieldName, "(Ljava/lang/Object;)Ljava/lang/Object;",
+						BSM_INVOKE_NO_ARG_INSTANCE_MEMBER, requireField? 1: 0);
 				}
-			}
-		else
-			{
-			target.emit(C.EXPRESSION, objx, gen);
-			gen.visitLineNumber(line, gen.mark());
-			gen.push(fieldName);
-			gen.push(requireField);
-			gen.invokeStatic(REFLECTOR_TYPE, invokeNoArgInstanceMember);
-			if(context == C.STATEMENT)
-				gen.pop();
-			}
+			else
+				{
+				target.emit(C.EXPRESSION, objx, gen);
+				gen.visitLineNumber(line, gen.mark());
+				gen.push(fieldName);
+				gen.push(requireField);
+				gen.invokeStatic(REFLECTOR_TYPE, invokeNoArgInstanceMember);
+				}
+		if(context == C.STATEMENT)
+			gen.pop();
 	}
 
 	public boolean hasJavaClass() {
@@ -1246,14 +1271,22 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 			HostExpr.emitUnboxArg(objx, gen, field.getType());
 			gen.putField(getType(targetClass), fieldName, Type.getType(field.getType()));
 			}
-		else
-			{
-			target.emit(C.EXPRESSION, objx, gen);
-			gen.push(fieldName);
-			val.emit(C.EXPRESSION, objx, gen);
-			gen.visitLineNumber(line, gen.mark());
-			gen.invokeStatic(REFLECTOR_TYPE, setInstanceFieldMethod);
-			}
+		else if(RT.booleanCast(getCompilerOption(emitInvokeDynamicKey)))
+				{
+				target.emit(C.EXPRESSION, objx, gen);
+				val.emit(C.EXPRESSION, objx, gen);
+				gen.visitLineNumber(line, gen.mark());
+				gen.visitInvokeDynamicInsn(fieldName, "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+						BSM_SET_INSTANCE_FIELD, RT.EMPTY_ARRAY);
+				}
+			else
+				{
+				target.emit(C.EXPRESSION, objx, gen);
+				gen.push(fieldName);
+				val.emit(C.EXPRESSION, objx, gen);
+				gen.visitLineNumber(line, gen.mark());
+				gen.invokeStatic(REFLECTOR_TYPE, setInstanceFieldMethod);
+				}
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -1390,6 +1423,13 @@ static Class maybeJavaClass(Collection<Expr> exprs){
 
 
 static abstract class MethodExpr extends HostExpr{
+	static void emitArgs(IPersistentVector args, ObjExpr objx, GeneratorAdapter gen){
+		for(int i = 0; i < args.count(); i++)
+			{
+			((Expr) args.nth(i)).emit(C.EXPRESSION, objx, gen);
+			}
+	}
+  
 	static void emitArgsAsArray(IPersistentVector args, ObjExpr objx, GeneratorAdapter gen){
 		gen.push(args.count());
 		gen.newArray(OBJECT_TYPE);
@@ -1613,19 +1653,32 @@ static class InstanceMethodExpr extends MethodExpr{
 			//if(context != C.STATEMENT || method.getReturnType() == Void.TYPE)
 			HostExpr.emitBoxReturn(objx, gen, method.getReturnType());
 			}
-		else
-			{
-			target.emit(C.EXPRESSION, objx, gen);
-			gen.push(methodName);
-			emitArgsAsArray(args, objx, gen);
-			gen.visitLineNumber(line, gen.mark());
-			if(context == C.RETURN)
+		else if(RT.booleanCast(getCompilerOption(emitInvokeDynamicKey)))
 				{
-				ObjMethod method = (ObjMethod) METHOD.deref();
-				method.emitClearLocals(gen);
+				target.emit(C.EXPRESSION, objx, gen);
+				emitArgs(args, objx, gen);
+				gen.visitLineNumber(line, gen.mark());
+				if(context == C.RETURN)
+					{
+					ObjMethod method = (ObjMethod) METHOD.deref();
+					method.emitClearLocals(gen);
+					}
+				gen.visitInvokeDynamicInsn(methodName, genericMethodType(1 + args.count()).toMethodDescriptorString(),
+						BSM_INVOKE_INSTANCE, RT.EMPTY_ARRAY);
 				}
-			gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
-			}
+			else
+				{
+				target.emit(C.EXPRESSION, objx, gen);
+				gen.push(methodName);
+				emitArgsAsArray(args, objx, gen);
+				gen.visitLineNumber(line, gen.mark());
+				if(context == C.RETURN)
+					{
+					ObjMethod method = (ObjMethod) METHOD.deref();
+					method.emitClearLocals(gen);
+					}
+				gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
+				}
 		if(context == C.STATEMENT)
 			gen.pop();
 	}
@@ -1657,6 +1710,7 @@ static class StaticMethodExpr extends MethodExpr{
 	final static Method invokeStaticMethodMethod =
 			Method.getMethod("Object invokeStaticMethod(Class,String,Object[])");
 	final static Keyword warnOnBoxedKeyword = Keyword.intern("warn-on-boxed");
+	final static Keyword emitInvokeDyamic = Keyword.intern("emit-indy");
     Class jc;
 
 	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c,
@@ -1833,20 +1887,35 @@ static class StaticMethodExpr extends MethodExpr{
 			}
 		else
 			{
-			gen.visitLineNumber(line, gen.mark());
-			gen.push(c.getName());
-			gen.invokeStatic(RT_TYPE, forNameMethod);
-			gen.push(methodName);
-			emitArgsAsArray(args, objx, gen);
-			gen.visitLineNumber(line, gen.mark());
-			if(context == C.RETURN)
+			if(RT.booleanCast(getCompilerOption(emitInvokeDynamicKey)))
 				{
-				ObjMethod method = (ObjMethod) METHOD.deref();
-				method.emitClearLocals(gen);
+				emitArgs(args, objx, gen);
+				gen.visitLineNumber(line, gen.mark());
+				if(context == C.RETURN)
+					{
+					ObjMethod method = (ObjMethod) METHOD.deref();
+					method.emitClearLocals(gen);
+					}
+				gen.visitInvokeDynamicInsn(methodName, genericMethodType(args.count()).toMethodDescriptorString(),
+						BSM_INVOKE_STATIC, c.getName());
 				}
-			gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
-			if(context == C.STATEMENT)
-				gen.pop();
+			else
+			{
+				gen.visitLineNumber(line, gen.mark());
+				gen.push(c.getName());
+				gen.invokeStatic(RT_TYPE, forNameMethod);
+				gen.push(methodName);
+				emitArgsAsArray(args, objx, gen);
+				gen.visitLineNumber(line, gen.mark());
+				if(context == C.RETURN)
+					{
+					ObjMethod method = (ObjMethod) METHOD.deref();
+					method.emitClearLocals(gen);
+					}
+				gen.invokeStatic(REFLECTOR_TYPE, invokeStaticMethodMethod);
+				}
+		  if(context == C.STATEMENT)
+		  	gen.pop();
 			}
 	}
 
@@ -2632,12 +2701,21 @@ public static class NewExpr implements Expr{
 			gen.invokeConstructor(type, new Method("<init>", Type.getConstructorDescriptor(ctor)));
 			}
 		else
-			{
-			gen.push(destubClassName(c.getName()));
-			gen.invokeStatic(RT_TYPE, forNameMethod);
-			MethodExpr.emitArgsAsArray(args, objx, gen);
-			gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
-			}
+		  {
+		  if(RT.booleanCast(getCompilerOption(emitInvokeDynamicKey)))
+        {
+		    MethodExpr.emitArgs(args, objx, gen);
+		    gen.visitInvokeDynamicInsn("new", genericMethodType(args.count()).toMethodDescriptorString(),
+            BSM_INVOKE_CONSTRUCTOR, destubClassName(c.getName()));
+        }
+      else
+			  {
+			  gen.push(destubClassName(c.getName()));
+			  gen.invokeStatic(RT_TYPE, forNameMethod);
+			  MethodExpr.emitArgsAsArray(args, objx, gen);
+			  gen.invokeStatic(REFLECTOR_TYPE, invokeConstructorMethod);
+			  }
+		  }
 		if(context == C.STATEMENT)
 			gen.pop();
 	}

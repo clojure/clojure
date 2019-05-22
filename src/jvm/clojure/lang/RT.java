@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.*;
 import java.lang.reflect.Array;
+import java.lang.invoke.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.AccessController;
@@ -2392,5 +2393,24 @@ static public Object[] aclone(Object[] xs){
 	return xs.clone();
 }
 
+public static CallSite bsm_invoke_static(MethodHandles.Lookup lookup, String methodName, MethodType type, String className){
+	return RTMetaFactories.bsm_invoke_static(lookup, methodName, type, className);
+}
+
+public static CallSite bsm_invoke_constructor(MethodHandles.Lookup lookup, String methodName, MethodType type, String className){
+	return RTMetaFactories.bsm_invoke_constructor(lookup, methodName, type, className);
+}
+
+public static CallSite bsm_invoke_instance(MethodHandles.Lookup lookup, String methodName, MethodType type){
+	return RTMetaFactories.bsm_invoke_instance(lookup, methodName, type);
+}
+
+public static CallSite bsm_invoke_no_arg_member(MethodHandles.Lookup lookup, String memberName, MethodType type, Integer boxedRequireField){
+	return RTMetaFactories.bsm_invoke_no_arg_member(lookup, memberName, type, boxedRequireField);
+}
+
+public static CallSite bsm_set_instance_field(MethodHandles.Lookup lookup, String fieldName, MethodType type){
+	return RTMetaFactories.bsm_set_instance_field(lookup, fieldName, type);
+}
 
 }

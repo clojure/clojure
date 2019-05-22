@@ -78,7 +78,7 @@ private static Method tryFindMethod(Class c, Method m) {
 	}
 }
 
-private static Method toAccessibleSuperMethod(Method m, Object target) {
+static Method toAccessibleSuperMethod(Method m, Object target) {
 	Method selected = m;
 	while(selected != null) {
 		if(canAccess(selected, target)) return selected;
@@ -272,17 +272,22 @@ public static boolean isAccessibleMatch(Method lhs, Method rhs, Object target) {
 	return match;
 }
 
+static List<Constructor<?>> getConstructors(Class<?> c, int arity) {
+	Constructor<?>[] allctors = c.getConstructors();
+	ArrayList<Constructor<?>> ctors = new ArrayList<>();
+	for(int i = 0; i < allctors.length; i++)
+		{
+		Constructor<?> ctor = allctors[i];
+		if(ctor.getParameterCount() == arity)
+			ctors.add(ctor);
+		}
+	return ctors;
+}
+
 public static Object invokeConstructor(Class c, Object[] args) {
 	try
 		{
-		Constructor[] allctors = c.getConstructors();
-		ArrayList ctors = new ArrayList();
-		for(int i = 0; i < allctors.length; i++)
-			{
-			Constructor ctor = allctors[i];
-			if(ctor.getParameterTypes().length == args.length)
-				ctors.add(ctor);
-			}
+		List ctors = getConstructors(c, args.length);
 		if(ctors.isEmpty())
 			{
 			throw new IllegalArgumentException("No matching ctor found"
