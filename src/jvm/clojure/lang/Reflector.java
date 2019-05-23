@@ -78,7 +78,7 @@ private static Method tryFindMethod(Class c, Method m) {
 	}
 }
 
-static Method toAccessibleSuperMethod(Method m, Object target) {
+private static Method toAccessibleSuperMethod(Method m, Object target) {
 	Method selected = m;
 	while(selected != null) {
 		if(canAccess(selected, target)) return selected;
