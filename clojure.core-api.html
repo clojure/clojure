@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>clojure.core - Clojure v1.10 API documentation</title>
+    <title>clojure.core - Clojure v1.10.1 API documentation</title>
     <link rel="icon" href="static/favicon.png" />
     <link rel="shortcut icon" href="static/favicon.png" />
     <link rel="stylesheet" href="static/clojure.css" type="text/css" media="all" />
@@ -25,7 +25,7 @@ namespace.
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.10</span> API</span><br />
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.10.1</span> API</span><br />
     <ul>
       <li><a href="index.html" class="wiki_link">Overview</a></li>
       <li><a href="api-index.html" class="wiki_link">API Index</a></li>
@@ -39,7 +39,7 @@ namespace.
     <div class="BranchTOC">
       <span class="toc-header">Other Versions</span>
       <ul id="left-sidebar-branch-list">
-        <li><a class="wiki_link" href="branch-master/index.html">v1.10.1 (in development)</a></li><li><a class="wiki_link" href="branch-clojure-1.9.0/index.html">v1.9 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.8.0/index.html">v1.8 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.7.0/index.html">v1.7 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.6.0/index.html">v1.6 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+        <li><a class="wiki_link" href="branch-clojure-1.9.0/index.html">v1.9 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.8.0/index.html">v1.8 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.7.0/index.html">v1.7 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.6.0/index.html">v1.6 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="branch-1.1.x/index.html">v1.1 (legacy)</a></li>
       </ul>
     </div>
     <a class="wiki_link" href="https://clojure.org">Clojure Home</a>
@@ -2112,7 +2112,7 @@ namespace.
 </div>
 </div>
                 <div id="content-tag"><h1 id="overview">API for <span id="clojure.core">clojure.core</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.10</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.10.1</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
   </h1>
 
 <br />Full namespace name: <span id="long-name">clojure.core</span>
@@ -12238,7 +12238,7 @@ Alpha, subject to change.</pre>
     <hr />
     <h2 id="clojure.core.server/remote-prepl">remote-prepl</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (remote-prepl host port in-reader out-fn &amp; {:keys [valf readf], :or {valf read-string, readf (fn* [p1__6709# p2__6710#] (read p1__6709# false p2__6710#))}})
+    <pre id="var-usage">Usage: (remote-prepl host port in-reader out-fn &amp; {:keys [valf readf], :or {valf read-string, readf (fn* [p1__6724# p2__6725#] (read p1__6724# false p2__6725#))}})
 </pre>
     <pre id="var-docstr">Implements a prepl on in-reader and out-fn by forwarding to a
 remote [io-]prepl over a socket.  Messages will be read by readf, a

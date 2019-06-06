@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>clojure.main - Clojure v1.10 API documentation</title>
+    <title>clojure.main - Clojure v1.10.1 API documentation</title>
     <link rel="icon" href="static/favicon.png" />
     <link rel="shortcut icon" href="static/favicon.png" />
     <link rel="stylesheet" href="static/clojure.css" type="text/css" media="all" />
@@ -25,7 +25,7 @@ namespace.
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.10</span> API</span><br />
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.10.1</span> API</span><br />
     <ul>
       <li><a href="index.html" class="wiki_link">Overview</a></li>
       <li><a href="api-index.html" class="wiki_link">API Index</a></li>
@@ -39,7 +39,7 @@ namespace.
     <div class="BranchTOC">
       <span class="toc-header">Other Versions</span>
       <ul id="left-sidebar-branch-list">
-        <li><a class="wiki_link" href="branch-master/index.html">v1.10.1 (in development)</a></li><li><a class="wiki_link" href="branch-clojure-1.9.0/index.html">v1.9 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.8.0/index.html">v1.8 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.7.0/index.html">v1.7 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.6.0/index.html">v1.6 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+        <li><a class="wiki_link" href="branch-clojure-1.9.0/index.html">v1.9 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.8.0/index.html">v1.8 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.7.0/index.html">v1.7 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.6.0/index.html">v1.6 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="branch-1.1.x/index.html">v1.1 (legacy)</a></li>
       </ul>
     </div>
     <a class="wiki_link" href="https://clojure.org">Clojure Home</a>
@@ -65,6 +65,9 @@ namespace.
     <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
     <div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.main/demunge" class="toc-entry-anchor">demunge</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.main/err-&gt;msg" class="toc-entry-anchor">err-&gt;msg</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.main/ex-str" class="toc-entry-anchor">ex-str</a>
@@ -100,6 +103,9 @@ namespace.
       <a href="#clojure.main/repl-requires" class="toc-entry-anchor">repl-requires</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.main/report-error" class="toc-entry-anchor">report-error</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.main/root-cause" class="toc-entry-anchor">root-cause</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
@@ -125,7 +131,7 @@ namespace.
 </div>
 </div>
                 <div id="content-tag"><h1 id="overview">API for <span id="clojure.main">clojure.main</span>
-  - <span id="header-project">Clojure</span> <span id="header-version">v1.10</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.10.1</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
   </h1>
 <span id="author-line">by <span id="author-name">Stephen C. Gilardi and Rich Hickey</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.main</span>
@@ -154,13 +160,25 @@ as in a stack trace element, returns a readable version.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L26">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L28">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/err-&gt;msg">err-&gt;msg</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (err-&gt;msg e)
+</pre>
+    <pre id="var-docstr">Helper to return an error message string from an exception.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L343">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
     <h2 id="clojure.main/ex-str">ex-str</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (ex-str {:clojure.error/keys [phase source line column symbol class cause spec], :as triage-data})
+    <pre id="var-usage">Usage: (ex-str {:clojure.error/keys [phase source path line column symbol class cause spec], :as triage-data})
 </pre>
     <pre id="var-docstr">Returns a string from exception data, as produced by ex-triage.
 The first line summarizes the exception phase and location.
@@ -168,7 +186,7 @@ The subsequent lines describe the cause.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.10</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L251">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L269">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -183,6 +201,7 @@ are optional:
     :read-source :compile-syntax-check :compilation :macro-syntax-check :macroexpansion
     :execution :read-eval-result :print-eval-result
   :clojure.error/source - file name (no path)
+  :clojure.error/path - source path
   :clojure.error/line - integer line number
   :clojure.error/column - integer column number
   :clojure.error/symbol - symbol being expanded/compiled/invoked
@@ -192,7 +211,7 @@ are optional:
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.10</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L193">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L208">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -205,7 +224,7 @@ beginning with @ or @/ are considered relative to classpath.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L445">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L468">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -220,6 +239,8 @@ With no options or args, runs an interactive Read-Eval-Print Loop
 init options:
   -i, --init path     Load a file or resource
   -e, --eval string   Evaluate expressions in string; print non-nil values
+  --report target     Report uncaught exception to "file" (default), "stderr",
+                      or "none", overrides System property clojure.main.report
 
 main options:
   -m, --main ns-name  Call the -main function from a namespace with args
@@ -246,7 +267,7 @@ classpath. Classpath-relative paths have prefix of @ or @/</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L561">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L616">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -261,7 +282,7 @@ The line number on re-read is the passed line-number unless :line or
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.10</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L138">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L140">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -314,7 +335,7 @@ are sequential keyword-value pairs. Available options and their defaults:
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L345">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L368">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -326,7 +347,7 @@ are sequential keyword-value pairs. Available options and their defaults:
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L325">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L348">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -338,7 +359,7 @@ are sequential keyword-value pairs. Available options and their defaults:
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L170">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L172">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -350,7 +371,7 @@ are sequential keyword-value pairs. Available options and their defaults:
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L101">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L103">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -371,7 +392,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF into a single
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L152">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L154">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -383,7 +404,24 @@ by default when a new command-line REPL is started.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L332">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L355">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.main/report-error">report-error</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (report-error t &amp; {:keys [target], :or {target file}, :as opts})
+</pre>
+    <pre id="var-docstr">Create and output an exception report for a Throwable to target.
+
+Options:
+  :target - "file" (default), "stderr", "none"
+
+If file is specified but cannot be written, falls back to stderr.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L584">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -396,7 +434,7 @@ its wrappers</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L33">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L35">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -413,7 +451,7 @@ CRLF to a single \newline.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L106">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L108">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -432,7 +470,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF to a single
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L120">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L122">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -444,7 +482,7 @@ supporting .unread and collapsing all of CR, LF, and CRLF to a single
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.3</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L60">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L62">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -459,7 +497,7 @@ that often need to be set!: *ns* *warn-on-reflection* *math-context*
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L75">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L77">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -472,7 +510,7 @@ i.e. substituting true for :unknown if necessary.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b182982007df934394f0bc68b3a238ca9f200dd1/src/clj/clojure/main.clj#L338">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj#L361">Source</a>
   </div>
 </div>
 
