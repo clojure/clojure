@@ -436,4 +436,5 @@
 (deftest CLJ-2284
   (testing "CLJ-2284 Can call static methods on interfaces"
     (is (= 42 (compilation.JDK8InterfaceMethods/staticMethod0 42)))
-    (is (= "test" (compilation.JDK8InterfaceMethods/staticMethod1 "test")))))
+    (is (= "test" (compilation.JDK8InterfaceMethods/staticMethod1 "test")))
+    (is (= 1 (if (compilation.JDK8InterfaceMethods/staticMethod2 true) 1 2)))))
