@@ -51,6 +51,13 @@
              (def ^{:a 1} foo 0)
              #'foo)]
       (is (= 1 (-> v meta :a)))))
+  (testing "const vars preserve metadata"
+    (let [[v1 v2] (eval-in-temp-ns
+                   (def ^:const foo ^:foo [])
+                   (def ^:const bar ^:foo [:bar])
+                   [(meta foo) (meta bar)])]
+      (is (= {:foo true} v1))
+      (is (= {:foo true} v2))))
   #_(testing "subsequent declare doesn't overwrite metadata"
     (let [v (eval-in-temp-ns
              (def ^{:b 2} bar 0)
