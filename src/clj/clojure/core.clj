@@ -6808,15 +6808,24 @@ fails, attempts to require sym's namespace and retries."
   [x] (instance? java.util.UUID x))
 
 (defn reduce
-  "f should be a function of 2 arguments. If val is not supplied,
-  returns the result of applying f to the first 2 items in coll, then
-  applying f to that result and the 3rd item, etc. If coll contains no
-  items, f must accept no arguments as well, and reduce returns the
-  result of calling f with no arguments.  If coll has only 1 item, it
-  is returned and f is not called.  If val is supplied, returns the
-  result of applying f to val and the first item in coll, then
-  applying f to that result and the 2nd item, etc. If coll contains no
-  items, returns val and f is not called."
+  "f should be a function of 2 arguments.
+   There are two scenarios which affects the way the function works:
+  
+   Scenario 1: `val` is NOT supplied
+   If val is not supplied, returns the result of applying f to the
+   first 2 items in coll, then applying f to that result and the 3rd
+   item, etc. 
+   
+   If coll contains no items, f must accept no arguments as well, and
+   reduce returns the result of calling f with no arguments.  If coll
+   has only 1 item, it is returned and f is not called.  
+   
+   Scenario 2: `val` is supplied
+   If val is supplied, returns the result of applying f to val and the
+   first item in coll, then applying f to that result and the 2nd item,
+   etc. 
+   
+   If coll contains no items, returns val and f is not called."
   {:added "1.0"}
   ([f coll]
      (if (instance? clojure.lang.IReduce coll)
