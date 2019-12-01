@@ -702,7 +702,7 @@ may have skipped implementing this method in the past.
 
 ### 2.1 Transducers
 
-Transducers is a new way to decouple algorithmic transformations from their
+Transducers are a new way to decouple algorithmic transformations from their
 application in different contexts. Transducers are functions that transform
 reducing functions to build up a "recipe" for transformation.
 
