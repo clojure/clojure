@@ -99,7 +99,7 @@
       (print (str "<" (name (:tag e))))
       (when (:attrs e)
 	(doseq [attr (:attrs e)]
-	  (print (str " " (name (key attr)) "='" (val attr)"'"))))
+	  (print (str " " (name (key attr)) "='" (clojure.string/escape (val attr) {\' "&apos;"}) "'"))))
       (if (:content e)
 	(do
 	  (println ">")
