@@ -55,7 +55,7 @@
             (recur ret (inc i))))
         ret))))
 
-(deftype VecSeq [^clojure.core.ArrayManager am ^clojure.core.IVecImpl vec anode ^int i ^int offset] 
+(deftype VecSeq [^clojure.core.ArrayManager am ^clojure.core.IVecImpl vec anode ^int i ^int offset ^clojure.lang.IPersistentMap _meta]
   :no-print true
 
   clojure.core.protocols.InternalReduce
@@ -82,7 +82,7 @@
   (first [_] (.aget am anode offset))
   (next [this] 
     (if (< (inc offset) (.alength am anode))
-      (new VecSeq am vec anode i (inc offset))
+      (new VecSeq am vec anode i (inc offset) nil)
       (.chunkedNext this)))
   (more [this]
     (let [s (.next this)]
@@ -120,10 +120,18 @@
   (chunkedNext [_] 
    (let [nexti (+ i (.alength am anode))]
      (when (< nexti (count vec))
-       (new VecSeq am vec (.arrayFor vec nexti) nexti 0))))
+       (new VecSeq am vec (.arrayFor vec nexti) nexti 0 nil))))
   (chunkedMore [this]
     (let [s (.chunkedNext this)]
-      (or s (clojure.lang.PersistentList/EMPTY)))))
+      (or s (clojure.lang.PersistentList/EMPTY))))
+
+  clojure.lang.IMeta
+  (meta [_]
+    _meta)
+
+  clojure.lang.IObj
+  (withMeta [_ m]
+    (new VecSeq am vec anode i offset m)))
 
 (defmethod print-method ::VecSeq [v w]
   ((get (methods print-method) clojure.lang.ISeq) v w))
@@ -296,7 +304,7 @@
   (seq [this] 
     (if (zero? cnt) 
       nil
-      (VecSeq. am this (.arrayFor this 0) 0 0)))
+      (VecSeq. am this (.arrayFor this 0) 0 0 nil)))
 
   clojure.lang.Sequential ;marker, no methods
 

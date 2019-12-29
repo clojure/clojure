@@ -1368,3 +1368,19 @@
 (deftest test-sort-retains-meta
   (is (= {:a true} (meta (sort (with-meta (range 10) {:a true})))))
   (is (= {:a true} (meta (sort-by :a (with-meta (seq [{:a 5} {:a 2} {:a 3}]) {:a true}))))))
+
+(deftest test-seqs-implements-iobj
+  (doseq [coll [[1 2 3]
+                (vector-of :long 1 2 3)
+                {:a 1 :b 2 :c 3}
+                (sorted-map :a 1 :b 2 :c 3)
+                #{1 2 3}
+                (sorted-set 1 2 3)
+                (into clojure.lang.PersistentQueue/EMPTY [1 2 3])]]
+    (is (= true (instance? clojure.lang.IMeta coll)))
+    (is (= {:a true} (meta (with-meta coll {:a true}))))
+    (is (= true (instance? clojure.lang.IMeta (seq coll))))
+    (is (= {:a true} (meta (with-meta (seq coll) {:a true}))))
+    (when (reversible? coll)
+      (is (= true (instance? clojure.lang.IMeta (rseq coll))))
+      (is (= {:a true} (meta (with-meta (rseq coll) {:a true})))))))
