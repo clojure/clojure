@@ -5,7 +5,7 @@
   <artifactId>clojure</artifactId>
   <name>clojure</name>
   <packaging>jar</packaging>
-  <version>1.11.0-master-SNAPSHOT</version>
+  <version>1.10.2-master-SNAPSHOT</version>
 
   <url>http://clojure.org/</url>
   <description>Clojure core environment and runtime library.</description>
@@ -41,7 +41,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>spec.alpha</artifactId>
-      <version>0.2.176</version>
+       <version>0.2.187</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
