@@ -1651,12 +1651,10 @@
   [x & body]
   `(let [lockee# ~x]
      (try
-       (let [locklocal# lockee#]
-         (monitor-enter locklocal#)
-         (try
-           ~@body
-           (finally
-            (monitor-exit locklocal#)))))))
+      (monitor-enter lockee#)
+      ~@body
+      (finally
+       (monitor-exit lockee#)))))
 
 (defmacro ..
   "form => fieldName-symbol or (instanceMethodName-symbol args*)
