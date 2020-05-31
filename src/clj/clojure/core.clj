@@ -4810,7 +4810,8 @@
 (defn ex-cause
   "Returns the cause of ex if ex is a Throwable.
   Otherwise returns nil."
-  {:added "1.10"}
+  {:tag Throwable
+   :added "1.10"}
   [ex]
   (when (instance? Throwable ex)
     (.getCause ^Throwable ex)))
