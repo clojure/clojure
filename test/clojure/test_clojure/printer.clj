@@ -14,7 +14,8 @@
 ;;  Created 29 October 2008
 
 (ns clojure.test-clojure.printer
-  (:use clojure.test))
+  (:use clojure.test)
+  (:require [clojure.pprint :refer [pprint]]))
 
 (deftest print-length-empty-seq
   (let [coll () val "()"]
@@ -135,8 +136,49 @@
                                                {:with "even" :more 'data})))))))
 
 (deftest print-ns-maps
-  (is (= "#:user{:a 1}" (binding [*print-namespace-maps* true] (pr-str {:user/a 1}))))
-  (is (= "{:user/a 1}" (binding [*print-namespace-maps* false] (pr-str {:user/a 1}))))
+  (are [m s-on pp-on s-off]
+    (and (= s-on (binding [*print-namespace-maps* true] (pr-str m)))
+      (= pp-on (binding [*print-namespace-maps* true] (with-out-str (pprint m))))
+      (= s-off (binding [*print-namespace-maps* false] (pr-str m))))
+    {} "{}" "{}\n" "{}"
+    {:a 1, :b 2} "{:a 1, :b 2}" "{:a 1, :b 2}\n" "{:a 1, :b 2}"
+    {:user/a 1} "#:user{:a 1}" "#:user{:a 1}\n" "{:user/a 1}"
+    {:user/a 1, :user/b 2} "#:user{:a 1, :b 2}" "#:user{:a 1, :b 2}\n" "{:user/a 1, :user/b 2}"
+    {:user/a 1, :b 2} "{:user/a 1, :b 2}" "{:user/a 1, :b 2}\n" "{:user/a 1, :b 2}"
+    {:user/a 1, 'user/b 2} "#:user{:a 1, b 2}" "#:user{:a 1, b 2}\n" "{:user/a 1, user/b 2}"
+    {:user/a 1, :foo/b 2} "{:user/a 1, :foo/b 2}" "{:user/a 1, :foo/b 2}\n" "{:user/a 1, :foo/b 2}"
+
+    {:user/a 1, :user/b 2, 100 200}
+    "{:user/a 1, :user/b 2, 100 200}"
+    "{:user/a 1, :user/b 2, 100 200}\n"
+    "{:user/a 1, :user/b 2, 100 200}"
+
+    ;; CLJ-2469
+    (struct (create-struct :q/a :q/b :q/c) 1 2 3)
+    "#:q{:a 1, :b 2, :c 3}"
+    "#:q{:a 1, :b 2, :c 3}\n"
+    "{:q/a 1, :q/b 2, :q/c 3}"
+
+    ;; CLJ-2537
+    {:x.y/a {:rem 0}, :x.y/b {:rem 1}}
+    "#:x.y{:a {:rem 0}, :b {:rem 1}}"
+    "#:x.y{:a {:rem 0}, :b {:rem 1}}\n"
+    "{:x.y/a {:rem 0}, :x.y/b {:rem 1}}"
+
+    (into (sorted-map-by (fn [k1 k2]
+                           (when-not (every? qualified-ident? [k1 k2])
+                             (throw (RuntimeException. (str "Invalid keys:" [k1 k2]))))
+                           (compare k1 k2))
+            :x.y/a {:rem 0}, :x.y/b {:rem 1}))
+    "#:x.y{:a {:rem 0}, :b {:rem 1}}"
+    "#:x.y{:a {:rem 0}, :b {:rem 1}}\n"
+    "{:x.y/a {:rem 0}, :x.y/b {:rem 1}}"
+
+    (sorted-map-by #(compare %2 %1) :k/a 1 :k/b 2 :k/c 3 :k/d 4 :k/e 5 :k/f 6 :k/g 7 :k/h 8 :k/i 9)
+    "#:k{:i 9, :h 8, :g 7, :f 6, :e 5, :d 4, :c 3, :b 2, :a 1}"
+    "#:k{:i 9, :h 8, :g 7, :f 6, :e 5, :d 4, :c 3, :b 2, :a 1}\n"
+    "{:k/i 9, :k/h 8, :k/g 7, :k/f 6, :k/e 5, :k/d 4, :k/c 3, :k/b 2, :k/a 1}")
+
   (let [date-map (bean (java.util.Date. 0))]
     (is (= (binding [*print-namespace-maps* true] (pr-str date-map))
            (binding [*print-namespace-maps* false] (pr-str date-map))))))
