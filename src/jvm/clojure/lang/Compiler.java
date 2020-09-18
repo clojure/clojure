@@ -1375,6 +1375,8 @@ static Class maybeJavaClass(Collection<Expr> exprs){
         if (!e.hasJavaClass())
             return null;
         Class c = e.getJavaClass();
+        if (c == null)
+            return null;
         if (match == null)
             match = c;
         else if (match != c)

@@ -438,3 +438,8 @@
     (is (= 42 (compilation.JDK8InterfaceMethods/staticMethod0 42)))
     (is (= "test" (compilation.JDK8InterfaceMethods/staticMethod1 "test")))
     (is (= 1 (if (compilation.JDK8InterfaceMethods/staticMethod2 true) 1 2)))))
+
+(deftest CLJ-2580
+  (testing "CLJ-2580 Correctly calculate exit branches of case"
+    (is (zero? (let [d (case nil :x nil 0)] d)))
+    (is (nil? (let [d (case nil :x 0 nil)] d)))))
