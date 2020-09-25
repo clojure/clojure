@@ -6696,6 +6696,9 @@ fails, attempts to require sym's namespace and retries."
                          (into1 #{} (map #(shift-mask shift mask %) skip-check)))]
         [shift mask case-map switch-type skip-check]))))
 
+(defn case-fallthrough-err-impl
+  [val]
+  (IllegalArgumentException. (str "No matching clause: " (pr-str val))))
 
 (defmacro case 
   "Takes an expression, and a set of clauses.
@@ -6726,7 +6729,7 @@ fails, attempts to require sym's namespace and retries."
   (let [ge (with-meta (gensym) {:tag Object})
         default (if (odd? (count clauses)) 
                   (last clauses)
-                  `(throw (IllegalArgumentException. (str "No matching clause: " ~ge))))]
+                  `(throw (case-fallthrough-err-impl ~ge)))]
     (if (> 2 (count clauses))
       `(let [~ge ~e] ~default)
       (let [pairs (partition 2 clauses)
