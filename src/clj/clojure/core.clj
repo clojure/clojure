@@ -6961,7 +6961,11 @@ fails, attempts to require sym's namespace and retries."
        (reduce conj to from)))
   ([to xform from]
      (if (instance? clojure.lang.IEditableCollection to)
-       (with-meta (persistent! (transduce xform conj! (transient to) from)) (meta to))
+       (let [tm (meta to)
+             rf (fn
+                  ([coll] (-> (persistent! coll) (with-meta tm)))
+                  ([coll v] (conj! coll v)))]
+         (transduce xform rf (transient to) from))
        (transduce xform conj to from))))
 
 (defn mapv

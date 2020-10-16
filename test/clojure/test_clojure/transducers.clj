@@ -398,3 +398,13 @@
          (sequence (map-indexed vector) [])))
   (is (= [[0 1] [1 2] [2 3] [3 4]]
          (sequence (map-indexed vector) (range 1 5)))))
+
+(deftest test-into+halt-when
+  (is (= :anomaly (into [] (comp (filter some?) (halt-when #{:anomaly}))
+                        [1 2 3 :anomaly 4])))
+  (is (= {:anomaly :oh-no!,
+          :partial-results [1 2]}
+         (into []
+               (halt-when :anomaly #(assoc %2 :partial-results %1))
+               [1 2 {:anomaly :oh-no!} 3 4]))))
+
