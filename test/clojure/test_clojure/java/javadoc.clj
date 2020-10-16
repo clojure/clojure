@@ -9,14 +9,19 @@
 (ns clojure.test-clojure.java.javadoc
   (:use clojure.test
 	[clojure.java.javadoc :as j])
+  (:require [clojure.string :as str])
   (:import (java.io File)))
+
+(defn correct-url [url-pattern-str module-name url-suffix]
+  (str (format url-pattern-str module-name) url-suffix))
 
 (deftest javadoc-url-test
   (testing "for a core api"
     (binding [*feeling-lucky* false]
       (are [x y] (= x (#'j/javadoc-url y))
            nil "foo.Bar"
-           (str *core-java-api* "java/lang/String.html") "java.lang.String")))
+           (correct-url *core-java-api* "java.base" "java/lang/String.html") "java.lang.String"
+           (correct-url *core-java-api* "java.sql" "java/sql/Connection.html") "java.sql.Connection")))
   (testing "for a remote javadoc"
     (binding [*remote-javadocs* (ref (sorted-map "java." "http://example.com/"))]
       (is (= "http://example.com/java/lang/Number.html" (#'j/javadoc-url "java.lang.Number"))))))

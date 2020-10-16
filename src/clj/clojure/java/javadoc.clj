@@ -23,7 +23,11 @@
     "1.8" "http://docs.oracle.com/javase/8/docs/api/"
     "9" "http://docs.oracle.com/javase/9/docs/api/"
     "10" "http://docs.oracle.com/javase/10/docs/api/"
-    "11" "https://docs.oracle.com/en/java/javase/11/docs/api/java.base/"
+    "11" "https://docs.oracle.com/en/java/javase/11/docs/api/%s/"
+    "12" "https://docs.oracle.com/en/java/javase/12/docs/api/%s/"
+    "13" "https://docs.oracle.com/en/java/javase/13/docs/api/%s/"
+    "14" "https://docs.oracle.com/en/java/javase/14/docs/api/%s/"
+    "15" "https://docs.oracle.com/en/java/javase/15/docs/api/%s/"
     "http://docs.oracle.com/javase/8/docs/api/"))
 
 (def ^:dynamic *remote-javadocs*
@@ -53,6 +57,16 @@
   [package-prefix url]
   (dosync (commute *remote-javadocs* assoc package-prefix url)))
 
+(defn- fill-in-module-name [^String url ^String classname]
+  ;; The getModule method was introduced in JDK 9, and did not exist
+  ;; in earlier JDK versions.  Avoid calling it unless its result is
+  ;; needed.
+  (if (.contains url "%s")
+    (let [klass (Class/forName classname)
+          module-name (.getName (.getModule klass))]
+      (format url module-name))
+    url))
+
 (defn- javadoc-url
   "Searches for a URL for the given class name.  Tries
   *local-javadocs* first, then *remote-javadocs*.  Returns a string."
@@ -69,7 +83,8 @@
       ;; If no local file, try remote URLs:
       (or (some (fn [[prefix url]]
                   (when (.startsWith classname prefix)
-                    (str url url-path ".html")))
+                    (str (fill-in-module-name url classname)
+                         url-path ".html")))
             @*remote-javadocs*)
         ;; if *feeling-lucky* try a web search
         (when *feeling-lucky* (str *feeling-lucky-url* url-path ".html"))))))
