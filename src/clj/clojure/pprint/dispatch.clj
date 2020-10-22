@@ -62,8 +62,19 @@
 ;;; are a little easier on the stack. (Or, do "real" compilation, a
 ;;; la Common Lisp)
 
+(declare pprint-map)
+
+(defn- pprint-meta [obj]
+  (when *print-meta*
+    (when-let [m (meta obj)]
+      (.write ^java.io.Writer *out* "^")
+      (pprint-map m)
+      (.write ^java.io.Writer *out* " ")
+      (pprint-newline :linear))))
+
 ;;; (def pprint-simple-list (formatter-out "~:<~@{~w~^ ~_~}~:>"))
 (defn- pprint-simple-list [alis]
+  (pprint-meta alis)
   (pprint-logical-block :prefix "(" :suffix ")"
     (print-length-loop [alis (seq alis)]
       (when alis
@@ -79,6 +90,7 @@
 
 ;;; (def pprint-vector (formatter-out "~<[~;~@{~w~^ ~_~}~;]~:>"))
 (defn- pprint-vector [avec]
+  (pprint-meta avec)
   (pprint-logical-block :prefix "[" :suffix "]"
     (print-length-loop [aseq (seq avec)]
       (when aseq
@@ -92,6 +104,7 @@
 
 ;;; (def pprint-map (formatter-out "~<{~;~@{~<~w~^ ~_~w~:>~^, ~_~}~;}~:>"))
 (defn- pprint-map [amap]
+  (pprint-meta amap)
   (let [[ns lift-map] (when (not (record? amap))
                         (#'clojure.core/lift-ns amap))
         amap (or lift-map amap)
@@ -110,7 +123,17 @@
             (pprint-newline :linear)
             (recur (next aseq))))))))
 
-(def ^{:private true} pprint-set (formatter-out "~<#{~;~@{~w~^ ~:_~}~;}~:>"))
+;;; (def ^{:private true} pprint-set (formatter-out "~<#{~;~@{~w~^ ~:_~}~;}~:>"))
+(defn- pprint-set [aset]
+  (pprint-meta aset)
+  (pprint-logical-block :prefix "#{" :suffix "}"
+    (print-length-loop [aseq (seq aset)]
+      (when aseq
+        (write-out (first aseq))
+        (when (next aseq)
+          (.write ^java.io.Writer *out* " ")
+          (pprint-newline :linear)
+          (recur (next aseq)))))))
 
 (def ^{:private true} 
      type-map {"core$future_call" "Future",

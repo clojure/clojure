@@ -384,3 +384,32 @@ It is implemented with a number of custom enlive templates.\"
            ["#inst \"2014-04-29T14:00:00.000+00:00\""])
         "calendar object pretty prints")))
 
+(deftest test-print-meta
+  (let [r (with-meta (range 25) {:b 2})]
+    (are [expected val] (= expected (with-out-str (binding [*print-meta* true] (pprint val))))
+      "^{:a 1, :b 2} {:x 1, :y 2}\n"
+      ^{:a 1 :b 2} {:x 1 :y 2}
+
+      "^{:a 1, :b 2}\n{:x\n ^{:b 2}\n (0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24),\n :y 1}\n"
+      ^{:a 1 :b 2} {:x r :y 1}
+
+      "^{:a 1} {:x ^{:foo true} {:y 2}}\n"
+      ^{:a 1} {:x ^:foo {:y 2}}
+
+      "^{:a 1} [1 2 3 4]\n"
+      ^{:a 1} [1 2 3 4]
+
+      "^{:a 1} [^{:b 2} [1 2]]\n"
+      ^{:a 1} [^{:b 2} [1 2]]
+
+      "^{:a 1}\n[[[1\n   ^{:b 2}\n   (0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24)]]]\n"
+      ^{:a 1} [[[1 ^{:b 2} r]]]
+
+      "^{:line 409, :column 16} (1 2 3 4)\n"
+      ^{:a 1} '(1 2 3 4)
+
+      "^{:a 1} (0 1 2 3)\n"
+      ^{:a 1} (with-meta (range 4) {:a 1})
+
+      "^{:a 1} #{1 4 3 2}\n"
+      ^{:a 1} #{1 2 3 4})))
