@@ -965,7 +965,8 @@ static Object nthFrom(Object coll, int n, Object notFound){
 	}
 	else if(coll instanceof Matcher) {
 		Matcher m = (Matcher) coll;
-		if(n < m.groupCount())
+		int groups = m.groupCount();
+		if(groups > 0 && n <= m.groupCount())
 			return m.group(n);
 		return notFound;
 	}
