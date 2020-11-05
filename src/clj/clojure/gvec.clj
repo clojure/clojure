@@ -142,7 +142,7 @@ Object
         (let [v (first s)]
           (if (nil? v)
             (recur (unchecked-multiply-int 31 hash) (next s))
-            (recur (unchecked-add-int (unchecked-multiply-int 31 hash) (.hashCode v)) (next s))))
+            (recur (unchecked-add-int (unchecked-multiply-int 31 hash) (.hashCode ^Object v)) (next s))))
         hash)))
   (equals [this other]
     (cond (identical? this other) true
