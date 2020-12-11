@@ -73,10 +73,12 @@
  rest (fn ^:static rest [x] (. clojure.lang.RT (more x))))
 
 (def
- ^{:arglists '([coll x] [coll x & xs])
+ ^{:arglists '([] [coll] [coll x] [coll x & xs])
    :doc "conj[oin]. Returns a new collection with the xs
-    'added'. (conj nil item) returns (item).  The 'addition' may
-    happen at different 'places' depending on the concrete type."
+    'added'. (conj nil item) returns (item).
+    (conj coll) returns coll. (conj) returns [].
+    The 'addition' may happen at different 'places' depending
+    on the concrete type."
    :added "1.0"
    :static true}
  conj (fn ^:static conj
