@@ -195,11 +195,11 @@
 
   Calls out-fn with data, one of:
   {:tag :ret
-   :val val ;;eval result
+   :val val ;;eval result, or Throwable->map data if exception thrown
    :ns ns-name-string
    :ms long ;;eval time in milliseconds
    :form string ;;iff successfully read
-   :clojure.error/phase (:execution et al per clojure.main/ex-triage) ;;iff error occurred
+   :exception true ;;iff exception thrown
   }
   {:tag :out
    :val string} ;chars from during-eval *out*
