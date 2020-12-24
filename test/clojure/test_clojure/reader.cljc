@@ -453,7 +453,7 @@
 
 ;; Anonymous function literal (#())
 
-(deftest t-Anonymouns-function-literal)
+(deftest t-Anonymous-function-literal)
 
 ;; Syntax-quote (`, note, the "backquote" character), Unquote (~) and
 ;; Unquote-splicing (~@)
