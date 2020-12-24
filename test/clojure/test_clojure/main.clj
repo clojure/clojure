@@ -37,7 +37,7 @@
        (str s#))))
 
 (defn run-repl-and-return-err
-  "Run repl, swallowing stdout and returing stderr."
+  "Run repl, swallowing stdout and returning stderr."
   [in-str]
   (with-err-str
     (with-out-str
