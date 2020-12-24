@@ -157,7 +157,7 @@ public class Type {
    * @param valueBuffer a buffer containing the value of this field or method type.
    * @param valueBegin the beginning index, inclusive, of the value of this field or method type in
    *     valueBuffer.
-   * @param valueEnd tne end index, exclusive, of the value of this field or method type in
+   * @param valueEnd the end index, exclusive, of the value of this field or method type in
    *     valueBuffer.
    */
   private Type(final int sort, final String valueBuffer, final int valueBegin, final int valueEnd) {
