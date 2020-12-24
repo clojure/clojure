@@ -176,7 +176,7 @@
 
 (deftype SatisfiesTestWidget []
   ExampleProtocol)
-#_(deftest satisifies?-test
+#_(deftest satisfies?-test
   (reload-example-protocols)
   (let [whatzit (SatisfiesTestWidget.)]
     (testing "returns false if a type does not implement the protocol at all"
