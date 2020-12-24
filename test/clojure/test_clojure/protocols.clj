@@ -366,7 +366,7 @@
         (is (= (into {} (assoc r-b :c 3 :d 4)) (into {} (assoc r-n :a 1 :b 2 :c 3 :d 4))))
         (is (= (assoc r :d 4) (assoc r-n :a 1 :b 2 :c 3 :d 4))))
       (testing "that factory functions have docstrings"
-        ;; just test non-nil to avoid overspecifiying what's in the docstring
+        ;; just test non-nil to avoid overspecifying what's in the docstring
         (is (false? (-> ->RecordToTestFactories var meta :doc nil?)))
         (is (false? (->  map->RecordToTestFactories var meta :doc nil?))))
       (testing "that a literal record equals one by the positional factory fn"
