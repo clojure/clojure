@@ -5339,7 +5339,7 @@ public static class FnMethod extends ObjMethod{
 
 	static FnMethod parse(ObjExpr objx, ISeq form, Object rettag) {
 		//([args] body...)
-		IPersistentVector parms = (IPersistentVector) RT.first(form);
+		IPersistentVector params = (IPersistentVector) RT.first(form);
 		ISeq body = RT.next(form);
 		try
 			{
@@ -5362,7 +5362,7 @@ public static class FnMethod extends ObjMethod{
                             ,METHOD_RETURN_CONTEXT, RT.T
                         ));
 
-			method.prim = primInterface(parms);
+			method.prim = primInterface(params);
 			if(method.prim != null)
 				method.prim = method.prim.replace('.', '/');
 
@@ -5376,7 +5376,7 @@ public static class FnMethod extends ObjMethod{
                 if(!(retstr.equals("long") || retstr.equals("double")))
                    rettag = null;
                 }
-			method.retClass = tagClass(tagOf(parms)!=null?tagOf(parms):rettag);
+			method.retClass = tagClass(tagOf(params)!=null?tagOf(params):rettag);
 			if(method.retClass.isPrimitive()){
                 if(!(method.retClass == double.class || method.retClass == long.class))
                     throw new IllegalArgumentException("Only long and double primitives are supported");
@@ -5396,11 +5396,11 @@ public static class FnMethod extends ObjMethod{
 			PersistentVector argLocals = PersistentVector.EMPTY;
 			ArrayList<Type> argtypes = new ArrayList();
 			ArrayList<Class> argclasses = new ArrayList();
-			for(int i = 0; i < parms.count(); i++)
+			for(int i = 0; i < params.count(); i++)
 				{
-				if(!(parms.nth(i) instanceof Symbol))
+				if(!(params.nth(i) instanceof Symbol))
 					throw new IllegalArgumentException("fn params must be Symbols");
-				Symbol p = (Symbol) parms.nth(i);
+				Symbol p = (Symbol) params.nth(i);
 				if(p.getNamespace() != null)
 					throw Util.runtimeException("Can't use qualified name as parameter: " + p);
 				if(p.equals(_AMP_))
@@ -8400,7 +8400,7 @@ public static class NewInstanceMethod extends ObjMethod{
 	Class[] exclasses;
 
 	static Symbol dummyThis = Symbol.intern(null,"dummy_this_dlskjsdfower");
-	private IPersistentVector parms;
+	private IPersistentVector params;
 
 	public NewInstanceMethod(ObjExpr objx, ObjMethod parent){
 		super(objx, parent);
@@ -8435,13 +8435,13 @@ public static class NewInstanceMethod extends ObjMethod{
 		NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod) METHOD.deref());
 		Symbol dotname = (Symbol)RT.first(form);
 		Symbol name = (Symbol) Symbol.intern(null,munge(dotname.name)).withMeta(RT.meta(dotname));
-		IPersistentVector parms = (IPersistentVector) RT.second(form);
-		if(parms.count() == 0)
+		IPersistentVector params = (IPersistentVector) RT.second(form);
+		if(params.count() == 0)
 			{
 			throw new IllegalArgumentException("Must supply at least one argument for 'this' in: " + dotname);
 			}
-		Symbol thisName = (Symbol) parms.nth(0);
-		parms = RT.subvec(parms,1,parms.count());
+		Symbol thisName = (Symbol) params.nth(0);
+		params = RT.subvec(params,1,params.count());
 		ISeq body = RT.next(RT.next(form));
 		try
 			{
@@ -8469,16 +8469,16 @@ public static class NewInstanceMethod extends ObjMethod{
 
 			PersistentVector argLocals = PersistentVector.EMPTY;
 			method.retClass = tagClass(tagOf(name));
-			method.argTypes = new Type[parms.count()];
+			method.argTypes = new Type[params.count()];
 			boolean hinted = tagOf(name) != null;
-			Class[] pclasses = new Class[parms.count()];
-			Symbol[] psyms = new Symbol[parms.count()];
+			Class[] pclasses = new Class[params.count()];
+			Symbol[] psyms = new Symbol[params.count()];
 
-			for(int i = 0; i < parms.count(); i++)
+			for(int i = 0; i < params.count(); i++)
 				{
-				if(!(parms.nth(i) instanceof Symbol))
+				if(!(params.nth(i) instanceof Symbol))
 					throw new IllegalArgumentException("params must be Symbols");
-				Symbol p = (Symbol) parms.nth(i);
+				Symbol p = (Symbol) params.nth(i);
 				Object tag = tagOf(p);
 				if(tag != null)
 					hinted = true;
@@ -8488,7 +8488,7 @@ public static class NewInstanceMethod extends ObjMethod{
 				pclasses[i] = pclass;
 				psyms[i] = p;
 				}
-			Map matches = findMethodsWithNameAndArity(name.name, parms.count(), overridables);
+			Map matches = findMethodsWithNameAndArity(name.name, params.count(), overridables);
 			Object mk = msig(name.name, pclasses);
 			java.lang.reflect.Method m = null;
 			if(matches.size() > 0)
@@ -8538,13 +8538,13 @@ public static class NewInstanceMethod extends ObjMethod{
 			method.retType = Type.getType(method.retClass);
 			method.exclasses = m.getExceptionTypes();
 
-			for(int i = 0; i < parms.count(); i++)
+			for(int i = 0; i < params.count(); i++)
 				{
 				LocalBinding lb = registerLocal(psyms[i], null, new MethodParamExpr(pclasses[i]),true);
 				argLocals = argLocals.assocN(i,lb);
 				method.argTypes[i] = Type.getType(pclasses[i]);
 				}
-			for(int i = 0; i < parms.count(); i++)
+			for(int i = 0; i < params.count(); i++)
 				{
 				if(pclasses[i] == long.class || pclasses[i] == double.class)
 					getAndIncLocalNum();
@@ -8552,7 +8552,7 @@ public static class NewInstanceMethod extends ObjMethod{
 			LOOP_LOCALS.set(argLocals);
 			method.name = name.name;
 			method.methodMeta = RT.meta(name);
-			method.parms = parms;
+			method.params = params;
 			method.argLocals = argLocals;
 			method.body = (new BodyExpr.Parser()).parse(C.RETURN, body);
 			return method;
@@ -8603,9 +8603,9 @@ public static class NewInstanceMethod extends ObjMethod{
 		                                            extypes,
 		                                            cv);
 		addAnnotation(gen,methodMeta);
-		for(int i = 0; i < parms.count(); i++)
+		for(int i = 0; i < params.count(); i++)
 			{
-			IPersistentMap meta = RT.meta(parms.nth(i));
+			IPersistentMap meta = RT.meta(params.nth(i));
 			addParameterAnnotation(gen, meta, i);
 			}
 		gen.visitCode();
