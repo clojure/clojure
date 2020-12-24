@@ -1131,7 +1131,7 @@ nil is returned.
 * [CLJ-1580](http://dev.clojure.org/jira/browse/CLJ-1580)
   Transient collections should guarantee thread visibility
 * [CLJ-1590](http://dev.clojure.org/jira/browse/CLJ-1590)
-  Some IReduce/IReduceInit implementors don't respect reduced
+  Some IReduce/IReduceInit implementers don't respect reduced
 * [CLJ-979](http://dev.clojure.org/jira/browse/CLJ-979)
   Clojure resolves to wrong deftype classes when AOT compiling or reloading
 * [CLJ-1636](http://dev.clojure.org/jira/browse/CLJ-1636)
