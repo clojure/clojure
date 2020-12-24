@@ -1455,7 +1455,7 @@ not a pretty writer (which keeps track of columns), this function always outputs
        (print (apply str (repeat n \~)))
        arg-navigator)))
 
-  (\newline ;; Whitespace supression is handled in the compilation loop
+  (\newline ;; Whitespace suppression is handled in the compilation loop
    [ ] 
    #{:colon :at} {}
    (fn [params arg-navigator offsets]
