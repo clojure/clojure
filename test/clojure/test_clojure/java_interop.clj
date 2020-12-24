@@ -207,7 +207,7 @@
                  (-> (java.io.ByteArrayOutputStream.)
                      (java.io.ObjectOutputStream.)
                      (.writeObject (proxy [Object java.io.Serializable] [])))))
-    ;; Serializable included via inheritence:
+    ;; Serializable included via inheritance:
     (is (thrown? java.io.NotSerializableException
                  (-> (java.io.ByteArrayOutputStream.)
                      (java.io.ObjectOutputStream.)
