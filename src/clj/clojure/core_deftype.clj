@@ -792,7 +792,7 @@
   to specify which impl to use. You can extend a protocol on nil.
 
   If you are supplying the definitions explicitly (i.e. not reusing
-  exsting functions or mixin maps), you may find it more convenient to
+  existing functions or mixin maps), you may find it more convenient to
   use the extend-type or extend-protocol macros.
 
   Note that multiple independent extend clauses can exist for the same
