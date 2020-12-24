@@ -51,7 +51,7 @@
   "Call ns with a unique namespace name. Return the result of calling ns"
   []  `(ns a#))
 (defmacro call-ns-sym 
-  "Call ns wih a unique namespace name. Return the namespace symbol."
+  "Call ns with a unique namespace name. Return the namespace symbol."
   [] `(do (ns a#) 'a#))
 
 (deftest test-dynamic-ns
