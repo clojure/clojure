@@ -3956,7 +3956,7 @@ static public class FnExpr extends ObjExpr{
 			                                            null,
 			                                            cv);
 			gen.visitCode();
-			gen.push(variadicMethod.reqParms.count());
+			gen.push(variadicMethod.reqParams.count());
 			gen.returnValue();
 			gen.endMethod();
 			}
@@ -4043,8 +4043,8 @@ static public class FnExpr extends ObjExpr{
 					else
 						throw Util.runtimeException("Can't have more than 1 variadic overload");
 					}
-				else if(methodArray[f.reqParms.count()] == null)
-					methodArray[f.reqParms.count()] = f;
+				else if(methodArray[f.reqParams.count()] == null)
+					methodArray[f.reqParams.count()] = f;
 				else
 					throw Util.runtimeException("Can't have 2 overloads with same arity");
 				if(f.prim != null)
@@ -4052,7 +4052,7 @@ static public class FnExpr extends ObjExpr{
 				}
 			if(variadicMethod != null)
 				{
-				for(int i = variadicMethod.reqParms.count() + 1; i <= MAX_POSITIONAL_ARITY; i++)
+				for(int i = variadicMethod.reqParams.count() + 1; i <= MAX_POSITIONAL_ARITY; i++)
 					if(methodArray[i] != null)
 						throw Util.runtimeException(
 								"Can't have fixed arity function with more params than variadic function");
@@ -4409,7 +4409,7 @@ static public class ObjExpr implements Expr{
 			ctorgen.invokeConstructor(Type.getObjectType(superName), voidctor);
 //		else if(isVariadic()) //RestFn ctor takes reqArity arg
 //			{
-//			ctorgen.push(variadicMethod.reqParms.count());
+//			ctorgen.push(variadicMethod.reqParams.count());
 //			ctorgen.invokeConstructor(restFnType, restfnctor);
 //			}
 //		else
@@ -5297,8 +5297,8 @@ enum PSTATE{
 
 public static class FnMethod extends ObjMethod{
 	//localbinding->localbinding
-	PersistentVector reqParms = PersistentVector.EMPTY;
-	LocalBinding restParm = null;
+	PersistentVector reqParams = PersistentVector.EMPTY;
+	LocalBinding restParam = null;
 	Type[] argtypes;
 	Class[] argclasses;
 	Class retClass;
@@ -5441,10 +5441,10 @@ public static class FnMethod extends ObjMethod{
 					switch(state)
 						{
 						case REQ:
-							method.reqParms = method.reqParms.cons(lb);
+							method.reqParams = method.reqParams.cons(lb);
 							break;
 						case REST:
-							method.restParm = lb;
+							method.restParam = lb;
 							state = PSTATE.DONE;
 							break;
 
@@ -5453,7 +5453,7 @@ public static class FnMethod extends ObjMethod{
 						}
 					}
 				}
-			if(method.reqParms.count() > MAX_POSITIONAL_ARITY)
+			if(method.reqParams.count() > MAX_POSITIONAL_ARITY)
 				throw Util.runtimeException("Can't specify more than " + MAX_POSITIONAL_ARITY + " params");
 			LOOP_LOCALS.set(argLocals);
 			method.argLocals = argLocals;
@@ -5711,20 +5711,20 @@ public static class FnMethod extends ObjMethod{
 
 
 
-	public final PersistentVector reqParms(){
-		return reqParms;
+	public final PersistentVector reqParams(){
+		return reqParams;
 	}
 
-	public final LocalBinding restParm(){
-		return restParm;
+	public final LocalBinding restParam(){
+		return restParam;
 	}
 
 	boolean isVariadic(){
-		return restParm != null;
+		return restParam != null;
 	}
 
 	int numParams(){
-		return reqParms.count() + (isVariadic() ? 1 : 0);
+		return reqParams.count() + (isVariadic() ? 1 : 0);
 	}
 
 	String getMethodName(){
@@ -5738,7 +5738,7 @@ public static class FnMethod extends ObjMethod{
 	}
 
 	Type[] getArgTypes(){
-		if(isVariadic() && reqParms.count() == MAX_POSITIONAL_ARITY)
+		if(isVariadic() && reqParams.count() == MAX_POSITIONAL_ARITY)
 			{
 			Type[] ret = new Type[MAX_POSITIONAL_ARITY + 1];
 			for(int i = 0;i<MAX_POSITIONAL_ARITY + 1;i++)
