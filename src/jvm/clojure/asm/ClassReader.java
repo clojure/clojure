@@ -525,7 +525,7 @@ public class ClassReader {
     classVisitor.visit(
         readInt(cpInfoOffsets[1] - 7), accessFlags, thisClass, signature, superClass, interfaces);
 
-    // Visit the SourceFile and SourceDebugExtenstion attributes.
+    // Visit the SourceFile and SourceDebugExtension attributes.
     if ((parsingOptions & SKIP_DEBUG) == 0
         && (sourceFile != null || sourceDebugExtension != null)) {
       classVisitor.visitSource(sourceFile, sourceDebugExtension);
