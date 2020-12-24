@@ -8533,7 +8533,7 @@ public static class NewInstanceMethod extends ObjMethod{
 				throw new IllegalArgumentException("Can't define method not in interfaces: " + name.name);
 
 			//else
-				//validate unque name+arity among additional methods
+				//validate unique name+arity among additional methods
 
 			method.retType = Type.getType(method.retClass);
 			method.exclasses = m.getExceptionTypes();
