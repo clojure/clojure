@@ -102,7 +102,7 @@
 (deftest marker-tests
   (testing "That a marker protocol has no methods"
     (is (= '() (method-names clojure.test_clojure.protocols.examples.MarkerProtocol))))
-  (testing "That types with markers are reportedly satifying them."
+  (testing "That types with markers are reportedly satisfying them."
     (let [hm (HasMarkers.)
           wgm (WillGetMarker.)]
       (is (satisfies? MarkerProtocol hm))
