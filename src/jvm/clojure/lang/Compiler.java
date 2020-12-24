@@ -5962,7 +5962,7 @@ public static class LocalBinding{
 	public final boolean isArg;
     public final PathNode clearPathRoot;
 	public boolean canBeCleared = !RT.booleanCast(getCompilerOption(disableLocalsClearingKey));
-	public boolean recurMistmatch = false;
+	public boolean recurMismatch = false;
     public boolean used = false;
 
     public LocalBinding(int num, Symbol sym, Symbol tag, Expr init, boolean isArg,PathNode clearPathRoot)
@@ -6446,7 +6446,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 							for(int i = 0;i< loopLocals.count();i++)
 								{
 								LocalBinding lb = (LocalBinding) loopLocals.nth(i);
-								if(lb.recurMistmatch)
+								if(lb.recurMismatch)
 									{
 									recurMismatches = (IPersistentVector)recurMismatches.assoc(i, RT.T);
 									moreMismatches = true;
@@ -6700,7 +6700,7 @@ public static class RecurExpr implements Expr, MaybePrimitiveExpr{
 						}
 					if(mismatch)
 						{
-						lb.recurMistmatch = true;
+						lb.recurMismatch = true;
 						if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 							RT.errPrintWriter().println
 								(source + ":" + line +
