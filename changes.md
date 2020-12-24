@@ -1472,7 +1472,7 @@ runs them *with their fixtures*.
   Clojure can leak memory in a servlet container when using dynamic
   bindings or STM transactions.
 * [CLJ-1082](http://dev.clojure.org/jira/browse/CLJ-1082)
-  Subvecs of primitve vectors cannot be reduced
+  Subvecs of primitive vectors cannot be reduced
 * [CLJ-1301](http://dev.clojure.org/jira/browse/CLJ-1301)
   Case expressions use a mixture of hashCode and hasheq, potentially
   leading to missed case matches when these differ.
