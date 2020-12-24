@@ -8023,9 +8023,9 @@ static public class NewInstanceExpr extends ObjExpr{
 			}
 		Class superClass = Object.class;
 		Map[] mc = gatherMethods(superClass,RT.seq(interfaces));
-		Map overrideables = mc[0];
+		Map overridables = mc[0];
 		Map covariants = mc[1];
-		ret.mmap = overrideables;
+		ret.mmap = overridables;
 		ret.covariants = covariants;
 		
 		String[] inames = interfaceNames(interfaces);
@@ -8060,7 +8060,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			IPersistentCollection methods = null;
 			for(ISeq s = methodForms; s != null; s = RT.next(s))
 				{
-				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s),thistag, overrideables);
+				NewInstanceMethod m = NewInstanceMethod.parse(ret, (ISeq) RT.first(s),thistag, overridables);
 				methods = RT.conj(methods, m);
 				}
 
@@ -8429,7 +8429,7 @@ public static class NewInstanceMethod extends ObjMethod{
 	}
 
 	static NewInstanceMethod parse(ObjExpr objx, ISeq form, Symbol thistag,
-	                               Map overrideables) {
+	                               Map overridables) {
 		//(methodname [this-name args*] body...)
 		//this-name might be nil
 		NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod) METHOD.deref());
@@ -8488,7 +8488,7 @@ public static class NewInstanceMethod extends ObjMethod{
 				pclasses[i] = pclass;
 				psyms[i] = p;
 				}
-			Map matches = findMethodsWithNameAndArity(name.name, parms.count(), overrideables);
+			Map matches = findMethodsWithNameAndArity(name.name, parms.count(), overridables);
 			Object mk = msig(name.name, pclasses);
 			java.lang.reflect.Method m = null;
 			if(matches.size() > 0)
