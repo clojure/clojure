@@ -168,7 +168,7 @@ abstract class Symbol {
    *       #CONSTANT_METHOD_HANDLE_TAG} symbols,
    *   <li>the CONSTANT_InvokeDynamic_info bootstrap_method_attr_index field value for {@link
    *       #CONSTANT_INVOKE_DYNAMIC_TAG} symbols,
-   *   <li>the offset of a bootstrap method in the BootstrapMethods boostrap_methods array, for
+   *   <li>the offset of a bootstrap method in the BootstrapMethods bootstrap_methods array, for
    *       {@link #CONSTANT_DYNAMIC_TAG} or {@link #BOOTSTRAP_METHOD_TAG} symbols,
    *   <li>the bytecode offset of the NEW instruction that created an {@link
    *       Frame#ITEM_UNINITIALIZED} type for {@link #UNINITIALIZED_TYPE_TAG} symbols,
