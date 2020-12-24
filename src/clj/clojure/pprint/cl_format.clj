@@ -1371,7 +1371,7 @@ not a pretty writer (which keeps track of columns), this function always outputs
     :commainterval [ 3 Integer]]
    #{ :at :colon :both } {}
    (do
-     (cond                          ; ~R is overloaded with bizareness
+     (cond                          ; ~R is overloaded with bizarreness
        (first (:base params))     #(format-integer (:base %1) %1 %2 %3)
        (and (:at params) (:colon params))   #(format-old-roman %1 %2 %3)
        (:at params)               #(format-new-roman %1 %2 %3)
