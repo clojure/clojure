@@ -46,7 +46,7 @@
           [(Integer/toHexString (hash inames))])))))
 
 (defn- generate-proxy [^Class super interfaces]
-  (let [cv (new ClassWriter (. ClassWriter COMPUTE_MAXS))
+  (let [cv (clojure.lang.Compiler/classWriter)
         pname (proxy-name super interfaces)
         cname (.replace pname \. \/) ;(str "clojure/lang/" (gensym "Proxy__"))
         ctype (. Type (getObjectType cname))
@@ -131,7 +131,7 @@
               (. gen (endMethod))))]
     
                                         ;start class definition
-    (. cv (visit (. Opcodes V1_5) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
+    (. cv (visit (. Opcodes V1_8) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
                  cname nil (iname super) 
                  (into-array (map iname (cons IProxy interfaces)))))
                                         ;add field for fn mappings
