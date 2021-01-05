@@ -2,9 +2,16 @@
 
 # Changes to Clojure in Version 1.10.2
 
-## 1 Fixes
+## 1 Dependencies
 
-## 1.1 Interop / JVM
+Updated dependencies:
+
+* spec.alpha dependency to 0.2.194 - [changes](https://github.com/clojure/spec.alpha/blob/master/CHANGES.md)
+* core.specs.alpha dependency to 0.2.56 - [changes](https://github.com/clojure/core.specs.alpha/blob/master/CHANGES.md)
+
+## 2 Fixes
+
+## 2.1 Interop / JVM
 
 * [CLJ-1472](https://clojure.atlassian.net/browse/CLJ-1472)
   Ensure monitor object is on stack, for verifiers
@@ -20,8 +27,10 @@
   Avoid reflection in clojure.data
 * [CLJ-2502](https://clojure.atlassian.net/browse/CLJ-2502)
   Fix reflection warnings in clojure.stacktrace/print-stack-trace
+* [CLJ-2597](https://clojure.atlassian.net/browse/CLJ-2597)
+  proxy should emit Java 1.8 bytecode
 
-## 1.2 Core
+## 2.2 Core
 
 * [CLJ-2580](https://clojure.atlassian.net/browse/CLJ-2580)
   Fix case expression branch analysis that resulted in compilation error
@@ -38,14 +47,14 @@
 * [CLJ-2459](https://clojure.atlassian.net/browse/CLJ-2459)
   ExceptionInInitializerError if jars executed with java -jar
 
-## 1.3 Printing
+## 2.3 Printing
 
 * [CLJ-2469](https://clojure.atlassian.net/browse/CLJ-2469)
   Fix errors in printing some maps with namespace syntax
 * [CLJ-1445](https://clojure.atlassian.net/browse/CLJ-1445)
   pprint doesn't print collection metadata when `*print-meta*` is true
 
-## 1.4 Docstrings
+## 2.4 Docstrings
 
 * [CLJ-2295](https://clojure.atlassian.net/browse/CLJ-2295)
   Eliminate duplicate doc string printing for special forms
@@ -54,7 +63,7 @@
 * [CLJ-2169](https://clojure.atlassian.net/browse/CLJ-2169)
   conj has out-of-date :arglists
 
-## 2 Performance
+## 3 Performance
 
 * [CLJ-1005](https://clojure.atlassian.net/browse/CLJ-1005)
   Use transient map in zipmap
