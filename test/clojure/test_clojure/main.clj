@@ -56,7 +56,7 @@
             (.setStackTrace (into-array java.lang.StackTraceElement nil)))
         tr-data (-> e Throwable->map main/ex-triage)]
     (is (= tr-data #:clojure.error{:phase :execution, :class 'java.lang.Error, :cause "xyz"}))
-    (is (= (main/ex-str tr-data) "Execution error (Error) at (REPL:1).\nxyz\n"))))
+    (is (= (main/ex-str tr-data) (platform-newlines "Execution error (Error) at (REPL:1).\nxyz\n")))))
 
 (defn s->lpr
   [s]

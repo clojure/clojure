@@ -14,7 +14,8 @@
 ;;  Created 29 October 2008
 
 (ns clojure.test-clojure.printer
-  (:use clojure.test)
+  (:use clojure.test
+        [clojure.test-helper :only [platform-newlines]])
   (:require [clojure.pprint :refer [pprint]]))
 
 (deftest print-length-empty-seq
@@ -138,7 +139,7 @@
 (deftest print-ns-maps
   (are [m s-on pp-on s-off]
     (and (= s-on (binding [*print-namespace-maps* true] (pr-str m)))
-      (= pp-on (binding [*print-namespace-maps* true] (with-out-str (pprint m))))
+      (= (platform-newlines pp-on) (binding [*print-namespace-maps* true] (with-out-str (pprint m))))
       (= s-off (binding [*print-namespace-maps* false] (pr-str m))))
     {} "{}" "{}\n" "{}"
     {:a 1, :b 2} "{:a 1, :b 2}" "{:a 1, :b 2}\n" "{:a 1, :b 2}"
