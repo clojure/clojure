@@ -1,5 +1,17 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.10.3
+
+## 1 Changes reverted
+
+* [CLJ-2564](https://clojure.atlassian.net/browse/CLJ-2564)
+  Improve error message for case
+
+## 2 Fixes
+
+* [CLJ-2453](https://clojure.atlassian.net/browse/CLJ-2453)
+  Enable reader conditionals in Clojure prepl
+
 # Changes to Clojure in Version 1.10.2
 
 ## 1 Dependencies
