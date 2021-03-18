@@ -207,7 +207,7 @@
 	     instead, push SCM changes in Hudson configuration -->
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-release-plugin</artifactId>
-	<version>2.4.1</version>
+	<version>2.5.3</version>
 	<configuration>
 	  <pushChanges>false</pushChanges>
 	  <localCheckout>true</localCheckout>
@@ -227,7 +227,7 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.7</version>
+        <version>1.6.8</version>
         <extensions>true</extensions>
         <configuration>
           <!-- The server "id" element from settings to use authentication from -->
