@@ -142,6 +142,13 @@ public int lastIndexOf(Object o) {
 	return -1;
 }
 
+public Object[] toArray(){
+	int sz = this.array.length - this.i;
+	Object[] ret = new Object[sz];
+	System.arraycopy(this.array, i, ret, 0, sz);
+	return ret;
+}
+
 //////////////////////////////////// specialized primitive versions ///////////////////////////////
 
 static public class ArraySeq_int extends ASeq implements IndexedSeq, IReduce{

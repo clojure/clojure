@@ -1330,3 +1330,34 @@
     (is (= (hash (->Rec 1 1)) (hash (assoc r :a 1))))
     (is (= (hash (->Rec 1 1)) (hash (dissoc r2 :c))))
     (is (= (hash (->Rec 1 1)) (hash (dissoc (assoc r :c 1) :c))))))
+
+(deftest singleton-map-in-destructure-context
+  (let [sample-map {:a 1 :b 2}
+        {:keys [a] :as m1} (list sample-map)]
+    (is (= m1 sample-map))
+    (is (= a 1))))
+
+(deftest trailing-map-destructuring
+  (let [sample-map {:a 1 :b 2}
+        add  (fn [& {:keys [a b]}] (+ a b))
+        addn (fn [n & {:keys [a b]}] (+ n a b))]
+    (testing "that kwargs are applied properly given a map in place of the key/val pairs"
+      (is (= 3 (add  :a 1 :b 2)))
+      (is (= 3 (add  {:a 1 :b 2})))
+      (is (= 13 (addn 10 :a 1 :b 2)))
+      (is (= 13 (addn 10 {:a 1 :b 2})))
+      (is (= 103 ((partial addn 100) :a 1 {:b 2})))
+      (is (= 103 ((partial addn 100 :a 1) {:b 2})))
+      (is (= 107 ((partial addn 100 :a 1) {:a 5 :b 2}))))
+    (testing "built maps"
+      (let [{:as m1} (list :a 1 :b 2)
+            {:as m2} (list :a 1 :b 2 {:c 3})
+            {:as m3} (list :a 1 :b 2 {:a 0})
+            {:keys [a4] :as m4} (list nil)]
+        (= m1 {:a 1 :b 2})
+        (= m2 {:a 1 :b 2 :c 3})
+        (= m3 {:a 0 :b 2})
+        (= m1 (seq-to-map-for-destructuring (list :a 1 :b 2)))
+        (= m2 (seq-to-map-for-destructuring (list :a 1 :b 2 {:c 3})))
+        (= m3 (seq-to-map-for-destructuring (list :a 1 :b 2 {:a 0})))
+        (= a4 nil)))))

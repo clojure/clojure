@@ -76,9 +76,61 @@ static public PersistentArrayMap createWithCheck(Object[] init){
 	return new PersistentArrayMap(init);
 }
 
+/**
+ * <p>This method attempts to find resue the given array as the basis for an array map as quickly as possible.</p>
+ *
+ * <p>If a trailing element exists in the array or it contains duplicate keys then it delegates to the complex path.</p>
+ **/
 static public PersistentArrayMap createAsIfByAssoc(Object[] init){
-	if ((init.length & 1) == 1)
-                throw new IllegalArgumentException(String.format("No value supplied for key: %s", init[init.length-1]));
+	boolean complexPath, hasTrailing;
+	complexPath = hasTrailing = ((init.length & 1) == 1);
+
+	for(int i=0;((i< init.length) && !complexPath);i += 2)
+		{
+		for(int j=0;j<i;j += 2)
+			{
+			if(equalKey(init[i],init[j]))
+				{
+				    complexPath = true;
+				    break;
+				}
+			}
+		}
+
+	if (complexPath) return createAsIfByAssocComplexPath(init, hasTrailing);
+
+	return new PersistentArrayMap(init);
+}
+
+private static Object[] growSeedArray(Object[] seed, IPersistentCollection trailing){
+	ISeq extraKVs = trailing.seq();
+	int seedCount = seed.length - 1;
+	Object[] result = Arrays.copyOf(seed, seedCount + (trailing.count() * 2));
+
+	for(int i=seedCount; extraKVs != null; extraKVs = extraKVs.next(), i+=2)
+		{
+		Map.Entry e = (Entry) extraKVs.first();
+		result[i] = e.getKey();
+		result[i+1] = e.getValue();
+		}
+
+	return result;
+}
+
+/**
+ * <p>This method handles the default case of an array containing alternating key/value pairs.</p>
+ * <p>It will reallocate a smaller init array if duplicate keys are found.</p>
+ *
+ * <p>If a trailing element is found then will attempt to add it to the resulting map as if by conj.</p>
+ * <p>No guarantees about the order of the keys in the trailing element are made.</p>
+ **/
+private static PersistentArrayMap createAsIfByAssocComplexPath(Object[] init, boolean hasTrailing){
+	if(hasTrailing)
+		{
+		IPersistentCollection trailing = PersistentArrayMap.EMPTY.cons(init[init.length-1]);
+		init = growSeedArray(init, trailing);
+		}
+
 	// If this looks like it is doing busy-work, it is because it
 	// is achieving these goals: O(n^2) run time like
 	// createWithCheck(), never modify init arg, and only

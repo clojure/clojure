@@ -4371,7 +4371,19 @@
    :static true}
   ([] (. clojure.lang.PersistentArrayMap EMPTY))
   ([& keyvals]
-     (clojure.lang.PersistentArrayMap/createAsIfByAssoc (to-array keyvals))))
+     (let [ary (to-array keyvals)]
+       (if (odd? (alength ary))
+         (throw (IllegalArgumentException. (str "No value supplied for key: " (last keyvals))))
+         (clojure.lang.PersistentArrayMap/createAsIfByAssoc ary)))))
+
+(defn seq-to-map-for-destructuring
+  "Builds a map from a seq as described in
+  https://clojure.org/reference/special_forms#keyword-arguments"
+  {:added "1.11"}
+  [s]
+  (if (next s)
+    (clojure.lang.PersistentArrayMap/createAsIfByAssoc (to-array s))
+    (if (seq s) (first s) clojure.lang.PersistentArrayMap/EMPTY)))
 
 ;;redefine let and loop  with destructuring
 (defn destructure [bindings]
@@ -4419,7 +4431,11 @@
                            gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
                            defaults (:or b)]
                        (loop [ret (-> bvec (conj gmap) (conj v)
-                                      (conj gmap) (conj `(if (seq? ~gmap) (clojure.lang.PersistentHashMap/create (seq ~gmapseq)) ~gmap))
+                                      (conj gmap) (conj `(if (seq? ~gmap)
+                                                           (if (next ~gmapseq)
+                                                             (clojure.lang.PersistentArrayMap/createAsIfByAssoc (to-array ~gmapseq))
+                                                             (if (seq ~gmapseq) (first ~gmapseq) clojure.lang.PersistentArrayMap/EMPTY))
+                                                           ~gmap))
                                       ((fn [ret]
                                          (if (:as b)
                                            (conj ret (:as b) gmap)
@@ -4468,10 +4484,15 @@
 
 (defmacro let
   "binding => binding-form init-expr
+  binding-form => name, or destructuring-form
+  destructuring-form => map-destructure-form, or seq-destructure-form
 
   Evaluates the exprs in a lexical context in which the symbols in
   the binding-forms are bound to their respective init-exprs or parts
-  therein."
+  therein.
+
+  See https://clojure.org/reference/special_forms#binding-forms for
+  more information about destructuring."
   {:added "1.0", :special-form true, :forms '[(let [bindings*] exprs*)]}
   [bindings & body]
   (assert-args
@@ -4499,12 +4520,14 @@
 
 ;redefine fn with destructuring and pre/post conditions
 (defmacro fn
-  "params => positional-params* , or positional-params* & next-param
+  "params => positional-params*, or positional-params* & rest-param
   positional-param => binding-form
-  next-param => binding-form
-  name => symbol
+  rest-param => binding-form
+  binding-form => name, or destructuring-form
 
-  Defines a function"
+  Defines a function.
+
+  See https://clojure.org/reference/special_forms#fn for more information"
   {:added "1.0", :special-form true,
    :forms '[(fn name? [params* ] exprs*) (fn name? ([params* ] exprs*)+)]}
   [& sigs]
