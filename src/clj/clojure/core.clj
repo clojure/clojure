@@ -7088,7 +7088,8 @@ fails, attempts to require sym's namespace and retries."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
 
-(let [properties (with-open [version-stream (.getResourceAsStream
+(let [^java.util.Properties
+      properties (with-open [version-stream (.getResourceAsStream
                                              (clojure.lang.RT/baseLoader)
                                              "clojure/version.properties")]
                    (doto (new java.util.Properties)
