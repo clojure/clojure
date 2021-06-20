@@ -6158,8 +6158,14 @@ fails, attempts to require sym's namespace and retries."
   {:added "1.2"
    :static true}
   ([m ks]
-     (reduce1 get m ks))
+   (if (vector? m)
+     (try (reduce nth m ks)
+          (catch Exception e nil))
+     (reduce1 get m ks)))
   ([m ks not-found]
+   (if (vector? m)
+     (try (reduce nth m ks)
+          (catch Exception e not-found))
      (loop [sentinel (Object.)
             m m
             ks (seq ks)]
@@ -6168,7 +6174,7 @@ fails, attempts to require sym's namespace and retries."
            (if (identical? sentinel m)
              not-found
              (recur sentinel m (next ks))))
-         m))))
+         m)))))
 
 (defn assoc-in
   "Associates a value in a nested associative structure, where ks is a
