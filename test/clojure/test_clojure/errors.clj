@@ -107,9 +107,9 @@
           (with-out-str (pr t))
           (catch Throwable t (is nil)))))))
 
-(deftest ex-info-disallows-nil-data
-  (is (thrown? IllegalArgumentException (ex-info "message" nil)))
-  (is (thrown? IllegalArgumentException (ex-info "message" nil (Throwable. "cause")))))
+(deftest ex-info-allows-nil-data
+  (is (= {} (ex-data (ex-info "message" nil))))
+  (is (= {} (ex-data (ex-info "message" nil (Throwable. "cause"))))))
 
 (deftest ex-info-arities-construct-equivalent-exceptions
   (let [ex1 (ex-info "message" {:foo "bar"})
