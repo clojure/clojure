@@ -277,7 +277,9 @@
    ((some-fn number? odd? #(> % 0)) 2 4 6 8 -10)
    ;; 3 preds, short-circuiting
    ((some-fn number? odd? #(> % 0)) 1 :a)
+   ((some-fn number? odd? #(> % 0)) :a 1)
    ((some-fn number? odd? #(> % 0)) 1 3 :a)
+   ((some-fn number? odd? #(> % 0)) :a 1 3)
    ((some-fn number? odd? #(> % 0)) 1 3 5 :a)
    ((some-fn number? odd? #(> % 0)) 1 :a 3 5 7)
    ;; 4 preds

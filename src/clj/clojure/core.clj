@@ -7461,8 +7461,8 @@ fails, attempts to require sym's namespace and retries."
      (fn ep3
        ([] true)
        ([x] (boolean (and (p1 x) (p2 x) (p3 x))))
-       ([x y] (boolean (and (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y))))
-       ([x y z] (boolean (and (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y) (p1 z) (p2 z) (p3 z))))
+       ([x y] (boolean (and (p1 x) (p1 y) (p2 x) (p2 y) (p3 x) (p3 y))))
+       ([x y z] (boolean (and (p1 x) (p1 y) (p1 z) (p2 x) (p2 y) (p2 z) (p3 x) (p3 y) (p3 z))))
        ([x y z & args] (boolean (and (ep3 x y z)
                                      (every? #(and (p1 %) (p2 %) (p3 %)) args))))))
   ([p1 p2 p3 & ps]
@@ -7501,8 +7501,8 @@ fails, attempts to require sym's namespace and retries."
      (fn sp3
        ([] nil)
        ([x] (or (p1 x) (p2 x) (p3 x)))
-       ([x y] (or (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y)))
-       ([x y z] (or (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y) (p1 z) (p2 z) (p3 z)))
+       ([x y] (or (p1 x) (p1 y) (p2 x) (p2 y) (p3 x) (p3 y)))
+       ([x y z] (or (p1 x) (p1 y) (p1 z) (p2 x) (p2 y) (p2 z) (p3 x) (p3 y) (p3 z)))
        ([x y z & args] (or (sp3 x y z)
                            (some #(or (p1 %) (p2 %) (p3 %)) args)))))
   ([p1 p2 p3 & ps]
