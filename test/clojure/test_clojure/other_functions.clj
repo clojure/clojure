@@ -379,3 +379,12 @@
     ;; rest arity
     {:a 5} (update {:a 1} :a + 1 1 1 1)
     {:a 6} (update {:a 1} :a + 1 1 1 1 1)))
+
+(deftest test-update-vals
+  (let [inm  (with-meta {:a 1 :b 2} {:has :meta})]
+    (are [result expr] (= result expr)
+      {:a 2 :b 3}   (update-vals inm inc)
+      {:has :meta}  (meta (update-vals inm inc))
+      {0 2 2 4}     (update-vals (hash-map 0 1 2 3) inc)
+      {0 2 2 4}     (update-vals (array-map 0 1 2 3) inc)
+      {0 2 2 4}     (update-vals (sorted-map 2 3 0 1) inc))))
