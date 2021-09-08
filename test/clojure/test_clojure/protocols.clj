@@ -674,3 +674,11 @@
 (deftest test-leading-dashes
   (is (= 10 (-do-dashed (Dashed.))))
   (is (= [10] (map -do-dashed [(Dashed.)]))))
+
+;; see CLJ-1879
+
+(deftest test-base-reduce-kv
+  (is (= {1 :a 2 :b}
+         (reduce-kv #(assoc %1 %3 %2)
+                    {}
+                    (seq {:a 1 :b 2})))))

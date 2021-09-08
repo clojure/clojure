@@ -6870,13 +6870,18 @@ fails, attempts to require sym's namespace and retries."
   init)
 
  ;;slow path default
- clojure.lang.IPersistentMap
- (kv-reduce 
+ java.lang.Object
+ (kv-reduce
   [amap f init]
-  (reduce (fn [ret [k v]] (f ret k v)) init amap))
+  (reduce (fn [ret ^java.util.Map$Entry me]
+            (f ret
+               (.getKey me)
+               (.getValue me)))
+          init
+          amap))
 
  clojure.lang.IKVReduce
- (kv-reduce 
+ (kv-reduce
   [amap f init]
   (.kvreduce amap f init)))
 
