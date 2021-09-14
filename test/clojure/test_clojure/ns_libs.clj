@@ -103,3 +103,41 @@
   (is (thrown-with-cause-msg? clojure.lang.Compiler$CompilerException
                         #"defrecord and deftype fields must be symbols, user\.MyType had: :key1"
                         (eval '(deftype MyType [:key1])))))
+
+(deftest require-as-alias
+  ;; :as-alias does not load
+  (require '[not.a.real.ns [foo :as-alias foo]
+                           [bar :as-alias bar]])
+  (let [aliases (ns-aliases *ns*)
+        foo-ns (get aliases 'foo)
+        bar-ns (get aliases 'bar)]
+    (is (= 'not.a.real.ns.foo (ns-name foo-ns)))
+    (is (= 'not.a.real.ns.bar (ns-name bar-ns))))
+
+  (is (= :not.a.real.ns.foo/baz (read-string "::foo/baz")))
+
+  ;; can use :as-alias in use
+  (use '[dummy.example1 :as-alias e1])
+  (let [aliases (ns-aliases *ns*)]
+    (is (= 'dummy.example1 (ns-name (get aliases 'e1)))))
+
+  ;; can use both :as and :as-alias
+  (require '[clojure.set :as n1 :as-alias n2])
+  (let [aliases (ns-aliases *ns*)]
+    (is (= 'clojure.set (ns-name (get aliases 'n1))))
+    (is (= 'clojure.set (ns-name (get aliases 'n2))))))
+
+(deftest require-as-alias-then-load-later
+  ;; alias but don't load
+  (require '[clojure.test-clojure.ns-libs-load-later :as-alias alias-now])
+  (is (contains? (ns-aliases *ns*) 'alias-now))
+  (is (not (nil? (find-ns 'clojure.test-clojure.ns-libs-load-later))))
+
+  ;; not loaded!
+  (is (nil? (resolve 'alias-now/example)))
+
+  ;; load
+  (require 'clojure.test-clojure.ns-libs-load-later)
+
+  ;; now loaded!
+  (is (not (nil? (resolve 'alias-now/example)))))

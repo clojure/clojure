@@ -5945,7 +5945,7 @@
             (name lib) prefix)
   (let [lib (if prefix (symbol (str prefix \. lib)) lib)
         opts (apply hash-map options)
-        {:keys [as reload reload-all require use verbose]} opts
+        {:keys [as reload reload-all require use verbose as-alias]} opts
         loaded (contains? @*loaded-libs* lib)
         load (cond reload-all
                    load-all
@@ -5955,21 +5955,28 @@
         filter-opts (select-keys opts '(:exclude :only :rename :refer))
         undefined-on-entry (not (find-ns lib))]
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
-      (if load
-        (try
-          (load lib need-ns require)
-          (catch Exception e
-            (when undefined-on-entry
-              (remove-ns lib))
-            (throw e)))
-        (throw-if (and need-ns (not (find-ns lib)))
-                  "namespace '%s' not found" lib))
+      (if as-alias
+        (when (not (find-ns lib))
+          (create-ns lib))
+        (if load
+          (try
+            (load lib need-ns require)
+            (catch Exception e
+              (when undefined-on-entry
+                (remove-ns lib))
+              (throw e)))
+          (throw-if (and need-ns (not (find-ns lib)))
+            "namespace '%s' not found" lib)))
       (when (and need-ns *loading-verbosely*)
         (printf "(clojure.core/in-ns '%s)\n" (ns-name *ns*)))
       (when as
         (when *loading-verbosely*
           (printf "(clojure.core/alias '%s '%s)\n" as lib))
         (alias as lib))
+      (when as-alias
+        (when *loading-verbosely*
+          (printf "(clojure.core/alias '%s '%s)\n" as-alias lib))
+        (alias as-alias lib))
       (when (or use (:refer filter-opts))
         (when *loading-verbosely*
           (printf "(clojure.core/refer '%s" lib)
@@ -5986,7 +5993,7 @@
         opts (interleave flags (repeat true))
         args (filter (complement keyword?) args)]
     ; check for unsupported options
-    (let [supported #{:as :reload :reload-all :require :use :verbose :refer}
+    (let [supported #{:as :reload :reload-all :require :use :verbose :refer :as-alias}
           unsupported (seq (remove supported flags))]
       (throw-if unsupported
                 (apply str "Unsupported option(s) supplied: "
@@ -6050,6 +6057,9 @@
   Recognized options:
   :as takes a symbol as its argument and makes that symbol an alias to the
     lib's namespace in the current namespace.
+  :as-alias takes a symbol as its argument and aliases like :as, however
+    the lib will not be loaded. If the lib has not been loaded, a new
+    empty namespace will be created (as with create-ns).
   :refer takes a list of symbols to refer from the namespace or the :all
     keyword to bring in all public vars.
 
@@ -6066,9 +6076,10 @@
   A flag is a keyword.
   Recognized flags: :reload, :reload-all, :verbose
   :reload forces loading of all the identified libs even if they are
-    already loaded
+    already loaded (has no effect on libspecs using :as-alias)
   :reload-all implies :reload and also forces loading of all libs that the
     identified libs directly or indirectly load via require or use
+    (has no effect on libspecs using :as-alias)
   :verbose triggers printing information about each load, alias, and refer
 
   Example:

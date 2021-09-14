@@ -113,7 +113,7 @@
           unless="maven.test.skip">
     <java classname="clojure.main" failonerror="true" fork="true">
       <sysproperty key="clojure.test-clojure.exclude-namespaces"
-                   value="#{clojure.test-clojure.compilation.load-ns}"/>
+                   value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.ns-libs-load-later}"/>
       <sysproperty key="clojure.compiler.direct-linking" value="${directlinking}"/>
       <classpath>
         <pathelement path="${maven.test.classpath}"/>
