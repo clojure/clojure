@@ -93,13 +93,21 @@ public String toString(){
 	return _str;
 }
 
+/**
+ * @deprecated CLJ-2350: This function is no longer called, but has not been
+ * removed to maintain the public interface.
+ */
 public Object throwArity(){
 	throw new IllegalArgumentException("Wrong number of args passed to keyword: "
 	                                   + toString());
 }
 
+Object throwArity(int n) {
+	throw new ArityException(n, toString());
+}
+
 public Object call() {
-	return throwArity();
+	return throwArity(0);
 }
 
 public void run(){
@@ -107,7 +115,7 @@ public void run(){
 }
 
 public Object invoke() {
-	return throwArity();
+	return throwArity(0);
 }
 
 public int compareTo(Object o){
@@ -146,98 +154,98 @@ final public Object invoke(Object obj, Object notFound) {
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3) {
-	return throwArity();
+	return throwArity(3);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4) {
-	return throwArity();
+	return throwArity(4);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
-	return throwArity();
+	return throwArity(5);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
-	return throwArity();
+	return throwArity(6);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7)
 		{
-	return throwArity();
+	return throwArity(7);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8) {
-	return throwArity();
+	return throwArity(8);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9) {
-	return throwArity();
+	return throwArity(9);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10) {
-	return throwArity();
+	return throwArity(10);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11) {
-	return throwArity();
+	return throwArity(11);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12) {
-	return throwArity();
+	return throwArity(12);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13)
 		{
-	return throwArity();
+	return throwArity(13);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14)
 		{
-	return throwArity();
+	return throwArity(14);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15) {
-	return throwArity();
+	return throwArity(15);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16) {
-	return throwArity();
+	return throwArity(16);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17) {
-	return throwArity();
+	return throwArity(17);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18) {
-	return throwArity();
+	return throwArity(18);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19) {
-	return throwArity();
+	return throwArity(19);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                      Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20)
 		{
-	return throwArity();
+	return throwArity(20);
 }
 
 public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
@@ -245,7 +253,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20,
                      Object... args)
 		{
-	return throwArity();
+	return throwArity(20 + args.length);
 }
 
 
