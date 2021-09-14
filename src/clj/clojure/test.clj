@@ -796,7 +796,7 @@
 
 (defn run-test-var
   "Runs the tests for a single Var, with fixtures executed around the test, and summary output after."
-  {:added "1.9"}
+  {:added "1.11"}
   [v]
   (binding [*report-counters* (ref *initial-report-counters*)]
     (let [ns-obj (-> v meta :ns)
@@ -814,7 +814,7 @@
   "Runs a single test.
 
   Because the intent is to run a single test, there is no check for the namespace test-ns-hook."
-  {:added "1.9"}
+  {:added "1.11"}
   [test-symbol]
   (let [test-var (resolve test-symbol)]
     (cond
