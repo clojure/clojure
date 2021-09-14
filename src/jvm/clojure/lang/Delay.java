@@ -54,7 +54,7 @@ public Object deref() {
 	return val;
 }
 
-synchronized public boolean isRealized(){
+public boolean isRealized(){
 	return fn == null;
 }
 }
