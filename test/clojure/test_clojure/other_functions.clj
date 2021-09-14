@@ -390,3 +390,12 @@
       {0 2 2 4}     (update-vals (hash-map 0 1 2 3) inc)
       {0 2 2 4}     (update-vals (array-map 0 1 2 3) inc)
       {0 2 2 4}     (update-vals (sorted-map 2 3 0 1) inc))))
+
+(deftest test-update-keys
+  (let [inm  (with-meta {:a 1 :b 2} {:has :meta})]
+    (are [result expr] (= result expr)
+      {"a" 1 "b" 2} (update-keys inm name)
+      {:has :meta}  (meta (update-keys inm name))
+      {1 1 3 3}     (update-keys (hash-map 0 1 2 3) inc)
+      {1 1 3 3}     (update-keys (array-map 0 1 2 3) inc)
+      {1 1 3 3}     (update-keys (sorted-map 2 3 0 1) inc))))
