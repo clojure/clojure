@@ -85,7 +85,7 @@ public MultiFn preferMethod(Object dispatchValX, Object dispatchValY) {
 	rw.writeLock().lock();
 	try
 		{
-		if(prefers(dispatchValY, dispatchValX))
+		if(prefers(hierarchy.deref(), dispatchValY, dispatchValX))
 			throw new IllegalStateException(
 					String.format("Preference conflict in multimethod '%s': %s is already preferred to %s",
 					              name, dispatchValY, dispatchValX));
@@ -102,29 +102,29 @@ public MultiFn preferMethod(Object dispatchValX, Object dispatchValY) {
 		}
 }
 
-private boolean prefers(Object x, Object y) {
+private boolean prefers(Object hierarchy, Object x, Object y) {
 	IPersistentSet xprefs = (IPersistentSet) getPreferTable().valAt(x);
 	if(xprefs != null && xprefs.contains(y))
 		return true;
-	for(ISeq ps = RT.seq(parents.invoke(y)); ps != null; ps = ps.next())
+	for(ISeq ps = RT.seq(parents.invoke(hierarchy, y)); ps != null; ps = ps.next())
 		{
-		if(prefers(x, ps.first()))
+		if(prefers(hierarchy, x, ps.first()))
 			return true;
 		}
-	for(ISeq ps = RT.seq(parents.invoke(x)); ps != null; ps = ps.next())
+	for(ISeq ps = RT.seq(parents.invoke(hierarchy, x)); ps != null; ps = ps.next())
 		{
-		if(prefers(ps.first(), y))
+		if(prefers(hierarchy, ps.first(), y))
 			return true;
 		}
 	return false;
 }
 
-private boolean isA(Object x, Object y) {
-    return RT.booleanCast(isa.invoke(hierarchy.deref(), x, y));
+private boolean isA(Object hierarchy, Object x, Object y) {
+    return RT.booleanCast(isa.invoke(hierarchy, x, y));
 }
 
-private boolean dominates(Object x, Object y) {
-	return prefers(x, y) || isA(x, y);
+private boolean dominates(Object hierarchy, Object x, Object y) {
+	return prefers(hierarchy, x, y) || isA(hierarchy, x, y);
 }
 
 private IPersistentMap resetCache() {
@@ -170,11 +170,11 @@ private IFn findAndCacheBestMethod(Object dispatchVal) {
 		for(Object o : getMethodTable())
 			{
 			Map.Entry e = (Map.Entry) o;
-			if(isA(dispatchVal, e.getKey()))
+			if(isA(ch, dispatchVal, e.getKey()))
 				{
-				if(bestEntry == null || dominates(e.getKey(), bestEntry.getKey()))
+				if(bestEntry == null || dominates(ch, e.getKey(), bestEntry.getKey()))
 					bestEntry = e;
-				if(!dominates(bestEntry.getKey(), e.getKey()))
+				if(!dominates(ch, bestEntry.getKey(), e.getKey()))
 					throw new IllegalArgumentException(
 							String.format(
 									"Multiple methods in multimethod '%s' match dispatch value: %s -> %s and %s, and neither is preferred",

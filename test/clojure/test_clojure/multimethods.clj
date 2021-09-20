@@ -203,6 +203,43 @@
  (testing "The prefers method now returns the correct table"
    (is (= {[::rect ::shape] #{[::shape ::rect]}} (prefers bar)))))
 
+(deftest indirect-preferences-mulitmethod-test
+  (testing "Using global hierarchy"
+    (derive ::parent-1 ::grandparent-1)
+    (derive ::parent-2 ::grandparent-2)
+    (derive ::child ::parent-1)
+    (derive ::child ::parent-2)
+    (testing "x should be preferred over y if x is preferred over an ancestor of y"
+      (defmulti indirect-1 keyword)
+      (prefer-method indirect-1 ::parent-1 ::grandparent-2)
+      (defmethod indirect-1 ::parent-1 [_] ::parent-1)
+      (defmethod indirect-1 ::parent-2 [_] ::parent-2)
+      (is (= ::parent-1 (indirect-1 ::child))))
+    (testing "x should be preferred over y if an ancestor of x is preferred over y"
+      (defmulti indirect-2 keyword)
+      (prefer-method indirect-2 ::grandparent-1 ::parent-2)
+      (defmethod indirect-2 ::parent-1 [_] ::parent-1)
+      (defmethod indirect-2 ::parent-2 [_] ::parent-2)
+      (is (= ::parent-1 (indirect-2 ::child)))))
+  (testing "Using custom hierarchy"
+    (def local-h (-> (make-hierarchy)
+                     (derive :parent-1 :grandparent-1)
+                     (derive :parent-2 :grandparent-2)
+                     (derive :child :parent-1)
+                     (derive :child :parent-2)))
+    (testing "x should be preferred over y if x is preferred over an ancestor of y"
+      (defmulti indirect-3 keyword :hierarchy #'local-h)
+      (prefer-method indirect-3 :parent-1 :grandparent-2)
+      (defmethod indirect-3 :parent-1 [_] :parent-1)
+      (defmethod indirect-3 :parent-2 [_] :parent-2)
+      (is (= :parent-1 (indirect-3 :child))))
+    (testing "x should be preferred over y if an ancestor of x is preferred over y"
+      (defmulti indirect-4 keyword :hierarchy #'local-h)
+      (prefer-method indirect-4 :grandparent-1 :parent-2)
+      (defmethod indirect-4 :parent-1 [_] :parent-1)
+      (defmethod indirect-4 :parent-2 [_] :parent-2)
+      (is (= :parent-1 (indirect-4 :child))))))
+
 (deftest remove-all-methods-test
   (testing "Core function remove-all-methods works"
     (defmulti simple1 identity)
