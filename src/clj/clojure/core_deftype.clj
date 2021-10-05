@@ -67,8 +67,9 @@
       (throw (IllegalArgumentException. (apply print-str "Unsupported option(s) -" bad-opts))))
     [interfaces methods opts]))
 
-(defmacro reify 
-  "reify is a macro with the following structure:
+(defmacro reify
+  "reify creates an object implementing a protocol or interface.
+  reify is a macro with the following structure:
 
  (reify options* specs*)
   
