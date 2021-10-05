@@ -544,7 +544,7 @@ public static class RSeq extends ASeq implements IndexedSeq, Counted{
 	}
 }
 
-public static class SubVector extends APersistentVector implements IObj{
+public static class SubVector extends APersistentVector implements IObj, IKVReduce{
 	public final IPersistentVector v;
 	public final int start;
 	public final int end;
@@ -572,6 +572,16 @@ public static class SubVector extends APersistentVector implements IObj{
 			return ((APersistentVector)v).rangedIterator(start,end);
 		}
 		return super.iterator();
+	}
+
+	public Object kvreduce(IFn f, Object init){
+		int cnt = count();
+		for (int i=0; i<cnt; i++){
+			init = f.invoke(init, i, v.nth(start + i));
+			if (RT.isReduced(init))
+				return ((IDeref)init).deref();
+		}
+		return init;
 	}
 
 	public Object nth(int i){

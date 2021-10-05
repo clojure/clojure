@@ -416,3 +416,7 @@
   (is (= [0 1 2 3] (vec (reify clojure.lang.IReduceInit
                           (reduce [_ f start]
                             (reduce f start (range 4))))))))
+
+(deftest test-reduce-kv-vectors
+  (is (= 25 (reduce-kv + 10 [2 4 6])))
+  (is (= 25 (reduce-kv + 10 (subvec [0 2 4 6] 1)))))
