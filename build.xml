@@ -76,6 +76,7 @@
       <arg value="clojure.repl"/>
       <arg value="clojure.java.browse"/>
       <arg value="clojure.java.javadoc"/>
+      <arg value="clojure.java.math"/>
       <arg value="clojure.java.shell"/>
       <arg value="clojure.java.browse-ui"/>
       <arg value="clojure.string"/>
