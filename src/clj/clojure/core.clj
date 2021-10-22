@@ -5960,26 +5960,25 @@
         opts (apply hash-map options)
         {:keys [as reload reload-all require use verbose as-alias]} opts
         loaded (contains? @*loaded-libs* lib)
-        load (cond reload-all
-                   load-all
-                   (or reload (not require) (not loaded))
-                   load-one)
         need-ns (or as use)
+        load (cond reload-all load-all
+                   reload load-one
+                   (not loaded) (cond need-ns load-one
+                                      as-alias (fn [lib _need _require] (create-ns lib))
+                                      :else load-one))
+
         filter-opts (select-keys opts '(:exclude :only :rename :refer))
         undefined-on-entry (not (find-ns lib))]
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
-      (if as-alias
-        (when (not (find-ns lib))
-          (create-ns lib))
-        (if load
-          (try
-            (load lib need-ns require)
-            (catch Exception e
-              (when undefined-on-entry
-                (remove-ns lib))
-              (throw e)))
-          (throw-if (and need-ns (not (find-ns lib)))
-            "namespace '%s' not found" lib)))
+      (if load
+        (try
+          (load lib need-ns require)
+          (catch Exception e
+            (when undefined-on-entry
+              (remove-ns lib))
+            (throw e)))
+        (throw-if (and need-ns (not (find-ns lib)))
+          "namespace '%s' not found" lib))
       (when (and need-ns *loading-verbosely*)
         (printf "(clojure.core/in-ns '%s)\n" (ns-name *ns*)))
       (when as

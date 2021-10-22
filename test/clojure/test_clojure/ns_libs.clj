@@ -116,16 +116,18 @@
 
   (is (= :not.a.real.ns.foo/baz (read-string "::foo/baz")))
 
-  ;; can use :as-alias in use
-  (use '[dummy.example1 :as-alias e1])
-  (let [aliases (ns-aliases *ns*)]
-    (is (= 'dummy.example1 (ns-name (get aliases 'e1)))))
+  ;; can use :as-alias in use, but load will occur
+  (use '[clojure.walk :as-alias e1])
+  (is (= 'clojure.walk (ns-name (get (ns-aliases *ns*) 'e1))))
+  (is (= :clojure.walk/walk (read-string "::e1/walk")))
 
   ;; can use both :as and :as-alias
   (require '[clojure.set :as n1 :as-alias n2])
   (let [aliases (ns-aliases *ns*)]
     (is (= 'clojure.set (ns-name (get aliases 'n1))))
-    (is (= 'clojure.set (ns-name (get aliases 'n2))))))
+    (is (= 'clojure.set (ns-name (get aliases 'n2))))
+    (is (= (resolve 'n1/union) #'clojure.set/union))
+    (is (= (resolve 'n2/union) #'clojure.set/union))))
 
 (deftest require-as-alias-then-load-later
   ;; alias but don't load
