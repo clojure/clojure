@@ -41,7 +41,7 @@ import clojure.lang.RT;
  * require.invoke(Clojure.read("clojure.set"));</pre>
  *
  * <p><code>IFn</code>s can be passed to higher order functions, e.g. the
- * example below passes <code>plus</code> to <code>read</code>:</p>
+ * example below passes <code>inc</code> to <code>map</code>:</p>
  *
  * <pre>
  * IFn map = Clojure.var("clojure.core", "map");
