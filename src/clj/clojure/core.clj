@@ -6843,6 +6843,13 @@ fails, attempts to require sym's namespace and retries."
   {:added "1.9"}
   [x] (instance? java.util.UUID x))
 
+(defn random-uuid
+  {:doc "Returns a pseudo-randomly generated java.util.UUID instance (i.e. type 4).
+
+  See: https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html#randomUUID--"
+   :added "1.11"}
+  ^java.util.UUID [] (java.util.UUID/randomUUID))
+
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
   returns the result of applying f to the first 2 items in coll, then
