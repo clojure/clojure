@@ -1494,7 +1494,8 @@
   [coll key] (. clojure.lang.RT (contains coll key)))
 
 (defn get
-  "Returns the value mapped to key, not-found or nil if key not present."
+  "Returns the value mapped to key, not-found or nil if key not present
+  in associative collection, set, string, array, or ILookup instance."
   {:inline (fn  [m k & nf] `(. clojure.lang.RT (get ~m ~k ~@nf)))
    :inline-arities #{2 3}
    :added "1.0"}
