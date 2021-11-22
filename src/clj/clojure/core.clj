@@ -7964,3 +7964,53 @@ fails, attempts to require sym's namespace and retries."
                         m))]
     (with-meta ret (meta m))))
 
+(defn- parsing-err
+  "Construct message for parsing for non-string parsing error"
+  ^String [val]
+  (str "Expected string, got " (if (nil? val) "nil" (-> val class .getName))))
+
+(defn parse-long
+  {:doc "Parse string of decimal digits with optional leading -/+ and return a
+  Long value, or nil if parse fails"
+   :added "1.11"}
+  ^Long [^String s]
+  (if (string? s)
+    (try
+      (Long/valueOf s)
+      (catch NumberFormatException _ nil))
+    (throw (IllegalArgumentException. (parsing-err s)))))
+
+(defn parse-double
+  {:doc "Parse string with floating point components and return a Double value,
+  or nil if parse fails.
+
+  Grammar: https://docs.oracle.com/javase/8/docs/api/java/lang/Double.html#valueOf-java.lang.String-"
+   :added "1.11"}
+  ^Double [^String s]
+  (if (string? s)
+    (try
+      (Double/valueOf s)
+      (catch NumberFormatException _ nil))
+    (throw (IllegalArgumentException. (parsing-err s)))))
+
+(defn parse-uuid
+  {:doc "Parse a string representing a UUID and return a java.util.UUID instance,
+  or nil if parse fails.
+
+  Grammar: https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html#toString--"
+   :added "1.11"}
+  ^java.util.UUID [^String s]
+  (try
+    (java.util.UUID/fromString s)
+    (catch IllegalArgumentException _ nil)))
+
+(defn parse-boolean
+  {:doc "Parse strings \"true\" or \"false\" and return a boolean, or nil if invalid"
+   :added "1.11"}
+  [^String s]
+  (if (string? s)
+    (case s
+      "true" true
+      "false" false
+      nil)
+    (throw (IllegalArgumentException. (parsing-err s)))))
