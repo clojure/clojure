@@ -6473,7 +6473,10 @@ fails, attempts to require sym's namespace and retries."
   Supported options:
   :elide-meta - a collection of metadata keys to elide during compilation.
   :disable-locals-clearing - set to true to disable clearing, useful for using a debugger
-  Alpha, subject to change."
+  :direct-linking - set to true to use direct static invocation of functions, rather than vars
+    Note that call sites compiled with direct linking will not be affected by var redefinition.
+    Use ^:redef (or ^:dynamic) on a var to prevent direct linking and allow redefinition.
+  See https://clojure.org/reference/compilation for more information."
   {:added "1.4"})
 
 (add-doc-and-meta *ns*
