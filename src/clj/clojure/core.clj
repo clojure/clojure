@@ -8014,3 +8014,20 @@ fails, attempts to require sym's namespace and retries."
       "false" false
       nil)
     (throw (IllegalArgumentException. (parsing-err s)))))
+
+(defn NaN?
+  {:doc "Returns true if num is NaN, else false"
+   :inline-arities #{1}
+   :inline (fn [num] `(Double/isNaN ~num))
+   :added "1.11"}
+
+  [^double num]
+  (Double/isNaN num))
+
+(defn infinite?
+  {:doc "Returns true if num is negative or positive infinity, else false"
+   :inline-arities #{1}
+   :inline (fn [num] `(Double/isInfinite ~num))
+   :added "1.11"}
+  [^double num]
+  (Double/isInfinite num))

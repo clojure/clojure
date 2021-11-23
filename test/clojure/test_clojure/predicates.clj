@@ -172,3 +172,23 @@
         (dotimes [i (count row)]
           (is (= ((resolve (nth preds i)) v) (nth row i))
               (pr-str (list (nth preds i) v))))))))
+
+;; Special double predicates
+
+(deftest test-double-preds
+  (is (NaN? ##NaN))
+  (is (NaN? (Double/parseDouble "NaN")))
+  (is (NaN? (Float/parseFloat "NaN")))
+  (is (NaN? Float/NaN))
+  (is (not (NaN? 5)))
+  (is (thrown? Throwable (NaN? nil)))
+  (is (thrown? Throwable (NaN? :xyz)))
+
+  (is (infinite? ##Inf))
+  (is (infinite? ##-Inf))
+  (is (infinite? Double/POSITIVE_INFINITY))
+  (is (infinite? Double/NEGATIVE_INFINITY))
+  (is (infinite? Float/POSITIVE_INFINITY))
+  (is (infinite? Float/NEGATIVE_INFINITY))
+  (is (thrown? Throwable (infinite? nil)))
+  (is (thrown? Throwable (infinite? :xyz))))
