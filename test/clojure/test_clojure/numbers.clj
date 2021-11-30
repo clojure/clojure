@@ -181,7 +181,7 @@
       (let [wrapped (fn [x]
                       (try
                        (f x)
-                       (catch IllegalArgumentException e :error)))]
+                       (catch RuntimeException e :error)))]
         (is (= vals (map wrapped inputs)))))))
 
 ;; *** Functions ***

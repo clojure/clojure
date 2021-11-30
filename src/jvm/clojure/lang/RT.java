@@ -1244,10 +1244,7 @@ static public int intCast(float x){
 }
 
 static public int intCast(long x){
-	int i = (int) x;
-	if(i != x)
-		throw new IllegalArgumentException("Value out of range for int: " + x);
-	return i;
+	return Math.toIntExact(x);
 }
 
 static public int intCast(double x){

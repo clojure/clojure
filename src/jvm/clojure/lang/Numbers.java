@@ -1915,10 +1915,7 @@ static public double remainder(double x, long y){return remainder(x,(double)y);}
 static public double remainder(long x, double y){return remainder((double)x,y);}
 
 static public long add(long x, long y){
-	long ret = x + y;
-	if ((ret ^ x) < 0 && (ret ^ y) < 0)
-		return throwIntOverflow();
-	return ret;
+	return Math.addExact(x, y);
 }
 
 static public Number addP(long x, long y){
@@ -1929,10 +1926,7 @@ static public Number addP(long x, long y){
 }
 
 static public long minus(long x, long y){
-	long ret = x - y;
-	if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
-		return throwIntOverflow();
-	return ret;
+	return Math.subtractExact(x, y);
 }
 
 static public Number minusP(long x, long y){
@@ -1943,9 +1937,7 @@ static public Number minusP(long x, long y){
 }
 
 static public long minus(long x){
-	if(x == Long.MIN_VALUE)
-		return throwIntOverflow();
-	return -x;
+	return Math.negateExact(x);
 }
 
 static public Number minusP(long x){
@@ -1955,9 +1947,7 @@ static public Number minusP(long x){
 }
 
 static public long inc(long x){
-	if(x == Long.MAX_VALUE)
-		return throwIntOverflow();
-	return x + 1;
+	return Math.incrementExact(x);
 }
 
 static public Number incP(long x){
@@ -1967,9 +1957,7 @@ static public Number incP(long x){
 }
 
 static public long dec(long x){
-	if(x == Long.MIN_VALUE)
-		return throwIntOverflow();
-	return x - 1;
+	return Math.decrementExact(x);
 }
 
 static public Number decP(long x){
@@ -1980,12 +1968,7 @@ static public Number decP(long x){
 
 
 static public long multiply(long x, long y){
-  if (x == Long.MIN_VALUE && y < 0)
-		return throwIntOverflow();
-	long ret = x * y;
-	if (y != 0 && ret/y != x)
-		return throwIntOverflow();
-	return ret;
+	return Math.multiplyExact(x, y);
 }
 
 static public Number multiplyP(long x, long y){
