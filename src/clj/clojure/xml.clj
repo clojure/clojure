@@ -72,8 +72,36 @@
            (skippedEntity [name])
            ))))
 
-(defn startparse-sax [s ch]
-  (.. SAXParserFactory (newInstance) (newSAXParser) (parse s ch)))
+(defn sax-parser
+  "Create a new SAXParser"
+  {:added "1.11"}
+  ^SAXParser []
+  (.newSAXParser (SAXParserFactory/newInstance)))
+
+(defn disable-external-entities
+  "Modifies a SAXParser to disable external entity resolution to prevent XXE attacks"
+  {:added "1.11"}
+  ^SAXParser [^SAXParser parser]
+  (let [reader (.getXMLReader parser)]
+    ;; as per https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+    (.setFeature reader "http://apache.org/xml/features/nonvalidating/load-external-dtd" false)
+    (.setFeature reader "http://xml.org/sax/features/external-general-entities", false)
+    (.setFeature reader "http://xml.org/sax/features/external-parameter-entities" false)
+    parser))
+
+(defn startparse-sax
+  "A startparse function suitable for use with clojure.xml/parse.
+  Note that this function is open to XXE entity attacks, see startparse-sax-safe."
+  {:added "1.0"}
+  [s ch]
+  (.parse (sax-parser) s ch))
+
+(defn startparse-sax-safe
+  "A startparse function suitable for use with clojure.xml/parse.
+  External entity resolution is disabled to prevent XXE entity attacks."
+  {:added "1.11"}
+  [s ch]
+  (.parse (disable-external-entities (sax-parser)) s ch))
 
 (defn parse
   "Parses and loads the source s, which can be a File, InputStream or
@@ -81,9 +109,13 @@
   which has the keys :tag, :attrs, and :content. and accessor fns tag,
   attrs, and content. Other parsers can be supplied by passing
   startparse, a fn taking a source and a ContentHandler and returning
-  a parser"
+  a parser.
+
+  Prior to 1.11, used startparse-sax by default. As of 1.11, uses
+  startparse-sax-safe, which disables XXE (XML External Entity)
+  processing. Pass startparse-sax to revert to prior behavior."
   {:added "1.0"}
-  ([s] (parse s startparse-sax))
+  ([s] (parse s startparse-sax-safe))
   ([s startparse]
     (binding [*stack* nil
               *current* (struct element)

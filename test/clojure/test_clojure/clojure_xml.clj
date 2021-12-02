@@ -11,9 +11,18 @@
 
 (ns clojure.test-clojure.clojure-xml
   (:use clojure.test)
-  (:require [clojure.xml :as xml]))
+  (:require [clojure.xml :as xml])
+  (:import [java.io ByteArrayInputStream]))
 
-
+(deftest CLJ-2611-avoid-XXE
+  (let [xml-str "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+<!DOCTYPE foo [
+  <!ELEMENT foo ANY >
+  <!ENTITY xxe SYSTEM \"file:///etc/hostname\" >]>
+<foo>&xxe;</foo>"]
+    (is (= {:tag :foo, :attrs nil, :content nil}
+           (with-open [input (ByteArrayInputStream. (.getBytes xml-str))]
+             (xml/parse input))))))
 ; parse
 
 ; emit-element
