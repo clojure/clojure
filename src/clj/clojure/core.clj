@@ -6702,7 +6702,7 @@ fails, attempts to require sym's namespace and retries."
                       (next ks) (next vs))
                     m))
         assoc-multi (fn [m h bucket]
-                      (let [testexprs (apply concat bucket)
+                      (let [testexprs (mapcat (fn [kv] [(list 'quote (first kv)) (second kv)]) bucket)
                             expr `(condp = ~expr-sym ~@testexprs ~default)]
                         (assoc m h expr)))
         hmap (reduce1

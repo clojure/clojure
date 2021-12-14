@@ -421,7 +421,14 @@
          :b 1
          :c -2
          :d 4294967296
-         :d 3))
+         :d 3)
+    (are [result input] (= result (case input
+                                    #{a} :set
+                                    :foo :keyword
+                                    a :symbol))
+         :symbol 'a
+         :keyword :foo
+         :set '#{a}))
   (testing "test warn for hash collision"
     (should-print-err-message
      #"Performance warning, .*:\d+ - hash collision of some case test constants; if selected, those entries will be tested sequentially..*\r?\n"
