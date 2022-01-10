@@ -1134,6 +1134,18 @@
   ([x y & more]
    (reduce1 min (min x y) more)))
 
+(defn abs
+  {:doc "Returns the absolute value of a.
+  If a is Long/MIN_VALUE => Long/MIN_VALUE
+  If a is a double and zero => +0.0
+  If a is a double and ##Inf or ##-Inf => ##Inf
+  If a is a double and ##NaN => ##NaN"
+   :inline-arities #{1}
+   :inline (fn [a] `(clojure.lang.Numbers/abs ~a))
+   :added "1.11"}
+  [a]
+  (clojure.lang.Numbers/abs a))
+
 (defn dec'
   "Returns a number one less than num. Supports arbitrary precision.
   See also: dec"
