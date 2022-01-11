@@ -3852,7 +3852,7 @@
                               (try
                                 (with-open ~(subvec bindings 2) ~@body)
                                 (finally
-                                  (. ~(bindings 0) close))))
+                                  (. ~(bindings 0) ~'close))))
     :else (throw (IllegalArgumentException.
                    "with-open only allows Symbols in bindings"))))
 
