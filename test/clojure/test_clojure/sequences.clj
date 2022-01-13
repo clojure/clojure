@@ -1384,3 +1384,88 @@
     (when (reversible? coll)
       (is (= true (instance? clojure.lang.IMeta (rseq coll))))
       (is (= {:a true} (meta (with-meta (rseq coll) {:a true})))))))
+
+(deftest test-iteration-opts
+  (let [genstep (fn [steps]
+                  (fn [k] (swap! steps inc) (inc k)))
+        test (fn [expect & iteropts]
+               (is (= expect
+                      (let [nsteps (atom 0)
+                            iter (apply iteration (genstep nsteps) iteropts)
+                            ret (doall (seq iter))]
+                        {:ret ret :steps @nsteps})
+                      (let [nsteps (atom 0)
+                            iter (apply iteration (genstep nsteps) iteropts)
+                            ret (into [] iter)]
+                        {:ret ret :steps @nsteps}))))]
+    (test {:ret [1 2 3 4]
+           :steps 5}
+          :initk 0 :some? #(< % 5))
+    (test {:ret [1 2 3 4 5]
+           :steps 5}
+          :initk 0 :kf (fn [ret] (when (< ret 5) ret)))
+    (test {:ret ["1"]
+           :steps 2}
+          :initk 0 :some? #(< % 2) :vf str))
+
+  ;; kf does not stop on false
+  (let [iter #(iteration (fn [k]
+                           (if (boolean? k)
+                             [10 :boolean]
+                             [k k]))
+                         :vf second
+                         :kf (fn [[k v]]
+                               (cond
+                                 (= k 3) false
+                                 (< k 14) (inc k)))
+                         :initk 0)]
+    (is (= [0 1 2 3 :boolean 11 12 13 14]
+           (into [] (iter))
+           (seq (iter))))))
+
+(deftest test-iteration
+  ;; equivalence to line-seq
+  (let [readme #(java.nio.file.Files/newBufferedReader (.toPath (java.io.File. "readme.txt")))]
+    (is (= (with-open [r (readme)]
+             (vec (iteration (fn [_] (.readLine r)))))
+           (with-open [r (readme)]
+             (doall (line-seq r))))))
+
+  ;; paginated API
+  (let [items 12 pgsize 5
+        src (vec (repeatedly items #(java.util.UUID/randomUUID)))
+        api (fn [tok]
+              (let [tok (or tok 0)]
+                (when (< tok items)
+                  {:tok (+ tok pgsize)
+                   :ret (subvec src tok (min (+ tok pgsize) items))})))]
+    (is (= src
+           (mapcat identity (iteration api :kf :tok :vf :ret))
+           (into [] cat (iteration api :kf :tok :vf :ret)))))
+
+  (let [src [:a :b :c :d :e]
+        api (fn [k]
+              (let [k (or k 0)]
+                (if (< k (count src))
+                  {:item (nth src k)
+                   :k (inc k)})))]
+    (is (= [:a :b :c]
+           (vec (iteration api
+                           :some? (comp #{:a :b :c} :item)
+                           :kf :k
+                           :vf :item))
+           (vec (iteration api
+                           :kf #(some-> % :k #{0 1 2})
+                           :vf :item))))))
+
+(defspec iteration-seq-equals-reduce 100
+  (prop/for-all [initk gen/int
+                 seed gen/int]
+    (let [src (fn []
+                (let [rng (java.util.Random. seed)]
+                  (iteration #(unchecked-add % (.nextLong rng))
+                             :some? (complement #(zero? (mod % 1000)))
+                             :vf str
+                             :initk initk)))]
+      (= (into [] (src))
+         (seq (src))))))
