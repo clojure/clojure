@@ -184,6 +184,9 @@
                        (catch RuntimeException e :error)))]
         (is (= vals (map wrapped inputs)))))))
 
+(deftest test-prim-with-matching-hint
+  (is (= 1 (let [x 1.2] (Math/round ^double x)))))
+
 ;; *** Functions ***
 
 (defonce DELTA 1e-12)

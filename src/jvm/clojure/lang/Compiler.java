@@ -6024,9 +6024,14 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
 	public LocalBindingExpr(LocalBinding b, Symbol tag)
             {
 		if(b.getPrimitiveType() != null && tag != null)
-			throw new UnsupportedOperationException("Can't type hint a primitive local");
+			if(! b.getPrimitiveType().equals(tagClass(tag)))
+				throw new UnsupportedOperationException("Can't type hint a primitive local with a different type");
+			else
+				this.tag = null;
+		else
+			this.tag = tag;
+
 		this.b = b;
-		this.tag = tag;
 
         this.clearPath = (PathNode)CLEAR_PATH.get();
         this.clearRoot = (PathNode)CLEAR_ROOT.get();
