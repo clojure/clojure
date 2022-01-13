@@ -37,6 +37,11 @@ public boolean equiv(Object obj){
 
 	if(!(obj instanceof Sequential || obj instanceof List))
 		return false;
+
+	if(this instanceof Counted && obj instanceof Counted &&
+	   ((Counted)this).count() != ((Counted)obj).count())
+		return false;
+
 	ISeq ms = RT.seq(obj);
 	for(ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
 		{

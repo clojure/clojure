@@ -420,3 +420,11 @@
 (deftest test-reduce-kv-vectors
   (is (= 25 (reduce-kv + 10 [2 4 6])))
   (is (= 25 (reduce-kv + 10 (subvec [0 2 4 6] 1)))))
+
+(deftest test-vector-eqv-to-non-counted-types
+  (is (not= (range) [0 1 2]))
+  (is (not= [0 1 2] (range)))
+  (is (= [0 1 2] (take 3 (range))))
+  (is (= [0 1 2] (new java.util.ArrayList [0 1 2])))
+  (is (not= [1 2] (take 1 (cycle [1 2]))))
+  (is (= [1 2 3 nil 4 5 6 nil] (eduction cat [[1 2 3 nil] [4 5 6 nil]]))))
