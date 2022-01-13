@@ -73,6 +73,13 @@
    :source-url
    "https://github.com/clojure/clojure/blob/38524061dcb14c598c239be87184b3378ffc5bac/src/clj/clojure/main.clj"}
   {:doc
+   "Clojure wrapper functions for java.lang.Math static methods.\n\nFunction calls are inlined for performance, and type hinted for primitive\nlong or double parameters where appropriate. In general, Math methods are\noptimized for performance and have bounds for error tolerance. If\ngreater precision is needed, use java.lang.StrictMath directly instead.\n\nFor more complete information, see:\nhttps://docs.oracle.com/javase/8/docs/api/java/lang/Math.html",
+   :author "Alex Miller",
+   :name "clojure.math",
+   :wiki-url "https://clojure.github.io/clojure/clojure.math-api.html",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj"}
+  {:doc
    "A Pretty Printer for Clojure\n\nclojure.pprint implements a flexible system for printing structured data\nin a pleasing, easy-to-understand format. Basic use of the pretty printer is \nsimple, just call pprint instead of println. More advanced users can use \nthe building blocks provided to create custom output formats. \n\nOut of the box, pprint supports a simple structured format for basic data \nand a specialized format for Clojure source code. More advanced formats, \nincluding formats that don't look like Clojure data at all like XML and \nJSON, can be rendered by creating custom dispatch functions. \n\nIn addition to the pprint function, this module contains cl-format, a text \nformatting function which is fully compatible with the format function in \nCommon Lisp. Because pretty printing directives are directly integrated with\ncl-format, it supports very concise custom dispatch. It also provides\na more powerful alternative to Clojure's standard format function.\n\nSee documentation for pprint and cl-format for more information or \ncomplete documentation on the Clojure web site on GitHub.",
    :author "Tom Faulhaber",
    :name "clojure.pprint",
@@ -10624,6 +10631,681 @@
    :namespace "clojure.main",
    :wiki-url
    "https://clojure.github.io/clojure//clojure.main-api.html#clojure.main/with-read-known"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "E",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L24",
+   :line 24,
+   :var-type "var",
+   :arglists nil,
+   :doc
+   "Constant for e, the base for natural logarithms.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#E",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/E"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "IEEE-remainder",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L184",
+   :line 184,
+   :var-type "function",
+   :arglists ([dividend divisor]),
+   :doc
+   "Returns the remainder per IEEE 754 such that\n  remainder = dividend - divisor * n\nwhere n is the integer closest to the exact value of dividend / divisor.\nIf two integers are equally close, then n is the even one.\nIf the remainder is zero, sign will match dividend.\nIf dividend or divisor is ##NaN, or dividend is ##Inf or ##-Inf, or divisor is zero => ##NaN\nIf dividend is finite and divisor is infinite => dividend\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#IEEEremainder-double-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/IEEE-remainder"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "PI",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L33",
+   :line 33,
+   :var-type "var",
+   :arglists nil,
+   :doc
+   "Constant for pi, the ratio of the circumference of a circle to its diameter.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#PI",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/PI"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "acos",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L85",
+   :line 85,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the arc cosine of a, in the range 0.0 to pi.\nIf a is ##NaN or |a|>1 => ##NaN\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#acos-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/acos"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "add-exact",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L277",
+   :line 277,
+   :var-type "function",
+   :arglists ([x y]),
+   :doc
+   "Returns the sum of x and y, throws ArithmeticException on overflow.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#addExact-long-long-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/add-exact"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "asin",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L74",
+   :line 74,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the arc sine of an angle, in the range -pi/2 to pi/2.\nIf a is ##NaN or |a|>1 => ##NaN\nIf a is zero => zero with the same sign as a\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#asin-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/asin"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "atan",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L95",
+   :line 95,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the arc tangent of a, in the range of -pi/2 to pi/2.\nIf a is ##NaN => ##NaN\nIf a is zero => zero with the same sign as a\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#atan-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/atan"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "atan2",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L233",
+   :line 233,
+   :var-type "function",
+   :arglists ([y x]),
+   :doc
+   "Returns the angle theta from the conversion of rectangular coordinates (x, y) to polar coordinates (r, theta).\nComputes the phase theta by computing an arc tangent of y/x in the range of -pi to pi.\nFor more details on special cases, see:\nhttps://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#atan2-double-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/atan2"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "cbrt",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L172",
+   :line 172,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the cube root of a.\nIf a is ##NaN => ##NaN\nIf a is ##Inf or ##-Inf => a\nIf a is zero => zero with sign matching a\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#cbrt-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/cbrt"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "ceil",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L199",
+   :line 199,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the smallest double greater than or equal to a, and equal to a\nmathematical integer.\nIf a is ##NaN or ##Inf or ##-Inf or already equal to an integer => a\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#ceil-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/ceil"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "copy-sign",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L448",
+   :line 448,
+   :var-type "function",
+   :arglists ([magnitude sign]),
+   :doc
+   "Returns a double with the magnitude of the first argument and the sign of\nthe second.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#copySign-double-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/copy-sign"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "cos",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L53",
+   :line 53,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the cosine of an angle.\nIf a is ##NaN, ##-Inf, ##Inf => ##NaN\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#cos-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/cos"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "cosh",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L385",
+   :line 385,
+   :var-type "function",
+   :arglists ([x]),
+   :doc
+   "Returns the hyperbolic cosine of x, (e^x + e^-x)/2.\nIf x is ##NaN => ##NaN\nIf x is ##Inf or ##-Inf => ##Inf\nIf x is zero => 1.0\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#cosh-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/cosh"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "decrement-exact",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L313",
+   :line 313,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns a decremented by 1, throws ArithmeticException on overflow.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#decrementExact-long-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/decrement-exact"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "exp",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L124",
+   :line 124,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns Euler's number e raised to the power of a.\nIf a is ##NaN => ##NaN\nIf a is ##Inf => ##Inf\nIf a is ##-Inf => +0.0\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#exp-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/exp"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "expm1",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L421",
+   :line 421,
+   :var-type "function",
+   :arglists ([x]),
+   :doc
+   "Returns e^x - 1. Near 0, expm1(x)+1 is more accurate to e^x than exp(x).\nIf x is ##NaN => ##NaN\nIf x is ##Inf => #Inf\nIf x is ##-Inf => -1.0\nIf x is zero => x\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#expm1-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/expm1"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "floor",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L210",
+   :line 210,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the largest double less than or equal to a, and equal to a\nmathematical integer.\nIf a is ##NaN or ##Inf or ##-Inf or already equal to an integer => a\nIf a is less than zero but greater than -1.0 => -0.0\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#floor-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/floor"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "floor-div",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L331",
+   :line 331,
+   :var-type "function",
+   :arglists ([x y]),
+   :doc
+   "Integer division that rounds to negative infinity (as opposed to zero).\nThe special case (floorDiv Long/MIN_VALUE -1) overflows and returns Long/MIN_VALUE.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#floorDiv-long-long-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/floor-div"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "floor-mod",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L341",
+   :line 341,
+   :var-type "function",
+   :arglists ([x y]),
+   :doc
+   "Integer modulus x - (floorDiv(x, y) * y). Sign matches y and is in the\nrange -|y| < r < |y|.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#floorMod-long-long-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/floor-mod"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "get-exponent",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L458",
+   :line 458,
+   :var-type "function",
+   :arglists ([d]),
+   :doc
+   "Returns the exponent of d.\nIf d is ##NaN, ##Inf, ##-Inf => Double/MAX_EXPONENT + 1\nIf d is zero or subnormal => Double/MIN_EXPONENT - 1\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#getExponent-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/get-exponent"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "hypot",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L410",
+   :line 410,
+   :var-type "function",
+   :arglists ([x y]),
+   :doc
+   "Returns sqrt(x^2 + y^2) without intermediate underflow or overflow.\nIf x or y is ##Inf or ##-Inf => ##Inf\nIf x or y is ##NaN and neither is ##Inf or ##-Inf => ##NaN\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#hypot-double-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/hypot"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "increment-exact",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L304",
+   :line 304,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns a incremented by 1, throws ArithmeticException on overflow.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#incrementExact-long-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/increment-exact"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "log",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L136",
+   :line 136,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the natural logarithm (base e) of a.\nIf a is ##NaN or negative => ##NaN\nIf a is ##Inf => ##Inf\nIf a is zero => ##-Inf\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#log-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/log"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "log10",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L148",
+   :line 148,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the logarithm (base 10) of a.\nIf a is ##NaN or negative => ##NaN\nIf a is ##Inf => ##Inf\nIf a is zero => ##-Inf\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#log10-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/log10"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "log1p",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L434",
+   :line 434,
+   :var-type "function",
+   :arglists ([x]),
+   :doc
+   "Returns ln(1+x). For small values of x, log1p(x) is more accurate than\nlog(1.0+x).\nIf x is ##NaN or < -1 => ##NaN\nIf x is ##Inf => ##Inf\nIf x is -1 => ##-Inf\nIf x is 0 => 0 with sign matching x\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#log1p-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/log1p"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "multiply-exact",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L295",
+   :line 295,
+   :var-type "function",
+   :arglists ([x y]),
+   :doc
+   "Returns the product of x and y, throws ArithmeticException on overflow.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#multiplyExact-long-long-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/multiply-exact"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "negate-exact",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L322",
+   :line 322,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the negation of a, throws ArithmeticException on overflow.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#negateExact-long-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/negate-exact"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "next-after",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L469",
+   :line 469,
+   :var-type "function",
+   :arglists ([start direction]),
+   :doc
+   "Returns the adjacent floating point number to start in the direction of\nthe second argument. If the arguments are equal, the second is returned.\nIf either arg is #NaN => #NaN\nIf both arguments are signed zeros => direction\nIf start is +-Double/MIN_VALUE and direction would cause a smaller magnitude\n  => zero with sign matching start\nIf start is ##Inf or ##-Inf and direction would cause a smaller magnitude\n  => Double/MAX_VALUE with same sign as start\nIf start is equal to +=Double/MAX_VALUE and direction would cause a larger magnitude\n  => ##Inf or ##-Inf with sign matching start\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextAfter-double-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/next-after"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "next-down",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L499",
+   :line 499,
+   :var-type "function",
+   :arglists ([d]),
+   :doc
+   "Returns the adjacent double of d in the direction of ##-Inf.\nIf d is ##NaN => ##NaN\nIf d is ##-Inf => ##-Inf\nIf d is zero => -Double/MIN_VALUE\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextDown-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/next-down"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "next-up",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L487",
+   :line 487,
+   :var-type "function",
+   :arglists ([d]),
+   :doc
+   "Returns the adjacent double of d in the direction of ##Inf.\nIf d is ##NaN => ##NaN\nIf d is ##Inf => ##Inf\nIf d is zero => Double/MIN_VALUE\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextUp-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/next-up"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "pow",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L244",
+   :line 244,
+   :var-type "function",
+   :arglists ([a b]),
+   :doc
+   "Returns the value of a raised to the power of b.\nFor more details on special cases, see:\nhttps://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#pow-double-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/pow"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "random",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L267",
+   :line 267,
+   :var-type "function",
+   :arglists ([]),
+   :doc
+   "Returns a positive double between 0.0 and 1.0, chosen pseudorandomly with\napproximately random distribution.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#random--",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/random"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "rint",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L222",
+   :line 222,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the double closest to a and equal to a mathematical integer.\nIf two values are equally close, return the even one.\nIf a is ##NaN or ##Inf or ##-Inf or zero => a\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#rint-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/rint"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "round",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L254",
+   :line 254,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the closest long to a. If equally close to two values, return the one\ncloser to ##Inf.\nIf a is ##NaN => 0\nIf a is ##-Inf or < Long/MIN_VALUE => Long/MIN_VALUE\nIf a is ##Inf or > Long/MAX_VALUE => Long/MAX_VALUE\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#round-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/round"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "scalb",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L511",
+   :line 511,
+   :var-type "function",
+   :arglists ([d scaleFactor]),
+   :doc
+   "Returns d * 2^scaleFactor, scaling by a factor of 2. If the exponent\nis between Double/MIN_EXPONENT and Double/MAX_EXPONENT, the answer is exact.\nIf d is ##NaN => ##NaN\nIf d is ##Inf or ##-Inf => ##Inf or ##-Inf respectively\nIf d is zero => zero of same sign as d\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextDown-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/scalb"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "signum",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L364",
+   :line 364,
+   :var-type "function",
+   :arglists ([d]),
+   :doc
+   "Returns the signum function of d - zero for zero, 1.0 if >0, -1.0 if <0.\nIf d is ##NaN => ##NaN\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#signum-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/signum"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "sin",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L42",
+   :line 42,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the sine of an angle.\nIf a is ##NaN, ##-Inf, ##Inf => ##NaN\nIf a is zero => zero with the same sign as a\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#sin-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/sin"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "sinh",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L374",
+   :line 374,
+   :var-type "function",
+   :arglists ([x]),
+   :doc
+   "Returns the hyperbolic sine of x, (e^x - e^-x)/2.\nIf x is ##NaN => ##NaN\nIf x is ##Inf or ##-Inf or zero => x\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#sinh-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/sinh"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "sqrt",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L160",
+   :line 160,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the positive square root of a.\nIf a is ##NaN or negative => ##NaN\nIf a is ##Inf => ##Inf\nIf a is zero => a\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#sqrt-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/sqrt"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "subtract-exact",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L286",
+   :line 286,
+   :var-type "function",
+   :arglists ([x y]),
+   :doc
+   "Returns the difference of x and y, throws ArithmeticException on overflow.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#subtractExact-long-long-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/subtract-exact"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "tan",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L63",
+   :line 63,
+   :var-type "function",
+   :arglists ([a]),
+   :doc
+   "Returns the tangent of an angle.\nIf a is ##NaN, ##-Inf, ##Inf => ##NaN\nIf a is zero => zero with the same sign as a\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#tan-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/tan"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "tanh",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L397",
+   :line 397,
+   :var-type "function",
+   :arglists ([x]),
+   :doc
+   "Returns the hyperbolic tangent of x, sinh(x)/cosh(x).\nIf x is ##NaN => ##NaN\nIf x is zero => zero, with same sign\nIf x is ##Inf => +1.0\nIf x is ##-Inf => -1.0\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#tanh-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/tanh"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "to-degrees",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L115",
+   :line 115,
+   :var-type "function",
+   :arglists ([r]),
+   :doc
+   "Converts an angle in radians to an approximate equivalent angle in degrees.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#toDegrees-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/to-degrees"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "to-radians",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L106",
+   :line 106,
+   :var-type "function",
+   :arglists ([deg]),
+   :doc
+   "Converts an angle in degrees to an approximate equivalent angle in radians.\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#toRadians-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/to-radians"}
+  {:raw-source-url
+   "https://github.com/clojure/clojure/raw/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj",
+   :added "1.11",
+   :name "ulp",
+   :file "src/clj/clojure/math.clj",
+   :source-url
+   "https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L351",
+   :line 351,
+   :var-type "function",
+   :arglists ([d]),
+   :doc
+   "Returns the size of an ulp (unit in last place) for d.\nIf d is ##NaN => ##NaN\nIf d is ##Inf or ##-Inf => ##Inf\nIf d is zero => Double/MIN_VALUE\nIf d is +/- Double/MAX_VALUE => 2^971\nSee: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#ulp-double-",
+   :namespace "clojure.math",
+   :wiki-url
+   "https://clojure.github.io/clojure//clojure.math-api.html#clojure.math/ulp"}
   {:raw-source-url
    "https://github.com/clojure/clojure/raw/0a6810ab3484b5be0afe4f505cd724eb5c974a09/src/clj/clojure/pprint/pprint_base.clj",
    :added "1.2",
