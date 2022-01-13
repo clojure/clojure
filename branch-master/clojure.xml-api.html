@@ -33,7 +33,7 @@ namespace.
     <div class="NamespaceTOC">
       <span class="toc-header">Namespaces</span>
       <ul id="left-sidebar-list">
-        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.datafy-api.html">clojure.datafy</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.math-api.html">clojure.java.math</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.datafy-api.html">clojure.datafy</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
       </ul>
     </div>
     <div class="BranchTOC">
@@ -64,7 +64,19 @@ namespace.
   </div><div class="toc-section" style="margin-left: 1em;">
     <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
     <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.xml/disable-external-entities" class="toc-entry-anchor">disable-external-entities</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.xml/parse" class="toc-entry-anchor">parse</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.xml/sax-parser" class="toc-entry-anchor">sax-parser</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.xml/startparse-sax" class="toc-entry-anchor">startparse-sax</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.xml/startparse-sax-safe" class="toc-entry-anchor">startparse-sax-safe</a>
       
     </div>
   </div><div class="toc-section" style="margin-left: 1em;">
@@ -94,6 +106,18 @@ namespace.
   <div id="var-entry">
     <br />
     <hr />
+    <h2 id="clojure.xml/disable-external-entities">disable-external-entities</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (disable-external-entities parser)
+</pre>
+    <pre id="var-docstr">Modifies a SAXParser to disable external entity resolution to prevent XXE attacks</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4a4a6e7717d411679820c4a3ce735a77aef45cc3/src/clj/clojure/xml.clj#L81">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
     <h2 id="clojure.xml/parse">parse</h2>
     <span id="var-type">function</span><br />
     <pre id="var-usage">Usage: (parse s)
@@ -104,11 +128,53 @@ String naming a URI. Returns a tree of the xml/element struct-map,
 which has the keys :tag, :attrs, and :content. and accessor fns tag,
 attrs, and content. Other parsers can be supplied by passing
 startparse, a fn taking a source and a ContentHandler and returning
-a parser</pre>
+a parser.
+
+Prior to 1.11, used startparse-sax by default. As of 1.11, uses
+startparse-sax-safe, which disables XXE (XML External Entity)
+processing. Pass startparse-sax to revert to prior behavior.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/b9b1a094499b69a94bd47fc94c4f082d80239fa9/src/clj/clojure/xml.clj#L78">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4a4a6e7717d411679820c4a3ce735a77aef45cc3/src/clj/clojure/xml.clj#L106">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.xml/sax-parser">sax-parser</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (sax-parser)
+</pre>
+    <pre id="var-docstr">Create a new SAXParser</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4a4a6e7717d411679820c4a3ce735a77aef45cc3/src/clj/clojure/xml.clj#L75">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.xml/startparse-sax">startparse-sax</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (startparse-sax s ch)
+</pre>
+    <pre id="var-docstr">A startparse function suitable for use with clojure.xml/parse.
+Note that this function is open to XXE entity attacks, see startparse-sax-safe.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4a4a6e7717d411679820c4a3ce735a77aef45cc3/src/clj/clojure/xml.clj#L92">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.xml/startparse-sax-safe">startparse-sax-safe</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (startparse-sax-safe s ch)
+</pre>
+    <pre id="var-docstr">A startparse function suitable for use with clojure.xml/parse.
+External entity resolution is disabled to prevent XXE entity attacks.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/4a4a6e7717d411679820c4a3ce735a77aef45cc3/src/clj/clojure/xml.clj#L99">Source</a>
   </div>
 </div>
 
