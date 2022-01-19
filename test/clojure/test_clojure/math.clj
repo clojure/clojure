@@ -21,20 +21,26 @@
   [^double d]
   (and (zero? d) (not (< (Double/compare d 0.0) 0))))
 
+(defn ulp=
+  "Tests that y = x +/- m*ulp(x)"
+  [x y ^double m]
+  (let [mu (* (m/ulp x) m)]
+    (<= (- x mu) y (+ x mu))))
+
 (deftest test-sin
   (is (NaN? (m/sin ##NaN)))
   (is (NaN? (m/sin ##-Inf)))
   (is (NaN? (m/sin ##Inf)))
   (is (pos-zero? (m/sin 0.0)))
   (is (neg-zero? (m/sin -0.0)))
-  (is (= (m/sin m/PI) (- (m/sin (- m/PI))))))
+  (is (ulp= (m/sin m/PI) (- (m/sin (- m/PI))) 1)))
 
 (deftest test-cos
   (is (NaN? (m/cos ##NaN)))
   (is (NaN? (m/cos ##-Inf)))
   (is (NaN? (m/cos ##Inf)))
   (is (= 1.0 (m/cos 0.0) (m/cos -0.0)))
-  (is (= (m/cos m/PI) (m/cos (- m/PI)))))
+  (is (ulp= (m/cos m/PI) (m/cos (- m/PI)) 1)))
 
 (deftest test-tan
   (is (NaN? (m/tan ##NaN)))
@@ -42,7 +48,7 @@
   (is (NaN? (m/tan ##Inf)))
   (is (pos-zero? (m/tan 0.0)))
   (is (neg-zero? (m/tan -0.0)))
-  (is (= (- (m/tan m/PI)) (m/tan (- m/PI)))))
+  (is (ulp= (- (m/tan m/PI)) (m/tan (- m/PI)) 1)))
 
 (deftest test-asin
   (is (NaN? (m/asin ##NaN)))
@@ -54,45 +60,45 @@
   (is (NaN? (m/acos ##NaN)))
   (is (NaN? (m/acos -2.0)))
   (is (NaN? (m/acos 2.0)))
-  (is (= m/PI (* 2 (m/acos 0.0)))))
+  (is (ulp= (* 2 (m/acos 0.0)) m/PI 1)))
 
 (deftest test-atan
   (is (NaN? (m/atan ##NaN)))
   (is (pos-zero? (m/atan 0.0)))
   (is (neg-zero? (m/atan -0.0)))
-  (is (= 0.7853981633974483 (m/atan 1))))
+  (is (ulp= (m/atan 1) 0.7853981633974483 1)))
 
 (deftest test-radians-degrees-roundtrip
   (doseq [d (range 0.0 360.0 5.0)]
-    (is (= (m/round d) (m/round (-> d m/to-radians m/to-degrees))))))
+    (is (ulp= (m/round d) (m/round (-> d m/to-radians m/to-degrees)) 1))))
 
 (deftest test-exp
   (is (NaN? (m/exp ##NaN)))
   (is (= ##Inf (m/exp ##Inf)))
   (is (pos-zero? (m/exp ##-Inf)))
-  (is (= 1.0 (m/exp 0.0)))
-  (is (= m/E (m/exp 1))))
+  (is (ulp= (m/exp 0.0) 1.0 1))
+  (is (ulp= (m/exp 1) m/E 1)))
 
 (deftest test-log
   (is (NaN? (m/log ##NaN)))
   (is (NaN? (m/log -1.0)))
   (is (= ##Inf (m/log ##Inf)))
   (is (= ##-Inf (m/log 0.0)))
-  (is (= 1.0 (m/log m/E))))
+  (is (ulp= (m/log m/E) 1.0 1)))
 
 (deftest test-log10
   (is (NaN? (m/log10 ##NaN)))
   (is (NaN? (m/log10 -1.0)))
   (is (= ##Inf (m/log10 ##Inf)))
   (is (= ##-Inf (m/log10 0.0)))
-  (is (= 1.0 (m/log10 10))))
+  (is (ulp= (m/log10 10) 1.0 1)))
 
 (deftest test-sqrt
   (is (NaN? (m/sqrt ##NaN)))
   (is (NaN? (m/sqrt -1.0)))
   (is (= ##Inf (m/sqrt ##Inf)))
   (is (pos-zero? (m/sqrt 0)))
-  (is (= 2.0 (m/sqrt 4.0))))
+  (is (= (m/sqrt 4.0) 2.0)))
 
 (deftest test-cbrt
   (is (NaN? (m/cbrt ##NaN)))
@@ -133,14 +139,14 @@
   (is (NaN? (m/atan2 1.0 ##NaN)))
   (is (pos-zero? (m/atan2 0.0 1.0)))
   (is (neg-zero? (m/atan2 -0.0 1.0)))
-  (is (= m/PI (m/atan2 0.0 -1.0)))
-  (is (= (- m/PI) (m/atan2 -0.0 -1.0)))
-  (is (= m/PI (* 2.0 (m/atan2 1.0 0.0))))
-  (is (= m/PI (* -2.0 (m/atan2 -1.0 0.0))))
-  (is (= m/PI (* 4.0 (m/atan2 ##Inf ##Inf))))
-  (is (= m/PI (/ (* 4.0 (m/atan2 ##Inf ##-Inf)) 3.0)))
-  (is (= m/PI (* -4.0 (m/atan2 ##-Inf ##Inf))))
-  (is (= m/PI (/ (* -4.0 (m/atan2 ##-Inf ##-Inf)) 3.0))))
+  (is (ulp= (m/atan2 0.0 -1.0) m/PI 2))
+  (is (ulp= (m/atan2 -0.0 -1.0) (- m/PI) 2))
+  (is (ulp= (* 2.0 (m/atan2 1.0 0.0)) m/PI 2))
+  (is (ulp= (* -2.0 (m/atan2 -1.0 0.0)) m/PI 2))
+  (is (ulp= (* 4.0 (m/atan2 ##Inf ##Inf)) m/PI 2))
+  (is (ulp= (/ (* 4.0 (m/atan2 ##Inf ##-Inf)) 3.0) m/PI 2))
+  (is (ulp= (* -4.0 (m/atan2 ##-Inf ##Inf)) m/PI 2))
+  (is (ulp= (/ (* -4.0 (m/atan2 ##-Inf ##-Inf)) 3.0) m/PI 2)))
 
 (deftest test-pow
   (is (= 1.0 (m/pow 4.0 0.0)))
