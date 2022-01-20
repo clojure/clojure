@@ -988,7 +988,7 @@
       {} {:a 1 :b 2}
       #{} #{1 2} ))
 
-(defspec longrange-equals-range 100
+(defspec longrange-equals-range 1000
   (prop/for-all [start gen/int
                  end gen/int
                  step gen/s-pos-int]
@@ -1458,7 +1458,7 @@
                            :kf #(some-> % :k #{0 1 2})
                            :vf :item))))))
 
-(defspec iteration-seq-equals-reduce 100
+(defspec iteration-seq-equals-reduce 1000
   (prop/for-all [initk gen/int
                  seed gen/int]
     (let [src (fn []
@@ -1468,4 +1468,4 @@
                              :vf str
                              :initk initk)))]
       (= (into [] (src))
-         (seq (src))))))
+         (into [] (seq (src)))))))
