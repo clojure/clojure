@@ -1400,13 +1400,13 @@
                         {:ret ret :steps @nsteps}))))]
     (test {:ret [1 2 3 4]
            :steps 5}
-          :initk 0 :some? #(< % 5))
+          :initk 0 :somef #(< % 5))
     (test {:ret [1 2 3 4 5]
            :steps 5}
           :initk 0 :kf (fn [ret] (when (< ret 5) ret)))
     (test {:ret ["1"]
            :steps 2}
-          :initk 0 :some? #(< % 2) :vf str))
+          :initk 0 :somef #(< % 2) :vf str))
 
   ;; kf does not stop on false
   (let [iter #(iteration (fn [k]
@@ -1451,7 +1451,7 @@
                    :k (inc k)})))]
     (is (= [:a :b :c]
            (vec (iteration api
-                           :some? (comp #{:a :b :c} :item)
+                           :somef (comp #{:a :b :c} :item)
                            :kf :k
                            :vf :item))
            (vec (iteration api
@@ -1464,7 +1464,7 @@
     (let [src (fn []
                 (let [rng (java.util.Random. seed)]
                   (iteration #(unchecked-add % (.nextLong rng))
-                             :some? (complement #(zero? (mod % 1000)))
+                             :somef (complement #(zero? (mod % 1000)))
                              :vf str
                              :initk initk)))]
       (= (into [] (src))

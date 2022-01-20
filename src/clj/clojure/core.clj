@@ -7784,46 +7784,49 @@ fails, attempts to require sym's namespace and retries."
   nil)
 
 (defn iteration
-  "creates a seqable/reducible given step!,
-   a function of some (opaque continuation data) k
+  "Creates a seqable/reducible via repeated calls to step,
+  a function of some (continuation token) 'k'. The first call to step
+  will be passed initk, returning 'ret'. Iff (somef ret) is true,
+  (vf ret) will be included in the iteration, else iteration will
+  terminate and vf/kf will not be called. If (kf ret) is non-nil it
+  will be passed to the next step call, else iteration will terminate.
 
-   step! - fn of k/nil to (opaque) 'ret'
+  This can be used e.g. to consume APIs that return paginated or batched data.
 
-   :some? - fn of ret -> truthy, indicating there is a value
-           will not call vf/kf nor continue when false
-   :vf - fn of ret -> v, the values produced by the iteration
-   :kf - fn of ret -> next-k or nil (will not continue)
-   :initk - the first value passed to step!
+   step - (possibly impure) fn of 'k' -> 'ret'
 
-   vf, kf default to identity, some? defaults to some?, initk defaults to nil
+   :somef - fn of 'ret' -> logical true/false, default 'some?'
+   :vf - fn of 'ret' -> 'v', a value produced by the iteration, default 'identity'
+   :kf - fn of 'ret' -> 'next-k' or nil (signaling 'do not continue'), default 'identity'
+   :initk - the first value passed to step, default 'nil'
 
-   it is presumed that step! with non-initk is unreproducible/non-idempotent
-   if step! with initk is unreproducible, it is on the consumer to not consume twice"
+  It is presumed that step with non-initk is unreproducible/non-idempotent.
+  If step with initk is unreproducible it is on the consumer to not consume twice."
   {:added "1.11"}
-  [step! & {:keys [vf kf some? initk]
+  [step & {:keys [somef vf kf initk]
             :or {vf identity
                  kf identity
-                 some? some?
+                 somef some?
                  initk nil}}]
   (reify
    clojure.lang.Seqable
    (seq [_]
         ((fn next [ret]
-           (when (some? ret)
+           (when (somef ret)
              (cons (vf ret)
                    (when-some [k (kf ret)]
-                     (lazy-seq (next (step! k)))))))
-         (step! initk)))
+                     (lazy-seq (next (step k)))))))
+         (step initk)))
    clojure.lang.IReduceInit
    (reduce [_ rf init]
            (loop [acc init
-                  ret (step! initk)]
-             (if (some? ret)
+                  ret (step initk)]
+             (if (somef ret)
                (let [acc (rf acc (vf ret))]
                  (if (reduced? acc)
                    @acc
                    (if-some [k (kf ret)]
-                     (recur acc (step! k))
+                     (recur acc (step k))
                      acc)))
                acc)))))
 
