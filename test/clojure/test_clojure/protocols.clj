@@ -47,13 +47,13 @@
 (deftest protocols-test
   (testing "protocol fns have useful metadata"
     (let [common-meta {:ns (find-ns 'clojure.test-clojure.protocols.examples)
-                       :protocol #'ExampleProtocol}]
-      (are [m f] (= (merge (quote m) common-meta)
+                       :protocol #'ExampleProtocol :tag nil}]
+      (are [m f] (= (merge common-meta m)
                     (meta (var f)))
-           {:name foo :arglists ([a]) :doc "method with one arg"} foo
-           {:name bar :arglists ([a b]) :doc "method with two args"} bar
-           {:name baz :arglists ([a] [a b]) :doc "method with multiple arities" :tag String} baz
-           {:name with-quux :arglists ([a]) :doc "method name with a hyphen"} with-quux)))
+           {:name 'foo :arglists '([a]) :doc "method with one arg"} foo
+           {:name 'bar :arglists '([a b]) :doc "method with two args"} bar
+           {:name 'baz :arglists '([a] [a b]) :doc "method with multiple arities" :tag 'java.lang.String} baz
+           {:name 'with-quux :arglists '([a]) :doc "method name with a hyphen"} with-quux)))
   (testing "protocol fns throw IllegalArgumentException if no impl matches"
     (is (thrown-with-msg?
           IllegalArgumentException
@@ -682,3 +682,26 @@
          (reduce-kv #(assoc %1 %3 %2)
                     {}
                     (seq {:a 1 :b 2})))))
+
+(defn aget-long-hinted ^long [x] (aget (longs-hinted x) 0))
+
+(deftest test-longs-hinted-proto
+  (is (= 1
+        (aget-long-hinted
+          (reify LongsHintedProto
+            (longs-hinted [_] (long-array [1])))))))
+
+;; CLJ-1180 - resolve type hints in protocol methods
+
+(import 'clojure.lang.ISeq)
+(defprotocol P
+  (^ISeq f [_]))
+(ns clojure.test-clojure.protocols.other
+  (:use clojure.test))
+(defn cf [val]
+  (let [aseq (clojure.test-clojure.protocols/f val)]
+    (count aseq)))
+(extend-protocol clojure.test-clojure.protocols/P String
+  (f [s] (seq s)))
+(deftest test-resolve-type-hints-in-protocol-methods
+  (is (= 4 (clojure.test-clojure.protocols/f "test"))))
