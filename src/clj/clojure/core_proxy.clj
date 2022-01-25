@@ -241,12 +241,17 @@
           mb (map #(vector (%1 %2) (vals (dissoc %1 %2))) mgroups rtypes)
           bridge? (reduce1 into1 #{} (map second mb))
           ifaces-meths (remove bridge? (vals ifaces-meths))
-          mm (remove bridge? (vals mm))]
+          mm (remove bridge? (vals mm))
+          reflect-Method-keyfn (fn [meth]
+                                 (let [[name param-types ^Class return-type] (method-sig meth)]
+                                   (-> [name]
+                                       (into1 (map #(.getName ^Class %) param-types))
+                                       (conj (.getName return-type)))))]
                                         ;add methods matching supers', if no mapping -> call super
-      (doseq [[^java.lang.reflect.Method dest bridges] mb
-              ^java.lang.reflect.Method meth bridges]
+      (doseq [[^java.lang.reflect.Method dest bridges] (sort-by (comp reflect-Method-keyfn first) mb)
+              ^java.lang.reflect.Method meth (sort-by reflect-Method-keyfn bridges)]
           (gen-bridge meth dest))
-      (doseq [^java.lang.reflect.Method meth mm]
+      (doseq [^java.lang.reflect.Method meth (sort-by reflect-Method-keyfn mm)]
           (gen-method meth 
                       (fn [^GeneratorAdapter gen ^Method m]
                           (. gen (loadThis))
@@ -259,7 +264,7 @@
                                                 (. m (getDescriptor)))))))
       
                                         ;add methods matching interfaces', if no mapping -> throw
-      (doseq [^java.lang.reflect.Method meth ifaces-meths]
+      (doseq [^java.lang.reflect.Method meth (sort-by reflect-Method-keyfn ifaces-meths)]
                 (gen-method meth 
                             (fn [^GeneratorAdapter gen ^Method m]
                                 (. gen (throwException ex-type (. m (getName))))))))

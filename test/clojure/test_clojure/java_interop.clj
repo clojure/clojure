@@ -11,8 +11,11 @@
 
 (ns clojure.test-clojure.java-interop
   (:use clojure.test)
-  (:require [clojure.inspector]
-            [clojure.set :as set])
+  (:require [clojure.data :as data]
+            [clojure.inspector]
+            [clojure.pprint :as pp]
+            [clojure.set :as set]
+            [clojure.test-clojure.proxy.examples :as proxy-examples])
   (:import java.util.Base64
            (java.util.concurrent.atomic AtomicLong AtomicInteger)))
 
@@ -176,6 +179,37 @@
             str)
         "chain chain chain")))
 
+;https://clojure.atlassian.net/browse/CLJ-1973
+(deftest test-proxy-method-order
+  (let [class-reader (clojure.asm.ClassReader. proxy-examples/proxy1-class-name)
+        method-order (atom [])
+        method-visitor (proxy [clojure.asm.ClassVisitor] [clojure.asm.Opcodes/ASM4 nil]
+                         (visitMethod [access name descriptor signature exceptions]
+                           (swap! method-order conj {:name name :descriptor descriptor})
+                           nil))
+        _ (.accept class-reader method-visitor 0)
+        expected [{:name "<init>", :descriptor "()V"}
+                  {:name "__initClojureFnMappings", :descriptor "(Lclojure/lang/IPersistentMap;)V"}
+                  {:name "__updateClojureFnMappings", :descriptor "(Lclojure/lang/IPersistentMap;)V"}
+                  {:name "__getClojureFnMappings", :descriptor "()Lclojure/lang/IPersistentMap;"}
+                  {:name "clone", :descriptor "()Ljava/lang/Object;"}
+                  {:name "hashCode", :descriptor "()I"}
+                  {:name "toString", :descriptor "()Ljava/lang/String;"}
+                  {:name "equals", :descriptor "(Ljava/lang/Object;)Z"}
+                  {:name "a", :descriptor "(Ljava/io/File;)Z"}
+                  {:name "a", :descriptor "(Ljava/lang/Boolean;)Ljava/lang/Object;"}
+                  {:name "a", :descriptor "(Ljava/lang/Runnable;)Z"}
+                  {:name "a", :descriptor "(Ljava/lang/String;)I"}
+                  {:name "b", :descriptor "(Ljava/lang/String;)Ljava/lang/Object;"}
+                  {:name "c", :descriptor "(Ljava/lang/String;)Ljava/lang/Object;"}
+                  {:name "d", :descriptor "(Ljava/lang/String;)Ljava/lang/Object;"}
+                  {:name "a", :descriptor "(Ljava/lang/Boolean;Ljava/lang/String;)I"}
+                  {:name "a", :descriptor "(Ljava/lang/String;Ljava/io/File;)Z"}
+                  {:name "a", :descriptor "(Ljava/lang/String;Ljava/lang/Runnable;)Z"}
+                  {:name "a", :descriptor "(Ljava/lang/String;Ljava/lang/String;)I"}]
+        actual @method-order]
+    (is (= expected actual)
+        (with-out-str (pp/pprint (data/diff expected actual))))))
 
 ;; serialized-proxy can be regenerated using a modified version of
 ;; Clojure with the proxy serialization prohibition disabled and the
