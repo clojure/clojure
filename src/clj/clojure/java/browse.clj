@@ -12,7 +12,9 @@
   clojure.java.browse
   (:require [clojure.java.shell :as sh]
             [clojure.string :as str])
-  (:import (java.net URI)))
+  (:import (java.io File)
+           (java.net URI)
+           (java.lang ProcessBuilder ProcessBuilder$Redirect)))
 
 (defn- macosx? []
   (-> "os.name" System/getProperty .toLowerCase
@@ -71,6 +73,16 @@
         script (if (= :uninitialized script)
                  (reset! *open-url-script* (open-url-script-val))
                  script)]
-    (or (when script (sh/sh script (str url)) true)
+    (or (when script
+          (try
+            (let [command [script (str url)]
+                  null-file (File. (if (.startsWith (System/getProperty "os.name") "Windows") "NUL" "/dev/null"))
+                  pb (doto (ProcessBuilder. ^java.util.List command)
+                       ;; emulate ProcessBuilder.Redirect.DISCARD added in Java 9
+                       (.redirectOutput null-file)
+                       (.redirectError null-file))]
+              (.start pb) ;; do not wait for the process
+              true)
+            (catch Throwable _ false)))
         (open-url-in-browser url)
         (open-url-in-swing url))))
