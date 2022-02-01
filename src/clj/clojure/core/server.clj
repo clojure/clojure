@@ -288,7 +288,7 @@
                         (try
                           (assoc m :val (valf (:val m)))
                           (catch Throwable ex
-                            (assoc m :val (ex->data ex :print-eval-result)
+                            (assoc m :val (valf (ex->data ex :print-eval-result))
                                      :exception true)))
                         m))))))))
 
