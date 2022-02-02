@@ -598,7 +598,17 @@ Math/pow overflows to Infinity."
   (is (== (denominator 1/2) 2))
   (is (== (numerator 1/2) 1))
   (is (= (bigint (/ 100000000000000000000 3)) 33333333333333333333))
-  (is (= (long 10000000000000000000/3) 3333333333333333333)))
+  (is (= (long 10000000000000000000/3) 3333333333333333333))
+
+  ;; special cases around Long/MIN_VALUE
+  (is (= (/ 1 Long/MIN_VALUE) -1/9223372036854775808))
+  (is (true? (< (/ 1 Long/MIN_VALUE) 0)))
+  (is (true? (< (* 1 (/ 1 Long/MIN_VALUE)) 0)))
+  (is (= (abs (/ 1 Long/MIN_VALUE)) 1/9223372036854775808))
+  (is (false? (< (abs (/ 1 Long/MIN_VALUE)) 0)))
+  (is (false? (< (* 1 (abs (/ 1 Long/MIN_VALUE))) 0)))
+  (is (= (/ Long/MIN_VALUE -3) 9223372036854775808/3))
+  (is (false? (< (/ Long/MIN_VALUE -3) 0))))
 
 (deftest test-arbitrary-precision-subtract
   (are [x y] (= x y)
