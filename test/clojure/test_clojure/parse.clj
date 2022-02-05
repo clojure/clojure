@@ -52,12 +52,15 @@
     "Infinity" Double/POSITIVE_INFINITY
     "-Infinity" Double/NEGATIVE_INFINITY
     "1.7976931348623157E308" Double/MAX_VALUE
-    "4.9E-324" Double/MIN_VALUE)
+    "4.9E-324" Double/MIN_VALUE
+    "1.7976931348623157E309" Double/POSITIVE_INFINITY  ;; past max double
+    "2.5e-324" Double/MIN_VALUE  ;; past min double, above half minimum
+    "2.4e-324" 0.0)  ;; below minimum double
   (is (Double/isNaN (parse-double "NaN")))
   (are [s] ;; nil on invalid string
-    (nil? (parse-long s))
-    "1.7976931348623157E309" ;; past max double
-    "9.9E-324")) ;; past min double
+    (nil? (parse-double s))
+    "double" ;; invalid string
+    "1.7976931348623157G309")) ;; invalid, but similar to valid
 
 ;; generative test - gen double -> str -> parse, compare
 (deftest test-gen-parse-double
