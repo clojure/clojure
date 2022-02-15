@@ -1,5 +1,164 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.11.0
+
+## 1 Compatibility
+
+### 1.1 Security
+
+Because XML external entity (XXE) attacks can be used to disclose local files using file schemes or relative paths in the system identifier, `clojure.xml/parse` now disables external entity processing by default.
+
+See: https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing
+
+This change disables the following SAX parser features:
+
+* `http://apache.org/xml/features/nonvalidating/load-external-dtd`
+* `http://xml.org/sax/features/external-general-entities`
+* `http://xml.org/sax/features/external-parameter-entities`
+
+If you rely on these features, modify your calls to `clojure.xml/parse` to explicitly
+supply `startparse-sax` function as the final argument: 
+`(clojure.xml/parse the-string clojure.xml/startparse-sax)`
+This modification also works on prior Clojure versions.
+
+* [CLJ-2611](http://dev.clojure.org/jira/browse/CLJ-2611) clojure.xml now disables XXE processing by default
+
+### 1.2 Dependencies
+
+Updated dependencies:
+
+* spec.alpha dependency to 0.3.218 - [changes](https://github.com/clojure/spec.alpha/blob/master/CHANGES.md)
+* core.specs.alpha dependency to 0.2.62 - [changes](https://github.com/clojure/core.specs.alpha/blob/master/CHANGES.md)
+
+## 2 Features
+
+### 2.1 Keyword argument functions take a trailing map
+
+Keyword arguments are optional trailing variadic arguments of the form *akey aval bkey bval...​*.
+In Clojure 1.11, functions taking keyword arguments can now be passed a map instead of or in addition
+to and following the key/value pairs. When a lone map is passed, it is used for destructuring, else
+a trailing map is added to the key/value pair map by `conj`.
+
+Also see: https://clojure.org/news/2021/03/18/apis-serving-people-and-programs
+
+* [CLJ-2603](https://clojure.atlassian.net/browse/CLJ-2603) Clojure keyword argument functions now also accept a map
+
+### 2.2 `:as-alias` in `require`
+
+Spec (and other libs) rely on qualified keywords as spec names.
+Namespace aliasing in `ns` makes long names shorter but required namespaces to be loadable.
+This change adds `:as-alias` to `require`, which is like `:as` but does not require the namespace to load.
+
+* [CLJ-2123](https://clojure.atlassian.net/browse/CLJ-2123) Add :as-alias option to require like :as but not load
+* [CLJ-2665](https://clojure.atlassian.net/browse/CLJ-2665) Fix require with :as and :as-alias to load
+
+## 3 New functions and namespaces
+
+### 3.1 clojure.math and numeric helper functions
+
+Added a new clojure.math namespace which provides wrappers for the functions available in java.lang.Math.
+These functions are narrowed to only `long` and `double` overloads and provide primitive support without reflection.
+
+In addition, the following functions were added to clojure.core:
+
+* `abs` - absolute value in optimized form for all Clojure numeric types (long, double, ratio, bigint, bigdecimal)
+* `NaN?` - predicate for doubles to check whether "not a number"
+* `infinite?` - predicate for doubles to check whether positive or negative infinity
+
+* [CLJ-2668](https://clojure.atlassian.net/browse/CLJ-2668) Add NaN? and infinite? predicates
+* [CLJ-2664](https://clojure.atlassian.net/browse/CLJ-2664) Add clojure.java.math namespace, wrappers for java.lang.Math
+* [CLJ-2673](https://clojure.atlassian.net/browse/CLJ-2673) Add `abs`, and update `min` and `max` to use Math impls when possible
+* [CLJ-2677](https://clojure.atlassian.net/browse/CLJ-2677) clojure.math - fix method reflection in bodies and inlines, fix docstrings, renamed
+* [CLJ-2689](https://clojure.atlassian.net/browse/CLJ-2689) Fix clojure.math tests to be more tolerant of floating point comparisons
+
+### 3.2 Parser functions
+
+Added the following parsing functions to clojure.core:
+
+* `parse-double` - parses floating point number, including scientific notation
+* `parse-long` - parses integer in long range
+* `parse-boolean` - parses `"true"` or `"false"` to the canonical boolean values
+* `parse-uuid` - parses a UUID string to java.util.UUID
+
+All of these functions expect a string argument and return either the parsed value or `nil` if the value
+is in invalid format.
+
+* [CLJ-2667](https://clojure.atlassian.net/browse/CLJ-2667) Add functions to parse a single long/double/uuid/boolean from a string
+
+### 3.2 `random-uuid`
+
+Added `random-uuid`, a function to construct a random java.util.UUID.
+
+* [CLJ-1925](https://clojure.atlassian.net/browse/CLJ-1925) Add random-uuid
+
+### 3.3 `update-keys` and `update-vals`
+
+Added:
+
+* `update-keys` - applies a function to every key in a map, `m f => {(f k) v ...}`
+* `update-vals` - applies a function to every value in a map, `m f => {k (f v) ...}`
+
+* [CLJ-1959](https://clojure.atlassian.net/browse/CLJ-1959) Add implementation of update-keys
+* [CLJ-2651](https://clojure.atlassian.net/browse/CLJ-2651) Add implementation of update-vals
+
+### 3.4 `iteration`
+
+Added `iteration`, to repeatedly apply a (possibly impure) step function with continuation state.
+This can be used e.g. to consume APIs that return paginated or batched data.
+
+* [CLJ-2555](https://clojure.atlassian.net/browse/CLJ-2555) Add `iteration` generator function
+* [CLJ-2690](https://clojure.atlassian.net/browse/CLJ-2690) Improve `iteration` docstring and arg names
+* [CLJ-2685](https://clojure.atlassian.net/browse/CLJ-2685) Fix `iteration` generative test failure
+
+## 4 Fixes
+
+### 4.1 Compiler
+
+* [CLJ-2680](https://clojure.atlassian.net/browse/CLJ-2680) Fix type hinting a primitive local with matching type hint to not error
+* [CLJ-1180](https://clojure.atlassian.net/browse/CLJ-1180) Fix resolution of class type hints in `defprotocol`
+* [CLJ-1973](https://clojure.atlassian.net/browse/CLJ-1973) Make order of emitted protocol methods in generated classes reproducible
+
+### 4.2 Core
+
+* [CLJ-1879](https://clojure.atlassian.net/browse/CLJ-1879) IKVReduce - make IPersistentMap case faster and extend to Object, detaching it from any fully enumerable set of types
+* [CLJ-2065](https://clojure.atlassian.net/browse/CLJ-2065) IKVReduce - add direct support for SubVector
+* [CLJ-2663](https://clojure.atlassian.net/browse/CLJ-2663) Fix vector `=` not terminating when called with infinite sequence
+* [CLJ-2679](https://clojure.atlassian.net/browse/CLJ-2679) Fix hash collisions in `case` expressions on symbols
+* [CLJ-2600](https://clojure.atlassian.net/browse/CLJ-2600) Don't block `realized?` of `delay` on pending result
+* [CLJ-2649](https://clojure.atlassian.net/browse/CLJ-2649) Fix order of checks in `some-fn` and `every-pred` for 3 predicate case to match other unrollings
+* [CLJ-2234](https://clojure.atlassian.net/browse/CLJ-2234) Fix multimethod preferences to correctly use local hierarchy when it exists
+* [CLJ-2556](https://clojure.atlassian.net/browse/CLJ-2556) Fix `into` completion so `halt-when` works
+
+### 4.3 Performance
+
+* [CLJ-1808](https://clojure.atlassian.net/browse/CLJ-1808) `map-invert` should use `reduce-kv` and transient
+* [CLJ-2621](https://clojure.atlassian.net/browse/CLJ-2621) Fix unnecessary boxing of unused return in statement context for instance method expr
+* [CLJ-2670](https://clojure.atlassian.net/browse/CLJ-2670) Use Math.exact... methods for checked long math ops for performance
+* [CLJ-2636](https://clojure.atlassian.net/browse/CLJ-2636) Get rid of reflection on java.util.Properties when defining `*clojure-version*`
+* [CLJ-1509](https://clojure.atlassian.net/browse/CLJ-1509) AOT compile clojure.instant, clojure.uuid, clojure.core.reducers in build
+
+### 4.4 Error messages
+
+* [CLJ-2529](https://clojure.atlassian.net/browse/CLJ-2529) Fix incorrect reporting of runtime errors as compiler errors in calls through `Compiler.load()`
+* [CLJ-2350](https://clojure.atlassian.net/browse/CLJ-2350) Improve keyword arity exception message
+
+### 4.5 Docstrings
+
+* [CLJ-2249](https://clojure.atlassian.net/browse/CLJ-2249) Clarify `get` docstring regarding sets, strings, arrays, ILookup
+* [CLJ-2488](https://clojure.atlassian.net/browse/CLJ-2488) Add definition to `reify` docstring
+* [CLJ-1360](https://clojure.atlassian.net/browse/CLJ-1360) Update `clojure.string/split` docstring regarding trailing empty parts
+* [CLJ-2444](https://clojure.atlassian.net/browse/CLJ-2444) Fix typo in `test-vars` docstring
+* [CLJ-2666](https://clojure.atlassian.net/browse/CLJ-2666) Make Clojure Java API javadoc text match the example
+
+### 4.6 Other enhancements
+
+* [CLJ-2493](https://clojure.atlassian.net/browse/CLJ-2493) clojure.java.browse - Fix `browse-url` hanging on call to xdg-open
+* [CLJ-1908](https://clojure.atlassian.net/browse/CLJ-1908) clojure.test - Add `run-test` and `run-test-var` to run single test with fixtures and report
+* [CLJ-1379](https://clojure.atlassian.net/browse/CLJ-1379) clojure.test - Fix quoting of `:actual` form in `:pass` maps
+* [CLJ-2620](https://clojure.atlassian.net/browse/CLJ-2620) clojure.server - Fix asymmetric handling of `:exception` `:val`s in `prepl`
+* [CLJ-2387](https://clojure.atlassian.net/browse/CLJ-2387) clojure.server - Fix off-by-one in socket server port validation
+
+
 # Changes to Clojure in Version 1.10.3
 
 ## 1 Changes reverted
