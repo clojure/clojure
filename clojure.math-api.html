@@ -1,0 +1,931 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>clojure.math - Clojure v1.11 API documentation</title>
+    <link rel="icon" href="static/favicon.png" />
+    <link rel="shortcut icon" href="static/favicon.png" />
+    <link rel="stylesheet" href="static/clojure.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="static/wiki.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="static/internal.css" type="text/css" media="all" />
+    <style>.menuWrapper{height: 36px;}</style>
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a href="index.html" id="Logo"><img src="static/clojure-icon.gif" width="100" height="100" alt="Clojure" /></a>
+	<h1><a href="index.html" id="page-header" title="page header title">Clojure Core API Reference</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Clojure</span> <span id="version">v1.11</span> API</span><br />
+    <ul>
+      <li><a href="index.html" class="wiki_link">Overview</a></li>
+      <li><a href="api-index.html" class="wiki_link">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.datafy-api.html">clojure.datafy</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.math-api.html">clojure.math</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
+      </ul>
+    </div>
+    <div class="BranchTOC">
+      <span class="toc-header">Other Versions</span>
+      <ul id="left-sidebar-branch-list">
+        <li><a class="wiki_link" href="branch-master/index.html">v1.12 (in development)</a></li><li><a class="wiki_link" href="branch-clojure-1.10.3/index.html">v1.10.3 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.9.0/index.html">v1.9 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.8.0/index.html">v1.8 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.7.0/index.html">v1.7 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.6.0/index.html">v1.6 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.5.0/index.html">v1.5 (legacy)</a></li><li><a class="wiki_link" href="branch-clojure-1.4.0/index.html">v1.4 (legacy)</a></li><li><a class="wiki_link" href="branch-1.3.x/index.html">v1.3 (legacy)</a></li><li><a class="wiki_link" href="branch-1.2.x/index.html">v1.2 (legacy)</a></li><li><a class="wiki_link" href="branch-1.1.x/index.html">v1.1 (legacy)</a></li>
+      </ul>
+    </div>
+    <a class="wiki_link" href="https://clojure.org">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div class="wiki wikiPage" id="content_view">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#toc0">Overview</a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/E" class="toc-entry-anchor">E</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/IEEE-remainder" class="toc-entry-anchor">IEEE-remainder</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/PI" class="toc-entry-anchor">PI</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/acos" class="toc-entry-anchor">acos</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/add-exact" class="toc-entry-anchor">add-exact</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/asin" class="toc-entry-anchor">asin</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/atan" class="toc-entry-anchor">atan</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/atan2" class="toc-entry-anchor">atan2</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/cbrt" class="toc-entry-anchor">cbrt</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/ceil" class="toc-entry-anchor">ceil</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/copy-sign" class="toc-entry-anchor">copy-sign</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/cos" class="toc-entry-anchor">cos</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/cosh" class="toc-entry-anchor">cosh</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/decrement-exact" class="toc-entry-anchor">decrement-exact</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/exp" class="toc-entry-anchor">exp</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/expm1" class="toc-entry-anchor">expm1</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/floor" class="toc-entry-anchor">floor</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/floor-div" class="toc-entry-anchor">floor-div</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/floor-mod" class="toc-entry-anchor">floor-mod</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/get-exponent" class="toc-entry-anchor">get-exponent</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/hypot" class="toc-entry-anchor">hypot</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/increment-exact" class="toc-entry-anchor">increment-exact</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/log" class="toc-entry-anchor">log</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/log10" class="toc-entry-anchor">log10</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/log1p" class="toc-entry-anchor">log1p</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/multiply-exact" class="toc-entry-anchor">multiply-exact</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/negate-exact" class="toc-entry-anchor">negate-exact</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/next-after" class="toc-entry-anchor">next-after</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/next-down" class="toc-entry-anchor">next-down</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/next-up" class="toc-entry-anchor">next-up</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/pow" class="toc-entry-anchor">pow</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/random" class="toc-entry-anchor">random</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/rint" class="toc-entry-anchor">rint</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/round" class="toc-entry-anchor">round</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/scalb" class="toc-entry-anchor">scalb</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/signum" class="toc-entry-anchor">signum</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/sin" class="toc-entry-anchor">sin</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/sinh" class="toc-entry-anchor">sinh</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/sqrt" class="toc-entry-anchor">sqrt</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/subtract-exact" class="toc-entry-anchor">subtract-exact</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/tan" class="toc-entry-anchor">tan</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/tanh" class="toc-entry-anchor">tanh</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/to-degrees" class="toc-entry-anchor">to-degrees</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/to-radians" class="toc-entry-anchor">to-radians</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.math/ulp" class="toc-entry-anchor">ulp</a>
+      
+    </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.math">clojure.math</span>
+  - <span id="header-project">Clojure</span> <span id="header-version">v1.11</span><span id="header-status-block"> (<span id="header-status">stable</span>)</span>
+  </h1>
+<span id="author-line">by <span id="author-name">Alex Miller</span><br /></span>
+<br />Full namespace name: <span id="long-name">clojure.math</span>
+<p></p>
+<h2>Overview</h2>
+
+<pre id="namespace-docstr">Clojure wrapper functions for java.lang.Math static methods.
+
+Function calls are inlined for performance, and type hinted for primitive
+long or double parameters where appropriate. In general, Math methods are
+optimized for performance and have bounds for error tolerance. If
+greater precision is needed, use java.lang.StrictMath directly instead.
+
+For more complete information, see:
+<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html</a></pre>
+
+
+<br />
+
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/E">E</h2>
+    <span id="var-type">var</span><br />
+    <pre id="var-usage"></pre>
+    <pre id="var-docstr">Constant for e, the base for natural logarithms.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#E">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#E</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L24">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/IEEE-remainder">IEEE-remainder</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (IEEE-remainder dividend divisor)
+</pre>
+    <pre id="var-docstr">Returns the remainder per IEEE 754 such that
+  remainder = dividend - divisor * n
+where n is the integer closest to the exact value of dividend / divisor.
+If two integers are equally close, then n is the even one.
+If the remainder is zero, sign will match dividend.
+If dividend or divisor is ##NaN, or dividend is ##Inf or ##-Inf, or divisor is zero =&gt; ##NaN
+If dividend is finite and divisor is infinite =&gt; dividend
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#IEEEremainder-double-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#IEEEremainder-double-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L184">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/PI">PI</h2>
+    <span id="var-type">var</span><br />
+    <pre id="var-usage"></pre>
+    <pre id="var-docstr">Constant for pi, the ratio of the circumference of a circle to its diameter.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#PI">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#PI</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L33">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/acos">acos</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (acos a)
+</pre>
+    <pre id="var-docstr">Returns the arc cosine of a, in the range 0.0 to pi.
+If a is ##NaN or |a|&gt;1 =&gt; ##NaN
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#acos-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#acos-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L85">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/add-exact">add-exact</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (add-exact x y)
+</pre>
+    <pre id="var-docstr">Returns the sum of x and y, throws ArithmeticException on overflow.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#addExact-long-long-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#addExact-long-long-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L277">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/asin">asin</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (asin a)
+</pre>
+    <pre id="var-docstr">Returns the arc sine of an angle, in the range -pi/2 to pi/2.
+If a is ##NaN or |a|&gt;1 =&gt; ##NaN
+If a is zero =&gt; zero with the same sign as a
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#asin-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#asin-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L74">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/atan">atan</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (atan a)
+</pre>
+    <pre id="var-docstr">Returns the arc tangent of a, in the range of -pi/2 to pi/2.
+If a is ##NaN =&gt; ##NaN
+If a is zero =&gt; zero with the same sign as a
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#atan-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#atan-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L95">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/atan2">atan2</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (atan2 y x)
+</pre>
+    <pre id="var-docstr">Returns the angle theta from the conversion of rectangular coordinates (x, y) to polar coordinates (r, theta).
+Computes the phase theta by computing an arc tangent of y/x in the range of -pi to pi.
+For more details on special cases, see:
+<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#atan2-double-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#atan2-double-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L233">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/cbrt">cbrt</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (cbrt a)
+</pre>
+    <pre id="var-docstr">Returns the cube root of a.
+If a is ##NaN =&gt; ##NaN
+If a is ##Inf or ##-Inf =&gt; a
+If a is zero =&gt; zero with sign matching a
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#cbrt-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#cbrt-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L172">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/ceil">ceil</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (ceil a)
+</pre>
+    <pre id="var-docstr">Returns the smallest double greater than or equal to a, and equal to a
+mathematical integer.
+If a is ##NaN or ##Inf or ##-Inf or already equal to an integer =&gt; a
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#ceil-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#ceil-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L199">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/copy-sign">copy-sign</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (copy-sign magnitude sign)
+</pre>
+    <pre id="var-docstr">Returns a double with the magnitude of the first argument and the sign of
+the second.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#copySign-double-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#copySign-double-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L448">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/cos">cos</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (cos a)
+</pre>
+    <pre id="var-docstr">Returns the cosine of an angle.
+If a is ##NaN, ##-Inf, ##Inf =&gt; ##NaN
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#cos-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#cos-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L53">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/cosh">cosh</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (cosh x)
+</pre>
+    <pre id="var-docstr">Returns the hyperbolic cosine of x, (e^x + e^-x)/2.
+If x is ##NaN =&gt; ##NaN
+If x is ##Inf or ##-Inf =&gt; ##Inf
+If x is zero =&gt; 1.0
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#cosh-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#cosh-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L385">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/decrement-exact">decrement-exact</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (decrement-exact a)
+</pre>
+    <pre id="var-docstr">Returns a decremented by 1, throws ArithmeticException on overflow.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#decrementExact-long-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#decrementExact-long-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L313">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/exp">exp</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (exp a)
+</pre>
+    <pre id="var-docstr">Returns Euler's number e raised to the power of a.
+If a is ##NaN =&gt; ##NaN
+If a is ##Inf =&gt; ##Inf
+If a is ##-Inf =&gt; +0.0
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#exp-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#exp-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L124">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/expm1">expm1</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (expm1 x)
+</pre>
+    <pre id="var-docstr">Returns e^x - 1. Near 0, expm1(x)+1 is more accurate to e^x than exp(x).
+If x is ##NaN =&gt; ##NaN
+If x is ##Inf =&gt; #Inf
+If x is ##-Inf =&gt; -1.0
+If x is zero =&gt; x
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#expm1-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#expm1-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L421">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/floor">floor</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (floor a)
+</pre>
+    <pre id="var-docstr">Returns the largest double less than or equal to a, and equal to a
+mathematical integer.
+If a is ##NaN or ##Inf or ##-Inf or already equal to an integer =&gt; a
+If a is less than zero but greater than -1.0 =&gt; -0.0
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#floor-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#floor-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L210">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/floor-div">floor-div</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (floor-div x y)
+</pre>
+    <pre id="var-docstr">Integer division that rounds to negative infinity (as opposed to zero).
+The special case (floorDiv Long/MIN_VALUE -1) overflows and returns Long/MIN_VALUE.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#floorDiv-long-long-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#floorDiv-long-long-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L331">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/floor-mod">floor-mod</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (floor-mod x y)
+</pre>
+    <pre id="var-docstr">Integer modulus x - (floorDiv(x, y) * y). Sign matches y and is in the
+range -|y| &lt; r &lt; |y|.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#floorMod-long-long-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#floorMod-long-long-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L341">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/get-exponent">get-exponent</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (get-exponent d)
+</pre>
+    <pre id="var-docstr">Returns the exponent of d.
+If d is ##NaN, ##Inf, ##-Inf =&gt; Double/MAX_EXPONENT + 1
+If d is zero or subnormal =&gt; Double/MIN_EXPONENT - 1
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#getExponent-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#getExponent-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L458">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/hypot">hypot</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (hypot x y)
+</pre>
+    <pre id="var-docstr">Returns sqrt(x^2 + y^2) without intermediate underflow or overflow.
+If x or y is ##Inf or ##-Inf =&gt; ##Inf
+If x or y is ##NaN and neither is ##Inf or ##-Inf =&gt; ##NaN
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#hypot-double-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#hypot-double-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L410">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/increment-exact">increment-exact</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (increment-exact a)
+</pre>
+    <pre id="var-docstr">Returns a incremented by 1, throws ArithmeticException on overflow.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#incrementExact-long-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#incrementExact-long-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L304">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/log">log</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (log a)
+</pre>
+    <pre id="var-docstr">Returns the natural logarithm (base e) of a.
+If a is ##NaN or negative =&gt; ##NaN
+If a is ##Inf =&gt; ##Inf
+If a is zero =&gt; ##-Inf
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#log-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#log-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L136">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/log10">log10</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (log10 a)
+</pre>
+    <pre id="var-docstr">Returns the logarithm (base 10) of a.
+If a is ##NaN or negative =&gt; ##NaN
+If a is ##Inf =&gt; ##Inf
+If a is zero =&gt; ##-Inf
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#log10-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#log10-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L148">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/log1p">log1p</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (log1p x)
+</pre>
+    <pre id="var-docstr">Returns ln(1+x). For small values of x, log1p(x) is more accurate than
+log(1.0+x).
+If x is ##NaN or &lt; -1 =&gt; ##NaN
+If x is ##Inf =&gt; ##Inf
+If x is -1 =&gt; ##-Inf
+If x is 0 =&gt; 0 with sign matching x
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#log1p-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#log1p-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L434">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/multiply-exact">multiply-exact</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (multiply-exact x y)
+</pre>
+    <pre id="var-docstr">Returns the product of x and y, throws ArithmeticException on overflow.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#multiplyExact-long-long-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#multiplyExact-long-long-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L295">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/negate-exact">negate-exact</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (negate-exact a)
+</pre>
+    <pre id="var-docstr">Returns the negation of a, throws ArithmeticException on overflow.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#negateExact-long-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#negateExact-long-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L322">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/next-after">next-after</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (next-after start direction)
+</pre>
+    <pre id="var-docstr">Returns the adjacent floating point number to start in the direction of
+the second argument. If the arguments are equal, the second is returned.
+If either arg is #NaN =&gt; #NaN
+If both arguments are signed zeros =&gt; direction
+If start is +-Double/MIN_VALUE and direction would cause a smaller magnitude
+  =&gt; zero with sign matching start
+If start is ##Inf or ##-Inf and direction would cause a smaller magnitude
+  =&gt; Double/MAX_VALUE with same sign as start
+If start is equal to +=Double/MAX_VALUE and direction would cause a larger magnitude
+  =&gt; ##Inf or ##-Inf with sign matching start
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextAfter-double-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextAfter-double-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L469">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/next-down">next-down</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (next-down d)
+</pre>
+    <pre id="var-docstr">Returns the adjacent double of d in the direction of ##-Inf.
+If d is ##NaN =&gt; ##NaN
+If d is ##-Inf =&gt; ##-Inf
+If d is zero =&gt; -Double/MIN_VALUE
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextDown-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextDown-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L499">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/next-up">next-up</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (next-up d)
+</pre>
+    <pre id="var-docstr">Returns the adjacent double of d in the direction of ##Inf.
+If d is ##NaN =&gt; ##NaN
+If d is ##Inf =&gt; ##Inf
+If d is zero =&gt; Double/MIN_VALUE
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextUp-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextUp-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L487">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/pow">pow</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (pow a b)
+</pre>
+    <pre id="var-docstr">Returns the value of a raised to the power of b.
+For more details on special cases, see:
+<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#pow-double-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#pow-double-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L244">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/random">random</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (random)
+</pre>
+    <pre id="var-docstr">Returns a positive double between 0.0 and 1.0, chosen pseudorandomly with
+approximately random distribution.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#random--">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#random--</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L267">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/rint">rint</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (rint a)
+</pre>
+    <pre id="var-docstr">Returns the double closest to a and equal to a mathematical integer.
+If two values are equally close, return the even one.
+If a is ##NaN or ##Inf or ##-Inf or zero =&gt; a
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#rint-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#rint-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L222">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/round">round</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (round a)
+</pre>
+    <pre id="var-docstr">Returns the closest long to a. If equally close to two values, return the one
+closer to ##Inf.
+If a is ##NaN =&gt; 0
+If a is ##-Inf or &lt; Long/MIN_VALUE =&gt; Long/MIN_VALUE
+If a is ##Inf or &gt; Long/MAX_VALUE =&gt; Long/MAX_VALUE
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#round-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#round-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L254">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/scalb">scalb</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (scalb d scaleFactor)
+</pre>
+    <pre id="var-docstr">Returns d * 2^scaleFactor, scaling by a factor of 2. If the exponent
+is between Double/MIN_EXPONENT and Double/MAX_EXPONENT, the answer is exact.
+If d is ##NaN =&gt; ##NaN
+If d is ##Inf or ##-Inf =&gt; ##Inf or ##-Inf respectively
+If d is zero =&gt; zero of same sign as d
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextDown-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextDown-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L511">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/signum">signum</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (signum d)
+</pre>
+    <pre id="var-docstr">Returns the signum function of d - zero for zero, 1.0 if &gt;0, -1.0 if &lt;0.
+If d is ##NaN =&gt; ##NaN
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#signum-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#signum-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L364">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/sin">sin</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (sin a)
+</pre>
+    <pre id="var-docstr">Returns the sine of an angle.
+If a is ##NaN, ##-Inf, ##Inf =&gt; ##NaN
+If a is zero =&gt; zero with the same sign as a
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#sin-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#sin-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L42">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/sinh">sinh</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (sinh x)
+</pre>
+    <pre id="var-docstr">Returns the hyperbolic sine of x, (e^x - e^-x)/2.
+If x is ##NaN =&gt; ##NaN
+If x is ##Inf or ##-Inf or zero =&gt; x
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#sinh-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#sinh-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L374">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/sqrt">sqrt</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (sqrt a)
+</pre>
+    <pre id="var-docstr">Returns the positive square root of a.
+If a is ##NaN or negative =&gt; ##NaN
+If a is ##Inf =&gt; ##Inf
+If a is zero =&gt; a
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#sqrt-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#sqrt-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L160">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/subtract-exact">subtract-exact</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (subtract-exact x y)
+</pre>
+    <pre id="var-docstr">Returns the difference of x and y, throws ArithmeticException on overflow.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#subtractExact-long-long-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#subtractExact-long-long-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L286">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/tan">tan</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (tan a)
+</pre>
+    <pre id="var-docstr">Returns the tangent of an angle.
+If a is ##NaN, ##-Inf, ##Inf =&gt; ##NaN
+If a is zero =&gt; zero with the same sign as a
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#tan-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#tan-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L63">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/tanh">tanh</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (tanh x)
+</pre>
+    <pre id="var-docstr">Returns the hyperbolic tangent of x, sinh(x)/cosh(x).
+If x is ##NaN =&gt; ##NaN
+If x is zero =&gt; zero, with same sign
+If x is ##Inf =&gt; +1.0
+If x is ##-Inf =&gt; -1.0
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#tanh-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#tanh-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L397">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/to-degrees">to-degrees</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (to-degrees r)
+</pre>
+    <pre id="var-docstr">Converts an angle in radians to an approximate equivalent angle in degrees.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#toDegrees-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#toDegrees-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L115">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/to-radians">to-radians</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (to-radians deg)
+</pre>
+    <pre id="var-docstr">Converts an angle in degrees to an approximate equivalent angle in radians.
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#toRadians-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#toRadians-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L106">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.math/ulp">ulp</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (ulp d)
+</pre>
+    <pre id="var-docstr">Returns the size of an ulp (unit in last place) for d.
+If d is ##NaN =&gt; ##NaN
+If d is ##Inf or ##-Inf =&gt; ##Inf
+If d is zero =&gt; Double/MIN_VALUE
+If d is +/- Double/MAX_VALUE =&gt; 2^971
+See: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#ulp-double-">https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#ulp-double-</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.11</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/304d7c6a81bd7d8511e9ef3d89dc199b1464afaa/src/clj/clojure/math.clj#L351">Source</a>
+  </div>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2022 by Rich Hickey</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>
