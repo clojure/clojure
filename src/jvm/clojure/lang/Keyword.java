@@ -23,6 +23,8 @@ import java.lang.ref.SoftReference;
 
 public class Keyword implements IFn, Comparable, Named, Serializable, IHashEq {
 
+private static final long serialVersionUID = -2105088845257724163L;
+
 private static ConcurrentHashMap<Symbol, Reference<Keyword>> table = new ConcurrentHashMap();
 static final ReferenceQueue rq = new ReferenceQueue();
 public final Symbol sym;
