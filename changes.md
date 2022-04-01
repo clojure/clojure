@@ -1,5 +1,10 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.11.1
+
+* [CLJ-2701](https://clojure.atlassian.net/browse/CLJ-2701)
+  Pin serialVersionUID for Keyword and ArraySeq back to 1.10.3 values to retain binary serialization
+
 # Changes to Clojure in Version 1.11.0
 
 ## 1 Compatibility
