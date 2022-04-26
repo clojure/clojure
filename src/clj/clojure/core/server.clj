@@ -220,8 +220,8 @@
     (m/with-bindings
       (in-ns 'user)
       (binding [*in* (or stdin in-reader)
-                *out* (PrintWriter-on #(out-fn {:tag :out :val %1}) nil)
-                *err* (PrintWriter-on #(out-fn {:tag :err :val %1}) nil)]
+                *out* (PrintWriter-on #(out-fn {:tag :out :val %1}) nil true)
+                *err* (PrintWriter-on #(out-fn {:tag :err :val %1}) nil true)]
         (try
           (add-tap tapfn)
           (loop []
