@@ -6244,13 +6244,6 @@ fails, attempts to require sym's namespace and retries."
   ([m k f x y z & more]
    (assoc m k (apply f (get m k) x y z more))))
 
-(defn empty?
-  "Returns true if coll has no items - same as (not (seq coll)).
-  Please use the idiom (seq x) rather than (not (empty? x))"
-  {:added "1.0"
-   :static true}
-  [coll] (not (seq coll)))
-
 (defn coll?
   "Returns true if x implements IPersistentCollection"
   {:added "1.0"
@@ -6305,6 +6298,16 @@ fails, attempts to require sym's namespace and retries."
  {:added "1.0"
    :static true}
   [coll] (instance? clojure.lang.Counted coll))
+
+(defn empty?
+  "Returns true if coll has no items. To check the emptiness of a seq,
+  please use the idiom (seq x) rather than (not (empty? x))"
+  {:added "1.0"
+   :static true}
+  [coll]
+  (if (counted? coll)
+    (zero? (count coll))
+    (not (seq coll))))
 
 (defn reversible?
  "Returns true if coll implements Reversible"

@@ -1136,7 +1136,10 @@
     {}
     #{}
     ""
-    (into-array []) )
+    (into-array [])
+    (transient [])
+    (transient #{})
+    (transient {}))
 
   (are [x] (not (empty? x))
     '(1 2)
@@ -1145,7 +1148,10 @@
     {:a 1 :b 2}
     #{1 2}
     "abc"
-    (into-array [1 2]) ))
+    (into-array [1 2])
+    (transient [1])
+    (transient #{1})
+    (transient {1 2})))
 
 
 (deftest test-every?
