@@ -410,7 +410,6 @@ static class DefExpr implements Expr{
 	public final Expr meta;
 	public final boolean initProvided;
 	public final boolean isDynamic;
-	public final boolean shadowsCoreMapping;
 	public final String source;
 	public final int line;
 	public final int column;
@@ -419,9 +418,8 @@ static class DefExpr implements Expr{
 	final static Method setMetaMethod = Method.getMethod("void setMeta(clojure.lang.IPersistentMap)");
 	final static Method setDynamicMethod = Method.getMethod("clojure.lang.Var setDynamic(boolean)");
 	final static Method symintern = Method.getMethod("clojure.lang.Symbol intern(String, String)");
-	final static Method internVar = Method.getMethod("clojure.lang.Var refer(clojure.lang.Symbol, clojure.lang.Var)");
 
-	public DefExpr(String source, int line, int column, Var var, Expr init, Expr meta, boolean initProvided, boolean isDynamic, boolean shadowsCoreMapping){
+	public DefExpr(String source, int line, int column, Var var, Expr init, Expr meta, boolean initProvided, boolean isDynamic){
 		this.source = source;
 		this.line = line;
 		this.column = column;
@@ -429,7 +427,6 @@ static class DefExpr implements Expr{
 		this.init = init;
 		this.meta = meta;
 		this.isDynamic = isDynamic;
-		this.shadowsCoreMapping = shadowsCoreMapping;
 		this.initProvided = initProvided;
 	}
 
@@ -475,18 +472,6 @@ static class DefExpr implements Expr{
 
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		objx.emitVar(gen, var);
-
-		if (shadowsCoreMapping)
-		{
-			gen.dup();
-			gen.getField(VAR_TYPE, "ns", NS_TYPE);
-			gen.swap();
-			gen.dup();
-			gen.getField(VAR_TYPE, "sym", SYMBOL_TYPE);
-			gen.swap();
-			gen.invokeVirtual(NS_TYPE, internVar);
-		}
-
 		if(isDynamic)
 			{
 			gen.push(isDynamic);
@@ -544,13 +529,11 @@ static class DefExpr implements Expr{
 			Var v = lookupVar(sym, true);
 			if(v == null)
 				throw Util.runtimeException("Can't refer to qualified var that doesn't exist");
-			boolean shadowsCoreMapping = false;
 			if(!v.ns.equals(currentNS()))
 				{
 				if(sym.ns == null)
 					{
 					v = currentNS().intern(sym);
-					shadowsCoreMapping = true;
 					registerVar(v);
 					}
 //					throw Util.runtimeException("Name conflict, can't def " + sym + " because namespace: " + currentNS().name +
@@ -594,7 +577,7 @@ static class DefExpr implements Expr{
 			Expr meta = mm.count()==0 ? null:analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
 			return new DefExpr((String) SOURCE.deref(), lineDeref(), columnDeref(),
 			                   v, analyze(context == C.EVAL ? context : C.EXPRESSION, RT.third(form), v.sym.name),
-			                   meta, RT.count(form) == 3, isDynamic, shadowsCoreMapping);
+			                   meta, RT.count(form) == 3, isDynamic);
 		}
 	}
 }
