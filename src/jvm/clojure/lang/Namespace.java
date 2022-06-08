@@ -50,11 +50,22 @@ public IPersistentMap getMappings(){
 	return mappings.get();
 }
 
+/**
+ * An interned mapping is one where a var's ns matches the current ns and its sym matches the mapping key.
+ * Once established, interned mappings should never change.
+ */
+private boolean isInternedMapping(Symbol sym, Object o){
+	return(o instanceof Var &&
+			((Var) o).ns == this &&
+			((Var) o).sym.equals(sym));
+}
+
 public Var intern(Symbol sym){
 	if(sym.ns != null)
 		{
 		throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
 		}
+
 	IPersistentMap map = getMappings();
 	Object o;
 	Var v = null;
@@ -66,32 +77,50 @@ public Var intern(Symbol sym){
 		mappings.compareAndSet(map, newMap);
 		map = getMappings();
 		}
-	if(o instanceof Var && ((Var) o).ns == this)
+	if(isInternedMapping(sym, o))
 		return (Var) o;
 
 	if(v == null)
 		v = new Var(this, sym);
 
-	warnOrFailOnReplace(sym, o, v);
+	if(checkReplacement(sym, o, v)){
+		while (!mappings.compareAndSet(map, map.assoc(sym, v)))
+			map = getMappings();
 
+		return v;
+	}
 
-	while(!mappings.compareAndSet(map, map.assoc(sym, v)))
-		map = getMappings();
-
-	return v;
+	return (Var) o;
 }
 
-private void warnOrFailOnReplace(Symbol sym, Object o, Object v){
-    if (o instanceof Var)
-        {
-        Namespace ns = ((Var)o).ns;
-        if (ns == this || (v instanceof Var && ((Var)v).ns  == RT.CLOJURE_NS))
-            return;
-        if (ns != RT.CLOJURE_NS)
-            throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
-        }
-	RT.errPrintWriter().println("WARNING: " + sym + " already refers to: " + o + " in namespace: " + name
-		+ ", being replaced by: " + v);
+/*
+ This method checks if a namespace's mapping is applicable and warns on problematic cases.
+ It will return a boolean indicating if a mapping is replaceable.
+ The semantics of what constitutes a legal replacement mapping is summarized as follows:
+
+| classification | in namespace ns        | newval = anything other than ns/name | newval = ns/name                    |
+|----------------+------------------------+--------------------------------------+-------------------------------------|
+| native mapping | name -> ns/name        | no replace, warn-if newval not-core  | no replace, warn-if newval not-core |
+| alias mapping  | name -> other/whatever | warn + replace                       | warn + replace                      |
+*/
+private boolean checkReplacement(Symbol sym, Object old, Object neu){
+	if(old instanceof Var) {
+		Namespace ons = ((Var)old).ns;
+		Namespace nns = neu instanceof Var ? ((Var) neu).ns : null;
+
+		if(isInternedMapping(sym, old)){
+			if(nns != RT.CLOJURE_NS){
+				RT.errPrintWriter().println("REJECTED: attempt to replace interned var "
+						+ old +  " with " + neu + " in " + name + ", you must ns-unmap first");
+				return false;
+			}
+			else
+				return false;
+		}
+	}
+	RT.errPrintWriter().println("WARNING: " + sym + " already refers to: " + old + " in namespace: " + name
+			+ ", being replaced by: " + neu);
+	return true;
 }
 
 Object reference(Symbol sym, Object val){
@@ -99,6 +128,7 @@ Object reference(Symbol sym, Object val){
 		{
 		throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
 		}
+
 	IPersistentMap map = getMappings();
 	Object o;
 	while((o = map.valAt(sym)) == null)
@@ -110,13 +140,14 @@ Object reference(Symbol sym, Object val){
 	if(o == val)
 		return o;
 
-	warnOrFailOnReplace(sym, o, val);
+	if(checkReplacement(sym, o, val)){
+		while (!mappings.compareAndSet(map, map.assoc(sym, val)))
+			map = getMappings();
 
-	while(!mappings.compareAndSet(map, map.assoc(sym, val)))
-		map = getMappings();
+		return val;
+	}
 
-	return val;
-
+	return o;
 }
 
 public static boolean areDifferentInstancesOfSameClassName(Class cls1, Class cls2) {

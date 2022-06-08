@@ -9,7 +9,8 @@
 ; Author: Stuart Halloway
 
 (ns clojure.test-clojure.rt
-  (:require clojure.set)
+  (:require [clojure.string :as string]
+            clojure.set)
   (:use clojure.test clojure.test-helper))
 
 (defn bare-rt-print
@@ -75,31 +76,29 @@
   (.bindRoot #'example-var 0)
   (is (not (contains? (meta #'example-var) :macro))))
 
-(deftest last-var-wins-for-core
+(deftest ns-intern-policies
   (testing "you can replace a core name, with warning"
     (let [ns (temp-ns)
-        replacement (gensym)]
-      (with-err-string-writer (intern ns 'prefers replacement))
+          replacement (gensym)
+          e1 (with-err-string-writer (intern ns 'prefers replacement))]
+      (is (string/starts-with? e1 "WARNING"))
       (is (= replacement @('prefers (ns-publics ns))))))
-  (testing "you can replace a name you defined before"
+  (testing "you can replace a defined alias"
     (let [ns (temp-ns)
           s (gensym)
           v1 (intern ns 'foo s)
-          v2 (intern ns 'bar s)]
-      (with-err-string-writer (.refer ns 'flatten v1))
-      (.refer ns 'flatten v2)
+          v2 (intern ns 'bar s)
+          e1 (with-err-string-writer (.refer ns 'flatten v1))
+          e2 (with-err-string-writer (.refer ns 'flatten v2))]
+      (is (string/starts-with? e1 "WARNING"))
+      (is (string/starts-with? e2 "WARNING"))
       (is (= v2 (ns-resolve ns 'flatten)))))
-  (testing "you cannot intern over an existing non-core name"
-    (let [ns (temp-ns 'clojure.set)
-          replacement (gensym)]
-      (is (thrown? IllegalStateException
-                   (intern ns 'subset? replacement)))
-      (is (nil? ('subset? (ns-publics ns))))
-      (is (= #'clojure.set/subset? ('subset? (ns-refers ns))))))
-  (testing "you cannot refer over an existing non-core name"
-    (let [ns (temp-ns 'clojure.set)
-          replacement (gensym)]
-      (is (thrown? IllegalStateException
-                   (.refer ns 'subset? #'clojure.set/intersection)))
-      (is (nil? ('subset? (ns-publics ns))))
-      (is (= #'clojure.set/subset? ('subset? (ns-refers ns)))))))
+  (testing "you cannot replace an interned var"
+    (let [ns1 (temp-ns)
+          ns2 (temp-ns)
+          v1 (intern ns1 'foo 1)
+          v2 (intern ns2 'foo 2)
+          e1 (with-err-string-writer (.refer ns1 'foo v2))]
+      (is (string/starts-with? e1 "REJECTED"))
+      (is (= v1 (ns-resolve ns1 'foo))))))
+
