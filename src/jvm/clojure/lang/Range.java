@@ -18,6 +18,8 @@ import java.util.*;
  */
 public class Range extends ASeq implements IChunkedSeq, IReduce {
 
+private static final long serialVersionUID = -71973733672395145L;
+
 private static final int CHUNK_SIZE = 32;
 
 // Invariants guarantee this is never an "empty" seq

@@ -29,6 +29,8 @@ import java.util.NoSuchElementException;
 
 public class PersistentArrayMap extends APersistentMap implements IObj, IEditableCollection, IMapIterable, IKVReduce, IDrop{
 
+private static final long serialVersionUID = -2074065891090893601L;
+
 final Object[] array;
 static final int HASHTABLE_THRESHOLD = 16;
 

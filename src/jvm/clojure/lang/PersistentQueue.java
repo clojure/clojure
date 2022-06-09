@@ -24,6 +24,8 @@ import java.util.NoSuchElementException;
 
 public class PersistentQueue extends Obj implements IPersistentList, Collection, Counted, IHashEq{
 
+private static final long serialVersionUID = 8247184423915313132L;
+
 final public static PersistentQueue EMPTY = new PersistentQueue(null, 0, null, null);
 
 //*

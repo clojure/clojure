@@ -16,6 +16,8 @@ import java.io.StringWriter;
 
 public abstract class AMapEntry extends APersistentVector implements IMapEntry{
 
+private static final long serialVersionUID = -5007980429903443802L;
+
 public Object nth(int i){
 	if(i == 0)
 		return key();

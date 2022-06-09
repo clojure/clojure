@@ -16,6 +16,8 @@ import java.io.Serializable;
 
 final public class Cons extends ASeq implements Serializable {
 
+private static final long serialVersionUID = 6682587018567831263L;
+
 private final Object _first;
 private final ISeq _more;
 

@@ -16,6 +16,8 @@ import java.io.Serializable;
 
 public abstract class Obj implements IObj, Serializable {
 
+private static final long serialVersionUID = 802029099426284526L;
+
 final IPersistentMap _meta;
 
 public Obj(IPersistentMap meta){

@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PersistentVector extends APersistentVector implements IObj, IEditableCollection, IReduce, IKVReduce, IDrop{
 
+private static final long serialVersionUID = -7896022351281214157L;
+
 public static class Node implements Serializable {
 	transient public final AtomicReference<Thread> edit;
 	public final Object[] array;

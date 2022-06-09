@@ -16,6 +16,9 @@ package clojure.lang;
  * exception classes.
  */
 public class ExceptionInfo extends RuntimeException implements IExceptionInfo {
+
+    private static final long serialVersionUID = -1073473305916521986L;
+
     public final IPersistentMap data;
 
     public ExceptionInfo(String s, IPersistentMap data) {

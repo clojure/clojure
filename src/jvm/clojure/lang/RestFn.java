@@ -10,6 +10,9 @@
 package clojure.lang;
 
 public abstract class RestFn extends AFunction{
+
+private static final long serialVersionUID = -4319097849151802009L;
+
 abstract public int getRequiredArity();
 
 protected Object doInvoke(Object args) {

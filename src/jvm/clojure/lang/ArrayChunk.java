@@ -16,6 +16,8 @@ import java.io.Serializable;
 
 public final class ArrayChunk implements IChunk, Serializable {
 
+private static final long serialVersionUID = -8302142882294545702L;
+
 final Object[] array;
 final int off;
 final int end;

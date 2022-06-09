@@ -17,6 +17,8 @@ import java.math.BigDecimal;
 
 public final class BigInt extends Number implements IHashEq{
 
+private static final long serialVersionUID = 5097771279236135022L;
+
 final public long lpart;
 final public BigInteger bipart;
 

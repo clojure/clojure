@@ -13,6 +13,9 @@ package clojure.lang;
 import java.util.Iterator;
 
 public class MapEntry extends AMapEntry{
+
+private static final long serialVersionUID = -3752414622414469244L;
+
 final Object _key;
 final Object _val;
 

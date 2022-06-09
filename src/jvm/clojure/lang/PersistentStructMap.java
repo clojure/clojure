@@ -19,6 +19,8 @@ import java.util.NoSuchElementException;
 
 public class PersistentStructMap extends APersistentMap implements IObj{
 
+private static final long serialVersionUID = -2701411408470234065L;
+
 public static class Def implements Serializable{
 	final ISeq keys;
 	final IPersistentMap keyslots;

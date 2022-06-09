@@ -14,6 +14,8 @@ package clojure.lang;
 
 public class Repeat extends ASeq implements IReduce, IDrop {
 
+private static final long serialVersionUID = -5140377547192202551L;
+
 private static final long INFINITE = -1;
 
 private final long count;  // always INFINITE or >0

@@ -16,6 +16,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class StringSeq extends ASeq implements IndexedSeq,IDrop,IReduceInit{
+
+private static final long serialVersionUID = 7975525539139301753L;
+
 public final CharSequence s;
 public final int i;
 

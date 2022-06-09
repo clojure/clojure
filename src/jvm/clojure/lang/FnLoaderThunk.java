@@ -14,6 +14,8 @@ package clojure.lang;
 
 public class FnLoaderThunk extends RestFn{
 
+private static final long serialVersionUID = 2194257205455463687L;
+
 final Var v;
 final ClassLoader loader;
 final String fnClassName;

@@ -15,6 +15,8 @@ import java.util.*;
 
 public class PersistentList extends ASeq implements IPersistentList, IReduce, List, Counted {
 
+private static final long serialVersionUID = -8833289659955219995L;
+
 private final Object _first;
 private final IPersistentList _rest;
 private final int _count;

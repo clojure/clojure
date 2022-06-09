@@ -16,6 +16,8 @@ import java.util.*;
 
 public final class LazySeq extends Obj implements ISeq, Sequential, List, IPending, IHashEq{
 
+private static final long serialVersionUID = 7700080124382322592L;
+
 private IFn fn;
 private Object sv;
 private ISeq s;

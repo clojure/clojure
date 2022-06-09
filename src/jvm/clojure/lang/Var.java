@@ -19,6 +19,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Var extends ARef implements IFn, IRef, Settable, Serializable{
 
+private static final long serialVersionUID = 8368961370796295279L;
+
 static class TBox{
 
 volatile Object val;

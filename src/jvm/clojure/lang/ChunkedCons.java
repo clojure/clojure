@@ -14,6 +14,8 @@ package clojure.lang;
 
 final public class ChunkedCons extends ASeq implements IChunkedSeq{
 
+private static final long serialVersionUID = 2773920188566401743L;
+
 final IChunk chunk;
 final ISeq _more;
 

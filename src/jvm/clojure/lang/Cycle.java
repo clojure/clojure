@@ -14,6 +14,8 @@ package clojure.lang;
 
 public class Cycle extends ASeq implements IReduce, IPending {
 
+private static final long serialVersionUID = 4007270937279943908L;
+
 private final ISeq all;      // never null
 private final ISeq prev;
 private volatile ISeq _current; // lazily realized

@@ -14,6 +14,9 @@ import java.io.Serializable;
 import java.util.*;
 
 public abstract class APersistentMap extends AFn implements IPersistentMap, Map, Iterable, Serializable, MapEquivalence, IHashEq {
+
+private static final long serialVersionUID = 6736310834519110267L;
+
 int _hash;
 int _hasheq;
 

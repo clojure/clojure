@@ -18,6 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Namespace extends AReference implements Serializable {
+
+private static final long serialVersionUID = -3134444395801383865L;
+
 final public Symbol name;
 transient final AtomicReference<IPersistentMap> mappings = new AtomicReference<IPersistentMap>();
 transient final AtomicReference<IPersistentMap> aliases = new AtomicReference<IPersistentMap>();

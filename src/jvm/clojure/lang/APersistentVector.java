@@ -19,6 +19,9 @@ public abstract class APersistentVector extends AFn implements IPersistentVector
                                                                List,
                                                                RandomAccess, Comparable,
                                                                Serializable, IHashEq {
+
+private static final long serialVersionUID = 4667575149454420891L;
+
 int _hash;
 int _hasheq;
 

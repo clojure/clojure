@@ -15,6 +15,8 @@ package clojure.lang;
  */
 public class ArityException extends IllegalArgumentException {
 
+	private static final long serialVersionUID = 2265783180488869950L;
+
 	final public int actual;
 
 	final public String name;

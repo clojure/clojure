@@ -18,6 +18,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 public abstract class APersistentSet extends AFn implements IPersistentSet, Collection, Set, Serializable, IHashEq {
+
+private static final long serialVersionUID = 889908853183699706L;
+
 int _hash;
 int _hasheq;
 final IPersistentMap impl;

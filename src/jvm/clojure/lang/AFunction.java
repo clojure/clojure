@@ -17,6 +17,8 @@ import java.util.Comparator;
 
 public abstract class AFunction extends AFn implements IObj, Comparator, Fn, Serializable {
 
+private static final long serialVersionUID = 4469383498184457675L;
+
 public volatile MethodImplCache __methodImplCache;
 
 public IPersistentMap meta(){

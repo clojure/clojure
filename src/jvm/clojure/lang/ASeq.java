@@ -14,6 +14,9 @@ import java.io.Serializable;
 import java.util.*;
 
 public abstract class ASeq extends Obj implements ISeq, Sequential, List, Serializable, IHashEq {
+
+private static final long serialVersionUID = 4748650717905139299L;
+
 transient int _hash;
 transient int _hasheq;
 

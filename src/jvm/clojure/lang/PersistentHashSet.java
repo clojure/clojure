@@ -16,6 +16,8 @@ import java.util.List;
 
 public class PersistentHashSet extends APersistentSet implements IObj, IEditableCollection {
 
+private static final long serialVersionUID = 6973890746204954938L;
+
 static public final PersistentHashSet EMPTY = new PersistentHashSet(null, PersistentHashMap.EMPTY);
 
 final IPersistentMap _meta;

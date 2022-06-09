@@ -15,6 +15,9 @@ import java.io.NotSerializableException;
 import java.util.Iterator;
 
 public class IteratorSeq extends ASeq{
+
+private static final long serialVersionUID = -2631916503522522760L;
+
 final Iterator iter;
 final State state;
 

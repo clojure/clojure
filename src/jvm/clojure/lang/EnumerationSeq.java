@@ -17,6 +17,9 @@ import java.io.NotSerializableException;
 import java.util.Enumeration;
 
 public class EnumerationSeq extends ASeq{
+
+private static final long serialVersionUID = 5227192199685595994L;
+
 final Enumeration iter;
 final State state;
 

@@ -14,6 +14,8 @@ package clojure.lang;
 
 public class Iterate extends ASeq implements IReduce, IPending {
 
+private static final long serialVersionUID = -78221705247226450L;
+
 private static final Object UNREALIZED_SEED = new Object();
 private final IFn f;      // never null
 private final Object prevSeed;

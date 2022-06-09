@@ -27,6 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PersistentHashMap extends APersistentMap implements IEditableCollection, IObj, IMapIterable, IKVReduce {
 
+private static final long serialVersionUID = -8682496769319143320L;
+
 final int count;
 final INode root;
 final boolean hasNull;

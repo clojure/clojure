@@ -17,6 +17,9 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 
 public class Ratio extends Number implements Comparable{
+
+private static final long serialVersionUID = -576272795628662988L;
+
 final public BigInteger numerator;
 final public BigInteger denominator;
 

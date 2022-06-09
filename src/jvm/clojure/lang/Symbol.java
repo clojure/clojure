@@ -17,6 +17,9 @@ import java.io.ObjectStreamException;
 
 
 public class Symbol extends AFn implements IObj, Comparable, Named, Serializable, IHashEq{
+
+private static final long serialVersionUID = 1191039485148212259L;
+
 final String ns;
 final String name;
 private int _hasheq;
