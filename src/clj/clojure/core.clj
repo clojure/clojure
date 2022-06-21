@@ -2924,7 +2924,7 @@
           (cons (first s) (take-while pred (rest s))))))))
 
 (defn drop
-  "Returns a lazy sequence of all but the first n items in coll.
+  "Returns a laziness-preserving sequence of all but the first n items in coll.
   Returns a stateful transducer when no collection is provided."
   {:added "1.0"
    :static true}
@@ -2941,12 +2941,14 @@
                   result
                   (rf result input))))))))
   ([n coll]
-     (let [step (fn [n coll]
-                  (let [s (seq coll)]
-                    (if (and (pos? n) s)
-                      (recur (dec n) (rest s))
-                      s)))]
-       (lazy-seq (step n coll)))))
+     (if (instance? clojure.lang.IDrop coll)
+       (or (.drop ^clojure.lang.IDrop coll n) ())
+       (let [step (fn [n coll]
+                    (let [s (seq coll)]
+                      (if (and (pos? n) s)
+                        (recur (dec n) (rest s))
+                        s)))]
+         (lazy-seq (step n coll))))))
 
 (defn drop-last
   "Return a lazy sequence of all but the last n (default 1) items in coll"
@@ -3167,20 +3169,24 @@
   {:added "1.0"
    :static true}
   [coll n]
+  (if (instance? clojure.lang.IDrop coll)
+    (.drop ^clojure.lang.IDrop coll n)
     (loop [n n xs (seq coll)]
       (if (and xs (pos? n))
         (recur (dec n) (next xs))
-        xs)))
+        xs))))
 
 (defn nthrest
   "Returns the nth rest of coll, coll when n is 0."
   {:added "1.3"
    :static true}
   [coll n]
+  (if (instance? clojure.lang.IDrop coll)
+    (or (.drop ^clojure.lang.IDrop coll n) ())
     (loop [n n xs coll]
       (if-let [xs (and (pos? n) (seq xs))]
         (recur (dec n) (rest xs))
-        xs)))
+        xs))))
 
 (defn partition
   "Returns a lazy sequence of lists of n items each, at offsets step
@@ -7338,6 +7344,50 @@ fails, attempts to require sym's namespace and retries."
       (when-let [s (seq coll)]
         (let [seg (doall (take n s))]
           (cons seg (partition-all n step (nthrest s step))))))))
+
+(defn splitv-at
+  "Returns a vector of [(into [] (take n) coll) (drop n coll)]"
+  {:added "1.12"}
+  [n coll]
+  [(into [] (take n) coll) (drop n coll)])
+
+(defn partitionv
+  "Returns a lazy sequence of vectors of n items each, at offsets step
+  apart. If step is not supplied, defaults to n, i.e. the partitions
+  do not overlap. If a pad collection is supplied, use its elements as
+  necessary to complete last partition upto n items. In case there are
+  not enough padding elements, return a partition with less than n items."
+  {:added "1.12"}
+  ([n coll]
+   (partitionv n n coll))
+  ([n step coll]
+   (lazy-seq
+     (when-let [s (seq coll)]
+       (let [p (into [] (take n) s)]
+         (when (= n (count p))
+           (cons p (partitionv n step (nthrest s step))))))))
+  ([n step pad coll]
+   (lazy-seq
+     (when-let [s (seq coll)]
+       (let [p (into [] (take n) s)]
+         (if (= n (count p))
+           (cons p (partitionv n step pad (nthrest s step)))
+           (into [] (take n) (concat p pad))))))))
+
+(defn partitionv-all
+  "Returns a lazy sequence of vector partitions, but may include
+  partitions with fewer than n items at the end.
+  Returns a stateful transducer when no collection is provided."
+  {:added "1.12"}
+  ([n]
+   (partition-all n))
+  ([n coll]
+   (partitionv-all n n coll))
+  ([n step coll]
+   (lazy-seq
+     (when-let [s (seq coll)]
+       (let [seg (into [] (take n) coll)]
+         (cons seg (partitionv-all n step (drop step s))))))))
 
 (defn shuffle
   "Return a random permutation of coll"

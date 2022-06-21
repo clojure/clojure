@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
  * <p>null keys and values are ok, but you won't be able to distinguish a null value via valAt - use contains/entryAt</p>
  */
 
-public class PersistentArrayMap extends APersistentMap implements IObj, IEditableCollection, IMapIterable, IKVReduce{
+public class PersistentArrayMap extends APersistentMap implements IObj, IEditableCollection, IMapIterable, IKVReduce, IDrop{
 
 final Object[] array;
 static final int HASHTABLE_THRESHOLD = 16;
@@ -348,11 +348,19 @@ public ISeq seq(){
 	return null;
 }
 
+public Sequential drop(int n) {
+	if(array.length > 0) {
+		return ((Seq) seq()).drop(n);
+	} else {
+		return null;
+	}
+}
+
 public IPersistentMap meta(){
 	return _meta;
 }
 
-static class Seq extends ASeq implements Counted{
+static class Seq extends ASeq implements Counted, IReduce, IDrop {
 	final Object[] array;
 	final int i;
 
@@ -381,16 +389,52 @@ static class Seq extends ASeq implements Counted{
 		return (array.length - i) / 2;
 	}
 
+	public Sequential drop(int n) {
+		if(n < count()) {
+			return new Seq(array, i + (2 * n));
+		} else {
+			return null;
+		}
+	}
+
 	public Obj withMeta(IPersistentMap meta){
 		if(meta() == meta)
 			return this;
 		return new Seq(meta, array, i);
 	}
+
+	public Iterator iterator() {
+		return new Iter(array, i-2, APersistentMap.MAKE_ENTRY);
+	}
+
+	public Object reduce(IFn f) {
+		if(i < array.length) {
+			Object acc = MapEntry.create(array[i], array[i+1]);
+			for(int j=i+2;j < array.length;j+=2){
+				acc = f.invoke(acc, MapEntry.create(array[j], array[j+1]));
+				if(RT.isReduced(acc))
+					return ((IDeref)acc).deref();
+			}
+			return acc;
+		} else {
+			return f.invoke();
+		}
+	}
+
+	public Object reduce(IFn f, Object init) {
+		Object acc = init;
+		for(int j=i;j < array.length;j+=2){
+			acc = f.invoke(acc, MapEntry.create(array[j], array[j+1]));
+			if(RT.isReduced(acc))
+				return ((IDeref)acc).deref();
+		}
+		return acc;
+	}
 }
 
 static class Iter implements Iterator{
-    IFn f;
-	Object[] array;
+	final IFn f;
+	final Object[] array;
 	int i;
 
 	//for iterator

@@ -12,7 +12,7 @@ package clojure.lang;
 
 /* Alex Miller, Dec 5, 2014 */
 
-public class Repeat extends ASeq implements IReduce {
+public class Repeat extends ASeq implements IReduce, IDrop {
 
 private static final long INFINITE = -1;
 
@@ -94,6 +94,16 @@ public Object reduce(IFn f, Object start){
                 return ((IDeref)ret).deref();
         }
         return ret;
+    }
+}
+
+public Sequential drop(int n) {
+    if(count > 1) {
+        return new Repeat(count-n, val);
+    } else if(count == INFINITE) {
+        return this;
+    } else {
+        return null;
     }
 }
 

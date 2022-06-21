@@ -796,6 +796,23 @@
     (is (= (assoc (array-map (repeat 1 :x) :y) '(:x) :z) {'(:x) :z}))
     (is (= (assoc (hash-map (repeat 1 :x) :y) '(:x) :z) {'(:x) :z})))
 
+(deftest test-partitionv
+  (are [x y] (= x y)
+    (partitionv 2 [1 2 3]) '((1 2))
+    (partitionv 2 [1 2 3 4]) '((1 2) (3 4))
+    (partitionv 2 []) ()
+
+    (partitionv 2 3 [1 2 3 4 5 6 7]) '((1 2) (4 5))
+    (partitionv 2 3 [1 2 3 4 5 6 7 8]) '((1 2) (4 5) (7 8))
+    (partitionv 2 3 []) ()
+
+    (partitionv 1 []) ()
+    (partitionv 1 [1 2 3]) '((1) (2) (3))
+
+    (partitionv 5 [1 2 3]) ()
+
+    (partitionv -1 [1 2 3]) ()
+    (partitionv -2 [1 2 3]) () ))
 
 (deftest test-iterate
       (are [x y] (= x y)
@@ -1331,6 +1348,12 @@
   (is (= (partition-all 4 2 [1 2 3 4 5 6 7 8 9])
 	 [[1 2 3 4] [3 4 5 6] [5 6 7 8] [7 8 9] [9]])))
 
+(deftest test-partitionv-all
+  (is (= (partitionv-all 4 [1 2 3 4 5 6 7 8 9])
+        [[1 2 3 4] [5 6 7 8] [9]]))
+  (is (= (partitionv-all 4 2 [1 2 3 4 5 6 7 8 9])
+        [[1 2 3 4] [3 4 5 6] [5 6 7 8] [7 8 9] [9]])))
+
 (deftest test-shuffle-invariants
   (is (= (count (shuffle [1 2 3 4])) 4))
   (let [shuffled-seq (shuffle [1 2 3 4])]
@@ -1457,6 +1480,42 @@
            (vec (iteration api
                            :kf #(some-> % :k #{0 1 2})
                            :vf :item))))))
+
+(deftest test-reduce-on-coll-seqs
+  ;; reduce on seq of coll, both with and without an init
+  (are [coll expected expected-init]
+    (and
+      (= expected-init (reduce conj [:init] (seq coll)))
+      (= expected (reduce conj (seq coll))))
+    ;; (seq [ ... ])
+    []      []    [:init]
+    [1]     1     [:init 1]
+    [[1] 2] [1 2] [:init [1] 2]
+
+    ;; (seq { ... })
+    {}        []          [:init]
+    {1 1}     [1 1]       [:init [1 1]]
+    {1 1 2 2} [1 1 [2 2]] [:init [1 1] [2 2]]
+
+    ;; (seq (hash-map ... ))
+    (hash-map)         []          [:init]
+    (hash-map 1 1)     [1 1]       [:init [1 1]]
+    (hash-map 1 1 2 2) [1 1 [2 2]] [:init [1 1] [2 2]]
+
+    ;; (seq (sorted-map ... ))
+    (sorted-map)         []          [:init]
+    (sorted-map 1 1)     [1 1]       [:init [1 1]]
+    (sorted-map 1 1 2 2) [1 1 [2 2]] [:init [1 1] [2 2]])
+
+  (are [coll expected expected-init]
+    (and
+      (= expected-init (reduce + 100 (seq coll)))
+      (= expected (reduce + (seq coll))))
+
+    ;; (seq (range ...))
+    (range 0)   0 100
+    (range 1 2) 1 101
+    (range 1 3) 3 103))
 
 (defspec iteration-seq-equals-reduce 1000
   (prop/for-all [initk gen/int
