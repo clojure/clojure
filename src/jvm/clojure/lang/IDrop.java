@@ -20,7 +20,7 @@ public interface IDrop{
      * useful if the returned coll implements IDrop for subsequent use in a
      * partition-like scenario.
      *
-     * If n is <= 0, return this.
+     * If n is &lt;= 0, return this.
      * If n drops to or past the end of the collection, return null.
      *
      * @param n Items to drop
