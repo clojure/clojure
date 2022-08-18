@@ -100,12 +100,15 @@ public Object reduce(IFn f, Object start){
 }
 
 public Sequential drop(int n) {
-    if(count > 1) {
-        return new Repeat(count-n, val);
-    } else if(count == INFINITE) {
+    if(count == INFINITE) {
         return this;
     } else {
-        return null;
+        long droppedCount = count-n;
+        if(droppedCount > 0) {
+            return new Repeat(droppedCount, val);
+        } else {
+            return null;
+        }
     }
 }
 

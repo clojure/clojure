@@ -1003,7 +1003,12 @@
       () '(1 2)
       [] [1 2]
       {} {:a 1 :b 2}
-      #{} #{1 2} ))
+      #{} #{1 2})
+
+  ; CLJ-2718
+  (is (= '(:a) (drop 1 (repeat 2 :a))))
+  (is (= () (drop 2 (repeat 2 :a))))
+  (is (= () (drop 3 (repeat 2 :a)))))
 
 (defspec longrange-equals-range 1000
   (prop/for-all [start gen/int
