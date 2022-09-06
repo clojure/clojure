@@ -101,7 +101,7 @@ public static ISeq create(final Object start, Object end, Object step) {
 public Obj withMeta(IPersistentMap meta){
 	if(meta == _meta)
 		return this;
-	return new Range(meta, end, start, step, boundsCheck, _chunk, _chunkNext);
+	return new Range(meta, start, end, step, boundsCheck, _chunk, _chunkNext);
 }
 
 public Object first(){
