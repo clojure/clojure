@@ -21,6 +21,8 @@
               CharArrayReader Closeable)
      (java.net URI URL MalformedURLException Socket URLDecoder URLEncoder)))
 
+(set! *warn-on-reflection* true)
+
 (def
     ^{:doc "Type object for a Java primitive byte array."
       :private true
@@ -385,7 +387,7 @@
 (defmethod do-copy [byte-array-type Writer] [^"[B" input ^Writer output opts]
   (do-copy (ByteArrayInputStream. input) output opts))
 
-(defmethod do-copy [byte-array-type File] [^"[B" input ^Writer output opts]
+(defmethod do-copy [byte-array-type File] [^"[B" input ^File output opts]
   (do-copy (ByteArrayInputStream. input) output opts))
 
 (defn copy
