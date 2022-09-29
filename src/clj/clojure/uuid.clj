@@ -9,8 +9,9 @@
 (ns clojure.uuid)
 
 (defn- default-uuid-reader [form]
-  {:pre [(string? form)]}
-  (java.util.UUID/fromString form))
+  (if (string? form)
+    (java.util.UUID/fromString form)
+    (throw (IllegalArgumentException. "#uuid data reader expected string"))))
 
 (defmethod print-method java.util.UUID [uuid ^java.io.Writer w]
   (.write w (str "#uuid \"" (str uuid) "\"")))
