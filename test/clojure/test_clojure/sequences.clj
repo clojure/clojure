@@ -781,6 +781,8 @@
 
     (partition 5 [1 2 3]) ()
 
+    (partition 4 4 [0 0 0] (range 10)) '((0 1 2 3) (4 5 6 7) (8 9 0 0))
+
 ;    (partition 0 [1 2 3]) (repeat nil)   ; infinite sequence of nil
     (partition -1 [1 2 3]) ()
     (partition -2 [1 2 3]) () )
@@ -809,6 +811,8 @@
     (partitionv 1 []) ()
     (partitionv 1 [1 2 3]) '((1) (2) (3))
 
+    (partitionv 4 4 [0 0 0] (range 10)) '([0 1 2 3] [4 5 6 7] [8 9 0 0])
+ 
     (partitionv 5 [1 2 3]) ()
 
     (partitionv -1 [1 2 3]) ()

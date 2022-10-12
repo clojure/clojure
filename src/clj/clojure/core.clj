@@ -7375,7 +7375,7 @@ fails, attempts to require sym's namespace and retries."
        (let [p (into [] (take n) s)]
          (if (= n (count p))
            (cons p (partitionv n step pad (nthrest s step)))
-           (into [] (take n) (concat p pad))))))))
+           (list (into [] (take n) (concat p pad)))))))))
 
 (defn partitionv-all
   "Returns a lazy sequence of vector partitions, but may include
