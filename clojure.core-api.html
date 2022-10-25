@@ -4810,18 +4810,20 @@ name (fn ([params* ] exprs*)+)) with any doc-string or attrs added
 to the var metadata. prepost-map defines a map with optional keys
 :pre and :post that contain collections of pre or post conditions.</pre>
     <pre id="var-specs">Specs:
-  Args: (cat
-         :fn-name simple-symbol?
-         :docstring (? string?)
-         :meta (? map?)
-         :fn-tail (alt
-                   :arity-1 :clojure.core.specs.alpha/params+body
-                   :arity-n (cat
-                             :bodies (+
-                                       (spec
-                                         :clojure.core.specs.alpha/params+body))
-                             :attr-map (? map?))))
-  Ret:  any?</pre>
+  Args: (fspec
+          :args
+          :clojure.core.specs.alpha/defn-args
+          :ret
+          any?
+          :fn
+          nil)
+  Ret:  (fspec
+          :args
+          :clojure.core.specs.alpha/defn-args
+          :ret
+          any?
+          :fn
+          nil)</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2b3ba822815981e7f76907a3b75e9ecc428f7656/src/clj/clojure/core.clj#L285">Source</a>
@@ -4834,18 +4836,20 @@ to the var metadata. prepost-map defines a map with optional keys
 </pre>
     <pre id="var-docstr">same as defn, yielding non-public def</pre>
     <pre id="var-specs">Specs:
-  Args: (cat
-         :fn-name simple-symbol?
-         :docstring (? string?)
-         :meta (? map?)
-         :fn-tail (alt
-                   :arity-1 :clojure.core.specs.alpha/params+body
-                   :arity-n (cat
-                             :bodies (+
-                                       (spec
-                                         :clojure.core.specs.alpha/params+body))
-                             :attr-map (? map?))))
-  Ret:  any?</pre>
+  Args: (fspec
+          :args
+          :clojure.core.specs.alpha/defn-args
+          :ret
+          any?
+          :fn
+          nil)
+  Ret:  (fspec
+          :args
+          :clojure.core.specs.alpha/defn-args
+          :ret
+          any?
+          :fn
+          nil)</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2b3ba822815981e7f76907a3b75e9ecc428f7656/src/clj/clojure/core.clj#L4950">Source</a>
@@ -6088,14 +6092,32 @@ Defines a function.
 
 See <a href="https://clojure.org/reference/special_forms#fn">https://clojure.org/reference/special_forms#fn</a> for more information</pre>
     <pre id="var-specs">Specs:
-  Args: (cat
-         :fn-name (? simple-symbol?)
-         :fn-tail (alt
-                   :arity-1 :clojure.core.specs.alpha/params+body
-                   :arity-n (+
-                              (spec
-                                :clojure.core.specs.alpha/params+body))))
-  Ret:  any?</pre>
+  Args: (fspec
+          :args
+          (cat
+           :fn-name (? simple-symbol?)
+           :fn-tail (alt
+                     :arity-1 :clojure.core.specs.alpha/params+body
+                     :arity-n (+
+                                (spec
+                                  :clojure.core.specs.alpha/params+body))))
+          :ret
+          any?
+          :fn
+          nil)
+  Ret:  (fspec
+          :args
+          (cat
+           :fn-name (? simple-symbol?)
+           :fn-tail (alt
+                     :arity-1 :clojure.core.specs.alpha/params+body
+                     :arity-n (+
+                                (spec
+                                  :clojure.core.specs.alpha/params+body))))
+          :ret
+          any?
+          :fn
+          nil)</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2b3ba822815981e7f76907a3b75e9ecc428f7656/src/clj/clojure/core.clj#L4535">Source</a>
@@ -6721,11 +6743,26 @@ Please see <a href="https://clojure.org/reference/special_forms#if">https://cloj
 If test is true, evaluates then with binding-form bound to the value of 
 test, if not, yields else</pre>
     <pre id="var-specs">Specs:
-  Args: (cat
-         :bindings (and vector? :clojure.core.specs.alpha/binding)
-         :then any?
-         :else (? any?))
-  Ret:  any?</pre>
+  Args: (fspec
+          :args
+          (cat
+           :bindings (and vector? :clojure.core.specs.alpha/binding)
+           :then any?
+           :else (? any?))
+          :ret
+          any?
+          :fn
+          nil)
+  Ret:  (fspec
+          :args
+          (cat
+           :bindings (and vector? :clojure.core.specs.alpha/binding)
+           :then any?
+           :else (? any?))
+          :ret
+          any?
+          :fn
+          nil)</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2b3ba822815981e7f76907a3b75e9ecc428f7656/src/clj/clojure/core.clj#L1858">Source</a>
@@ -6785,12 +6822,20 @@ For each name in class-name-symbols, adds a mapping from name to the
 class named by package.name to the current namespace. Use :import in the ns
 macro in preference to calling this directly.</pre>
     <pre id="var-specs">Specs:
-  Args: (*
-          (alt
-           :class (quotable simple-symbol?)
-           :package-list (quotable
-                           :clojure.core.specs.alpha/package-list)))
-  Ret:  any?</pre>
+  Args: (fspec
+          :args
+          :clojure.core.specs.alpha/quotable-import-list
+          :ret
+          any?
+          :fn
+          nil)
+  Ret:  (fspec
+          :args
+          :clojure.core.specs.alpha/quotable-import-list
+          :ret
+          any?
+          :fn
+          nil)</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2b3ba822815981e7f76907a3b75e9ecc428f7656/src/clj/clojure/core.clj#L3426">Source</a>
@@ -7297,10 +7342,24 @@ therein.
 See <a href="https://clojure.org/reference/special_forms#binding-forms">https://clojure.org/reference/special_forms#binding-forms</a> for
 more information about destructuring.</pre>
     <pre id="var-specs">Specs:
-  Args: (cat
-         :bindings :clojure.core.specs.alpha/bindings
-         :body (* any?))
-  Ret:  any?</pre>
+  Args: (fspec
+          :args
+          (cat
+           :bindings :clojure.core.specs.alpha/bindings
+           :body (* any?))
+          :ret
+          any?
+          :fn
+          nil)
+  Ret:  (fspec
+          :args
+          (cat
+           :bindings :clojure.core.specs.alpha/bindings
+           :body (* any?))
+          :ret
+          any?
+          :fn
+          nil)</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2b3ba822815981e7f76907a3b75e9ecc428f7656/src/clj/clojure/core.clj#L4498">Source</a>
@@ -8098,12 +8157,20 @@ individual calls to in-ns/require/use/import:
   (:import (java.util Date Timer Random)
            (java.sql Connection Statement)))</pre>
     <pre id="var-specs">Specs:
-  Args: (cat
-         :ns-name simple-symbol?
-         :docstring (? string?)
-         :attr-map (? map?)
-         :ns-clauses :clojure.core.specs.alpha/ns-clauses)
-  Ret:  any?</pre>
+  Args: (fspec
+          :args
+          :clojure.core.specs.alpha/ns-form
+          :ret
+          any?
+          :fn
+          nil)
+  Ret:  (fspec
+          :args
+          :clojure.core.specs.alpha/ns-form
+          :ret
+          any?
+          :fn
+          nil)</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2b3ba822815981e7f76907a3b75e9ecc428f7656/src/clj/clojure/core.clj#L5789">Source</a>
@@ -9464,18 +9531,44 @@ clashes. Use :use in the ns macro in preference to calling this directly.</pre>
 </pre>
     <pre id="var-docstr">Same as (refer 'clojure.core &lt;filters&gt;)</pre>
     <pre id="var-specs">Specs:
-  Args: (*
-          (alt
-           :exclude (cat
-                     :op (quotable #{:exclude})
-                     :arg (quotable :clojure.core.specs.alpha/exclude))
-           :only (cat
-                  :op (quotable #{:only})
-                  :arg (quotable :clojure.core.specs.alpha/only))
-           :rename (cat
-                    :op (quotable #{:rename})
-                    :arg (quotable :clojure.core.specs.alpha/rename))))
-  Ret:  any?</pre>
+  Args: (fspec
+          :args
+          (*
+            (alt
+             :exclude (cat
+                       :op (quotable #{:exclude})
+                       :arg (quotable
+                              :clojure.core.specs.alpha/exclude))
+             :only (cat
+                    :op (quotable #{:only})
+                    :arg (quotable :clojure.core.specs.alpha/only))
+             :rename (cat
+                      :op (quotable #{:rename})
+                      :arg (quotable
+                             :clojure.core.specs.alpha/rename))))
+          :ret
+          any?
+          :fn
+          nil)
+  Ret:  (fspec
+          :args
+          (*
+            (alt
+             :exclude (cat
+                       :op (quotable #{:exclude})
+                       :arg (quotable
+                              :clojure.core.specs.alpha/exclude))
+             :only (cat
+                    :op (quotable #{:only})
+                    :arg (quotable :clojure.core.specs.alpha/only))
+             :rename (cat
+                      :op (quotable #{:rename})
+                      :arg (quotable
+                             :clojure.core.specs.alpha/rename))))
+          :ret
+          any?
+          :fn
+          nil)</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2b3ba822815981e7f76907a3b75e9ecc428f7656/src/clj/clojure/core.clj#L5847">Source</a>
@@ -11764,10 +11857,24 @@ Roughly the same as (when (seq xs) (let [x (first xs)] body)) but xs is evaluate
 
 When test is true, evaluates body with binding-form bound to the value of test</pre>
     <pre id="var-specs">Specs:
-  Args: (cat
-         :bindings (and vector? :clojure.core.specs.alpha/binding)
-         :body (* any?))
-  Ret:  any?</pre>
+  Args: (fspec
+          :args
+          (cat
+           :bindings (and vector? :clojure.core.specs.alpha/binding)
+           :body (* any?))
+          :ret
+          any?
+          :fn
+          nil)
+  Ret:  (fspec
+          :args
+          (cat
+           :bindings (and vector? :clojure.core.specs.alpha/binding)
+           :body (* any?))
+          :ret
+          any?
+          :fn
+          nil)</pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/2b3ba822815981e7f76907a3b75e9ecc428f7656/src/clj/clojure/core.clj#L1878">Source</a>
