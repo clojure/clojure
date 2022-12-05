@@ -137,7 +137,7 @@ public Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object 
                      Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20,
                      Object... args)
 		{
-	return throwArity(21);
+	return throwArity(20 + args.length);
 }
 
 public Object applyTo(ISeq arglist) {
