@@ -500,7 +500,6 @@ static public final class ChunkedSeq extends ASeq implements IChunkedSeq,Counted
 		} else {
 			int i = this.i +o;
 			if(i < vec.cnt) { // in vec
-				Object[] array = vec.arrayFor(i);
 				int newOffset = i%32;
 				return new ChunkedSeq(vec, vec.arrayFor(i), i-newOffset, newOffset);
 			} else {
