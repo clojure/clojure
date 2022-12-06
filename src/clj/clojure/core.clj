@@ -5382,17 +5382,17 @@
   [xs] `(. clojure.lang.Numbers booleans ~xs))
 
 (definline bytes
-  "Casts to bytes[]"
+  "Casts to byte[]"
   {:added "1.1"}
   [xs] `(. clojure.lang.Numbers bytes ~xs))
 
 (definline chars
-  "Casts to chars[]"
+  "Casts to char[]"
   {:added "1.1"}
   [xs] `(. clojure.lang.Numbers chars ~xs))
 
 (definline shorts
-  "Casts to shorts[]"
+  "Casts to short[]"
   {:added "1.1"}
   [xs] `(. clojure.lang.Numbers shorts ~xs))
 
