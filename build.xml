@@ -77,7 +77,10 @@
       <arg value="clojure.java.browse"/>
       <arg value="clojure.java.javadoc"/>
       <arg value="clojure.java.shell"/>
+      <arg value="clojure.java.process"/>
       <arg value="clojure.java.browse-ui"/>
+      <arg value="clojure.java.basis.impl"/>
+      <arg value="clojure.java.basis"/>
       <arg value="clojure.string"/>
       <arg value="clojure.data"/>
       <arg value="clojure.reflect"/>
@@ -86,6 +89,8 @@
       <arg value="clojure.uuid"/>
       <arg value="clojure.core.reducers"/>
       <arg value="clojure.math"/>
+      <arg value="clojure.tools.deps.interop"/>
+      <arg value="clojure.repl.deps"/>
     </java>
   </target>
 
