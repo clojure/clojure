@@ -33,7 +33,7 @@ namespace.
     <div class="NamespaceTOC">
       <span class="toc-header">Namespaces</span>
       <ul id="left-sidebar-list">
-        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.datafy-api.html">clojure.datafy</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.math-api.html">clojure.math</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
+        <li><a class="wiki_link" href="clojure.core-api.html">clojure.core</a></li><li><a class="wiki_link" href="clojure.data-api.html">clojure.data</a></li><li><a class="wiki_link" href="clojure.datafy-api.html">clojure.datafy</a></li><li><a class="wiki_link" href="clojure.edn-api.html">clojure.edn</a></li><li><a class="wiki_link" href="clojure.inspector-api.html">clojure.inspector</a></li><li><a class="wiki_link" href="clojure.instant-api.html">clojure.instant</a></li><li><a class="wiki_link" href="clojure.java.basis-api.html">clojure.java.basis</a></li><li><a class="wiki_link" href="clojure.java.browse-api.html">clojure.java.browse</a></li><li><a class="wiki_link" href="clojure.java.io-api.html">clojure.java.io</a></li><li><a class="wiki_link" href="clojure.java.javadoc-api.html">clojure.java.javadoc</a></li><li><a class="wiki_link" href="clojure.java.process-api.html">clojure.java.process</a></li><li><a class="wiki_link" href="clojure.java.shell-api.html">clojure.java.shell</a></li><li><a class="wiki_link" href="clojure.main-api.html">clojure.main</a></li><li><a class="wiki_link" href="clojure.math-api.html">clojure.math</a></li><li><a class="wiki_link" href="clojure.pprint-api.html">clojure.pprint</a></li><li><a class="wiki_link" href="clojure.reflect-api.html">clojure.reflect</a></li><li><a class="wiki_link" href="clojure.repl-api.html">clojure.repl</a></li><li><a class="wiki_link" href="clojure.set-api.html">clojure.set</a></li><li><a class="wiki_link" href="clojure.stacktrace-api.html">clojure.stacktrace</a></li><li><a class="wiki_link" href="clojure.string-api.html">clojure.string</a></li><li><a class="wiki_link" href="clojure.template-api.html">clojure.template</a></li><li><a class="wiki_link" href="clojure.test-api.html">clojure.test</a></li><li><a class="wiki_link" href="clojure.tools.deps.interop-api.html">clojure.tools.deps.interop</a></li><li><a class="wiki_link" href="clojure.walk-api.html">clojure.walk</a></li><li><a class="wiki_link" href="clojure.xml-api.html">clojure.xml</a></li><li><a class="wiki_link" href="clojure.zip-api.html">clojure.zip</a></li>
       </ul>
     </div>
     <div class="BranchTOC">
@@ -106,6 +106,18 @@ namespace.
   </div><div class="toc-section" style="margin-left: 1em;">
     <a style="margin-top: 3px;" href="#"></a>
     
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#clojure.repl.deps">clojure.repl.deps</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.repl.deps/add-lib" class="toc-entry-anchor">add-lib</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.repl.deps/add-libs" class="toc-entry-anchor">add-libs</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.repl.deps/sync-deps" class="toc-entry-anchor">sync-deps</a>
+      
+    </div>
   </div>
 </div>
 </div>
@@ -308,6 +320,73 @@ to stop the given thread.  Defaults to the current thread</pre>
     
     
     <a id="var-source" href="https://github.com/clojure/clojure/blob/3b6256e654bf250ddfd01cdaa4be9f39a74c2de6/src/clj/clojure/repl.clj#L273">Source</a>
+  </div>
+</div>
+
+<br />
+<h2 id="clojure.repl.deps">clojure.repl.deps</h2>
+<pre id="namespace-docstr">clojure.repl.deps provides facilities for dynamically modifying the available
+libraries in the runtime when running at the REPL, without restarting</pre>
+
+
+<br />
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.repl.deps/add-lib">add-lib</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (add-lib lib coord)
+       (add-lib lib)
+</pre>
+    <pre id="var-docstr">Given a lib that is not yet on the repl classpath, make it available by
+downloading the library if necessary and adding it to the classloader.
+Libs already on the classpath are not updated. Requires a valid parent
+DynamicClassLoader.
+
+ lib - symbol identifying a library, for Maven: groupId/artifactId
+ coord - optional map of location information specific to the procurer,
+         or latest if not supplied
+
+Returns coll of libs loaded, including transitive (or nil if none).
+
+For info on libs, coords, and versions, see:
+ <a href="https://clojure.org/reference/deps_and_cli">https://clojure.org/reference/deps_and_cli</a></pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/d0175370c05ef12304aa46236012bc56059c3ddc/src/clj/clojure/repl/deps.clj#L57">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.repl.deps/add-libs">add-libs</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (add-libs lib-coords)
+</pre>
+    <pre id="var-docstr">Given lib-coords, a map of lib to coord, will resolve all transitive deps for the libs
+together and add them to the repl classpath, unlike separate calls to add-lib.</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/d0175370c05ef12304aa46236012bc56059c3ddc/src/clj/clojure/repl/deps.clj#L35">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.repl.deps/sync-deps">sync-deps</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (sync-deps &amp; {:as opts})
+</pre>
+    <pre id="var-docstr">Calls add-libs with any libs present in deps.edn but not yet present on the classpath.
+
+:aliases - coll of alias keywords to use during the sync</pre>
+    <pre id="var-specs"></pre>
+    <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/d0175370c05ef12304aa46236012bc56059c3ddc/src/clj/clojure/repl/deps.clj#L83">Source</a>
   </div>
 </div>
 
