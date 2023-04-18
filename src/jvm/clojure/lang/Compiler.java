@@ -6342,7 +6342,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 			ISeq body = RT.next(RT.next(form));
 
 			if(context == C.EVAL
-			   || (context != C.RETURN && isLoop))
+			   || (context == C.EXPRESSION && isLoop))
 				return analyze(context, RT.list(RT.list(FNONCE, PersistentVector.EMPTY, form)));
 
 			ObjMethod method = (ObjMethod) METHOD.deref();
