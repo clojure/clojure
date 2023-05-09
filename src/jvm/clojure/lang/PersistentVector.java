@@ -366,9 +366,7 @@ public Object kvreduce(IFn f, Object init){
 }
 
 public Sequential drop(int n) {
-	if(n < 0) {
-		return this;
-	} else if(n < cnt) {
+	if(n < cnt) {
 		int offset = n%32;
 		return new ChunkedSeq(this, this.arrayFor(n), n-offset, offset);
 	} else {
@@ -617,7 +615,7 @@ static final class TransientVector extends AFn implements ITransientVector, ITra
 		ensureEditable();
 		return cnt;
 	}
-	
+
 	Node ensureEditable(Node node){
 		if(node.edit == root.edit)
 			return node;
