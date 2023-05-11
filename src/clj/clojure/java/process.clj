@@ -41,18 +41,18 @@
   "Coerce f to a file per clojure.java.io/file and return a ProcessBuilder.Redirect writing to the file.
   Set ':append' in opts to append. This can be passed to 'start' in :out or :err."
   {:added "1.12"}
-  ^ProcessBuilder$Redirect [file & {:keys [append] :as opts}]
-  (let [f (jio/file file)]
+  ^ProcessBuilder$Redirect [f & {:keys [append] :as opts}]
+  (let [fo (jio/file f)]
     (if append
-      (ProcessBuilder$Redirect/appendTo f)
-      (ProcessBuilder$Redirect/to f))))
+      (ProcessBuilder$Redirect/appendTo fo)
+      (ProcessBuilder$Redirect/to fo))))
 
 (defn from-file
   "Coerce f to a file per clojure.java.io/file and return a ProcessBuilder.Redirect reading from the file.
   This can be passed to 'start' in :in."
   {:added "1.12"}
-  ^ProcessBuilder$Redirect [file]
-  (ProcessBuilder$Redirect/from (jio/file file)))
+  ^ProcessBuilder$Redirect [f]
+  (ProcessBuilder$Redirect/from (jio/file f)))
 
 (defn start
   "Starts an external command as args and optional leading opts map:
