@@ -86,7 +86,7 @@
     (when in (.redirectInput pb ^ProcessBuilder$Redirect (to-redirect in)))
     (when out (.redirectOutput pb ^ProcessBuilder$Redirect (to-redirect out)))
     (cond
-      (= err :stdout) (.redirectErrorStream pb)
+      (= err :stdout) (.redirectErrorStream pb true)
       err (.redirectError pb ^ProcessBuilder$Redirect (to-redirect err)))
     (when env
       (let [pb-env (.environment pb)]
@@ -134,7 +134,7 @@
   (let [[opts command] (if (map? (first opts+args))
                          [(first opts+args) (rest opts+args)]
                          [{} opts+args])
-        opts (merge opts {:err :inherit})]
+        opts (merge {:err :inherit} opts)]
     (let [state (apply start opts command)
           out-promise (promise)
           capture-fn #(deliver out-promise (capture (:out state)))]
