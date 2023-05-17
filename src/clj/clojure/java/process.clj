@@ -116,7 +116,7 @@
 
 (defn capture
   "Read from input-stream until EOF and return a String (or nil if 0 length).
-  Takes same opts as clojure.java.io/copy - :buffer and :encoding"
+  Takes same opts as clojure.java.io/copy - :buffer-size and :encoding"
   {:added "1.12"}
   [input-stream & opts]
   (let [writer (StringWriter.)]
