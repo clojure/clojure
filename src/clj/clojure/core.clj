@@ -6351,7 +6351,7 @@ fails, attempts to require sym's namespace and retries."
 (def ^:dynamic
   ^{:doc "Bound to true in a repl thread"
     :added "1.12"}
-  *repl*)
+  *repl* false)
 
 (defn trampoline
   "trampoline can be used to convert algorithms requiring mutual
