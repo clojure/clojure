@@ -82,12 +82,12 @@
                         :discard (ProcessBuilder$Redirect/to @null-file)
                         ;; in Java 9+, just use ProcessBuilder$Redirect/DISCARD
                         x))]
-    (.directory pb (jio/file (or dir ".")))
-    (when in (.redirectInput pb ^ProcessBuilder$Redirect (to-redirect in)))
-    (when out (.redirectOutput pb ^ProcessBuilder$Redirect (to-redirect out)))
-    (cond
+    (.directory pb (jio/file dir))
+    (.redirectInput pb ^ProcessBuilder$Redirect (to-redirect in))
+    (.redirectOutput pb ^ProcessBuilder$Redirect (to-redirect out))
+    (if
       (= err :stdout) (.redirectErrorStream pb true)
-      err (.redirectError pb ^ProcessBuilder$Redirect (to-redirect err)))
+      (.redirectError pb ^ProcessBuilder$Redirect (to-redirect err)))
     (when env
       (let [pb-env (.environment pb)]
         (run! (fn [[k v]] (.put pb-env k v)) env)))
