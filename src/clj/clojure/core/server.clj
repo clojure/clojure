@@ -16,6 +16,7 @@
    [clojure.lang LineNumberingPushbackReader]
    [java.net InetAddress Socket ServerSocket SocketException]
    [java.io Reader Writer PrintWriter BufferedWriter BufferedReader InputStreamReader OutputStreamWriter]
+   [java.util Properties]
    [java.util.concurrent.locks ReentrantLock]))
 
 (set! *warn-on-reflection* true)
@@ -145,14 +146,16 @@
 
 (defn- parse-props
   "Parse clojure.server.* from properties to produce a map of server configs."
-  [props]
+  [^Properties props]
   (reduce
-    (fn [acc [^String k ^String v]]
-      (let [[k1 k2 k3] (str/split k #"\.")]
-        (if (and (= k1 "clojure") (= k2 "server"))
-          (conj acc (merge {:name k3} (edn/read-string v)))
-          acc)))
-    [] props))
+   (fn [acc ^String k]
+     (let [[k1 k2 k3] (str/split k #"\.")]
+       (if (and (= k1 "clojure") (= k2 "server"))
+         (let [v (get props k)]
+           (conj acc (merge {:name k3} (edn/read-string v))))
+         acc)))
+   []
+   (.stringPropertyNames props)))
 
 (defn start-servers
   "Start all servers specified in the system properties."
