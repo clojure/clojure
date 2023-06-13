@@ -13,9 +13,6 @@ jobs:
         java-version: ["8", "11", "17"]
         distribution: ["temurin", "corretto"]
         profile: ["test-direct", "test-no-direct"]
-        include:
-          - distribution: "oracle"
-            java-version: "17"
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
