@@ -9,7 +9,8 @@
   "Functions for invoking Java processes and invoking tools via the Clojure CLI."
   (:require
    [clojure.java.process :as proc]
-   [clojure.edn :as edn]))
+   [clojure.edn :as edn]
+   [clojure.java.io :as jio]))
 
 (defn ^:dynamic invoke-tool
   "Invoke tool using Clojure CLI. Args (one of :tool-alias or :tool-name, and :fn
@@ -28,18 +29,24 @@
     :as opts}]
   (when-not (or tool-name tool-alias) (throw (ex-info "Either :tool-alias or :tool-name must be provided" (or opts {}))))
   (when-not (symbol? fn) (throw (ex-info (str "fn should be a symbol " fn) (or opts {}))))
-  (let [args (assoc args :clojure.exec/invoke :fn)
+  (let [args (conj [fn] (assoc args :clojure.exec/invoke :fn))
         _ (when (:debug opts) (println "args" args))
-        command-strs [command (str "-T" (or tool-alias tool-name)) (pr-str fn) (pr-str args)]
+        command-strs [command (str "-T" (or tool-alias tool-name)) "-"]
         _ (when (:debug opts) (apply println "Invoking: " command-strs))
-        envelope (edn/read-string (apply proc/exec command-strs))]
-    (if preserve-envelope
-      envelope
-      (let [{:keys [tag val]} envelope
-            parsed-val (edn/read-string val)]
-        (if (= :ret tag)
-          parsed-val
-          (throw (ex-info (:cause parsed-val) (or parsed-val {}))))))))
+        {:keys [in out]} (apply proc/start command-strs)]
+    (proc/io-task
+      #(with-open [w (jio/writer in)]
+         (doseq [a args]
+           (.write w (pr-str a))
+           (.write w " "))))
+    (let [envelope (edn/read-string (proc/capture out))]
+      (if preserve-envelope
+        envelope
+        (let [{:keys [tag val]} envelope
+              parsed-val (edn/read-string val)]
+          (if (= :ret tag)
+            parsed-val
+            (throw (ex-info (:cause parsed-val) (or parsed-val {})))))))))
 
 (comment
   ;; regular invocation, should return {:hi :there}
