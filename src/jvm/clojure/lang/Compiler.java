@@ -1454,7 +1454,20 @@ static abstract class MethodExpr extends HostExpr{
 
 					if (sam != null && maybeSamClass.getName().startsWith("java.util.function."))
 						{
-						// objx is presumed to be either an instance of the SAM (nothing needed) or an IFn
+						// check if objx is already of the desired functional interface
+						gen.dup();
+						Type samType = Type.getType(maybeSamClass);
+						gen.instanceOf(samType);
+
+						// if so, checkcast and go to end
+						Label adapterLabel = gen.newLabel();
+						gen.ifZCmp(Opcodes.IFEQ, adapterLabel);
+						gen.checkCast(samType);
+						Label endLabel = gen.newLabel();
+						gen.goTo(endLabel);
+
+						// if not, insert lambda adapter
+						gen.mark(adapterLabel);
 						// need to emit the body of an adapter from IFn f into the necessary functional interface:
 						//   (f, a1, a2) -> (Ret) f.invoke(a1, a2)
 
@@ -1490,6 +1503,7 @@ static abstract class MethodExpr extends HostExpr{
 										new Handle(Opcodes.H_INVOKESTATIC, currentClassName, lambdaMethodName, lambdaDescriptor, false),
 										Type.getType(samDescriptor)});
 						gen.visitTypeInsn(CHECKCAST, Type.getType(maybeSamClass).getInternalName());
+						gen.mark(endLabel);
 						}
 						else
 					    {
