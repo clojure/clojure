@@ -1452,7 +1452,7 @@ static abstract class MethodExpr extends HostExpr{
 //					if(sam != null)
 //						System.out.println("Found sam for " + parameterTypes[i] + ": " + sam.toGenericString());
 
-					if (sam != null && maybeSamClass.getName().startsWith("java.util.function."))
+					if (sam != null) // && maybeSamClass.getName().startsWith("java.util.function."))
 						{
 						// check if objx is already of the desired functional interface
 						gen.dup();
