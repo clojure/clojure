@@ -1483,7 +1483,7 @@ static abstract class MethodExpr extends HostExpr{
 						// Adapter interface, IFn -> SAM
 						MethodType adapterSig = MethodType.methodType(sam.getDeclaringClass(), new Class[] {IFn.class});
 
-						String currentClassName = objx.name.replaceAll("\\.", "/"); // .replaceAll("\\$", "\\\\\\$");
+						String currentClassName = objx.internalName;
 						String lambdaMethodName = objx.addLambdaAdapter(samSig);
 
 						// Lambda method - takes IFn instance (closed over) + args, body calls IFn.invoke
