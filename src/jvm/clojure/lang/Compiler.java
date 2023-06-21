@@ -23,9 +23,9 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.util.stream.Collectors;
 
 //*/
 /*
@@ -1389,20 +1389,22 @@ static abstract class MethodExpr extends HostExpr{
 			}
 	}
 
-	private static java.lang.reflect.Method getSAMMethod(Class target) {
-		if(target.isInterface()) {
-			List<java.lang.reflect.Method> abstractMethods =
-					Arrays.stream(target.getMethods())
-							.filter(m -> Modifier.isAbstract(m.getModifiers()))
-							.collect(Collectors.toList());
-			if(abstractMethods.size() == 1) {
-				return abstractMethods.get(0);
-			} else {
-				return null;
-			}
-		} else {
-			return null;
+	private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString", "hashCode");
+
+	// SAM interfaces (for our purposes) are interfaces marked with @FunctionalInterface
+	// and NOT one of: Runnable, Callable, or Comparator. Because we are adapting from IFn, these are covered.
+	// The SAM method (there must be one) is abstract, and not an override from Object of equals, toString, or hashCode
+	private static java.lang.reflect.Method getAdaptableSAMMethod(Class target) {
+		if(target.isInterface() &&
+			target.isAnnotationPresent(FunctionalInterface.class) &&
+			target != Runnable.class && target != Callable.class && target != Comparator.class) {
+
+			java.lang.reflect.Method[] methods = target.getMethods();
+			for (int i = 0; i < methods.length; i++)
+				if (Modifier.isAbstract(methods[i].getModifiers()) && !OBJECT_METHODS.contains(methods[i].getName()))
+					return methods[i];
 		}
+		return null;
 	}
 
 	public static void emitTypedArgs(ObjExpr objx, GeneratorAdapter gen, Class[] parameterTypes, IPersistentVector args){
@@ -1448,14 +1450,15 @@ static abstract class MethodExpr extends HostExpr{
 					e.emit(C.EXPRESSION, objx, gen);
 
 					Class maybeSamClass = parameterTypes[i];
-					java.lang.reflect.Method sam = getSAMMethod(parameterTypes[i]);
-//					if(sam != null)
-//						System.out.println("Found sam for " + parameterTypes[i] + ": " + sam.toGenericString());
+					java.lang.reflect.Method sam = getAdaptableSAMMethod(parameterTypes[i]);
+//					if(sam != null) {
+//						System.out.println("Found sam arg " + parameterTypes[i].getName() + " in " + objx.internalName);
+//					}
 
 					if (sam != null &&
 						!(e.hasJavaClass() && maybeSamClass.isAssignableFrom(e.getJavaClass())))
 						{
-//						System.out.println("Adapting sam " + maybeSamClass.getName() + " in " + objx.internalName);
+//						System.out.println("Adapting sam " + maybeSamClass.getName() + "::" + sam.getName() + " in " + objx.internalName);
 
 						// check if objx is already of the desired functional interface
 						gen.dup();
