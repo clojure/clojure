@@ -4795,24 +4795,27 @@ static public class ObjExpr implements Expr{
 
 			// lambda sig is SAM sig with IFn inserted at beginning
 			//   ex: (Lclojure/lang/IFn;Ljava/lang/Long;Ljava/lang/Long;)Ljava/lang/Long;
-			//  TODO: handle prims by using IFn$LOL, and inserting checkcast/coercion
+
 			MethodType lambdaSig = samSig.insertParameterTypes(0, IFn.class);
 			int lambdaParams = lambdaSig.parameterCount();
-			MethodVisitor methodVisitor = cv.visitMethod(ACC_PRIVATE | ACC_STATIC | ACC_SYNTHETIC, lambdaName, lambdaSig.toMethodDescriptorString(), null, null);
-			methodVisitor.visitCode();
-			for(int i=0; i<lambdaParams; i++) {
-				methodVisitor.visitVarInsn(ALOAD, i);
-			}
+			Method lambdaMethod = new Method(lambdaName, lambdaSig.toMethodDescriptorString());
+			GeneratorAdapter gen = new GeneratorAdapter(ACC_PRIVATE | ACC_STATIC | ACC_SYNTHETIC, lambdaMethod, lambdaSig.toMethodDescriptorString(), null, cv);
+			gen.loadArgs();
 
-			// TODO: handle prims
+			// TODO: handle prims if IFn$LOL
 			Class[] ifnParams = new Class[samSig.parameterCount()];
 			Arrays.fill(ifnParams, Object.class);
 			MethodType ifnSig = MethodType.methodType(Object.class, ifnParams);
-			methodVisitor.visitMethodInsn(INVOKEINTERFACE, "clojure/lang/IFn", "invoke", ifnSig.toMethodDescriptorString(), true);
-			methodVisitor.visitTypeInsn(CHECKCAST, Type.getType(samSig.returnType()).getInternalName());
-			methodVisitor.visitInsn(ARETURN);
-			methodVisitor.visitMaxs(lambdaParams, lambdaParams);
-			methodVisitor.visitEnd();
+			gen.invokeInterface(Type.getObjectType("clojure/lang/IFn"), new Method("invoke", ifnSig.toMethodDescriptorString()));
+
+			Class retType = samSig.returnType();
+			if(retType.isPrimitive()) {
+				gen.unbox(Type.getType(retType));
+			} else {
+				gen.checkCast(Type.getType(retType));
+			}
+			gen.returnValue();
+			gen.endMethod();
 		}
 	}
 
