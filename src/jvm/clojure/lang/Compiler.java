@@ -1449,8 +1449,8 @@ static abstract class MethodExpr extends HostExpr{
 
 					Class maybeSamClass = parameterTypes[i];
 					java.lang.reflect.Method sam = getSAMMethod(parameterTypes[i]);
-					if(sam != null)
-						System.out.println("Found sam for " + parameterTypes[i] + ": " + sam.toGenericString());
+//					if(sam != null)
+//						System.out.println("Found sam for " + parameterTypes[i] + ": " + sam.toGenericString());
 
 					if (sam != null && maybeSamClass.getName().startsWith("java.util.function."))
 						{
@@ -4770,7 +4770,7 @@ static public class ObjExpr implements Expr{
 	IPersistentVector lambdaAdapters = PersistentVector.EMPTY;
 
 	protected String addLambdaAdapter(MethodType samSig) {
-		System.out.println("Adapting sam " + samSig.toMethodDescriptorString());
+		//System.out.println("Adapting sam " + samSig.toMethodDescriptorString());
 
 		String lambdaName = "lambda$" + (lambdaAdapterCounter++);
 		IPersistentMap lambda = RT.map(
