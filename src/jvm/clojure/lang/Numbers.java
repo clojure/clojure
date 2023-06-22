@@ -530,6 +530,10 @@ final static class LongOps implements Ops{
 	public Number divide(Number x, Number y){
 		long n = x.longValue();
 		long val = y.longValue();
+
+		if(n == Long.MIN_VALUE || val == Long.MIN_VALUE)
+			return BIGINT_OPS.divide(x, y);
+
 		long gcd = gcd(n, val);
 		if(gcd == 0)
 			return num(0);

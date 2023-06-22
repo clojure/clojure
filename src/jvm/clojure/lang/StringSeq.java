@@ -61,7 +61,7 @@ public int count(){
 public Sequential drop(int n) {
 	int ii = i + n;
 	if (ii < s.length()) {
-		return new StringSeq(_meta, s, ii);
+		return new StringSeq(null, s, ii);
 	} else {
 		return null;
 	}

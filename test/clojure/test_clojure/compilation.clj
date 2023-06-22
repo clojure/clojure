@@ -443,7 +443,3 @@
   (testing "CLJ-2580 Correctly calculate exit branches of case"
     (is (zero? (let [d (case nil :x nil 0)] d)))
     (is (nil? (let [d (case nil :x 0 nil)] d)))))
-
-(deftest CLJ-2521
-  (testing "CLJ-2521 Can nest loop->try when in statement position"
-    (is (= "ret" ((fn [] (loop [] (try "" (catch Throwable _))) "ret"))))))

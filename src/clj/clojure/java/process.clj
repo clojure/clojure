@@ -41,18 +41,18 @@
   "Coerce f to a file per clojure.java.io/file and return a ProcessBuilder.Redirect writing to the file.
   Set ':append' in opts to append. This can be passed to 'start' in :out or :err."
   {:added "1.12"}
-  ^ProcessBuilder$Redirect [file & {:keys [append] :as opts}]
-  (let [f (jio/file file)]
+  ^ProcessBuilder$Redirect [f & {:keys [append] :as opts}]
+  (let [fo (jio/file f)]
     (if append
-      (ProcessBuilder$Redirect/appendTo f)
-      (ProcessBuilder$Redirect/to f))))
+      (ProcessBuilder$Redirect/appendTo fo)
+      (ProcessBuilder$Redirect/to fo))))
 
 (defn from-file
   "Coerce f to a file per clojure.java.io/file and return a ProcessBuilder.Redirect reading from the file.
   This can be passed to 'start' in :in."
   {:added "1.12"}
-  ^ProcessBuilder$Redirect [file]
-  (ProcessBuilder$Redirect/from (jio/file file)))
+  ^ProcessBuilder$Redirect [f]
+  (ProcessBuilder$Redirect/from (jio/file f)))
 
 (defn start
   "Starts an external command as args and optional leading opts map:
@@ -82,12 +82,12 @@
                         :discard (ProcessBuilder$Redirect/to @null-file)
                         ;; in Java 9+, just use ProcessBuilder$Redirect/DISCARD
                         x))]
-    (.directory pb (jio/file (or dir ".")))
-    (when in (.redirectInput pb ^ProcessBuilder$Redirect (to-redirect in)))
-    (when out (.redirectOutput pb ^ProcessBuilder$Redirect (to-redirect out)))
-    (cond
-      (= err :stdout) (.redirectErrorStream pb)
-      err (.redirectError pb ^ProcessBuilder$Redirect (to-redirect err)))
+    (.directory pb (jio/file dir))
+    (.redirectInput pb ^ProcessBuilder$Redirect (to-redirect in))
+    (.redirectOutput pb ^ProcessBuilder$Redirect (to-redirect out))
+    (if
+      (= err :stdout) (.redirectErrorStream pb true)
+      (.redirectError pb ^ProcessBuilder$Redirect (to-redirect err)))
     (when env
       (let [pb-env (.environment pb)]
         (run! (fn [[k v]] (.put pb-env k v)) env)))
@@ -116,7 +116,7 @@
 
 (defn capture
   "Read from input-stream until EOF and return a String (or nil if 0 length).
-  Takes same opts as clojure.java.io/copy - :buffer and :encoding"
+  Takes same opts as clojure.java.io/copy - :buffer-size and :encoding"
   {:added "1.12"}
   [input-stream & opts]
   (let [writer (StringWriter.)]
@@ -134,7 +134,7 @@
   (let [[opts command] (if (map? (first opts+args))
                          [(first opts+args) (rest opts+args)]
                          [{} opts+args])
-        opts (merge opts {:err :inherit})]
+        opts (merge {:err :inherit} opts)]
     (let [state (apply start opts command)
           out-promise (promise)
           capture-fn #(deliver out-promise (capture (:out state)))]

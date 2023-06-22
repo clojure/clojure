@@ -2942,7 +2942,11 @@
                   (rf result input))))))))
   ([n coll]
      (if (instance? clojure.lang.IDrop coll)
-       (or (.drop ^clojure.lang.IDrop coll n) ())
+       (or
+        (if (pos? n)
+          (.drop ^clojure.lang.IDrop coll (if (int? n) n (Math/ceil n)))
+          (seq coll))
+        ())
        (let [step (fn [n coll]
                     (let [s (seq coll)]
                       (if (and (pos? n) s)
@@ -3170,7 +3174,9 @@
    :static true}
   [coll n]
   (if (instance? clojure.lang.IDrop coll)
-    (.drop ^clojure.lang.IDrop coll n)
+    (if (pos? n)
+      (.drop ^clojure.lang.IDrop coll (if (int? n) n (Math/ceil n)))
+      (seq coll))
     (loop [n n xs (seq coll)]
       (if (and xs (pos? n))
         (recur (dec n) (next xs))
@@ -3182,7 +3188,9 @@
    :static true}
   [coll n]
   (if (instance? clojure.lang.IDrop coll)
-    (or (.drop ^clojure.lang.IDrop coll n) ())
+    (if (pos? n)
+      (or (.drop ^clojure.lang.IDrop coll (if (int? n) n (Math/ceil n))) ())
+      coll)
     (loop [n n xs coll]
       (if-let [xs (and (pos? n) (seq xs))]
         (recur (dec n) (rest xs))

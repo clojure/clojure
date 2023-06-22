@@ -9,6 +9,7 @@
 ; Author: Alex Miller
 
 (ns clojure.test-clojure.server
+    (:import java.util.Random)
     (:require [clojure.test :refer :all])
     (:require [clojure.core.server :as s]))
 
@@ -21,9 +22,26 @@
       (is (= (ex-data e) opts))
       (is (= msg (.getMessage e))))))
 
+(defn create-random-thread
+  []
+  (Thread.
+    (fn []
+      (let [random (new Random)]
+      (while (not (.isInterrupted (Thread/currentThread)))
+        (System/setProperty (Integer/toString (.nextInt random)) (Integer/toString (.nextInt random))))))))
+
 (deftest test-validate-opts
   (check-invalid-opts {} "Missing required socket server property :name")
   (check-invalid-opts {:name "a" :accept 'clojure.core/+} "Missing required socket server property :port")
   (doseq [port [-1 "5" 999999]]
     (check-invalid-opts {:name "a" :port port :accept 'clojure.core/+} (str "Invalid socket server port: " port)))
   (check-invalid-opts {:name "a" :port 5555} "Missing required socket server property :accept"))
+
+(deftest test-parse-props
+  (let [thread (create-random-thread)]
+    (.start thread)
+    (Thread/sleep 1000)
+    (try
+      (is (>= (count
+        (#'s/parse-props (System/getProperties))) 0))
+      (finally (.interrupt thread)))))
