@@ -4804,7 +4804,14 @@ static public class ObjExpr implements Expr{
 			int lambdaParams = lambdaSig.parameterCount();
 			Method lambdaMethod = new Method(lambdaName, lambdaSig.toMethodDescriptorString());
 			GeneratorAdapter gen = new GeneratorAdapter(ACC_PRIVATE | ACC_STATIC | ACC_SYNTHETIC, lambdaMethod, lambdaSig.toMethodDescriptorString(), null, cv);
-			gen.loadArgs();
+			gen.loadArg(0); // IFn
+			for(int i=0; i<samSig.parameterCount(); i++) {
+				gen.loadArg(i+1);
+				Class paramType = samSig.parameterType(i);
+				if(paramType.isPrimitive()) {
+					gen.box(Type.getType(paramType));
+				}
+			}
 
 			// TODO: handle prims if IFn$LOL
 			Class[] ifnParams = new Class[samSig.parameterCount()];
