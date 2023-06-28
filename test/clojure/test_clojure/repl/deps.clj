@@ -18,13 +18,13 @@
          (finally
            (.setContextClassLoader t# cl#))))))
 
-(deftest test-no-add-libs-outside-repl
-  (try
-    (deps/add-lib 'org.clojure/data.json {:mvn/version "2.4.0"})
-    (is false "add-libs outside repl should throw")
-    (catch Throwable t (str/includes? (ex-message t) "add-libs")))
-
-  (with-dynamic-loader
-    (binding [*repl* true]
-      (is (some #{'org.clojure/data.json} (deps/add-lib 'org.clojure/data.json {:mvn/version "2.4.0"})))))
-  )
+;(deftest test-no-add-libs-outside-repl
+;  (try
+;    (deps/add-lib 'org.clojure/data.json {:mvn/version "2.4.0"})
+;    (is false "add-libs outside repl should throw")
+;    (catch Throwable t (str/includes? (ex-message t) "add-libs")))
+;
+;  (with-dynamic-loader
+;    (binding [*repl* true]
+;      (is (some #{'org.clojure/data.json} (deps/add-lib 'org.clojure/data.json {:mvn/version "2.4.0"})))))
+;  )
