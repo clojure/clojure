@@ -1,0 +1,72 @@
+name: Build API Docs
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: 'Commit changes to gh-pages branch'
+        type: boolean
+        required: true
+        default: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: 8
+        distribution: 'temurin'
+
+    - name: Set up Clojure
+      uses: DeLaGuardo/setup-clojure@11.0
+      with:
+          cli: 'latest'
+
+    - name: Cache clojure dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.m2/repository
+          ~/.gitlibs
+        key: cljdeps-${{ hashFiles('deps.edn') }}
+        restore-keys: cljdeps-
+
+    - name: Clone clojure api doc repo
+      uses: actions/checkout@v3
+      with:
+        repository: clojure/clojure-api-doc
+        path: clojure-api-doc
+        fetch-depth: 0
+
+    - name: Clone clojure source code repo into clojure-api-doc
+      uses: actions/checkout@v3
+      with:
+        path: clojure-api-doc/repo
+        fetch-depth: 0
+
+    - name: Clone clojure gh-pages branch into clojure-api-doc
+      uses: actions/checkout@v3
+      with:
+        repository: clojure/clojure
+        path: clojure-api-doc/repo-docs
+        ref: 'gh-pages'
+        fetch-depth: 0
+
+    - name: Install markdown
+      run: sudo apt install markdown
+
+    - name: Call clojure-api-doc build.sh
+      run:  bash ${GITHUB_WORKSPACE}/clojure-api-doc/build.sh
+
+    - name: Commit
+      if: ${{inputs.commit}}
+      run: |
+        git config --global user.name clojure-build
+        git config --global user.email "clojure-build@users.noreply.github.com"
+        cd clojure-api-doc/repo-docs
+        git add -u -v
+        git commit -m "Autodoc commit"
+        git push origin gh-pages
