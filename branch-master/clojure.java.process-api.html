@@ -124,11 +124,11 @@ stdout.</pre>
     <pre id="var-usage">Usage: (capture input-stream &amp; opts)
 </pre>
     <pre id="var-docstr">Read from input-stream until EOF and return a String (or nil if 0 length).
-Takes same opts as clojure.java.io/copy - :buffer and :encoding</pre>
+Takes same opts as clojure.java.io/copy - :buffer-size and :encoding</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/65ea3e7688dfb492403f615cb0a5694f5ccefadc/src/clj/clojure/java/process.clj#L117">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L118">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -142,20 +142,20 @@ if supplied override the default 'exec' settings.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/65ea3e7688dfb492403f615cb0a5694f5ccefadc/src/clj/clojure/java/process.clj#L128">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L163">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
     <h2 id="clojure.java.process/from-file">from-file</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (from-file file)
+    <pre id="var-usage">Usage: (from-file f)
 </pre>
     <pre id="var-docstr">Coerce f to a file per clojure.java.io/file and return a ProcessBuilder.Redirect reading from the file.
 This can be passed to 'start' in :in.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/65ea3e7688dfb492403f615cb0a5694f5ccefadc/src/clj/clojure/java/process.clj#L50">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L51">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -168,7 +168,7 @@ and then return true on success</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/65ea3e7688dfb492403f615cb0a5694f5ccefadc/src/clj/clojure/java/process.clj#L110">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L111">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -190,20 +190,20 @@ and returns the exit code.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/65ea3e7688dfb492403f615cb0a5694f5ccefadc/src/clj/clojure/java/process.clj#L57">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L58">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
     <h2 id="clojure.java.process/to-file">to-file</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (to-file file &amp; {:keys [append], :as opts})
+    <pre id="var-usage">Usage: (to-file f &amp; {:keys [append], :as opts})
 </pre>
     <pre id="var-docstr">Coerce f to a file per clojure.java.io/file and return a ProcessBuilder.Redirect writing to the file.
 Set ':append' in opts to append. This can be passed to 'start' in :out or :err.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/65ea3e7688dfb492403f615cb0a5694f5ccefadc/src/clj/clojure/java/process.clj#L40">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L41">Source</a>
   </div>
 </div>
 
