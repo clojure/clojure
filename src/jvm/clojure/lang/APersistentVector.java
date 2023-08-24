@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Consumer;
 
 public abstract class APersistentVector extends AFn implements IPersistentVector, Iterable,
                                                                List,
@@ -274,6 +275,62 @@ Iterator rangedIterator(final int start, final int end){
 			throw new UnsupportedOperationException();
 		}
 	};
+}
+
+Spliterator rangedSpliterator(final int start, final int end) {
+	return new Spliterator() {
+		int i = start;
+
+		@Override
+		public int characteristics() {
+			return Spliterator.IMMUTABLE |   // persistent
+					Spliterator.ORDERED |    // know order
+					Spliterator.SIZED |      // know size
+					Spliterator.SUBSIZED;    // know size after split
+		}
+
+		@Override
+		public long estimateSize() {
+			return end-i;
+		}
+
+		@Override
+		public long getExactSizeIfKnown() {
+			return end-i;
+		}
+
+		@Override
+		public boolean tryAdvance(Consumer action) {
+			if(i < end) {
+				action.accept(nth(i++));
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public Spliterator trySplit() {
+			int lo = i;
+			int mid = (lo + end) >>> 1; // avoid overflow
+			if(lo >= mid) {
+				return null;
+			} else {
+				i = mid;
+				return rangedSpliterator(lo, mid);
+			}
+		}
+
+		@Override
+		public void forEachRemaining(Consumer action) {
+			for(int x=i; x<end; x++)
+				action.accept(nth(x));
+			i=end;
+		}
+	};
+}
+
+public Spliterator spliterator(){
+	return rangedSpliterator(0,count());
 }
 
 public List subList(int fromIndex, int toIndex){
@@ -578,6 +635,11 @@ public static class SubVector extends APersistentVector implements IObj, IKVRedu
 			return ((APersistentVector)v).rangedIterator(start,end);
 		}
 		return super.iterator();
+	}
+
+	@Override
+	public Spliterator spliterator(){
+		return ((APersistentVector)v).rangedSpliterator(start,end);
 	}
 
 	public Object kvreduce(IFn f, Object init){

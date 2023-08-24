@@ -17,7 +17,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public class PersistentVector extends APersistentVector implements IObj, IEditableCollection, IReduce, IKVReduce, IDrop{
 
@@ -317,6 +319,77 @@ Iterator rangedIterator(final int start, final int end){
 }
 
 public Iterator iterator(){return rangedIterator(0,count());}
+
+@Override
+Spliterator rangedSpliterator(final int start, final int end){
+	return new Spliterator(){
+		int i = start;
+		int base = i - (i%32);
+		Object[] array = (start < count())?arrayFor(i):null;
+
+		@Override
+		public int characteristics() {
+			return Spliterator.IMMUTABLE |   // persistent
+					Spliterator.ORDERED |    // know order
+					Spliterator.SIZED |      // know size
+					Spliterator.SUBSIZED;    // know size after split
+		}
+
+		@Override
+		public long estimateSize() {
+			return end-i;
+		}
+
+		@Override
+		public long getExactSizeIfKnown() {
+			return end-i;
+		}
+
+		@Override
+		public boolean tryAdvance(Consumer action) {
+			if(i < end) {
+				if(i-base == 32){
+					array = arrayFor(i);
+					base += 32;
+				}
+				action.accept(array[i++ & 0x01f]);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public Spliterator trySplit() {
+			int lo = i;
+			int mid = (lo + end) >>> 1; // avoid overflow
+			if(lo >= mid) {
+				return null;
+			} else {
+				i = mid;
+				return rangedSpliterator(lo, mid);
+			}
+		}
+
+		@Override
+		public void forEachRemaining(Consumer action) {
+			int x=i;
+			while(x<end){
+				Object[] array = arrayFor(x);
+				int remaining = end-x;
+				int offset = x & 0x01f;
+				int limit = Math.min(array.length, offset + remaining);
+				for(int j=offset; j<limit; ++j){
+					action.accept(array[j]);
+				}
+				x+= (limit-offset);
+			}
+			i=end; // done
+			this.array=null;
+		}
+	};
+}
+
+public Spliterator spliterator(){return rangedSpliterator(0,count());}
 
 public Object reduce(IFn f){
     Object init;

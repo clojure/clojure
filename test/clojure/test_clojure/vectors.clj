@@ -9,7 +9,11 @@
 ; Author: Stuart Halloway, Daniel Solano Gómez
 
 (ns clojure.test-clojure.vectors
-  (:use clojure.test))
+  (:use clojure.test)
+  (:import
+    [java.util Collection Spliterator]
+    [java.util.function Consumer]
+    [java.util.stream Collectors]))
 
 (deftest test-reversed-vec
   (let [r (range 6)
@@ -428,3 +432,61 @@
   (is (= [0 1 2] (new java.util.ArrayList [0 1 2])))
   (is (not= [1 2] (take 1 (cycle [1 2]))))
   (is (= [1 2 3 nil 4 5 6 nil] (eduction cat [[1 2 3 nil] [4 5 6 nil]]))))
+
+(set! *warn-on-reflection* true)
+
+;; remember returns a consumer that adds to an-atom of coll
+(defn remember
+  ^Consumer [an-atom]
+  (reify Consumer (accept [_ v] (swap! an-atom conj v))))
+
+(deftest test-empty-vector-spliterator
+  (let [v []
+        s (.spliterator ^Collection v)
+        seen (atom [])]
+    (is (= 0 (.estimateSize s) (.getExactSizeIfKnown s)))
+    (is (nil? (.trySplit s)))
+    (is (false? (.tryAdvance s (remember seen))))
+    (is (= @seen []))))
+
+;; tryAdvance then forEachRemaining walks vector spliterator
+(deftest test-spliterator-tryadvance-then-forEach
+  (let [n 66
+        source-vec (vec (range n))]
+    (for [v (into [(vec (range n))] (map #(subvec source-vec % (+ % 33)) (range 33)))]
+      (dotimes [up-to n]
+        (let [s (.spliterator ^Collection v)
+              seen (atom [])
+              consumer (remember seen)]
+          (loop [i 0]
+            (if (< i up-to)
+              (do (is (true? (.tryAdvance s consumer))) (recur (inc i)))
+              (.forEachRemaining s consumer)))
+          (is (= v @seen))
+          (is (false? (.tryAdvance s consumer))))))))
+
+;; recursively split vector spliterators, walk all of the splits
+(deftest test-spliterator-trySplit
+  (dotimes [n 257]
+    (let [v (vec (range n))
+          seen (atom #{})
+          consumer (remember seen)
+          splits (loop [ss [(.spliterator ^Collection v)]]
+                   (let [ss' (map #(.trySplit ^Spliterator %) ss)]
+                     (if (every? nil? ss')
+                       ss
+                       (recur (into ss (remove nil? ss'))))))]
+      (loop [[spl & sr] splits]
+        (when spl
+          (.forEachRemaining ^Spliterator spl consumer)
+          (recur sr)))
+      (is (= v (sort @seen))))))
+
+(deftest test-vector-parallel-stream
+  (dotimes [n 1024]
+    (let [v (vec (range n))]
+      (is (= n
+            (-> ^Collection v .stream (.collect (Collectors/counting)))
+            (-> ^Collection v .parallelStream (.collect (Collectors/counting)))
+            (-> v ^Collection (subvec 0 n) .stream (.collect (Collectors/counting)))
+            (-> v ^Collection (subvec 0 n) .parallelStream (.collect (Collectors/counting))))))))
