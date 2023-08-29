@@ -1,14 +1,14 @@
  *   Clojure
  *   Copyright (c) Rich Hickey. All rights reserved.
  *   The use and distribution terms for this software are covered by the
- *   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+ *   Eclipse Public License 1.0 (https://opensource.org/license/epl-1-0/)
  *   which can be found in the file epl-v10.html at the root of this distribution.
  *   By using this software in any fashion, you are agreeing to be bound by
  * 	 the terms of this license.
  *   You must not remove this notice, or any other, from this software.
 
 Docs: https://clojure.org
-Feedback: http://groups.google.com/group/clojure
+Feedback: https://ask.clojure.org
 Getting Started: https://clojure.org/guides/getting_started
 
 To build and run locally with Ant:
@@ -76,7 +76,7 @@ under the Apache License:
 
                                  Apache License
                            Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+                        https://www.apache.org/licenses/
 
    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
