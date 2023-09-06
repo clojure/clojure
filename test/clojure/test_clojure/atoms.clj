@@ -42,3 +42,19 @@
 (deftest reset-on-deref-reset-equality
   (let [a (atom :usual-value)]
     (is (= :usual-value (reset! a (first (reset-vals! a :almost-never-seen-value)))))))
+
+(deftest atoms-are-suppliers
+  (let [a (atom 10)]
+    (is (instance? java.util.function.Supplier a))
+    (is (= 10 (.get ^java.util.function.Supplier a)))
+    (swap! a inc)
+    (is (= 11 (.get ^java.util.function.Supplier a)))
+
+    (is (instance? java.util.function.IntSupplier a))
+    (is (= 11 (.getAsInt a)))
+
+    (is (instance? java.util.function.LongSupplier a))
+    (is (= 11 (.getAsLong a)))
+
+    (is (instance? java.util.function.BooleanSupplier a))
+    (is (true? (.getAsBoolean a)))))

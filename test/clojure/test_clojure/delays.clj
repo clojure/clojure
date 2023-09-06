@@ -66,3 +66,23 @@
     (.await barrier)
     (is (instance? Exception (try-call)))
     (is (identical? (try-call) (try-call)))))
+
+(deftest delays-are-suppliers
+  (let [dt (delay true)
+        df (delay false)
+        dn (delay nil)
+        di (delay 100)]
+
+    (is (instance? java.util.function.Supplier dt))
+    (is (instance? java.util.function.BooleanSupplier dt))
+    (is (true? (.get dt)))
+    (is (true? (.getAsBoolean dt)))
+    (is (false? (.getAsBoolean df)))
+    (is (false? (.getAsBoolean dn)))
+
+    (is (instance? java.util.function.Supplier di))
+    (is (instance? java.util.function.IntSupplier di))
+    (is (instance? java.util.function.LongSupplier di))
+    (is (= 100 (.get ^java.util.function.Supplier di)))
+    (is (= 100 (.getAsInt ^java.util.function.IntSupplier di)))
+    (is (= 100 (.getAsLong ^java.util.function.LongSupplier di)))))
