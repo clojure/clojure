@@ -1,0 +1,38 @@
+;; https://clojure.org/dev/developing_patches#_run_an_individual_test
+{:paths ["test"
+         "target/test-classes"]
+ :deps
+ {org.clojure/clojure {:local/root "."
+                       :deps/manifest :pom} #_{:mvn/version "RELEASE"}
+  org.clojure/test.check {:mvn/version "1.1.1"}
+  org.clojure/test.generative {:mvn/version "1.0.0"}}
+ :aliases
+ {:dbg {:classpath-overrides {org.clojure/clojure "target/classes"}
+        :extra-deps {criterium/criterium {:mvn/version "0.4.4"}}}
+  :cognitest {:extra-deps {io.github.cognitect-labs/test-runner 
+                           {:git/tag "v0.5.0" :git/sha "b3fd0d2"}}
+              :main-opts ["-m" "cognitect.test-runner"]
+              :exec-fn cognitect.test-runner.api/test
+              :exec-args {:dirs ["test"]
+                          :patterns [;; FIXME clojure.test-clojure.ns-libs has a test that is sensitive to loading order
+                                     ;; FIXME clojure.test-clojure.java-interop doesn't seem to work on JDK 17 (untested on others)
+                                     ;; regex ref: https://stackoverflow.com/a/2387072
+                                     "^((?!(clojure.test-clojure.ns-libs|clojure.test-clojure.java-interop)).)*$"
+                                     ]}}
+  :test-example-script {:jvm-opts [;; from build.xml
+                                   "-Dclojure.test-clojure.exclude-namespaces=#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.ns-libs-load-later}"
+                                   "-Dclojure.compiler.direct-linking=true"]
+                        :main-opts ["-e" "(load-file,\"src/script/run_test.clj\")"]}
+  :test-generative-script {:jvm-opts [;; from build.xml
+                                      "-Dclojure.compiler.direct-linking=true"]
+                           :main-opts ["-e" "(load-file,\"src/script/run_test_generative.clj\")"]}
+
+  :kaocha {:extra-deps {lambdaisland/kaocha {:mvn/version "1.60.977"}}
+           :exec-fn kaocha.runner/exec-fn
+           :exec-args {;:watch? true
+                       :tests [{:id          :unit
+                                :test-paths  ["test"]
+                                :ns-patterns [".*"]}]
+                       :reporter kaocha.report/dots
+                       ;; :plugins [:kaocha.plugin/profiling :kaocha.plugin/notifier]
+                       }}}}

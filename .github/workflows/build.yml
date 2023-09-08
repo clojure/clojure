@@ -1,0 +1,26 @@
+name: Java CI
+
+on: [push]
+
+jobs:
+  build:
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        jdk: ['8', '11', '17', '19']
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK ${{ matrix.jdk }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.jdk }}
+          distribution: 'temurin'
+          cache: maven
+      - name: Build with Maven
+        run: mvn test
+      - name: Configure settings.xml
+        run: |
+          mkdir -p ~/.m2
+          echo "<settings><servers><server><id>clojars</id><username>${{ secrets.CLOJARS_USER }}-clojars</username><password>${{ secrets.CLOJARS_PASSWORD }}</password></server></servers></settings>" > ~/.m2/settings.xml
