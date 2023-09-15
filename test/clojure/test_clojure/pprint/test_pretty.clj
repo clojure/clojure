@@ -413,3 +413,8 @@ It is implemented with a number of custom enlive templates.\"
 
       "^{:a 1} #{1 4 3 2}\n"
       ^{:a 1} #{1 2 3 4})))
+
+(deftest CLJ-2801-tagged-literal-print-dup-test
+  (is (= "#foo 123"
+         (binding [*default-data-reader-fn* tagged-literal]
+           (with-out-str (eval (read-string "(pr #foo 123)")))))))

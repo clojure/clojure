@@ -551,6 +551,8 @@
   (.write w " ")
   (print-method (:form o) w))
 
+(defmethod print-dup clojure.lang.TaggedLiteral [o w] (print-method o w))
+
 (defmethod print-method clojure.lang.ReaderConditional [o ^Writer w]
   (.write w "#?")
   (when (:splicing? o) (.write w "@"))
