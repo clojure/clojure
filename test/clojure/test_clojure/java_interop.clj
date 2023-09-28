@@ -639,3 +639,58 @@
 (deftest test-boxing-prevention-when-compiling-statements
   (is (= 1 (.get (doto (AtomicInteger. 0) inc-atomic-int))))
   (is (= 1 (.get (doto (AtomicLong. 0) inc-atomic-long)))))
+
+(deftest clojure-fn-as-java-fn
+  ;; pass Clojure fn as Java Predicate
+  (let [coll (java.util.ArrayList. [1 2 3 4 5])]
+    (is (true? (.removeIf coll even?)))
+    (is (= coll [1 3 5])))
+
+  ;; pass Clojure set as Java predicate - function return
+  ;; should use Clojure semantics to return logical true
+  ;(let [coll (java.util.ArrayList. [1 2 3 4 5])]
+  ;  (is (true? (.removeIf coll #{1 2})))
+  ;  (is (= coll [3 4 5])))
+  )
+
+;; TODO:
+;; variety of function interface types
+;;   java.util.function interfaces (Other than *Supplier)
+;;     variety of primitive and object combinations for primitive args and return
+;;     not interested in arity difference (Function vs BiFunction)
+;;   Other interfaces marked as @FunctionalInterface
+;;     https://docs.oracle.com/javase/8/docs/api/java/lang/class-use/FunctionalInterface.html
+;;     FileFilter, FilenameFilter
+;; Negative tests - should NOT be adapted
+;;   Runnable, Callable
+;;   Comparable
+
+(comment
+  (let [f (constantly 100)
+        ^Runnable g f]
+    (identical? f g)
+    )
+  )
+
+;; single compilation unit with multiple overrides
+;;   given two methods that take the same FI (and thus need the same adapter),
+;;   check that this works
+;;   (defn foo [clojure-fn] (.method1 obj clojure-fn) (.method2 obj clojure-fn))
+
+;; let coercion and reuse of adapted FI
+(comment
+  (let [^java.util.function.Predicate pred even?]
+    (instance? java.util.function.Predicate pred)
+    (.removeIf coll1 pred)
+    (.removeIf coll2 pred)
+    )
+  )
+
+;; let coercion and type inference - no reflection (use return type of adapted function)
+(comment
+  (set! *warn-on-reflection* true)
+  (defn f ^long []
+    (let [^java.util.function.ToLongFunction f (fn ^long [x] 1)]
+      (Long/highestOneBit (f :x))))
+  )
+
