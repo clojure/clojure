@@ -669,28 +669,28 @@
   ;  (is (= coll [3 4 5])))
 
   (let [{:keys [dir file-id]} (make-test-files)
-        ff ^java.io.FileFilter (fn [f]
+        ^java.io.FileFilter ff (fn [f]
                                  (str/includes? (.getName f) file-id))
         filtered (.listFiles dir ff)]
     (is (= 2 (count filtered))))
 
   (let [{:keys [dir file-id]} (make-test-files)
-        ff ^java.io.FilenameFilter (fn [dir file-name]
+        ^java.io.FilenameFilter ff (fn [dir file-name]
                                      (str/includes? file-name file-id))
         filtered (.list dir ff)]
     (is (= 2 (count filtered))))
 
-  (let [f ^java.util.function.DoubleToLongFunction (fn [d] (int d))]
+  (let [^java.util.function.DoubleToLongFunction f (fn [d] (int d))]
     (is (= 10 (.applyAsLong f (double 10.6)))))
 
-  (let [f ^java.util.function.IntConsumer (fn [i] nil)]
+  (let [^java.util.function.IntConsumer f (fn [i] nil)]
     (is (nil? (.accept f 42))))
 
-  (let [f ^java.util.function.IntPredicate (fn [i] true)]
+  (let [^java.util.function.IntPredicate f (fn [i] true)]
     (is (true? (.test f 42))))
 
   (let [arr (java.util.ArrayList. [1 2 3 4 5])
-        f ^java.util.function.ObjDoubleConsumer (fn [arr i] nil)]
+        ^java.util.function.ObjDoubleConsumer f (fn [arr i] nil)]
     (is (nil? (.accept f arr 42))))
 
   (let [f (constantly 100)
