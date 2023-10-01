@@ -4840,7 +4840,12 @@ static public class ObjExpr implements Expr{
 
 			Class retType = samSig.returnType();
 			if(retType.isPrimitive()) {
-				gen.unbox(Type.getType(retType));
+				if(Boolean.TYPE.equals(retType)) {
+					// Convert to boolean via logical coercion
+					gen.invokeStatic(RT_TYPE, Method.getMethod("boolean booleanCast(Object)"));
+				} else {
+					gen.unbox(Type.getType(retType));
+				}
 			} else {
 				gen.checkCast(Type.getType(retType));
 			}
