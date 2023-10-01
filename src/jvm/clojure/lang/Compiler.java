@@ -1359,9 +1359,11 @@ private static boolean isAdaptableFunctionalInterface(Class c){
 			c != Runnable.class && c != Callable.class && c != Comparator.class;
 }
 
-// (let [a ^FI b] ...)
-private static boolean isAdaptableFunctionExpression(Expr e){
-	return (e.hasJavaClass() && isAdaptableFunctionalInterface(e.getJavaClass()));
+// (let [^FI lb e] ...)
+private static boolean isAdaptableFunctionExpression(Class target, Expr e){
+	return isAdaptableFunctionalInterface(target) &&
+			!(e.hasJavaClass() && target.isAssignableFrom(e.getJavaClass()));
+
 }
 
 private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString", "hashCode");
@@ -6657,9 +6659,10 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 					gen.pop();
 				else
 					{
-					if(isAdaptableFunctionExpression(bi.init))
+					Class bindingClass = tagClass(bi.binding.tag);
+					if(isAdaptableFunctionExpression(bindingClass, bi.init))
 						{
-						emitFunctionalAdapter(objx, gen, bi.init.getJavaClass(), null);
+						emitFunctionalAdapter(objx, gen, bindingClass, (bi.init.hasJavaClass() ? bi.init.getJavaClass() : null));
 						}
 					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
 					}
