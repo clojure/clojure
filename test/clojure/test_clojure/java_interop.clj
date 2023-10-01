@@ -15,8 +15,12 @@
             [clojure.inspector]
             [clojure.pprint :as pp]
             [clojure.set :as set]
-            [clojure.test-clojure.proxy.examples :as proxy-examples])
+            [clojure.string :as str]
+            [clojure.test-clojure.proxy.examples :as proxy-examples]
+            [clojure.test-helper :refer [should-not-reflect]])
   (:import java.util.Base64
+           (java.io File FileFilter)
+           (java.util UUID)
            (java.util.concurrent.atomic AtomicLong AtomicInteger)))
 
 ; http://clojure.org/java_interop
@@ -640,6 +644,18 @@
   (is (= 1 (.get (doto (AtomicInteger. 0) inc-atomic-int))))
   (is (= 1 (.get (doto (AtomicLong. 0) inc-atomic-long)))))
 
+(defn make-test-files []
+  (let [id (str (UUID/randomUUID))
+        temp-1 (java.io.File/createTempFile (str "test-1-" id)".edn")
+        temp-2 (java.io.File/createTempFile "test-2"".xml")
+        temp-3 (java.io.File/createTempFile (str "test-3-" id)".edn")
+        dir (File. (.getParent temp-3))]
+    {:dir dir :file-id id}))
+
+(defn return-long ^long []
+  (let [^java.util.function.ToLongFunction f (fn ^long [x] 1)]
+    (Long/highestOneBit (f :x))))
+
 (deftest clojure-fn-as-java-fn
   ;; pass Clojure fn as Java Predicate
   (let [coll (java.util.ArrayList. [1 2 3 4 5])]
@@ -651,46 +667,47 @@
   ;(let [coll (java.util.ArrayList. [1 2 3 4 5])]
   ;  (is (true? (.removeIf coll #{1 2})))
   ;  (is (= coll [3 4 5])))
-  )
 
-;; TODO:
-;; variety of function interface types
-;;   java.util.function interfaces (Other than *Supplier)
-;;     variety of primitive and object combinations for primitive args and return
-;;     not interested in arity difference (Function vs BiFunction)
-;;   Other interfaces marked as @FunctionalInterface
-;;     https://docs.oracle.com/javase/8/docs/api/java/lang/class-use/FunctionalInterface.html
-;;     FileFilter, FilenameFilter
-;; Negative tests - should NOT be adapted
-;;   Runnable, Callable
-;;   Comparable
+  (let [{:keys [dir file-id]} (make-test-files)
+        ff ^java.io.FileFilter (fn [f]
+                                 (str/includes? (.getName f) file-id))
+        filtered (.listFiles dir ff)]
+    (is (= 2 (count filtered))))
 
-(comment
+  (let [{:keys [dir file-id]} (make-test-files)
+        ff ^java.io.FilenameFilter (fn [dir file-name]
+                                     (str/includes? file-name file-id))
+        filtered (.list dir ff)]
+    (is (= 2 (count filtered))))
+
+  (let [f ^java.util.function.DoubleToLongFunction (fn [d] (int d))]
+    (is (= 10 (.applyAsLong f (double 10.6)))))
+
+  (let [f ^java.util.function.IntConsumer (fn [i] nil)]
+    (is (nil? (.accept f 42))))
+
+  (let [f ^java.util.function.IntPredicate (fn [i] true)]
+    (is (true? (.test f 42))))
+
+  (let [arr (java.util.ArrayList. [1 2 3 4 5])
+        f ^java.util.function.ObjDoubleConsumer (fn [arr i] nil)]
+    (is (nil? (.accept f arr 42))))
+
   (let [f (constantly 100)
         ^Runnable g f]
-    (identical? f g)
-    )
-  )
+    (is (identical? f g) "has been unintentionally adapted"))
 
-;; single compilation unit with multiple overrides
-;;   given two methods that take the same FI (and thus need the same adapter),
-;;   check that this works
-;;   (defn foo [clojure-fn] (.method1 obj clojure-fn) (.method2 obj clojure-fn))
+  ; NOTE Type hinting binding itself (left side) throws an error
+  ;; (let [^java.util.function.Predicate pred even?
+  ;;       coll1 (java.util.ArrayList. [1 2 3 4 5])
+  ;;       coll2 (java.util.ArrayList. [6 7 8 9 10])]
+  ;;   (instance? java.util.function.Predicate pred)
+  ;;   (is (true? (.removeIf coll1 pred)))
+  ;;   (is (= coll1 [1 3 5]))
+  ;;   (is (true? (.removeIf coll2 pred)))
+  ;;   (is (= coll2 [7 9])))
 
-;; let coercion and reuse of adapted FI
-(comment
-  (let [^java.util.function.Predicate pred even?]
-    (instance? java.util.function.Predicate pred)
-    (.removeIf coll1 pred)
-    (.removeIf coll2 pred)
-    )
-  )
+  (should-not-reflect #(clojure.test-clojure.java-interop/return-long))
 
-;; let coercion and type inference - no reflection (use return type of adapted function)
-(comment
-  (set! *warn-on-reflection* true)
-  (defn f ^long []
-    (let [^java.util.function.ToLongFunction f (fn ^long [x] 1)]
-      (Long/highestOneBit (f :x))))
   )
 
