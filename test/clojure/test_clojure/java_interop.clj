@@ -697,15 +697,14 @@
         ^Runnable g f]
     (is (identical? f g) "has been unintentionally adapted"))
 
-  ; NOTE Type hinting binding itself (left side) throws an error
-  ;; (let [^java.util.function.Predicate pred even?
-  ;;       coll1 (java.util.ArrayList. [1 2 3 4 5])
-  ;;       coll2 (java.util.ArrayList. [6 7 8 9 10])]
-  ;;   (instance? java.util.function.Predicate pred)
-  ;;   (is (true? (.removeIf coll1 pred)))
-  ;;   (is (= coll1 [1 3 5]))
-  ;;   (is (true? (.removeIf coll2 pred)))
-  ;;   (is (= coll2 [7 9])))
+  (let [^java.util.function.Predicate pred even?
+        coll1 (java.util.ArrayList. [1 2 3 4 5])
+        coll2 (java.util.ArrayList. [6 7 8 9 10])]
+    (instance? java.util.function.Predicate pred)
+    (is (true? (.removeIf coll1 pred)))
+    (is (= coll1 [1 3 5]))
+    (is (true? (.removeIf coll2 pred)))
+    (is (= coll2 [7 9])))
 
   (should-not-reflect #(clojure.test-clojure.java-interop/return-long))
 
