@@ -664,13 +664,24 @@
 
   ;; pass Clojure set as Java predicate - function return
   ;; should use Clojure semantics to return logical true
-  ;(let [coll (java.util.ArrayList. [1 2 3 4 5])]
-  ;  (is (true? (.removeIf coll #{1 2})))
-  ;  (is (= coll [3 4 5])))
+  (let [coll (java.util.ArrayList. [1 2 3 4 5])]
+    (is (true? (.removeIf coll #{1 2})))
+    (is (= coll [3 4 5])))
 
+  ;; binding type hint triggers implicit coercion
+  (is (= (class (let [^java.io.FileFilter ff (fn [f] true)] ff))
+        java.io.FileFilter))
+
+  ;; coercion in let
   (let [{:keys [dir file-id]} (make-test-files)
         ^java.io.FileFilter ff (fn [f]
                                  (str/includes? (.getName f) file-id))
+        filtered (.listFiles dir ff)]
+    (is (= 2 (count filtered))))
+
+  ;; conversion in invoke
+  (let [{:keys [dir file-id]} (make-test-files)
+        ff (fn [f] (str/includes? (.getName f) file-id))
         filtered (.listFiles dir ff)]
     (is (= 2 (count filtered))))
 
@@ -681,6 +692,7 @@
     (is (= 2 (count filtered))))
 
   (let [^java.util.function.DoubleToLongFunction f (fn [d] (int d))]
+    (is (= java.util.function.DoubleToLongFunction (class f)))
     (is (= 10 (.applyAsLong f (double 10.6)))))
 
   (let [^java.util.function.IntConsumer f (fn [i] nil)]
@@ -707,6 +719,15 @@
     (is (= coll2 [7 9])))
 
   (should-not-reflect #(clojure.test-clojure.java-interop/return-long))
+
+  ;; calling overloaded Java method that takes a functional interface in the overload
+  ;; specify the class of the method
+  ;;   AClass/method - static
+  ;;   (.AClass/method - instance
+  ;;   ^[FI] arg-tags metadata to select the right overload if needed
+  ;; given that, we should then know FI is needed, we don't have one, so convert the arg
+
+
 
   )
 
