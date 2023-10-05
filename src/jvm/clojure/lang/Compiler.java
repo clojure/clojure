@@ -1094,6 +1094,60 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return c;
     }
 
+	static String getPrimDescriptor(Class c) {
+		String descr = null;
+		if(c.equals(Long.TYPE))
+			descr = "J";
+		else if(c.equals(Double.TYPE))
+			descr = "D";
+		else if(c.equals(Integer.TYPE))
+			descr = "I";
+		else if(c.equals(Float.TYPE))
+			descr = "F";
+		else if(c.equals(Short.TYPE))
+			descr = "S";
+		else if(c.equals(Boolean.TYPE))
+			descr = "Z";
+		else if(c.equals(Byte.TYPE))
+			descr = "B";
+		else if(c.equals(Character.TYPE))
+			descr = "C";
+
+		return descr;
+	}
+
+	static Class maybeArrayClassSymbol(Symbol sym) {
+		Class rootClass = null;
+		Class derivedClass = null;
+
+		if(sym.name.endsWith("*")) {
+			int idx = sym.name.indexOf('*');
+			Symbol rootSymbol = Symbol.intern(sym.name.substring(0, idx));
+			String descr = null;
+			rootClass = tagToClass(rootSymbol);
+
+			if(rootClass == null) {
+				throw new IllegalArgumentException("Unable to resolve classname: " + sym);
+			}
+			else {
+				descr = getPrimDescriptor(rootClass);
+			}
+
+			int dim = sym.name.substring(idx).length();
+			StringBuilder repr = new StringBuilder(String.join("", Collections.nCopies(dim, "[")));
+
+			if(descr != null) {
+				repr.append(descr);
+			}
+			else {
+				repr.append("L" + rootClass.getName() + ";");
+			}
+
+			derivedClass = maybeClass(repr.toString(), true);
+		}
+
+		return derivedClass;
+	}
 
 	static Class tagToClass(Object tag) {
 		Class c = null;
@@ -1103,6 +1157,11 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
 				c = maybeSpecialTag(sym);
+				}
+			// Check for array class symbols, e.g. String*, long**, etc.
+			if(c == null)
+				{
+				c = maybeArrayClassSymbol(sym);
 				}
 			}
 		if(c == null)
