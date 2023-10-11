@@ -189,6 +189,7 @@ final static public Var ERR =
 		Var.intern(CLOJURE_NS, Symbol.intern("*err*"),
 		           new PrintWriter(new OutputStreamWriter(System.err), true)).setDynamic();
 final static Keyword TAG_KEY = Keyword.intern(null, "tag");
+final static Keyword ARG_TAGS_KEY = Keyword.intern(null, "arg-tags");
 final static Keyword CONST_KEY = Keyword.intern(null, "const");
 final static public Var AGENT = Var.intern(CLOJURE_NS, Symbol.intern("*agent*"), null).setDynamic();
 static Object readeval = readTrueFalseUnknown(System.getProperty("clojure.read.eval","true"));
