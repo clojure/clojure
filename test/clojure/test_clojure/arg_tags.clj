@@ -21,6 +21,10 @@
   (is (= "A" (^[java.util.Locale] .toUpperCase "a" java.util.Locale/ENGLISH)))
   (is (= [1 2] (^[_ _] Tuple/create 1 2)))
   (is (= (^[long long] UUID. 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
+  (testing "qualified instance method invocation"
+    (is (= "A" (.String/toUpperCase "a")))
+    (is (= "A" (^[java.util.Locale] .String/toUpperCase "a" java.util.Locale/ENGLISH)))
+    (is (= "A" (^[Locale] .String/toUpperCase "a" java.util.Locale/ENGLISH))))
   (testing "array resolutions"
      (let [lary (long-array [1 2 3 4 99 100])
            oary (into-array [1 2 3 4 99 100])
