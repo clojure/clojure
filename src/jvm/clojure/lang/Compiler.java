@@ -6993,7 +6993,7 @@ static public IFn isInline(Object op, int arity) {
 }
 
 public static boolean namesStaticMember(Symbol sym){
-	return sym.ns != null && namespaceFor(sym) == null;
+	return sym.ns != null && namespaceFor(sym) == null && sym.ns.charAt(0) != '.';
 }
 
 public static Object preserveTag(ISeq src, Object dst) {
@@ -7055,57 +7055,63 @@ public static Object macroexpand1(Object x) {
 		Var v = isMacro(op);
 		if(v != null)
 			{
-				checkSpecs(v, form);
+			checkSpecs(v, form);
 
-				try
-					{
-                    ISeq args = RT.cons(form, RT.cons(Compiler.LOCAL_ENV.get(), form.next()));
-					return v.applyTo(args);
-					}
-				catch(ArityException e)
-					{
-						// hide the 2 extra params for a macro
-						if(e.name.equals(munge(v.ns.name.name) + "$" + munge(v.sym.name))) {
-							throw new ArityException(e.actual - 2, e.name);
-						} else {
-							throw e;
-						}
-					}
-				catch(CompilerException e)
-					{
-						throw e;
-					}
-				catch(IllegalArgumentException | IllegalStateException | ExceptionInfo e)
-					{
-						throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(),
-								(op instanceof Symbol ? (Symbol) op : null),
-								CompilerException.PHASE_MACRO_SYNTAX_CHECK,
-								e);
-					}
-				catch(Throwable e)
-				    {
-						throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(),
-								(op instanceof Symbol ? (Symbol) op : null),
-								(e.getClass().equals(Exception.class) ? CompilerException.PHASE_MACRO_SYNTAX_CHECK : CompilerException.PHASE_MACROEXPANSION),
-								e);
-					}
-			} else
+			try
+				{
+				ISeq args = RT.cons(form, RT.cons(Compiler.LOCAL_ENV.get(), form.next()));
+				return v.applyTo(args);
+				}
+			catch(ArityException e)
+				{
+				// hide the 2 extra params for a macro
+				if(e.name.equals(munge(v.ns.name.name) + "$" + munge(v.sym.name)))
+					throw new ArityException(e.actual - 2, e.name);
+				else
+					throw e;
+
+				}
+			catch(CompilerException e)
+				{
+				throw e;
+				}
+			catch(IllegalArgumentException | IllegalStateException | ExceptionInfo e)
+				{
+				throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(),
+						(op instanceof Symbol ? (Symbol) op : null),
+						CompilerException.PHASE_MACRO_SYNTAX_CHECK,
+						e);
+				}
+			catch(Throwable e)
+				{
+				throw new CompilerException((String) SOURCE_PATH.deref(), lineDeref(), columnDeref(),
+						(op instanceof Symbol ? (Symbol) op : null),
+						(e.getClass().equals(Exception.class) ? CompilerException.PHASE_MACRO_SYNTAX_CHECK : CompilerException.PHASE_MACROEXPANSION),
+						e);
+				}
+		} else
 			{
 			if(op instanceof Symbol)
 				{
 				Symbol sym = (Symbol) op;
 				String sname = sym.name;
 				//(.substring s 2 5) => (. s substring 2 5)
-				if(sym.name.charAt(0) == '.')
+				//(.String/substring s 2 5) => (. ^String s substring 2 5)
+				if(sym.name.charAt(0) == '.' || (sym.ns != null && sym.ns.charAt(0) == '.'))
 					{
 					if(RT.length(form) < 2)
 						throw new IllegalArgumentException(
 								"Malformed member expression, expecting (.member target ...)");
-					Symbol meth = (Symbol) preserveArgTags(sym, Symbol.intern(sname.substring(1)));
+					Symbol meth = (sname.charAt(0) == '.') ? Symbol.intern(sname.substring(1)) : Symbol.intern(sname);
+					Symbol maybeLocalHint = (sym.ns != null && sym.ns.charAt(0) == '.') ? Symbol.intern(sym.ns.substring(1)) : null;
 					Object target = RT.second(form);
 					if(HostExpr.maybeClass(target, false) != null)
 						{
 						target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY,CLASS));
+						}
+					else if (maybeLocalHint != null && target instanceof IObj)
+						{
+						target = ((IObj)target).withMeta(RT.map(RT.TAG_KEY, maybeLocalHint));
 						}
 					return preserveTag(form, RT.listStar(DOT, target, meth, form.next().next()));
 					}
@@ -7130,8 +7136,8 @@ public static Object macroexpand1(Object x) {
 //						Symbol meth = Symbol.intern(sname.substring(idx + 1));
 //						return RT.listStar(DOT, target, meth, form.rest());
 //						}
-					//(StringBuilder. "foo") => (new StringBuilder "foo")	
-					//else 
+					//(StringBuilder. "foo") => (new StringBuilder "foo")
+					//else
 					if(idx == sname.length() - 1)
 						{
 						Symbol taggedSym = (Symbol) Symbol.intern(sname.substring(0, idx)).withMeta(sym.meta());
