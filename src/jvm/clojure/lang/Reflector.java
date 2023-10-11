@@ -15,10 +15,7 @@ package clojure.lang;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -650,5 +647,106 @@ public static Object prepRet(Class c, Object x){
 //	else if(x instanceof Float)
 //			return Double.valueOf(((Float) x).doubleValue());
 	return x;
+}
+
+static public Executable findMatchingTarget(Executable[] targets, Class c, String targetName, IPersistentVector sig) {
+	List<Executable> potentialTargets = new ArrayList<>();
+	int leastArity = Integer.MAX_VALUE;
+	int derivedArity = sig != null ? sig.count() : -1;
+	List<Class> declaredSignature = processDeclaredSignature(sig);
+
+	// Get only the methods with the right name
+	try
+		{
+		for (int i = 0; i < targets.length; i++)
+			{
+			if(targets[i].getName().equals(targetName))
+				{
+				leastArity = Math.min(targets[i].getParameterCount(), leastArity);
+				potentialTargets.add(targets[i]);
+				}
+			}
+		}
+	catch(Throwable t)
+		{
+		throw Util.sneakyThrow(t);
+		}
+
+	java.util.stream.Stream<Executable> targetStream = potentialTargets.stream();
+
+	// filter arities
+	if(derivedArity > -1)
+		{
+		targetStream = targetStream.filter(tgt -> tgt.getParameterTypes().length == derivedArity);
+		}
+	else
+		{
+		int finalLeastArity = leastArity;
+		targetStream = targetStream.filter(tgt -> tgt.getParameterCount() == finalLeastArity);
+		}
+
+	// Match signatures
+	if(!declaredSignature.isEmpty()) {
+		targetStream = targetStream.filter(tgt -> {
+			Class[] targetSig = tgt.getParameterTypes();
+
+			for (int i = 0; i < targetSig.length; i++)
+				{
+				if (declaredSignature.get(i) == null)
+					{ // ignoring placeholders
+					}
+				else if (!declaredSignature.get(i).equals(targetSig[i]))
+					{
+					return false;
+					}
+				}
+
+			return true;
+		});
+	}
+
+	List<Executable> filteredTargets = targetStream.collect(Collectors.toList());
+
+	if(filteredTargets.isEmpty())
+		throw new IllegalArgumentException("Could not resolve " + targetName + " from arg-tags in class " + c.getName());
+
+	if(filteredTargets.size() > 1)
+		throw new IllegalArgumentException("Ambiguous arg-tags for " + targetName + " in class " + c.getName());
+
+	Executable target = filteredTargets.get(0);
+
+	if(target.isVarArgs())
+		throw new UnsupportedOperationException("Varargs not supported for method thunks, got " + targetName);
+
+	return target;
+}
+
+public static List<Class> processDeclaredSignature(IPersistentVector sig) {
+	List<Class> tsig = new ArrayList<>();
+	for (ISeq s = RT.seq(sig); s!=null; s = s.next())
+	{
+		Object t = s.first();
+		Object maybeClass = null;
+		boolean isIgnoring = false;
+
+		if (t.equals(Symbol.intern(null, "_")))
+			{
+			isIgnoring = true;
+			}
+		else
+			{
+			maybeClass = Compiler.HostExpr.tagToClass(t);
+			}
+
+		if (maybeClass == null && !isIgnoring)
+			{
+			ClassNotFoundException cnfe = new ClassNotFoundException(t.toString());
+			Util.sneakyThrow(cnfe);
+			}
+
+		tsig.add((Class) maybeClass);
+	}
+
+	return tsig;
 }
 }
