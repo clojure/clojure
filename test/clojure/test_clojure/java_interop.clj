@@ -19,7 +19,7 @@
             [clojure.test-clojure.proxy.examples :as proxy-examples]
             [clojure.test-helper :refer [should-not-reflect]])
   (:import java.util.Base64
-           (java.io File FileFilter)
+           (java.io File FileFilter FilenameFilter)
            (java.util UUID)
            (java.util.concurrent.atomic AtomicLong AtomicInteger)))
 
@@ -668,31 +668,44 @@
     (is (true? (.removeIf coll #{1 2})))
     (is (= coll [3 4 5])))
 
-  ;; binding type hint triggers implicit coercion
-  (is (= (class (let [^java.io.FileFilter ff (fn [f] true)] ff))
-        java.io.FileFilter))
+  ;; binding type hint triggers coercion
+  (is (instance? FileFilter
+    (let [^FileFilter ff (fn [f] true)] ff)))
 
-  ;; coercion in let
+  ;; coercion in let - reflection has types that should work
   (let [{:keys [dir file-id]} (make-test-files)
-        ^java.io.FileFilter ff (fn [f]
+        ^FileFilter ff (fn [^File f]
                                  (str/includes? (.getName f) file-id))
         filtered (.listFiles dir ff)]
     (is (= 2 (count filtered))))
 
-  ;; conversion in invoke
+  ;; coercion in let
   (let [{:keys [dir file-id]} (make-test-files)
-        ff (fn [f] (str/includes? (.getName f) file-id))
-        filtered (.listFiles dir ff)]
+        ^FileFilter ff (fn [^File f]
+                                 (str/includes? (.getName f) file-id))
+        filtered (.listFiles ^File dir ff)]
     (is (= 2 (count filtered))))
 
+  ;;; resolve method ambiguity using member symbol and arg-tags
+  ;(let [{:keys [dir file-id]} (make-test-files)
+  ;      ^FileFilter ff (fn [^File f]
+  ;                               (str/includes? (.getName f) file-id))
+  ;      filtered (^[FileFilter] .File/listFiles dir ff)]
+  ;  (is (= 2 (count filtered))))
+
+
+  ;(defn files-with-ext [^File dir ext]
+  ;  (vec (.list dir ^FilenameFilter #(str/ends-with? % ext))))
+  ;
+
   (let [{:keys [dir file-id]} (make-test-files)
-        ^java.io.FilenameFilter ff (fn [dir file-name]
-                                     (str/includes? file-name file-id))
-        filtered (.list dir ff)]
+        ^FilenameFilter ff (fn [dir file-name]
+                             (str/includes? file-name file-id))
+        filtered (.list ^File dir ff)]
     (is (= 2 (count filtered))))
 
   (let [^java.util.function.DoubleToLongFunction f (fn [d] (int d))]
-    (is (= java.util.function.DoubleToLongFunction (class f)))
+    (is (instance? java.util.function.DoubleToLongFunction f))
     (is (= 10 (.applyAsLong f (double 10.6)))))
 
   (let [^java.util.function.IntConsumer f (fn [i] nil)]
@@ -719,15 +732,6 @@
     (is (= coll2 [7 9])))
 
   (should-not-reflect #(clojure.test-clojure.java-interop/return-long))
-
-  ;; calling overloaded Java method that takes a functional interface in the overload
-  ;; specify the class of the method
-  ;;   AClass/method - static
-  ;;   (.AClass/method - instance
-  ;;   ^[FI] arg-tags metadata to select the right overload if needed
-  ;; given that, we should then know FI is needed, we don't have one, so convert the arg
-
-
 
   )
 

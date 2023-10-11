@@ -1525,10 +1525,11 @@ static abstract class MethodExpr extends HostExpr{
 				else
 					{
 					e.emit(C.EXPRESSION, objx, gen);
-					if(isAdaptableFunctionalInterface(parameterTypes[i]))
+					Class exprClass = e.hasJavaClass() ? e.getJavaClass() : null;
+					if(isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
 						{
-						System.out.println("Emit function arg adapter to " + parameterTypes[i]);
-						emitFunctionalAdapter(objx, gen, parameterTypes[i], e.hasJavaClass() ? e.getJavaClass() : null);
+						System.out.println("Emit function arg adapter to " + parameterTypes[i] + ", have " + (exprClass == null ? "unknown" : exprClass.getName()));
+						emitFunctionalAdapter(objx, gen, parameterTypes[i], exprClass);
 						}
 						else
 					    {
@@ -6665,9 +6666,12 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 				else
 					{
 					Class bindingClass = tagClass(bi.binding.tag);
+					Class initClass = bi.init.hasJavaClass() ? bi.init.getJavaClass() : null;
+					// TODO: && (initClass == null || ! bindingClass.isAssignableFrom(initClass)) ???
 					if(isAdaptableFunctionExpression(bindingClass, bi.init))
 						{
-						emitFunctionalAdapter(objx, gen, bindingClass, (bi.init.hasJavaClass() ? bi.init.getJavaClass() : null));
+						System.out.println("Emit coercion to " + bindingClass + ", have " + (initClass == null ? "unknown" : initClass));
+						emitFunctionalAdapter(objx, gen, bindingClass, initClass);
 						}
 					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
 					}
