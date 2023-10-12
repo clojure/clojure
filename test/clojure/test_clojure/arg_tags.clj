@@ -9,9 +9,8 @@
 
 (ns clojure.test-clojure.arg-tags
   (:use clojure.test)
-  (:import (clojure.lang Compiler Tuple)
-           (java.util Arrays UUID Locale)
-           clojure.lang.IFn$LL))
+  (:import (clojure.lang Tuple)
+           (java.util Arrays UUID Locale)))
 
 (set! *warn-on-reflection* true)
 
