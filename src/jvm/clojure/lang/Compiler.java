@@ -1057,6 +1057,25 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return c;
 	}
 
+	public static Class maybeClassFromMemberSymbol(Symbol sym) {
+		String contextPart = sym.ns;
+		String targetPart = sym.name;
+
+		// maybe Ctor.
+		if (targetPart.endsWith(".") && contextPart == null)
+		{
+			return maybeClass(Symbol.intern(null, targetPart.substring(0, targetPart.length() - 1)), false);
+		}
+
+		// maybe .Class/method
+		if (contextPart!= null && targetPart != null && contextPart.startsWith("."))
+		{
+			return maybeClass(Symbol.intern(null, contextPart.substring(1)), false);
+		}
+
+		return null;
+	}
+
 	/*
 	 private static String maybeClassName(Object form, boolean stringOk){
 		 String className = null;
@@ -4208,6 +4227,200 @@ static public class FnExpr extends ObjExpr{
 			emit(C.EXPRESSION,objx,gen);
 	}
 }
+
+static public class MethodValueExpr extends FnExpr
+{
+	private final List<Class> declaredSignature;
+	private final Symbol targetSymbol;
+	Class klass;
+	Executable target;
+
+	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>() {{
+		put(double.class, Symbol.intern("double"));
+		put(double[].class, Symbol.intern("doubles"));
+		put(long.class, Symbol.intern("long"));
+		put(long[].class, Symbol.intern("longs"));
+		put(int.class, Symbol.intern("int"));
+		put(int[].class, Symbol.intern("ints"));
+		put(float.class, Symbol.intern("float"));
+		put(float[].class, Symbol.intern("floats"));
+		put(char.class, Symbol.intern("char"));
+		put(char[].class, Symbol.intern("chars"));
+		put(short.class, Symbol.intern("short"));
+		put(short[].class, Symbol.intern("shorts"));
+		put(byte.class, Symbol.intern("byte"));
+		put(byte[].class, Symbol.intern("bytes"));
+		put(boolean.class, Symbol.intern("boolean"));
+		put(boolean[].class, Symbol.intern("booleans"));
+	}};
+
+	public MethodValueExpr(Object tag, Class c, Symbol targetSymbol, IPersistentVector sig)
+	{
+		super(tag);
+		this.klass = c;
+		this.declaredSignature = Reflector.processDeclaredSignature(sig);
+		this.targetSymbol = targetSymbol;
+
+		if (isCtor())
+			this.target = Reflector.findMatchingTarget(c.getConstructors(), c, this.klass.getName(), sig);
+		else
+			this.target = Reflector.findMatchingTarget(c.getMethods(), c, targetSymbol.name, sig);
+	}
+
+	public boolean isStatic() {
+		return Modifier.isStatic(target.getModifiers());
+	}
+
+	public boolean isCtor() {
+		return targetSymbol.name.endsWith(".");
+	}
+
+	public Object eval(){
+		String name = buildThunkName();
+		ISeq form = buildThunk(name);
+		Expr retExpr = analyzeSeq(null, form, name);
+		return retExpr.eval();
+	}
+
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		String name = buildThunkName();
+		ISeq form = buildThunk(name);
+		Expr retExpr = analyzeSeq(context, form, name);
+		retExpr.emit(context, objx, gen);
+	}
+
+	private String buildThunkName(){
+		return "dot__" + targetSymbol + RT.nextID();
+	}
+
+	private ISeq buildThunk(String name) {
+		// (fn dot__new42 ([^T arg] (new Klass arg)))
+		// (fn dot__staticMethod42 (^r [^T arg] (. Klass staticMethod arg)))
+		// (fn dot__instanceMethod42 (^r [^Klass self ^T arg] (. ^Klass self instanceMethod arg)))
+		return	RT.list(Symbol.intern("fn"), Symbol.intern(name),
+				buildThunkBody(buildThunkParams()));
+	}
+
+	private IPersistentVector buildThunkParams(){
+		IPersistentVector params = PersistentVector.EMPTY;
+
+		if(isCtor() || isStatic())
+		{
+			// [^T arg1 ^U arg2]
+			for(Class klass : target.getParameterTypes())
+			{
+				params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
+			}
+		}
+		else
+		{
+			// [^T self ^U arg]
+			params = params.cons(Symbol.intern("self" + RT.nextID())
+					.withMeta(PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName()))));
+			for(Class klass : target.getParameterTypes())
+			{
+				params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
+			}
+		}
+		return maybeHintReturn((PersistentVector)params);
+	}
+
+	private IPersistentVector maybeHintReturn(PersistentVector params){
+		// ^long [...]
+		// ^double [...]
+		if (!isCtor())
+		{
+			Class t = ((java.lang.reflect.Method) target).getReturnType();
+
+			if (t.isPrimitive() && (t.equals(Long.TYPE) || t.equals(Double.TYPE)))
+			{
+				return params.withMeta(PersistentHashMap.create(Keyword.intern("tag"), coerceFns.get(t)));
+			}
+		}
+		return params;
+	}
+
+	private Symbol maybeHintParam(Class klass, Symbol name){
+		if (klass.equals(Long.TYPE) || klass.equals(Double.TYPE) || !klass.isPrimitive())
+		{
+			return (Symbol) name.withMeta(PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName())));
+		}
+		return name;
+	}
+
+	private ISeq buildThunkBody(IPersistentVector params){
+		// ([^T arg] (. Klass staticMethod arg))
+		// ([^Klass self ^T arg] (. self instanceMethod arg))
+		// ([^T arg] (new Klass arg))
+		ISeq body = RT.list(params, buildThunkDispatch(params));
+		return body;
+	}
+
+	ISeq maybeCoerceArgs(ISeq args){
+		Class[] sig = target.getParameterTypes();
+		ArrayList ret = new ArrayList();
+
+		for(int i = 0; args != null; args = args.next(), i++)
+		{
+			if (coerceFns.containsKey(sig[i]))
+			{
+				ArrayList coerceCall = new ArrayList();
+				coerceCall.add(coerceFns.get(sig[i]));
+				coerceCall.add(args.first());
+				ret.add(RT.seq(coerceCall));
+			}
+			else
+			{
+				ret.add(args.first());
+			}
+		}
+
+		return RT.seq(ret);
+	}
+
+	private ISeq buildThunkDispatch(IPersistentVector params){
+		if (isCtor())
+		{
+			// ([^T arg] (new Klass arg))
+			// ([^long arg1 ^double arg2] (new Klass arg1 arg2))
+			// ([prim] (new Klass (coercefn prim)))
+			return RT.listStar(Symbol.intern("new"), Symbol.intern(klass.getName()), maybeCoerceArgs(params.seq()));
+		}
+		else if (isStatic())
+		{
+			// ([^T arg] (. Klass staticMethod arg))
+			// ([^long arg1 ^double arg2] (. Klass staticMethod arg1 arg2))
+			// ([prim] (. Klass staticMethod (coercefn prim)))
+			return RT.listStar(Symbol.intern("."),
+					Symbol.intern(klass.getName()), Symbol.intern(target.getName()),
+					maybeCoerceArgs(params.seq()));
+		}
+		else
+		{
+			// ([^Klass self ^T arg] (. self instanceMethod arg))
+			// ([^long arg1 ^double arg2] (. self instanceMethod arg1 arg2))
+			// ([^Klass self prim] (. self instanceMethod (coercefn prim)))
+			return RT.listStar(Symbol.intern("."),
+					params.seq().first(), Symbol.intern(target.getName()),
+					maybeCoerceArgs(params.seq().next()));
+		}
+	}
+
+	public boolean hasJavaClass() {
+		return true;
+	}
+
+	public Class getJavaClass() {
+		if (isCtor())
+		{
+			return this.klass;
+		}
+		else {
+			return ((java.lang.reflect.Method)this.target).getReturnType();
+		}
+	}
+}
+
 
 static public class ObjExpr implements Expr{
 	static final String CONST_PREFIX = "const__";
@@ -7367,53 +7580,84 @@ static void addParameterAnnotation(Object visitor, IPersistentMap meta, int i){
 		 ADD_ANNOTATIONS.invoke(visitor, meta, i);
 }
 
-	private static Expr analyzeSymbol(Symbol sym) {
-		Symbol tag = tagOf(sym);
-		if(sym.ns == null) //ns-qualified syms are always Vars
+private static Expr analyzeSymbol(Symbol sym) {
+	Symbol tag = tagOf(sym);
+	if(sym.ns == null) //ns-qualified syms are always Vars or member symbols
+	{
+		LocalBinding b = referenceLocal(sym);
+		if(b != null)
 		{
-			LocalBinding b = referenceLocal(sym);
-			if(b != null)
-			{
-				return new LocalBindingExpr(b, tag);
-			}
+			return new LocalBindingExpr(b, tag);
 		}
 		else
 		{
-			if(namespaceFor(sym) == null)
+			//maybe Klass. member symbol
+			Class c = HostExpr.maybeClassFromMemberSymbol(sym);
+			if (c != null)
 			{
-				Symbol nsSym = Symbol.intern(sym.ns);
-				Class c = HostExpr.maybeClass(nsSym, false);
-				if(c != null)
+				Object argTags = (sym.meta() != null) ? sym.meta().valAt(RT.ARG_TAGS_KEY) : null;
+
+				if (argTags != null && !(argTags instanceof IPersistentVector))
+					throw new IllegalArgumentException("Malformed arg-tags. Expected a vector.");
+
+				return new MethodValueExpr(null, c, Symbol.intern(null, sym.name), (IPersistentVector) argTags);
+			}
+		}
+	}
+	else
+	{
+		if(namespaceFor(sym) == null)
+		{
+			Symbol nsSym = Symbol.intern(sym.ns);
+			Class c = HostExpr.maybeClass(nsSym, false);
+
+			if (c == null) {
+				// maybe .Klass/method
+				c = HostExpr.maybeClassFromMemberSymbol(sym);
+			}
+
+			if(c != null)
+			{
+				if(Reflector.getField(c, sym.name, true) != null)
 				{
-					if(Reflector.getField(c, sym.name, true) != null)
-						return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
-					throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
+					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
+				}
+				else
+				{
+					Object argTags = (sym.meta() != null) ? sym.meta().valAt(RT.ARG_TAGS_KEY) : null;
+
+					if (argTags != null && !(argTags instanceof IPersistentVector))
+						throw new IllegalArgumentException("Malformed arg-tags. Expected a vector.");
+
+					return new MethodValueExpr(null, c, Symbol.intern(null, sym.name), (IPersistentVector) argTags);
 				}
 			}
 		}
-		//Var v = lookupVar(sym, false);
+	}
+	//Var v = lookupVar(sym, false);
 //	Var v = lookupVar(sym, false);
 //	if(v != null)
 //		return new VarExpr(v, tag);
-		Object o = resolve(sym);
-		if(o instanceof Var)
-		{
-			Var v = (Var) o;
-			if(isMacro(v) != null)
-				throw Util.runtimeException("Can't take value of a macro: " + v);
-			if(RT.booleanCast(RT.get(v.meta(),RT.CONST_KEY)))
-				return analyze(C.EXPRESSION, RT.list(QUOTE, v.get()));
-			registerVar(v);
-			return new VarExpr(v, tag);
-		}
-		else if(o instanceof Class)
-			return new ConstantExpr(o);
-		else if(o instanceof Symbol)
-			return new UnresolvedVarExpr((Symbol) o);
+	Object o = resolve(sym);
+	if(o instanceof Var)
+	{
+		Var v = (Var) o;
+		if(isMacro(v) != null)
+			throw Util.runtimeException("Can't take value of a macro: " + v);
+		if(RT.booleanCast(RT.get(v.meta(),RT.CONST_KEY)))
+			return analyze(C.EXPRESSION, RT.list(QUOTE, v.get()));
+		registerVar(v);
+		return new VarExpr(v, tag);
+	}
+	else if(o instanceof Class)
+		return new ConstantExpr(o);
+	else if(o instanceof Symbol)
+		return new UnresolvedVarExpr((Symbol) o);
 
-		throw Util.runtimeException("Unable to resolve symbol: " + sym + " in this context");
+	throw Util.runtimeException("Unable to resolve symbol: " + sym + " in this context");
 
 }
+
 static String destubClassName(String className){
 	//skip over prefix + '.' or '/'
 	if(className.startsWith(COMPILE_STUB_PREFIX))
