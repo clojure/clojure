@@ -593,6 +593,23 @@ Math/pow overflows to Infinity."
        "[I" (int-array 1) (ints (int-array 1 1))
        "[J" (long-array 1) (longs (long-array 1 1))))
 
+(deftest test-array-type-symbols
+  (are [str-repr klass] (= (Class/forName str-repr) klass)
+       "[Z" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'boolean*)
+       "[B" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'byte*)
+       "[C" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'char*)
+       "[S" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'short*)
+       "[F" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'float*)
+       "[D" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'double*)
+       "[I" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'int*)
+       "[J" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'long*)
+       "[[J" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'long**)
+       "[Ljava.lang.Object;" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'Object*)
+       "[Ljava.lang.String;" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'String*)
+       "[[Ljava.lang.String;" (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'String**))
+  (is (= nil (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'Object)))
+  (is (= nil (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'ThisIsNotAClassThatCouldBeFound138)))
+  (is (thrown? IllegalArgumentException (clojure.lang.Compiler$HostExpr/maybeArrayClassFromSymbol 'String*IJ*))))
 
 (deftest test-ratios
   (is (== (denominator 1/2) 2))

@@ -1116,7 +1116,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return descr;
 	}
 
-	static Class maybeArrayClassSymbol(Symbol sym) {
+	public static Class maybeArrayClassFromSymbol(Symbol sym) {
 		Class rootClass = null;
 		Class derivedClass = null;
 
@@ -1133,7 +1133,12 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				descr = getPrimDescriptor(rootClass);
 			}
 
-			int dim = sym.name.substring(idx).length();
+			String stars = sym.name.substring(idx);
+
+			if (stars.replace("*", "").length() > 0)
+				throw new IllegalArgumentException("Array type hint requires asterisks only for dimensionality, found " + sym);
+
+			int dim = stars.length();
 			StringBuilder repr = new StringBuilder(String.join("", Collections.nCopies(dim, "[")));
 
 			if(descr != null) {
@@ -1161,7 +1166,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			// Check for array class symbols, e.g. String*, long**, etc.
 			if(c == null)
 				{
-				c = maybeArrayClassSymbol(sym);
+				c = maybeArrayClassFromSymbol(sym);
 				}
 			}
 		if(c == null)
