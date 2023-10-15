@@ -22,6 +22,7 @@ import java.io.*;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
@@ -1366,6 +1367,24 @@ private static boolean isAdaptableFunctionExpression(Class target, Expr e){
 
 }
 
+// Dynamically adapt fn to targetFnInterface using proxy
+private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
+	return Proxy.newProxyInstance(
+			(ClassLoader)LOADER.get(),
+			new Class[] { targetFnInterface },
+			(proxy,method,methodArgs)-> {
+				if (fn instanceof IFn) {
+					Object ret = ((IFn) fn).applyTo(RT.seq(methodArgs));
+					if(method.getReturnType() == Boolean.TYPE) {
+						ret = RT.booleanCast(ret);
+					}
+					return ret;
+				} else {
+					throw new IllegalArgumentException("Expected instance of " + method.getDeclaringClass() + " or IFn to adapt, got: " + ((proxy == null) ? "null" : proxy.getClass().getName()));
+				}
+			});
+}
+
 private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString", "hashCode");
 
 // The SAM method (there must be one) is abstract,
@@ -1638,6 +1657,12 @@ static class InstanceMethodExpr extends MethodExpr{
 				argvals[i] = ((Expr) args.nth(i)).eval();
 			if(method != null)
 				{
+				Class[] params = method.getParameterTypes();
+				for(int i = 0; i < params.length; i++) {
+					if(argvals[i] != null && isAdaptableFunctionalInterface(params[i]) && !params[i].isAssignableFrom(argvals[i].getClass())) {
+						argvals[i] = dynamicAdapt(params[i], argvals[i]);
+					}
+				}
 				LinkedList ms = new LinkedList();
 				ms.add(method);
 				return Reflector.invokeMatchingMethod(methodName, ms, targetval, argvals);
@@ -1826,6 +1851,12 @@ static class StaticMethodExpr extends MethodExpr{
 				argvals[i] = ((Expr) args.nth(i)).eval();
 			if(method != null)
 				{
+				Class[] params = method.getParameterTypes();
+				for(int i = 0; i < params.length; i++) {
+					if(argvals[i] != null && isAdaptableFunctionalInterface(params[i]) && !params[i].isAssignableFrom(argvals[i].getClass())) {
+						argvals[i] = dynamicAdapt(params[i], argvals[i]);
+					}
+				}
 				LinkedList ms = new LinkedList();
 				ms.add(method);
 				return Reflector.invokeMatchingMethod(methodName, ms, null, argvals);
@@ -2712,6 +2743,12 @@ public static class NewExpr implements Expr{
 			{
 			try
 				{
+				Class[] params = ctor.getParameterTypes();
+				for(int i = 0; i < params.length; i++) {
+					if(argvals[i] != null && isAdaptableFunctionalInterface(params[i]) && !params[i].isAssignableFrom(argvals[i].getClass())) {
+						argvals[i] = dynamicAdapt(params[i], argvals[i]);
+					}
+				}
 				return ctor.newInstance(Reflector.boxArgs(ctor.getParameterTypes(), argvals));
 				}
 			catch(Exception e)
