@@ -1050,7 +1050,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return c;
 	}
 
-	public static Class maybeClassFromMemberSymbol(Symbol sym) {
+	private static Class maybeClassFromMemberSymbol(Symbol sym) {
 		String contextPart = sym.ns;
 		String targetPart = sym.name;
 
@@ -4226,13 +4226,13 @@ static public class MethodValueExpr extends FnExpr
 	{
 		super(tag);
 		this.klass = c;
-		this.declaredSignature = Reflector.processDeclaredSignature(sig);
+		this.declaredSignature = resolveSignatureClasses(sig);
 		this.targetSymbol = targetSymbol;
 
 		if (isCtor())
-			this.target = Reflector.findMatchingTarget(c.getConstructors(), c, this.klass.getName(), sig);
+			this.target = findMatchingTarget(c.getConstructors(), c, this.klass.getName(), sig);
 		else
-			this.target = Reflector.findMatchingTarget(c.getMethods(), c, targetSymbol.name, sig);
+			this.target = findMatchingTarget(c.getMethods(), c, targetSymbol.name, sig);
 	}
 
 	public boolean isStatic() {
@@ -7564,7 +7564,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 			if (c != null)
 				{
 				Object argTags = (sym.meta() != null) ? sym.meta().valAt(RT.ARG_TAGS_KEY) : null;
-				return maybeProcessMethodDescriptor(c, Symbol.intern(null, sym.name), argTags);
+				return new MethodValueExpr(null, c, Symbol.intern(null, sym.name), (IPersistentVector) argTags);
 				}
 			}
 		}
@@ -7590,7 +7590,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 				else
 					{
 					Object argTags = (sym.meta() != null) ? sym.meta().valAt(RT.ARG_TAGS_KEY) : null;
-					return maybeProcessMethodDescriptor(c, Symbol.intern(null, sym.name), argTags);
+					return new MethodValueExpr(null, c, Symbol.intern(null, sym.name), (IPersistentVector) argTags);
 					}
 				}
 			}
