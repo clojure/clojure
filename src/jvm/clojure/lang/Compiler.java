@@ -25,6 +25,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 //*/
 /*
@@ -1004,17 +1005,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				for(ISeq s = RT.next(call); s != null; s = s.next())
 					args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 				if(c != null)
-					{
-					if(argTags != null)
-						return new StaticMethodExpr(source, line, column, tag, argTags, c, munge(sym.name), args, tailPosition);
-					else
-						return new StaticMethodExpr(source, line, column, tag, c, munge(sym.name), args, tailPosition);
-					}
+					return new StaticMethodExpr(source, line, column, tag, argTags, c, munge(sym.name), args, tailPosition);
 				else
-					if(argTags != null)
-						return new InstanceMethodExpr(source, line, column, tag, argTags, instance, munge(sym.name), args, tailPosition);
-					else
-						return new InstanceMethodExpr(source, line, column, tag, instance, munge(sym.name), args, tailPosition);
+					return new InstanceMethodExpr(source, line, column, tag, argTags, instance, munge(sym.name), args, tailPosition);
 				}
 		}
 	}
@@ -1466,16 +1459,10 @@ static class InstanceMethodExpr extends MethodExpr{
 	final static Method invokeInstanceMethodMethod =
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
-	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
-							  String methodName, IPersistentVector args, boolean tailPosition)
-	{
-		this(source, line, column, tag, null, target, methodName, args, tailPosition);
-	}
-
 
 	public InstanceMethodExpr(String source, int line, int column, Symbol tag, IPersistentVector argTags, Expr target,
 			String methodName, IPersistentVector args, boolean tailPosition)
-		{
+			{
 		this.source = source;
 		this.line = line;
 		this.column = column;
@@ -1484,74 +1471,71 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-		if (argTags == null)
+		if(target.hasJavaClass() && target.getJavaClass() != null && argTags == null)
 			{
-			if (target.hasJavaClass() && target.getJavaClass() != null)
+			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
+			if(methods.isEmpty())
 				{
-				List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
-				if (methods.isEmpty())
+				method = null;
+				if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 					{
-					method = null;
-					if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-						{
-						RT.errPrintWriter()
-								.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
-										SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName());
-						}
-					}
-				else
-					{
-					int methodidx = 0;
-					if (methods.size() > 1)
-						{
-						ArrayList<Class[]> params = new ArrayList();
-						ArrayList<Class> rets = new ArrayList();
-						for (int i = 0; i < methods.size(); i++)
-							{
-							java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
-							params.add(m.getParameterTypes());
-							rets.add(m.getReturnType());
-							}
-						methodidx = getMatchingParams(methodName, params, args, rets);
-						}
-					java.lang.reflect.Method m =
-							(java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
-					if (m != null && !Modifier.isPublic(m.getDeclaringClass().getModifiers()))
-						{
-						//public method of non-public class, try to find it in hierarchy
-						m = Reflector.getAsMethodOfPublicBase(m.getDeclaringClass(), m);
-						}
-					method = m;
-					if (method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-						{
-						RT.errPrintWriter()
-								.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
-										SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName(), getTypeStringForArgs(args));
-						}
+					RT.errPrintWriter()
+						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
+							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName());
 					}
 				}
 			else
 				{
-				method = null;
-				if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+				int methodidx = 0;
+				if(methods.size() > 1)
+					{
+					ArrayList<Class[]> params = new ArrayList();
+					ArrayList<Class> rets = new ArrayList();
+					for(int i = 0; i < methods.size(); i++)
+						{
+						java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
+						params.add(m.getParameterTypes());
+						rets.add(m.getReturnType());
+						}
+					methodidx = getMatchingParams(methodName, params, args, rets);
+					}
+				java.lang.reflect.Method m =
+						(java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
+				if(m != null && !Modifier.isPublic(m.getDeclaringClass().getModifiers()))
+					{
+					//public method of non-public class, try to find it in hierarchy
+					m = Reflector.getAsMethodOfPublicBase(m.getDeclaringClass(), m);
+					}
+				method = m;
+				if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 					{
 					RT.errPrintWriter()
-							.format("Reflection warning, %s:%d:%d - call to method %s can't be resolved (target class is unknown).\n",
-									SOURCE_PATH.deref(), line, column, methodName);
+						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
+							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName(), getTypeStringForArgs(args));
 					}
 				}
-		}
-		else
+			}
+		else if(argTags != null)
 			{
 			if (target.hasJavaClass())
 				{
 				Class c = target.getJavaClass();
-				this.method = (java.lang.reflect.Method) Reflector.findMatchingTarget(c.getMethods(), c, methodName, argTags);
+				this.method = (java.lang.reflect.Method) findMatchingTarget(c.getMethods(), c, methodName, argTags);
 				}
 			else
 				throw new IllegalArgumentException("Ambiguous arg-tags for " + methodName + ", no target instance class given.");
 			}
-		}
+		else
+			{
+			method = null;
+			if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+				{
+				RT.errPrintWriter()
+					.format("Reflection warning, %s:%d:%d - call to method %s can't be resolved (target class is unknown).\n",
+						SOURCE_PATH.deref(), line, column, methodName);
+				}
+			}
+	}
 
 	public Object eval() {
 		try
@@ -1681,15 +1665,9 @@ static class StaticMethodExpr extends MethodExpr{
 	final static Keyword warnOnBoxedKeyword = Keyword.intern("warn-on-boxed");
     Class jc;
 
-	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c,
-							String methodName, IPersistentVector args, boolean tailPosition)
-			{
-			this(source, line, column, tag, null, c, methodName, args, tailPosition);
-			}
-
 	public StaticMethodExpr(String source, int line, int column, Symbol tag, IPersistentVector argTags, Class c,
 				String methodName, IPersistentVector args, boolean tailPosition)
-		{
+			{
 		this.c = c;
 		this.methodName = methodName;
 		this.args = args;
@@ -1699,45 +1677,44 @@ static class StaticMethodExpr extends MethodExpr{
 		this.tag = tag;
 		this.tailPosition = tailPosition;
 
-		if (argTags == null)
+		if(argTags != null)
 			{
-			List methods = Reflector.getMethods(c, args.count(), methodName, true);
-			if(methods.isEmpty())
-				throw new IllegalArgumentException("No matching method " + methodName + " found taking "
-						+ args.count() + " args for " + c);
+			this.method = (java.lang.reflect.Method) findMatchingTarget(c.getMethods(), c, methodName, argTags);
+			return;
+			}
 
-			int methodidx = 0;
-			if (methods.size() > 1)
-				{
-				ArrayList<Class[]> params = new ArrayList();
-				ArrayList<Class> rets = new ArrayList();
-				for (int i = 0; i < methods.size(); i++)
-					{
-					java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
-					params.add(m.getParameterTypes());
-					rets.add(m.getReturnType());
-					}
-				methodidx = getMatchingParams(methodName, params, args, rets);
-				}
-			method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
-			if (method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-				{
-				RT.errPrintWriter()
-						.format("Reflection warning, %s:%d:%d - call to static method %s on %s can't be resolved (argument types: %s).\n",
-								SOURCE_PATH.deref(), line, column, methodName, c.getName(), getTypeStringForArgs(args));
-				}
-			if (method != null && warnOnBoxedKeyword.equals(RT.UNCHECKED_MATH.deref()) && isBoxedMath(method))
-				{
-				RT.errPrintWriter()
-						.format("Boxed math warning, %s:%d:%d - call: %s.\n",
-								SOURCE_PATH.deref(), line, column, method.toString());
-				}
-			}
-		else
+		List methods = Reflector.getMethods(c, args.count(), methodName, true);
+		if(methods.isEmpty())
+			throw new IllegalArgumentException("No matching method " + methodName + " found taking "
+			                                   + args.count() + " args for " + c);
+
+		int methodidx = 0;
+		if(methods.size() > 1)
 			{
-			this.method = (java.lang.reflect.Method) Reflector.findMatchingTarget(c.getMethods(), c, methodName, argTags);
+			ArrayList<Class[]> params = new ArrayList();
+			ArrayList<Class> rets = new ArrayList();
+			for(int i = 0; i < methods.size(); i++)
+				{
+				java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
+				params.add(m.getParameterTypes());
+				rets.add(m.getReturnType());
+				}
+			methodidx = getMatchingParams(methodName, params, args, rets);
 			}
-		}
+		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
+		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+			{
+			RT.errPrintWriter()
+				.format("Reflection warning, %s:%d:%d - call to static method %s on %s can't be resolved (argument types: %s).\n",
+					SOURCE_PATH.deref(), line, column, methodName, c.getName(), getTypeStringForArgs(args));
+			}
+		if(method != null && warnOnBoxedKeyword.equals(RT.UNCHECKED_MATH.deref()) && isBoxedMath(method))
+			{
+			RT.errPrintWriter()
+				.format("Boxed math warning, %s:%d:%d - call: %s.\n",
+						SOURCE_PATH.deref(), line, column, method.toString());
+			}
+	}
 
 	public static boolean isBoxedMath(java.lang.reflect.Method m) {
 		Class c = m.getDeclaringClass();
@@ -1895,7 +1872,6 @@ static class StaticMethodExpr extends MethodExpr{
         return jc;
 	}
 }
-
 
 static class UnresolvedVarExpr implements Expr{
 	public final Symbol symbol;
@@ -2606,50 +2582,45 @@ public static class NewExpr implements Expr{
 			Method.getMethod("Object invokeConstructor(Class,Object[])");
 	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
 
-	public NewExpr(Class c, IPersistentVector args, int line, int column) {
-		this(c, null, args, line, column);
-	}
-
 	public NewExpr(Class c, IPersistentVector argTags, IPersistentVector args, int line, int column) {
 		this.args = args;
 		this.c = c;
 		Constructor[] allctors = c.getConstructors();
 
-		if (argTags == null)
+		if(argTags != null)
 			{
-			ArrayList ctors = new ArrayList();
-			ArrayList<Class[]> params = new ArrayList();
-			ArrayList<Class> rets = new ArrayList();
-			for (int i = 0; i < allctors.length; i++)
-				{
-				Constructor ctor = allctors[i];
-				if (ctor.getParameterTypes().length == args.count())
-					{
-					ctors.add(ctor);
-					params.add(ctor.getParameterTypes());
-					rets.add(c);
-					}
-				}
-			if (ctors.isEmpty())
-				throw new IllegalArgumentException("No matching ctor found for " + c);
+			this.ctor = (Constructor) findMatchingTarget(allctors, c, c.getName(), argTags);
+			return;
+			}
 
-			int ctoridx = 0;
-			if (ctors.size() > 1)
+		ArrayList ctors = new ArrayList();
+		ArrayList<Class[]> params = new ArrayList();
+		ArrayList<Class> rets = new ArrayList();
+		for(int i = 0; i < allctors.length; i++)
+			{
+			Constructor ctor = allctors[i];
+			if(ctor.getParameterTypes().length == args.count())
 				{
-				ctoridx = getMatchingParams(c.getName(), params, args, rets);
-				}
-
-			this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
-			if (ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-				{
-				RT.errPrintWriter()
-						.format("Reflection warning, %s:%d:%d - call to %s ctor can't be resolved.\n",
-								SOURCE_PATH.deref(), line, column, c.getName());
+				ctors.add(ctor);
+				params.add(ctor.getParameterTypes());
+				rets.add(c);
 				}
 			}
-		else
+		if(ctors.isEmpty())
+			throw new IllegalArgumentException("No matching ctor found for " + c);
+
+		int ctoridx = 0;
+		if(ctors.size() > 1)
 			{
-			this.ctor = (Constructor) Reflector.findMatchingTarget(allctors, c, c.getName(), argTags);
+			ctoridx = getMatchingParams(c.getName(), params, args, rets);
+			}
+
+		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
+		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+			{
+			RT.errPrintWriter()
+              .format("Reflection warning, %s:%d:%d - call to %s ctor can't be resolved.\n",
+                      SOURCE_PATH.deref(), line, column, c.getName());
 			}
 	}
 
@@ -2716,10 +2687,7 @@ public static class NewExpr implements Expr{
 			for(ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
 				args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 
-			if(argTags != null)
-				return new NewExpr(c, argTags, args, line, column);
-			else
-				return new NewExpr(c, args, line, column);
+			return new NewExpr(c, argTags, args, line, column);
 		}
 	}
 
@@ -6446,14 +6414,14 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 							{
 							if(recurMismatches != null && RT.booleanCast(recurMismatches.nth(i/2)))
 								{
-								init = new StaticMethodExpr("", 0, 0, null, RT.class, "box", RT.vector(init), false);
+								init = new StaticMethodExpr("", 0, 0, null, null, RT.class, "box", RT.vector(init), false);
 								if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 									RT.errPrintWriter().println("Auto-boxing loop arg: " + sym);
 								}
 							else if(maybePrimitiveType(init) == int.class)
-								init = new StaticMethodExpr("", 0, 0, null, RT.class, "longCast", RT.vector(init), false);
+								init = new StaticMethodExpr("", 0, 0, null, null, RT.class, "longCast", RT.vector(init), false);
 							else if(maybePrimitiveType(init) == float.class)
-								init = new StaticMethodExpr("", 0, 0, null, RT.class, "doubleCast", RT.vector(init), false);
+								init = new StaticMethodExpr("", 0, 0, null, null, RT.class, "doubleCast", RT.vector(init), false);
 							}
 						//sequential enhancement of env (like Lisp let*)
 						try
@@ -7005,7 +6973,7 @@ public static Object preserveTag(ISeq src, Object dst) {
 	return dst;
 }
 
-public static Object preserveArgTags(IObj memberSymbol, Object target) {
+private static Object preserveArgTags(IObj memberSymbol, Object target) {
 	Object argTags = (memberSymbol.meta() != null) ? memberSymbol.meta().valAt(RT.ARG_TAGS_KEY) : null;
 	if (argTags != null && target instanceof IObj) {
 		IPersistentMap meta = RT.meta(target);
@@ -7013,7 +6981,6 @@ public static Object preserveArgTags(IObj memberSymbol, Object target) {
 	}
 	return target;
 }
-
 
 private static volatile Var MACRO_CHECK = null;
 private static volatile boolean MACRO_CHECK_LOADING = false;
@@ -7361,53 +7328,54 @@ static void addParameterAnnotation(Object visitor, IPersistentMap meta, int i){
 		 ADD_ANNOTATIONS.invoke(visitor, meta, i);
 }
 
-	private static Expr analyzeSymbol(Symbol sym) {
-		Symbol tag = tagOf(sym);
-		if(sym.ns == null) //ns-qualified syms are always Vars
+private static Expr analyzeSymbol(Symbol sym) {
+	Symbol tag = tagOf(sym);
+	if(sym.ns == null) //ns-qualified syms are always Vars
 		{
-			LocalBinding b = referenceLocal(sym);
-			if(b != null)
-			{
-				return new LocalBindingExpr(b, tag);
-			}
+		LocalBinding b = referenceLocal(sym);
+		if(b != null)
+            {
+            return new LocalBindingExpr(b, tag);
+            }
 		}
-		else
+	else
 		{
-			if(namespaceFor(sym) == null)
+		if(namespaceFor(sym) == null)
 			{
-				Symbol nsSym = Symbol.intern(sym.ns);
-				Class c = HostExpr.maybeClass(nsSym, false);
-				if(c != null)
+			Symbol nsSym = Symbol.intern(sym.ns);
+			Class c = HostExpr.maybeClass(nsSym, false);
+			if(c != null)
 				{
-					if(Reflector.getField(c, sym.name, true) != null)
-						return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
-					throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
+				if(Reflector.getField(c, sym.name, true) != null)
+					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
+				throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
 				}
 			}
 		}
-		//Var v = lookupVar(sym, false);
+	//Var v = lookupVar(sym, false);
 //	Var v = lookupVar(sym, false);
 //	if(v != null)
 //		return new VarExpr(v, tag);
-		Object o = resolve(sym);
-		if(o instanceof Var)
+	Object o = resolve(sym);
+	if(o instanceof Var)
 		{
-			Var v = (Var) o;
-			if(isMacro(v) != null)
-				throw Util.runtimeException("Can't take value of a macro: " + v);
-			if(RT.booleanCast(RT.get(v.meta(),RT.CONST_KEY)))
-				return analyze(C.EXPRESSION, RT.list(QUOTE, v.get()));
-			registerVar(v);
-			return new VarExpr(v, tag);
+		Var v = (Var) o;
+		if(isMacro(v) != null)
+			throw Util.runtimeException("Can't take value of a macro: " + v);
+		if(RT.booleanCast(RT.get(v.meta(),RT.CONST_KEY)))
+			return analyze(C.EXPRESSION, RT.list(QUOTE, v.get()));
+		registerVar(v);
+		return new VarExpr(v, tag);
 		}
-		else if(o instanceof Class)
-			return new ConstantExpr(o);
-		else if(o instanceof Symbol)
+	else if(o instanceof Class)
+		return new ConstantExpr(o);
+	else if(o instanceof Symbol)
 			return new UnresolvedVarExpr((Symbol) o);
 
-		throw Util.runtimeException("Unable to resolve symbol: " + sym + " in this context");
+	throw Util.runtimeException("Unable to resolve symbol: " + sym + " in this context");
 
 }
+
 static String destubClassName(String className){
 	//skip over prefix + '.' or '/'
 	if(className.startsWith(COMPILE_STUB_PREFIX))
@@ -9157,4 +9125,102 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 		    }
 		};
     }
+
+// This method attempts to find exactly one matching method in an array of Executables given
+// the enclosing class, method name, and symbolic signature, which may include special
+// type specifiers like long, longs, and string encoded array classes. Additionally, the
+// signature may contain underscores which signal that the type in that position is
+// inconsequential for finding the method and therefore ignored.
+//
+// This method attempts to resolve all classes in the given signature and throws if any
+// class aliases cannot resolve.
+//
+// In the case where a signature is null, this method will attempt to find the method with the
+// given name having the least arity count. Also, if the method finds more than one valid Executable
+// then it will throw an exception indicating that the signature was insufficient to
+// disambiguate the desired method. Methods/constructors with varargs are currently not supported.
+private static Executable findMatchingTarget(Executable[] targets, Class c, String targetName, IPersistentVector sig) {
+	List<Executable> potentialTargets = new ArrayList<>();
+	int leastArity = Integer.MAX_VALUE;
+	int derivedArity = sig != null ? sig.count() : -1;
+	List<Class> declaredSignature = resolveSignatureClasses(sig);
+	// Get only the methods with the right name
+	try
+		{
+		for (int i = 0; i < targets.length; i++)
+			{
+			if(targets[i].getName().equals(targetName))
+				{
+				leastArity = Math.min(targets[i].getParameterCount(), leastArity);
+				potentialTargets.add(targets[i]);
+				}
+			}
+		}
+	catch(Throwable t)
+		{
+		throw Util.sneakyThrow(t);
+		}
+	java.util.stream.Stream<Executable> targetStream = potentialTargets.stream();
+	// filter arities
+	if(derivedArity > -1)
+		{
+		targetStream = targetStream.filter(tgt -> tgt.getParameterTypes().length == derivedArity);
+		}
+	else
+		{
+		int finalLeastArity = leastArity;
+		targetStream = targetStream.filter(tgt -> tgt.getParameterCount() == finalLeastArity);
+		}
+	// Match signatures
+	if(!declaredSignature.isEmpty()) {
+		targetStream = targetStream.filter(tgt -> {
+			Class[] targetSig = tgt.getParameterTypes();
+			for (int i = 0; i < targetSig.length; i++)
+				{
+				if (declaredSignature.get(i) == null)
+					{ // ignoring placeholders
+					}
+				else if (!declaredSignature.get(i).equals(targetSig[i]))
+					{
+					return false;
+					}
+				}
+			return true;
+		});
+	}
+	List<Executable> filteredTargets = targetStream.collect(Collectors.toList());
+	if(filteredTargets.isEmpty())
+		throw new IllegalArgumentException("Could not resolve " + targetName + " from arg-tags in class " + c.getName());
+	if(filteredTargets.size() > 1)
+		throw new IllegalArgumentException("Ambiguous arg-tags for " + targetName + " in class " + c.getName());
+	Executable target = filteredTargets.get(0);
+	if(target.isVarArgs())
+		throw new UnsupportedOperationException("Varargs not supported for method thunks, got " + targetName);
+	return target;
+}
+
+private static List<Class> resolveSignatureClasses(IPersistentVector sig) {
+	List<Class> tsig = new ArrayList<>();
+	for (ISeq s = RT.seq(sig); s!=null; s = s.next())
+	{
+		Object t = s.first();
+		Object maybeClass = null;
+		boolean isIgnoring = false;
+		if (t.equals(Symbol.intern(null, "_")))
+			{
+			isIgnoring = true;
+			}
+		else
+			{
+			maybeClass = HostExpr.tagToClass(t);
+			}
+		if (maybeClass == null && !isIgnoring)
+			{
+			ClassNotFoundException cnfe = new ClassNotFoundException(t.toString());
+			Util.sneakyThrow(cnfe);
+			}
+		tsig.add((Class) maybeClass);
+	}
+	return tsig;
+}
 }
