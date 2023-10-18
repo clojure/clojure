@@ -1502,7 +1502,7 @@ static abstract class MethodExpr extends HostExpr{
 			}
 	}
 
-	public static void emitTypedArgs(ObjExpr objx, GeneratorAdapter gen, Class[] parameterTypes, IPersistentVector args){
+	public static void emitTypedArgs(ObjExpr objx, GeneratorAdapter gen, Class[] parameterTypes, IPersistentVector args, int line, int col){
 		for(int i = 0; i < parameterTypes.length; i++)
 			{
 			Expr e = (Expr) args.nth(i);
@@ -1547,7 +1547,11 @@ static abstract class MethodExpr extends HostExpr{
 					Class exprClass = e.hasJavaClass() ? e.getJavaClass() : null;
 					if(isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
 						{
-						System.out.println("Emit function arg adapter to " + parameterTypes[i] + ", have " + (exprClass == null ? "unknown" : exprClass.getName()));
+						if(RT.booleanCast(RT.VERBOSE_FN_CONVERSIONS.deref())) {
+							RT.errPrintWriter()
+									.format("Function conversion to %s in invocation, %s:%d:%d.\n",
+											parameterTypes[i].getName(), SOURCE_PATH.deref(), line, col);
+						}
 						emitFunctionalAdapter(objx, gen, parameterTypes[i], exprClass);
 						}
 						else
@@ -1689,7 +1693,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			target.emit(C.EXPRESSION, objx, gen);
 			//if(!method.getDeclaringClass().isInterface())
 			gen.checkCast(type);
-			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args, line, column);
 			gen.visitLineNumber(line, gen.mark());
 			if(tailPosition && !objx.canBeDirect)
 				{
@@ -1713,7 +1717,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			target.emit(C.EXPRESSION, objx, gen);
 			//if(!method.getDeclaringClass().isInterface())
 			gen.checkCast(type);
-			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args, line, column);
 			gen.visitLineNumber(line, gen.mark());
 			if(context == C.RETURN)
 				{
@@ -1884,7 +1888,7 @@ static class StaticMethodExpr extends MethodExpr{
 		gen.visitLineNumber(line, gen.mark());
 		if(method != null)
 			{
-			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args, line, column);
 			if(context == C.RETURN)
 				{
 				ObjMethod method = (ObjMethod) METHOD.deref();
@@ -1902,7 +1906,7 @@ static class StaticMethodExpr extends MethodExpr{
 	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen){
 		if(method != null)
 			{
-			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args, line, column);
 			gen.visitLineNumber(line, gen.mark());
 			//Type type = Type.getObjectType(className.replace('.', '/'));
 			if(context == C.RETURN)
@@ -1935,7 +1939,7 @@ static class StaticMethodExpr extends MethodExpr{
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
 		if(method != null)
 			{
-			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, method.getParameterTypes(), args, line, column);
 			gen.visitLineNumber(line, gen.mark());
 			//Type type = Type.getObjectType(className.replace('.', '/'));
 			if(tailPosition && !objx.canBeDirect)
@@ -2695,6 +2699,8 @@ public static class NewExpr implements Expr{
 	public final IPersistentVector args;
 	public final Constructor ctor;
 	public final Class c;
+	public final int line;
+	public final int column;
 	final static Method invokeConstructorMethod =
 			Method.getMethod("Object invokeConstructor(Class,Object[])");
 	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
@@ -2703,6 +2709,8 @@ public static class NewExpr implements Expr{
 	public NewExpr(Class c, IPersistentVector args, int line, int column) {
 		this.args = args;
 		this.c = c;
+		this.line = line;
+		this.column = column;
 		Constructor[] allctors = c.getConstructors();
 		ArrayList ctors = new ArrayList();
 		ArrayList<Class[]> params = new ArrayList();
@@ -2765,7 +2773,7 @@ public static class NewExpr implements Expr{
 			Type type = getType(c);
 			gen.newInstance(type);
 			gen.dup();
-			MethodExpr.emitTypedArgs(objx, gen, ctor.getParameterTypes(), args);
+			MethodExpr.emitTypedArgs(objx, gen, ctor.getParameterTypes(), args, line, column);
 			gen.invokeConstructor(type, new Method("<init>", Type.getConstructorDescriptor(ctor)));
 			}
 		else
@@ -3672,7 +3680,7 @@ static class StaticInvokeExpr implements Expr, MaybePrimitiveExpr{
 			gen.invokeStatic(Type.getType(ArraySeq.class), Method.getMethod("clojure.lang.ArraySeq create(Object[])"));
 			}
 		else
-			MethodExpr.emitTypedArgs(objx, gen, paramclasses, args);
+			MethodExpr.emitTypedArgs(objx, gen, paramclasses, args, 1, 1);
 
 		if(tailPosition && !objx.canBeDirect)
 		{
@@ -3900,7 +3908,7 @@ static class InvokeExpr implements Expr{
 		if(protocolOn != null)
 			{
  			gen.checkCast(Type.getType(protocolOn));
-			MethodExpr.emitTypedArgs(objx, gen, onMethod.getParameterTypes(), RT.subvec(args,1,args.count()));
+			MethodExpr.emitTypedArgs(objx, gen, onMethod.getParameterTypes(), RT.subvec(args,1,args.count()), line, column);
 			if(context == C.RETURN)
 				{
 				ObjMethod method = (ObjMethod) METHOD.deref();
@@ -6530,11 +6538,15 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 	public final PersistentVector bindingInits;
 	public final Expr body;
 	public final boolean isLoop;
+	public final int line;
+	public final int column;
 
-	public LetExpr(PersistentVector bindingInits, Expr body, boolean isLoop){
+	public LetExpr(PersistentVector bindingInits, Expr body, boolean isLoop, int line, int column){
 		this.bindingInits = bindingInits;
 		this.body = body;
 		this.isLoop = isLoop;
+		this.line = line;
+		this.column = column;
 	}
 
 	static class Parser implements IParser{
@@ -6661,7 +6673,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 							}
 						}
 					if(!moreMismatches)
-						return new LetExpr(bindingInits, bodyExpr, isLoop);
+						return new LetExpr(bindingInits, bodyExpr, isLoop, lineDeref(), columnDeref());
 					}
 				finally
 					{
@@ -6707,7 +6719,11 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 					// TODO: && (initClass == null || ! bindingClass.isAssignableFrom(initClass)) ???
 					if(isAdaptableFunctionExpression(bindingClass, bi.init))
 						{
-						System.out.println("Emit coercion to " + bindingClass + ", have " + (initClass == null ? "unknown" : initClass));
+						if(RT.booleanCast(RT.VERBOSE_FN_CONVERSIONS.deref())) {
+							RT.errPrintWriter()
+									.format("Function conversion to %s in binding, %s:%d:%d.\n",
+											bindingClass.getName(), SOURCE_PATH.deref(), line, column);
+						}
 						emitFunctionalAdapter(objx, gen, bindingClass, initClass);
 						}
 					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
@@ -7841,6 +7857,7 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) {
 			       COLUMN_AFTER, pushbackReader.getColumnNumber()
 			       ,RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()
 					,RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref()
+					,RT.VERBOSE_FN_CONVERSIONS, RT.VERBOSE_FN_CONVERSIONS.deref()
 			       ,RT.DATA_READERS, RT.DATA_READERS.deref()
                         ));
 
@@ -7985,6 +8002,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       VARS, PersistentHashMap.EMPTY
 					,RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()
 					,RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref()
+					,RT.VERBOSE_FN_CONVERSIONS, RT.VERBOSE_FN_CONVERSIONS.deref()
 					,RT.DATA_READERS, RT.DATA_READERS.deref()
 			   //    ,LOADER, RT.makeClassLoader()
 			));

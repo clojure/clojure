@@ -228,6 +228,7 @@ final static Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.intern("*print-meta*
 final static Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), T).setDynamic();
 final static Var PRINT_DUP = Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), F).setDynamic();
 final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), F).setDynamic();
+final static Var VERBOSE_FN_CONVERSIONS = Var.intern(CLOJURE_NS, Symbol.intern("*verbose-fn-conversions*"), F).setDynamic();
 final static Var ALLOW_UNRESOLVED_VARS = Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), F).setDynamic();
 final static Var READER_RESOLVER = Var.intern(CLOJURE_NS, Symbol.intern("*reader-resolver*"), null).setDynamic();
 
@@ -444,8 +445,9 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 		try {
 			Var.pushThreadBindings(
 					RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
-					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()
-							,RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()));
+					       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref(),
+							VERBOSE_FN_CONVERSIONS, RT.VERBOSE_FN_CONVERSIONS.deref(),
+							RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()));
 			loaded = (loadClassForName(scriptbase.replace('/', '.') + LOADER_SUFFIX) != null);
 		}
 		finally {

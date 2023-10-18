@@ -81,6 +81,7 @@
   [& body]
   `(binding [*ns* *ns*
              *warn-on-reflection* *warn-on-reflection*
+             *verbose-fn-conversions* *verbose-fn-conversions*
              *math-context* *math-context*
              *print-meta* *print-meta*
              *print-length* *print-length*

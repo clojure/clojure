@@ -657,6 +657,8 @@
   (let [^java.util.function.ToLongFunction f (fn ^long [x] 1)]
     (Long/highestOneBit (f :x))))
 
+(set! *verbose-fn-conversions* true)
+
 (deftest clojure-fn-as-java-fn
   ;; pass Clojure fn as Java Predicate
   (let [coll (java.util.ArrayList. [1 2 3 4 5])]
