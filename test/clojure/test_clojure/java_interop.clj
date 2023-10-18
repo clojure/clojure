@@ -734,6 +734,15 @@
     (is (true? (.removeIf coll2 pred)))
     (is (= coll2 [7 9])))
 
+  (let [^java.util.function.Predicate pred even?
+        coll1 (java.util.ArrayList. [1 2 3 4 5])
+        cup-fn (java.util.ArrayList. [1 2 3 4 5])]
+    (is (instance? java.util.function.Predicate pred))
+    (is (true? (.removeIf coll1 pred)))
+    (is (= coll1 [1 3 5]))
+    (is (true? (.removeIf cup-fn pred)))
+    (is (= cup-fn [1 3 5])))
+
   (should-not-reflect #(clojure.test-clojure.java-interop/return-long))
 
   ;; FI in class constructor
