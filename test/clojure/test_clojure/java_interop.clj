@@ -21,7 +21,8 @@
   (:import java.util.Base64
            (java.io File FileFilter FilenameFilter)
            (java.util UUID)
-           (java.util.concurrent.atomic AtomicLong AtomicInteger)))
+           (java.util.concurrent.atomic AtomicLong AtomicInteger)
+           (clojure.test FIConstructor FIStatic)))
 
 ; http://clojure.org/java_interop
 ; http://clojure.org/compilation
@@ -725,7 +726,7 @@
   (let [^java.util.function.Predicate pred even?
         coll1 (java.util.ArrayList. [1 2 3 4 5])
         coll2 (java.util.ArrayList. [6 7 8 9 10])]
-    (instance? java.util.function.Predicate pred)
+    (is (instance? java.util.function.Predicate pred))
     (is (true? (.removeIf coll1 pred)))
     (is (= coll1 [1 3 5]))
     (is (true? (.removeIf coll2 pred)))
@@ -733,5 +734,31 @@
 
   (should-not-reflect #(clojure.test-clojure.java-interop/return-long))
 
-  )
+  ;; FI in class constructor
+  (let [^java.util.function.Predicate hinted-pred (fn [i] (> i 0))
+        clj-pred (fn [i] (> i 0))
+        fi-constructor-1 (FIConstructor. hinted-pred)
+        fi-constructor-2 (FIConstructor. clj-pred)
+        fi-constructor-3 (FIConstructor. (fn [i] (> i 0)))]
+    (is (= [1 2] (.numbers fi-constructor-1)))
+    (is (= [1 2] (.numbers fi-constructor-2)))
+    (is (= [1 2] (.numbers fi-constructor-3))))
 
+  ;; FI as arg to static
+  (let [^java.util.function.Predicate hinted-pred (fn [i] (> i 0))
+        res (FIStatic/numbers hinted-pred)]
+    (is (= [1 2] res))))
+
+(deftest eval-in-place-as-java-fn
+
+  (def stream (java.util.stream.Stream/generate (constantly 42)))
+  (is (instance? java.util.stream.Stream stream))
+
+  (def filtered-list (.removeIf (java.util.ArrayList. [1 2 3 4 5]) even?))
+  (is (true? filtered-list))
+
+  (def fi-constructor-numbers (.numbers (FIConstructor. (fn [i] (> i 0)))))
+  (is (= [1 2] fi-constructor-numbers))
+
+  (def fi-static (FIStatic/numbers (fn [i] (< i 0))))
+  (is (= [-2 -1] fi-static)))
