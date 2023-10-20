@@ -4214,8 +4214,8 @@ static public abstract class MethodValueExpr extends FnExpr
 
 	abstract Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig);
 
-	public List<Class> getDeclaredSignature() {
-		return Collections.unmodifiableList(declaredSignature);
+	public Executable getDerivedTarget() {
+		return target;
 	}
 
 	public Object eval(){
@@ -4243,8 +4243,20 @@ static public abstract class MethodValueExpr extends FnExpr
 		return	RT.list(Symbol.intern("fn"), Symbol.intern(name),
 				buildThunkBody(buildThunkParams()));
 	}
+	
+	abstract IPersistentVector prepParams();
 
-	abstract IPersistentVector buildThunkParams();
+	IPersistentVector buildThunkParams() {
+		IPersistentVector params = prepParams();
+
+		// [^T arg1 ^U arg2]
+		for(Class klass : target.getParameterTypes())
+		{
+			params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
+		}
+
+		return maybeHintReturn((PersistentVector)params);
+	}
 
 	abstract IPersistentVector maybeHintReturn(PersistentVector params);
 
@@ -4310,16 +4322,8 @@ static public class ConstructorValueExpr extends MethodValueExpr
 	}
 
 	@Override
-	IPersistentVector buildThunkParams() {
-		IPersistentVector params = PersistentVector.EMPTY;
-
-		// [^T arg1 ^U arg2]
-		for(Class klass : target.getParameterTypes())
-		{
-			params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
-		}
-
-		return maybeHintReturn((PersistentVector)params);
+	IPersistentVector prepParams() {
+		return PersistentVector.EMPTY;
 	}
 
 	@Override
@@ -4353,16 +4357,8 @@ static public class StaticMethodValueExpr extends MethodValueExpr
 	}
 
 	@Override
-	IPersistentVector buildThunkParams() {
-		IPersistentVector params = PersistentVector.EMPTY;
-
-		// [^T arg1 ^U arg2]
-		for(Class klass : target.getParameterTypes())
-		{
-			params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
-		}
-
-		return maybeHintReturn((PersistentVector)params);
+	IPersistentVector prepParams() {
+		return PersistentVector.EMPTY;
 	}
 
 	@Override
@@ -4404,16 +4400,10 @@ static public class InstanceMethodValueExpr extends MethodValueExpr
 	}
 
 	@Override
-	IPersistentVector buildThunkParams() {
-		IPersistentVector params = PersistentVector.EMPTY;
-
-		// [^T self ^U arg]
-		params = params.cons(Symbol.intern("self" + RT.nextID()).withMeta(PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName()))));
-		for(Class klass : target.getParameterTypes())
-		{
-			params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
-		}
-		return maybeHintReturn((PersistentVector)params);
+	IPersistentVector prepParams() {
+		// seed params with this as first binding
+		IPersistentMap m = PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName()));
+		return PersistentVector.EMPTY.cons(Symbol.intern("this" + RT.nextID()).withMeta(m));
 	}
 
 	@Override
@@ -4429,9 +4419,9 @@ static public class InstanceMethodValueExpr extends MethodValueExpr
 
 	@Override
 	ISeq buildThunkDispatch(IPersistentVector params) {
-		// ([^Klass self ^T arg] (. self instanceMethod arg))
-		// ([^long arg1 ^double arg2] (. self instanceMethod arg1 arg2))
-		// ([^Klass self prim] (. self instanceMethod (coercefn prim)))
+		// ([^Klass this ^T arg] (. this instanceMethod arg))
+		// ([^long arg1 ^double arg2] (. this instanceMethod arg1 arg2))
+		// ([^Klass this prim] (. this instanceMethod (coercefn prim)))
 		return RT.listStar(Symbol.intern("."),
 				params.seq().first(), Symbol.intern(target.getName()),
 				maybeCoerceArgs(params.seq().next()));
