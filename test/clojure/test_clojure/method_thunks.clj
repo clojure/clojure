@@ -35,11 +35,11 @@
   (is (= [#uuid "00000000-0000-0001-0000-000000000002"]
          (map ^[long long] UUID. [1] [2])))
   (is (= '("a" "12")
-         (map ^[Object] .String/valueOf ["a" 12])))
+         (map ^[Object] String/valueOf ["a" 12])))
   (is (= ["A" "B" "C"]
          (map ^[java.util.Locale] .String/toUpperCase ["a" "b" "c"] (repeat java.util.Locale/ENGLISH))))
   (is (thrown? ClassCastException
-               (doall (map ^[long] .String/valueOf [12 "a"])))))
+               (doall (map ^[long] String/valueOf [12 "a"])))))
 
 (def mt ^[_] Tuple/create)
 (def mts {:fromString UUID/fromString})
@@ -50,5 +50,5 @@
   (is (= [1] (mt 1))))
 
 (deftest primitive-hinting
-  (is (instance? clojure.lang.IFn$DO ^[double] .String/valueOf))
+  (is (instance? clojure.lang.IFn$DO ^[double] String/valueOf))
   (is (instance? clojure.lang.IFn$LL ^[long] Math/abs)))
