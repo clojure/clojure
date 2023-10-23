@@ -4853,8 +4853,11 @@
     (.getCause ^Throwable ex)))
 
 (defmacro assert
-  "Evaluates expr and throws an exception if it does not evaluate to
-  logical true."
+  "Evaluates expression x and throws an AssertionError with optional
+  message if x does not evaluate to logical true.
+
+  Assertion checks are omitted from compiled code if '*assert*' is
+  false."
   {:added "1.0"}
   ([x]
      (when *assert*
@@ -6585,6 +6588,11 @@ fails, attempts to require sym's namespace and retries."
   occur in considered contexts. You can also accomplish this in a
   particular scope by binding *read-eval* to :unknown
   "
+  {:added "1.0"})
+
+(add-doc-and-meta *assert*
+  "When set to logical false, 'assert' will omit assertion checks in
+  compiled code. Defaults to true."
   {:added "1.0"})
 
 (defn future?
