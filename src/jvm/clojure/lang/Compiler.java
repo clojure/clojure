@@ -6964,6 +6964,14 @@ public static boolean namesStaticMember(Symbol sym){
 	return sym.ns != null && namespaceFor(sym) == null && sym.ns.charAt(0) != '.';
 }
 
+public static boolean namesInstanceMethod(Symbol sym) {
+	return sym.name.charAt(0) == '.';
+}
+
+public static boolean namesQualifiedInstanceMember(Symbol sym) {
+	return (sym.ns != null && sym.ns.charAt(0) == '.');
+}
+
 public static Object preserveTag(ISeq src, Object dst) {
 	Symbol tag = tagOf(src);
 	if (tag != null && dst instanceof IObj) {
@@ -7064,13 +7072,13 @@ public static Object macroexpand1(Object x) {
 				String sname = sym.name;
 				//(.substring s 2 5) => (. s substring 2 5)
 				//(.String/substring s 2 5) => (. ^String s substring 2 5)
-				if(sym.name.charAt(0) == '.' || (sym.ns != null && sym.ns.charAt(0) == '.'))
+				if(namesInstanceMethod(sym) || namesQualifiedInstanceMember(sym))
 					{
 					if(RT.length(form) < 2)
 						throw new IllegalArgumentException(
 								"Malformed member expression, expecting (.member target ...)");
 					Symbol meth = (sname.charAt(0) == '.') ? Symbol.intern(sname.substring(1)) : Symbol.intern(sname);
-					Symbol maybeQualifiedHint = (sym.ns != null && sym.ns.charAt(0) == '.') ? Symbol.intern(sym.ns.substring(1)) : null;
+					Symbol maybeQualifiedHint = namesQualifiedInstanceMember(sym) ? Symbol.intern(sym.ns.substring(1)) : null;
 					Object target = RT.second(form);
 					if(HostExpr.maybeClass(target, false) != null)
 						{
