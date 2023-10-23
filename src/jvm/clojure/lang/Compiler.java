@@ -1116,42 +1116,42 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return descr;
 	}
 
-	public static Class maybeArrayClassFromSymbol(Symbol sym) {
-		Class rootClass = null;
-		Class derivedClass = null;
+	public static Class maybeArrayClass(Symbol tag) {
+		Class componentClass = null;
+		Class arrayClass = null;
 
-		if(sym.name.endsWith("*")) {
-			int idx = sym.name.indexOf('*');
-			Symbol rootSymbol = Symbol.intern(sym.name.substring(0, idx));
-			String descr = null;
-			rootClass = tagToClass(rootSymbol);
+		if(tag.name.endsWith("*")) {
+			int idx = tag.name.indexOf('*');
+			Symbol rootSymbol = Symbol.intern(tag.name.substring(0, idx));
+			String primitiveDecriptor = null;
+			componentClass = tagToClass(rootSymbol);
 
-			if(rootClass == null) {
-				throw new IllegalArgumentException("Unable to resolve classname: " + sym);
+			if(componentClass == null) {
+				throw new IllegalArgumentException("Unable to resolve classname: " + tag);
 			}
 			else {
-				descr = getPrimDescriptor(rootClass);
+				primitiveDecriptor = getPrimDescriptor(componentClass);
 			}
 
-			String stars = sym.name.substring(idx);
+			String stars = tag.name.substring(idx);
 
 			if (stars.replace("*", "").length() > 0)
-				throw new IllegalArgumentException("Array type hint requires asterisks only for dimensionality, found " + sym);
+				throw new IllegalArgumentException("Array type hint requires asterisks only for dimensionality, found " + tag);
 
 			int dim = stars.length();
 			StringBuilder repr = new StringBuilder(String.join("", Collections.nCopies(dim, "[")));
 
-			if(descr != null) {
-				repr.append(descr);
+			if(primitiveDecriptor != null) {
+				repr.append(primitiveDecriptor);
 			}
 			else {
-				repr.append("L" + rootClass.getName() + ";");
+				repr.append("L" + componentClass.getName() + ";");
 			}
 
-			derivedClass = maybeClass(repr.toString(), true);
+			arrayClass = maybeClass(repr.toString(), true);
 		}
 
-		return derivedClass;
+		return arrayClass;
 	}
 
 	static Class tagToClass(Object tag) {
@@ -1166,7 +1166,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			// Check for array class symbols, e.g. String*, long**, etc.
 			if(c == null)
 				{
-				c = maybeArrayClassFromSymbol(sym);
+				c = maybeArrayClass(sym);
 				}
 			}
 		if(c == null)
