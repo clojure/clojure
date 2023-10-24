@@ -12,6 +12,7 @@
     clojure.java.io
     (:require clojure.string)
     (:import 
+     (clojure.lang RT)
      (java.io Reader InputStream InputStreamReader PushbackReader
               BufferedReader File OutputStream
               OutputStreamWriter BufferedWriter Writer
@@ -19,7 +20,8 @@
               StringReader ByteArrayInputStream
               BufferedInputStream BufferedOutputStream
               CharArrayReader Closeable)
-     (java.net URI URL MalformedURLException Socket URLDecoder URLEncoder)))
+     (java.lang IllegalArgumentException)
+     (java.net URI URL Socket URLDecoder URLEncoder)))
 
 (set! *warn-on-reflection* true)
 
@@ -50,11 +52,11 @@
   
   String
   (as-file [s] (File. s))
-  (as-url [s] (URL. s))  
+  (as-url [s] (RT/toUrl s))
   
   File
   (as-file [f] f)
-  (as-url [f] (.toURL (.toURI f)))
+  (as-url [f] (RT/toUrl f))
 
   URL
   (as-url [u] u)
@@ -255,13 +257,13 @@
   (assoc default-streams-impl
     :make-input-stream (fn [^String x opts]
                          (try
-                          (make-input-stream (URL. x) opts)
-                          (catch MalformedURLException e
+                          (make-input-stream (RT/toUrl x) opts)
+                          (catch IllegalArgumentException e
                             (make-input-stream (File. x) opts))))
     :make-output-stream (fn [^String x opts]
                           (try
-                           (make-output-stream (URL. x) opts)
-                           (catch MalformedURLException err
+                           (make-output-stream (RT/toUrl x) opts)
+                           (catch IllegalArgumentException err
                              (make-output-stream (File. x) opts))))))
 
 (extend Socket
