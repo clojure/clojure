@@ -1380,7 +1380,7 @@ private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
 					}
 					return ret;
 				} else {
-					throw new IllegalArgumentException("Expected instance of " + method.getDeclaringClass() + " or IFn to adapt, got: " + ((proxy == null) ? "null" : proxy.getClass().getName()));
+					throw new IllegalArgumentException("Expected function, but found " + (proxy == null ? "null" : proxy.getClass().getName()));
 				}
 			});
 }
