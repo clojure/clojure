@@ -1399,6 +1399,34 @@ private static java.lang.reflect.Method getAdaptableSAMMethod(Class target) {
 	return null;
 }
 
+private static Class decodeToClass(char c) {
+	switch(c) {
+		case 'L': return Long.TYPE;
+		case 'D': return Double.TYPE;
+		case 'B': return Boolean.TYPE;
+		case 'I': return Integer.TYPE;
+		default: return Object.class;
+	}
+}
+
+private static char encodeAdapterParam(Class c) {
+	switch(c.getName()) {
+		case "long": return 'L';
+		case "double": return 'D';
+		default: return 'O';
+	}
+}
+
+private static char encodeAdapterReturn(Class c) {
+	switch(c.getName()) {
+		case "long": return 'L';
+		case "double": return 'D';
+		case "int": return 'I';
+		case "boolean": return 'B';
+		default: return 'O';
+	}
+}
+
 private static void emitFunctionalAdapter(ObjExpr objx, GeneratorAdapter gen, Class samClass, Class exprClass) {
 	java.lang.reflect.Method sam = getAdaptableSAMMethod(samClass);
 //	if(sam != null) {
@@ -1426,24 +1454,35 @@ private static void emitFunctionalAdapter(ObjExpr objx, GeneratorAdapter gen, Cl
 		// need to emit the body of an adapter from IFn f into the necessary functional interface:
 		//   (f, a1, a2) -> (Ret) f.invoke(a1, a2)
 
-		// lambda method will be:
-		//   private static synthetic Ret lambda$thisFn$0(IFn f, A1 a1, A2 a2) {
-		//       return (Ret) f.invoke(a1, a2);
+		// adapter method matches method in FnAdapters:
+		//   public static Object adaptOOO(Object f, Object a, Object b) {
+		//       return f.invoke(a, b);
 
 		// Target functional interface method (SAM)
 		String samMethodName = sam.getName();
-		MethodType samSig = MethodType.methodType(sam.getReturnType(), sam.getParameterTypes());
+		Class[] samParams = sam.getParameterTypes();
+		MethodType samSig = MethodType.methodType(sam.getReturnType(), samParams);
 		String samDescriptor = samSig.toMethodDescriptorString();
 
 		// Adapter interface, IFn -> SAM
-		MethodType adapterSig = MethodType.methodType(sam.getDeclaringClass(), new Class[] {IFn.class});
+		MethodType adapterSig = MethodType.methodType(sam.getDeclaringClass(), new Class[] {Object.class});
 
-		String currentClassName = objx.internalName;
-		String lambdaMethodName = objx.addLambdaAdapter(samSig);
+		String adapterClassName = "clojure/lang/FnAdapters";
+		Class[] adapterParams = new Class[samParams.length+1];
+		adapterParams[0] = Object.class;  // IFn closed over
+		StringBuilder adaptMethodBuilder = new StringBuilder("adapt");
+		for (int i = 0; i < sam.getParameterCount(); i++) {
+			char paramCode = encodeAdapterParam(samParams[i]);
+			adaptMethodBuilder.append(paramCode);
+			adapterParams[i+1] = decodeToClass(paramCode);
+		}
+		char adapterReturnCode = encodeAdapterReturn(samSig.returnType());
+		adaptMethodBuilder.append(adapterReturnCode);
+		Class adapterReturnType = decodeToClass(adapterReturnCode);
+		String adapterMethodName = adaptMethodBuilder.toString();
 
-		// Lambda method - takes IFn instance (closed over) + args, body calls IFn.invoke
-		MethodType lambdaSig = samSig.insertParameterTypes(0, IFn.class);
-		String lambdaDescriptor = lambdaSig.toMethodDescriptorString();
+		// Adapter method - takes IFn instance (closed over) + args, body calls IFn.invoke
+		String adapterDescriptor = MethodType.methodType(adapterReturnType, adapterParams).toMethodDescriptorString();
 
 		// invokedynamic calls the LambdaMetaFactory as a bootstrap method (like Java lambda)
 		gen.visitInvokeDynamicInsn(
@@ -1455,7 +1494,7 @@ private static void emitFunctionalAdapter(ObjExpr objx, GeneratorAdapter gen, Cl
 						"(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
 						false),
 				new Object[]{Type.getType(samDescriptor),
-						new Handle(Opcodes.H_INVOKESTATIC, currentClassName, lambdaMethodName, lambdaDescriptor, false),
+						new Handle(Opcodes.H_INVOKESTATIC, adapterClassName, adapterMethodName, adapterDescriptor, false),
 						Type.getType(samDescriptor)});
 		gen.visitTypeInsn(CHECKCAST, Type.getType(samClass).getInternalName());
 		gen.mark(endLabel);
@@ -4723,7 +4762,6 @@ static public class ObjExpr implements Expr{
 
 		emitStatics(cv);
 		emitMethods(cv);
-		emitLambdaAdapters(cv);
 
         //static fields for constants
         for(int i = 0; i < constants.count(); i++)
@@ -4831,73 +4869,6 @@ static public class ObjExpr implements Expr{
 			clinitgen.putStatic(objtype, siteNameStatic(i), KEYWORD_LOOKUPSITE_TYPE);
 			clinitgen.putStatic(objtype, thunkNameStatic(i), ILOOKUP_THUNK_TYPE);
 			}
-	}
-
-	static final Keyword LAMBDA_NAME = Keyword.intern(null, "lambda-name");  // String
-	static final Keyword SAM_SIGNATURE = Keyword.intern(null, "sam-sig");  // MethodType
-
-	//synthetic lambda adapter methods
-	volatile int lambdaAdapterCounter = 0;
-	IPersistentVector lambdaAdapters = PersistentVector.EMPTY;
-
-	protected String addLambdaAdapter(MethodType samSig) {
-		String lambdaName = "lambda$" + (lambdaAdapterCounter++);
-		IPersistentMap lambda = RT.map(
-				LAMBDA_NAME, lambdaName,
-				SAM_SIGNATURE, samSig);
-		lambdaAdapters = lambdaAdapters.cons(lambda);
-		return lambdaName;
-	}
-
-	// Lambda adapter has SAM method signature, but takes additional IFn instance
-	// and invokes it in the body:
-	//
-	//  private static synthetic Long lambda$fnname$0(IFn f, Long a1, Long a2) {
-	//      return (Long) f.invoke(a1, a2);
-	//  }
-	private void emitLambdaAdapters(ClassVisitor cv) {
-		for(ISeq s = RT.seq(lambdaAdapters); s != null; s = s.next())
-		{
-			IPersistentMap lambda = (IPersistentMap) s.first();
-			String lambdaName = (String) lambda.valAt(LAMBDA_NAME);  // "lambda$afunction$0"
-			MethodType samSig = (MethodType) lambda.valAt(SAM_SIGNATURE); // ex: (Ljava/lang/Long;Ljava/lang/Long;)Ljava/lang/Long;
-
-			// lambda sig is SAM sig with IFn inserted at beginning
-			//   ex: (Lclojure/lang/IFn;Ljava/lang/Long;Ljava/lang/Long;)Ljava/lang/Long;
-
-			MethodType lambdaSig = samSig.insertParameterTypes(0, IFn.class);
-			int lambdaParams = lambdaSig.parameterCount();
-			Method lambdaMethod = new Method(lambdaName, lambdaSig.toMethodDescriptorString());
-			GeneratorAdapter gen = new GeneratorAdapter(ACC_PRIVATE | ACC_STATIC | ACC_SYNTHETIC, lambdaMethod, lambdaSig.toMethodDescriptorString(), null, cv);
-			gen.loadArg(0); // IFn
-			for(int i=0; i<samSig.parameterCount(); i++) {
-				gen.loadArg(i+1);
-				Class paramType = samSig.parameterType(i);
-				if(paramType.isPrimitive()) {
-					gen.box(Type.getType(paramType));
-				}
-			}
-
-			// TODO: handle prims if IFn$LOL
-			Class[] ifnParams = new Class[samSig.parameterCount()];
-			Arrays.fill(ifnParams, Object.class);
-			MethodType ifnSig = MethodType.methodType(Object.class, ifnParams);
-			gen.invokeInterface(Type.getObjectType("clojure/lang/IFn"), new Method("invoke", ifnSig.toMethodDescriptorString()));
-
-			Class retType = samSig.returnType();
-			if(retType.isPrimitive()) {
-				if(Boolean.TYPE.equals(retType)) {
-					// Convert to boolean via logical coercion
-					gen.invokeStatic(RT_TYPE, Method.getMethod("boolean booleanCast(Object)"));
-				} else {
-					gen.unbox(Type.getType(retType));
-				}
-			} else {
-				gen.checkCast(Type.getType(retType));
-			}
-			gen.returnValue();
-			gen.endMethod();
-		}
 	}
 
 	protected void emitStatics(ClassVisitor gen){
