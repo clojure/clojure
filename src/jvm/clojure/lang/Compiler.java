@@ -1411,7 +1411,10 @@ private static Class decodeToClass(char c) {
 
 private static char encodeAdapterParam(Class c) {
 	switch(c.getName()) {
+		case "short":
+		case "int":
 		case "long": return 'L';
+		case "float":
 		case "double": return 'D';
 		default: return 'O';
 	}

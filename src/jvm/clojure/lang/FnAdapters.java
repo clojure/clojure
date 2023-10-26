@@ -78,6 +78,36 @@ public class FnAdapters {
         }
     }
 
+    public static boolean adaptLB(Object f, long a) {
+        if(f instanceof IFn.LO) {
+            return RT.booleanCast(((IFn.LO)f).invokePrim(a));
+        } else if(f instanceof IFn) {
+            return RT.booleanCast(((IFn)f).invoke(a));
+        } else {
+            throw notIFnError(f);
+        }
+    }
+
+    public static Object adaptLO(Object f, long a) {
+        if(f instanceof IFn.LO) {
+            return ((IFn.LO)f).invokePrim(a);
+        } else if(f instanceof IFn) {
+            return ((IFn)f).invoke(a);
+        } else {
+            throw notIFnError(f);
+        }
+    }
+
+    public static int adaptLLI(Object f, long a, long b) {
+        if(f instanceof IFn.LLL) {
+            return RT.intCast(((IFn.LLL)f).invokePrim(a, b));
+        } else if(f instanceof IFn) {
+            return RT.intCast(((IFn)f).invoke(a, b));
+        } else {
+            throw notIFnError(f);
+        }
+    }
+
     public static double adaptLD(Object f, long a) {
         if(f instanceof IFn.LD) {
             return ((IFn.LD)f).invokePrim(a);
