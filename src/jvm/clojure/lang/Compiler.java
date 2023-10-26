@@ -1377,6 +1377,8 @@ private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
 					Object ret = ((IFn) fn).applyTo(RT.seq(methodArgs));
 					if(method.getReturnType() == Boolean.TYPE) {
 						ret = RT.booleanCast(ret);
+					} else if(method.getReturnType() == Integer.TYPE) {
+						ret = RT.intCast(ret);
 					}
 					return ret;
 				} else {
