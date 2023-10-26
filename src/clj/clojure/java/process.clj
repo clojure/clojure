@@ -56,13 +56,17 @@
   (ProcessBuilder$Redirect/from (jio/file f)))
 
 (defn start
-  "Starts an external command as args and optional leading opts map:
+  "Start an external command, defined in args.
+  The process environment vars are inherited from the parent by
+  default (use :clear-env to clear them).
 
+  If needed, provide options in map as first arg:
     :in - a ProcessBuilder.Redirect (default = :pipe) or :inherit
     :out - a ProcessBuilder.Redirect (default = :pipe) or :inherit :discard
     :err - a ProcessBuilder.Redirect (default = :pipe) or :inherit :discard :stdout
-    :dir - directory to run the command from, default=\".\"
-    :env - {env-var value} of environment variables (all strings)
+    :dir - current directory when the process runs (default=\".\")
+    :clear-env - if true, remove all inherited parent env vars
+    :env - {env-var value} of environment variables to set (all strings)
 
   Returns an ILookup containing the java.lang.Process in :process and the
   streams :in :out :err. The map is also an IDeref that waits for process exit
@@ -72,7 +76,7 @@
   (let [[opts command] (if (map? (first opts+args))
                          [(first opts+args) (rest opts+args)]
                          [{} opts+args])
-        {:keys [in out err dir env]
+        {:keys [in out err dir env clear-env]
          :or {in :pipe, out :pipe, err :pipe, dir "."}} opts
         pb (ProcessBuilder. ^List command)
         to-redirect (fn to-redirect
@@ -89,6 +93,8 @@
     (if
       (= err :stdout) (.redirectErrorStream pb true)
       (.redirectError pb ^ProcessBuilder$Redirect (to-redirect err)))
+    (when clear-env
+      (.clear (.environment pb)))
     (when env
       (let [pb-env (.environment pb)]
         (run! (fn [[k v]] (.put pb-env k v)) env)))
