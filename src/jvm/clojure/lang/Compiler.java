@@ -1021,7 +1021,10 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(Util.equals(sym,COMPILE_STUB_SYM.get()))
 					return (Class) COMPILE_STUB_CLASS.get();
 				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
-					c = RT.classForNameNonLoading(sym.name);
+					if(looksLikeArrayType(sym))
+						c = maybeArrayClass(sym);
+					else
+						c = RT.classForNameNonLoading(sym.name);
 				else
 					{
 					Object o = currentNS().getMapping(sym);
@@ -1029,10 +1032,13 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 						c = (Class) o;
 					else if(LOCAL_ENV.deref() != null && ((java.util.Map)LOCAL_ENV.deref()).containsKey(form))
 						return null;
+					else if(looksLikeArrayType(sym))
+						c = maybeArrayClass(sym);
 					else
 						{
 						try{
-						c = RT.classForNameNonLoading(sym.name);
+						if(c == null)
+							c = RT.classForNameNonLoading(sym.name);
 						}
 						catch(Exception e){
 							// aargh
@@ -1116,42 +1122,43 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return descr;
 	}
 
+	public static boolean looksLikeArrayType(Symbol sym) {
+		return sym != null && sym.name.endsWith("*") && !sym.name.startsWith("*") && sym.name.contains("-");
+	}
+
 	public static Class maybeArrayClass(Symbol tag) {
+		if(!looksLikeArrayType(tag)) return null;
+
 		Class componentClass = null;
-		Class arrayClass = null;
 
-		if(tag.name.endsWith("*")) {
-			int idx = tag.name.indexOf('*');
-			Symbol rootSymbol = Symbol.intern(tag.name.substring(0, idx));
-			String primitiveDecriptor = null;
-			componentClass = tagToClass(rootSymbol);
+		int idx = tag.name.indexOf("-*");
+		Symbol rootSymbol = Symbol.intern(tag.name.substring(0, idx));
+		String primitiveDecriptor = null;
+		componentClass = tagToClass(rootSymbol);
 
-			if(componentClass == null) {
-				throw new IllegalArgumentException("Unable to resolve classname: " + tag);
-			}
-			else {
-				primitiveDecriptor = getPrimDescriptor(componentClass);
-			}
-
-			String stars = tag.name.substring(idx);
-
-			if (stars.replace("*", "").length() > 0)
-				throw new IllegalArgumentException("Array type hint requires asterisks only for dimensionality, found " + tag);
-
-			int dim = stars.length();
-			StringBuilder repr = new StringBuilder(String.join("", Collections.nCopies(dim, "[")));
-
-			if(primitiveDecriptor != null) {
-				repr.append(primitiveDecriptor);
-			}
-			else {
-				repr.append("L" + componentClass.getName() + ";");
-			}
-
-			arrayClass = maybeClass(repr.toString(), true);
+		if(componentClass == null) {
+			throw new IllegalArgumentException("Unable to resolve classname: " + tag);
+		}
+		else {
+			primitiveDecriptor = getPrimDescriptor(componentClass);
 		}
 
-		return arrayClass;
+		String stars = tag.name.substring(idx+1);
+
+		if (stars.replace("*", "").length() > 0)
+			throw new IllegalArgumentException("Array type hint requires asterisks only for dimensionality, found " + tag);
+
+		int dim = stars.length();
+		StringBuilder repr = new StringBuilder(String.join("", Collections.nCopies(dim, "[")));
+
+		if(primitiveDecriptor != null) {
+			repr.append(primitiveDecriptor);
+		}
+		else {
+			repr.append("L" + componentClass.getName() + ";");
+		}
+
+		return maybeClass(repr.toString(), true);
 	}
 
 	static Class tagToClass(Object tag) {
@@ -1162,11 +1169,6 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
 				c = maybeSpecialTag(sym);
-				}
-			// Check for array class symbols, e.g. String*, long**, etc.
-			if(c == null)
-				{
-				c = maybeArrayClass(sym);
 				}
 			}
 		if(c == null)
@@ -7456,7 +7458,10 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
 		}
 	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 		{
-		return RT.classForName(sym.name);
+		if(HostExpr.looksLikeArrayType(sym))
+			return HostExpr.maybeArrayClass(sym);
+		else
+			return RT.classForName(sym.name);
 		}
 	else if(sym.equals(NS))
 			return RT.NS_VAR;
@@ -7469,7 +7474,11 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
 		Object o = n.getMapping(sym);
 		if(o == null)
 			{
-			if(RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
+			if(HostExpr.looksLikeArrayType(sym))
+				{
+				return HostExpr.maybeArrayClass(sym);
+				}
+			else if(RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
 				{
 				return sym;
 				}
