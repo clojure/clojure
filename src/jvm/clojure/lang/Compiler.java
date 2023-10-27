@@ -1367,6 +1367,17 @@ private static boolean isAdaptableFunctionExpression(Class target, Expr e){
 
 }
 
+// These return type coercions match the coercions done in FnAdapters for compiled adapters
+private static Object dynamicAdapterReturn(Object ret, Class targetType) {
+	if(Boolean.TYPE.equals(targetType)) {
+		return RT.booleanCast(ret);
+	} else if(Integer.TYPE.equals(targetType)) {
+		return RT.intCast(ret);
+	} else {
+		return ret;
+	}
+}
+
 // Dynamically adapt fn to targetFnInterface using proxy
 private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
 	return Proxy.newProxyInstance(
@@ -1375,15 +1386,29 @@ private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
 			(proxy,method,methodArgs)-> {
 				if (fn instanceof IFn) {
 					Object ret = ((IFn) fn).applyTo(RT.seq(methodArgs));
-					if(method.getReturnType() == Boolean.TYPE) {
-						ret = RT.booleanCast(ret);
-					} else if(method.getReturnType() == Integer.TYPE) {
-						ret = RT.intCast(ret);
-					}
-					return ret;
+					return dynamicAdapterReturn(ret, method.getReturnType());
 				} else {
 					throw new IllegalArgumentException("Expected function, but found " + (proxy == null ? "null" : proxy.getClass().getName()));
 				}
+			});
+}
+
+// Dynamically adapt Method reference
+private static Object dynamicAdapt(Class targetFnInterface, java.lang.reflect.Method srcMethod) {
+	return Proxy.newProxyInstance(
+			(ClassLoader)LOADER.get(),
+			new Class[] { targetFnInterface },
+			(proxy,method,methodArgs)-> {
+				Object ret = null;
+				if(Modifier.isStatic(method.getModifiers())) {
+					ret = srcMethod.invoke(null, methodArgs);
+				} else {
+					Object obj = methodArgs[0];
+					Object[] restArgs = new Object[methodArgs.length-1];
+					System.arraycopy(methodArgs, 1, restArgs, 0, restArgs.length);
+					ret = srcMethod.invoke(obj, restArgs);
+				}
+				return dynamicAdapterReturn(ret, method.getReturnType());
 			});
 }
 
