@@ -4243,7 +4243,7 @@ static public abstract class MethodValueExpr extends FnExpr
 		return	RT.list(Symbol.intern("fn"), Symbol.intern(name),
 				buildThunkBody(buildThunkParams()));
 	}
-	
+
 	abstract IPersistentVector prepParams();
 
 	IPersistentVector buildThunkParams() {
@@ -7225,7 +7225,11 @@ public static boolean namesInstanceMethod(Symbol sym) {
 }
 
 public static boolean namesQualifiedInstanceMember(Symbol sym) {
-	return (sym.ns != null && sym.ns.charAt(0) == '.');
+	return (sym.ns != null && sym.name != null && sym.ns.charAt(0) == '.');
+}
+
+public static boolean namesConstructor(Symbol sym) {
+	return (sym.name.endsWith(".") && sym.ns == null);
 }
 
 public static Object preserveTag(ISeq src, Object dst) {
@@ -7613,7 +7617,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 			//maybe Klass. member symbol
 			Class c = null;
 
-			if (sym.name.endsWith(".") && sym.ns == null)
+			if (namesConstructor(sym))
 				{
 				c = HostExpr.maybeClass(Symbol.intern(null, sym.name.substring(0, sym.name.length() - 1)), false);
 				}
@@ -7630,14 +7634,12 @@ private static Expr analyzeSymbol(Symbol sym) {
 			{
 			Symbol nsSym = Symbol.intern(sym.ns);
 			Class c = HostExpr.maybeClass(nsSym, false);
-			boolean isInstanceMemberSymbol = false;
 
 			if (c == null)
 				{
 				// maybe .Klass/method
-				if (sym.ns != null && sym.name != null && sym.ns.startsWith("."))
+				if (namesQualifiedInstanceMember(sym))
 					{
-					isInstanceMemberSymbol = true;
 					c = HostExpr.maybeClass(Symbol.intern(null, sym.ns.substring(1)), false);
 					}
 				}
@@ -7650,9 +7652,9 @@ private static Expr analyzeSymbol(Symbol sym) {
 					}
 				else
 					{
-					Object argTags = (sym.meta() != null) ? sym.meta().valAt(RT.ARG_TAGS_KEY) : null;
+					Object argTags = argTagsOf(sym);
 
-					if (isInstanceMemberSymbol)
+					if (namesQualifiedInstanceMember(sym))
 						return new InstanceMethodValueExpr(null, c, Symbol.intern(null, sym.name), (IPersistentVector) argTags);
 					else
 						return new StaticMethodValueExpr(null, c, Symbol.intern(null, sym.name), (IPersistentVector) argTags);
