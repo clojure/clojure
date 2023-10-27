@@ -998,7 +998,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(!(RT.first(call) instanceof Symbol))
 					throw new IllegalArgumentException("Malformed member expression");
 				Symbol sym = (Symbol) RT.first(call);
-				IPersistentVector argTags = (sym.meta() != null) ? (IPersistentVector) sym.meta().valAt(RT.ARG_TAGS_KEY) : null;
+				IPersistentVector argTags = argTagsOf(sym);
 				Symbol tag = tagOf(form);
 				PersistentVector args = PersistentVector.EMPTY;
 				boolean tailPosition = inTailCall(context);
@@ -2682,7 +2682,7 @@ public static class NewExpr implements Expr{
 			Class c = HostExpr.maybeClass(op, false);
 			if(c == null)
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
-			IPersistentVector argTags = (RT.meta(op) != null) ? (IPersistentVector) ((IObj)op).meta().valAt(RT.ARG_TAGS_KEY) : null;
+			IPersistentVector argTags = argTagsOf(op);
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
 				args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
@@ -7220,6 +7220,14 @@ public static boolean namesStaticMember(Symbol sym){
 	return sym.ns != null && namespaceFor(sym) == null && sym.ns.charAt(0) != '.';
 }
 
+public static boolean namesInstanceMethod(Symbol sym) {
+	return sym.name.charAt(0) == '.';
+}
+
+public static boolean namesQualifiedInstanceMember(Symbol sym) {
+	return (sym.ns != null && sym.ns.charAt(0) == '.');
+}
+
 public static Object preserveTag(ISeq src, Object dst) {
 	Symbol tag = tagOf(src);
 	if (tag != null && dst instanceof IObj) {
@@ -7230,7 +7238,7 @@ public static Object preserveTag(ISeq src, Object dst) {
 }
 
 private static Object preserveArgTags(IObj memberSymbol, Object target) {
-	Object argTags = (memberSymbol.meta() != null) ? memberSymbol.meta().valAt(RT.ARG_TAGS_KEY) : null;
+	Object argTags = argTagsOf(memberSymbol);
 	if (argTags != null && target instanceof IObj) {
 		IPersistentMap meta = RT.meta(target);
 		return ((IObj)target).withMeta((IPersistentMap) RT.assoc(meta, RT.ARG_TAGS_KEY, argTags));
@@ -7320,13 +7328,13 @@ public static Object macroexpand1(Object x) {
 				String sname = sym.name;
 				//(.substring s 2 5) => (. s substring 2 5)
 				//(.String/substring s 2 5) => (. ^String s substring 2 5)
-				if(sym.name.charAt(0) == '.' || (sym.ns != null && sym.ns.charAt(0) == '.'))
+				if(namesInstanceMethod(sym) || namesQualifiedInstanceMember(sym))
 					{
 					if(RT.length(form) < 2)
 						throw new IllegalArgumentException(
 								"Malformed member expression, expecting (.member target ...)");
 					Symbol meth = (sname.charAt(0) == '.') ? Symbol.intern(sname.substring(1)) : Symbol.intern(sname);
-					Symbol maybeQualifiedHint = (sym.ns != null && sym.ns.charAt(0) == '.') ? Symbol.intern(sym.ns.substring(1)) : null;
+					Symbol maybeQualifiedHint = namesQualifiedInstanceMember(sym) ? Symbol.intern(sym.ns.substring(1)) : null;
 					Object target = RT.second(form);
 					if(HostExpr.maybeClass(target, false) != null)
 						{
@@ -7900,6 +7908,11 @@ private static Symbol tagOf(Object o){
 	else if(tag instanceof String)
 		return Symbol.intern(null, (String) tag);
 	return null;
+}
+
+private static IPersistentVector argTagsOf(Object o){
+	Object argTags = RT.get(RT.meta(o), RT.ARG_TAGS_KEY);
+	return (IPersistentVector) argTags;
 }
 
 public static Object loadFile(String file) throws IOException{

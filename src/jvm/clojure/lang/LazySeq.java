@@ -12,24 +12,30 @@
 
 package clojure.lang;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class LazySeq extends Obj implements ISeq, Sequential, List, IPending, IHashEq{
 
-private static final long serialVersionUID = 7700080124382322592L;
+private static final long serialVersionUID = -7345643944998411680L;
 
 private IFn fn;
 private Object sv;
 private ISeq s;
+private Lock lock;
 
-public LazySeq(IFn fn){
-	this.fn = fn;
+public LazySeq(IFn f){
+	fn = f;
+	lock = new ReentrantLock();
 }
 
-private LazySeq(IPersistentMap meta, ISeq s){
+private LazySeq(IPersistentMap meta, ISeq seq){
 	super(meta);
-	this.fn = null;
-	this.s = s;
+	fn = null;
+	s = seq;
 }
 
 public Obj withMeta(IPersistentMap meta){
@@ -38,29 +44,66 @@ public Obj withMeta(IPersistentMap meta){
 	return new LazySeq(meta, seq());
 }
 
-final synchronized Object sval(){
-	if(fn != null)
-		{
-                sv = fn.invoke();
-                fn = null;
+// MUST be locked when called!
+final private void force() {
+	if (fn != null) {
+		sv = fn.invoke();
+		fn = null;
+	}
+}
+
+final private void lockAndForce() {
+	Lock l = lock;
+	if(l != null) {
+		l.lock();
+		try {
+			force();
+		} finally {
+			l.unlock();
 		}
+	}
+}
+
+final private Object sval() {
+	if(fn != null)
+	    lockAndForce();
 	if(sv != null)
 		return sv;
 	return s;
 }
 
-final synchronized public ISeq seq(){
-	sval();
-	if(sv != null)
-		{
-		Object ls = sv;
-		sv = null;
-		while(ls instanceof LazySeq)
-			{
-			ls = ((LazySeq)ls).sval();
-			}
-		s = RT.seq(ls);
+final private Object unwrap(Object ls){
+    while(ls instanceof LazySeq) {
+        ls = ((LazySeq) ls).sval();
+        }
+    return ls;
+}
+
+final private void realize() {
+	Lock l = lock;
+	if(l != null) {
+		l.lock();
+		try {
+            //must re-examine under lock
+            if(lock != null) {
+                force();
+                Object ls = sv;
+                sv = null;
+                if(ls instanceof LazySeq)
+                    ls = unwrap(ls);
+                s = RT.seq(ls);
+                lock = null;
+                }
+		    }
+        finally {
+			l.unlock();
 		}
+	}
+}
+
+public final ISeq seq(){
+    if(lock != null)
+        realize();
 	return s;
 }
 
@@ -243,8 +286,19 @@ public boolean addAll(int index, Collection c){
 	throw new UnsupportedOperationException();
 }
 
+public boolean isRealized(){
+	if(lock != null) {
+		Lock l = lock;
+		if(l != null) {
+			l.lock();
+			try {
+				return lock == null;
+			} finally {
+				l.unlock();
+			}
+		}
+	}
+	return true;
+}
+}
 
-synchronized public boolean isRealized(){
-	return fn == null;
-}
-}
