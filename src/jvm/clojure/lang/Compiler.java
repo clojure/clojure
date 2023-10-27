@@ -998,7 +998,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(!(RT.first(call) instanceof Symbol))
 					throw new IllegalArgumentException("Malformed member expression");
 				Symbol sym = (Symbol) RT.first(call);
-				IPersistentVector argTags = (sym.meta() != null) ? (IPersistentVector) sym.meta().valAt(RT.ARG_TAGS_KEY) : null;
+				IPersistentVector argTags = argTagsOf(sym);
 				Symbol tag = tagOf(form);
 				PersistentVector args = PersistentVector.EMPTY;
 				boolean tailPosition = inTailCall(context);
@@ -2682,7 +2682,7 @@ public static class NewExpr implements Expr{
 			Class c = HostExpr.maybeClass(op, false);
 			if(c == null)
 				throw new IllegalArgumentException("Unable to resolve classname: " + RT.second(form));
-			IPersistentVector argTags = (RT.meta(op) != null) ? (IPersistentVector) ((IObj)op).meta().valAt(RT.ARG_TAGS_KEY) : null;
+			IPersistentVector argTags = argTagsOf(op);
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
 				args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
@@ -6974,7 +6974,7 @@ public static Object preserveTag(ISeq src, Object dst) {
 }
 
 private static Object preserveArgTags(IObj memberSymbol, Object target) {
-	Object argTags = (memberSymbol.meta() != null) ? memberSymbol.meta().valAt(RT.ARG_TAGS_KEY) : null;
+	Object argTags = argTagsOf(memberSymbol);
 	if (argTags != null && target instanceof IObj) {
 		IPersistentMap meta = RT.meta(target);
 		return ((IObj)target).withMeta((IPersistentMap) RT.assoc(meta, RT.ARG_TAGS_KEY, argTags));
@@ -7601,6 +7601,11 @@ private static Symbol tagOf(Object o){
 	else if(tag instanceof String)
 		return Symbol.intern(null, (String) tag);
 	return null;
+}
+
+private static IPersistentVector argTagsOf(Object o){
+	Object argTags = RT.get(RT.meta(o), RT.ARG_TAGS_KEY);
+	return (IPersistentVector) argTags;
 }
 
 public static Object loadFile(String file) throws IOException{
