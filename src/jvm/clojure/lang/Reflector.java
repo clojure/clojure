@@ -651,5 +651,4 @@ public static Object prepRet(Class c, Object x){
 //			return Double.valueOf(((Float) x).doubleValue());
 	return x;
 }
-
 }
