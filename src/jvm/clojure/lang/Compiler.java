@@ -1369,12 +1369,12 @@ private static boolean isAdaptableFunctionExpression(Class target, Expr e){
 
 // These return type coercions match the coercions done in FnAdapters for compiled adapters
 private static Object dynamicAdapterReturn(Object ret, Class targetType) {
-	if(Boolean.TYPE.equals(targetType)) {
-		return RT.booleanCast(ret);
-	} else if(Integer.TYPE.equals(targetType)) {
-		return RT.intCast(ret);
-	} else {
-		return ret;
+	switch(targetType.getName()) {
+		case "boolean": return RT.booleanCast(ret);
+		case "int": return RT.intCast(ret);
+		case "long": return RT.longCast(ret);
+		case "double": return RT.doubleCast(ret);
+		default: return ret;
 	}
 }
 
@@ -1436,6 +1436,7 @@ private static Class decodeToClass(char c) {
 	}
 }
 
+// Support widening conversion from short, int, or float to long or double on adapter params
 private static char encodeAdapterParam(Class c) {
 	switch(c.getName()) {
 		case "short":
@@ -1447,12 +1448,13 @@ private static char encodeAdapterParam(Class c) {
 	}
 }
 
+
 private static char encodeAdapterReturn(Class c) {
 	switch(c.getName()) {
 		case "long": return 'L';
 		case "double": return 'D';
-		case "int": return 'I';
-		case "boolean": return 'B';
+		case "int": return 'I';      // narrowing conversion from IFn$...L
+		case "boolean": return 'B';  // Clojure boolean logic from IFn$...O
 		default: return 'O';
 	}
 }
