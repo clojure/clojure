@@ -956,8 +956,10 @@ public static class MetaReader extends AFn{
 			meta = RT.map(RT.TAG_KEY, meta);
 		else if (meta instanceof Keyword)
 			meta = RT.map(meta, RT.T);
+		else if (meta instanceof IPersistentVector)
+			meta = RT.map(RT.ARG_TAGS_KEY, meta);
 		else if(!(meta instanceof IPersistentMap))
-			throw new IllegalArgumentException("Metadata must be Symbol,Keyword,String or Map");
+			throw new IllegalArgumentException("Metadata must be Symbol,Keyword,String,Vector or Map");
 
 		Object o = read(r, true, null, true, opts, pendingForms);
 		if(o instanceof IMeta)
@@ -1071,8 +1073,7 @@ public static class SyntaxQuoteReader extends AFn{
 				if(maybeClass instanceof Class)
 					{
 					// Classname/foo -> package.qualified.Classname/foo
-					sym = Symbol.intern(
-							((Class)maybeClass).getName(), sym.name);
+					sym = Symbol.intern(((Class)maybeClass).getName(), sym.name);
 					}
 				else
 					sym = Compiler.resolveSymbol(sym);
