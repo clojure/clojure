@@ -1459,14 +1459,13 @@ private static char encodeAdapterReturn(Class c) {
 	}
 }
 
-private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class targetClass, Class exprClass) {
+private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class targetClass) {
 	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(targetClass);
 
 	// adapter method matches method in FnAdapters (closes over f, an IFn):
 	//   public static Object adaptOOO(Object f, Object a, Object b) {
 	//       return f.invoke(a, b);
 
-	String adapterClassName = Type.getInternalName(FnAdapters.class);
 	Class[] adapterParams = new Class[targetMethod.getParameterCount()+1];
 	adapterParams[0] = Object.class;  // IFn closed over
 	StringBuilder adaptMethodBuilder = new StringBuilder("adapt");
@@ -1477,7 +1476,6 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class targetC
 	}
 	char adapterReturnCode = encodeAdapterReturn(targetMethod.getReturnType());
 	adaptMethodBuilder.append(adapterReturnCode);
-	Class adapterReturnType = decodeToClass(adapterReturnCode);
 	String adapterMethodName = adaptMethodBuilder.toString();
 
 	// Adapter method - takes IFn instance (closed over) + args, body calls IFn.invoke
@@ -1487,7 +1485,6 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class targetC
 	} catch(NoSuchMethodException e) {
 		return false;
 	}
-	String adapterDescriptor = MethodType.methodType(adapterReturnType, adapterParams).toMethodDescriptorString();
 
 	// emit... if(! (exp instanceof FIType)) { adapt... }
 	gen.dup();
@@ -1655,7 +1652,7 @@ static abstract class MethodExpr extends HostExpr{
 					if(isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
 						{
 						e.emit(C.EXPRESSION, objx, gen);
-						boolean adapted = emitFunctionalAdapter(gen, parameterTypes[i], exprClass);
+						boolean adapted = emitFunctionalAdapter(gen, parameterTypes[i]);
 						if(RT.booleanCast(RT.VERBOSE_FN_CONVERSIONS.deref()))
 							if(adapted)
 								RT.errPrintWriter().format("Function conversion to %s in invocation, %s:%d:%d.\n",
@@ -6762,7 +6759,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 						if(isAdaptableFunctionExpression(bindingClass, bi.init)
 								&& (initClass == null || ! bindingClass.isAssignableFrom(initClass)))
 						{
-						boolean adapted = emitFunctionalAdapter(gen, bindingClass, initClass);
+						boolean adapted = emitFunctionalAdapter(gen, bindingClass);
 						if(RT.booleanCast(RT.VERBOSE_FN_CONVERSIONS.deref()))
 							if(adapted)
 								RT.errPrintWriter().format("Function conversion to %s in binding, %s:%d:%d.\n",
