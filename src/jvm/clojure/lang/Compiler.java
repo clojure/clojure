@@ -1459,16 +1459,10 @@ private static char encodeAdapterReturn(Class c) {
 	}
 }
 
-private static void emitFunctionalAdapter(ObjExpr objx, GeneratorAdapter gen, Class samClass, Class exprClass) {
+private static void emitFunctionalAdapter(GeneratorAdapter gen, Class samClass, Class exprClass) {
 	java.lang.reflect.Method sam = getAdaptableSAMMethod(samClass);
-//	if(sam != null) {
-//		System.out.println("Found sam arg " + parameterTypes[i].getName() + " in " + objx.internalName);
-//	}
-
 	if (sam != null && !(exprClass != null && samClass.isAssignableFrom(exprClass)))
 	{
-		//System.out.println("Adapting sam " + samClass.getName() + "::" + sam.getName() + " in " + objx.internalName);
-
 		// check if objx is already of the desired functional interface
 		gen.dup();
 		Type samType = Type.getType(samClass);
@@ -1614,19 +1608,19 @@ static abstract class MethodExpr extends HostExpr{
 					}
 				else
 					{
-					e.emit(C.EXPRESSION, objx, gen);
 					Class exprClass = e.hasJavaClass() ? e.getJavaClass() : null;
 					if(isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
 						{
-						if(RT.booleanCast(RT.VERBOSE_FN_CONVERSIONS.deref())) {
+						if(RT.booleanCast(RT.VERBOSE_FN_CONVERSIONS.deref()))
 							RT.errPrintWriter()
 									.format("Function conversion to %s in invocation, %s:%d:%d.\n",
 											parameterTypes[i].getName(), SOURCE_PATH.deref(), line, col);
+						e.emit(C.EXPRESSION, objx, gen);
+						emitFunctionalAdapter(gen, parameterTypes[i], exprClass);
 						}
-						emitFunctionalAdapter(objx, gen, parameterTypes[i], exprClass);
-						}
-						else
+					else
 					    {
+						e.emit(C.EXPRESSION, objx, gen);
 						HostExpr.emitUnboxArg(objx, gen, parameterTypes[i]);
 						}
 					}
@@ -6727,7 +6721,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 									.format("Function conversion to %s in binding, %s:%d:%d.\n",
 											bindingClass.getName(), SOURCE_PATH.deref(), line, column);
 						}
-						emitFunctionalAdapter(objx, gen, bindingClass, initClass);
+						emitFunctionalAdapter(gen, bindingClass, initClass);
 						}
 					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
 					}
