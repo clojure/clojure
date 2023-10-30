@@ -200,6 +200,7 @@
   {:doc "Returns the smallest double greater than or equal to a, and equal to a
   mathematical integer.
   If a is ##NaN or ##Inf or ##-Inf or already equal to an integer => a
+  If a is less than zero but greater than -1.0 => -0.0
   See: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#ceil-double-"
    :inline-arities #{1}
    :inline (fn [a] `(Math/ceil (double ~a)))
@@ -211,7 +212,6 @@
   {:doc "Returns the largest double less than or equal to a, and equal to a
   mathematical integer.
   If a is ##NaN or ##Inf or ##-Inf or already equal to an integer => a
-  If a is less than zero but greater than -1.0 => -0.0
   See: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#floor-double-"
    :inline-arities #{1}
    :inline (fn [a] `(Math/floor (double ~a)))
