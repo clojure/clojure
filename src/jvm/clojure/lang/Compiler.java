@@ -9162,7 +9162,7 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 private static Executable findMatchingTarget(Executable[] targets, Class c, String targetName, IPersistentVector sig) {
 	List<Executable> potentialTargets = new ArrayList<>();
 	int leastArity = Integer.MAX_VALUE;
-	int derivedArity = sig != null ? sig.count() : -1;
+	int targetArity = sig != null ? sig.count() : -1;
 	List<Class> declaredSignature = resolveSignatureClasses(sig);
 	// Get only the methods with the right name
 	try
@@ -9182,9 +9182,9 @@ private static Executable findMatchingTarget(Executable[] targets, Class c, Stri
 		}
 	java.util.stream.Stream<Executable> targetStream = potentialTargets.stream();
 	// filter arities
-	if(derivedArity > -1)
+	if(targetArity > -1)
 		{
-		targetStream = targetStream.filter(tgt -> tgt.getParameterTypes().length == derivedArity);
+		targetStream = targetStream.filter(tgt -> tgt.getParameterTypes().length == targetArity);
 		}
 	else
 		{
