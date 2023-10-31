@@ -1649,7 +1649,16 @@ static abstract class MethodExpr extends HostExpr{
 				else
 					{
 					Class exprClass = e.hasJavaClass() ? e.getJavaClass() : null;
-					if(isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
+
+// TODO: when MethodValueExpr exists
+//					if(isAdaptableFunctionalInterface(parameterTypes[i]) && (e instanceof MethodValueExpr))
+//						{
+//						java.lang.reflect.Method methodValue = null;  // TODO
+//						emitInvokeDynamicAdapter(gen, parameterTypes[i], methodValue, null);
+//						}
+//
+//					else
+						if(isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
 						{
 						e.emit(C.EXPRESSION, objx, gen);
 						boolean adapted = emitFunctionalAdapter(gen, parameterTypes[i]);
