@@ -39,7 +39,10 @@
   (is (= ["A" "B" "C"]
          (map ^[java.util.Locale] .String/toUpperCase ["a" "b" "c"] (repeat java.util.Locale/ENGLISH))))
   (is (thrown? ClassCastException
-               (doall (map ^[long] String/valueOf [12 "a"])))))
+               (doall (map ^[long] String/valueOf [12 "a"]))))
+  (testing "array type symbolic hint"
+    (is (= [2]
+           (map ^[long-* long] Arrays/binarySearch [(long-array [1 2 3 5 6])] [3])))))
 
 (def mt ^[_] Tuple/create)
 (def mts {:fromString UUID/fromString})

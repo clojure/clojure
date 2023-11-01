@@ -31,4 +31,6 @@
        (is (= 4 (^[longs long] Arrays/binarySearch lary (long 99))))
        (is (= 4 (^[objects _] Arrays/binarySearch oary 99)))
        (is (= 4 (^["[Ljava.lang.Object;" _] Arrays/binarySearch oary 99)))
-       (is (= 1 (^["[Ljava.lang.Object;" _] Arrays/binarySearch sary "b"))))))
+       (is (= 1 (^["[Ljava.lang.Object;" _] Arrays/binarySearch sary "b")))))
+  (testing "array type symbolic arg-tags"
+     (= 4 (^[long-* long] Arrays/binarySearch (long-array [1 2 3 4 99 100]) 99))))
