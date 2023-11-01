@@ -1350,66 +1350,10 @@ static Class maybePrimitiveType(Expr e){
 	return null;
 }
 
-// Interface with @FunctionalInterface annotation
-// but exclude Runnable, Callable, Comparator because Clojure IFn/AFn already
-// extend those so IFns don't need adapting for those
-private static boolean isAdaptableFunctionalInterface(Class c){
-	return c != null &&
-			c.isInterface() &&
-			c.isAnnotationPresent(FunctionalInterface.class) &&
-			c != Runnable.class && c != Callable.class && c != Comparator.class;
-}
-
 // (let [^FI lb e] ...)
 private static boolean isAdaptableFunctionExpression(Class target, Expr e){
-	return isAdaptableFunctionalInterface(target) &&
+	return Reflector.isAdaptableFunctionalInterface(target) &&
 			!(e.hasJavaClass() && target.isAssignableFrom(e.getJavaClass()));
-
-}
-
-// These return type coercions match the coercions done in FnAdapters for compiled adapters
-private static Object dynamicAdapterReturn(Object ret, Class targetType) {
-	switch(targetType.getName()) {
-		case "boolean": return RT.booleanCast(ret);
-		case "int": return RT.intCast(ret);
-		case "long": return RT.longCast(ret);
-		case "double": return RT.doubleCast(ret);
-		default: return ret;
-	}
-}
-
-// Dynamically adapt fn to targetFnInterface using proxy
-private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
-	return Proxy.newProxyInstance(
-			(ClassLoader)LOADER.get(),
-			new Class[] { targetFnInterface },
-			(proxy,method,methodArgs)-> {
-				if (fn instanceof IFn) {
-					Object ret = ((IFn) fn).applyTo(RT.seq(methodArgs));
-					return dynamicAdapterReturn(ret, method.getReturnType());
-				} else {
-					throw new IllegalArgumentException("Expected function, but found " + (proxy == null ? "null" : proxy.getClass().getName()));
-				}
-			});
-}
-
-// Dynamically adapt Method reference
-private static Object dynamicAdapt(Class targetFnInterface, java.lang.reflect.Method srcMethod) {
-	return Proxy.newProxyInstance(
-			(ClassLoader)LOADER.get(),
-			new Class[] { targetFnInterface },
-			(proxy,method,methodArgs)-> {
-				Object ret = null;
-				if(Modifier.isStatic(method.getModifiers())) {
-					ret = srcMethod.invoke(null, methodArgs);
-				} else {
-					Object obj = methodArgs[0];
-					Object[] restArgs = new Object[methodArgs.length-1];
-					System.arraycopy(methodArgs, 1, restArgs, 0, restArgs.length);
-					ret = srcMethod.invoke(obj, restArgs);
-				}
-				return dynamicAdapterReturn(ret, method.getReturnType());
-			});
 }
 
 private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString", "hashCode");
@@ -1417,7 +1361,7 @@ private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString"
 // The SAM method (there must be one) is abstract,
 // and not an override from Object of equals, toString, or hashCode
 private static java.lang.reflect.Method getAdaptableSAMMethod(Class target) {
-	if(isAdaptableFunctionalInterface(target)) {
+	if(Reflector.isAdaptableFunctionalInterface(target)) {
 		java.lang.reflect.Method[] methods = target.getMethods();
 		for (int i = 0; i < methods.length; i++)
 			if (Modifier.isAbstract(methods[i].getModifiers()) && !OBJECT_METHODS.contains(methods[i].getName()))
@@ -1651,14 +1595,14 @@ static abstract class MethodExpr extends HostExpr{
 					Class exprClass = e.hasJavaClass() ? e.getJavaClass() : null;
 
 // TODO: when MethodValueExpr exists
-//					if(isAdaptableFunctionalInterface(parameterTypes[i]) && (e instanceof MethodValueExpr))
+//					if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]) && (e instanceof MethodValueExpr))
 //						{
 //						java.lang.reflect.Method methodValue = null;  // TODO
 //						emitInvokeDynamicAdapter(gen, parameterTypes[i], methodValue, null);
 //						}
 //
 //					else
-						if(isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
+						if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
 						{
 						e.emit(C.EXPRESSION, objx, gen);
 						boolean adapted = emitFunctionalAdapter(gen, parameterTypes[i]);
@@ -1778,12 +1722,6 @@ static class InstanceMethodExpr extends MethodExpr{
 				argvals[i] = ((Expr) args.nth(i)).eval();
 			if(method != null)
 				{
-				Class[] params = method.getParameterTypes();
-				for(int i = 0; i < params.length; i++) {
-					if(argvals[i] != null && isAdaptableFunctionalInterface(params[i]) && !params[i].isAssignableFrom(argvals[i].getClass())) {
-						argvals[i] = dynamicAdapt(params[i], argvals[i]);
-					}
-				}
 				LinkedList ms = new LinkedList();
 				ms.add(method);
 				return Reflector.invokeMatchingMethod(methodName, ms, targetval, argvals);
@@ -1972,12 +1910,6 @@ static class StaticMethodExpr extends MethodExpr{
 				argvals[i] = ((Expr) args.nth(i)).eval();
 			if(method != null)
 				{
-				Class[] params = method.getParameterTypes();
-				for(int i = 0; i < params.length; i++) {
-					if(argvals[i] != null && isAdaptableFunctionalInterface(params[i]) && !params[i].isAssignableFrom(argvals[i].getClass())) {
-						argvals[i] = dynamicAdapt(params[i], argvals[i]);
-					}
-				}
 				LinkedList ms = new LinkedList();
 				ms.add(method);
 				return Reflector.invokeMatchingMethod(methodName, ms, null, argvals);
@@ -2868,12 +2800,6 @@ public static class NewExpr implements Expr{
 			{
 			try
 				{
-				Class[] params = ctor.getParameterTypes();
-				for(int i = 0; i < params.length; i++) {
-					if(argvals[i] != null && isAdaptableFunctionalInterface(params[i]) && !params[i].isAssignableFrom(argvals[i].getClass())) {
-						argvals[i] = dynamicAdapt(params[i], argvals[i]);
-					}
-				}
 				return ctor.newInstance(Reflector.boxArgs(ctor.getParameterTypes(), argvals));
 				}
 			catch(Exception e)
