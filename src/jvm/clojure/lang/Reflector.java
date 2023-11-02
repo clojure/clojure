@@ -544,9 +544,9 @@ static public List<Method> getMethods(Class c, int arity, String name, boolean g
 	return methods;
 }
 
-// Interface with @FunctionalInterface annotation
-// but exclude Runnable, Callable, Comparator because Clojure IFn/AFn already
-// extend those so IFns don't need adapting for those
+// Adaptable functional nterface has @FunctionalInterface annotation
+// but excludes Runnable, Callable, Comparator because Clojure IFn/AFn already
+// extend those, so no adapting needed
 public static boolean isAdaptableFunctionalInterface(Class c){
 	return c != null &&
 			c.isInterface() &&
@@ -554,18 +554,19 @@ public static boolean isAdaptableFunctionalInterface(Class c){
 			c != Runnable.class && c != Callable.class && c != Comparator.class;
 }
 
-	// These return type coercions match the coercions done in FnAdapters for compiled adapters
+// These return type coercions match the coercions done in FnAdapters for compiled adapters
 private static Object dynamicAdapterReturn(Object ret, Class targetType) {
 	switch(targetType.getName()) {
 		case "boolean": return RT.booleanCast(ret);
 		case "int": return RT.intCast(ret);
 		case "long": return RT.longCast(ret);
+		case "float": return RT.floatCast(ret);
 		case "double": return RT.doubleCast(ret);
 		default: return ret;
 	}
 }
 
-	// Dynamically adapt fn to targetFnInterface using proxy
+// Dynamically adapt fn to targetFnInterface using proxy
 private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
 	return Proxy.newProxyInstance(
 			(ClassLoader)Compiler.LOADER.get(),
@@ -586,7 +587,7 @@ private static Object dynamicAdapt(Class targetFnInterface, java.lang.reflect.Me
 			(ClassLoader)Compiler.LOADER.get(),
 			new Class[] { targetFnInterface },
 			(proxy,method,methodArgs)-> {
-				Object ret = null;
+				Object ret;
 				if(Modifier.isStatic(method.getModifiers())) {
 					ret = srcMethod.invoke(null, methodArgs);
 				} else {

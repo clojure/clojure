@@ -1376,6 +1376,7 @@ private static Class decodeToClass(char c) {
 		case 'D': return Double.TYPE;
 		case 'B': return Boolean.TYPE;
 		case 'I': return Integer.TYPE;
+		case 'F': return Float.TYPE;
 		default: return Object.class;
 	}
 }
@@ -1398,6 +1399,7 @@ private static char encodeAdapterReturn(Class c) {
 		case "long": return 'L';
 		case "double": return 'D';
 		case "int": return 'I';      // narrowing conversion from IFn$...L
+		case "float": return 'F';    // narrowing conversion from IFn$...D
 		case "boolean": return 'B';  // Clojure boolean logic from IFn$...O
 		default: return 'O';
 	}
