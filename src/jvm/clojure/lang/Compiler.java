@@ -7337,7 +7337,7 @@ public static Object macroexpand1(Object x) {
 					if(RT.length(form) < 2)
 						throw new IllegalArgumentException(
 								"Malformed member expression, expecting (.member target ...)");
-					Symbol meth = (sname.charAt(0) == '.') ? Symbol.intern(sname.substring(1)) : Symbol.intern(sname);
+					Symbol meth = (Symbol) preserveArgTags(sym, ((sname.charAt(0) == '.') ? Symbol.intern(sname.substring(1)) : Symbol.intern(sname)));
 					Symbol maybeQualifiedHint = namesQualifiedInstanceMember(sym) ? Symbol.intern(sym.ns.substring(1)) : null;
 					Object target = RT.second(form);
 					if(HostExpr.maybeClass(target, false) != null)
