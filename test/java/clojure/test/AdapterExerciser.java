@@ -3,27 +3,6 @@ package clojure.test;
 public class AdapterExerciser {
 
     @FunctionalInterface
-    public interface L {
-        public long RetL();
-    }
-    @FunctionalInterface
-    public interface I {
-        public int RetI();
-    }
-    @FunctionalInterface
-    public interface B {
-        public boolean RetB();
-    }
-    @FunctionalInterface
-    public interface D {
-        public double RetD();
-    }
-    @FunctionalInterface
-    public interface O {
-        public AdapterExerciser RetO();
-    }
-
-    @FunctionalInterface
     public interface LL {
         public long takesLRetL(long a);
     }
@@ -83,7 +62,18 @@ public class AdapterExerciser {
     public interface OO {
         public AdapterExerciser takesORetO(AdapterExerciser a);
     }
-
+    @FunctionalInterface
+    public interface LF {
+        public float takesLRetF(long a);
+    }
+    @FunctionalInterface
+    public interface DF {
+        public float takesDRetF(double a);
+    }
+    @FunctionalInterface
+    public interface OF {
+        public float takesORetF(AdapterExerciser a);
+    }
     @FunctionalInterface
     public interface LLL {
         public long takesLLRetL(long a, long b);
@@ -155,6 +145,42 @@ public class AdapterExerciser {
     @FunctionalInterface
     public interface DOI {
         public int takesDORetI(double a, AdapterExerciser b);
+    }
+    @FunctionalInterface
+    public interface LLF {
+        public float takesLLRetF(long a, long b);
+    }
+    @FunctionalInterface
+    public interface LOF {
+        public float takesLORetF(long a, AdapterExerciser b);
+    }
+    @FunctionalInterface
+    public interface OLF {
+        public float takesOLRetF(AdapterExerciser a, long b);
+    }
+    @FunctionalInterface
+    public interface DDF {
+        public float takesDDRetF(double a, double b);
+    }
+    @FunctionalInterface
+    public interface LDF {
+        public float takesLDRetF(long a, double b);
+    }
+    @FunctionalInterface
+    public interface DLF {
+        public float takesDLRetF(double a, long b);
+    }
+    @FunctionalInterface
+    public interface OOF {
+        public float takesOORetF(AdapterExerciser a, AdapterExerciser b);
+    }
+    @FunctionalInterface
+    public interface ODF {
+        public float takesODRetF(AdapterExerciser a, double b);
+    }
+    @FunctionalInterface
+    public interface DOF {
+        public float takesDORetF(double a, AdapterExerciser b);
     }
     @FunctionalInterface
     public interface LLB {
@@ -330,11 +356,6 @@ public class AdapterExerciser {
         public boolean takesOOOOOOOOOORetB(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f, AdapterExerciser g, AdapterExerciser h, AdapterExerciser i, AdapterExerciser j);
     }
 
-    public int methodL(L a)                     { return 1; }
-    public int methodI(I a)                     { return 2; }
-    public int methodB(B a)                     { return 3; }
-    public int methodD(D a)                     { return 4; }
-    public int methodO(O a)                     { return 5; }
     public int methodLL(LL a)                   { return 6; }
     public int methodDL(DL a)                   { return 7; }
     public int methodOL(OL a)                   { return 8; }
@@ -350,6 +371,9 @@ public class AdapterExerciser {
     public int methodLO(LO a)                   { return 18; }
     public int methodDO(DO a)                   { return 19; }
     public int methodOO(OO a)                   { return 20; }
+    public int methodLF(LF a)                   { return 18; }
+    public int methodDF(DF a)                   { return 19; }
+    public int methodOF(OF a)                   { return 20; }
     public int methodLLL(LLL a)                 { return 21; }
     public int methodLOL(LOL a)                 { return 22; }
     public int methodOLL(OLL a)                 { return 23; }
@@ -359,6 +383,15 @@ public class AdapterExerciser {
     public int methodOOL(OOL a)                 { return 27; }
     public int methodODL(ODL a)                 { return 28; }
     public int methodDOL(DOL a)                 { return 29; }
+    public int methodLLF(LLF a)                 { return 211; }
+    public int methodLOF(LOF a)                 { return 221; }
+    public int methodOLF(OLF a)                 { return 231; }
+    public int methodDDF(DDF a)                 { return 241; }
+    public int methodLDF(LDF a)                 { return 251; }
+    public int methodDLF(DLF a)                 { return 261; }
+    public int methodOOF(OOF a)                 { return 271; }
+    public int methodODF(ODF a)                 { return 281; }
+    public int methodDOF(DOF a)                 { return 291; }
     public int methodLLI(LLI a)                 { return 30; }
     public int methodLOI(LOI a)                 { return 31; }
     public int methodOLI(OLI a)                 { return 32; }

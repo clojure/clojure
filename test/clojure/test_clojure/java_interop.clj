@@ -24,17 +24,20 @@
            (java.util.concurrent.atomic AtomicLong AtomicInteger)
            (clojure.test FIConstructor FIStatic
                          AdapterExerciser AdapterExerciser$LL AdapterExerciser$DL AdapterExerciser$OL AdapterExerciser$LI AdapterExerciser$DI
+                         AdapterExerciser$LF AdapterExerciser$DF AdapterExerciser$OF
                          AdapterExerciser$OI AdapterExerciser$LB AdapterExerciser$DB AdapterExerciser$OB AdapterExerciser$OD AdapterExerciser$LD
-                         AdapterExerciser$DD AdapterExerciser$LO AdapterExerciser$DO AdapterExerciser$OO AdapterExerciser$LLL AdapterExerciser$LOL
-                         AdapterExerciser$OLL AdapterExerciser$DDL AdapterExerciser$LDL AdapterExerciser$DLL AdapterExerciser$OOL AdapterExerciser$ODL
-                         AdapterExerciser$DOL AdapterExerciser$LLI AdapterExerciser$LOI AdapterExerciser$OLI AdapterExerciser$DDI AdapterExerciser$LDI
+                         AdapterExerciser$DD AdapterExerciser$LO AdapterExerciser$DO AdapterExerciser$OO
+                         AdapterExerciser$LLL AdapterExerciser$LOL AdapterExerciser$OLL AdapterExerciser$DDL
+                         AdapterExerciser$LDL AdapterExerciser$DLL AdapterExerciser$OOL AdapterExerciser$ODL
+                         AdapterExerciser$DOL AdapterExerciser$LLF AdapterExerciser$LOF AdapterExerciser$OLF AdapterExerciser$DDF AdapterExerciser$LDF
+                         AdapterExerciser$DLF AdapterExerciser$OOF AdapterExerciser$ODF AdapterExerciser$DOF
+                         AdapterExerciser$LLI AdapterExerciser$LOI AdapterExerciser$OLI AdapterExerciser$DDI AdapterExerciser$LDI
                          AdapterExerciser$DLI AdapterExerciser$OOI AdapterExerciser$ODI AdapterExerciser$DOI AdapterExerciser$LLB AdapterExerciser$LOB
                          AdapterExerciser$OLB AdapterExerciser$DDB AdapterExerciser$LDB AdapterExerciser$DLB AdapterExerciser$OOB AdapterExerciser$ODB
                          AdapterExerciser$DOB AdapterExerciser$LLD AdapterExerciser$LOD AdapterExerciser$OLD AdapterExerciser$DDD AdapterExerciser$LDD
                          AdapterExerciser$DLD AdapterExerciser$OOD AdapterExerciser$ODD AdapterExerciser$DOD AdapterExerciser$LLO AdapterExerciser$LOO
                          AdapterExerciser$OLO AdapterExerciser$DDO AdapterExerciser$LDO AdapterExerciser$DLO
                          AdapterExerciser$OOO AdapterExerciser$ODO AdapterExerciser$DOO
-                         AdapterExerciser$L AdapterExerciser$I AdapterExerciser$B AdapterExerciser$D AdapterExerciser$O
                          AdapterExerciser$OOOO AdapterExerciser$OOOOO AdapterExerciser$OOOOOO AdapterExerciser$OOOOOOO
                          AdapterExerciser$OOOOOOOO AdapterExerciser$OOOOOOOOO AdapterExerciser$OOOOOOOOOO AdapterExerciser$OOOOOOOOOOO
                          AdapterExerciser$OOOB AdapterExerciser$OOOOB AdapterExerciser$OOOOOB AdapterExerciser$OOOOOOB
@@ -793,11 +796,6 @@
 (deftest test-all-fi-adapters-in-let
 
   (let [^AdapterExerciser exerciser (AdapterExerciser.)
-        ^AdapterExerciser$L Ladapter (fn [] (long 1))
-        ^AdapterExerciser$I Iadapter (fn [] 1)
-        ^AdapterExerciser$B Badapter (fn [] false)
-        ^AdapterExerciser$D Dadapter (fn [] (double 1))
-        ^AdapterExerciser$O Oadapter (fn [] exerciser)
         ^AdapterExerciser$LL LLadapter (fn [^long a] (long 1))
         ^AdapterExerciser$DL DLadapter (fn [^double a] (long 1))
         ^AdapterExerciser$OL OLadapter (fn [^AdapterExerciser a] (long 1))
@@ -813,6 +811,9 @@
         ^AdapterExerciser$LO LOadapter (fn [^long a] exerciser)
         ^AdapterExerciser$DO DOadapter (fn [^double a] exerciser)
         ^AdapterExerciser$OO OOadapter (fn [^AdapterExerciser a] exerciser)
+        ^AdapterExerciser$LF LFadapter (fn [^long a] 1)
+        ^AdapterExerciser$DF DFadapter (fn [^double a] (float 1))
+        ^AdapterExerciser$OF OFadapter (fn [^AdapterExerciser a] (float 1))
         ^AdapterExerciser$LLL LLLadapter (fn [^long a ^long a] (long 1))
         ^AdapterExerciser$LOL LOLadapter (fn [^long a ^AdapterExerciser b] (long 1))
         ^AdapterExerciser$OLL OLLadapter (fn [^AdapterExerciser a ^long b] (long 1))
@@ -831,6 +832,15 @@
         ^AdapterExerciser$OOI OOIadapter (fn [^AdapterExerciser a ^AdapterExerciser b] 1)
         ^AdapterExerciser$ODI ODIadapter (fn [^AdapterExerciser a ^double b] 1)
         ^AdapterExerciser$DOI DOIadapter (fn [^double a ^AdapterExerciser b] 1)
+        ^AdapterExerciser$LLF LLFadapter (fn [^long a ^long a] (float 1))
+        ^AdapterExerciser$LOF LOFadapter (fn [^long a ^AdapterExerciser b] (float 1))
+        ^AdapterExerciser$OLF OLFadapter (fn [^AdapterExerciser a ^long b] (float 1))
+        ^AdapterExerciser$DDF DDFadapter (fn [^double a ^double b] (float 1))
+        ^AdapterExerciser$LDF LDFadapter (fn [^long a ^double b] (float 1))
+        ^AdapterExerciser$DLF DLFadapter (fn [^double d ^long b] (float 1))
+        ^AdapterExerciser$OOF OOFadapter (fn [^AdapterExerciser a ^AdapterExerciser b] (float 1))
+        ^AdapterExerciser$ODF ODFadapter (fn [^AdapterExerciser a ^double b] (float 1))
+        ^AdapterExerciser$DOF DOFadapter (fn [^double a ^AdapterExerciser b] (float 1))
         ^AdapterExerciser$LLB LLBadapter (fn [^long a ^long a] false)
         ^AdapterExerciser$LOB LOBadapter (fn [^long a ^AdapterExerciser b] false)
         ^AdapterExerciser$OLB OLBadapter (fn [^AdapterExerciser a ^long b] false)
@@ -874,11 +884,6 @@
         ^AdapterExerciser$OOOOOOOOB OOOOOOOOBadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g ^AdapterExerciser h] false)
         ^AdapterExerciser$OOOOOOOOOB OOOOOOOOOBadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g ^AdapterExerciser h ^AdapterExerciser i] false)
         ^AdapterExerciser$OOOOOOOOOOB OOOOOOOOOOBadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g ^AdapterExerciser h ^AdapterExerciser i ^AdapterExerciser j] false)]
-    (is (= (.RetL Ladapter) (long 1)))
-    (is (= (.RetI Iadapter) 1))
-    (is (= (.RetB Badapter) false))
-    (is (= (.RetD Dadapter) (double 1)))
-    (is (= (.RetO Oadapter) exerciser))
     (is (= (.takesLRetL LLadapter (long 1)) 1))
     (is (= (.takesDRetL DLadapter (double 1)) 1))
     (is (= (.takesORetL OLadapter exerciser) 1))
@@ -894,6 +899,9 @@
     (is (= (.takesLRetO LOadapter (long 1)) exerciser))
     (is (= (.takesDRetO DOadapter (double 1)) exerciser))
     (is (= (.takesORetO OOadapter exerciser) exerciser))
+    (is (= (.takesLRetF LFadapter (long 1)) (float 1)))
+    (is (= (.takesDRetF DFadapter (double 1)) (float 1)))
+    (is (= (.takesORetF OFadapter exerciser) (float 1)))
     (is (= (.takesLLRetL LLLadapter (long 1) (long 1)) (long 1)))
     (is (= (.takesLORetL LOLadapter (long 1) exerciser) (long 1)))
     (is (= (.takesOLRetL OLLadapter exerciser (long 1)) (long 1)))
@@ -912,6 +920,15 @@
     (is (= (.takesOORetI OOIadapter exerciser exerciser) 1))
     (is (= (.takesODRetI ODIadapter exerciser (double 1)) 1))
     (is (= (.takesDORetI DOIadapter (double 1) exerciser) 1))
+    (is (= (.takesLLRetF LLFadapter (long 1) (long 1)) (float 1)))
+    (is (= (.takesLORetF LOFadapter (long 1) exerciser) (float 1)))
+    (is (= (.takesOLRetF OLFadapter exerciser (long 1)) (float 1)))
+    (is (= (.takesDDRetF DDFadapter (double 1) (double 1)) (float 1)))
+    (is (= (.takesLDRetF LDFadapter (long 1) (double 1)) (float 1)))
+    (is (= (.takesDLRetF DLFadapter (double 1) (long 1)) (float 1)))
+    (is (= (.takesOORetF OOFadapter exerciser exerciser) (float 1)))
+    (is (= (.takesODRetF ODFadapter exerciser (double 1)) (float 1)))
+    (is (= (.takesDORetF DOFadapter (double 1) exerciser) (float 1)))
     (is (= (.takesLLRetB LLBadapter (long 1) (long 1)) false))
     (is (= (.takesLORetB LOBadapter (long 1) exerciser) false))
     (is (= (.takesOLRetB OLBadapter exerciser (long 1)) false))
@@ -958,16 +975,6 @@
 
 (deftest functional-adapters-in-def
   (def exerciser (AdapterExerciser.))
-  (def Ladapter (fn [] (long 1)))
-  (is (= (.methodL ^AdapterExerciser exerciser Ladapter) 1))
-  (def Iadapter (fn [] 1))
-  (is (= (.methodI ^AdapterExerciser exerciser Iadapter) 2))
-  (def Badapter (fn [] false))
-  (is (= (.methodB ^AdapterExerciser exerciser Badapter) 3))
-  (def Dadapter (fn [] (double 1)))
-  (is (= (.methodD ^AdapterExerciser exerciser Dadapter) 4))
-  (def Oadapter (fn [] exerciser))
-  (is (= (.methodO ^AdapterExerciser exerciser Oadapter) 5))
   (def LLadapter (fn [^long a] (long 1)))
   (is (= (.methodLL ^AdapterExerciser exerciser LLadapter) 6))
   (def DLadapter (fn [^double a] (long 1)))
@@ -998,6 +1005,12 @@
   (is (= (.methodDO ^AdapterExerciser exerciser DOadapter) 19))
   (def OOadapter (fn [^AdapterExerciser a] exerciser))
   (is (= (.methodOO ^AdapterExerciser exerciser OOadapter) 20))
+  (def LFadapter (fn [^long a] 1))
+  (is (= (.methodLF ^AdapterExerciser exerciser LFadapter) 18))
+  (def DFadapter (fn [^double a] 2))
+  (is (= (.methodDF ^AdapterExerciser exerciser DFadapter) 19))
+  (def OFadapter (fn [^AdapterExerciser a] 3))
+  (is (= (.methodOF ^AdapterExerciser exerciser OFadapter) 20))
   (def LLLadapter (fn [^long a ^long a] (long 1)))
   (is (= (.methodLLL ^AdapterExerciser exerciser LLLadapter) 21))
   (def LOLadapter (fn [^long a ^AdapterExerciser b] (long 1)))
@@ -1016,6 +1029,24 @@
   (is (= (.methodODL ^AdapterExerciser exerciser ODLadapter) 28))
   (def DOLadapter (fn [^double a ^AdapterExerciser b] (long 1)))
   (is (= (.methodDOL ^AdapterExerciser exerciser DOLadapter) 29))
+  (def LLfadapter (fn [^long a ^long a] (float 1)))
+  (is (= (.methodLLF ^AdapterExerciser exerciser LLLadapter) 211))
+  (def LOfadapter (fn [^long a ^AdapterExerciser b] (float 1)))
+  (is (= (.methodLOF ^AdapterExerciser exerciser LOLadapter) 221))
+  (def OLfadapter (fn [^AdapterExerciser a ^long b] (float 1)))
+  (is (= (.methodOLF ^AdapterExerciser exerciser OLLadapter) 231))
+  (def DDfadapter (fn [^double a ^double b] (float 1)))
+  (is (= (.methodDDF ^AdapterExerciser exerciser DDLadapter) 241))
+  (def LDfadapter (fn [^long a ^double b] (float 1)))
+  (is (= (.methodLDF ^AdapterExerciser exerciser LDLadapter) 251))
+  (def DLfadapter (fn [^double d ^long b] (float 1)))
+  (is (= (.methodDLF ^AdapterExerciser exerciser DLLadapter) 261))
+  (def OOfadapter (fn [^AdapterExerciser a ^AdapterExerciser b] (float 1)))
+  (is (= (.methodOOF ^AdapterExerciser exerciser OOLadapter) 271))
+  (def ODfadapter (fn [^AdapterExerciser a ^double b] (float 1)))
+  (is (= (.methodODF ^AdapterExerciser exerciser ODLadapter) 281))
+  (def DOfadapter (fn [^double a ^AdapterExerciser b] (float 1)))
+  (is (= (.methodDOF ^AdapterExerciser exerciser DOLadapter) 291))
   (def LLIadapter (fn [^long a ^long a] 1))
   (is (= (.methodLLI ^AdapterExerciser exerciser LLIadapter) 30))
   (def LOIadapter (fn [^long a ^AdapterExerciser b] 1))
@@ -1123,16 +1154,6 @@
 
 (deftest functional-adapters-in-def-reflected
   (def exerciser (AdapterExerciser.))
-  (def Ladapter (fn [] (long 1)))
-  (is (= (.methodL exerciser Ladapter) 1))
-  (def Iadapter (fn [] 1))
-  (is (= (.methodI exerciser Iadapter) 2))
-  (def Badapter (fn [] false))
-  (is (= (.methodB exerciser Badapter) 3))
-  (def Dadapter (fn [] (double 1)))
-  (is (= (.methodD exerciser Dadapter) 4))
-  (def Oadapter (fn [] exerciser))
-  (is (= (.methodO exerciser Oadapter) 5))
   (def LLadapter (fn [^long a] (long 1)))
   (is (= (.methodLL exerciser LLadapter) 6))
   (def DLadapter (fn [^double a] (long 1)))
@@ -1201,6 +1222,24 @@
   (is (= (.methodDOI exerciser DOIadapter) 38))
   (def LLBadapter (fn [^long a ^long a] false))
   (is (= (.methodLLB exerciser LLBadapter) 39))
+  (def LLfadapter (fn [^long a ^long a] (float 1)))
+  (is (= (.methodLLF exerciser LLLadapter) 211))
+  (def LOfadapter (fn [^long a ^AdapterExerciser b] (float 1)))
+  (is (= (.methodLOF exerciser LOLadapter) 221))
+  (def OLfadapter (fn [^AdapterExerciser a ^long b] (float 1)))
+  (is (= (.methodOLF exerciser OLLadapter) 231))
+  (def DDfadapter (fn [^double a ^double b] (float 1)))
+  (is (= (.methodDDF exerciser DDLadapter) 241))
+  (def LDfadapter (fn [^long a ^double b] (float 1)))
+  (is (= (.methodLDF exerciser LDLadapter) 251))
+  (def DLfadapter (fn [^double d ^long b] (float 1)))
+  (is (= (.methodDLF exerciser DLLadapter) 261))
+  (def OOfadapter (fn [^AdapterExerciser a ^AdapterExerciser b] (float 1)))
+  (is (= (.methodOOF exerciser OOLadapter) 271))
+  (def ODfadapter (fn [^AdapterExerciser a ^double b] (float 1)))
+  (is (= (.methodODF exerciser ODLadapter) 281))
+  (def DOfadapter (fn [^double a ^AdapterExerciser b] (float 1)))
+  (is (= (.methodDOF exerciser DOLadapter) 291))
   (def LOBadapter (fn [^long a ^AdapterExerciser b] false))
   (is (= (.methodLOB exerciser LOBadapter) 40))
   (def OLBadapter (fn [^AdapterExerciser a ^long b] false))

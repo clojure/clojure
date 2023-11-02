@@ -61,6 +61,15 @@ public class FnAdapters {
         }
     }")
 
+(def adaptF-format
+  "    public static float adapt%sF(Object f0%s) {
+        if(f0 instanceof IFn) {
+            return RT.FloatCast(((IFn)f0).invoke(%s));
+        } else {
+            throw notIFnError(f0);
+        }
+    }")
+
 (def adaptL-format
   "    public static long adapt%sL(Object f0%s) {
         if(f0 instanceof IFn.%sL) {
@@ -116,7 +125,8 @@ public class FnAdapters {
       "L" (format adaptL-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
       "I" (format adaptI-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
       "D" (format adaptD-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
-      "B" (format adaptB-format arg-str fn-vars fn-vars-sans-type))))
+      "B" (format adaptB-format arg-str fn-vars fn-vars-sans-type)
+      "F" (format adaptF-format arg-str fn-vars fn-vars-sans-type))))
 
 (defn sigs [args return-types]
   (let [fun-sig-reducer (fn [res ret]
@@ -125,9 +135,8 @@ public class FnAdapters {
     (reduce fun-sig-reducer [] return-types)))
 
 (defn gen-sigs []
-  (let [zero-arity (sigs [""] ["L" "I" "B" "D" "O"])
-        single-arity (sigs ["L" "D" "O"] ["L" "I" "B" "D" "O"])
-        two-arity (sigs ["LL" "LO" "OL" "DD" "LD" "DL" "OO" "OD" "DO"] ["L" "I" "B" "D" "O"])
+  (let [single-arity (sigs ["L" "D" "O"] ["L" "I" "B" "D" "O" "F"])
+        two-arity (sigs ["LL" "LO" "OL" "DD" "LD" "DL" "OO" "OD" "DO"] ["L" "I" "B" "D" "O" "F"])
         three-arity (sigs ["OOO"] ["B" "O"])
         four-arity  (sigs ["OOOO"] ["B" "O"])
         five-arity  (sigs ["OOOOO"] ["B" "O"])
@@ -136,7 +145,7 @@ public class FnAdapters {
         eight-arity (sigs ["OOOOOOOO"] ["B" "O"])
         nine-arity  (sigs ["OOOOOOOOO"] ["B" "O"])
         ten-arity   (sigs ["OOOOOOOOOO"] ["B" "O"])]
-    (mapcat seq [zero-arity single-arity two-arity three-arity four-arity five-arity six-arity seven-arity eight-arity nine-arity ten-arity])))
+    (mapcat seq [single-arity two-arity three-arity four-arity five-arity six-arity seven-arity eight-arity nine-arity ten-arity])))
 
 (defn gen-adapters []
   (let [sb (StringBuilder. ^String header)

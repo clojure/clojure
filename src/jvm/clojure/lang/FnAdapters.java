@@ -16,52 +16,6 @@ public class FnAdapters {
         return new RuntimeException("Expected function, but found " + (f == null ? "null" : f.getClass().getName()));
     }
 
-    public static long adaptL(Object f0) {
-        if(f0 instanceof IFn.L) {
-            return ((IFn.L)f0).invokePrim();
-        } else if(f0 instanceof IFn) {
-            return RT.longCast(((IFn)f0).invoke());
-        } else {
-            throw notIFnError(f0);
-        }
-    }
-
-    public static int adaptI(Object f0) {
-        if(f0 instanceof IFn.L) {
-            return RT.intCast(((IFn.L)f0).invokePrim());
-        } else if(f0 instanceof IFn) {
-            return RT.intCast(((IFn)f0).invoke());
-        } else {
-            throw notIFnError(f0);
-        }
-    }
-
-    public static boolean adaptB(Object f0) {
-        if(f0 instanceof IFn) {
-            return RT.booleanCast(((IFn)f0).invoke());
-        } else {
-            throw notIFnError(f0);
-        }
-    }
-
-    public static double adaptD(Object f0) {
-        if(f0 instanceof IFn.D) {
-            return ((IFn.D)f0).invokePrim();
-        } else if(f0 instanceof IFn) {
-            return RT.doubleCast(((IFn)f0).invoke());
-        } else {
-            throw notIFnError(f0);
-        }
-    }
-
-    public static Object adaptO(Object f0) {
-        if(f0 instanceof IFn) {
-            return ((IFn)f0).invoke();
-        } else {
-            throw notIFnError(f0);
-        }
-    }
-
     public static long adaptLL(Object f0, long a) {
         if(f0 instanceof IFn.LL) {
             return ((IFn.LL)f0).invokePrim(a);
@@ -123,9 +77,7 @@ public class FnAdapters {
     }
 
     public static boolean adaptLB(Object f0, long a) {
-        if(f0 instanceof IFn.LO) {
-            return RT.booleanCast(((IFn.LO)f0).invokePrim(a));
-        } else if(f0 instanceof IFn) {
+        if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(a));
         } else {
             throw notIFnError(f0);
@@ -133,9 +85,7 @@ public class FnAdapters {
     }
 
     public static boolean adaptDB(Object f0, double a) {
-        if(f0 instanceof IFn.DO) {
-            return RT.booleanCast(((IFn.DO)f0).invokePrim(a));
-        } else if(f0 instanceof IFn) {
+        if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(a));
         } else {
             throw notIFnError(f0);
@@ -203,6 +153,30 @@ public class FnAdapters {
     public static Object adaptOO(Object f0, Object a) {
         if(f0 instanceof IFn) {
             return ((IFn)f0).invoke(a);
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptLF(Object f0, long a) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a));
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptDF(Object f0, double a) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a));
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptOF(Object f0, Object a) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a));
         } else {
             throw notIFnError(f0);
         }
@@ -389,9 +363,7 @@ public class FnAdapters {
     }
 
     public static boolean adaptLLB(Object f0, long a, long b) {
-        if(f0 instanceof IFn.LLO) {
-            return RT.booleanCast(((IFn.LLO)f0).invokePrim(a, b));
-        } else if(f0 instanceof IFn) {
+        if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(a, b));
         } else {
             throw notIFnError(f0);
@@ -399,9 +371,7 @@ public class FnAdapters {
     }
 
     public static boolean adaptLOB(Object f0, long a, Object b) {
-        if(f0 instanceof IFn.LOO) {
-            return RT.booleanCast(((IFn.LOO)f0).invokePrim(a, b));
-        } else if(f0 instanceof IFn) {
+        if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(a, b));
         } else {
             throw notIFnError(f0);
@@ -409,9 +379,7 @@ public class FnAdapters {
     }
 
     public static boolean adaptOLB(Object f0, Object a, long b) {
-        if(f0 instanceof IFn.OLO) {
-            return RT.booleanCast(((IFn.OLO)f0).invokePrim(a, b));
-        } else if(f0 instanceof IFn) {
+        if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(a, b));
         } else {
             throw notIFnError(f0);
@@ -419,9 +387,7 @@ public class FnAdapters {
     }
 
     public static boolean adaptDDB(Object f0, double a, double b) {
-        if(f0 instanceof IFn.DDO) {
-            return RT.booleanCast(((IFn.DDO)f0).invokePrim(a, b));
-        } else if(f0 instanceof IFn) {
+        if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(a, b));
         } else {
             throw notIFnError(f0);
@@ -429,9 +395,7 @@ public class FnAdapters {
     }
 
     public static boolean adaptLDB(Object f0, long a, double b) {
-        if(f0 instanceof IFn.LDO) {
-            return RT.booleanCast(((IFn.LDO)f0).invokePrim(a, b));
-        } else if(f0 instanceof IFn) {
+        if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(a, b));
         } else {
             throw notIFnError(f0);
@@ -439,9 +403,7 @@ public class FnAdapters {
     }
 
     public static boolean adaptDLB(Object f0, double a, long b) {
-        if(f0 instanceof IFn.DLO) {
-            return RT.booleanCast(((IFn.DLO)f0).invokePrim(a, b));
-        } else if(f0 instanceof IFn) {
+        if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(a, b));
         } else {
             throw notIFnError(f0);
@@ -457,9 +419,7 @@ public class FnAdapters {
     }
 
     public static boolean adaptODB(Object f0, Object a, double b) {
-        if(f0 instanceof IFn.ODO) {
-            return RT.booleanCast(((IFn.ODO)f0).invokePrim(a, b));
-        } else if(f0 instanceof IFn) {
+        if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(a, b));
         } else {
             throw notIFnError(f0);
@@ -467,9 +427,7 @@ public class FnAdapters {
     }
 
     public static boolean adaptDOB(Object f0, double a, Object b) {
-        if(f0 instanceof IFn.DOO) {
-            return RT.booleanCast(((IFn.DOO)f0).invokePrim(a, b));
-        } else if(f0 instanceof IFn) {
+        if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(a, b));
         } else {
             throw notIFnError(f0);
@@ -649,6 +607,78 @@ public class FnAdapters {
             return ((IFn.DOO)f0).invokePrim(a, b);
         } else if(f0 instanceof IFn) {
             return ((IFn)f0).invoke(a, b);
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptLLF(Object f0, long a, long b) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a, b));
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptLOF(Object f0, long a, Object b) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a, b));
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptOLF(Object f0, Object a, long b) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a, b));
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptDDF(Object f0, double a, double b) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a, b));
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptLDF(Object f0, long a, double b) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a, b));
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptDLF(Object f0, double a, long b) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a, b));
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptOOF(Object f0, Object a, Object b) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a, b));
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptODF(Object f0, Object a, double b) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a, b));
+        } else {
+            throw notIFnError(f0);
+        }
+    }
+
+    public static float adaptDOF(Object f0, double a, Object b) {
+        if(f0 instanceof IFn) {
+            return RT.floatCast(((IFn)f0).invoke(a, b));
         } else {
             throw notIFnError(f0);
         }
