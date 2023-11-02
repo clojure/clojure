@@ -1126,7 +1126,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	public static boolean looksLikeArrayType(Symbol sym) {
-		return sym != null && sym.name.endsWith("*") && !sym.name.startsWith("*") && sym.name.contains("-");
+		return sym != null && sym.name.endsWith("*") && !sym.name.startsWith("*") && sym.name.contains("-*");
 	}
 
 	public static Class maybeArrayClass(Symbol tag) {
