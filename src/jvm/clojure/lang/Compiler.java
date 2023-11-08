@@ -4221,7 +4221,7 @@ static public abstract class MethodValueExpr extends FnExpr
 	public Object eval(){
 		String name = buildThunkName();
 		ISeq form = buildThunk(name);
-		Expr retExpr = analyzeSeq(null, form, name);
+		Expr retExpr = analyzeSeq(C.EVAL, form, name);
 		return retExpr.eval();
 	}
 
@@ -4244,10 +4244,15 @@ static public abstract class MethodValueExpr extends FnExpr
 				buildThunkBody(buildThunkParams()));
 	}
 
-	abstract IPersistentVector prepParams();
+	Symbol instanceParam() {
+		return null;
+	}
 
 	IPersistentVector buildThunkParams() {
-		IPersistentVector params = prepParams();
+		Symbol seedParam = instanceParam();
+		IPersistentVector params = PersistentVector.EMPTY;
+
+		if(seedParam != null) params = params.cons(seedParam);
 
 		// [^T arg1 ^U arg2]
 		for(Class klass : target.getParameterTypes())
@@ -4299,14 +4304,13 @@ static public abstract class MethodValueExpr extends FnExpr
 	}
 
 	abstract ISeq buildThunkDispatch(IPersistentVector params);
-	abstract Class getReturnType();
 
 	public boolean hasJavaClass() {
 		return true;
 	}
 
 	public Class getJavaClass() {
-		return getReturnType();
+		return null;
 	}
 }
 
@@ -4319,11 +4323,6 @@ static public class ConstructorValueExpr extends MethodValueExpr
 	@Override
 	Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig) {
 		return findMatchingTarget(c.getConstructors(), c, klass.getName(), sig);
-	}
-
-	@Override
-	IPersistentVector prepParams() {
-		return PersistentVector.EMPTY;
 	}
 
 	@Override
@@ -4340,7 +4339,7 @@ static public class ConstructorValueExpr extends MethodValueExpr
 	}
 
 	@Override
-	Class getReturnType() {
+	public Class getJavaClass() {
 		return klass;
 	}
 }
@@ -4354,11 +4353,6 @@ static public class StaticMethodValueExpr extends MethodValueExpr
 	@Override
 	Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig) {
 		return findMatchingTarget(c.getMethods(), c, targetSymbol.name, sig);
-	}
-
-	@Override
-	IPersistentVector prepParams() {
-		return PersistentVector.EMPTY;
 	}
 
 	@Override
@@ -4383,7 +4377,7 @@ static public class StaticMethodValueExpr extends MethodValueExpr
 	}
 
 	@Override
-	Class getReturnType() {
+	public Class getJavaClass() {
 		return ((java.lang.reflect.Method)this.target).getReturnType();
 	}
 }
@@ -4400,10 +4394,10 @@ static public class InstanceMethodValueExpr extends MethodValueExpr
 	}
 
 	@Override
-	IPersistentVector prepParams() {
+	Symbol instanceParam() {
 		// seed params with this as first binding
 		IPersistentMap m = PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName()));
-		return PersistentVector.EMPTY.cons(Symbol.intern("this" + RT.nextID()).withMeta(m));
+		return (Symbol) Symbol.intern("this" + RT.nextID()).withMeta(m);
 	}
 
 	@Override
@@ -4428,7 +4422,7 @@ static public class InstanceMethodValueExpr extends MethodValueExpr
 	}
 
 	@Override
-	Class getReturnType() {
+	public Class getJavaClass() {
 		return ((java.lang.reflect.Method)this.target).getReturnType();
 	}
 }
