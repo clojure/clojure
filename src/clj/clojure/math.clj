@@ -514,7 +514,7 @@
   If d is ##NaN => ##NaN
   If d is ##Inf or ##-Inf => ##Inf or ##-Inf respectively
   If d is zero => zero of same sign as d
-  See: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#nextDown-double-"
+  See: https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#scalb-double-int-"
    :inline-arities #{2}
    :inline (fn [d scaleFactor] `(Math/scalb (double ~d) (int ~scaleFactor)))
    :added "1.11"}
