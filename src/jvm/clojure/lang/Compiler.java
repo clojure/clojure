@@ -4276,6 +4276,9 @@ static public abstract class MethodValueExpr extends FnExpr
 		this.declaredSignature = resolveSignatureClasses(sig);
 		this.targetSymbol = targetSymbol;
 		this.target = matchTarget(c, targetSymbol, sig);
+
+		if(target.isVarArgs())
+			throw new UnsupportedOperationException("Varargs not supported for method thunks." + targetSymbol);
 	}
 
 	abstract Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig);
@@ -9576,10 +9579,8 @@ private static Executable findMatchingTarget(Executable[] targets, Class c, Stri
 		throw new IllegalArgumentException("Could not resolve " + targetName + " from arg-tags in class " + c.getName());
 	if(filteredTargets.size() > 1)
 		throw new IllegalArgumentException("Ambiguous arg-tags for " + targetName + " in class " + c.getName());
-	Executable target = filteredTargets.get(0);
-	if(target.isVarArgs())
-		throw new UnsupportedOperationException("Varargs not supported for method thunks, got " + targetName);
-	return target;
+
+	return filteredTargets.get(0);
 }
 
 private static List<Class> resolveSignatureClasses(IPersistentVector sig) {
