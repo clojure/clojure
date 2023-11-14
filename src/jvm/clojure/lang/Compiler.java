@@ -4210,6 +4210,9 @@ static public abstract class MethodValueExpr extends FnExpr
 		this.declaredSignature = resolveSignatureClasses(sig);
 		this.targetSymbol = targetSymbol;
 		this.target = matchTarget(c, targetSymbol, sig);
+
+		if(target.isVarArgs())
+			throw new UnsupportedOperationException("Varargs not supported for method thunks." + targetSymbol);
 	}
 
 	abstract Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig);
