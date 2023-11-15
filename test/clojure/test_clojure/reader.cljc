@@ -454,7 +454,26 @@
 
 ;; Anonymous function literal (#())
 
-(deftest t-Anonymouns-function-literal)
+(deftest t-Anonymous-function-literal
+  ;; #(vector %) => #(fn* [gen__#] (vector gen__#))
+  ;; [\S]+ matches the anon arg, then \1 is backref matching first group
+  (is (= "(fn* [] (vector))" (pr-str (read-string "#(vector)"))))
+  (is (not (nil? (re-matches #"\(fn\* \[([\S]+)] \(vector \1\)\)" (pr-str (read-string "#(vector %)"))))))
+  (is (not (nil? (re-matches #"\(fn\* \[([\S]+)] \(vector \1 \1\)\)" (pr-str (read-string "#(vector % %)"))))))
+  (is (not (nil? (re-matches #"\(fn\* \[([\S]+)] \(vector \1 \1\)\)" (pr-str (read-string "#(vector % %1)"))))))
+  (is (not (nil? (re-matches #"\(fn\* \[([\S]+) ([\S]+)] \(vector \1 \2\)\)" (pr-str (read-string "#(vector %1 %2)"))))))
+  (is (not (nil? (re-matches #"\(fn\* \[([\S]+) ([\S]+) & ([\S]+)] \(vector \2 \3\)\)" (pr-str (read-string "#(vector %2 %&)"))))))
+
+  ;; invalid formats
+  (is (thrown? RuntimeException (read-string "#(vector %%)")))
+  (is (thrown? RuntimeException (read-string "#(vector %1/2)")))
+  (is (thrown? RuntimeException (read-string "#(vector %1.5)")))
+  (is (thrown? RuntimeException (read-string "#(vector %-0.2)")))
+  (is (thrown? RuntimeException (read-string "#(vector %3M)")))
+
+  ;; check sneaking in discarded content
+  (is (thrown? RuntimeException (read-string "#(list %#_(first arg)1.00000001 %#_(secong arg)2r10 %#_(rest arg)-1.5)")))
+  )
 
 ;; Syntax-quote (`, note, the "backquote" character), Unquote (~) and
 ;; Unquote-splicing (~@)
