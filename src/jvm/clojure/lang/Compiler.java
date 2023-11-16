@@ -9208,6 +9208,9 @@ private static Executable findMatchingTarget(Executable[] targets, Class c, Stri
 			return true;
 		});
 	}
+	// remove bridge/lambda methods
+	targetStream = targetStream.filter(tgt -> !tgt.isSynthetic());
+
 	List<Executable> filteredTargets = targetStream.collect(Collectors.toList());
 	if(filteredTargets.isEmpty())
 		throw new IllegalArgumentException("Could not resolve " + targetName + " from arg-tags in class " + c.getName());
