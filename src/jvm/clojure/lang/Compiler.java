@@ -4213,7 +4213,7 @@ static public abstract class MethodValueExpr extends FnExpr
 		this.target = matchTarget(c, targetSymbol, sig);
 
 		if(target.isVarArgs())
-			throw new UnsupportedOperationException("Varargs not supported for method thunks." + targetSymbol);
+			throw new UnsupportedOperationException("Varargs not supported for methods in value positions. " + targetSymbol);
 	}
 
 	abstract Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig);
