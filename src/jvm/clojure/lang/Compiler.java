@@ -1103,26 +1103,11 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return c;
     }
 
-	static String getPrimDescriptor(Class c) {
-		String descr = null;
-		if(c.equals(Long.TYPE))
-			descr = "J";
-		else if(c.equals(Double.TYPE))
-			descr = "D";
-		else if(c.equals(Integer.TYPE))
-			descr = "I";
-		else if(c.equals(Float.TYPE))
-			descr = "F";
-		else if(c.equals(Short.TYPE))
-			descr = "S";
-		else if(c.equals(Boolean.TYPE))
-			descr = "Z";
-		else if(c.equals(Byte.TYPE))
-			descr = "B";
-		else if(c.equals(Character.TYPE))
-			descr = "C";
+	static String getComponentDescriptor(Class c) {
+		if (c.isPrimitive())
+			return Type.getType(c).getDescriptor();
 
-		return descr;
+		return "L" + c.getName() + ";";
 	}
 
 	public static boolean looksLikeArrayType(Symbol sym) {
@@ -1132,20 +1117,15 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	public static Class maybeArrayClass(Symbol tag) {
 		if(!looksLikeArrayType(tag)) return null;
 
-		Class componentClass = null;
-
 		int idx = tag.name.indexOf("-*");
 		Symbol rootSymbol = Symbol.intern(tag.name.substring(0, idx));
-		String primitiveDecriptor = null;
-		componentClass = tagToClass(rootSymbol);
+		Class componentClass = tagToClass(rootSymbol);
 
 		if(componentClass == null) {
 			throw new IllegalArgumentException("Unable to resolve classname: " + tag);
 		}
-		else {
-			primitiveDecriptor = getPrimDescriptor(componentClass);
-		}
 
+		String componentDescriptor = getComponentDescriptor(componentClass);
 		String stars = tag.name.substring(idx+1);
 
 		if (stars.replace("*", "").length() > 0)
@@ -1153,13 +1133,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 
 		int dim = stars.length();
 		StringBuilder repr = new StringBuilder(String.join("", Collections.nCopies(dim, "[")));
-
-		if(primitiveDecriptor != null) {
-			repr.append(primitiveDecriptor);
-		}
-		else {
-			repr.append("L" + componentClass.getName() + ";");
-		}
+		repr.append(componentDescriptor);
 
 		return maybeClass(repr.toString(), true);
 	}
