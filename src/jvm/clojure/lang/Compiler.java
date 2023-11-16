@@ -1103,7 +1103,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return c;
     }
 
-	static String getComponentDescriptor(Class c) {
+	static String getArrayComponentClassDescriptor(Class c) {
 		if (c.isPrimitive())
 			return Type.getType(c).getDescriptor();
 
@@ -1125,7 +1125,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			throw new IllegalArgumentException("Unable to resolve classname: " + tag);
 		}
 
-		String componentDescriptor = getComponentDescriptor(componentClass);
+		String componentDescriptor = getArrayComponentClassDescriptor(componentClass);
 		String stars = tag.name.substring(idx+1);
 
 		if (stars.replace("*", "").length() > 0)
