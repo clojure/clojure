@@ -4184,24 +4184,25 @@ static public abstract class MethodValueExpr extends FnExpr
 	Class klass;
 	Executable target;
 
-	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>() {{
-		put(double.class, Symbol.intern("double"));
-		put(double[].class, Symbol.intern("doubles"));
-		put(long.class, Symbol.intern("long"));
-		put(long[].class, Symbol.intern("longs"));
-		put(int.class, Symbol.intern("int"));
-		put(int[].class, Symbol.intern("ints"));
-		put(float.class, Symbol.intern("float"));
-		put(float[].class, Symbol.intern("floats"));
-		put(char.class, Symbol.intern("char"));
-		put(char[].class, Symbol.intern("chars"));
-		put(short.class, Symbol.intern("short"));
-		put(short[].class, Symbol.intern("shorts"));
-		put(byte.class, Symbol.intern("byte"));
-		put(byte[].class, Symbol.intern("bytes"));
-		put(boolean.class, Symbol.intern("boolean"));
-		put(boolean[].class, Symbol.intern("booleans"));
-	}};
+	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>();
+	static {
+		coerceFns.put(double.class, Symbol.intern("double"));
+		coerceFns.put(double[].class, Symbol.intern("doubles"));
+		coerceFns.put(long.class, Symbol.intern("long"));
+		coerceFns.put(long[].class, Symbol.intern("longs"));
+		coerceFns.put(int.class, Symbol.intern("int"));
+		coerceFns.put(int[].class, Symbol.intern("ints"));
+		coerceFns.put(float.class, Symbol.intern("float"));
+		coerceFns.put(float[].class, Symbol.intern("floats"));
+		coerceFns.put(char.class, Symbol.intern("char"));
+		coerceFns.put(char[].class, Symbol.intern("chars"));
+		coerceFns.put(short.class, Symbol.intern("short"));
+		coerceFns.put(short[].class, Symbol.intern("shorts"));
+		coerceFns.put(byte.class, Symbol.intern("byte"));
+		coerceFns.put(byte[].class, Symbol.intern("bytes"));
+		coerceFns.put(boolean.class, Symbol.intern("boolean"));
+		coerceFns.put(boolean[].class, Symbol.intern("booleans"));
+	}
 
 	MethodValueExpr(Object tag, Class c, Symbol targetSymbol, IPersistentVector sig)
 	{
@@ -4310,10 +4311,6 @@ static public abstract class MethodValueExpr extends FnExpr
 
 	public boolean hasJavaClass() {
 		return true;
-	}
-
-	public Class getJavaClass() {
-		return null;
 	}
 }
 
