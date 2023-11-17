@@ -1044,7 +1044,7 @@ public static class SyntaxQuoteReader extends AFn{
 				{
 				Class maybeArrayClass = Compiler.HostExpr.maybeArrayClass(sym);
 				if(maybeArrayClass != null)
-					sym = Symbol.intern(null, maybeArrayClass.getName());
+				    sym = Compiler.HostExpr.arrayTypeToSymbol(maybeArrayClass);
 				}
             else if(resolver != null)
                 {

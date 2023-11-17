@@ -607,9 +607,9 @@ Math/pow overflows to Infinity."
        "[Ljava.lang.Object;" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'Object-*)
        "[Ljava.lang.String;" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String-*)
        "[[Ljava.lang.String;" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String-**))
-  (is (= nil (clojure.lang.Compiler$HostExpr/maybeArrayClass 'Object)))
-  (is (= nil (clojure.lang.Compiler$HostExpr/maybeArrayClass 'ThisIsNotAClassThatCouldBeFound138)))
-  (is (thrown? IllegalArgumentException (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String-*IJ*))))
+  (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'Object)))
+  (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'ThisIsNotAClassThatCouldBeFound138)))
+  (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String-*IJ*))))
 
 (deftest test-ratios
   (is (== (denominator 1/2) 2))
