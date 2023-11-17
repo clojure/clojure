@@ -1040,12 +1040,6 @@ public static class SyntaxQuoteReader extends AFn{
 				{
 				// Simply quote method names.
 				}
-			else if(Compiler.HostExpr.looksLikeArrayType(sym))
-				{
-				Class maybeArrayClass = Compiler.HostExpr.maybeArrayClass(sym);
-				if(maybeArrayClass != null)
-				    sym = Compiler.HostExpr.arrayTypeToSymbol(maybeArrayClass);
-				}
             else if(resolver != null)
                 {
                 Symbol nsym = null;
