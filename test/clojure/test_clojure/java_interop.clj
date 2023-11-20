@@ -656,4 +656,6 @@
   (is (= `java.util.UUID-* 'java.util.UUID-*))
   (is (= `String-* 'java.lang.String-*))
   (is (= `java.lang.String-* 'java.lang.String-*))
-  (is (= `[NotAClassThatWasImported-*] '[clojure.test-clojure.java-interop/NotAClassThatWasImported-*])))
+  (is (= `[NotAClassThatWasImported-*] '[clojure.test-clojure.java-interop/NotAClassThatWasImported-*]))
+  (is (= [long-**] `[~long-**]))
+  (is (= [42] (let [long-** 42] `[~long-**]))))
