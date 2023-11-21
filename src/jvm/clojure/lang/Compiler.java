@@ -1118,7 +1118,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return "L" + c.getName() + ";";
 	}
 
-	static Pattern ARRAY_TYPE_PATTERN = Pattern.compile("(.+)-([*]+)$");
+	final static Pattern ARRAY_TYPE_PATTERN = Pattern.compile("(.+)-([*]+)$");
 
 	public static Class maybeArrayClass(Symbol sym) {
 		Matcher matcher = ARRAY_TYPE_PATTERN.matcher(sym.name);
@@ -1135,10 +1135,6 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		if(componentClass == null) return null;
 
 		String componentDescriptor = getArrayComponentClassDescriptor(componentClass);
-
-		if (stars.replace("*", "").length() > 0)
-			throw new IllegalArgumentException("Array type hint requires asterisks only for dimensionality, found " + sym);
-
 		int dim = stars.length();
 		String arrayDescriptor = String.join("", Collections.nCopies(dim, "[")) + componentDescriptor;
 		return maybeClass(arrayDescriptor, true);
