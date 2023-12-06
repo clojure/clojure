@@ -23,6 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -1520,7 +1521,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			if (target.hasJavaClass())
 				{
 				Class c = target.getJavaClass();
-				this.method = (java.lang.reflect.Method) findMatchingTarget(c.getMethods(), c, methodName, argTags);
+				this.method = (java.lang.reflect.Method) findMethod(c, methodName, argTags);
 				}
 			else
 				throw new IllegalArgumentException("Ambiguous arg-tags for " + methodName + ", no target instance class given.");
@@ -1679,7 +1680,7 @@ static class StaticMethodExpr extends MethodExpr{
 
 		if(argTags != null)
 			{
-			this.method = (java.lang.reflect.Method) findMatchingTarget(c.getMethods(), c, methodName, argTags);
+			this.method = (java.lang.reflect.Method) findMethod(c, methodName, argTags);
 			return;
 			}
 
@@ -2589,7 +2590,7 @@ public static class NewExpr implements Expr{
 
 		if(argTags != null)
 			{
-			this.ctor = (Constructor) findMatchingTarget(allctors, c, c.getName(), argTags);
+			this.ctor = (Constructor) findMethod(c, c.getName(), argTags);
 			return;
 			}
 
@@ -6981,11 +6982,11 @@ public static Object preserveTag(ISeq src, Object dst) {
 	return dst;
 }
 
-private static Object preserveArgTags(IObj memberSymbol, Object target) {
+private static Symbol conveyArgTags(Symbol memberSymbol, Symbol target) {
 	Object argTags = argTagsOf(memberSymbol);
-	if (argTags != null && target instanceof IObj) {
+	if (argTags != null) {
 		IPersistentMap meta = RT.meta(target);
-		return ((IObj)target).withMeta((IPersistentMap) RT.assoc(meta, RT.ARG_TAGS_KEY, argTags));
+		return (Symbol) target.withMeta((IPersistentMap) RT.assoc(meta, RT.ARG_TAGS_KEY, argTags));
 	}
 	return target;
 }
@@ -7077,8 +7078,10 @@ public static Object macroexpand1(Object x) {
 					if(RT.length(form) < 2)
 						throw new IllegalArgumentException(
 								"Malformed member expression, expecting (.member target ...)");
-					Symbol meth = (Symbol) preserveArgTags(sym, (namesInstanceMember(sym) ? Symbol.intern(sname.substring(1)) : Symbol.intern(sname)));
+
+					Symbol meth = conveyArgTags(sym, (namesInstanceMember(sym) ? Symbol.intern(sname.substring(1)) : Symbol.intern(sname)));
 					Symbol maybeQualifiedHint = namesQualifiedInstanceMember(sym) ? Symbol.intern(sym.ns.substring(1)) : null;
+
 					Object target = RT.second(form);
 					if(HostExpr.maybeClass(target, false) != null)
 						{
@@ -7097,7 +7100,7 @@ public static Object macroexpand1(Object x) {
 					Class c = HostExpr.maybeClass(target, false);
 					if(c != null)
 						{
-						Symbol meth = (Symbol) preserveArgTags(sym, Symbol.intern(sym.name));
+						Symbol meth = conveyArgTags(sym, Symbol.intern(sym.name));
 						return preserveTag(form, RT.listStar(DOT, target, meth, form.next()));
 						}
 					}
@@ -7115,10 +7118,7 @@ public static Object macroexpand1(Object x) {
 					//(StringBuilder. "foo") => (new StringBuilder "foo")	
 					//else 
 					if(idx == sname.length() - 1)
-						{
-						Symbol taggedSym = (Symbol) Symbol.intern(sname.substring(0, idx)).withMeta(sym.meta());
-						return RT.listStar(NEW, preserveArgTags(sym, taggedSym), form.next());
-						}
+						return RT.listStar(NEW, conveyArgTags(sym, Symbol.intern(sname.substring(0, idx))), form.next());
 					}
 				}
 			}
@@ -7620,6 +7620,10 @@ private static Symbol tagOf(Object o){
 
 private static IPersistentVector argTagsOf(Object o){
 	Object argTags = RT.get(RT.meta(o), RT.ARG_TAGS_KEY);
+
+	if(argTags != null && !(argTags instanceof IPersistentVector))
+		throw new IllegalArgumentException("arg-tags value should be a vector, but was type " + argTags.getClass().getName());
+
 	return (IPersistentVector) argTags;
 }
 
@@ -9146,6 +9150,39 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 		};
     }
 
+private static Predicate<Executable> signatureMatcherFor(List<Class> sig)
+{
+	if(sig.isEmpty()) return e -> true;
+
+	return tgt -> {
+		Class[] targetSig = tgt.getParameterTypes();
+		for (int i = 0; i < targetSig.length; i++) {
+			if (sig.get(i) == null) { // ignoring placeholders
+			} else if (!sig.get(i).equals(targetSig[i])) {
+				return false;
+			}
+		}
+		return true;
+	};
+};
+
+private static int findLeastArity(List<Executable> targets) {
+	Optional<Executable> maybeTarget = targets.stream().min(Comparator.comparing(Executable::getParameterCount));
+	return maybeTarget.isPresent() ? maybeTarget.get().getParameterCount() : -1;
+}
+
+private static List<Executable> getMethodsByName(String name, Class c) {
+	List<Executable> methods = new ArrayList<>();
+	final Executable[] targets = (c.getName().equals(name)) ? c.getConstructors() : c.getMethods();
+
+	for(int i=0; i < targets.length; i++) {
+		if(targets[i].getName().equals(name))
+			methods.add(targets[i]);
+	}
+
+	return methods;
+}
+
 // This method attempts to find exactly one matching method in an array of Executables given
 // the enclosing class, method name, and symbolic signature, which may include special
 // type specifiers like long, longs, and string encoded array classes. Additionally, the
@@ -9159,59 +9196,18 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 // given name having the least arity count. Also, if the method finds more than one valid Executable
 // then it will throw an exception indicating that the signature was insufficient to
 // disambiguate the desired method. Methods/constructors with varargs are currently not supported.
-private static Executable findMatchingTarget(Executable[] targets, Class c, String targetName, IPersistentVector sig) {
-	List<Executable> potentialTargets = new ArrayList<>();
-	int leastArity = Integer.MAX_VALUE;
-	int targetArity = sig != null ? sig.count() : -1;
-	List<Class> declaredSignature = resolveSignatureClasses(sig);
-	// Get only the methods with the right name
-	try
-		{
-		for (int i = 0; i < targets.length; i++)
-			{
-			if(targets[i].getName().equals(targetName))
-				{
-				leastArity = Math.min(targets[i].getParameterCount(), leastArity);
-				potentialTargets.add(targets[i]);
-				}
-			}
-		}
-	catch(Throwable t)
-		{
-		throw Util.sneakyThrow(t);
-		}
-	java.util.stream.Stream<Executable> targetStream = potentialTargets.stream();
-	// filter arities
-	if(targetArity > -1)
-		{
-		targetStream = targetStream.filter(tgt -> tgt.getParameterTypes().length == targetArity);
-		}
-	else
-		{
-		int finalLeastArity = leastArity;
-		targetStream = targetStream.filter(tgt -> tgt.getParameterCount() == finalLeastArity);
-		}
-	// Match signatures
-	if(!declaredSignature.isEmpty()) {
-		targetStream = targetStream.filter(tgt -> {
-			Class[] targetSig = tgt.getParameterTypes();
-			for (int i = 0; i < targetSig.length; i++)
-				{
-				if (declaredSignature.get(i) == null)
-					{ // ignoring placeholders
-					}
-				else if (!declaredSignature.get(i).equals(targetSig[i]))
-					{
-					return false;
-					}
-				}
-			return true;
-		});
-	}
-	// remove bridge/lambda methods
-	targetStream = targetStream.filter(tgt -> !tgt.isSynthetic());
+private static Executable findMethod(Class c, String targetName, IPersistentVector argTags) {
+	final List<Executable> targets = getMethodsByName(targetName, c);
+	final List<Class> declaredSignature = tagsToClasses(argTags);
+	final int targetArity = argTags != null ? argTags.count() : findLeastArity(targets);
 
-	List<Executable> filteredTargets = targetStream.collect(Collectors.toList());
+	List<Executable> filteredTargets =
+			targets.stream()
+					.filter(tgt -> tgt.getParameterCount() == targetArity)
+					.filter(signatureMatcherFor(declaredSignature))
+					.filter(tgt -> !tgt.isSynthetic()) // remove bridge/lambda methods
+					.collect(Collectors.toList());
+
 	if(filteredTargets.isEmpty())
 		throw new IllegalArgumentException("Could not resolve " + targetName + " from arg-tags in class " + c.getName());
 	if(filteredTargets.size() > 1)
@@ -9220,28 +9216,23 @@ private static Executable findMatchingTarget(Executable[] targets, Class c, Stri
 	return filteredTargets.get(0);
 }
 
-private static List<Class> resolveSignatureClasses(IPersistentVector sig) {
+// calls tagToClass on every element, unless it encounters _ which becomes null
+private static List<Class> tagsToClasses(IPersistentVector argTags) {
 	List<Class> tsig = new ArrayList<>();
-	for (ISeq s = RT.seq(sig); s!=null; s = s.next())
-	{
+	for (ISeq s = RT.seq(argTags); s!=null; s = s.next())
+		{
 		Object t = s.first();
 		Object maybeClass = null;
-		boolean isIgnoring = false;
-		if (t.equals(Symbol.intern(null, "_")))
-			{
-			isIgnoring = true;
-			}
-		else
+
+		if (!t.equals(Symbol.intern(null, "_")))
 			{
 			maybeClass = HostExpr.tagToClass(t);
+			if (maybeClass == null)
+				Util.sneakyThrow(new ClassNotFoundException(t.toString()));
 			}
-		if (maybeClass == null && !isIgnoring)
-			{
-			ClassNotFoundException cnfe = new ClassNotFoundException(t.toString());
-			Util.sneakyThrow(cnfe);
-			}
+
 		tsig.add((Class) maybeClass);
-	}
+		}
 	return tsig;
 }
 }
