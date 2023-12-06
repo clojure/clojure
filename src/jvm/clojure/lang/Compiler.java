@@ -7101,9 +7101,7 @@ public static Object macroexpand1(Object x) {
 					//(StringBuilder. "foo") => (new StringBuilder "foo")	
 					//else 
 					if(idx == sname.length() - 1)
-						{
 						return RT.listStar(NEW, conveyArgTags(sym, Symbol.intern(sname.substring(0, idx))), form.next());
-						}
 					}
 				}
 			}
