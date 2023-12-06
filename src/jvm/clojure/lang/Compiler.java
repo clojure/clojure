@@ -4205,13 +4205,13 @@ static public abstract class MethodValueExpr extends FnExpr
 		coerceFns.put(boolean[].class, Symbol.intern("booleans"));
 	}
 
-	MethodValueExpr(Object tag, Class c, Symbol targetSymbol, IPersistentVector sig)
+	MethodValueExpr(Object tag, Class c, Symbol targetSymbol, IPersistentVector argTags)
 	{
 		super(tag);
 		this.klass = c;
-		this.declaredSignature = resolveSignatureClasses(sig);
+		this.declaredSignature = tagsToClasses(argTags);
 		this.targetSymbol = targetSymbol;
-		this.target = matchTarget(c, targetSymbol, sig);
+		this.target = matchTarget(c, targetSymbol, argTags);
 
 		if(target.isVarArgs())
 			throw new UnsupportedOperationException("Varargs not supported for methods in value positions. " + targetSymbol);
@@ -4323,7 +4323,7 @@ static public class ConstructorValueExpr extends MethodValueExpr
 
 	@Override
 	Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig) {
-		return findMatchingTarget(c.getConstructors(), c, klass.getName(), sig);
+		return findMethod(c, klass.getName(), sig);
 	}
 
 	@Override
@@ -4353,7 +4353,7 @@ static public class StaticMethodValueExpr extends MethodValueExpr
 
 	@Override
 	Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig) {
-		return findMatchingTarget(c.getMethods(), c, targetSymbol.name, sig);
+		return findMethod(c, targetSymbol.name, sig);
 	}
 
 	@Override
@@ -4391,7 +4391,7 @@ static public class InstanceMethodValueExpr extends MethodValueExpr
 
 	@Override
 	Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig) {
-		return findMatchingTarget(c.getMethods(), c, targetSymbol.name, sig);
+		return findMethod(c, targetSymbol.name, sig);
 	}
 
 	@Override
