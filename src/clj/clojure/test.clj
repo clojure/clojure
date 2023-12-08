@@ -229,7 +229,9 @@
    \"with-test-out\" macro, which rebinds *out* to the current value
    of *test-out*.
 
-   For additional event types, see the examples in the code.
+   The event types are:
+   :default :pass :fail :error :summary :begin-test-ns :end-test-ns
+   :begin-test-var :end-test-var
 "}
   clojure.test
   (:require [clojure.template :as temp]
@@ -324,10 +326,10 @@
 (defmulti
   ^{:doc "Generic reporting function, may be overridden to plug in
    different report formats (e.g., TAP, JUnit).  Assertions such as
-   'is' call 'report' to indicate results.  The argument given to
-   'report' will be a map with a :type key.  See the documentation at
-   the top of test_is.clj for more information on the types of
-   arguments for 'report'."
+   'is' call 'report' to indicate results. The argument given to
+   'report' will be a map with a :type key. See (doc clojure.test)
+   docs under 'EXTENDING TEST-IS' for types of arguments for
+   'report'."
      :dynamic true
      :added "1.1"}
   report :type)
