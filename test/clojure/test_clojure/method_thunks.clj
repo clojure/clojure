@@ -17,13 +17,12 @@
 
 (deftest method-arity-selection
   (is (= '([] [] [])
-         (take 3 (repeatedly Tuple/create))))
-  (is (= '([] [] [])
          (take 3 (repeatedly ^[] Tuple/create))))
   (is (= '([1] [2] [3])
          (map ^[_] Tuple/create [1 2 3])))
   (is (= '([1 4] [2 5] [3 6])
-         (map ^[_ _] Tuple/create [1 2 3] [4 5 6]))))
+         (map ^[_ _] Tuple/create [1 2 3] [4 5 6])))
+  (is (thrown? Exception (eval 'clojure.lang.Tuple/create))))
 
 (deftest method-signature-selection
   (is (= [1.23 3.14]
@@ -42,7 +41,7 @@
                (doall (map ^[long] String/valueOf [12 "a"])))))
 
 (def mt ^[_] Tuple/create)
-(def mts {:fromString UUID/fromString})
+(def mts {:fromString ^[_] UUID/fromString})
 
 (deftest method-thunks-in-structs
   (is (= #uuid "00000000-0000-0001-0000-000000000002"
