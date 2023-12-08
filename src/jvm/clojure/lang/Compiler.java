@@ -9163,11 +9163,6 @@ private static boolean signatureMatches(List<Class> sig, Executable method)
 	return true;
 };
 
-private static int findLeastArity(Executable[] targets) {
-	Optional<Executable> maybeTarget = Arrays.stream(targets).min(Comparator.comparing(Executable::getParameterCount));
-	return maybeTarget.isPresent() ? maybeTarget.get().getParameterCount() : -1;
-}
-
 final static Symbol ARG_TAG_ANY = Symbol.intern(null, "_");
 
 // calls tagToClass on every element, unless it encounters _ which becomes null
@@ -9187,14 +9182,15 @@ private static RuntimeException buildResolutionError(Executable[] methods, List<
 	boolean isCtor = c.getName().equals(methodName);
 	String type = isCtor ? "constructor" : "method";
 	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
-	Object spec = argTags == null ? "unknown" : argTags;
 
-	if(methods.length == 0)
+	if(argTags == null)
+		return new IllegalArgumentException("No arg-tags provided for " + coord);
+	else if(methods.length == 0)
 		return new IllegalArgumentException("Could not find " + coord);
 	else if(filteredMethods.isEmpty())
-		return new IllegalArgumentException("No matching " + coord + " found using arg-tags " + spec);
+		return new IllegalArgumentException("No matching " + coord + " found using arg-tags " + argTags);
 	else // methods.size() > 1
-		return new IllegalArgumentException("Multiple matching " + coord + " found using arg-tags " + spec);
+		return new IllegalArgumentException("Multiple matching " + coord + " found using arg-tags " + argTags);
 }
 
 // In the case where argTags is null, this method will attempt to find the method with the
@@ -9202,9 +9198,11 @@ private static RuntimeException buildResolutionError(Executable[] methods, List<
 // then it will throw an exception indicating that the signature was insufficient to
 // disambiguate the desired method.
 private static Executable findMethod(Class c, String methodName, IPersistentVector argTags) {
+	if(argTags == null) throw buildResolutionError(null, null, c, methodName, argTags);
+
 	final Executable[] methods = (c.getName().equals(methodName)) ? c.getConstructors() : c.getMethods();
 	final List<Class> argTagsSignature = tagsToClasses(argTags);
-	final int arity = argTags != null ? argTags.count() : findLeastArity(methods);
+	final int arity = argTags.count();
 
 	List<Executable> filteredMethods =
 			Arrays.stream(methods)
