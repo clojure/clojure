@@ -94,7 +94,6 @@
              *unchecked-math* *unchecked-math*
              *assert* *assert*
              clojure.spec.alpha/*explain-out* clojure.spec.alpha/*explain-out*
-             *repl* true
              *1 nil
              *2 nil
              *3 nil
@@ -448,24 +447,25 @@ by default when a new command-line REPL is started."} repl-requires
              (caught e)
              (set! *e e))))]
     (with-bindings
-     (try
-      (init)
-      (catch Throwable e
-        (caught e)
-        (set! *e e)))
-     (prompt)
-     (flush)
-     (loop []
-       (when-not
-       	 (try (identical? (read-eval-print) request-exit)
-	  (catch Throwable e
-	   (caught e)
-	   (set! *e e)
-	   nil))
-         (when (need-prompt)
-           (prompt)
-           (flush))
-         (recur))))))
+     (binding [*repl* true]
+       (try
+        (init)
+        (catch Throwable e
+          (caught e)
+          (set! *e e)))
+       (prompt)
+       (flush)
+       (loop []
+         (when-not
+           (try (identical? (read-eval-print) request-exit)
+	    (catch Throwable e
+	     (caught e)
+	     (set! *e e)
+	     nil))
+           (when (need-prompt)
+             (prompt)
+             (flush))
+           (recur)))))))
 
 (defn load-script
   "Loads Clojure source from a file or resource given its path. Paths

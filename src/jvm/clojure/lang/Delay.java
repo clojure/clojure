@@ -12,15 +12,20 @@
 
 package clojure.lang;
 
-public class Delay implements IDeref, IPending{
-volatile Object val;
-volatile Throwable exception;
-volatile IFn fn;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public Delay(IFn fn){
-	this.fn = fn;
-	this.val = null;
-        this.exception = null;
+public class Delay implements IDeref, IPending{
+Object val;
+Throwable exception;
+IFn fn;
+volatile Lock lock;
+
+public Delay(IFn f){
+	fn = f;
+	val = null;
+	exception = null;
+	lock = new ReentrantLock();
 }
 
 static public Object force(Object x) {
@@ -29,32 +34,35 @@ static public Object force(Object x) {
 	       : x;
 }
 
-public Object deref() {
-	if(fn != null)
-		{
-	        synchronized(this)
-	        {
-	        //double check
-	        if(fn!=null)
-	            {
-	                try
-	                    {
-	                    val = fn.invoke();
-	                    }
-	                catch(Throwable t)
-	                    {
-	                    exception = t;
-	                    }
-	                fn = null;
-	            }
-	        }
+private void realize() {
+	Lock l = lock;
+	if(l != null) {
+		l.lock();
+		try {
+			if(fn!=null) {
+				try {
+					val = fn.invoke();
+				} catch (Throwable t) {
+					exception = t;
+				}
+				fn = null;
+				lock = null;
+			}
+		} finally {
+			l.unlock();
 		}
+	}
+}
+
+public Object deref() {
+	if(lock != null)
+		realize();
 	if(exception != null)
 		throw Util.sneakyThrow(exception);
 	return val;
 }
 
 public boolean isRealized(){
-	return fn == null;
+	return lock == null;
 }
 }

@@ -25,7 +25,8 @@
     [java.io StringWriter File]
     [java.lang ProcessBuilder ProcessBuilder$Redirect Process]
     [java.util List]
-    [clojure.lang IDeref IBlockingDeref]))
+    [clojure.lang IDeref IBlockingDeref]
+    [java.util.concurrent Executors ExecutorService ThreadFactory]))
 
 (set! *warn-on-reflection* true)
 
@@ -125,6 +126,40 @@
       (when-not (zero? (.length s))
         s))))
 
+;; A thread factory for daemon threads
+(defonce ^:private io-thread-factory
+  (let [counter (atom 0)]
+    (reify ThreadFactory
+      (newThread [_ r]
+        (doto (Thread. r)
+          (.setName (str "Clojure Process IO " (swap! counter inc)))
+          (.setDaemon true))))))
+
+;; An ExecutorService for cached, daemon threads
+(defonce ^:private io-executor
+  (Executors/newCachedThreadPool ^ThreadFactory io-thread-factory))
+
+(defn io-task
+  {:skip-wiki true}
+  [^Runnable f]
+  (let [f (bound-fn* f)
+        fut (.submit ^ExecutorService io-executor ^Callable f)]
+    (reify
+      clojure.lang.IDeref
+      (deref [_] (#'clojure.core/deref-future fut))
+      clojure.lang.IBlockingDeref
+      (deref
+        [_ timeout-ms timeout-val]
+        (#'clojure.core/deref-future fut timeout-ms timeout-val))
+      clojure.lang.IPending
+      (isRealized [_] (.isDone fut))
+      java.util.concurrent.Future
+      (get [_] (.get fut))
+      (get [_ timeout unit] (.get fut timeout unit))
+      (isCancelled [_] (.isCancelled fut))
+      (isDone [_] (.isDone fut))
+      (cancel [_ interrupt?] (.cancel fut interrupt?)))))
+
 (defn exec
   "Execute a command and on successful exit, return the captured output,
   else throw RuntimeException. Args are the same as 'start' and options
@@ -136,11 +171,9 @@
                          [{} opts+args])
         opts (merge {:err :inherit} opts)]
     (let [state (apply start opts command)
-          out-promise (promise)
-          capture-fn #(deliver out-promise (capture (:out state)))]
-      (doto (Thread. ^Runnable capture-fn) (.setDaemon true) (.start))
+          captured (io-task #(capture (:out state)))]
       (if (ok? state)
-        @out-promise
+        @captured
         (throw (RuntimeException. (str "Process failed with exit=" (.exitValue ^Process (:process state)))))))))
 
 (comment

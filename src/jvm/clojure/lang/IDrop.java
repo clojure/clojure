@@ -20,7 +20,7 @@ public interface IDrop{
      * useful if the returned coll implements IDrop for subsequent use in a
      * partition-like scenario.
      *
-     * @param n Items to drop, must be > 0
+     * @param n Items to drop, must be &gt; 0
      * @return Collection that is Sequential, ISeq, and IReduceInit, or null if past the end
      */
     Sequential drop(int n);
