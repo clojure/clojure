@@ -23,7 +23,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -9438,89 +9437,73 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 		};
     }
 
-private static Predicate<Executable> signatureMatcherFor(List<Class> sig)
+private static boolean signatureMatches(List<Class> sig, Executable method)
 {
-	if(sig.isEmpty()) return e -> true;
+	Class[] methodSig = method.getParameterTypes();
+	if(methodSig.length != sig.size()) return false;
 
-	return tgt -> {
-		Class[] targetSig = tgt.getParameterTypes();
-		for (int i = 0; i < targetSig.length; i++) {
-			if (sig.get(i) == null) { // ignoring placeholders
-			} else if (!sig.get(i).equals(targetSig[i])) {
-				return false;
-			}
+	for (int i = 0; i < methodSig.length; i++) {
+		if (sig.get(i) == null) { // ignoring placeholders
+		} else if (!sig.get(i).equals(methodSig[i])) {
+			return false;
 		}
-		return true;
-	};
+	}
+	return true;
 };
 
-private static int findLeastArity(List<Executable> targets) {
-	Optional<Executable> maybeTarget = targets.stream().min(Comparator.comparing(Executable::getParameterCount));
+private static int findLeastArity(Executable[] targets) {
+	Optional<Executable> maybeTarget = Arrays.stream(targets).min(Comparator.comparing(Executable::getParameterCount));
 	return maybeTarget.isPresent() ? maybeTarget.get().getParameterCount() : -1;
 }
 
-private static List<Executable> getMethodsByName(String name, Class c) {
-	List<Executable> methods = new ArrayList<>();
-	final Executable[] targets = (c.getName().equals(name)) ? c.getConstructors() : c.getMethods();
-
-	for(int i=0; i < targets.length; i++) {
-		if(targets[i].getName().equals(name))
-			methods.add(targets[i]);
-	}
-
-	return methods;
-}
-
-// This method attempts to find exactly one matching method in an array of Executables given
-// the enclosing class, method name, and symbolic signature, which may include special
-// type specifiers like long, longs, and string encoded array classes. Additionally, the
-// signature may contain underscores which signal that the type in that position is
-// inconsequential for finding the method and therefore ignored.
-//
-// This method attempts to resolve all classes in the given signature and throws if any
-// class aliases cannot resolve.
-//
-// In the case where a signature is null, this method will attempt to find the method with the
-// given name having the least arity count. Also, if the method finds more than one valid Executable
-// then it will throw an exception indicating that the signature was insufficient to
-// disambiguate the desired method. Methods/constructors with varargs are currently not supported.
-private static Executable findMethod(Class c, String targetName, IPersistentVector argTags) {
-	final List<Executable> targets = getMethodsByName(targetName, c);
-	final List<Class> declaredSignature = tagsToClasses(argTags);
-	final int targetArity = argTags != null ? argTags.count() : findLeastArity(targets);
-
-	List<Executable> filteredTargets =
-			targets.stream()
-					.filter(tgt -> tgt.getParameterCount() == targetArity)
-					.filter(signatureMatcherFor(declaredSignature))
-					.filter(tgt -> !tgt.isSynthetic()) // remove bridge/lambda methods
-					.collect(Collectors.toList());
-
-	if(filteredTargets.isEmpty())
-		throw new IllegalArgumentException("Could not resolve " + targetName + " from arg-tags in class " + c.getName());
-	if(filteredTargets.size() > 1)
-		throw new IllegalArgumentException("Ambiguous arg-tags for " + targetName + " in class " + c.getName());
-
-	return filteredTargets.get(0);
-}
+final static Symbol ARG_TAG_ANY = Symbol.intern(null, "_");
 
 // calls tagToClass on every element, unless it encounters _ which becomes null
 private static List<Class> tagsToClasses(IPersistentVector argTags) {
-	List<Class> tsig = new ArrayList<>();
-	for (ISeq s = RT.seq(argTags); s!=null; s = s.next())
-		{
+	List<Class> sig = new ArrayList<>();
+	for (ISeq s = RT.seq(argTags); s!=null; s = s.next()) {
 		Object t = s.first();
-		Object maybeClass = null;
+		if (t.equals(ARG_TAG_ANY))
+			sig.add(null);
+		else
+			sig.add(HostExpr.tagToClass(t));
+	}
+	return sig;
+}
 
-		if (!t.equals(Symbol.intern(null, "_")))
-			{
-			maybeClass = HostExpr.tagToClass(t);
-			if (maybeClass == null)
-				Util.sneakyThrow(new ClassNotFoundException(t.toString()));
-			}
+private static RuntimeException buildResolutionError(Executable[] methods, List<Executable> filteredMethods, Class c, String methodName, IPersistentVector argTags) {
+	boolean isCtor = c.getName().equals(methodName);
+	String type = isCtor ? "constructor" : "method";
+	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
+	Object spec = argTags == null ? "unknown" : argTags;
 
-		tsig.add((Class) maybeClass);
-		}
-	return tsig;
+	if(methods.length == 0)
+		return new IllegalArgumentException("Could not find " + coord);
+	else if(filteredMethods.isEmpty())
+		return new IllegalArgumentException("No matching " + coord + " found using arg-tags " + spec);
+	else // methods.size() > 1
+		return new IllegalArgumentException("Multiple matching " + coord + " found using arg-tags " + spec);
+}
+
+// In the case where argTags is null, this method will attempt to find the method with the
+// given name having the least arity count. Also, if the method finds more than one valid Executable
+// then it will throw an exception indicating that the signature was insufficient to
+// disambiguate the desired method.
+private static Executable findMethod(Class c, String methodName, IPersistentVector argTags) {
+	final Executable[] methods = (c.getName().equals(methodName)) ? c.getConstructors() : c.getMethods();
+	final List<Class> argTagsSignature = tagsToClasses(argTags);
+	final int arity = argTags != null ? argTags.count() : findLeastArity(methods);
+
+	List<Executable> filteredMethods =
+			Arrays.stream(methods)
+					.filter(m -> m.getName().equals(methodName))
+					.filter(m -> m.getParameterCount() == arity)
+					.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
+					.filter(m -> signatureMatches(argTagsSignature, m))
+					.collect(Collectors.toList());
+
+	if(filteredMethods.size() == 1) return filteredMethods.get(0);
+
+	throw buildResolutionError(methods, filteredMethods, c, methodName, argTags);
 }
 }
