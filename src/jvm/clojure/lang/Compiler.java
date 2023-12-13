@@ -1006,6 +1006,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(!(RT.first(call) instanceof Symbol))
 					throw new IllegalArgumentException("Malformed member expression");
 				Symbol sym = (Symbol) RT.first(call);
+				if(contextClass == null)
+					contextClass = maybeContextClass(sym.ns);
+
 				IPersistentVector argTags = argTagsOf(sym);
 				Symbol tag = tagOf(form);
 				PersistentVector args = PersistentVector.EMPTY;
@@ -1550,7 +1553,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			}
 		else if(argTags != null)
 			{
-			if (target.hasJavaClass())
+			if (contextClass != null || target.hasJavaClass())
 				{
 				Class c = preferQualifiedContext(target, contextClass);
 				this.method = (java.lang.reflect.Method) findMethod(c, methodName, argTags);
