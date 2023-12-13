@@ -9182,12 +9182,10 @@ private static boolean signatureMatches(List<Class> sig, Executable method)
 	Class[] methodSig = method.getParameterTypes();
 	if(methodSig.length != sig.size()) return false;
 
-	for (int i = 0; i < methodSig.length; i++) {
-		if (sig.get(i) == null) { // ignoring placeholders
-		} else if (!sig.get(i).equals(methodSig[i])) {
+	for (int i = 0; i < methodSig.length; i++)
+		if (sig.get(i) != null && !sig.get(i).equals(methodSig[i]))
 			return false;
-		}
-	}
+
 	return true;
 };
 
@@ -9207,7 +9205,7 @@ private static List<Class> tagsToClasses(IPersistentVector argTags) {
 }
 
 private static RuntimeException buildResolutionError(Executable[] methods, List<Executable> filteredMethods, Class c, String methodName, IPersistentVector argTags) {
-	boolean isCtor = c.getName().equals(methodName);
+	boolean isCtor = methodNamesConstructor(c, methodName);
 	String type = isCtor ? "constructor" : "method";
 	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 
@@ -9221,14 +9219,18 @@ private static RuntimeException buildResolutionError(Executable[] methods, List<
 		return new IllegalArgumentException("Multiple matching " + coord + " found using arg-tags " + argTags);
 }
 
-// In the case where argTags is null, this method will attempt to find the method with the
-// given name having the least arity count. Also, if the method finds more than one valid Executable
-// then it will throw an exception indicating that the signature was insufficient to
+private static boolean methodNamesConstructor(Class c, String methodName) {
+	return c.getName().equals(methodName);
+}
+
+// This method will attempt to find the method that matches the given argTags. If argTags
+// is null then the method throws an exception. Also, if the method finds more than one valid
+// method/ctor then it will throw an exception indicating that the signature was insufficient to
 // disambiguate the desired method.
 private static Executable findMethod(Class c, String methodName, IPersistentVector argTags) {
 	if(argTags == null) throw buildResolutionError(null, null, c, methodName, argTags);
 
-	final Executable[] methods = (c.getName().equals(methodName)) ? c.getConstructors() : c.getMethods();
+	final Executable[] methods = methodNamesConstructor(c, methodName) ? c.getConstructors() : c.getMethods();
 	final List<Class> argTagsSignature = tagsToClasses(argTags);
 	final int arity = argTags.count();
 
