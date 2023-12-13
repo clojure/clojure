@@ -7071,24 +7071,19 @@ public static Object macroexpand1(Object x) {
 				Symbol sym = (Symbol) op;
 				String sname = sym.name;
 				//(.substring s 2 5) => (. s substring 2 5)
-				//(.String/substring s 2 5) => (. ^String s substring 2 5)
+				//(.String/substring s 2 5) => (. s String/substring 2 5)
 				if(namesInstanceMember(sym) || namesQualifiedInstanceMember(sym))
 					{
 					if(RT.length(form) < 2)
 						throw new IllegalArgumentException(
 								"Malformed member expression, expecting (.member target ...)");
 
-					Symbol meth = conveyArgTags(sym, (namesInstanceMember(sym) ? Symbol.intern(sname.substring(1)) : Symbol.intern(sname)));
-					Symbol maybeQualifiedHint = namesQualifiedInstanceMember(sym) ? Symbol.intern(sym.ns.substring(1)) : null;
+					Symbol meth = conveyArgTags(sym, (namesInstanceMember(sym) ? Symbol.intern(sname.substring(1)) : Symbol.intern(sym.ns.substring(1), sname)));
 
 					Object target = RT.second(form);
 					if(HostExpr.maybeClass(target, false) != null)
 						{
 						target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY,CLASS));
-						}
-					else if (maybeQualifiedHint != null && target instanceof IObj)
-						{
-						target = ((IObj)target).withMeta(RT.map(RT.TAG_KEY, maybeQualifiedHint));
 						}
 
 					return preserveTag(form, RT.listStar(DOT, target, meth, form.next().next()));
