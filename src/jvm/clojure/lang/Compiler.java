@@ -387,8 +387,14 @@ static Symbol resolveSymbol(Symbol sym){
 		return sym;
 	if(sym.ns != null)
 		{
+		if(namesQualifiedInstanceMember(sym))
+			{
+			Object o = currentNS().getMapping(Symbol.intern(sym.ns.substring(1)));
+			if(o instanceof Class)
+				return Symbol.intern("."+((Class) o).getName(), sym.name);
+			}
 		Namespace ns = namespaceFor(sym);
-		if(ns == null || (ns.name.name == null ? sym.ns == null : ns.name.name.equals(sym.ns)))
+		if (ns == null || (ns.name.name == null ? sym.ns == null : ns.name.name.equals(sym.ns)))
 			return sym;
 		return Symbol.intern(ns.name.name, sym.name);
 		}
@@ -964,6 +970,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			int line = lineDeref();
 			int column = columnDeref();
 			String source = (String) SOURCE.deref();
+			Class contextClass = null;
 			Class c = maybeClass(RT.second(form), false);
 			//at this point c will be non-null if static
 			Expr instance = null;
@@ -975,10 +982,11 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			if(maybeField && !(((Symbol)RT.third(form)).name.charAt(0) == '-'))
 				{
 				Symbol sym = (Symbol) RT.third(form);
+				contextClass = maybeContextClass(sym.ns);
 				if(c != null)
 					maybeField = Reflector.getMethods(c, 0, munge(sym.name), true).size() == 0;
-				else if(instance != null && instance.hasJavaClass() && instance.getJavaClass() != null)
-					maybeField = Reflector.getMethods(instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
+				else if(hasLocalTypeContext(instance, contextClass))
+					maybeField = Reflector.getMethods(contextClass != null ? contextClass : instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
 				}
 
 			if(maybeField)    //field
@@ -998,6 +1006,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(!(RT.first(call) instanceof Symbol))
 					throw new IllegalArgumentException("Malformed member expression");
 				Symbol sym = (Symbol) RT.first(call);
+				if(contextClass == null)
+					contextClass = maybeContextClass(sym.ns);
+
 				IPersistentVector argTags = argTagsOf(sym);
 				Symbol tag = tagOf(form);
 				PersistentVector args = PersistentVector.EMPTY;
@@ -1007,8 +1018,20 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(c != null)
 					return new StaticMethodExpr(source, line, column, tag, argTags, c, munge(sym.name), args, tailPosition);
 				else
-					return new InstanceMethodExpr(source, line, column, tag, argTags, instance, munge(sym.name), args, tailPosition);
+					return new InstanceMethodExpr(source, line, column, tag, argTags, contextClass, instance, munge(sym.name), args, tailPosition);
 				}
+		}
+
+		private Class maybeContextClass(String context) {
+			if(context == null) return null;
+
+			try {
+				Class c = maybeClass(Symbol.intern(null, context), false);
+				return c;
+			}
+			catch(Exception ex) {
+				return null;
+			}
 		}
 	}
 
@@ -1444,6 +1467,19 @@ static abstract class MethodExpr extends HostExpr{
 	}
 }
 
+private static boolean hasLocalTypeContext(Expr instance, Class contextClass) {
+	return instance != null && ((instance.hasJavaClass() && instance.getJavaClass() != null) || contextClass != null);
+}
+
+private static Class preferQualifiedContext(Expr instance, Class contextClass) {
+	if(contextClass != null) return contextClass;
+
+	if(instance.hasJavaClass() && instance.getJavaClass() != null)
+		return instance.getJavaClass();
+	else
+		return null;
+}
+
 static class InstanceMethodExpr extends MethodExpr{
 	public final Expr target;
 	public final String methodName;
@@ -1460,8 +1496,8 @@ static class InstanceMethodExpr extends MethodExpr{
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
 
-	public InstanceMethodExpr(String source, int line, int column, Symbol tag, IPersistentVector argTags, Expr target,
-			String methodName, IPersistentVector args, boolean tailPosition)
+	public InstanceMethodExpr(String source, int line, int column, Symbol tag, IPersistentVector argTags, Class contextClass,
+			Expr target, String methodName, IPersistentVector args, boolean tailPosition)
 			{
 		this.source = source;
 		this.line = line;
@@ -1471,9 +1507,9 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-		if(target.hasJavaClass() && target.getJavaClass() != null && argTags == null)
+		if(hasLocalTypeContext(target, contextClass) && argTags == null)
 			{
-			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
+			List methods = Reflector.getMethods(preferQualifiedContext(target, contextClass), args.count(), methodName, false);
 			if(methods.isEmpty())
 				{
 				method = null;
@@ -1481,7 +1517,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName());
+							SOURCE_PATH.deref(), line, column, methodName, preferQualifiedContext(target, contextClass).getName());
 					}
 				}
 			else
@@ -1511,15 +1547,15 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName(), getTypeStringForArgs(args));
+							SOURCE_PATH.deref(), line, column, methodName, preferQualifiedContext(target, contextClass).getName(), getTypeStringForArgs(args));
 					}
 				}
 			}
 		else if(argTags != null)
 			{
-			if (target.hasJavaClass())
+			if (contextClass != null || target.hasJavaClass())
 				{
-				Class c = target.getJavaClass();
+				Class c = preferQualifiedContext(target, contextClass);
 				this.method = (java.lang.reflect.Method) findMethod(c, methodName, argTags);
 				}
 			else
@@ -7325,24 +7361,19 @@ public static Object macroexpand1(Object x) {
 				Symbol sym = (Symbol) op;
 				String sname = sym.name;
 				//(.substring s 2 5) => (. s substring 2 5)
-				//(.String/substring s 2 5) => (. ^String s substring 2 5)
+				//(.String/substring s 2 5) => (. s String/substring 2 5)
 				if(namesInstanceMember(sym) || namesQualifiedInstanceMember(sym))
 					{
 					if(RT.length(form) < 2)
 						throw new IllegalArgumentException(
 								"Malformed member expression, expecting (.member target ...)");
 
-					Symbol meth = conveyArgTags(sym, (namesInstanceMember(sym) ? Symbol.intern(sname.substring(1)) : Symbol.intern(sname)));
-					Symbol maybeQualifiedHint = namesQualifiedInstanceMember(sym) ? Symbol.intern(sym.ns.substring(1)) : null;
+					Symbol meth = conveyArgTags(sym, (namesInstanceMember(sym) ? Symbol.intern(sname.substring(1)) : Symbol.intern(sym.ns.substring(1), sname)));
 
 					Object target = RT.second(form);
 					if(HostExpr.maybeClass(target, false) != null)
 						{
 						target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY,CLASS));
-						}
-					else if (maybeQualifiedHint != null && target instanceof IObj)
-						{
-						target = ((IObj)target).withMeta(RT.map(RT.TAG_KEY, maybeQualifiedHint));
 						}
 
 					return preserveTag(form, RT.listStar(DOT, target, meth, form.next().next()));
@@ -9442,12 +9473,10 @@ private static boolean signatureMatches(List<Class> sig, Executable method)
 	Class[] methodSig = method.getParameterTypes();
 	if(methodSig.length != sig.size()) return false;
 
-	for (int i = 0; i < methodSig.length; i++) {
-		if (sig.get(i) == null) { // ignoring placeholders
-		} else if (!sig.get(i).equals(methodSig[i])) {
+	for (int i = 0; i < methodSig.length; i++)
+		if (sig.get(i) != null && !sig.get(i).equals(methodSig[i]))
 			return false;
-		}
-	}
+
 	return true;
 };
 
@@ -9467,7 +9496,7 @@ private static List<Class> tagsToClasses(IPersistentVector argTags) {
 }
 
 private static RuntimeException buildResolutionError(Executable[] methods, List<Executable> filteredMethods, Class c, String methodName, IPersistentVector argTags) {
-	boolean isCtor = c.getName().equals(methodName);
+	boolean isCtor = methodNamesConstructor(c, methodName);
 	String type = isCtor ? "constructor" : "method";
 	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 
@@ -9481,14 +9510,18 @@ private static RuntimeException buildResolutionError(Executable[] methods, List<
 		return new IllegalArgumentException("Multiple matching " + coord + " found using arg-tags " + argTags);
 }
 
-// In the case where argTags is null, this method will attempt to find the method with the
-// given name having the least arity count. Also, if the method finds more than one valid Executable
-// then it will throw an exception indicating that the signature was insufficient to
+private static boolean methodNamesConstructor(Class c, String methodName) {
+	return c.getName().equals(methodName);
+}
+
+// This method will attempt to find the method that matches the given argTags. If argTags
+// is null then the method throws an exception. Also, if the method finds more than one valid
+// method/ctor then it will throw an exception indicating that the signature was insufficient to
 // disambiguate the desired method.
 private static Executable findMethod(Class c, String methodName, IPersistentVector argTags) {
 	if(argTags == null) throw buildResolutionError(null, null, c, methodName, argTags);
 
-	final Executable[] methods = (c.getName().equals(methodName)) ? c.getConstructors() : c.getMethods();
+	final Executable[] methods = methodNamesConstructor(c, methodName) ? c.getConstructors() : c.getMethods();
 	final List<Class> argTagsSignature = tagsToClasses(argTags);
 	final int arity = argTags.count();
 

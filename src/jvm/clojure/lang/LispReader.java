@@ -1073,7 +1073,8 @@ public static class SyntaxQuoteReader extends AFn{
 				if(maybeClass instanceof Class)
 					{
 					// Classname/foo -> package.qualified.Classname/foo
-					sym = Symbol.intern(((Class)maybeClass).getName(), sym.name);
+					sym = Symbol.intern(
+							((Class)maybeClass).getName(), sym.name);
 					}
 				else
 					sym = Compiler.resolveSymbol(sym);
