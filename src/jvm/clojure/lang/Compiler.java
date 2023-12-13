@@ -387,8 +387,14 @@ static Symbol resolveSymbol(Symbol sym){
 		return sym;
 	if(sym.ns != null)
 		{
+		if(namesQualifiedInstanceMember(sym))
+			{
+			Object o = currentNS().getMapping(Symbol.intern(sym.ns.substring(1)));
+			if(o instanceof Class)
+				return Symbol.intern("."+((Class) o).getName(), sym.name);
+			}
 		Namespace ns = namespaceFor(sym);
-		if(ns == null || (ns.name.name == null ? sym.ns == null : ns.name.name.equals(sym.ns)))
+		if (ns == null || (ns.name.name == null ? sym.ns == null : ns.name.name.equals(sym.ns)))
 			return sym;
 		return Symbol.intern(ns.name.name, sym.name);
 		}
@@ -964,6 +970,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			int line = lineDeref();
 			int column = columnDeref();
 			String source = (String) SOURCE.deref();
+			Class contextClass = null;
 			Class c = maybeClass(RT.second(form), false);
 			//at this point c will be non-null if static
 			Expr instance = null;
@@ -975,10 +982,11 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			if(maybeField && !(((Symbol)RT.third(form)).name.charAt(0) == '-'))
 				{
 				Symbol sym = (Symbol) RT.third(form);
+				contextClass = maybeContextClass(sym);
 				if(c != null)
 					maybeField = Reflector.getMethods(c, 0, munge(sym.name), true).size() == 0;
-				else if(instance != null && instance.hasJavaClass() && instance.getJavaClass() != null)
-					maybeField = Reflector.getMethods(instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
+				else if(hasLocalTypeContext(instance, contextClass))
+					maybeField = Reflector.getMethods(contextClass != null ? contextClass : instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
 				}
 
 			if(maybeField)    //field
@@ -1007,8 +1015,18 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(c != null)
 					return new StaticMethodExpr(source, line, column, tag, argTags, c, munge(sym.name), args, tailPosition);
 				else
-					return new InstanceMethodExpr(source, line, column, tag, argTags, instance, munge(sym.name), args, tailPosition);
+					return new InstanceMethodExpr(source, line, column, tag, argTags, contextClass, instance, munge(sym.name), args, tailPosition);
 				}
+		}
+
+		private Class maybeContextClass(Symbol callContext) {
+			if(callContext == null) return null;
+
+			Class c = null;
+			if(callContext.ns != null)
+				c =  maybeClass(Symbol.intern(null, callContext.ns), false);
+
+			return c;
 		}
 	}
 
@@ -1444,6 +1462,19 @@ static abstract class MethodExpr extends HostExpr{
 	}
 }
 
+private static boolean hasLocalTypeContext(Expr instance, Class contextClass) {
+	return instance != null && ((instance.hasJavaClass() && instance.getJavaClass() != null) || contextClass != null);
+}
+
+private static Class preferQualifiedContext(Expr instance, Class contextClass) {
+	if(contextClass != null) return contextClass;
+
+	if(instance.hasJavaClass() && instance.getJavaClass() != null)
+		return instance.getJavaClass();
+	else
+		return null;
+}
+
 static class InstanceMethodExpr extends MethodExpr{
 	public final Expr target;
 	public final String methodName;
@@ -1460,8 +1491,8 @@ static class InstanceMethodExpr extends MethodExpr{
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
 
-	public InstanceMethodExpr(String source, int line, int column, Symbol tag, IPersistentVector argTags, Expr target,
-			String methodName, IPersistentVector args, boolean tailPosition)
+	public InstanceMethodExpr(String source, int line, int column, Symbol tag, IPersistentVector argTags, Class contextClass,
+			Expr target, String methodName, IPersistentVector args, boolean tailPosition)
 			{
 		this.source = source;
 		this.line = line;
@@ -1471,9 +1502,9 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-		if(target.hasJavaClass() && target.getJavaClass() != null && argTags == null)
+		if(hasLocalTypeContext(target, contextClass) && argTags == null)
 			{
-			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
+			List methods = Reflector.getMethods(preferQualifiedContext(target, contextClass), args.count(), methodName, false);
 			if(methods.isEmpty())
 				{
 				method = null;
@@ -1481,7 +1512,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName());
+							SOURCE_PATH.deref(), line, column, methodName, preferQualifiedContext(target, contextClass).getName());
 					}
 				}
 			else
@@ -1511,7 +1542,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName(), getTypeStringForArgs(args));
+							SOURCE_PATH.deref(), line, column, methodName, preferQualifiedContext(target, contextClass).getName(), getTypeStringForArgs(args));
 					}
 				}
 			}
@@ -1519,7 +1550,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			{
 			if (target.hasJavaClass())
 				{
-				Class c = target.getJavaClass();
+				Class c = preferQualifiedContext(target, contextClass);
 				this.method = (java.lang.reflect.Method) findMethod(c, methodName, argTags);
 				}
 			else
