@@ -982,7 +982,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			if(maybeField && !(((Symbol)RT.third(form)).name.charAt(0) == '-'))
 				{
 				Symbol sym = (Symbol) RT.third(form);
-				contextClass = maybeContextClass(sym);
+				contextClass = maybeContextClass(sym.ns);
 				if(c != null)
 					maybeField = Reflector.getMethods(c, 0, munge(sym.name), true).size() == 0;
 				else if(hasLocalTypeContext(instance, contextClass))
@@ -1019,14 +1019,16 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				}
 		}
 
-		private Class maybeContextClass(Symbol callContext) {
-			if(callContext == null) return null;
+		private Class maybeContextClass(String context) {
+			if(context == null) return null;
 
-			Class c = null;
-			if(callContext.ns != null)
-				c =  maybeClass(Symbol.intern(null, callContext.ns), false);
-
-			return c;
+			try {
+				Class c = maybeClass(Symbol.intern(null, context), false);
+				return c;
+			}
+			catch(Exception ex) {
+				return null;
+			}
 		}
 	}
 
