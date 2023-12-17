@@ -7649,7 +7649,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 			if (c != null)
 				{
 				IPersistentVector argTags = argTagsOf(sym);
-				return new ConstructorValueExpr(null, c, Symbol.intern(null, sym.name), argTags);
+				return MethodValues.buildMethodThunk(c, sym, argTags);
 				}
 			}
 		}
@@ -7677,11 +7677,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 				else
 					{
 					IPersistentVector argTags = argTagsOf(sym);
-
-					if (namesQualifiedInstanceMember(sym))
-						return new InstanceMethodValueExpr(null, c, Symbol.intern(null, sym.name), argTags);
-					else
-						return new StaticMethodValueExpr(null, c, Symbol.intern(null, sym.name), argTags);
+					return MethodValues.buildMethodThunk(c, sym, argTags);
 					}
 				}
 		}
@@ -9536,5 +9532,33 @@ private static Executable findMethod(Class c, String methodName, IPersistentVect
 	if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
 	throw buildResolutionError(methods, filteredMethods, c, methodName, argTags);
+}
+
+public static class MethodValues {
+	public static FnExpr buildMethodThunk(Class c, Symbol methodName, IPersistentVector argTags) {
+		List<Class> declaredSignature = tagsToClasses(argTags);
+
+		if (namesConstructor(methodName))
+			return buildCtorThunk(c, methodName, argTags, declaredSignature);
+		else if(namesQualifiedInstanceMember(methodName))
+			return buildInstanceMethodThunk(c, methodName, argTags, declaredSignature);
+		else
+			return buildStaticMethodThunk(c, methodName, argTags, declaredSignature);
+	}
+
+	private static FnExpr buildStaticMethodThunk(Class c, Symbol methodName, IPersistentVector argTags, List<Class> declaredSignature) {
+		Executable target = findMethod(c, methodName.name, argTags);
+		return new StaticMethodValueExpr(null, c, Symbol.intern(null, methodName.name), argTags);
+	}
+
+	private static FnExpr buildInstanceMethodThunk(Class c, Symbol methodName, IPersistentVector argTags, List<Class> declaredSignature) {
+		Executable target = findMethod(c, methodName.name, argTags);
+		return new InstanceMethodValueExpr(null, c, Symbol.intern(null, methodName.name), argTags);
+	}
+
+	private static FnExpr buildCtorThunk(Class c, Symbol methodName, IPersistentVector argTags, List<Class> declaredSignature) {
+		Executable target = findMethod(c, c.getName(), argTags);
+		return new ConstructorValueExpr(null, c, Symbol.intern(null, methodName.name), argTags);
+	}
 }
 }
