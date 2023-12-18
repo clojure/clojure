@@ -7380,57 +7380,42 @@ static void addParameterAnnotation(Object visitor, IPersistentMap meta, int i){
 
 private static Expr analyzeSymbol(Symbol sym) {
 	Symbol tag = tagOf(sym);
+	IPersistentVector argTags = argTagsOf(sym);
 	if(sym.ns == null)
 		{
 		LocalBinding b = referenceLocal(sym);
 		if(b != null)
+            {
+            return new LocalBindingExpr(b, tag);
+            }
+		else if(namesConstructor(sym)) // Class.
 			{
-			return new LocalBindingExpr(b, tag);
-			}
-		else
-			{
-			//maybe Klass. member symbol
-			Class c = null;
-
-			if (namesConstructor(sym))
-				{
-				c = HostExpr.maybeClass(Symbol.intern(null, sym.name.substring(0, sym.name.length() - 1)), false);
-				}
-
-			if (c != null)
-				{
-				IPersistentVector argTags = argTagsOf(sym);
-				return MethodValues.buildMethodThunk(sym, argTags);
-				}
+			return MethodValues.buildMethodThunk(sym, argTags);
 			}
 		}
 	else
+		{
 		if(namespaceFor(sym) == null)
 			{
 			Symbol nsSym = Symbol.intern(sym.ns);
 			Class c = HostExpr.maybeClass(nsSym, false);
-
-			if (c == null)
-				{
-				// maybe .Klass/method
-				if (namesQualifiedInstanceMember(sym))
-					{
-					c = HostExpr.maybeClass(Symbol.intern(null, sym.ns.substring(1)), false);
-					}
-				}
-
 			if(c != null)
 				{
 				if(Reflector.getField(c, sym.name, true) != null)
 					{
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
 					}
-				else
+				else if(namesStaticMember(sym)) // Class/method
 					{
-					IPersistentVector argTags = argTagsOf(sym);
 					return MethodValues.buildMethodThunk(sym, argTags);
 					}
+				throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
 				}
+			else if(namesQualifiedInstanceMember(sym)) // .Class/method
+				{
+				return MethodValues.buildMethodThunk(sym, argTags);
+				}
+			}
 		}
 	//Var v = lookupVar(sym, false);
 //	Var v = lookupVar(sym, false);
