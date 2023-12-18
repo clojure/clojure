@@ -1142,9 +1142,11 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return "L" + c.getName() + ";";
 	}
 
-	final static Pattern ARRAY_TYPE_PATTERN = Pattern.compile("(.+)-([*]+)$");
+	final static Pattern ARRAY_TYPE_PATTERN = Pattern.compile("([^*]+)(\\*+)");
 
 	public static Class maybeArrayClass(Symbol sym) {
+		if(!sym.name.endsWith("*")) return null;
+
 		Matcher matcher = ARRAY_TYPE_PATTERN.matcher(sym.name);
 
 		if(!matcher.matches()) return null;
@@ -1159,25 +1161,29 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		if(componentClass == null) return null;
 
 		String componentDescriptor = getArrayComponentClassDescriptor(componentClass);
-		int dim = stars.length();
-		String arrayDescriptor = String.join("", Collections.nCopies(dim, "[")) + componentDescriptor;
-		return maybeClass(arrayDescriptor, true);
+		StringBuilder arrayDescriptor = new StringBuilder();
+		arrayDescriptor.append(stars.replace('*', '['));
+		arrayDescriptor.append(componentDescriptor);
+		return maybeClass(arrayDescriptor.toString(), true);
 	}
 
 	public static Symbol arrayTypeToSymbol(Class c) {
 		if(!c.isArray()) return null;
 
-		int dim = 0;
+		int dim = 1;
 
-		Class componentClass = c;
+		Class componentClass = c.getComponentType();
 
 		while(componentClass.isArray()) {
 			dim++;
 			componentClass = componentClass.getComponentType();
 		}
 
-		String repr = componentClass.getName() + "-" + String.join("", Collections.nCopies(dim, "*"));
-		return Symbol.intern(null, repr);
+		StringBuilder repr = new StringBuilder(componentClass.getName());
+		for(int i=0; i<dim; i++)
+			repr.append("*");
+
+		return Symbol.intern(null, repr.toString());
 	}
 
 	static Class tagToClass(Object tag) {

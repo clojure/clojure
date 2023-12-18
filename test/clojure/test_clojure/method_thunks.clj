@@ -41,7 +41,7 @@
                (doall (map ^[long] String/valueOf [12 "a"]))))
   (testing "array type symbolic hint"
     (is (= [2]
-           (map ^[long-* long] Arrays/binarySearch [(long-array [1 2 3 5 6])] [3])))))
+           (map ^[long* long] Arrays/binarySearch [(long-array [1 2 3 5 6])] [3])))))
 
 (def mt ^[_] Tuple/create)
 (def mts {:fromString ^[_] UUID/fromString})
