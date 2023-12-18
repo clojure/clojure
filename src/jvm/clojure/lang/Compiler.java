@@ -4214,188 +4214,6 @@ static public class FnExpr extends ObjExpr{
 	}
 }
 
-static public abstract class MethodValueExpr extends FnExpr
-{
-	private final List<Class> declaredSignature;
-	private final Symbol targetSymbol;
-	Class klass;
-	Executable target;
-
-	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>();
-	static {
-		coerceFns.put(double.class, Symbol.intern("double"));
-		coerceFns.put(double[].class, Symbol.intern("doubles"));
-		coerceFns.put(long.class, Symbol.intern("long"));
-		coerceFns.put(long[].class, Symbol.intern("longs"));
-		coerceFns.put(int.class, Symbol.intern("int"));
-		coerceFns.put(int[].class, Symbol.intern("ints"));
-		coerceFns.put(float.class, Symbol.intern("float"));
-		coerceFns.put(float[].class, Symbol.intern("floats"));
-		coerceFns.put(char.class, Symbol.intern("char"));
-		coerceFns.put(char[].class, Symbol.intern("chars"));
-		coerceFns.put(short.class, Symbol.intern("short"));
-		coerceFns.put(short[].class, Symbol.intern("shorts"));
-		coerceFns.put(byte.class, Symbol.intern("byte"));
-		coerceFns.put(byte[].class, Symbol.intern("bytes"));
-		coerceFns.put(boolean.class, Symbol.intern("boolean"));
-		coerceFns.put(boolean[].class, Symbol.intern("booleans"));
-	}
-
-	MethodValueExpr(Object tag, Class c, Symbol targetSymbol, IPersistentVector argTags)
-	{
-		super(tag);
-		this.klass = c;
-		this.declaredSignature = tagsToClasses(argTags);
-		this.targetSymbol = targetSymbol;
-		this.target = matchTarget(c, targetSymbol, argTags);
-
-		if(target.isVarArgs())
-			throw new UnsupportedOperationException("Varargs not supported for methods in value positions. " + targetSymbol);
-	}
-
-	abstract Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig);
-
-	public Executable getTarget() {
-		return target;
-	}
-
-	public Object eval(){
-		String name = buildThunkName();
-		ISeq form = buildThunk(name);
-		Expr retExpr = analyzeSeq(C.EVAL, form, name);
-		return retExpr.eval();
-	}
-
-	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-		String name = buildThunkName();
-		ISeq form = buildThunk(name);
-		Expr retExpr = analyzeSeq(context, form, name);
-		retExpr.emit(context, objx, gen);
-	}
-
-	private String buildThunkName(){
-		return "dot__" + targetSymbol + RT.nextID();
-	}
-
-	private ISeq buildThunk(String name) {
-		// (fn dot__new42 ([^T arg] (new Klass arg)))
-		// (fn dot__staticMethod42 (^r [^T arg] (. Klass staticMethod arg)))
-		// (fn dot__instanceMethod42 (^r [^Klass self ^T arg] (. ^Klass self instanceMethod arg)))
-		return	RT.list(Symbol.intern("fn"), Symbol.intern(name),
-				buildThunkBody(buildThunkParams()));
-	}
-
-	Symbol instanceParam() {
-		return null;
-	}
-
-	IPersistentVector buildThunkParams() {
-		Symbol seedParam = instanceParam();
-		IPersistentVector params = PersistentVector.EMPTY;
-
-		if(seedParam != null) params = params.cons(seedParam);
-
-		// [^T arg1 ^U arg2]
-		for(Class klass : target.getParameterTypes())
-		{
-			params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
-		}
-
-		return maybeHintReturn((PersistentVector)params);
-	}
-
-	abstract IPersistentVector maybeHintReturn(PersistentVector params);
-
-	protected Symbol maybeHintParam(Class klass, Symbol name){
-		if (klass.equals(Long.TYPE) || klass.equals(Double.TYPE) || !klass.isPrimitive())
-		{
-			return (Symbol) name.withMeta(PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName())));
-		}
-		return name;
-	}
-
-	private ISeq buildThunkBody(IPersistentVector params){
-		// ([^T arg] (. Klass staticMethod arg))
-		// ([^Klass self ^T arg] (. self instanceMethod arg))
-		// ([^T arg] (new Klass arg))
-		ISeq body = RT.list(params, buildThunkDispatch(params));
-		return body;
-	}
-
-	protected ISeq maybeCoerceArgs(ISeq args){
-		Class[] sig = target.getParameterTypes();
-		ArrayList ret = new ArrayList();
-
-		for(int i = 0; args != null; args = args.next(), i++)
-		{
-			if (coerceFns.containsKey(sig[i]))
-			{
-				ArrayList coerceCall = new ArrayList();
-				coerceCall.add(coerceFns.get(sig[i]));
-				coerceCall.add(args.first());
-				ret.add(RT.seq(coerceCall));
-			}
-			else
-			{
-				ret.add(args.first());
-			}
-		}
-
-		return RT.seq(ret);
-	}
-
-	abstract ISeq buildThunkDispatch(IPersistentVector params);
-
-	public boolean hasJavaClass() {
-		return true;
-	}
-}
-
-static public class InstanceMethodValueExpr extends MethodValueExpr
-{
-	public InstanceMethodValueExpr(Object tag, Class c, Symbol targetSymbol, IPersistentVector sig) {
-		super(tag, c, targetSymbol, sig);
-	}
-
-	@Override
-	Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig) {
-		return findMethod(c, targetSymbol.name, sig);
-	}
-
-	@Override
-	Symbol instanceParam() {
-		// seed params with this as first binding
-		IPersistentMap m = PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName()));
-		return (Symbol) Symbol.intern("this" + RT.nextID()).withMeta(m);
-	}
-
-	@Override
-	IPersistentVector maybeHintReturn(PersistentVector params) {
-		Class t = ((java.lang.reflect.Method) target).getReturnType();
-
-		if (t.isPrimitive() && (t.equals(Long.TYPE) || t.equals(Double.TYPE))) {
-			return params.withMeta(PersistentHashMap.create(Keyword.intern("tag"), coerceFns.get(t)));
-		}
-
-		return params;
-	}
-
-	@Override
-	ISeq buildThunkDispatch(IPersistentVector params) {
-		// ([^Klass this ^T arg] (. this instanceMethod arg))
-		// ([^long arg1 ^double arg2] (. this instanceMethod arg1 arg2))
-		// ([^Klass this prim] (. this instanceMethod (coercefn prim)))
-		return RT.listStar(Symbol.intern("."),
-				params.seq().first(), Symbol.intern(target.getName()),
-				maybeCoerceArgs(params.seq().next()));
-	}
-
-	@Override
-	public Class getJavaClass() {
-		return ((java.lang.reflect.Method)this.target).getReturnType();
-	}
-}
-
 static public class ObjExpr implements Expr{
 	static final String CONST_PREFIX = "const__";
 	String name;
@@ -9517,8 +9335,21 @@ public static class MethodValues {
 	}
 
 	private static FnExpr buildInstanceMethodThunk(Class c, Symbol methodName, IPersistentVector argTags, List<Class> declaredSignature) {
-		Executable target = findMethod(c, methodName.name, argTags);
-		return new InstanceMethodValueExpr(null, c, Symbol.intern(null, methodName.name), argTags);
+		Executable method = findMethod(c, methodName.name, argTags);
+		Function<IPersistentVector, ISeq> instanceCallBuilder = (params) -> {
+			// ([^Klass this ^T arg] (. this instanceMethod arg))
+			// ([^long arg1 ^double arg2] (. this instanceMethod arg1 arg2))
+			// ([^Klass this prim] (. this instanceMethod (coercefn prim)))
+			return RT.listStar(Symbol.intern("."),
+					params.seq().first(), Symbol.intern(method.getName()),
+					maybeCoerceArgs(method, params.seq().next()));
+		};
+		String name = buildThunkName(methodName.name);
+		IPersistentMap m = PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(c.getName()));
+		Symbol instanceParam = (Symbol) Symbol.intern(null, "this" + RT.nextID()).withMeta(m);
+		ISeq form = buildThunk(method, name, c, declaredSignature, instanceParam, instanceCallBuilder);
+		Expr retExpr = analyzeSeq(C.EVAL, form, name);
+		return (FnExpr) retExpr;
 	}
 
 	private static FnExpr buildCtorThunk(Class c, Symbol methodName, IPersistentVector argTags, List<Class> declaredSignature) {
