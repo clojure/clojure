@@ -23,7 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -388,8 +388,14 @@ static Symbol resolveSymbol(Symbol sym){
 		return sym;
 	if(sym.ns != null)
 		{
+		if(namesQualifiedInstanceMember(sym))
+			{
+			Object o = currentNS().getMapping(Symbol.intern(sym.ns.substring(1)));
+			if(o instanceof Class)
+				return Symbol.intern("."+((Class) o).getName(), sym.name);
+			}
 		Namespace ns = namespaceFor(sym);
-		if(ns == null || (ns.name.name == null ? sym.ns == null : ns.name.name.equals(sym.ns)))
+		if (ns == null || (ns.name.name == null ? sym.ns == null : ns.name.name.equals(sym.ns)))
 			return sym;
 		return Symbol.intern(ns.name.name, sym.name);
 		}
@@ -970,6 +976,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			int line = lineDeref();
 			int column = columnDeref();
 			String source = (String) SOURCE.deref();
+			Class contextClass = null;
 			Class c = maybeClass(RT.second(form), false);
 			//at this point c will be non-null if static
 			Expr instance = null;
@@ -981,10 +988,11 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			if(maybeField && !(((Symbol)RT.third(form)).name.charAt(0) == '-'))
 				{
 				Symbol sym = (Symbol) RT.third(form);
+				contextClass = maybeContextClass(sym.ns);
 				if(c != null)
 					maybeField = Reflector.getMethods(c, 0, munge(sym.name), true).size() == 0;
-				else if(instance != null && instance.hasJavaClass() && instance.getJavaClass() != null)
-					maybeField = Reflector.getMethods(instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
+				else if(hasLocalTypeContext(instance, contextClass))
+					maybeField = Reflector.getMethods(contextClass != null ? contextClass : instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
 				}
 
 			if(maybeField)    //field
@@ -1004,6 +1012,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(!(RT.first(call) instanceof Symbol))
 					throw new IllegalArgumentException("Malformed member expression");
 				Symbol sym = (Symbol) RT.first(call);
+				if(contextClass == null)
+					contextClass = maybeContextClass(sym.ns);
+
 				IPersistentVector argTags = argTagsOf(sym);
 				Symbol tag = tagOf(form);
 				PersistentVector args = PersistentVector.EMPTY;
@@ -1013,8 +1024,20 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(c != null)
 					return new StaticMethodExpr(source, line, column, tag, argTags, c, munge(sym.name), args, tailPosition);
 				else
-					return new InstanceMethodExpr(source, line, column, tag, argTags, instance, munge(sym.name), args, tailPosition);
+					return new InstanceMethodExpr(source, line, column, tag, argTags, contextClass, instance, munge(sym.name), args, tailPosition);
 				}
+		}
+
+		private Class maybeContextClass(String context) {
+			if(context == null) return null;
+
+			try {
+				Class c = maybeClass(Symbol.intern(null, context), false);
+				return c;
+			}
+			catch(Exception ex) {
+				return null;
+			}
 		}
 	}
 
@@ -1503,6 +1526,19 @@ static abstract class MethodExpr extends HostExpr{
 	}
 }
 
+private static boolean hasLocalTypeContext(Expr instance, Class contextClass) {
+	return instance != null && ((instance.hasJavaClass() && instance.getJavaClass() != null) || contextClass != null);
+}
+
+private static Class preferQualifiedContext(Expr instance, Class contextClass) {
+	if(contextClass != null) return contextClass;
+
+	if(instance.hasJavaClass() && instance.getJavaClass() != null)
+		return instance.getJavaClass();
+	else
+		return null;
+}
+
 static class InstanceMethodExpr extends MethodExpr{
 	public final Expr target;
 	public final String methodName;
@@ -1519,8 +1555,8 @@ static class InstanceMethodExpr extends MethodExpr{
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
 
-	public InstanceMethodExpr(String source, int line, int column, Symbol tag, IPersistentVector argTags, Expr target,
-			String methodName, IPersistentVector args, boolean tailPosition)
+	public InstanceMethodExpr(String source, int line, int column, Symbol tag, IPersistentVector argTags, Class contextClass,
+			Expr target, String methodName, IPersistentVector args, boolean tailPosition)
 			{
 		this.source = source;
 		this.line = line;
@@ -1530,9 +1566,9 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-		if(target.hasJavaClass() && target.getJavaClass() != null && argTags == null)
+		if(hasLocalTypeContext(target, contextClass) && argTags == null)
 			{
-			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
+			List methods = Reflector.getMethods(preferQualifiedContext(target, contextClass), args.count(), methodName, false);
 			if(methods.isEmpty())
 				{
 				method = null;
@@ -1540,7 +1576,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName());
+							SOURCE_PATH.deref(), line, column, methodName, preferQualifiedContext(target, contextClass).getName());
 					}
 				}
 			else
@@ -1570,15 +1606,15 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName(), getTypeStringForArgs(args));
+							SOURCE_PATH.deref(), line, column, methodName, preferQualifiedContext(target, contextClass).getName(), getTypeStringForArgs(args));
 					}
 				}
 			}
 		else if(argTags != null)
 			{
-			if (target.hasJavaClass())
+			if (contextClass != null || target.hasJavaClass())
 				{
-				Class c = target.getJavaClass();
+				Class c = preferQualifiedContext(target, contextClass);
 				this.method = (java.lang.reflect.Method) findMethod(c, methodName, argTags);
 				}
 			else
@@ -4233,256 +4269,6 @@ static public class FnExpr extends ObjExpr{
 //			}
 //		else
 			emit(C.EXPRESSION,objx,gen);
-	}
-}
-
-static public abstract class MethodValueExpr extends FnExpr
-{
-	private final List<Class> declaredSignature;
-	private final Symbol targetSymbol;
-	Class klass;
-	Executable target;
-
-	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>();
-	static {
-		coerceFns.put(double.class, Symbol.intern("double"));
-		coerceFns.put(double[].class, Symbol.intern("doubles"));
-		coerceFns.put(long.class, Symbol.intern("long"));
-		coerceFns.put(long[].class, Symbol.intern("longs"));
-		coerceFns.put(int.class, Symbol.intern("int"));
-		coerceFns.put(int[].class, Symbol.intern("ints"));
-		coerceFns.put(float.class, Symbol.intern("float"));
-		coerceFns.put(float[].class, Symbol.intern("floats"));
-		coerceFns.put(char.class, Symbol.intern("char"));
-		coerceFns.put(char[].class, Symbol.intern("chars"));
-		coerceFns.put(short.class, Symbol.intern("short"));
-		coerceFns.put(short[].class, Symbol.intern("shorts"));
-		coerceFns.put(byte.class, Symbol.intern("byte"));
-		coerceFns.put(byte[].class, Symbol.intern("bytes"));
-		coerceFns.put(boolean.class, Symbol.intern("boolean"));
-		coerceFns.put(boolean[].class, Symbol.intern("booleans"));
-	}
-
-	MethodValueExpr(Object tag, Class c, Symbol targetSymbol, IPersistentVector argTags)
-	{
-		super(tag);
-		this.klass = c;
-		this.declaredSignature = tagsToClasses(argTags);
-		this.targetSymbol = targetSymbol;
-		this.target = matchTarget(c, targetSymbol, argTags);
-
-		if(target.isVarArgs())
-			throw new UnsupportedOperationException("Varargs not supported for methods in value positions. " + targetSymbol);
-	}
-
-	abstract Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig);
-
-	public Executable getTarget() {
-		return target;
-	}
-
-	public Object eval(){
-		String name = buildThunkName();
-		ISeq form = buildThunk(name);
-		Expr retExpr = analyzeSeq(C.EVAL, form, name);
-		return retExpr.eval();
-	}
-
-	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-		String name = buildThunkName();
-		ISeq form = buildThunk(name);
-		Expr retExpr = analyzeSeq(context, form, name);
-		retExpr.emit(context, objx, gen);
-	}
-
-	private String buildThunkName(){
-		return "dot__" + targetSymbol + RT.nextID();
-	}
-
-	private ISeq buildThunk(String name) {
-		// (fn dot__new42 ([^T arg] (new Klass arg)))
-		// (fn dot__staticMethod42 (^r [^T arg] (. Klass staticMethod arg)))
-		// (fn dot__instanceMethod42 (^r [^Klass self ^T arg] (. ^Klass self instanceMethod arg)))
-		return	RT.list(Symbol.intern("fn"), Symbol.intern(name),
-				buildThunkBody(buildThunkParams()));
-	}
-
-	Symbol instanceParam() {
-		return null;
-	}
-
-	IPersistentVector buildThunkParams() {
-		Symbol seedParam = instanceParam();
-		IPersistentVector params = PersistentVector.EMPTY;
-
-		if(seedParam != null) params = params.cons(seedParam);
-
-		// [^T arg1 ^U arg2]
-		for(Class klass : target.getParameterTypes())
-		{
-			params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
-		}
-
-		return maybeHintReturn((PersistentVector)params);
-	}
-
-	abstract IPersistentVector maybeHintReturn(PersistentVector params);
-
-	protected Symbol maybeHintParam(Class klass, Symbol name){
-		if (klass.equals(Long.TYPE) || klass.equals(Double.TYPE) || !klass.isPrimitive())
-		{
-			return (Symbol) name.withMeta(PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName())));
-		}
-		return name;
-	}
-
-	private ISeq buildThunkBody(IPersistentVector params){
-		// ([^T arg] (. Klass staticMethod arg))
-		// ([^Klass self ^T arg] (. self instanceMethod arg))
-		// ([^T arg] (new Klass arg))
-		ISeq body = RT.list(params, buildThunkDispatch(params));
-		return body;
-	}
-
-	protected ISeq maybeCoerceArgs(ISeq args){
-		Class[] sig = target.getParameterTypes();
-		ArrayList ret = new ArrayList();
-
-		for(int i = 0; args != null; args = args.next(), i++)
-		{
-			if (coerceFns.containsKey(sig[i]))
-			{
-				ArrayList coerceCall = new ArrayList();
-				coerceCall.add(coerceFns.get(sig[i]));
-				coerceCall.add(args.first());
-				ret.add(RT.seq(coerceCall));
-			}
-			else
-			{
-				ret.add(args.first());
-			}
-		}
-
-		return RT.seq(ret);
-	}
-
-	abstract ISeq buildThunkDispatch(IPersistentVector params);
-
-	public boolean hasJavaClass() {
-		return true;
-	}
-}
-
-static public class ConstructorValueExpr extends MethodValueExpr
-{
-	public ConstructorValueExpr(Object tag, Class c, Symbol targetSymbol, IPersistentVector sig) {
-		super(tag, c, targetSymbol, sig);
-	}
-
-	@Override
-	Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig) {
-		return findMethod(c, klass.getName(), sig);
-	}
-
-	@Override
-	IPersistentVector maybeHintReturn(PersistentVector params) {
-		return params;
-	}
-
-	@Override
-	ISeq buildThunkDispatch(IPersistentVector params) {
-		// ([^T arg] (new Klass arg))
-		// ([^long arg1 ^double arg2] (new Klass arg1 arg2))
-		// ([prim] (new Klass (coercefn prim)))
-		return RT.listStar(Symbol.intern("new"), Symbol.intern(klass.getName()), maybeCoerceArgs(params.seq()));
-	}
-
-	@Override
-	public Class getJavaClass() {
-		return klass;
-	}
-}
-
-static public class StaticMethodValueExpr extends MethodValueExpr
-{
-	public StaticMethodValueExpr(Object tag, Class c, Symbol targetSymbol, IPersistentVector sig) {
-		super(tag, c, targetSymbol, sig);
-	}
-
-	@Override
-	Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig) {
-		return findMethod(c, targetSymbol.name, sig);
-	}
-
-	@Override
-	IPersistentVector maybeHintReturn(PersistentVector params) {
-		Class t = ((java.lang.reflect.Method) target).getReturnType();
-
-		if (t.isPrimitive() && (t.equals(Long.TYPE) || t.equals(Double.TYPE))) {
-			return params.withMeta(PersistentHashMap.create(Keyword.intern("tag"), coerceFns.get(t)));
-		}
-
-		return params;
-	}
-
-	@Override
-	ISeq buildThunkDispatch(IPersistentVector params) {
-		// ([^T arg] (. Klass staticMethod arg))
-		// ([^long arg1 ^double arg2] (. Klass staticMethod arg1 arg2))
-		// ([prim] (. Klass staticMethod (coercefn prim)))
-		return RT.listStar(Symbol.intern("."),
-				Symbol.intern(klass.getName()), Symbol.intern(target.getName()),
-				maybeCoerceArgs(params.seq()));
-	}
-
-	@Override
-	public Class getJavaClass() {
-		return ((java.lang.reflect.Method)this.target).getReturnType();
-	}
-}
-
-static public class InstanceMethodValueExpr extends MethodValueExpr
-{
-	public InstanceMethodValueExpr(Object tag, Class c, Symbol targetSymbol, IPersistentVector sig) {
-		super(tag, c, targetSymbol, sig);
-	}
-
-	@Override
-	Executable matchTarget(Class c, Symbol targetSymbol, IPersistentVector sig) {
-		return findMethod(c, targetSymbol.name, sig);
-	}
-
-	@Override
-	Symbol instanceParam() {
-		// seed params with this as first binding
-		IPersistentMap m = PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName()));
-		return (Symbol) Symbol.intern("this" + RT.nextID()).withMeta(m);
-	}
-
-	@Override
-	IPersistentVector maybeHintReturn(PersistentVector params) {
-		Class t = ((java.lang.reflect.Method) target).getReturnType();
-
-		if (t.isPrimitive() && (t.equals(Long.TYPE) || t.equals(Double.TYPE))) {
-			return params.withMeta(PersistentHashMap.create(Keyword.intern("tag"), coerceFns.get(t)));
-		}
-
-		return params;
-	}
-
-	@Override
-	ISeq buildThunkDispatch(IPersistentVector params) {
-		// ([^Klass this ^T arg] (. this instanceMethod arg))
-		// ([^long arg1 ^double arg2] (. this instanceMethod arg1 arg2))
-		// ([^Klass this prim] (. this instanceMethod (coercefn prim)))
-		return RT.listStar(Symbol.intern("."),
-				params.seq().first(), Symbol.intern(target.getName()),
-				maybeCoerceArgs(params.seq().next()));
-	}
-
-	@Override
-	public Class getJavaClass() {
-		return ((java.lang.reflect.Method)this.target).getReturnType();
 	}
 }
 
@@ -7384,24 +7170,19 @@ public static Object macroexpand1(Object x) {
 				Symbol sym = (Symbol) op;
 				String sname = sym.name;
 				//(.substring s 2 5) => (. s substring 2 5)
-				//(.String/substring s 2 5) => (. ^String s substring 2 5)
+				//(.String/substring s 2 5) => (. s String/substring 2 5)
 				if(namesInstanceMember(sym) || namesQualifiedInstanceMember(sym))
 					{
 					if(RT.length(form) < 2)
 						throw new IllegalArgumentException(
 								"Malformed member expression, expecting (.member target ...)");
 
-					Symbol meth = conveyArgTags(sym, (namesInstanceMember(sym) ? Symbol.intern(sname.substring(1)) : Symbol.intern(sname)));
-					Symbol maybeQualifiedHint = namesQualifiedInstanceMember(sym) ? Symbol.intern(sym.ns.substring(1)) : null;
+					Symbol meth = conveyArgTags(sym, (namesInstanceMember(sym) ? Symbol.intern(sname.substring(1)) : Symbol.intern(sym.ns.substring(1), sname)));
 
 					Object target = RT.second(form);
 					if(HostExpr.maybeClass(target, false) != null)
 						{
 						target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY,CLASS));
-						}
-					else if (maybeQualifiedHint != null && target instanceof IObj)
-						{
-						target = ((IObj)target).withMeta(RT.map(RT.TAG_KEY, maybeQualifiedHint));
 						}
 
 					return preserveTag(form, RT.listStar(DOT, target, meth, form.next().next()));
@@ -7657,61 +7438,42 @@ static void addParameterAnnotation(Object visitor, IPersistentMap meta, int i){
 
 private static Expr analyzeSymbol(Symbol sym) {
 	Symbol tag = tagOf(sym);
+	IPersistentVector argTags = argTagsOf(sym);
 	if(sym.ns == null)
 		{
 		LocalBinding b = referenceLocal(sym);
 		if(b != null)
+            {
+            return new LocalBindingExpr(b, tag);
+            }
+		else if(namesConstructor(sym)) // Class.
 			{
-			return new LocalBindingExpr(b, tag);
-			}
-		else
-			{
-			//maybe Klass. member symbol
-			Class c = null;
-
-			if (namesConstructor(sym))
-				{
-				c = HostExpr.maybeClass(Symbol.intern(null, sym.name.substring(0, sym.name.length() - 1)), false);
-				}
-
-			if (c != null)
-				{
-				IPersistentVector argTags = argTagsOf(sym);
-				return new ConstructorValueExpr(null, c, Symbol.intern(null, sym.name), argTags);
-				}
+			return MethodValues.buildMethodThunk(sym, argTags);
 			}
 		}
 	else
+		{
 		if(namespaceFor(sym) == null)
 			{
 			Symbol nsSym = Symbol.intern(sym.ns);
 			Class c = HostExpr.maybeClass(nsSym, false);
-
-			if (c == null)
-				{
-				// maybe .Klass/method
-				if (namesQualifiedInstanceMember(sym))
-					{
-					c = HostExpr.maybeClass(Symbol.intern(null, sym.ns.substring(1)), false);
-					}
-				}
-
 			if(c != null)
 				{
 				if(Reflector.getField(c, sym.name, true) != null)
 					{
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
 					}
-				else
+				else if(namesStaticMember(sym)) // Class/method
 					{
-					IPersistentVector argTags = argTagsOf(sym);
-
-					if (namesQualifiedInstanceMember(sym))
-						return new InstanceMethodValueExpr(null, c, Symbol.intern(null, sym.name), argTags);
-					else
-						return new StaticMethodValueExpr(null, c, Symbol.intern(null, sym.name), argTags);
+					return MethodValues.buildMethodThunk(sym, argTags);
 					}
+				throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
 				}
+			else if(namesQualifiedInstanceMember(sym)) // .Class/method
+				{
+				return MethodValues.buildMethodThunk(sym, argTags);
+				}
+			}
 		}
 	//Var v = lookupVar(sym, false);
 //	Var v = lookupVar(sym, false);
@@ -9505,89 +9267,236 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 		};
     }
 
-private static Predicate<Executable> signatureMatcherFor(List<Class> sig)
+private static boolean signatureMatches(List<Class> sig, Executable method)
 {
-	if(sig.isEmpty()) return e -> true;
+	Class[] methodSig = method.getParameterTypes();
+	if(methodSig.length != sig.size()) return false;
 
-	return tgt -> {
-		Class[] targetSig = tgt.getParameterTypes();
-		for (int i = 0; i < targetSig.length; i++) {
-			if (sig.get(i) == null) { // ignoring placeholders
-			} else if (!sig.get(i).equals(targetSig[i])) {
-				return false;
-			}
-		}
-		return true;
-	};
+	for (int i = 0; i < methodSig.length; i++)
+		if (sig.get(i) != null && !sig.get(i).equals(methodSig[i]))
+			return false;
+
+	return true;
 };
 
-private static int findLeastArity(List<Executable> targets) {
-	Optional<Executable> maybeTarget = targets.stream().min(Comparator.comparing(Executable::getParameterCount));
-	return maybeTarget.isPresent() ? maybeTarget.get().getParameterCount() : -1;
-}
-
-private static List<Executable> getMethodsByName(String name, Class c) {
-	List<Executable> methods = new ArrayList<>();
-	final Executable[] targets = (c.getName().equals(name)) ? c.getConstructors() : c.getMethods();
-
-	for(int i=0; i < targets.length; i++) {
-		if(targets[i].getName().equals(name))
-			methods.add(targets[i]);
-	}
-
-	return methods;
-}
-
-// This method attempts to find exactly one matching method in an array of Executables given
-// the enclosing class, method name, and symbolic signature, which may include special
-// type specifiers like long, longs, and string encoded array classes. Additionally, the
-// signature may contain underscores which signal that the type in that position is
-// inconsequential for finding the method and therefore ignored.
-//
-// This method attempts to resolve all classes in the given signature and throws if any
-// class aliases cannot resolve.
-//
-// In the case where a signature is null, this method will attempt to find the method with the
-// given name having the least arity count. Also, if the method finds more than one valid Executable
-// then it will throw an exception indicating that the signature was insufficient to
-// disambiguate the desired method. Methods/constructors with varargs are currently not supported.
-private static Executable findMethod(Class c, String targetName, IPersistentVector argTags) {
-	final List<Executable> targets = getMethodsByName(targetName, c);
-	final List<Class> declaredSignature = tagsToClasses(argTags);
-	final int targetArity = argTags != null ? argTags.count() : findLeastArity(targets);
-
-	List<Executable> filteredTargets =
-			targets.stream()
-					.filter(tgt -> tgt.getParameterCount() == targetArity)
-					.filter(signatureMatcherFor(declaredSignature))
-					.filter(tgt -> !tgt.isSynthetic()) // remove bridge/lambda methods
-					.collect(Collectors.toList());
-
-	if(filteredTargets.isEmpty())
-		throw new IllegalArgumentException("Could not resolve " + targetName + " from arg-tags in class " + c.getName());
-	if(filteredTargets.size() > 1)
-		throw new IllegalArgumentException("Ambiguous arg-tags for " + targetName + " in class " + c.getName());
-
-	return filteredTargets.get(0);
-}
+final static Symbol ARG_TAG_ANY = Symbol.intern(null, "_");
 
 // calls tagToClass on every element, unless it encounters _ which becomes null
 private static List<Class> tagsToClasses(IPersistentVector argTags) {
-	List<Class> tsig = new ArrayList<>();
-	for (ISeq s = RT.seq(argTags); s!=null; s = s.next())
-		{
+	List<Class> sig = new ArrayList<>();
+	for (ISeq s = RT.seq(argTags); s!=null; s = s.next()) {
 		Object t = s.first();
-		Object maybeClass = null;
+		if (t.equals(ARG_TAG_ANY))
+			sig.add(null);
+		else
+			sig.add(HostExpr.tagToClass(t));
+	}
+	return sig;
+}
 
-		if (!t.equals(Symbol.intern(null, "_")))
-			{
-			maybeClass = HostExpr.tagToClass(t);
-			if (maybeClass == null)
-				Util.sneakyThrow(new ClassNotFoundException(t.toString()));
-			}
+private static RuntimeException buildResolutionError(Executable[] methods, List<Executable> filteredMethods, Class c, String methodName, IPersistentVector argTags) {
+	boolean isCtor = methodNamesConstructor(c, methodName);
+	String type = isCtor ? "constructor" : "method";
+	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 
-		tsig.add((Class) maybeClass);
+	if(argTags == null)
+		return new IllegalArgumentException("No arg-tags provided for " + coord);
+	else if(methods.length == 0)
+		return new IllegalArgumentException("Could not find " + coord);
+	else if(filteredMethods.isEmpty())
+		return new IllegalArgumentException("No matching " + coord + " found using arg-tags " + argTags);
+	else // methods.size() > 1
+		return new IllegalArgumentException("Multiple matching " + coord + " found using arg-tags " + argTags);
+}
+
+private static boolean methodNamesConstructor(Class c, String methodName) {
+	return c.getName().equals(methodName);
+}
+
+// This method will attempt to find the method that matches the given argTags. If argTags
+// is null then the method throws an exception. Also, if the method finds more than one valid
+// method/ctor then it will throw an exception indicating that the signature was insufficient to
+// disambiguate the desired method.
+private static Executable findMethod(Class c, String methodName, IPersistentVector argTags) {
+	if(argTags == null) throw buildResolutionError(null, null, c, methodName, argTags);
+
+	final Executable[] methods = methodNamesConstructor(c, methodName) ? c.getConstructors() : c.getMethods();
+	final List<Class> argTagsSignature = tagsToClasses(argTags);
+	final int arity = argTags.count();
+
+	List<Executable> filteredMethods =
+			Arrays.stream(methods)
+					.filter(m -> m.getName().equals(methodName))
+					.filter(m -> m.getParameterCount() == arity)
+					.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
+					.filter(m -> signatureMatches(argTagsSignature, m))
+					.collect(Collectors.toList());
+
+	if(filteredMethods.size() == 1) return filteredMethods.get(0);
+
+	throw buildResolutionError(methods, filteredMethods, c, methodName, argTags);
+}
+
+public static class MethodValues {
+	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>();
+	static {
+		coerceFns.put(double.class, Symbol.intern("double"));
+		coerceFns.put(double[].class, Symbol.intern("doubles"));
+		coerceFns.put(long.class, Symbol.intern("long"));
+		coerceFns.put(long[].class, Symbol.intern("longs"));
+		coerceFns.put(int.class, Symbol.intern("int"));
+		coerceFns.put(int[].class, Symbol.intern("ints"));
+		coerceFns.put(float.class, Symbol.intern("float"));
+		coerceFns.put(float[].class, Symbol.intern("floats"));
+		coerceFns.put(char.class, Symbol.intern("char"));
+		coerceFns.put(char[].class, Symbol.intern("chars"));
+		coerceFns.put(short.class, Symbol.intern("short"));
+		coerceFns.put(short[].class, Symbol.intern("shorts"));
+		coerceFns.put(byte.class, Symbol.intern("byte"));
+		coerceFns.put(byte[].class, Symbol.intern("bytes"));
+		coerceFns.put(boolean.class, Symbol.intern("boolean"));
+		coerceFns.put(boolean[].class, Symbol.intern("booleans"));
+	}
+
+	// Currently returns a new FnExpr on every call, caching is not implemented and is TBD.
+	public static FnExpr buildMethodThunk(Symbol memberSymbol, IPersistentVector argTags) {
+		List<Class> declaredSignature = tagsToClasses(argTags);
+		Class c = null;
+
+		if (namesConstructor(memberSymbol)) {
+			c = HostExpr.maybeClass(Symbol.intern(null, memberSymbol.name.substring(0, memberSymbol.name.length() - 1)), false);
+			return buildCtorThunk(c, memberSymbol, argTags, declaredSignature);
 		}
-	return tsig;
+		else if(namesQualifiedInstanceMember(memberSymbol)) {
+			c = HostExpr.maybeClass(Symbol.intern(null, memberSymbol.ns.substring(1)), false);
+			return buildInstanceMethodThunk(c, memberSymbol, argTags, declaredSignature);
+		}
+		else {
+			c = HostExpr.maybeClass(Symbol.intern(null, memberSymbol.ns), false);
+			return buildStaticMethodThunk(c, memberSymbol, argTags, declaredSignature);
+		}
+	}
+
+	private static FnExpr buildStaticMethodThunk(Class c, Symbol methodName, IPersistentVector argTags, List<Class> declaredSignature) {
+		Executable method = findMethod(c, methodName.name, argTags);
+		Function<IPersistentVector, ISeq> staticCallBuilder = (params) -> {
+			// ([^T arg] (. Klass staticMethod arg))
+			// ([^long arg1 ^double arg2] (. Klass staticMethod arg1 arg2))
+			// ([prim] (. Klass staticMethod (coercefn prim)))
+			return RT.listStar(Symbol.intern("."),
+					Symbol.intern(c.getName()), Symbol.intern(method.getName()),
+					maybeCoerceArgs(method, params.seq()));
+		};
+		String name = buildThunkName(methodName.name);
+		ISeq form = buildThunk(method, name, c, declaredSignature, null, staticCallBuilder);
+		Expr retExpr = analyzeSeq(C.EVAL, form, name);
+		return (FnExpr) retExpr;
+	}
+
+	private static FnExpr buildInstanceMethodThunk(Class c, Symbol methodName, IPersistentVector argTags, List<Class> declaredSignature) {
+		Executable method = findMethod(c, methodName.name, argTags);
+		Function<IPersistentVector, ISeq> instanceCallBuilder = (params) -> {
+			// ([^Klass this ^T arg] (. this instanceMethod arg))
+			// ([^long arg1 ^double arg2] (. this instanceMethod arg1 arg2))
+			// ([^Klass this prim] (. this instanceMethod (coercefn prim)))
+			return RT.listStar(Symbol.intern("."),
+					params.seq().first(), Symbol.intern(method.getName()),
+					maybeCoerceArgs(method, params.seq().next()));
+		};
+		String name = buildThunkName(methodName.name);
+		IPersistentMap m = PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(c.getName()));
+		Symbol instanceParam = (Symbol) Symbol.intern(null, "this" + RT.nextID()).withMeta(m);
+		ISeq form = buildThunk(method, name, c, declaredSignature, instanceParam, instanceCallBuilder);
+		Expr retExpr = analyzeSeq(C.EVAL, form, name);
+		return (FnExpr) retExpr;
+	}
+
+	private static FnExpr buildCtorThunk(Class c, Symbol methodName, IPersistentVector argTags, List<Class> declaredSignature) {
+		Executable ctor = findMethod(c, c.getName(), argTags);
+		Function<IPersistentVector, ISeq> ctorCallBuilder = (params) -> {
+			return RT.listStar(Symbol.intern("new"), Symbol.intern(c.getName()), maybeCoerceArgs(ctor, params.seq()));
+		};
+		String name = buildThunkName(methodName.name);
+		ISeq form = buildThunk(ctor, name, c, declaredSignature, null, ctorCallBuilder);
+		Expr retExpr = analyzeSeq(C.EVAL, form, name);
+		return (FnExpr) retExpr;
+	}
+
+	private static String buildThunkName(String methodName){
+		return "dot__" + munge(methodName) + RT.nextID();
+	}
+
+	private static ISeq buildThunk(Executable method, String name, Class c, List<Class> declaredSignature, Symbol instanceParam, Function<IPersistentVector, ISeq> callBuilder) {
+		// (fn dot__new42 ([^T arg] (new Klass arg)))
+		// (fn dot__staticMethod42 (^r [^T arg] (. Klass staticMethod arg)))
+		// (fn dot__instanceMethod42 (^r [^Klass self ^T arg] (. ^Klass self instanceMethod arg)))
+		IPersistentVector params = buildThunkParams(method, instanceParam);
+		return	RT.list(Symbol.intern("fn"), Symbol.intern(name),
+				buildThunkBody(maybeHintReturn(method, (PersistentVector) params), callBuilder));
+	}
+
+	static IPersistentVector buildThunkParams(Executable target, Symbol seedParam) {
+		IPersistentVector params = PersistentVector.EMPTY;
+
+		if(seedParam != null) params = params.cons(seedParam);
+
+		// [^T arg1 ^U arg2]
+		for(Class klass : target.getParameterTypes())
+		{
+			params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
+		}
+
+		return params;
+	}
+
+	static ISeq buildThunkBody(IPersistentVector params, Function<IPersistentVector, ISeq> callBuilder){
+		// ([^T arg] (. Klass staticMethod arg))
+		// ([^Klass self ^T arg] (. self instanceMethod arg))
+		// ([^T arg] (new Klass arg))
+		ISeq body = RT.list(params, callBuilder.apply(params));
+		return body;
+	}
+
+	static protected Symbol maybeHintParam(Class klass, Symbol name){
+		if (klass.equals(Long.TYPE) || klass.equals(Double.TYPE) || !klass.isPrimitive())
+		{
+			return (Symbol) name.withMeta(PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName())));
+		}
+		return name;
+	}
+
+	static IPersistentVector maybeHintReturn(Executable target, PersistentVector params) {
+		if(target instanceof Constructor) return params;
+
+		Class t = ((java.lang.reflect.Method) target).getReturnType();
+
+		if (t.isPrimitive() && (t.equals(Long.TYPE) || t.equals(Double.TYPE))) {
+			return params.withMeta(PersistentHashMap.create(Keyword.intern("tag"), coerceFns.get(t)));
+		}
+
+		return params;
+	}
+
+	static protected ISeq maybeCoerceArgs(Executable target, ISeq args){
+		Class[] sig = target.getParameterTypes();
+		ArrayList ret = new ArrayList();
+
+		for(int i = 0; args != null; args = args.next(), i++)
+		{
+			if (coerceFns.containsKey(sig[i]))
+			{
+				ArrayList coerceCall = new ArrayList();
+				coerceCall.add(coerceFns.get(sig[i]));
+				coerceCall.add(args.first());
+				ret.add(RT.seq(coerceCall));
+			}
+			else
+			{
+				ret.add(args.first());
+			}
+		}
+
+		return RT.seq(ret);
+	}
 }
 }
