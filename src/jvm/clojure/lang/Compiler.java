@@ -7400,7 +7400,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 			if (c != null)
 				{
 				IPersistentVector argTags = argTagsOf(sym);
-				return MethodValues.buildMethodThunk(c, sym, argTags);
+				return MethodValues.buildMethodThunk(sym, argTags);
 				}
 			}
 		}
@@ -7428,7 +7428,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 				else
 					{
 					IPersistentVector argTags = argTagsOf(sym);
-					return MethodValues.buildMethodThunk(c, sym, argTags);
+					return MethodValues.buildMethodThunk(sym, argTags);
 					}
 				}
 		}
@@ -9307,15 +9307,22 @@ public static class MethodValues {
 	}
 
 	// Currently returns a new FnExpr on every call, caching is not implemented and is TBD.
-	public static FnExpr buildMethodThunk(Class c, Symbol memberSymbol, IPersistentVector argTags) {
+	public static FnExpr buildMethodThunk(Symbol memberSymbol, IPersistentVector argTags) {
 		List<Class> declaredSignature = tagsToClasses(argTags);
+		Class c = null;
 
-		if (namesConstructor(memberSymbol))
+		if (namesConstructor(memberSymbol)) {
+			c = HostExpr.maybeClass(Symbol.intern(null, memberSymbol.name.substring(0, memberSymbol.name.length() - 1)), false);
 			return buildCtorThunk(c, memberSymbol, argTags, declaredSignature);
-		else if(namesQualifiedInstanceMember(memberSymbol))
+		}
+		else if(namesQualifiedInstanceMember(memberSymbol)) {
+			c = HostExpr.maybeClass(Symbol.intern(null, memberSymbol.ns.substring(1)), false);
 			return buildInstanceMethodThunk(c, memberSymbol, argTags, declaredSignature);
-		else
+		}
+		else {
+			c = HostExpr.maybeClass(Symbol.intern(null, memberSymbol.ns), false);
 			return buildStaticMethodThunk(c, memberSymbol, argTags, declaredSignature);
+		}
 	}
 
 	private static FnExpr buildStaticMethodThunk(Class c, Symbol methodName, IPersistentVector argTags, List<Class> declaredSignature) {
