@@ -983,10 +983,11 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				{
 				Symbol sym = (Symbol) RT.third(form);
 				contextClass = maybeContextClass(sym.ns);
+				Class preferredContext = preferQualifiedContext(instance, contextClass);
 				if(c != null)
 					maybeField = Reflector.getMethods(c, 0, munge(sym.name), true).size() == 0;
-				else if(hasLocalTypeContext(instance, contextClass))
-					maybeField = Reflector.getMethods(contextClass != null ? contextClass : instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
+				else if(preferredContext != null)
+					maybeField = Reflector.getMethods(preferredContext, 0, munge(sym.name), false).size() == 0;
 				}
 
 			if(maybeField)    //field
@@ -1467,14 +1468,10 @@ static abstract class MethodExpr extends HostExpr{
 	}
 }
 
-private static boolean hasLocalTypeContext(Expr instance, Class contextClass) {
-	return instance != null && ((instance.hasJavaClass() && instance.getJavaClass() != null) || contextClass != null);
-}
-
 private static Class preferQualifiedContext(Expr instance, Class contextClass) {
 	if(contextClass != null) return contextClass;
 
-	if(instance.hasJavaClass() && instance.getJavaClass() != null)
+	if(instance != null && instance.hasJavaClass() && instance.getJavaClass() != null)
 		return instance.getJavaClass();
 	else
 		return null;
@@ -1507,9 +1504,10 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-		if(hasLocalTypeContext(target, contextClass) && argTags == null)
+		Class preferredContext = preferQualifiedContext(target, contextClass);
+		if(preferredContext != null && argTags == null)
 			{
-			List methods = Reflector.getMethods(preferQualifiedContext(target, contextClass), args.count(), methodName, false);
+			List methods = Reflector.getMethods(preferredContext, args.count(), methodName, false);
 			if(methods.isEmpty())
 				{
 				method = null;
@@ -1553,10 +1551,9 @@ static class InstanceMethodExpr extends MethodExpr{
 			}
 		else if(argTags != null)
 			{
-			if (contextClass != null || target.hasJavaClass())
+			if (preferredContext != null)
 				{
-				Class c = preferQualifiedContext(target, contextClass);
-				this.method = (java.lang.reflect.Method) findMethod(c, methodName, argTags);
+				this.method = (java.lang.reflect.Method) findMethod(preferredContext, methodName, argTags);
 				}
 			else
 				throw new IllegalArgumentException("Ambiguous arg-tags for " + methodName + ", no target instance class given.");
