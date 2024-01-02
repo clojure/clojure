@@ -970,7 +970,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			int line = lineDeref();
 			int column = columnDeref();
 			String source = (String) SOURCE.deref();
-			Class contextClass = null;
+			Class qualifierClass = null;
 			Class c = maybeClass(RT.second(form), false);
 			//at this point c will be non-null if static
 			Expr instance = null;
@@ -982,12 +982,12 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			if(maybeField && !(((Symbol)RT.third(form)).name.charAt(0) == '-'))
 				{
 				Symbol sym = (Symbol) RT.third(form);
-				contextClass = maybeContextClass(sym.ns);
-				Class preferredContext = preferQualifiedContext(instance, contextClass);
+				qualifierClass = maybeQualifierClass(sym.ns);
+				Class instanceClass = maybeInstanceClass(instance, qualifierClass);
 				if(c != null)
 					maybeField = Reflector.getMethods(c, 0, munge(sym.name), true).size() == 0;
-				else if(preferredContext != null)
-					maybeField = Reflector.getMethods(preferredContext, 0, munge(sym.name), false).size() == 0;
+				else if(instanceClass != null)
+					maybeField = Reflector.getMethods(instanceClass, 0, munge(sym.name), false).size() == 0;
 				}
 
 			if(maybeField)    //field
@@ -1007,8 +1007,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(!(RT.first(call) instanceof Symbol))
 					throw new IllegalArgumentException("Malformed member expression");
 				Symbol sym = (Symbol) RT.first(call);
-				if(contextClass == null)
-					contextClass = maybeContextClass(sym.ns);
+				if(qualifierClass == null)
+					qualifierClass = maybeQualifierClass(sym.ns);
 
 				IPersistentVector argTags = argTagsOf(sym);
 				Symbol tag = tagOf(form);
@@ -1019,15 +1019,15 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(c != null)
 					return new StaticMethodExpr(source, line, column, tag, argTags, c, munge(sym.name), args, tailPosition);
 				else
-					return new InstanceMethodExpr(source, line, column, tag, argTags, contextClass, instance, munge(sym.name), args, tailPosition);
+					return new InstanceMethodExpr(source, line, column, tag, argTags, qualifierClass, instance, munge(sym.name), args, tailPosition);
 				}
 		}
 
-		private Class maybeContextClass(String context) {
-			if(context == null) return null;
+		private Class maybeQualifierClass(String qualifier) {
+			if(qualifier == null) return null;
 
 			try {
-				Class c = maybeClass(Symbol.intern(null, context), false);
+				Class c = maybeClass(Symbol.intern(null, qualifier), false);
 				return c;
 			}
 			catch(Exception ex) {
@@ -1468,11 +1468,15 @@ static abstract class MethodExpr extends HostExpr{
 	}
 }
 
-private static Class preferQualifiedContext(Expr instance, Class contextClass) {
-	if(contextClass != null) return contextClass;
-
-	if(instance != null && instance.hasJavaClass() && instance.getJavaClass() != null)
-		return instance.getJavaClass();
+// Returns the class of the instance if known
+// 1. Qualifier class if it exists
+// 2. Instance expression type if it exists
+// 3. null if unknown
+private static Class maybeInstanceClass(Expr instanceExpr, Class qualifierClass) {
+	if(qualifierClass != null)
+		return qualifierClass;
+	else if(instanceExpr != null && instanceExpr.hasJavaClass() && instanceExpr.getJavaClass() != null)
+		return instanceExpr.getJavaClass();
 	else
 		return null;
 }
@@ -1493,7 +1497,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
 
-	public InstanceMethodExpr(String source, int line, int column, Symbol tag, IPersistentVector argTags, Class contextClass,
+	public InstanceMethodExpr(String source, int line, int column, Symbol tag, IPersistentVector argTags, Class qualifierClass,
 			Expr target, String methodName, IPersistentVector args, boolean tailPosition)
 			{
 		this.source = source;
@@ -1504,10 +1508,10 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-		Class preferredContext = preferQualifiedContext(target, contextClass);
-		if(preferredContext != null && argTags == null)
+		Class instanceClass = maybeInstanceClass(target, qualifierClass);
+		if(instanceClass != null && argTags == null)
 			{
-			List methods = Reflector.getMethods(preferredContext, args.count(), methodName, false);
+			List methods = Reflector.getMethods(instanceClass, args.count(), methodName, false);
 			if(methods.isEmpty())
 				{
 				method = null;
@@ -1515,7 +1519,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
-							SOURCE_PATH.deref(), line, column, methodName, preferQualifiedContext(target, contextClass).getName());
+							SOURCE_PATH.deref(), line, column, methodName, maybeInstanceClass(target, qualifierClass).getName());
 					}
 				}
 			else
@@ -1545,15 +1549,15 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
-							SOURCE_PATH.deref(), line, column, methodName, preferQualifiedContext(target, contextClass).getName(), getTypeStringForArgs(args));
+							SOURCE_PATH.deref(), line, column, methodName, maybeInstanceClass(target, qualifierClass).getName(), getTypeStringForArgs(args));
 					}
 				}
 			}
 		else if(argTags != null)
 			{
-			if (preferredContext != null)
+			if (instanceClass != null)
 				{
-				this.method = (java.lang.reflect.Method) findMethod(preferredContext, methodName, argTags);
+				this.method = (java.lang.reflect.Method) findMethod(instanceClass, methodName, argTags);
 				}
 			else
 				throw new IllegalArgumentException("Ambiguous arg-tags for " + methodName + ", no target instance class given.");
