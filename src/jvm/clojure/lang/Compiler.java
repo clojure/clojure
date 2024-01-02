@@ -3975,6 +3975,7 @@ static public class FnExpr extends ObjExpr{
 	//	String superName = null;
     Class jc;
 
+
 	public FnExpr(Object tag){
 		super(tag);
 	}
@@ -9267,7 +9268,7 @@ private static Executable findMethod(Class c, String methodName, IPersistentVect
 	throw buildResolutionError(methods, filteredMethods, c, methodName, argTags);
 }
 
-public static class MethodValues {
+static class MethodValues {
 	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>();
 	static {
 		coerceFns.put(double.class, Symbol.intern("double"));
