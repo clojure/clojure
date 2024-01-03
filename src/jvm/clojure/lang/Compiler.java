@@ -3979,7 +3979,6 @@ static public class FnExpr extends ObjExpr{
 	//	String superName = null;
     Class jc;
 
-
 	public FnExpr(Object tag){
 		super(tag);
 	}
