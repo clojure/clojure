@@ -1519,7 +1519,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
-							SOURCE_PATH.deref(), line, column, methodName, maybeInstanceClass(target, qualifierClass).getName());
+							SOURCE_PATH.deref(), line, column, methodName, instanceClass.getName());
 					}
 				}
 			else
@@ -6998,7 +6998,7 @@ static public IFn isInline(Object op, int arity) {
 }
 
 public static boolean namesStaticMember(Symbol sym){
-	return sym.ns != null && namespaceFor(sym) == null && sym.ns.charAt(0) != '.';
+	return sym.ns != null && namespaceFor(sym) == null && !namesQualifiedInstanceMember(sym);
 }
 
 public static boolean namesInstanceMember(Symbol sym) {
