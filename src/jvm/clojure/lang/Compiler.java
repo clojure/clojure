@@ -1143,6 +1143,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return "L" + c.getName() + ";";
 	}
 
+	// componentArrayType (maybe qualified or prim) ending in 1+ *'s, e.g. java.lang.String**
+	// capture group 1 = componentArrayType, group 2 = dimension *'s
 	final static Pattern ARRAY_TYPE_PATTERN = Pattern.compile("([^*]+)(\\*+)");
 
 	public static Class maybeArrayClass(Symbol sym) {
@@ -1180,7 +1182,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			componentClass = componentClass.getComponentType();
 		}
 
-		StringBuilder repr = new StringBuilder(componentClass.getName());
+		String componentClassName = componentClass.getName();
+		StringBuilder repr = new StringBuilder(componentClassName.length() + dim);
+		repr.append(componentClassName);
 		for(int i=0; i<dim; i++)
 			repr.append("*");
 
