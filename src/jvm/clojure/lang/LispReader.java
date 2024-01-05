@@ -1043,15 +1043,16 @@ public static class SyntaxQuoteReader extends AFn{
             else if(resolver != null)
                 {
                 Symbol nsym = null;
+                boolean qualifiedInstance = Compiler.namesQualifiedInstanceMember(sym);
                 if(sym.ns != null){
-                    Symbol alias = Symbol.intern(null, sym.ns);
+                    Symbol alias = Symbol.intern(null, qualifiedInstance ? sym.ns.substring(1) : sym.ns);
                     nsym = resolver.resolveClass(alias);
                     if(nsym == null)
                         nsym = resolver.resolveAlias(alias);
                     }
                 if(nsym != null){
                     // Classname/foo -> package.qualified.Classname/foo
-                    sym = Symbol.intern(nsym.name, sym.name);
+                    sym = Symbol.intern(qualifiedInstance ? "." + nsym.name : nsym.name, sym.name);
                     }
                 else if(sym.ns == null){
                     Symbol rsym = resolver.resolveClass(sym);
@@ -1064,17 +1065,20 @@ public static class SyntaxQuoteReader extends AFn{
                 }
                 //leave alone if qualified
                 }
-			else
+			else  // default resolver
 				{
+				boolean qualifiedInstance = Compiler.namesQualifiedInstanceMember(sym);
 				Object maybeClass = null;
 				if(sym.ns != null)
-					maybeClass = Compiler.currentNS().getMapping(
-							Symbol.intern(null, sym.ns));
+					{
+					String ns = qualifiedInstance ? sym.ns.substring(1) : sym.ns;
+					maybeClass = Compiler.currentNS().getMapping(Symbol.intern(null, ns));
+					}
 				if(maybeClass instanceof Class)
 					{
 					// Classname/foo -> package.qualified.Classname/foo
-					sym = Symbol.intern(
-							((Class)maybeClass).getName(), sym.name);
+					String className = ((Class)maybeClass).getName();
+					sym = Symbol.intern(qualifiedInstance ? "." + className : className, sym.name);
 					}
 				else
 					sym = Compiler.resolveSymbol(sym);

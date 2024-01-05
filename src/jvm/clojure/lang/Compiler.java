@@ -387,12 +387,6 @@ static Symbol resolveSymbol(Symbol sym){
 		return sym;
 	if(sym.ns != null)
 		{
-		if(namesQualifiedInstanceMember(sym))
-			{
-			Object o = currentNS().getMapping(Symbol.intern(sym.ns.substring(1)));
-			if(o instanceof Class)
-				return Symbol.intern("."+((Class) o).getName(), sym.name);
-			}
 		Namespace ns = namespaceFor(sym);
 		if(ns == null || (ns.name.name == null ? sym.ns == null : ns.name.name.equals(sym.ns)))
 			return sym;
