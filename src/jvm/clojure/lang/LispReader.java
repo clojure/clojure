@@ -1051,7 +1051,7 @@ public static class SyntaxQuoteReader extends AFn{
                         nsym = resolver.resolveAlias(alias);
                     }
                 if(nsym != null){
-                    // Classname/foo -> package.qualified.Classname/foo
+                    // [.]Classname/foo -> [.]package.qualified.Classname/foo
                     sym = Symbol.intern(qualifiedInstance ? "." + nsym.name : nsym.name, sym.name);
                     }
                 else if(sym.ns == null){
@@ -1076,7 +1076,7 @@ public static class SyntaxQuoteReader extends AFn{
 					}
 				if(maybeClass instanceof Class)
 					{
-					// Classname/foo -> package.qualified.Classname/foo
+					// [.]Classname/foo -> [.]package.qualified.Classname/foo
 					String className = ((Class)maybeClass).getName();
 					sym = Symbol.intern(qualifiedInstance ? "." + className : className, sym.name);
 					}
