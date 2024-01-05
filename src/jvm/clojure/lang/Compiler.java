@@ -979,7 +979,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 					maybeField = Reflector.getMethods(c, 0, munge(sym.name), true).size() == 0;
 				else if(instance != null && instance.hasJavaClass() && instance.getJavaClass() != null)
 					maybeField = Reflector.getMethods(instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
-					}
+				}
 
 			if(maybeField)    //field
 				{
@@ -1017,8 +1017,12 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		// (defmethod f :type nil)
 		// (. user/f clojure.core/addMethod :type (clojure.core/fn nil)) ;; after macroexpand
 		private static Class maybeQualifierClass(String qualifier) {
-			if(qualifier == null || Character.isLowerCase(qualifier.charAt(0))) return null;
-			return RT.classForNameNonLoading(qualifier);
+			if(qualifier == null) return null;
+			try {
+				return maybeClass(Symbol.intern(null, qualifier), false);
+			} catch(Exception e) {
+				return null;
+			}
 		}
 	}
 
