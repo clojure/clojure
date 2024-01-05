@@ -954,9 +954,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		public Expr parse(C context, Object frm) {
 			ISeq form = (ISeq) frm;
 			//(. x fieldname-sym) or
-			//(. x 0-ary-method)
-			// (. x methodname-sym args+)
-			// (. x (methodname-sym args?))
+			//(. x [Class/]0-ary-method)
+			// (. x [Class/]methodname-sym args+)
+			// (. x ([Class/methodname-sym] args?))
 			if(RT.length(form) < 3)
 				throw new IllegalArgumentException("Malformed member expression, expecting (. target member ...)");
 			//determine static or instance
@@ -964,7 +964,6 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			int line = lineDeref();
 			int column = columnDeref();
 			String source = (String) SOURCE.deref();
-			Class qualifierClass = null;
 			Class c = maybeClass(RT.second(form), false);
 			//at this point c will be non-null if static
 			Expr instance = null;
@@ -976,13 +975,11 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			if(maybeField && !(((Symbol)RT.third(form)).name.charAt(0) == '-'))
 				{
 				Symbol sym = (Symbol) RT.third(form);
-				qualifierClass = maybeQualifierClass(sym.ns);
-				Class instanceClass = maybeInstanceClass(instance, qualifierClass);
 				if(c != null)
 					maybeField = Reflector.getMethods(c, 0, munge(sym.name), true).size() == 0;
-				else if(instanceClass != null)
-					maybeField = Reflector.getMethods(instanceClass, 0, munge(sym.name), false).size() == 0;
-				}
+				else if(instance != null && instance.hasJavaClass() && instance.getJavaClass() != null)
+					maybeField = Reflector.getMethods(instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
+					}
 
 			if(maybeField)    //field
 				{
@@ -1001,8 +998,6 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(!(RT.first(call) instanceof Symbol))
 					throw new IllegalArgumentException("Malformed member expression");
 				Symbol sym = (Symbol) RT.first(call);
-				if(qualifierClass == null)
-					qualifierClass = maybeQualifierClass(sym.ns);
 
 				IPersistentVector argTags = argTagsOf(sym);
 				Symbol tag = tagOf(form);
@@ -1013,20 +1008,17 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(c != null)
 					return new StaticMethodExpr(source, line, column, tag, argTags, c, munge(sym.name), args, tailPosition);
 				else
-					return new InstanceMethodExpr(source, line, column, tag, argTags, qualifierClass, instance, munge(sym.name), args, tailPosition);
+					return new InstanceMethodExpr(source, line, column, tag, argTags, maybeQualifierClass(sym.ns), instance, munge(sym.name), args, tailPosition);
 				}
 		}
 
-		private Class maybeQualifierClass(String qualifier) {
-			if(qualifier == null) return null;
-
-			try {
-				Class c = maybeClass(Symbol.intern(null, qualifier), false);
-				return c;
-			}
-			catch(Exception ex) {
-				return null;
-			}
+		// symbols expanded in syntax quote may (incorrectly) have qualifiers that are namespaces
+		// this helper detects and ignores the qualifier, e.g.:
+		// (defmethod f :type nil)
+		// (. user/f clojure.core/addMethod :type (clojure.core/fn nil)) ;; after macroexpand
+		private static Class maybeQualifierClass(String qualifier) {
+			if(qualifier == null || Character.isLowerCase(qualifier.charAt(0))) return null;
+			return RT.classForNameNonLoading(qualifier);
 		}
 	}
 
