@@ -989,8 +989,14 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				Symbol tag = tagOf(form);
 				if(c != null) {
 					return new StaticFieldExpr(line, column, c, munge(sym.name), tag);
-				} else
-					return new InstanceFieldExpr(line, column, instance, munge(sym.name), tag, (((Symbol)RT.third(form)).name.charAt(0) == '-'));
+				} else {
+					Class qualifierClass = maybeQualifierClass(sym.ns);
+					if(qualifierClass != null && Reflector.getMethods(qualifierClass, 0, munge(sym.name), false).size() > 0) {
+						return new InstanceMethodExpr(source, line, column, tag, argTagsOf(sym), qualifierClass, instance, munge(sym.name), PersistentVector.EMPTY, inTailCall(context));
+					} else {
+						return new InstanceFieldExpr(line, column, instance, munge(sym.name), tag, (((Symbol) RT.third(form)).name.charAt(0) == '-'));
+					}
+				}
 				}
 			else
 				{
