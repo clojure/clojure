@@ -7411,7 +7411,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 				else if (namesStaticMember(sym)) // Class/method
 					return MethodValues.buildStaticMethodThunk(c, sym, argTags);
 				else
-					throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
+					throw Util.runtimeException("Unable to find static field or method: " + sym.name + " in " + c);
 				}
 			}
 		}
