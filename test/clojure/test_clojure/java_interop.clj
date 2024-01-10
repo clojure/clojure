@@ -639,3 +639,23 @@
 (deftest test-boxing-prevention-when-compiling-statements
   (is (= 1 (.get (doto (AtomicInteger. 0) inc-atomic-int))))
   (is (= 1 (.get (doto (AtomicLong. 0) inc-atomic-long)))))
+
+(deftest array-type-symbols
+  (is (= long* (class (make-array Long/TYPE 0))))
+  (is (= int* (class (make-array Integer/TYPE 0))))
+  (is (= double* (class (make-array Double/TYPE 0))))
+  (is (= short* (class (make-array Short/TYPE 0))))
+  (is (= boolean* (class (make-array Boolean/TYPE 0))))
+  (is (= byte* (class (make-array Byte/TYPE 0))))
+  (is (= float* (class (make-array Float/TYPE 0))))
+  (is (= String* (class (make-array String 0))))
+  (is (= java.lang.String* (class (make-array String 0))))
+  (is (= java.util.UUID* (class (make-array java.util.UUID 0))))
+  (is (= `byte* 'byte*))
+  (is (= `byte*** 'byte***))
+  (is (= `java.util.UUID* 'java.util.UUID*))
+  (is (= `String* 'java.lang.String*))
+  (is (= `java.lang.String* 'java.lang.String*))
+  (is (= `[NotAClassThatWasImported*] '[clojure.test-clojure.java-interop/NotAClassThatWasImported*]))
+  (is (= [long**] `[~long**]))
+  (is (= [42] (let [long** 42] `[~long**]))))
