@@ -7563,6 +7563,15 @@ private static Symbol tagOf(Object o){
 	return null;
 }
 
+private static IPersistentVector paramTagsOf(Object o){
+	Object paramTags = RT.get(RT.meta(o), RT.PARAM_TAGS_KEY);
+
+	if(paramTags != null && !(paramTags instanceof IPersistentVector))
+		throw new IllegalArgumentException("param-tags value should be a vector, but was type " + paramTags.getClass().getName());
+
+	return (IPersistentVector) paramTags;
+}
+
 public static Object loadFile(String file) throws IOException{
 //	File fo = new File(file);
 //	if(!fo.exists())
