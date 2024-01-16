@@ -1122,7 +1122,7 @@ static class MemberExpr implements Expr{
 	private final IPersistentVector paramTags;
 	private final int modifiers;
 
-	public MemberExpr(Class c, Symbol sym) {
+	public MemberExpr(Class c, Symbol sym){
 		this.c = c;
 		this.memberName = sym.name;
 		this.paramTags = paramTagsOf(sym);
@@ -1726,7 +1726,7 @@ static class StaticMethodExpr extends MethodExpr{
     Class jc;
 
 	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c,
-							String methodName, java.lang.reflect.Method meth, IPersistentVector args, boolean tailPosition)
+				String methodName, java.lang.reflect.Method meth, IPersistentVector args, boolean tailPosition)
 			{
 		this.c = c;
 		this.methodName = methodName;
@@ -7124,16 +7124,6 @@ public static Object macroexpand1(Object x) {
 						}
 					return preserveTag(form, RT.listStar(DOT, target, meth, form.next().next()));
 					}
-				else if(namesStaticMember(sym) && paramTagsOf(sym) == null)
-					{
-					Symbol target = Symbol.intern(sym.ns);
-					Class c = HostExpr.maybeClass(target, false);
-					if(c != null)
-						{
-						Symbol meth = Symbol.intern(sym.name);
-						return preserveTag(form, RT.listStar(DOT, target, meth, form.next()));
-						}
-					}
 				else
 					{
 					//(s.substring 2 5) => (. s substring 2 5)
@@ -7193,9 +7183,21 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 		else
 			{
 			if(op instanceof Symbol && namesStaticMember((Symbol) op)) {
-				Expr aop = analyze(context, op);
-				if (aop instanceof MemberExpr) {
-					return ((MemberExpr) aop).parseMethodInvocation(context, form);
+				if(paramTagsOf(op) == null) {
+					Symbol sym = (Symbol) op;
+					Symbol target = Symbol.intern(sym.ns);
+					Class c = HostExpr.maybeClass(target, false);
+					if(c != null)
+					{
+						Symbol meth = Symbol.intern(sym.name);
+						return analyze(context, preserveTag(form, RT.listStar(DOT, target, meth, form.next())));
+					}
+				}
+				else {
+					Expr aop = analyze(context, op);
+					if (aop instanceof MemberExpr) {
+						return ((MemberExpr) aop).parseMethodInvocation(context, form);
+					}
 				}
 			}
 
@@ -7402,7 +7404,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 				{
 				if(Reflector.getField(c, sym.name, true) != null && paramTagsOf(sym) == null)
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
-				else if(paramTagsOf(sym) != null)
+				else if(c!= null && namesStaticMember(sym))
 					return new MemberExpr(c, sym);
 				throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
 				}
