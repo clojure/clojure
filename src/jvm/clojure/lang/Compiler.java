@@ -20,10 +20,12 @@ import clojure.asm.commons.Method;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 //*/
 /*
@@ -1110,6 +1112,39 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		if(c != null)
 			return c;
 		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
+	}
+}
+
+static class MemberExpr implements Expr{
+	Class c;
+	Symbol memberName;
+
+	public MemberExpr(Class c, Symbol sym) {
+		this.c = c;
+		this.memberName = Symbol.intern(null, sym.name);
+	}
+
+	public static Expr parseMethodInvocation(C context, MemberExpr aop, ISeq form) {
+	}
+
+	@Override
+	public Object eval() {
+		return null;
+	}
+
+	@Override
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
+
+	}
+
+	@Override
+	public boolean hasJavaClass() {
+		return false;
+	}
+
+	@Override
+	public Class getJavaClass() {
+		return null;
 	}
 }
 
@@ -7039,7 +7074,7 @@ public static Object macroexpand1(Object x) {
 						}
 					return preserveTag(form, RT.listStar(DOT, target, meth, form.next().next()));
 					}
-				else if(namesStaticMember(sym))
+				else if(namesStaticMember(sym) && paramTagsOf(sym) == null)
 					{
 					Symbol target = Symbol.intern(sym.ns);
 					Class c = HostExpr.maybeClass(target, false);
@@ -7106,7 +7141,12 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 		else if((p = (IParser) specials.valAt(op)) != null)
 			return p.parse(context, form);
 		else
+			{
+			Expr aop = analyze(context, op);
+			if(aop instanceof MemberExpr) return MemberExpr.parseMethodInvocation(context, (MemberExpr) aop, form);
+
 			return InvokeExpr.parse(context, form);
+			}
 		}
 	catch(Throwable e)
 		{
@@ -7306,8 +7346,10 @@ private static Expr analyzeSymbol(Symbol sym) {
 			Class c = HostExpr.maybeClass(nsSym, false);
 			if(c != null)
 				{
-				if(Reflector.getField(c, sym.name, true) != null)
+				if(Reflector.getField(c, sym.name, true) != null && paramTagsOf(sym) == null)
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
+				else if(paramTagsOf(sym) != null)
+					return new MemberExpr(c, sym);
 				throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
 				}
 			}
@@ -9094,4 +9136,74 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 		    }
 		};
     }
+
+private static boolean signatureMatches(List<Class> sig, Executable method)
+{
+	Class[] methodSig = method.getParameterTypes();
+	if(methodSig.length != sig.size()) return false;
+
+	for (int i = 0; i < methodSig.length; i++)
+		if (sig.get(i) != null && !sig.get(i).equals(methodSig[i]))
+			return false;
+
+	return true;
+};
+
+final static Symbol ARG_TAG_ANY = Symbol.intern(null, "_");
+
+// calls tagToClass on every element, unless it encounters _ which becomes null
+private static List<Class> tagsToClasses(IPersistentVector argTags) {
+	List<Class> sig = new ArrayList<>();
+	for (ISeq s = RT.seq(argTags); s!=null; s = s.next()) {
+		Object t = s.first();
+		if (t.equals(ARG_TAG_ANY))
+			sig.add(null);
+		else
+			sig.add(HostExpr.tagToClass(t));
+	}
+	return sig;
+}
+
+private static RuntimeException buildResolutionError(Executable[] methods, List<Executable> filteredMethods, Class c, String methodName, IPersistentVector argTags) {
+	boolean isCtor = methodNamesConstructor(c, methodName);
+	String type = isCtor ? "constructor" : "method";
+	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
+
+	if(argTags == null)
+		return new IllegalArgumentException("No arg-tags provided for " + coord);
+	else if(methods.length == 0)
+		return new IllegalArgumentException("Could not find " + coord);
+	else if(filteredMethods.isEmpty())
+		return new IllegalArgumentException("No matching " + coord + " found using arg-tags " + argTags);
+	else // methods.size() > 1
+		return new IllegalArgumentException("Multiple matching " + coord + " found using arg-tags " + argTags);
+}
+
+private static boolean methodNamesConstructor(Class c, String methodName) {
+	return c != null && methodName.equals("new");
+}
+
+// This method will attempt to find the method that matches the given argTags. If argTags
+// is null then the method throws an exception. Also, if the method finds more than one valid
+// method/ctor then it will throw an exception indicating that the signature was insufficient to
+// disambiguate the desired method.
+private static Executable findMethod(Class c, String methodName, IPersistentVector argTags) {
+	if(argTags == null) throw buildResolutionError(null, null, c, methodName, argTags);
+
+	final Executable[] methods = methodNamesConstructor(c, methodName) ? c.getConstructors() : c.getMethods();
+	final List<Class> argTagsSignature = tagsToClasses(argTags);
+	final int arity = argTags.count();
+
+	List<Executable> filteredMethods =
+			Arrays.stream(methods)
+					.filter(m -> m.getName().equals(methodName))
+					.filter(m -> m.getParameterCount() == arity)
+					.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
+					.filter(m -> signatureMatches(argTagsSignature, m))
+					.collect(Collectors.toList());
+
+	if(filteredMethods.size() == 1) return filteredMethods.get(0);
+
+	throw buildResolutionError(methods, filteredMethods, c, methodName, argTags);
+}
 }
