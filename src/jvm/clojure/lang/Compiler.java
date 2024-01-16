@@ -1004,9 +1004,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				for(ISeq s = RT.next(call); s != null; s = s.next())
 					args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 				if(c != null)
-					return new StaticMethodExpr(source, line, column, tag, c, munge(sym.name), args, tailPosition);
+					return new StaticMethodExpr(source, line, column, tag, c, munge(sym.name), null, args, tailPosition);
 				else
-					return new InstanceMethodExpr(source, line, column, tag, instance, munge(sym.name), args, tailPosition);
+					return new InstanceMethodExpr(source, line, column, tag, instance, munge(sym.name), null, args, tailPosition);
 				}
 		}
 	}
@@ -1116,15 +1116,48 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 }
 
 static class MemberExpr implements Expr{
-	Class c;
-	Symbol memberName;
+	private final Class c;
+	private final String memberName;
+	private final Executable method;
+	private final IPersistentVector paramTags;
+	private final int modifiers;
 
 	public MemberExpr(Class c, Symbol sym) {
 		this.c = c;
-		this.memberName = Symbol.intern(null, sym.name);
+		this.memberName = sym.name;
+		this.paramTags = paramTagsOf(sym);
+		this.method = findMethod(c, memberName, paramTags);
+		this.modifiers = method.getModifiers();
 	}
 
-	public static Expr parseMethodInvocation(C context, MemberExpr aop, ISeq form) {
+	IPersistentVector analyzeArgs(C context, ISeq form) {
+		PersistentVector args = PersistentVector.EMPTY;
+		for(ISeq s = form; s != null; s = s.next())
+			args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
+
+		return args;
+	}
+
+	public Expr parseMethodInvocation(C context, ISeq form) {
+		IPersistentVector args;
+		if(method instanceof Constructor)
+			{
+			args = analyzeArgs(context, RT.next(form));
+			return new NewExpr(c, (Constructor) method, args, lineDeref(), columnDeref());
+			}
+		else if (Modifier.isStatic(modifiers))
+			{
+			args = analyzeArgs(context, RT.next(form));
+			return new StaticMethodExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), c,
+					munge(memberName), (java.lang.reflect.Method) method, args, inTailCall(context));
+			}
+		else
+			{
+			args = analyzeArgs(context, RT.next(RT.next(form)));
+			Expr instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
+			return new InstanceMethodExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), instance,
+					munge(memberName), (java.lang.reflect.Method) method, args, inTailCall(context));
+			}
 	}
 
 	@Override
@@ -1493,7 +1526,7 @@ static class InstanceMethodExpr extends MethodExpr{
 
 
 	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
-			String methodName, IPersistentVector args, boolean tailPosition)
+			String methodName, java.lang.reflect.Method meth, IPersistentVector args, boolean tailPosition)
 			{
 		this.source = source;
 		this.line = line;
@@ -1503,7 +1536,12 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-		if(target.hasJavaClass() && target.getJavaClass() != null)
+
+		if(meth != null)
+			{
+			method = meth;
+			}
+		else if(target.hasJavaClass() && target.getJavaClass() != null)
 			{
 			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
 			if(methods.isEmpty())
@@ -1688,7 +1726,7 @@ static class StaticMethodExpr extends MethodExpr{
     Class jc;
 
 	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c,
-				String methodName, IPersistentVector args, boolean tailPosition)
+							String methodName, java.lang.reflect.Method meth, IPersistentVector args, boolean tailPosition)
 			{
 		this.c = c;
 		this.methodName = methodName;
@@ -1698,6 +1736,12 @@ static class StaticMethodExpr extends MethodExpr{
 		this.column = column;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
+
+		if(meth != null)
+			{
+			method = meth;
+			return;
+			}
 
 		List methods = Reflector.getMethods(c, args.count(), methodName, true);
 		if(methods.isEmpty())
@@ -2599,9 +2643,15 @@ public static class NewExpr implements Expr{
 	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
 
 
-	public NewExpr(Class c, IPersistentVector args, int line, int column) {
+	public NewExpr(Class c, Constructor thector, IPersistentVector args, int line, int column) {
 		this.args = args;
 		this.c = c;
+		if(thector != null)
+			{
+			this.ctor = thector;
+			return;
+			}
+
 		Constructor[] allctors = c.getConstructors();
 		ArrayList ctors = new ArrayList();
 		ArrayList<Class[]> params = new ArrayList();
@@ -2694,7 +2744,7 @@ public static class NewExpr implements Expr{
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
 				args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
-			return new NewExpr(c, args, line, column);
+			return new NewExpr(c, null, args, line, column);
 		}
 	}
 
@@ -6421,14 +6471,14 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 							{
 							if(recurMismatches != null && RT.booleanCast(recurMismatches.nth(i/2)))
 								{
-								init = new StaticMethodExpr("", 0, 0, null, RT.class, "box", RT.vector(init), false);
+								init = new StaticMethodExpr("", 0, 0, null, RT.class, "box", null, RT.vector(init), false);
 								if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 									RT.errPrintWriter().println("Auto-boxing loop arg: " + sym);
 								}
 							else if(maybePrimitiveType(init) == int.class)
-								init = new StaticMethodExpr("", 0, 0, null, RT.class, "longCast", RT.vector(init), false);
+								init = new StaticMethodExpr("", 0, 0, null, RT.class, "longCast", null, RT.vector(init), false);
 							else if(maybePrimitiveType(init) == float.class)
-								init = new StaticMethodExpr("", 0, 0, null, RT.class, "doubleCast", RT.vector(init), false);
+								init = new StaticMethodExpr("", 0, 0, null, RT.class, "doubleCast", null, RT.vector(init), false);
 							}
 						//sequential enhancement of env (like Lisp let*)
 						try
@@ -7142,8 +7192,12 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 			return p.parse(context, form);
 		else
 			{
-			Expr aop = analyze(context, op);
-			if(aop instanceof MemberExpr) return MemberExpr.parseMethodInvocation(context, (MemberExpr) aop, form);
+			if(op instanceof Symbol && namesStaticMember((Symbol) op)) {
+				Expr aop = analyze(context, op);
+				if (aop instanceof MemberExpr) {
+					return ((MemberExpr) aop).parseMethodInvocation(context, form);
+				}
+			}
 
 			return InvokeExpr.parse(context, form);
 			}
@@ -9183,27 +9237,27 @@ private static boolean methodNamesConstructor(Class c, String methodName) {
 	return c != null && methodName.equals("new");
 }
 
-// This method will attempt to find the method that matches the given argTags. If argTags
+// This method will attempt to find the method that matches the given paramTags. If paramTags
 // is null then the method throws an exception. Also, if the method finds more than one valid
 // method/ctor then it will throw an exception indicating that the signature was insufficient to
 // disambiguate the desired method.
-private static Executable findMethod(Class c, String methodName, IPersistentVector argTags) {
-	if(argTags == null) throw buildResolutionError(null, null, c, methodName, argTags);
+private static Executable findMethod(Class c, String methodName, IPersistentVector paramTags) {
+	if(paramTags == null) throw buildResolutionError(null, null, c, methodName, paramTags);
 
 	final Executable[] methods = methodNamesConstructor(c, methodName) ? c.getConstructors() : c.getMethods();
-	final List<Class> argTagsSignature = tagsToClasses(argTags);
-	final int arity = argTags.count();
+	final List<Class> paramTagsSignature = tagsToClasses(paramTags);
+	final int arity = paramTags.count();
 
 	List<Executable> filteredMethods =
 			Arrays.stream(methods)
 					.filter(m -> m.getName().equals(methodName))
 					.filter(m -> m.getParameterCount() == arity)
 					.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
-					.filter(m -> signatureMatches(argTagsSignature, m))
+					.filter(m -> signatureMatches(paramTagsSignature, m))
 					.collect(Collectors.toList());
 
 	if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
-	throw buildResolutionError(methods, filteredMethods, c, methodName, argTags);
+	throw buildResolutionError(methods, filteredMethods, c, methodName, paramTags);
 }
 }
