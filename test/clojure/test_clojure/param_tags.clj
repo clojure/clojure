@@ -9,17 +9,32 @@
 
 (ns clojure.test-clojure.param-tags
   (:use clojure.test)
+  (:require [clojure.test-helper :refer [should-not-reflect]])
   (:import (clojure.lang Tuple)
            (java.util Arrays UUID Locale)))
 
 (set! *warn-on-reflection* true)
 
+(deftest typehints-retained-destructuring
+  (should-not-reflect
+   (defn touc-no-reflect [s]
+     (^[] String/toUpperCase s)))
+  (should-not-reflect
+   (defn touc-no-reflectq [s]
+     (^[] java.lang.String/toUpperCase s)))
+  (should-not-reflect
+   (defn touc-no-reflect-arg-tags [s]
+     (^[java.util.Locale] String/toUpperCase s java.util.Locale/ENGLISH))))
+
 (deftest param-tags-in-invocation-positions
   (is (= 3 (^[long] Math/abs -3)))
-  (is (= "A" (^[] .toUpperCase "a")))
-  (is (= "A" (^[java.util.Locale] .toUpperCase "a" java.util.Locale/ENGLISH)))
   (is (= [1 2] (^[_ _] Tuple/create 1 2)))
-  (is (= (^[long long] UUID. 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
+  (is (= (^[long long] UUID/new 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
+  (is (= (^[long long] java.util.UUID/new 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
+  (testing "qualified instance method invocation"
+    (is (= "A" (^[] String/toUpperCase "a")))
+    (is (= "A" (^[java.util.Locale] String/toUpperCase "a" java.util.Locale/ENGLISH)))
+    (is (= "A" (^[Locale] String/toUpperCase "a" java.util.Locale/ENGLISH))))
   (testing "array resolutions"
      (let [lary (long-array [1 2 3 4 99 100])
            oary (into-array [1 2 3 4 99 100])
@@ -28,3 +43,4 @@
        (is (= 4 (^[objects _] Arrays/binarySearch oary 99)))
        (is (= 4 (^["[Ljava.lang.Object;" _] Arrays/binarySearch oary 99)))
        (is (= 1 (^["[Ljava.lang.Object;" _] Arrays/binarySearch sary "b"))))))
+

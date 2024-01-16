@@ -9243,10 +9243,20 @@ private static boolean methodNamesConstructor(Class c, String methodName) {
 // is null then the method throws an exception. Also, if the method finds more than one valid
 // method/ctor then it will throw an exception indicating that the signature was insufficient to
 // disambiguate the desired method.
-private static Executable findMethod(Class c, String methodName, IPersistentVector paramTags) {
-	if(paramTags == null) throw buildResolutionError(null, null, c, methodName, paramTags);
+private static Executable findMethod(Class c, String execName, IPersistentVector paramTags) {
+	if(paramTags == null) throw buildResolutionError(null, null, c, execName, paramTags);
 
-	final Executable[] methods = methodNamesConstructor(c, methodName) ? c.getConstructors() : c.getMethods();
+	final Executable[] methods;
+	final String methodName;
+	if (methodNamesConstructor(c, execName)) {
+		methods = c.getConstructors();
+		methodName = c.getName();
+	}
+	else {
+		methods = c.getMethods();
+		methodName = execName;
+	}
+
 	final List<Class> paramTagsSignature = tagsToClasses(paramTags);
 	final int arity = paramTags.count();
 
@@ -9260,6 +9270,6 @@ private static Executable findMethod(Class c, String methodName, IPersistentVect
 
 	if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
-	throw buildResolutionError(methods, filteredMethods, c, methodName, paramTags);
+	throw buildResolutionError(methods, filteredMethods, c, execName, paramTags);
 }
 }
