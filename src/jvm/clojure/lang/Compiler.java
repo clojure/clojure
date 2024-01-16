@@ -1130,6 +1130,26 @@ static class MemberExpr implements Expr{
 		this.modifiers = method.getModifiers();
 	}
 
+	public MemberExpr(Class c, Symbol sym, java.lang.reflect.Method maybeMethod) {
+		this.c = c;
+		this.memberName = sym.name;
+		this.paramTags = paramTagsOf(sym);
+		this.method = maybeMethod;
+		this.modifiers = method.getModifiers();
+	}
+
+	public static java.lang.reflect.Method maybeLookupMethod(Class c, String methodName, ISeq form) {
+		if(c == null || methodName == null || form == null) return null;
+		int arity = RT.count(RT.next(form));
+
+		List<java.lang.reflect.Method> instanceMethods = Reflector.getMethods(c, arity - 1, methodName, false);
+		instanceMethods.addAll(Reflector.getMethods(c, arity, methodName, true));
+
+		if(instanceMethods.size() == 1) return instanceMethods.get(0);
+
+		return null;
+	}
+
 	IPersistentVector analyzeArgs(C context, ISeq form) {
 		PersistentVector args = PersistentVector.EMPTY;
 		for(ISeq s = form; s != null; s = s.next())
@@ -7187,10 +7207,19 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 					Symbol sym = (Symbol) op;
 					Symbol target = Symbol.intern(sym.ns);
 					Class c = HostExpr.maybeClass(target, false);
+
 					if(c != null)
 					{
-						Symbol meth = Symbol.intern(sym.name);
-						return analyze(context, preserveTag(form, RT.listStar(DOT, target, meth, form.next())));
+						java.lang.reflect.Method maybeMethod = MemberExpr.maybeLookupMethod(c, sym.name, form);
+
+						if(maybeMethod != null) {
+							MemberExpr mexp = new MemberExpr(c, sym, maybeMethod);
+							return mexp.parseMethodInvocation(context, form);
+						}
+						else {
+							Symbol meth = Symbol.intern(sym.name);
+							return analyze(context, preserveTag(form, RT.listStar(DOT, target, meth, form.next())));
+						}
 					}
 				}
 				else {
