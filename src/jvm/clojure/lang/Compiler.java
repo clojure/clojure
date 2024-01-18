@@ -1138,15 +1138,35 @@ static class MemberExpr implements Expr{
 		this.modifiers = method.getModifiers();
 	}
 
-	public static java.lang.reflect.Method maybeLookupMethod(Class c, String methodName, ISeq form) {
-		if(c == null || methodName == null || form == null) return null;
-		int arity = RT.count(RT.next(form));
+	static java.lang.reflect.Method maybeLookupSingleMethod(Class c, String methodName, ISeq args) {
+		if(c == null || methodName == null) return null;
+		int arity = RT.count(args);
 
-		List<java.lang.reflect.Method> instanceMethods = Reflector.getMethods(c, arity - 1, methodName, false);
-		instanceMethods.addAll(Reflector.getMethods(c, arity, methodName, true));
+		List<java.lang.reflect.Method> methods = Reflector.getMethods(c, arity - 1, methodName, false);
+		methods.addAll(Reflector.getMethods(c, arity, methodName, true));
 
-		if(instanceMethods.size() == 1) return instanceMethods.get(0);
+		if(methods.size() == 1) return methods.get(0);
 
+		return null;
+	}
+
+	static Expr analyzeMemberExpr(C context, Class c, Symbol sym, Symbol target, ISeq form) {
+		if (paramTagsOf(sym) == null) {
+			java.lang.reflect.Method maybeMethod = MemberExpr.maybeLookupSingleMethod(c, sym.name, RT.next(form));
+
+			if (maybeMethod != null) {
+				MemberExpr mexp = new MemberExpr(c, sym, maybeMethod);
+				return mexp.analyzeMethodInvocation(context, form);
+			} else {
+				Symbol meth = Symbol.intern(sym.name);
+				return analyze(context, preserveTag(form, RT.listStar(DOT, target, meth, form.next())));
+			}
+		} else {
+			Expr aop = analyze(context, sym);
+			if (aop instanceof MemberExpr) {
+				return ((MemberExpr) aop).analyzeMethodInvocation(context, form);
+			}
+		}
 		return null;
 	}
 
@@ -1158,7 +1178,7 @@ static class MemberExpr implements Expr{
 		return args;
 	}
 
-	public Expr parseMethodInvocation(C context, ISeq form) {
+	Expr analyzeMethodInvocation(C context, ISeq form) {
 		IPersistentVector args;
 		if(method instanceof Constructor)
 			{
@@ -7203,30 +7223,13 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 		else
 			{
 			if(op instanceof Symbol && namesStaticMember((Symbol) op)) {
-				if(paramTagsOf(op) == null) {
-					Symbol sym = (Symbol) op;
-					Symbol target = Symbol.intern(sym.ns);
-					Class c = HostExpr.maybeClass(target, false);
+				Symbol sym = (Symbol) op;
+				Symbol target = Symbol.intern(sym.ns);
+				Class c = HostExpr.maybeClass(target, false);
 
-					if(c != null)
-					{
-						java.lang.reflect.Method maybeMethod = MemberExpr.maybeLookupMethod(c, sym.name, form);
-
-						if(maybeMethod != null) {
-							MemberExpr mexp = new MemberExpr(c, sym, maybeMethod);
-							return mexp.parseMethodInvocation(context, form);
-						}
-						else {
-							Symbol meth = Symbol.intern(sym.name);
-							return analyze(context, preserveTag(form, RT.listStar(DOT, target, meth, form.next())));
-						}
-					}
-				}
-				else {
-					Expr aop = analyze(context, op);
-					if (aop instanceof MemberExpr) {
-						return ((MemberExpr) aop).parseMethodInvocation(context, form);
-					}
+				if(c != null) {
+					Expr expr = MemberExpr.analyzeMemberExpr(context, c, sym, target, form);
+					if(expr != null) return expr;
 				}
 			}
 
@@ -7431,7 +7434,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 			Class c = HostExpr.maybeClass(nsSym, false);
 			if(c != null)
 				{
-				if(Reflector.getField(c, sym.name, true) != null && paramTagsOf(sym) == null)
+				if(Reflector.getField(c, sym.name, true) != null)
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
 				else if(c!= null && namesStaticMember(sym))
 					return new MemberExpr(c, sym);
