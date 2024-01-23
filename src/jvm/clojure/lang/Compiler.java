@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 //*/
 /*
@@ -1118,9 +1119,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 static class MemberExpr implements Expr{
 	private final Class c;
 	private final String memberName;
-	private final Executable method;
-	private final IPersistentVector paramTags;
-	private final int modifiers;
+	private Executable method;
+	private IPersistentVector paramTags;
+	private int modifiers;
 
 	public MemberExpr(Class c, Symbol sym){
 		this.c = c;
@@ -1130,7 +1131,7 @@ static class MemberExpr implements Expr{
 		this.modifiers = method.getModifiers();
 	}
 
-	public MemberExpr(Class c, Symbol sym, java.lang.reflect.Method method) {
+	MemberExpr(Class c, Symbol sym, java.lang.reflect.Method method) {
 		this.c = c;
 		this.memberName = sym.name;
 		this.paramTags = paramTagsOf(sym);
@@ -1157,7 +1158,7 @@ static class MemberExpr implements Expr{
 			if (maybeMethod != null) {
 				MemberExpr mexp = new MemberExpr(c, sym, maybeMethod);
 				return mexp.analyzeMethodInvocation(context, form);
-			} else {
+			} else { // could not resolve method, so fall back to dot form for resolution or reflection
 				Symbol memberName = Symbol.intern(sym.name);
 				if(Reflector.getField(c, sym.name, true) != null && RT.count(form) == 1)
 					RT.errPrintWriter().format("WARNING: Detected a parenthesized static field access pattern of form %1$s"
@@ -1207,22 +1208,22 @@ static class MemberExpr implements Expr{
 
 	@Override
 	public Object eval() {
-		return null;
+		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-
+		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
 	}
 
 	@Override
 	public boolean hasJavaClass() {
-		return false;
+		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
 	}
 
 	@Override
 	public Class getJavaClass() {
-		return null;
+		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
 	}
 }
 
@@ -9257,14 +9258,14 @@ private static List<Class> tagsToClasses(IPersistentVector argTags) {
 	return sig;
 }
 
-private static RuntimeException buildResolutionError(Executable[] methods, List<Executable> filteredMethods, Class c, String methodName, IPersistentVector argTags) {
+private static RuntimeException buildResolutionError(List<Executable> methods, List<Executable> filteredMethods, Class c, String methodName, IPersistentVector argTags) {
 	boolean isCtor = methodNamesConstructor(c, methodName);
 	String type = isCtor ? "constructor" : "method";
 	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 
 	if(argTags == null)
 		return new IllegalArgumentException("No arg-tags provided for " + coord);
-	else if(methods.length == 0)
+	else if(methods.size() == 0)
 		return new IllegalArgumentException("Could not find " + coord);
 	else if(filteredMethods.isEmpty())
 		return new IllegalArgumentException("No matching " + coord + " found using arg-tags " + argTags);
@@ -9276,6 +9277,21 @@ private static boolean methodNamesConstructor(Class c, String methodName) {
 	return c != null && methodName.equals("new");
 }
 
+private static Stream<Executable> methodStream(Class c, String name) {
+	final Executable[] methods;
+	final String methodName;
+	if (methodNamesConstructor(c, name)) {
+		methods = c.getConstructors();
+		methodName = c.getName();
+	}
+	else {
+		methods = c.getMethods();
+		methodName = name;
+	}
+
+	return Arrays.stream(methods).filter(m -> m.getName().equals(methodName));
+}
+
 // This method will attempt to find the method that matches the given paramTags. If paramTags
 // is null then the method throws an exception. Also, if the method finds more than one valid
 // method/ctor then it will throw an exception indicating that the signature was insufficient to
@@ -9283,23 +9299,11 @@ private static boolean methodNamesConstructor(Class c, String methodName) {
 private static Executable findMethod(Class c, String execName, IPersistentVector paramTags) {
 	if(paramTags == null) throw buildResolutionError(null, null, c, execName, paramTags);
 
-	final Executable[] methods;
-	final String methodName;
-	if (methodNamesConstructor(c, execName)) {
-		methods = c.getConstructors();
-		methodName = c.getName();
-	}
-	else {
-		methods = c.getMethods();
-		methodName = execName;
-	}
-
 	final List<Class> paramTagsSignature = tagsToClasses(paramTags);
 	final int arity = paramTags.count();
 
 	List<Executable> filteredMethods =
-			Arrays.stream(methods)
-					.filter(m -> m.getName().equals(methodName))
+			methodStream(c, execName)
 					.filter(m -> m.getParameterCount() == arity)
 					.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
 					.filter(m -> signatureMatches(paramTagsSignature, m))
@@ -9307,6 +9311,6 @@ private static Executable findMethod(Class c, String execName, IPersistentVector
 
 	if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
-	throw buildResolutionError(methods, filteredMethods, c, execName, paramTags);
+	throw buildResolutionError(filteredMethods, filteredMethods, c, execName, paramTags);
 }
 }
