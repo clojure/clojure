@@ -1130,12 +1130,12 @@ static class MemberExpr implements Expr{
 		this.modifiers = method.getModifiers();
 	}
 
-	public MemberExpr(Class c, Symbol sym, java.lang.reflect.Method maybeMethod) {
+	public MemberExpr(Class c, Symbol sym, java.lang.reflect.Method method) {
 		this.c = c;
 		this.memberName = sym.name;
 		this.paramTags = paramTagsOf(sym);
-		this.method = maybeMethod;
-		this.modifiers = method.getModifiers();
+		this.method = method;
+		this.modifiers = this.method.getModifiers();
 	}
 
 	static java.lang.reflect.Method maybeLookupSingleMethod(Class c, String methodName, ISeq args) {
@@ -1158,8 +1158,13 @@ static class MemberExpr implements Expr{
 				MemberExpr mexp = new MemberExpr(c, sym, maybeMethod);
 				return mexp.analyzeMethodInvocation(context, form);
 			} else {
-				Symbol meth = Symbol.intern(sym.name);
-				return analyze(context, preserveTag(form, RT.listStar(DOT, target, meth, form.next())));
+				Symbol memberName = Symbol.intern(sym.name);
+				if(Reflector.getField(c, sym.name, true) != null && RT.count(form) == 1)
+					RT.errPrintWriter().format("WARNING: Detected a parenthesized static field access pattern of form %1$s"
+							+ " please change to %2$s as the former will cease to work in the same way in future versions.\n",
+							form, RT.first(form));
+
+				return analyze(context, preserveTag(form, RT.listStar(DOT, target, memberName, form.next())));
 			}
 		} else {
 			Expr aop = analyze(context, sym);
