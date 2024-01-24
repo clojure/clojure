@@ -7089,7 +7089,7 @@ static public IFn isInline(Object op, int arity) {
 	return null;
 }
 
-public static boolean namesStaticMember(Symbol sym){
+public static boolean namesQualifiedMember(Symbol sym){
 	return sym.ns != null && namespaceFor(sym) == null;
 }
 
@@ -7253,9 +7253,7 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 		else if((p = (IParser) specials.valAt(op)) != null)
 			return p.parse(context, form);
 		else
-			{
 			return InvokeExpr.parse(context, form);
-			}
 		}
 	catch(Throwable e)
 		{
@@ -7457,7 +7455,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 				{
 				if(Reflector.getField(c, sym.name, true) != null)
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
-				else if(c!= null && namesStaticMember(sym))
+				else if(c!= null && namesQualifiedMember(sym))
 					return new MemberExpr(c, sym);
 				throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
 				}
