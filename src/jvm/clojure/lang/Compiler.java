@@ -1117,12 +1117,14 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 }
 
 static class MemberExpr implements Expr{
+	private final Symbol sym;
 	private final Class c;
 	private final String memberName;
 	private Executable method;
 	private IPersistentVector paramTags;
 
 	public MemberExpr(Class c, Symbol sym){
+		this.sym = sym;
 		this.c = c;
 		this.memberName = sym.name;
 		this.paramTags = paramTagsOf(sym);
@@ -1134,6 +1136,7 @@ static class MemberExpr implements Expr{
 	}
 
 	MemberExpr(Class c, Symbol sym, java.lang.reflect.Method method) {
+		this.sym = sym;
 		this.c = c;
 		this.memberName = sym.name;
 		this.paramTags = paramTagsOf(sym);
@@ -1165,25 +1168,23 @@ static class MemberExpr implements Expr{
 		return null;
 	}
 
-	static Expr analyzeMemberExpr(C context, Class c, Symbol sym, Symbol target, ISeq form) {
-		MemberExpr mexp = new MemberExpr(c, sym);
-
+	static Expr analyzeMemberExpr(MemberExpr mexp, C context, ISeq form) {
 		if (mexp.isResolved()) {
 			return mexp.analyzeMethodInvocation(context, form);
 		}
 		else {
-			java.lang.reflect.Method maybeMethod = MemberExpr.maybeLookupSingleMethod(c, sym.name, RT.next(form));
+			java.lang.reflect.Method maybeMethod = MemberExpr.maybeLookupSingleMethod(mexp.c, mexp.sym.name, RT.next(form));
 
 			if (maybeMethod != null) {
-				mexp = new MemberExpr(c, sym, maybeMethod);
+				mexp = new MemberExpr(mexp.c, mexp.sym, maybeMethod);
 				return mexp.analyzeMethodInvocation(context, form);
 			} else { // could not resolve method, so fall back to dot form for resolution or reflection
-				Symbol memberName = Symbol.intern(sym.name);
-				if(Reflector.getField(c, sym.name, true) != null && RT.count(form) == 1)
+				Symbol memberName = Symbol.intern(mexp.sym.name);
+				if(Reflector.getField(mexp.c, mexp.sym.name, true) != null && RT.count(form) == 1)
 					RT.errPrintWriter().format("WARNING: Detected a parenthesized static field access pattern of form %1$s"
 									+ " please change to %2$s as the former will cease to work in the same way in future versions.\n",
 							form, RT.first(form));
-
+				Symbol target = Symbol.intern(mexp.sym.ns);
 				return analyze(context, preserveTag(form, RT.listStar(DOT, target, memberName, form.next())));
 			}
 		}
@@ -4029,6 +4030,10 @@ static class InvokeExpr implements Expr{
 			return new KeywordInvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form),
 			                             (KeywordExpr) fexpr, target);
 			}
+
+		if(fexpr instanceof MemberExpr)
+			return MemberExpr.analyzeMemberExpr((MemberExpr)fexpr, context, form);
+
 		PersistentVector args = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form.next()); s != null; s = s.next())
 			{
@@ -7249,17 +7254,6 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 			return p.parse(context, form);
 		else
 			{
-			if(op instanceof Symbol && namesStaticMember((Symbol) op)) {
-				Symbol sym = (Symbol) op;
-				Symbol target = Symbol.intern(sym.ns);
-				Class c = HostExpr.maybeClass(target, false);
-
-				if(c != null) {
-					Expr expr = MemberExpr.analyzeMemberExpr(context, c, sym, target, form);
-					if(expr != null) return expr;
-				}
-			}
-
 			return InvokeExpr.parse(context, form);
 			}
 		}
