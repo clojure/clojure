@@ -1181,9 +1181,8 @@ static class MemberExpr implements Expr{
 			} else { // could not resolve method, so fall back to dot form for resolution or reflection
 				Symbol memberName = Symbol.intern(mexp.sym.name);
 				if(Reflector.getField(mexp.c, mexp.sym.name, true) != null && RT.count(form) == 1)
-					RT.errPrintWriter().format("WARNING: Detected a parenthesized static field access pattern of form %1$s"
-									+ " please change to %2$s as the former will cease to work in the same way in future versions.\n",
-							form, RT.first(form));
+					RT.errPrintWriter().format("Warning, static fields should be referenced without parens unless they are intended as function calls. "
+									+ " Future Clojure releases will treat the field's value as an IFn and invoke it. Found %1$s\n", form);
 				Symbol target = Symbol.intern(mexp.sym.ns);
 				return analyze(context, preserveTag(form, RT.listStar(DOT, target, memberName, form.next())));
 			}
