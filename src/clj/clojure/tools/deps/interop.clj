@@ -39,7 +39,7 @@
          (doseq [a args]
            (.write w (pr-str a))
            (.write w " "))))
-    (let [envelope (edn/read-string (proc/capture out))]
+    (let [envelope (edn/read-string (slurp out))]
       (if preserve-envelope
         envelope
         (let [{:keys [tag val]} envelope

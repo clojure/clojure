@@ -14,10 +14,9 @@
    (if available) and the Java Process object. It is also deref-able to wait for
    process exit.
 
-   Helper functions are available to 'capture' the output of the process stdout
-   and to wait for an 'ok?' non-error exit. The 'exec' function handles the common
-   case of `start'ing a process, waiting for process exit, capture and return
-   stdout."
+   Use ‘slurp' to capture the output of a process stream, and 'ok?’ to wait for a
+   non-error exit. The 'exec' function handles the common case of `start'ing a
+   process, waiting for process exit, slurp, and return stdout."
   (:require
    [clojure.java.io :as jio]
    [clojure.string :as str])
@@ -121,17 +120,6 @@
   [process-map]
   (zero? (.waitFor ^Process (:process process-map))))
 
-(defn capture
-  "Read from input-stream until EOF and return a String (or nil if 0 length).
-  Takes same opts as clojure.java.io/copy - :buffer-size and :encoding"
-  {:added "1.12"}
-  [input-stream & opts]
-  (let [writer (StringWriter.)]
-    (apply jio/copy input-stream writer opts)
-    (let [s (str/trim (.toString writer))]
-      (when-not (zero? (.length s))
-        s))))
-
 ;; A thread factory for daemon threads
 (defonce ^:private io-thread-factory
   (let [counter (atom 0)]
@@ -177,7 +165,7 @@
                          [{} opts+args])
         opts (merge {:err :inherit} opts)]
     (let [state (apply start opts command)
-          captured (io-task #(capture (:out state)))]
+          captured (io-task #(slurp (:out state)))]
       (if (ok? state)
         @captured
         (throw (RuntimeException. (str "Process failed with exit=" (.exitValue ^Process (:process state)))))))))
@@ -190,7 +178,7 @@
   @(start {:out (to-file "out") :err (to-file "err")} "ls" "-l")
 
   ;; capture output to string
-  (-> (start "ls" "-l") :out capture)
+  (-> (start "ls" "-l") :out slurp)
 
   ;; with exec
   (exec "ls" "-l")

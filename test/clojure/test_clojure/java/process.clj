@@ -17,7 +17,7 @@
   (is (not (str/blank? (p/exec "bash" "-c" "ls"))))
 
   ;; print to stderr, capture nil
-  (is (nil? (p/exec "bash" "-c" "ls >&2")))
+  (is (str/blank? (p/exec "bash" "-c" "ls >&2")))
 
   ;; redirect, then capture to string
   (is (not (str/blank? (p/exec {:err :stdout} "bash" "-c" "ls >&2")))))
