@@ -1140,7 +1140,7 @@ static class MemberExpr implements Expr, AssignableExpr {
 		}
 		else {
 			AccessibleObject maybeField = Reflector.getField(c, sym.name, true);
-			if(maybeField != null)
+			if(maybeField != null && Modifier.isStatic(((Field)maybeField).getModifiers()))
 				this.member = maybeField;
 			else
 				this.member = maybeLookupSingleMethod(c, memberName);
@@ -1215,12 +1215,19 @@ static class MemberExpr implements Expr, AssignableExpr {
 				&& Modifier.isStatic(((java.lang.reflect.Method)member).getModifiers());
 	}
 
+	public boolean isInstanceMethod() {
+		return member != null
+				&& member instanceof java.lang.reflect.Method
+				&& !Modifier.isStatic(((java.lang.reflect.Method)member).getModifiers());
+	}
+
 	public boolean isConstructor() {
 		return member instanceof Constructor;
 	}
 
 	public boolean isField() {
-		return member instanceof java.lang.reflect.Field;
+		return member instanceof Field
+				&& Modifier.isStatic(((Field)member).getModifiers());
 	}
 
 	Expr analyzeMethodInvocation(C context, ISeq form) {
@@ -1229,21 +1236,21 @@ static class MemberExpr implements Expr, AssignableExpr {
 			args = analyzeArgs(context, RT.next(form));
 			return new NewExpr(c, (Constructor) member, args, line, column);
 		}
-		else if(isStaticMethod()) {
-			args = analyzeArgs(context, RT.next(form));
-			return new StaticMethodExpr((String) SOURCE.deref(), line, column, tagOf(form), c,
-					munge(memberName), (java.lang.reflect.Method) member, args, inTailCall(context));
-		}
 		else if(isField()) {
 			RT.errPrintWriter().format("Warning, static fields should be referenced without parens unless they are intended as function calls. "
 					+ " Future Clojure releases will treat the field's value as an IFn and invoke it. Found %1$s\n", form);
 
 			return new StaticFieldExpr(line, column, c, sym.name, tag);
 		}
-		else {
+		else if(isInstanceMethod()){
 			args = analyzeArgs(context, RT.next(RT.next(form)));
 			Expr instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
 			return new InstanceMethodExpr((String) SOURCE.deref(), line, column, tagOf(form), instance,
+					munge(memberName), (java.lang.reflect.Method) member, args, inTailCall(context));
+		}
+		else {
+			args = analyzeArgs(context, RT.next(form));
+			return new StaticMethodExpr((String) SOURCE.deref(), line, column, tagOf(form), c,
 					munge(memberName), (java.lang.reflect.Method) member, args, inTailCall(context));
 		}
 	}
@@ -7504,11 +7511,8 @@ private static Expr analyzeSymbol(Symbol sym) {
 			{
 			Symbol nsSym = Symbol.intern(sym.ns);
 			Class c = HostExpr.maybeClass(nsSym, false);
-			if(c != null)
-				{
-				if(c!= null && namesQualifiedMember(sym))
+			if(c!= null && namesQualifiedMember(sym))
 					return new MemberExpr(c, sym, tag);
-				}
 			}
 		}
 	//Var v = lookupVar(sym, false);
@@ -9309,9 +9313,9 @@ private static boolean signatureMatches(List<Class> sig, Executable method)
 final static Symbol ARG_TAG_ANY = Symbol.intern(null, "_");
 
 // calls tagToClass on every element, unless it encounters _ which becomes null
-private static List<Class> tagsToClasses(IPersistentVector argTags) {
+private static List<Class> tagsToClasses(IPersistentVector paramTags) {
 	List<Class> sig = new ArrayList<>();
-	for (ISeq s = RT.seq(argTags); s!=null; s = s.next()) {
+	for (ISeq s = RT.seq(paramTags); s!=null; s = s.next()) {
 		Object t = s.first();
 		if (t.equals(ARG_TAG_ANY))
 			sig.add(null);
@@ -9321,19 +9325,19 @@ private static List<Class> tagsToClasses(IPersistentVector argTags) {
 	return sig;
 }
 
-private static RuntimeException buildResolutionError(List<Executable> methods, List<Executable> filteredMethods, Class c, String methodName, IPersistentVector argTags) {
+private static RuntimeException buildResolutionError(List<Executable> methods, List<Executable> filteredMethods, Class c, String methodName, IPersistentVector paramTags) {
 	boolean isCtor = methodNamesConstructor(c, methodName);
 	String type = isCtor ? "constructor" : "method";
 	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 
-	if(argTags == null)
-		return new IllegalArgumentException("No arg-tags provided for " + coord);
+	if(paramTags == null)
+		return new IllegalArgumentException("No param-tags provided for " + coord);
 	else if(methods.size() == 0)
 		return new IllegalArgumentException("Could not find " + coord);
 	else if(filteredMethods.isEmpty())
-		return new IllegalArgumentException("No matching " + coord + " found using arg-tags " + argTags);
+		return new IllegalArgumentException("No matching " + coord + " found using param-tags " + paramTags);
 	else // methods.size() > 1
-		return new IllegalArgumentException("Multiple matching " + coord + " found using arg-tags " + argTags);
+		return new IllegalArgumentException("Multiple matching " + coord + " found using param-tags " + paramTags);
 }
 
 private static boolean methodNamesConstructor(Class c, String methodName) {
@@ -9359,14 +9363,14 @@ private static Stream<Executable> methodStream(Class c, String name) {
 // is null then the method throws an exception. Also, if the method finds more than one valid
 // method/ctor then it will throw an exception indicating that the signature was insufficient to
 // disambiguate the desired method.
-private static Executable findMethod(Class c, String execName, IPersistentVector paramTags) {
-	if(paramTags == null) throw buildResolutionError(null, null, c, execName, paramTags);
+private static Executable findMethod(Class c, String methodName, IPersistentVector paramTags) {
+	if(paramTags == null) throw buildResolutionError(null, null, c, methodName, paramTags);
 
 	final List<Class> paramTagsSignature = tagsToClasses(paramTags);
 	final int arity = paramTags.count();
 
 	List<Executable> filteredMethods =
-			methodStream(c, execName)
+			methodStream(c, methodName)
 					.filter(m -> m.getParameterCount() == arity)
 					.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
 					.filter(m -> signatureMatches(paramTagsSignature, m))
@@ -9374,6 +9378,6 @@ private static Executable findMethod(Class c, String execName, IPersistentVector
 
 	if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
-	throw buildResolutionError(filteredMethods, filteredMethods, c, execName, paramTags);
+	throw buildResolutionError(filteredMethods, filteredMethods, c, methodName, paramTags);
 }
 }
