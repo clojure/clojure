@@ -15,13 +15,12 @@ package clojure.lang;
 //*
 
 import clojure.asm.*;
+import clojure.asm.Type;
 import clojure.asm.commons.GeneratorAdapter;
 import clojure.asm.commons.Method;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -1116,35 +1115,51 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	}
 }
 
-static class MemberExpr implements Expr{
+static class MemberExpr implements Expr, AssignableExpr {
+	final int line;
+	final int column;
+
 	private final Symbol sym;
+	private final Symbol tag;
 	private final Class c;
 	private final String memberName;
-	private Executable method;
+	private AccessibleObject member;
 	private IPersistentVector paramTags;
 
-	public MemberExpr(Class c, Symbol sym){
+	public MemberExpr(Class c, Symbol sym, Symbol tag){
+		this.line = lineDeref();
+		this.column = columnDeref();
 		this.sym = sym;
+		this.tag = tag;
 		this.c = c;
 		this.memberName = sym.name;
 		this.paramTags = paramTagsOf(sym);
 
-		if(paramTags != null)
-			this.method = findMethod(c, memberName, paramTags);
-		else
-			this.method = maybeLookupSingleMethod(c, memberName);
+		if(paramTags != null) {
+			this.member = findMethod(c, memberName, paramTags);
+		}
+		else {
+			AccessibleObject maybeField = Reflector.getField(c, sym.name, true);
+			if(maybeField != null)
+				this.member = maybeField;
+			else
+				this.member = maybeLookupSingleMethod(c, memberName);
+		}
 	}
 
-	MemberExpr(Class c, Symbol sym, java.lang.reflect.Method method) {
+	MemberExpr(Class c, Symbol sym, Symbol tag, java.lang.reflect.Method method) {
+		this.line = lineDeref();
+		this.column = columnDeref();
 		this.sym = sym;
+		this.tag = tag;
 		this.c = c;
 		this.memberName = sym.name;
 		this.paramTags = paramTagsOf(sym);
-		this.method = method;
+		this.member = method;
 	}
 
 	public boolean isResolved() {
-		return method != null;
+		return member != null;
 	}
 
 	static java.lang.reflect.Method maybeLookupSingleMethod(Class c, String methodName, ISeq args) {
@@ -1176,13 +1191,10 @@ static class MemberExpr implements Expr{
 			java.lang.reflect.Method maybeMethod = MemberExpr.maybeLookupSingleMethod(mexp.c, mexp.sym.name, RT.next(form));
 
 			if (maybeMethod != null) {
-				mexp = new MemberExpr(mexp.c, mexp.sym, maybeMethod);
+				mexp = new MemberExpr(mexp.c, mexp.sym, null, maybeMethod);
 				return mexp.analyzeMethodInvocation(context, form);
 			} else { // could not resolve method, so fall back to dot form for resolution or reflection
 				Symbol memberName = Symbol.intern(mexp.sym.name);
-				if(Reflector.getField(mexp.c, mexp.sym.name, true) != null && RT.count(form) == 1)
-					RT.errPrintWriter().format("Warning, static fields should be referenced without parens unless they are intended as function calls. "
-									+ " Future Clojure releases will treat the field's value as an IFn and invoke it. Found %1$s\n", form);
 				Symbol target = Symbol.intern(mexp.sym.ns);
 				return analyze(context, preserveTag(form, RT.listStar(DOT, target, memberName, form.next())));
 			}
@@ -1198,53 +1210,95 @@ static class MemberExpr implements Expr{
 	}
 
 	public boolean isStatic() {
-		return method != null && Modifier.isStatic(method.getModifiers());
+		return member != null
+				&& member instanceof java.lang.reflect.Method
+				&& Modifier.isStatic(((java.lang.reflect.Method)member).getModifiers());
 	}
 
 	public boolean isConstructor() {
-		return method instanceof Constructor;
+		return member instanceof Constructor;
+	}
+
+	public boolean isField() {
+		return member instanceof java.lang.reflect.Field;
 	}
 
 	Expr analyzeMethodInvocation(C context, ISeq form) {
 		IPersistentVector args;
-		if(isConstructor())
-			{
+		if(isConstructor()) {
 			args = analyzeArgs(context, RT.next(form));
-			return new NewExpr(c, (Constructor) method, args, lineDeref(), columnDeref());
-			}
-		else if(isStatic())
-			{
+			return new NewExpr(c, (Constructor) member, args, lineDeref(), columnDeref());
+		}
+		else if(isStatic()) {
 			args = analyzeArgs(context, RT.next(form));
 			return new StaticMethodExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), c,
-					munge(memberName), (java.lang.reflect.Method) method, args, inTailCall(context));
-			}
-		else
-			{
+					munge(memberName), (java.lang.reflect.Method) member, args, inTailCall(context));
+		}
+		else if(isField()) {
+			RT.errPrintWriter().format("Warning, static fields should be referenced without parens unless they are intended as function calls. "
+					+ " Future Clojure releases will treat the field's value as an IFn and invoke it. Found %1$s\n", form);
+
+			return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
+		}
+		else {
 			args = analyzeArgs(context, RT.next(RT.next(form)));
 			Expr instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
 			return new InstanceMethodExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), instance,
-					munge(memberName), (java.lang.reflect.Method) method, args, inTailCall(context));
-			}
+					munge(memberName), (java.lang.reflect.Method) member, args, inTailCall(context));
+		}
 	}
 
 	@Override
 	public Object eval() {
+		if(member instanceof Field) {
+			StaticFieldExpr sfexpr = new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
+			return sfexpr.eval();
+		}
+
 		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
+		if(member instanceof Field) {
+			StaticFieldExpr sfexpr = new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
+			sfexpr.emit(context, objx, gen);
+			return;
+		}
+
 		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
 	}
 
 	@Override
 	public boolean hasJavaClass() {
+		if(member instanceof Field) {
+			StaticFieldExpr sfexpr = new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
+			return sfexpr.hasJavaClass();
+		}
+
 		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
 	}
 
 	@Override
 	public Class getJavaClass() {
+		if(member instanceof Field) {
+			StaticFieldExpr sfexpr = new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
+			return sfexpr.getJavaClass();
+		}
+
 		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
+	}
+
+	@Override
+	public Object evalAssign(Expr val) {
+		StaticFieldExpr sfexpr = new StaticFieldExpr(line, column, c, sym.name, tag);
+		return sfexpr.evalAssign(val);
+	}
+
+	@Override
+	public void emitAssign(C context, ObjExpr objx, GeneratorAdapter gen, Expr val) {
+		StaticFieldExpr sfexpr = new StaticFieldExpr(line, column, c, sym.name, tag);
+		sfexpr.emitAssign(context, objx, gen, val);
 	}
 }
 
@@ -7452,11 +7506,8 @@ private static Expr analyzeSymbol(Symbol sym) {
 			Class c = HostExpr.maybeClass(nsSym, false);
 			if(c != null)
 				{
-				if(Reflector.getField(c, sym.name, true) != null)
-					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
-				else if(c!= null && namesQualifiedMember(sym))
-					return new MemberExpr(c, sym);
-				throw Util.runtimeException("Unable to find static field: " + sym.name + " in " + c);
+				if(c!= null && namesQualifiedMember(sym))
+					return new MemberExpr(c, sym, tag);
 				}
 			}
 		}
