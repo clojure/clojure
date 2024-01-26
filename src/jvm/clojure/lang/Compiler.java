@@ -1219,9 +1219,9 @@ static class QualifiedMethodExpr implements Expr {
 
 	Expr analyzeMethodInvocation(C context, ISeq form) {
 		IPersistentVector args;
-		if(isConstructor()) {
+		if(isConstructor() || methodNamesConstructor(c, memberName)) {
 			args = analyzeArgs(context, RT.next(form));
-			return new NewExpr(c, (Constructor) method, args, line, column);
+			return new NewExpr(c, (Constructor) method, false, args, line, column);
 		}
 		else if(isInstanceMethod()){
 			args = analyzeArgs(context, RT.next(RT.next(form)));
@@ -2718,8 +2718,7 @@ public static class NewExpr implements Expr{
 			Method.getMethod("Object invokeConstructor(Class,Object[])");
 	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
 
-
-	public NewExpr(Class c, Constructor thector, IPersistentVector args, int line, int column) {
+	public NewExpr(Class c, Constructor thector, boolean shouldInfer, IPersistentVector args, int line, int column) {
 		this.args = args;
 		this.c = c;
 		if(thector != null)
@@ -2728,30 +2727,35 @@ public static class NewExpr implements Expr{
 			return;
 			}
 
-		Constructor[] allctors = c.getConstructors();
-		ArrayList ctors = new ArrayList();
-		ArrayList<Class[]> params = new ArrayList();
-		ArrayList<Class> rets = new ArrayList();
-		for(int i = 0; i < allctors.length; i++)
+		if(shouldInfer)
 			{
-			Constructor ctor = allctors[i];
-			if(ctor.getParameterTypes().length == args.count())
-				{
-				ctors.add(ctor);
-				params.add(ctor.getParameterTypes());
-				rets.add(c);
+			Constructor[] allctors = c.getConstructors();
+			ArrayList ctors = new ArrayList();
+			ArrayList<Class[]> params = new ArrayList();
+			ArrayList<Class> rets = new ArrayList();
+			for (int i = 0; i < allctors.length; i++) {
+				Constructor ctor = allctors[i];
+				if (ctor.getParameterTypes().length == args.count()) {
+					ctors.add(ctor);
+					params.add(ctor.getParameterTypes());
+					rets.add(c);
 				}
 			}
-		if(ctors.isEmpty())
-			throw new IllegalArgumentException("No matching ctor found for " + c);
+			if (ctors.isEmpty())
+				throw new IllegalArgumentException("No matching ctor found for " + c);
 
-		int ctoridx = 0;
-		if(ctors.size() > 1)
-			{
-			ctoridx = getMatchingParams(c.getName(), params, args, rets);
+			int ctoridx = 0;
+			if (ctors.size() > 1) {
+				ctoridx = getMatchingParams(c.getName(), params, args, rets);
 			}
 
-		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
+			this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
+			}
+		else
+			{
+			this.ctor = null;
+			}
+
 		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
 			RT.errPrintWriter()
@@ -2820,7 +2824,7 @@ public static class NewExpr implements Expr{
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
 				args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
-			return new NewExpr(c, null, args, line, column);
+			return new NewExpr(c, null, true, args, line, column);
 		}
 	}
 
