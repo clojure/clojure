@@ -159,22 +159,18 @@ with invalid arguments."
 
 ;;; ------------------------------------------------------------------------
 ;;; print integration
-
-(def ^:private ^ThreadLocal thread-local-utc-date-format
-  ;; SimpleDateFormat is not thread-safe, so we use a ThreadLocal proxy for access.
-  ;; http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4228335
-  (proxy [ThreadLocal] []
-    (initialValue []
-      (doto (java.text.SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss.SSS-00:00")
-        ;; RFC3339 says to use -00:00 when the timezone is unknown (+00:00 implies a known GMT)
-        (.setTimeZone (java.util.TimeZone/getTimeZone "GMT"))))))
+(def ^:private ^java.time.format.DateTimeFormatter UTC_DATE_FORMATTER
+  ;; RFC3339 says to use -00:00 when the timezone is unknown (+00:00 implies a known GMT)
+  (.withZone (java.time.format.DateTimeFormatter/ofPattern "yyyy-MM-dd'T'HH:mm:ss.SSS-00:00")
+             (java.time.ZoneId/of "GMT")))
 
 (defn- print-date
   "Print a java.util.Date as RFC3339 timestamp, always in UTC."
   [^java.util.Date d, ^java.io.Writer w]
-  (let [^java.text.DateFormat utc-format (.get thread-local-utc-date-format)]
+  (let [instant (.toInstant d)
+        formatted-date (.format UTC_DATE_FORMATTER instant)]
     (.write w "#inst \"")
-    (.write w (.format utc-format d))
+    (.write w formatted-date)
     (.write w "\"")))
 
 (defmethod print-method java.util.Date
@@ -206,23 +202,19 @@ with invalid arguments."
   (print-calendar c w))
 
 
-(def ^:private ^ThreadLocal thread-local-utc-timestamp-format
-  ;; SimpleDateFormat is not thread-safe, so we use a ThreadLocal proxy for access.
-  ;; http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4228335
-  (proxy [ThreadLocal] []
-    (initialValue []
-      (doto (java.text.SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss")
-        (.setTimeZone (java.util.TimeZone/getTimeZone "GMT"))))))
+(def ^:private ^java.time.format.DateTimeFormatter UTC_TIMESTAMP_FORMATTER
+  (.withZone (java.time.format.DateTimeFormatter/ofPattern "yyyy-MM-dd'T'HH:mm:ss.nnnnnnnnn")
+             (java.time.ZoneId/of "UTC")))
 
 (defn- print-timestamp
   "Print a java.sql.Timestamp as RFC3339 timestamp, always in UTC."
   [^java.sql.Timestamp ts, ^java.io.Writer w]
-  (let [^java.text.DateFormat utc-format (.get thread-local-utc-timestamp-format)]
+  (let [instant (.toInstant ts)
+        formatted-date (.format UTC_TIMESTAMP_FORMATTER instant)]
     (.write w "#inst \"")
-    (.write w (.format utc-format ts))
-    ;; add on nanos and offset
+    (.write w formatted-date)
     ;; RFC3339 says to use -00:00 when the timezone is unknown (+00:00 implies a known GMT)
-    (.write w (format ".%09d-00:00" (.getNanos ts)))
+    (.write w "-00:00")
     (.write w "\"")))
 
 (defmethod print-method java.sql.Timestamp
@@ -292,3 +284,4 @@ fractional seconds with nanosecond precision. The timezone offset will
 be used to convert into UTC."
   [^CharSequence cs]
   (parse-timestamp (validated construct-timestamp) cs))
+
