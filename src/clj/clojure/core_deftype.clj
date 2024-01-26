@@ -101,18 +101,19 @@
   same arity in an interface you must specify complete hints to
   disambiguate - a missing hint implies Object.
 
-  recur works to method heads The method bodies of reify are lexical
-  closures, and can refer to the surrounding local scope:
+  Method heads are recursion points for recur, as in a fn. The method
+  bodies of reify are lexical closures, and can refer to the surrounding
+  local scope:
   
   (str (let [f \"foo\"] 
-       (reify Object 
-         (toString [this] f))))
+         (reify Object
+           (toString [this] f))))
   == \"foo\"
 
   (seq (let [f \"foo\"] 
-       (reify clojure.lang.Seqable 
-         (seq [this] (seq f)))))
-  == (\\f \\o \\o))
+         (reify clojure.lang.Seqable
+           (seq [this] (seq f)))))
+  == (\\f \\o \\o)
   
   reify always implements clojure.lang.IObj and transfers meta
   data of the form to the created object.
