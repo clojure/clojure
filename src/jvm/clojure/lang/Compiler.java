@@ -1119,7 +1119,7 @@ static class QualifiedMethodExpr implements Expr {
 	final int line;
 	final int column;
 
-	private final Symbol sym;
+	private final Symbol memberSymbol;
 	private final Symbol tag;
 	private final Class c;
 	private final String memberName;
@@ -1129,7 +1129,7 @@ static class QualifiedMethodExpr implements Expr {
 	public QualifiedMethodExpr(Class c, Symbol sym, Symbol tag){
 		this.line = lineDeref();
 		this.column = columnDeref();
-		this.sym = sym;
+		this.memberSymbol = sym;
 		this.tag = tag;
 		this.c = c;
 		this.memberName = sym.name;
@@ -1141,15 +1141,15 @@ static class QualifiedMethodExpr implements Expr {
 			this.method = maybeLookupSingleMethod(c, memberName);
 	}
 
-	QualifiedMethodExpr(Class c, Symbol sym, Symbol tag, java.lang.reflect.Method method) {
-		this.line = lineDeref();
-		this.column = columnDeref();
-		this.sym = sym;
-		this.tag = tag;
-		this.c = c;
-		this.memberName = sym.name;
-		this.paramTags = paramTagsOf(sym);
-		this.method = method;
+	QualifiedMethodExpr(QualifiedMethodExpr mexpr, java.lang.reflect.Method maybeMethod) {
+		this.line = mexpr.line;
+		this.column = mexpr.column;
+		this.memberSymbol = mexpr.memberSymbol;
+		this.tag = mexpr.tag;
+		this.c = mexpr.c;
+		this.memberName = mexpr.memberName;
+		this.paramTags = mexpr.paramTags;
+		this.method = maybeMethod;
 	}
 
 	boolean isResolved() {
@@ -1182,12 +1182,12 @@ static class QualifiedMethodExpr implements Expr {
 			return mexp.analyzeMethodInvocation(context, form);
 		}
 		else {
-			java.lang.reflect.Method maybeMethod = QualifiedMethodExpr.maybeLookupSingleMethod(mexp.c, mexp.sym.name, RT.next(form));
+			java.lang.reflect.Method maybeMethod = QualifiedMethodExpr.maybeLookupSingleMethod(mexp.c, mexp.memberSymbol.name, RT.next(form));
 
 			if (maybeMethod != null) {
-				mexp = new QualifiedMethodExpr(mexp.c, mexp.sym, mexp.tag, maybeMethod);
+				mexp = new QualifiedMethodExpr(mexp, maybeMethod);
 				return mexp.analyzeMethodInvocation(context, form);
-			} else { // could not resolve method, so fall back to dot form for resolution or reflection
+			} else {
 				return mexp.analyzeMethodInvocation(context, form);
 			}
 		}
@@ -1602,7 +1602,7 @@ static class InstanceMethodExpr extends MethodExpr{
 
 
 	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
-			String methodName, java.lang.reflect.Method meth, IPersistentVector args, boolean tailPosition)
+			String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
 			{
 		this.source = source;
 		this.line = line;
@@ -1613,9 +1613,9 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.tag = tag;
 		this.tailPosition = tailPosition;
 
-		if(meth != null)
+		if(preferredMethod != null)
 			{
-			method = meth;
+			method = preferredMethod;
 			}
 		else if(target.hasJavaClass() && target.getJavaClass() != null)
 			{
@@ -1802,7 +1802,7 @@ static class StaticMethodExpr extends MethodExpr{
     Class jc;
 
 	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c,
-				String methodName, java.lang.reflect.Method meth, IPersistentVector args, boolean tailPosition)
+				String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
 			{
 		this.c = c;
 		this.methodName = methodName;
@@ -1813,9 +1813,9 @@ static class StaticMethodExpr extends MethodExpr{
 		this.tag = tag;
 		this.tailPosition = tailPosition;
 
-		if(meth != null)
+		if(preferredMethod != null)
 			{
-			method = meth;
+			method = preferredMethod;
 			return;
 			}
 
@@ -2718,12 +2718,12 @@ public static class NewExpr implements Expr{
 			Method.getMethod("Object invokeConstructor(Class,Object[])");
 	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
 
-	public NewExpr(Class c, Constructor thector, boolean shouldInfer, IPersistentVector args, int line, int column) {
+	public NewExpr(Class c, Constructor preferredConstructor, boolean shouldInfer, IPersistentVector args, int line, int column) {
 		this.args = args;
 		this.c = c;
-		if(thector != null)
+		if(preferredConstructor != null)
 			{
-			this.ctor = thector;
+			this.ctor = preferredConstructor;
 			return;
 			}
 
