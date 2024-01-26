@@ -15,7 +15,7 @@
 
 (set! *warn-on-reflection* true)
 
-(deftest typehints-retained-destructuring
+(deftest no-hints-with-param-tags
   (should-not-reflect
    (defn touc-no-reflect [s]
      (^[] String/toUpperCase s)))

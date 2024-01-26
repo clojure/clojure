@@ -22,6 +22,7 @@ import clojure.asm.commons.Method;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -1238,22 +1239,41 @@ static class QualifiedMethodExpr implements Expr {
 
 	@Override
 	public Object eval() {
-		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
+		if(isConstructor())
+			return MethodValues.buildCtorThunk(c, method, paramTags).eval();
+		else if(isInstanceMethod())
+			return MethodValues.buildInstanceMethodThunk(c, method, memberName, paramTags).eval();
+		else if(isStaticMethod())
+			return MethodValues.buildStaticMethodThunk(c, method, memberName, paramTags).eval();
+		else
+			throw new IllegalArgumentException("Could resolve method value for " + memberSymbol);
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
+		if(isConstructor())
+			MethodValues.buildCtorThunk(c, method, paramTags).emit(context, objx, gen);
+		else if(isInstanceMethod())
+			MethodValues.buildInstanceMethodThunk(c, method, memberName, paramTags).emit(context, objx, gen);
+		else if(isStaticMethod())
+			MethodValues.buildStaticMethodThunk(c, method, memberName, paramTags).emit(context, objx, gen);
+		else
+			throw new IllegalArgumentException("Could resolve method value for " + memberSymbol);
 	}
 
 	@Override
 	public boolean hasJavaClass() {
-		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
+		return method != null;
 	}
 
 	@Override
 	public Class getJavaClass() {
-		throw new UnsupportedOperationException("Value semantics for method values not implemented.");
+		if(isConstructor())
+			return c;
+		else if(hasJavaClass())
+			return ((java.lang.reflect.Method)method).getReturnType();
+		else
+			return null;
 	}
 }
 
@@ -9344,5 +9364,151 @@ private static Executable findMethod(Class c, String methodName, IPersistentVect
 	if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
 	throw buildResolutionError(filteredMethods, filteredMethods, c, methodName, paramTags);
+}
+
+static class MethodValues {
+	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>();
+	static {
+		coerceFns.put(double.class, Symbol.intern("double"));
+		coerceFns.put(double[].class, Symbol.intern("doubles"));
+		coerceFns.put(long.class, Symbol.intern("long"));
+		coerceFns.put(long[].class, Symbol.intern("longs"));
+		coerceFns.put(int.class, Symbol.intern("int"));
+		coerceFns.put(int[].class, Symbol.intern("ints"));
+		coerceFns.put(float.class, Symbol.intern("float"));
+		coerceFns.put(float[].class, Symbol.intern("floats"));
+		coerceFns.put(char.class, Symbol.intern("char"));
+		coerceFns.put(char[].class, Symbol.intern("chars"));
+		coerceFns.put(short.class, Symbol.intern("short"));
+		coerceFns.put(short[].class, Symbol.intern("shorts"));
+		coerceFns.put(byte.class, Symbol.intern("byte"));
+		coerceFns.put(byte[].class, Symbol.intern("bytes"));
+		coerceFns.put(boolean.class, Symbol.intern("boolean"));
+		coerceFns.put(boolean[].class, Symbol.intern("booleans"));
+	}
+
+	// All buildThunk methods currently return a new FnExpr on every call
+	// caching is not implemented and is TBD.
+	static FnExpr buildStaticMethodThunk(Class c, Executable method, String methodName, IPersistentVector paramTags) {
+		List<Class> declaredSignature = tagsToClasses(paramTags);
+		Function<IPersistentVector, ISeq> staticCallBuilder = (params) -> {
+			// ([^T arg] (. Klass staticMethod arg))
+			// ([^long arg1 ^double arg2] (. Klass staticMethod arg1 arg2))
+			// ([prim] (. Klass staticMethod (coercefn prim)))
+			return RT.listStar(Symbol.intern("."),
+					Symbol.intern(c.getName()), Symbol.intern(method.getName()),
+					maybeCoerceArgs(method, params.seq()));
+		};
+		String name = buildThunkName(methodName);
+		ISeq form = buildThunk(method, name, c, declaredSignature, null, staticCallBuilder);
+		Expr retExpr = analyzeSeq(C.EVAL, form, name);
+		return (FnExpr) retExpr;
+	}
+
+	static FnExpr buildInstanceMethodThunk(Class c, Executable method, String methodName, IPersistentVector paramTags) {
+		List<Class> declaredSignature = tagsToClasses(paramTags);
+		Function<IPersistentVector, ISeq> instanceCallBuilder = (params) -> {
+			// ([^Klass this ^T arg] (. this instanceMethod arg))
+			// ([^long arg1 ^double arg2] (. this instanceMethod arg1 arg2))
+			// ([^Klass this prim] (. this instanceMethod (coercefn prim)))
+			return RT.listStar(Symbol.intern("."),
+					params.seq().first(), Symbol.intern(method.getName()),
+					maybeCoerceArgs(method, params.seq().next()));
+		};
+		String name = buildThunkName(methodName);
+		IPersistentMap m = PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(c.getName()));
+		Symbol instanceParam = (Symbol) Symbol.intern(null, "this" + RT.nextID()).withMeta(m);
+		ISeq form = buildThunk(method, name, c, declaredSignature, instanceParam, instanceCallBuilder);
+		Expr retExpr = analyzeSeq(C.EVAL, form, name);
+		return (FnExpr) retExpr;
+	}
+
+	static FnExpr buildCtorThunk(Class c, Executable ctor, IPersistentVector paramTags) {
+		List<Class> declaredSignature = tagsToClasses(paramTags);
+		Function<IPersistentVector, ISeq> ctorCallBuilder = (params) -> {
+			return RT.listStar(Symbol.intern("new"), Symbol.intern(c.getName()), maybeCoerceArgs(ctor, params.seq()));
+		};
+		String name = buildThunkName(c.getName() + "/new");
+		ISeq form = buildThunk(ctor, name, c, declaredSignature, null, ctorCallBuilder);
+		Expr retExpr = analyzeSeq(C.EVAL, form, name);
+		return (FnExpr) retExpr;
+	}
+
+	private static String buildThunkName(String methodName){
+		return "dot__" + munge(methodName) + RT.nextID();
+	}
+
+	private static ISeq buildThunk(Executable method, String name, Class c, List<Class> declaredSignature, Symbol instanceParam, Function<IPersistentVector, ISeq> callBuilder) {
+		// (fn dot__new42 ([^T arg] (new Klass arg)))
+		// (fn dot__staticMethod42 (^r [^T arg] (. Klass staticMethod arg)))
+		// (fn dot__instanceMethod42 (^r [^Klass self ^T arg] (. ^Klass self instanceMethod arg)))
+		IPersistentVector params = buildThunkParams(method, instanceParam);
+		return	RT.list(Symbol.intern("fn"), Symbol.intern(name),
+				buildThunkBody(maybeHintReturn(method, (PersistentVector) params), callBuilder));
+	}
+
+	static IPersistentVector buildThunkParams(Executable target, Symbol seedParam) {
+		IPersistentVector params = PersistentVector.EMPTY;
+
+		if(seedParam != null) params = params.cons(seedParam);
+
+		// [^T arg1 ^U arg2]
+		for(Class klass : target.getParameterTypes())
+		{
+			params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
+		}
+
+		return params;
+	}
+
+	static ISeq buildThunkBody(IPersistentVector params, Function<IPersistentVector, ISeq> callBuilder){
+		// ([^T arg] (. Klass staticMethod arg))
+		// ([^Klass self ^T arg] (. self instanceMethod arg))
+		// ([^T arg] (new Klass arg))
+		ISeq body = RT.list(params, callBuilder.apply(params));
+		return body;
+	}
+
+	static protected Symbol maybeHintParam(Class klass, Symbol name){
+		if (klass.equals(Long.TYPE) || klass.equals(Double.TYPE) || !klass.isPrimitive())
+		{
+			return (Symbol) name.withMeta(PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName())));
+		}
+		return name;
+	}
+
+	static IPersistentVector maybeHintReturn(Executable target, PersistentVector params) {
+		if(target instanceof Constructor) return params;
+
+		Class t = ((java.lang.reflect.Method) target).getReturnType();
+
+		if (t.isPrimitive() && (t.equals(Long.TYPE) || t.equals(Double.TYPE))) {
+			return params.withMeta(PersistentHashMap.create(Keyword.intern("tag"), coerceFns.get(t)));
+		}
+
+		return params;
+	}
+
+	static protected ISeq maybeCoerceArgs(Executable target, ISeq args){
+		Class[] sig = target.getParameterTypes();
+		ArrayList ret = new ArrayList();
+
+		for(int i = 0; args != null; args = args.next(), i++)
+		{
+			if (coerceFns.containsKey(sig[i]))
+			{
+				ArrayList coerceCall = new ArrayList();
+				coerceCall.add(coerceFns.get(sig[i]));
+				coerceCall.add(args.first());
+				ret.add(RT.seq(coerceCall));
+			}
+			else
+			{
+				ret.add(args.first());
+			}
+		}
+
+		return RT.seq(ret);
+	}
 }
 }
