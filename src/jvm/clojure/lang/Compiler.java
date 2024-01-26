@@ -1152,7 +1152,7 @@ static class QualifiedMethodExpr implements Expr {
 		this.method = method;
 	}
 
-	public boolean isResolved() {
+	boolean isResolved() {
 		return method != null;
 	}
 
@@ -1188,9 +1188,7 @@ static class QualifiedMethodExpr implements Expr {
 				mexp = new QualifiedMethodExpr(mexp.c, mexp.sym, mexp.tag, maybeMethod);
 				return mexp.analyzeMethodInvocation(context, form);
 			} else { // could not resolve method, so fall back to dot form for resolution or reflection
-				Symbol memberName = Symbol.intern(mexp.sym.name);
-				Symbol target = Symbol.intern(mexp.sym.ns);
-				return analyze(context, preserveTag(form, RT.listStar(DOT, target, memberName, form.next())));
+				return mexp.analyzeMethodInvocation(context, form);
 			}
 		}
 	}
