@@ -27,17 +27,23 @@
      (^[java.util.Locale] String/toUpperCase s java.util.Locale/ENGLISH))))
 
 (deftest param-tags-in-invocation-positions
-  (is (= 3 (^[long] Math/abs -3)))
-  (is (= [1 2] (^[_ _] Tuple/create 1 2)))
-  (is (= (^[long long] UUID/new 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
-  (is (= (^[long long] java.util.UUID/new 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
+  (testing "qualified static method invocation"
+    (is (= 3 (^[long] Math/abs -3)))
+    (is (= [1 2] (^[_ _] Tuple/create 1 2)))
+    (is (= "42" (Long/toString 42))))
+  (testing "qualified ctor invocation"
+    (is (= (^[long long] UUID/new 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
+    (is (= (^[long long] java.util.UUID/new 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
+    (is (= "a" (^[String] String/new "a"))))
   (testing "qualified instance method invocation"
     (is (= "A" (String/toUpperCase "a")))
     (is (= "A" (String/toUpperCase "a" Locale/ENGLISH)))
     (is (= "A" (^[] String/toUpperCase "a")))
     (is (= "A" (^[java.util.Locale] String/toUpperCase "a" java.util.Locale/ENGLISH)))
-    (is (= "A" (^[Locale] String/toUpperCase "a" java.util.Locale/ENGLISH))))
-  (testing "array resolutions"
+    (is (= "A" (^[Locale] String/toUpperCase "a" java.util.Locale/ENGLISH)))
+    (is (= 65 (aget (^[String] String/getBytes "A" "US-ASCII") 0)))
+    (is (= "42" (^[] Long/toString 42))))
+  (testing "string repr array type resolutions"
      (let [lary (long-array [1 2 3 4 99 100])
            oary (into-array [1 2 3 4 99 100])
            sary (into-array String ["a" "b" "c"])]
