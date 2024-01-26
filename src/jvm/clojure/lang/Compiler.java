@@ -1177,7 +1177,7 @@ static class QualifiedMethodExpr implements Expr {
 		return null;
 	}
 
-	static Expr analyzeMemberExpr(QualifiedMethodExpr mexp, C context, ISeq form) {
+	static Expr analyzeMethodExpr(QualifiedMethodExpr mexp, C context, ISeq form) {
 		if (mexp.isResolved()) {
 			return mexp.analyzeMethodInvocation(context, form);
 		}
@@ -4044,7 +4044,7 @@ static class InvokeExpr implements Expr{
 			}
 
 		if(fexpr instanceof QualifiedMethodExpr)
-			return QualifiedMethodExpr.analyzeMemberExpr((QualifiedMethodExpr)fexpr, context, form);
+			return QualifiedMethodExpr.analyzeMethodExpr((QualifiedMethodExpr)fexpr, context, form);
 
 		if(fexpr instanceof StaticFieldExpr)
 			{
