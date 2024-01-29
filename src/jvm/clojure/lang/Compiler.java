@@ -1138,7 +1138,7 @@ static class QualifiedMethodExpr implements Expr {
 		if(paramTags != null)
 			this.method = findMethod(c, memberName, paramTags);
 		else
-			this.method = maybeLookupSingleMethod(c, memberName);
+			this.method = maybeSingleMethod(c, memberName);
 	}
 
 	QualifiedMethodExpr(QualifiedMethodExpr mexpr, java.lang.reflect.Method maybeMethod) {
@@ -1156,9 +1156,8 @@ static class QualifiedMethodExpr implements Expr {
 		return method != null;
 	}
 
-	static java.lang.reflect.Method maybeLookupSingleMethod(Class c, String methodName, ISeq args) {
+	static java.lang.reflect.Method maybeSingleMethodWithArity(Class c, String methodName, int arity) {
 		if(c == null || methodName == null) return null;
-		int arity = RT.count(args);
 
 		List<java.lang.reflect.Method> methods = Reflector.getMethods(c, arity - 1, methodName, false);
 		methods.addAll(Reflector.getMethods(c, arity, methodName, true));
@@ -1168,7 +1167,7 @@ static class QualifiedMethodExpr implements Expr {
 		return null;
 	}
 
-	static Executable maybeLookupSingleMethod(Class c, String methodName) {
+	static Executable maybeSingleMethod(Class c, String methodName) {
 		if(c == null || methodName == null) return null;
 		List<Executable> methods = methodStream(c, methodName).collect(Collectors.toList());
 
@@ -1179,17 +1178,15 @@ static class QualifiedMethodExpr implements Expr {
 
 	static Expr analyzeMethodExpr(QualifiedMethodExpr mexp, C context, ISeq form) {
 		if (mexp.isResolved()) {
-			return mexp.analyzeMethodInvocation(context, form);
+			return mexp.rewriteInvocationExpr(context, form);
 		}
 		else {
-			java.lang.reflect.Method maybeMethod = QualifiedMethodExpr.maybeLookupSingleMethod(mexp.c, mexp.memberSymbol.name, RT.next(form));
+			java.lang.reflect.Method maybeMethod = QualifiedMethodExpr.maybeSingleMethodWithArity(mexp.c, mexp.memberSymbol.name, RT.count(RT.next(form)));
 
-			if (maybeMethod != null) {
+			if (maybeMethod != null)
 				mexp = new QualifiedMethodExpr(mexp, maybeMethod);
-				return mexp.analyzeMethodInvocation(context, form);
-			} else {
-				return mexp.analyzeMethodInvocation(context, form);
-			}
+
+			return mexp.rewriteInvocationExpr(context, form);
 		}
 	}
 
@@ -1204,24 +1201,26 @@ static class QualifiedMethodExpr implements Expr {
 	public boolean isStaticMethod() {
 		return method != null
 				&& method instanceof java.lang.reflect.Method
-				&& Modifier.isStatic(((java.lang.reflect.Method) method).getModifiers());
+				&& Modifier.isStatic(method.getModifiers());
 	}
 
 	public boolean isInstanceMethod() {
 		return method != null
 				&& method instanceof java.lang.reflect.Method
-				&& !Modifier.isStatic(((java.lang.reflect.Method) method).getModifiers());
+				&& !Modifier.isStatic(method.getModifiers());
 	}
 
 	public boolean isConstructor() {
 		return method instanceof Constructor;
 	}
 
-	Expr analyzeMethodInvocation(C context, ISeq form) {
+	Expr rewriteInvocationExpr(C context, ISeq form) {
 		IPersistentVector args;
 		if(isConstructor() || methodNamesConstructor(c, memberName)) {
+			if(!isResolved()) throw buildResolutionError(null, null, c, memberName, null);
+
 			args = analyzeArgs(context, RT.next(form));
-			return new NewExpr(c, (Constructor) method, false, args, line, column);
+			return new NewExpr(c, (Constructor) method, args, line, column);
 		}
 		else if(isInstanceMethod()){
 			args = analyzeArgs(context, RT.next(RT.next(form)));
@@ -2718,7 +2717,7 @@ public static class NewExpr implements Expr{
 			Method.getMethod("Object invokeConstructor(Class,Object[])");
 	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
 
-	public NewExpr(Class c, Constructor preferredConstructor, boolean shouldInfer, IPersistentVector args, int line, int column) {
+	public NewExpr(Class c, Constructor preferredConstructor, IPersistentVector args, int line, int column) {
 		this.args = args;
 		this.c = c;
 		if(preferredConstructor != null)
@@ -2727,34 +2726,27 @@ public static class NewExpr implements Expr{
 			return;
 			}
 
-		if(shouldInfer)
-			{
-			Constructor[] allctors = c.getConstructors();
-			ArrayList ctors = new ArrayList();
-			ArrayList<Class[]> params = new ArrayList();
-			ArrayList<Class> rets = new ArrayList();
-			for (int i = 0; i < allctors.length; i++) {
-				Constructor ctor = allctors[i];
-				if (ctor.getParameterTypes().length == args.count()) {
-					ctors.add(ctor);
-					params.add(ctor.getParameterTypes());
-					rets.add(c);
-				}
+		Constructor[] allctors = c.getConstructors();
+		ArrayList ctors = new ArrayList();
+		ArrayList<Class[]> params = new ArrayList();
+		ArrayList<Class> rets = new ArrayList();
+		for (int i = 0; i < allctors.length; i++) {
+			Constructor ctor = allctors[i];
+			if (ctor.getParameterTypes().length == args.count()) {
+				ctors.add(ctor);
+				params.add(ctor.getParameterTypes());
+				rets.add(c);
 			}
-			if (ctors.isEmpty())
-				throw new IllegalArgumentException("No matching ctor found for " + c);
+		}
+		if (ctors.isEmpty())
+			throw new IllegalArgumentException("No matching ctor found for " + c);
 
-			int ctoridx = 0;
-			if (ctors.size() > 1) {
-				ctoridx = getMatchingParams(c.getName(), params, args, rets);
-			}
+		int ctoridx = 0;
+		if (ctors.size() > 1) {
+			ctoridx = getMatchingParams(c.getName(), params, args, rets);
+		}
 
-			this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
-			}
-		else
-			{
-			this.ctor = null;
-			}
+		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
 
 		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
@@ -2824,7 +2816,7 @@ public static class NewExpr implements Expr{
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
 				args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
-			return new NewExpr(c, null, true, args, line, column);
+			return new NewExpr(c, null, args, line, column);
 		}
 	}
 
@@ -4046,12 +4038,11 @@ static class InvokeExpr implements Expr{
 		if(fexpr instanceof QualifiedMethodExpr)
 			return QualifiedMethodExpr.analyzeMethodExpr((QualifiedMethodExpr)fexpr, context, form);
 
+		// Preserving the existing static field bug that replaces a reference in parens with
+		// the field itself rather than trying to invoke the value in the field. This is
+		// an exception to the uniform Class/member qualification per CLJ-2806 ticket.
 		if(fexpr instanceof StaticFieldExpr)
-			{
-			RT.errPrintWriter().format("Warning, static fields should be referenced without parens unless they are intended as function calls. "
-				+ " Future Clojure releases will treat the field's value as an IFn and invoke it. Found %1$s\n", form);
 			return fexpr;
-			}
 
 		PersistentVector args = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form.next()); s != null; s = s.next())
