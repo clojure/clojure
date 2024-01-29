@@ -2730,24 +2730,26 @@ public static class NewExpr implements Expr{
 		ArrayList ctors = new ArrayList();
 		ArrayList<Class[]> params = new ArrayList();
 		ArrayList<Class> rets = new ArrayList();
-		for (int i = 0; i < allctors.length; i++) {
+		for(int i = 0; i < allctors.length; i++)
+			{
 			Constructor ctor = allctors[i];
-			if (ctor.getParameterTypes().length == args.count()) {
+			if(ctor.getParameterTypes().length == args.count())
+				{
 				ctors.add(ctor);
 				params.add(ctor.getParameterTypes());
 				rets.add(c);
+				}
 			}
-		}
-		if (ctors.isEmpty())
+		if(ctors.isEmpty())
 			throw new IllegalArgumentException("No matching ctor found for " + c);
 
 		int ctoridx = 0;
-		if (ctors.size() > 1) {
+		if(ctors.size() > 1)
+			{
 			ctoridx = getMatchingParams(c.getName(), params, args, rets);
-		}
+			}
 
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
-
 		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
 			RT.errPrintWriter()
