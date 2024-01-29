@@ -1237,28 +1237,25 @@ static class QualifiedMethodExpr implements Expr {
 		}
 	}
 
-	@Override
-	public Object eval() {
+	private Expr buildThunk() {
 		if(isConstructor())
-			return MethodValues.buildCtorThunk(c, method, paramTags).eval();
+			return MethodValues.buildCtorThunk(c, method, paramTags);
 		else if(isInstanceMethod())
-			return MethodValues.buildInstanceMethodThunk(c, method, memberName, paramTags).eval();
+			return MethodValues.buildInstanceMethodThunk(c, method, memberName, paramTags);
 		else if(isStaticMethod())
-			return MethodValues.buildStaticMethodThunk(c, method, memberName, paramTags).eval();
+			return MethodValues.buildStaticMethodThunk(c, method, memberName, paramTags);
 		else
 			throw new IllegalArgumentException("Could resolve method value for " + memberSymbol);
 	}
 
 	@Override
+	public Object eval() {
+		return buildThunk().eval();
+	}
+
+	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-		if(isConstructor())
-			MethodValues.buildCtorThunk(c, method, paramTags).emit(context, objx, gen);
-		else if(isInstanceMethod())
-			MethodValues.buildInstanceMethodThunk(c, method, memberName, paramTags).emit(context, objx, gen);
-		else if(isStaticMethod())
-			MethodValues.buildStaticMethodThunk(c, method, memberName, paramTags).emit(context, objx, gen);
-		else
-			throw new IllegalArgumentException("Could resolve method value for " + memberSymbol);
+		buildThunk().emit(context, objx, gen);
 	}
 
 	@Override
