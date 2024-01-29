@@ -1318,7 +1318,7 @@ public static class EvalReader extends AFn{
 				Object[] args = RT.toArray(RT.next(o));
 				return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
 				}
-			if(Compiler.namesQualifiedMember(fs))
+			if(Compiler.namesStaticMember(fs))
 				{
 				Object[] args = RT.toArray(RT.next(o));
 				return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
