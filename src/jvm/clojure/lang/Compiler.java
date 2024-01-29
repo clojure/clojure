@@ -7108,7 +7108,7 @@ static public IFn isInline(Object op, int arity) {
 	return null;
 }
 
-public static boolean namesQualifiedMember(Symbol sym){
+public static boolean namesStaticMember(Symbol sym){
 	return sym.ns != null && namespaceFor(sym) == null;
 }
 
@@ -7474,7 +7474,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 				{
 				if(Reflector.getField(c, sym.name, true) != null)
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
-				else if(namesQualifiedMember(sym))
+				else
 					return new QualifiedMethodExpr(c, sym, tag);
 				}
 
