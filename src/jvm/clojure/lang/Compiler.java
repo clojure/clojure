@@ -1178,17 +1178,14 @@ static class QualifiedMethodExpr implements Expr {
 	}
 
 	static Expr analyzeMethodExpr(QualifiedMethodExpr mexp, C context, ISeq form) {
-		if (mexp.isResolved()) {
-			return mexp.rewriteInvocationExpr(context, form);
-		}
-		else {
+		if (!mexp.isResolved()) {
 			java.lang.reflect.Method maybeMethod = QualifiedMethodExpr.maybeSingleMethodWithArity(mexp.c, mexp.memberSymbol.name, RT.count(RT.next(form)));
 
 			if (maybeMethod != null)
 				mexp = new QualifiedMethodExpr(mexp, maybeMethod);
-
-			return mexp.rewriteInvocationExpr(context, form);
 		}
+
+		return mexp.rewriteInvocationExpr(context, form);
 	}
 
 	IPersistentVector analyzeArgs(C context, ISeq form) {
