@@ -1134,37 +1134,19 @@ static class MethodValueExpr implements Expr {
 		this.c = c;
 		this.memberName = sym.name;
 		this.paramTags = paramTagsOf(sym);
-
-		if(paramTags != null)
-			this.method = findMethod(c, memberName, paramTags);
-		else
-			this.method = maybeSingleMethod(c, memberName);
 	}
 
-	MethodValueExpr(MethodValueExpr mexpr, java.lang.reflect.Method maybeMethod) {
-		this.line = mexpr.line;
-		this.column = mexpr.column;
-		this.memberSymbol = mexpr.memberSymbol;
-		this.tag = mexpr.tag;
-		this.c = mexpr.c;
-		this.memberName = mexpr.memberName;
-		this.paramTags = mexpr.paramTags;
-		this.method = maybeMethod;
+	public Executable maybeResolveMethod() {
+		if(paramTags != null)
+			method = findMethod(c, memberName, paramTags);
+		else
+			method = maybeSingleMethod(c, memberName);
+
+		return method;
 	}
 
 	boolean isResolved() {
 		return method != null;
-	}
-
-	static java.lang.reflect.Method maybeSingleMethodWithArity(Class c, String methodName, int arity) {
-		if(c == null || methodName == null) return null;
-
-		List<java.lang.reflect.Method> methods = Reflector.getMethods(c, arity - 1, methodName, false);
-		methods.addAll(Reflector.getMethods(c, arity, methodName, true));
-
-		if(methods.size() == 1) return methods.get(0);
-
-		return null;
 	}
 
 	static Executable maybeSingleMethod(Class c, String methodName) {
@@ -1174,25 +1156,6 @@ static class MethodValueExpr implements Expr {
 		if(methods.size() == 1) return methods.get(0);
 
 		return null;
-	}
-
-	static Expr analyzeMethodExpr(MethodValueExpr mexp, C context, ISeq form) {
-		if (!mexp.isResolved()) {
-			java.lang.reflect.Method maybeMethod = MethodValueExpr.maybeSingleMethodWithArity(mexp.c, mexp.memberSymbol.name, RT.count(RT.next(form)));
-
-			if (maybeMethod != null)
-				mexp = new MethodValueExpr(mexp, maybeMethod);
-		}
-
-		return mexp.rewriteInvocationExpr(context, form);
-	}
-
-	IPersistentVector analyzeArgs(C context, ISeq form) {
-		PersistentVector args = PersistentVector.EMPTY;
-		for(ISeq s = form; s != null; s = s.next())
-			args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
-
-		return args;
 	}
 
 	public boolean isStaticMethod() {
@@ -1211,27 +1174,6 @@ static class MethodValueExpr implements Expr {
 		return method instanceof Constructor;
 	}
 
-	Expr rewriteInvocationExpr(C context, ISeq form) {
-		IPersistentVector args;
-		if(isConstructor() || methodNamesConstructor(c, memberName)) {
-			if(!isResolved()) throw buildResolutionError(null, null, c, memberName, null);
-
-			args = analyzeArgs(context, RT.next(form));
-			return new NewExpr(c, (Constructor) method, args, line, column);
-		}
-		else if(isInstanceMethod()){
-			args = analyzeArgs(context, RT.next(RT.next(form)));
-			Expr instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
-			return new InstanceMethodExpr((String) SOURCE.deref(), line, column, tagOf(form), instance,
-					munge(memberName), (java.lang.reflect.Method) method, args, inTailCall(context));
-		}
-		else {
-			args = analyzeArgs(context, RT.next(form));
-			return new StaticMethodExpr((String) SOURCE.deref(), line, column, tagOf(form), c,
-					munge(memberName), (java.lang.reflect.Method) method, args, inTailCall(context));
-		}
-	}
-
 	private Expr buildThunk() {
 		if(isConstructor())
 			return MethodValues.buildCtorThunk(c, method, paramTags);
@@ -1245,11 +1187,13 @@ static class MethodValueExpr implements Expr {
 
 	@Override
 	public Object eval() {
+		maybeResolveMethod();
 		return buildThunk().eval();
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
+		maybeResolveMethod();
 		buildThunk().emit(context, objx, gen);
 	}
 
@@ -1266,6 +1210,10 @@ static class MethodValueExpr implements Expr {
 			return ((java.lang.reflect.Method)method).getReturnType();
 		else
 			return null;
+	}
+
+	public void setMethod(Executable maybeMethod) {
+		method = maybeMethod;
 	}
 }
 
@@ -4051,7 +3999,7 @@ static class InvokeExpr implements Expr{
 			}
 
 		if(fexpr instanceof MethodValueExpr)
-			return MethodValueExpr.analyzeMethodExpr((MethodValueExpr)fexpr, context, form);
+			return analyzeMethodExpr((MethodValueExpr)fexpr, context, form);
 
 		// Preserving the existing static field bug that replaces a reference in parens with
 		// the field itself rather than trying to invoke the value in the field. This is
@@ -9351,6 +9299,56 @@ private static Executable findMethod(Class c, String methodName, IPersistentVect
 	if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
 	throw buildResolutionError(filteredMethods, filteredMethods, c, methodName, paramTags);
+}
+
+static Executable maybeResolveMethodWithArity(Class c, String methodName, int arity) {
+	if(c == null || methodName == null) return null;
+
+	List<java.lang.reflect.Method> methods = Reflector.getMethods(c, arity - 1, methodName, false);
+	methods.addAll(Reflector.getMethods(c, arity, methodName, true));
+
+	if(methods.size() == 1) return methods.get(0);
+
+	return null;
+}
+
+private static Expr analyzeMethodExpr(MethodValueExpr mexp, C context, ISeq form) {
+	Executable maybeMethod = mexp.maybeResolveMethod();
+	if (maybeMethod == null) {
+		maybeMethod = maybeResolveMethodWithArity(mexp.c, mexp.memberSymbol.name, RT.count(RT.next(form)));
+		mexp.setMethod(maybeMethod);
+	}
+
+	return toHostExpr(mexp, context, form);
+}
+
+private static IPersistentVector analyzeArgs(C context, ISeq form) {
+	PersistentVector args = PersistentVector.EMPTY;
+	for(ISeq s = form; s != null; s = s.next())
+		args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
+
+	return args;
+}
+
+private static Expr toHostExpr(MethodValueExpr mexpr, C context, ISeq form) {
+	IPersistentVector args;
+	if(mexpr.isConstructor() || methodNamesConstructor(mexpr.c, mexpr.memberName)) {
+		if(!mexpr.isResolved()) throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, null);
+
+		args = analyzeArgs(context, RT.next(form));
+		return new NewExpr(mexpr.c, (Constructor) mexpr.method, args, mexpr.line, mexpr.column);
+	}
+	else if(mexpr.isInstanceMethod()){
+		args = analyzeArgs(context, RT.next(RT.next(form)));
+		Expr instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
+		return new InstanceMethodExpr((String) SOURCE.deref(), mexpr.line, mexpr.column, tagOf(form), instance,
+				munge(mexpr.memberName), (java.lang.reflect.Method) mexpr.method, args, inTailCall(context));
+	}
+	else {
+		args = analyzeArgs(context, RT.next(form));
+		return new StaticMethodExpr((String) SOURCE.deref(), mexpr.line, mexpr.column, tagOf(form), mexpr.c,
+				munge(mexpr.memberName), (java.lang.reflect.Method) mexpr.method, args, inTailCall(context));
+	}
 }
 
 static class MethodValues {
