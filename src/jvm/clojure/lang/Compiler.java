@@ -1137,25 +1137,21 @@ static class MethodValueExpr implements Expr {
 	}
 
 	public Executable maybeResolveMethod() {
-		if(paramTags != null)
+		if(paramTags != null) {
 			method = findMethod(c, memberName, paramTags);
-		else
-			method = maybeSingleMethod(c, memberName);
+		}
+		else {
+			// Using qualifying class and name, try to resolve a unique method
+			List<Executable> methods = methodsWithName(c, memberName);
+			if(methods.size() == 1)
+				method = methods.get(0);
+		}
 
 		return method;
 	}
 
 	boolean isResolved() {
 		return method != null;
-	}
-
-	static Executable maybeSingleMethod(Class c, String methodName) {
-		if(c == null || methodName == null) return null;
-		List<Executable> methods = methodsWithName(c, methodName).stream().collect(Collectors.toList());
-
-		if(methods.size() == 1) return methods.get(0);
-
-		return null;
 	}
 
 	public boolean isStaticMethod() {
@@ -9264,6 +9260,7 @@ private static boolean methodNamesConstructor(Class c, String methodName) {
 }
 
 private static List<Executable> methodsWithName(Class c, String name) {
+	if(c == null || name == null) return null;
 	final Executable[] methods;
 	final String methodName;
 	if (methodNamesConstructor(c, name)) {
