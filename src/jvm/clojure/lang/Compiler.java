@@ -26,7 +26,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 //*/
 /*
@@ -1116,7 +1115,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	}
 }
 
-static class QualifiedMethodExpr implements Expr {
+static class MethodValueExpr implements Expr {
 	final int line;
 	final int column;
 
@@ -1127,7 +1126,7 @@ static class QualifiedMethodExpr implements Expr {
 	private Executable method;
 	private IPersistentVector paramTags;
 
-	public QualifiedMethodExpr(Class c, Symbol sym, Symbol tag){
+	public MethodValueExpr(Class c, Symbol sym, Symbol tag){
 		this.line = lineDeref();
 		this.column = columnDeref();
 		this.memberSymbol = sym;
@@ -1142,7 +1141,7 @@ static class QualifiedMethodExpr implements Expr {
 			this.method = maybeSingleMethod(c, memberName);
 	}
 
-	QualifiedMethodExpr(QualifiedMethodExpr mexpr, java.lang.reflect.Method maybeMethod) {
+	MethodValueExpr(MethodValueExpr mexpr, java.lang.reflect.Method maybeMethod) {
 		this.line = mexpr.line;
 		this.column = mexpr.column;
 		this.memberSymbol = mexpr.memberSymbol;
@@ -1170,19 +1169,19 @@ static class QualifiedMethodExpr implements Expr {
 
 	static Executable maybeSingleMethod(Class c, String methodName) {
 		if(c == null || methodName == null) return null;
-		List<Executable> methods = methodStream(c, methodName).collect(Collectors.toList());
+		List<Executable> methods = methodsWithName(c, methodName).stream().collect(Collectors.toList());
 
 		if(methods.size() == 1) return methods.get(0);
 
 		return null;
 	}
 
-	static Expr analyzeMethodExpr(QualifiedMethodExpr mexp, C context, ISeq form) {
+	static Expr analyzeMethodExpr(MethodValueExpr mexp, C context, ISeq form) {
 		if (!mexp.isResolved()) {
-			java.lang.reflect.Method maybeMethod = QualifiedMethodExpr.maybeSingleMethodWithArity(mexp.c, mexp.memberSymbol.name, RT.count(RT.next(form)));
+			java.lang.reflect.Method maybeMethod = MethodValueExpr.maybeSingleMethodWithArity(mexp.c, mexp.memberSymbol.name, RT.count(RT.next(form)));
 
 			if (maybeMethod != null)
-				mexp = new QualifiedMethodExpr(mexp, maybeMethod);
+				mexp = new MethodValueExpr(mexp, maybeMethod);
 		}
 
 		return mexp.rewriteInvocationExpr(context, form);
@@ -4051,8 +4050,8 @@ static class InvokeExpr implements Expr{
 			                             (KeywordExpr) fexpr, target);
 			}
 
-		if(fexpr instanceof QualifiedMethodExpr)
-			return QualifiedMethodExpr.analyzeMethodExpr((QualifiedMethodExpr)fexpr, context, form);
+		if(fexpr instanceof MethodValueExpr)
+			return MethodValueExpr.analyzeMethodExpr((MethodValueExpr)fexpr, context, form);
 
 		// Preserving the existing static field bug that replaces a reference in parens with
 		// the field itself rather than trying to invoke the value in the field. This is
@@ -7482,7 +7481,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 				if(Reflector.getField(c, sym.name, true) != null)
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
 				else
-					return new QualifiedMethodExpr(c, sym, tag);
+					return new MethodValueExpr(c, sym, tag);
 				}
 
 			}
@@ -9316,7 +9315,7 @@ private static boolean methodNamesConstructor(Class c, String methodName) {
 	return c != null && methodName.equals("new");
 }
 
-private static Stream<Executable> methodStream(Class c, String name) {
+private static List<Executable> methodsWithName(Class c, String name) {
 	final Executable[] methods;
 	final String methodName;
 	if (methodNamesConstructor(c, name)) {
@@ -9328,7 +9327,8 @@ private static Stream<Executable> methodStream(Class c, String name) {
 		methodName = name;
 	}
 
-	return Arrays.stream(methods).filter(m -> m.getName().equals(methodName));
+	return Arrays.stream(methods).filter(m -> m.getName().equals(methodName))
+			.collect(Collectors.toList());
 }
 
 // This method will attempt to find the method that matches the given paramTags. If paramTags
@@ -9342,7 +9342,7 @@ private static Executable findMethod(Class c, String methodName, IPersistentVect
 	final int arity = paramTags.count();
 
 	List<Executable> filteredMethods =
-			methodStream(c, methodName)
+			methodsWithName(c, methodName).stream()
 					.filter(m -> m.getParameterCount() == arity)
 					.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
 					.filter(m -> signatureMatches(paramTagsSignature, m))
