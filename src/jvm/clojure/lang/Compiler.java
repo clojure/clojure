@@ -1006,9 +1006,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				for(ISeq s = RT.next(call); s != null; s = s.next())
 					args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
 				if(c != null)
-					return new StaticMethodExpr(source, line, column, tag, c, munge(sym.name), null, args, tailPosition);
+					return new StaticMethodExpr(source, line, column, tag, c, munge(sym.name), args, tailPosition);
 				else
-					return new InstanceMethodExpr(source, line, column, tag, instance, munge(sym.name), null, args, tailPosition);
+					return new InstanceMethodExpr(source, line, column, tag, instance, munge(sym.name), args, tailPosition);
 				}
 		}
 	}
@@ -1531,9 +1531,29 @@ static class InstanceMethodExpr extends MethodExpr{
 	final static Method invokeInstanceMethodMethod =
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 
+	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
+							  String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
+	{
+		this.source = source;
+		this.line = line;
+		this.column = column;
+		this.args = args;
+		this.methodName = methodName;
+		this.target = target;
+		this.tag = tag;
+		this.tailPosition = tailPosition;
+		this.method = preferredMethod;
+
+		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+		{
+			RT.errPrintWriter()
+					.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
+							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName(), getTypeStringForArgs(args));
+		}
+	}
 
 	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
-			String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
+			String methodName, IPersistentVector args, boolean tailPosition)
 			{
 		this.source = source;
 		this.line = line;
@@ -1544,11 +1564,7 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.tag = tag;
 		this.tailPosition = tailPosition;
 
-		if(preferredMethod != null)
-			{
-			method = preferredMethod;
-			}
-		else if(target.hasJavaClass() && target.getJavaClass() != null)
+		if(target.hasJavaClass() && target.getJavaClass() != null)
 			{
 			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
 			if(methods.isEmpty())
@@ -1733,7 +1749,34 @@ static class StaticMethodExpr extends MethodExpr{
     Class jc;
 
 	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c,
-				String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
+							String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
+	{
+		this.c = c;
+		this.methodName = methodName;
+		this.args = args;
+		this.source = source;
+		this.line = line;
+		this.column = column;
+		this.tag = tag;
+		this.tailPosition = tailPosition;
+		this.method = preferredMethod;
+
+		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+		{
+			RT.errPrintWriter()
+					.format("Reflection warning, %s:%d:%d - call to static method %s on %s can't be resolved (argument types: %s).\n",
+							SOURCE_PATH.deref(), line, column, methodName, c.getName(), getTypeStringForArgs(args));
+		}
+		if(method != null && warnOnBoxedKeyword.equals(RT.UNCHECKED_MATH.deref()) && isBoxedMath(method))
+		{
+			RT.errPrintWriter()
+					.format("Boxed math warning, %s:%d:%d - call: %s.\n",
+							SOURCE_PATH.deref(), line, column, method.toString());
+		}
+	}
+
+	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c,
+				String methodName, IPersistentVector args, boolean tailPosition)
 			{
 		this.c = c;
 		this.methodName = methodName;
@@ -1743,12 +1786,6 @@ static class StaticMethodExpr extends MethodExpr{
 		this.column = column;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-
-		if(preferredMethod != null)
-			{
-			method = preferredMethod;
-			return;
-			}
 
 		List methods = Reflector.getMethods(c, args.count(), methodName, true);
 		if(methods.isEmpty())
@@ -2652,11 +2689,19 @@ public static class NewExpr implements Expr{
 	public NewExpr(Class c, Constructor preferredConstructor, IPersistentVector args, int line, int column) {
 		this.args = args;
 		this.c = c;
-		if(preferredConstructor != null)
-			{
-			this.ctor = preferredConstructor;
-			return;
-			}
+		this.ctor = preferredConstructor;
+
+		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+		{
+			RT.errPrintWriter()
+					.format("Reflection warning, %s:%d:%d - call to %s ctor can't be resolved.\n",
+							SOURCE_PATH.deref(), line, column, c.getName());
+		}
+	}
+
+	public NewExpr(Class c, IPersistentVector args, int line, int column) {
+		this.args = args;
+		this.c = c;
 
 		Constructor[] allctors = c.getConstructors();
 		ArrayList ctors = new ArrayList();
@@ -2750,7 +2795,7 @@ public static class NewExpr implements Expr{
 			PersistentVector args = PersistentVector.EMPTY;
 			for(ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
 				args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
-			return new NewExpr(c, null, args, line, column);
+			return new NewExpr(c, args, line, column);
 		}
 	}
 
@@ -6488,14 +6533,14 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 							{
 							if(recurMismatches != null && RT.booleanCast(recurMismatches.nth(i/2)))
 								{
-								init = new StaticMethodExpr("", 0, 0, null, RT.class, "box", null, RT.vector(init), false);
+								init = new StaticMethodExpr("", 0, 0, null, RT.class, "box", RT.vector(init), false);
 								if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 									RT.errPrintWriter().println("Auto-boxing loop arg: " + sym);
 								}
 							else if(maybePrimitiveType(init) == int.class)
-								init = new StaticMethodExpr("", 0, 0, null, RT.class, "longCast", null, RT.vector(init), false);
+								init = new StaticMethodExpr("", 0, 0, null, RT.class, "longCast", RT.vector(init), false);
 							else if(maybePrimitiveType(init) == float.class)
-								init = new StaticMethodExpr("", 0, 0, null, RT.class, "doubleCast", null, RT.vector(init), false);
+								init = new StaticMethodExpr("", 0, 0, null, RT.class, "doubleCast", RT.vector(init), false);
 							}
 						//sequential enhancement of env (like Lisp let*)
 						try
@@ -9293,9 +9338,12 @@ private static void validateArgCount(MethodValueExpr mexpr, int expectedArity, i
 }
 
 private static Expr toHostExpr(MethodValueExpr mexpr, C context, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
-	if(isConstructor(mexpr.method) || methodNamesConstructor(mexpr.c, mexpr.memberName)) {
-		if(mexpr.method == null)
-			throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, null);
+	if(!mexpr.isResolved()) {
+		return new StaticMethodExpr(source, line, column, tag, mexpr.c, munge(mexpr.memberName), args, tailPosition);
+	}
+	else if(isConstructor(mexpr.method) || methodNamesConstructor(mexpr.c, mexpr.memberName)) {
+		if(!mexpr.isResolved())
+			throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, mexpr.paramTags);
 
 		validateArgCount(mexpr, mexpr.method.getParameterCount(), RT.count(args));
 
