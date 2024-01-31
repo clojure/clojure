@@ -3982,7 +3982,7 @@ static class InvokeExpr implements Expr{
 			}
 
 		if(fexpr instanceof MethodValueExpr)
-			return toHostExpr((MethodValueExpr)fexpr, context, tagOf(form), args);
+			return toHostExpr((MethodValueExpr)fexpr, context, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
 
 //		if(args.count() > MAX_POSITIONAL_ARITY)
 //			throw new IllegalArgumentException(
@@ -9292,30 +9292,26 @@ private static void validateArgCount(MethodValueExpr mexpr, int expectedArity, i
 		throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, mexpr.paramTags);
 }
 
-private static Expr toHostExpr(MethodValueExpr mexpr, C context, Symbol tag, IPersistentVector args) {
-	Executable method = mexpr.method;
-	int line = lineDeref();
-	int column = columnDeref();
-
-	if(isConstructor(method) || methodNamesConstructor(mexpr.c, mexpr.memberName)) {
-		if(method == null)
+private static Expr toHostExpr(MethodValueExpr mexpr, C context, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
+	if(isConstructor(mexpr.method) || methodNamesConstructor(mexpr.c, mexpr.memberName)) {
+		if(mexpr.method == null)
 			throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, null);
 
 		validateArgCount(mexpr, mexpr.method.getParameterCount(), RT.count(args));
 
-		return new NewExpr(mexpr.c, (Constructor) method, args, line, column);
+		return new NewExpr(mexpr.c, (Constructor) mexpr.method, args, line, column);
 	}
-	else if(isInstanceMethod(method)){
+	else if(isInstanceMethod(mexpr.method)){
 		IPersistentVector iargs = PersistentVector.create(RT.next(args));
 		validateArgCount(mexpr, mexpr.method.getParameterCount(), RT.count(iargs));
 		Expr instance = (Expr) RT.first(args);
 
-		return new InstanceMethodExpr((String) SOURCE.deref(), line, column, tag, instance,
-				munge(mexpr.memberName), (java.lang.reflect.Method) method, iargs, inTailCall(context));
+		return new InstanceMethodExpr(source, line, column, tag, instance,
+				munge(mexpr.memberName), (java.lang.reflect.Method) mexpr.method, iargs, tailPosition);
 	}
 	else {
-		return new StaticMethodExpr((String) SOURCE.deref(), line, column, tag, mexpr.c,
-				munge(mexpr.memberName), (java.lang.reflect.Method) method, args, inTailCall(context));
+		return new StaticMethodExpr(source, line, column, tag, mexpr.c,
+				munge(mexpr.memberName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
 	}
 }
 
