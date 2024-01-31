@@ -3969,9 +3969,6 @@ static class InvokeExpr implements Expr{
 			                             (KeywordExpr) fexpr, target);
 			}
 
-		if(fexpr instanceof MethodValueExpr)
-			return toHostExpr((MethodValueExpr)fexpr, context, form);
-
 		// Preserving the existing static field bug that replaces a reference in parens with
 		// the field itself rather than trying to invoke the value in the field. This is
 		// an exception to the uniform Class/member qualification per CLJ-2806 ticket.
@@ -3983,6 +3980,10 @@ static class InvokeExpr implements Expr{
 			{
 			args = args.cons(analyze(context, s.first()));
 			}
+
+		if(fexpr instanceof MethodValueExpr)
+			return toHostExpr((MethodValueExpr)fexpr, context, tagOf(form), args);
+
 //		if(args.count() > MAX_POSITIONAL_ARITY)
 //			throw new IllegalArgumentException(
 //					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
@@ -9210,9 +9211,9 @@ private static RuntimeException buildResolutionError(List<Executable> methods, L
 
 	if(paramTags == null)
 		return new IllegalArgumentException("No param-tags provided for " + coord);
-	else if(methods.size() == 0)
+	else if(methods == null || methods.isEmpty())
 		return new IllegalArgumentException("Could not find " + coord);
-	else if(filteredMethods.isEmpty())
+	else if(filteredMethods == null || filteredMethods.isEmpty())
 		return new IllegalArgumentException("No matching " + coord + " found using param-tags " + paramTags);
 	else // methods.size() > 1
 		return new IllegalArgumentException("Multiple matching " + coord + " found using param-tags " + paramTags);
@@ -9274,25 +9275,6 @@ private static Executable findMethod(Class c, String methodName, IPersistentVect
 	throw buildResolutionError(filteredMethods, filteredMethods, c, methodName, paramTags);
 }
 
-static Executable maybeResolveMethodWithArity(Class c, String methodName, int arity) {
-	if(c == null || methodName == null) return null;
-
-	List<java.lang.reflect.Method> methods = Reflector.getMethods(c, arity - 1, methodName, false);
-	methods.addAll(Reflector.getMethods(c, arity, methodName, true));
-
-	if(methods.size() == 1) return methods.get(0);
-
-	return null;
-}
-
-private static IPersistentVector analyzeArgs(C context, ISeq form) {
-	PersistentVector args = PersistentVector.EMPTY;
-	for(ISeq s = form; s != null; s = s.next())
-		args = args.cons(analyze(context == C.EVAL ? context : C.EXPRESSION, s.first()));
-
-	return args;
-}
-
 static boolean isStaticMethod(Executable method) {
 	return method instanceof java.lang.reflect.Method && Modifier.isStatic(method.getModifiers());
 }
@@ -9305,26 +9287,34 @@ static boolean isConstructor(Executable method) {
 	return method instanceof Constructor;
 }
 
-private static Expr toHostExpr(MethodValueExpr mexpr, C context, ISeq form) {
-	Executable method = mexpr.isResolved() ? mexpr.method : maybeResolveMethodWithArity(mexpr.c, mexpr.memberSymbol.name, RT.count(RT.next(form)));
+private static void validateArgCount(MethodValueExpr mexpr, int expectedArity, int argArity) {
+	if(argArity != expectedArity)
+		throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, mexpr.paramTags);
+}
+
+private static Expr toHostExpr(MethodValueExpr mexpr, C context, Symbol tag, IPersistentVector args) {
+	Executable method = mexpr.method;
 	int line = lineDeref();
 	int column = columnDeref();
 
 	if(isConstructor(method) || methodNamesConstructor(mexpr.c, mexpr.memberName)) {
-		if(method == null) throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, null);
+		if(method == null)
+			throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, null);
 
-		IPersistentVector args = analyzeArgs(context, RT.next(form));
+		validateArgCount(mexpr, mexpr.method.getParameterCount(), RT.count(args));
+
 		return new NewExpr(mexpr.c, (Constructor) method, args, line, column);
 	}
 	else if(isInstanceMethod(method)){
-		IPersistentVector args = analyzeArgs(context, RT.next(RT.next(form)));
-		Expr instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
-		return new InstanceMethodExpr((String) SOURCE.deref(), line, column, tagOf(form), instance,
-				munge(mexpr.memberName), (java.lang.reflect.Method) method, args, inTailCall(context));
+		IPersistentVector iargs = PersistentVector.create(RT.next(args));
+		validateArgCount(mexpr, mexpr.method.getParameterCount(), RT.count(iargs));
+		Expr instance = (Expr) RT.first(args);
+
+		return new InstanceMethodExpr((String) SOURCE.deref(), line, column, tag, instance,
+				munge(mexpr.memberName), (java.lang.reflect.Method) method, iargs, inTailCall(context));
 	}
 	else {
-		IPersistentVector args = analyzeArgs(context, RT.next(form));
-		return new StaticMethodExpr((String) SOURCE.deref(), line, column, tagOf(form), mexpr.c,
+		return new StaticMethodExpr((String) SOURCE.deref(), line, column, tag, mexpr.c,
 				munge(mexpr.memberName), (java.lang.reflect.Method) method, args, inTailCall(context));
 	}
 }

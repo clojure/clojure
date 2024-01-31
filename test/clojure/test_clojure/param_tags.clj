@@ -36,9 +36,7 @@
     (is (= (^[long long] java.util.UUID/new 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
     (is (= "a" (^[String] String/new "a"))))
   (testing "qualified instance method invocation"
-    (is (= "A" (String/toUpperCase "a")))
-    (is (= "A" (String/toUpperCase "a" Locale/ENGLISH)))
-    (is (= "A" (^[] String/toUpperCase "a")))
+    (is (= \A (String/charAt "A" 0)))
     (is (= "A" (^[java.util.Locale] String/toUpperCase "a" java.util.Locale/ENGLISH)))
     (is (= "A" (^[Locale] String/toUpperCase "a" java.util.Locale/ENGLISH)))
     (is (= 65 (aget (^[String] String/getBytes "A" "US-ASCII") 0)))
