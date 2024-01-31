@@ -2702,7 +2702,6 @@ public static class NewExpr implements Expr{
 	public NewExpr(Class c, IPersistentVector args, int line, int column) {
 		this.args = args;
 		this.c = c;
-
 		Constructor[] allctors = c.getConstructors();
 		ArrayList ctors = new ArrayList();
 		ArrayList<Class[]> params = new ArrayList();
