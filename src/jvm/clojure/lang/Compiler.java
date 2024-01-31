@@ -1534,6 +1534,11 @@ static class InstanceMethodExpr extends MethodExpr{
 	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
 							  String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
 	{
+		if(preferredMethod.getParameterCount() != RT.count(args))
+			throw new IllegalArgumentException("Invoked method " + methodName + " on " +
+					preferredMethod.getDeclaringClass().getName() + " expected " +
+					preferredMethod.getParameterCount() + " arguments but received " + RT.count(args));
+
 		this.source = source;
 		this.line = line;
 		this.column = column;
@@ -1543,13 +1548,6 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.tag = tag;
 		this.tailPosition = tailPosition;
 		this.method = preferredMethod;
-
-		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-		{
-			RT.errPrintWriter()
-					.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName(), getTypeStringForArgs(args));
-		}
 	}
 
 	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
@@ -1751,6 +1749,11 @@ static class StaticMethodExpr extends MethodExpr{
 	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c,
 							String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
 	{
+		if(preferredMethod.getParameterCount() != RT.count(args))
+			throw new IllegalArgumentException("Invoked method " + methodName + " on " +
+					c.getName() + " expected " +
+					preferredMethod.getParameterCount() + " arguments but received " + RT.count(args));
+
 		this.c = c;
 		this.methodName = methodName;
 		this.args = args;
@@ -1761,12 +1764,6 @@ static class StaticMethodExpr extends MethodExpr{
 		this.tailPosition = tailPosition;
 		this.method = preferredMethod;
 
-		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-		{
-			RT.errPrintWriter()
-					.format("Reflection warning, %s:%d:%d - call to static method %s on %s can't be resolved (argument types: %s).\n",
-							SOURCE_PATH.deref(), line, column, methodName, c.getName(), getTypeStringForArgs(args));
-		}
 		if(method != null && warnOnBoxedKeyword.equals(RT.UNCHECKED_MATH.deref()) && isBoxedMath(method))
 		{
 			RT.errPrintWriter()
@@ -2687,16 +2684,13 @@ public static class NewExpr implements Expr{
 	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
 
 	public NewExpr(Class c, Constructor preferredConstructor, IPersistentVector args, int line, int column) {
+		if(preferredConstructor.getParameterCount() != RT.count(args))
+			throw new IllegalArgumentException("Invoked constructor on " + c.getName() + " expected "
+					+ preferredConstructor.getParameterCount() + " arguments but received " + RT.count(args));
+
 		this.args = args;
 		this.c = c;
 		this.ctor = preferredConstructor;
-
-		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-		{
-			RT.errPrintWriter()
-					.format("Reflection warning, %s:%d:%d - call to %s ctor can't be resolved.\n",
-							SOURCE_PATH.deref(), line, column, c.getName());
-		}
 	}
 
 	public NewExpr(Class c, IPersistentVector args, int line, int column) {
@@ -4026,7 +4020,7 @@ static class InvokeExpr implements Expr{
 			}
 
 		if(fexpr instanceof MethodValueExpr)
-			return toHostExpr((MethodValueExpr)fexpr, context, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
+			return toHostExpr((MethodValueExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
 
 //		if(args.count() > MAX_POSITIONAL_ARITY)
 //			throw new IllegalArgumentException(
@@ -9336,30 +9330,25 @@ private static void validateArgCount(MethodValueExpr mexpr, int expectedArity, i
 		throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, mexpr.paramTags);
 }
 
-private static Expr toHostExpr(MethodValueExpr mexpr, C context, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
+private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
 	if(!mexpr.isResolved()) {
-		return new StaticMethodExpr(source, line, column, tag, mexpr.c, munge(mexpr.memberName), args, tailPosition);
-	}
-	else if(isConstructor(mexpr.method) || methodNamesConstructor(mexpr.c, mexpr.memberName)) {
-		if(!mexpr.isResolved())
+		if(methodNamesConstructor(mexpr.c, mexpr.memberName))
 			throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, mexpr.paramTags);
 
-		validateArgCount(mexpr, mexpr.method.getParameterCount(), RT.count(args));
+		// default to static method with inference
+		return new StaticMethodExpr(source, line, column, tag, mexpr.c, munge(mexpr.memberName), args, tailPosition);
+	}
 
+	if(isConstructor(mexpr.method))
 		return new NewExpr(mexpr.c, (Constructor) mexpr.method, args, line, column);
-	}
-	else if(isInstanceMethod(mexpr.method)){
-		IPersistentVector iargs = PersistentVector.create(RT.next(args));
-		validateArgCount(mexpr, mexpr.method.getParameterCount(), RT.count(iargs));
-		Expr instance = (Expr) RT.first(args);
 
-		return new InstanceMethodExpr(source, line, column, tag, instance,
-				munge(mexpr.memberName), (java.lang.reflect.Method) mexpr.method, iargs, tailPosition);
-	}
-	else {
-		return new StaticMethodExpr(source, line, column, tag, mexpr.c,
-				munge(mexpr.memberName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
-	}
+	if(isInstanceMethod(mexpr.method))
+		return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
+				munge(mexpr.memberName), (java.lang.reflect.Method) mexpr.method, PersistentVector.create(RT.next(args)),
+				tailPosition);
+
+	return new StaticMethodExpr(source, line, column, tag, mexpr.c,
+			munge(mexpr.memberName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
 }
 
 static class MethodValues {
