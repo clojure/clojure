@@ -7008,8 +7008,9 @@ fails, attempts to require sym's namespace and retries."
        (f ret))))
 
 (defn into
-  "Returns a new coll consisting of to-coll with all of the items of
-  from-coll conjoined. A transducer may be supplied."
+  "Returns a new coll consisting of to with all of the items of
+  from conjoined. A transducer may be supplied.
+  (into x) returns x. (into) returns []."
   {:added "1.0"
    :static true}
   ([] [])
