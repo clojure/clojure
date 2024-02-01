@@ -1151,8 +1151,9 @@ static class MethodValueExpr implements Expr {
 	}
 
 	private Expr buildThunk() {
-		if(!isResolved())
-			throw new IllegalArgumentException("Could resolve method value for " + memberSymbol);
+		if(!isResolved()) {
+			throw buildResolutionError(methodsWithName(c, memberName), null, c, memberName, paramTags);
+		}
 
 		if(isConstructor(method))
 			return MethodValues.buildCtorThunk(c, method, paramTags);
@@ -9247,10 +9248,10 @@ private static RuntimeException buildResolutionError(List<Executable> methods, L
 	String type = isCtor ? "constructor" : "method";
 	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 
-	if(paramTags == null)
-		return new IllegalArgumentException("No param-tags provided for " + coord);
-	else if(methods == null || methods.isEmpty())
+	if(methods == null || methods.isEmpty())
 		return new IllegalArgumentException("Could not find " + coord);
+	else if(paramTags == null)
+		return new IllegalArgumentException("No param-tags provided for " + coord);
 	else if(filteredMethods == null || filteredMethods.isEmpty())
 		return new IllegalArgumentException("No matching " + coord + " found using param-tags " + paramTags);
 	else // methods.size() > 1
