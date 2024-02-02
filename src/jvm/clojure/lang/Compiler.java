@@ -1536,9 +1536,9 @@ static class InstanceMethodExpr extends MethodExpr{
 							  String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
 	{
 		if(preferredMethod.getParameterCount() != RT.count(args))
-			throw new IllegalArgumentException("Invoked method " + methodName + " on " +
+			throw new IllegalArgumentException("Invocation of method " + methodName + " on " +
 					preferredMethod.getDeclaringClass().getName() + " expected " +
-					preferredMethod.getParameterCount() + " arguments but received " + RT.count(args));
+					preferredMethod.getParameterCount() + " arguments, but received " + RT.count(args));
 
 		this.source = source;
 		this.line = line;
@@ -1750,9 +1750,9 @@ static class StaticMethodExpr extends MethodExpr{
 							String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
 	{
 		if(preferredMethod.getParameterCount() != RT.count(args))
-			throw new IllegalArgumentException("Invoked method " + methodName + " on " +
+			throw new IllegalArgumentException("Invocation of method " + methodName + " on " +
 					c.getName() + " expected " +
-					preferredMethod.getParameterCount() + " arguments but received " + RT.count(args));
+					preferredMethod.getParameterCount() + " arguments, but received " + RT.count(args));
 
 		this.c = c;
 		this.methodName = methodName;
@@ -2685,8 +2685,8 @@ public static class NewExpr implements Expr{
 
 	public NewExpr(Class c, Constructor preferredConstructor, IPersistentVector args, int line, int column) {
 		if(preferredConstructor.getParameterCount() != RT.count(args))
-			throw new IllegalArgumentException("Invoked constructor on " + c.getName() + " expected "
-					+ preferredConstructor.getParameterCount() + " arguments but received " + RT.count(args));
+			throw new IllegalArgumentException("Invocation of constructor on " + c.getName() + " expected "
+					+ preferredConstructor.getParameterCount() + " arguments, but received " + RT.count(args));
 
 		this.args = args;
 		this.c = c;
@@ -9247,14 +9247,20 @@ private static RuntimeException buildResolutionError(List<Executable> methods, L
 	String type = isCtor ? "constructor" : "method";
 	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 
-	if(methods == null || methods.isEmpty())
-		return new IllegalArgumentException("Could not find " + coord);
-	else if(paramTags == null)
-		return new IllegalArgumentException("No param-tags provided for " + coord);
-	else if(filteredMethods == null || filteredMethods.isEmpty())
-		return new IllegalArgumentException("No matching " + coord + " found using param-tags " + paramTags);
-	else // methods.size() > 1
-		return new IllegalArgumentException("Multiple matching " + coord + " found using param-tags " + paramTags);
+	if(paramTags != null) {
+		if(methods == null || methods.isEmpty())
+			return new IllegalArgumentException("Could not find " + coord);
+		else if(filteredMethods != null && filteredMethods.isEmpty())
+			return new IllegalArgumentException("No matching signature for " + coord + " found using param-tags " + paramTags);
+		else
+			return new IllegalArgumentException("Multiple matching signatures for " + coord + " found using param-tags " + paramTags);
+	}
+	else {
+		if(methods == null || methods.isEmpty())
+			return new IllegalArgumentException("Could not find " + coord);
+		else // methods.size() > 1
+			return new IllegalArgumentException("Multiple matches for " + coord + ", use param-tags to specify");
+	}
 }
 
 private static boolean methodNamesConstructor(Class c, String methodName) {
@@ -9300,17 +9306,17 @@ private static Executable findMethod(Class c, String methodName, IPersistentVect
 
 	final List<Class> paramTagsSignature = tagsToClasses(paramTags);
 	final int arity = paramTags.count();
+	final List<Executable> methods = methodsWithName(c, methodName);
 
-	List<Executable> filteredMethods =
-			methodsWithName(c, methodName).stream()
-					.filter(m -> m.getParameterCount() == arity)
-					.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
-					.filter(m -> signatureMatches(paramTagsSignature, m))
-					.collect(Collectors.toList());
+	List<Executable> filteredMethods = methods.stream()
+			.filter(m -> m.getParameterCount() == arity)
+			.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
+			.filter(m -> signatureMatches(paramTagsSignature, m))
+			.collect(Collectors.toList());
 
 	if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
-	throw buildResolutionError(filteredMethods, filteredMethods, c, methodName, paramTags);
+	throw buildResolutionError(methods, filteredMethods, c, methodName, paramTags);
 }
 
 static boolean isStaticMethod(Executable method) {
@@ -9332,8 +9338,10 @@ private static void validateArgCount(MethodValueExpr mexpr, int expectedArity, i
 
 private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
 	if(!mexpr.isResolved()) {
-		if(methodNamesConstructor(mexpr.c, mexpr.memberName))
-			throw buildResolutionError(null, null, mexpr.c, mexpr.memberName, mexpr.paramTags);
+		if(methodNamesConstructor(mexpr.c, mexpr.memberName)) {
+			List<Executable> ctors = methodsWithName(mexpr.c, mexpr.memberName);
+			throw buildResolutionError(ctors, ctors, mexpr.c, mexpr.memberName, mexpr.paramTags);
+		}
 
 		// default to static method with inference
 		return new StaticMethodExpr(source, line, column, tag, mexpr.c, munge(mexpr.memberName), args, tailPosition);
