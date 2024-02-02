@@ -1562,7 +1562,6 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-
 		if(target.hasJavaClass() && target.getJavaClass() != null)
 			{
 			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
