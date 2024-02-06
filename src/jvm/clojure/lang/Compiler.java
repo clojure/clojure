@@ -1210,14 +1210,10 @@ static class MethodValueExpr implements Expr {
 
 		if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
-		if(filteredMethods.size() == 0)
-			throw new IllegalArgumentException("No matching signature for "
-					+ methodDescription(c, methodName)
-					+ " found using param-tags " + asParamTags(paramTagsSignature));
-		else
-			throw new IllegalArgumentException("Multiple matching signatures for "
+		throw new IllegalArgumentException("Expected to find 1 matching signature for "
 				+ methodDescription(c, methodName)
-				+ " found using param-tags " + asParamTags(paramTagsSignature));
+				+ " but found " + filteredMethods.size() + " using param-tags "
+				+ asParamTags(paramTagsSignature));
 	}
 
 	private static boolean methodNamesConstructor(Class c, String methodName) {
