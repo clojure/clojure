@@ -1120,28 +1120,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 static class MethodValueExpr implements Expr {
 	private final Class c;
 	private final String methodName;
-	private final Executable method;
 	private final List<Class> hintedSig;
-
-	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>();
-	static {
-		coerceFns.put(double.class, Symbol.intern("double"));
-		coerceFns.put(double[].class, Symbol.intern("doubles"));
-		coerceFns.put(long.class, Symbol.intern("long"));
-		coerceFns.put(long[].class, Symbol.intern("longs"));
-		coerceFns.put(int.class, Symbol.intern("int"));
-		coerceFns.put(int[].class, Symbol.intern("ints"));
-		coerceFns.put(float.class, Symbol.intern("float"));
-		coerceFns.put(float[].class, Symbol.intern("floats"));
-		coerceFns.put(char.class, Symbol.intern("char"));
-		coerceFns.put(char[].class, Symbol.intern("chars"));
-		coerceFns.put(short.class, Symbol.intern("short"));
-		coerceFns.put(short[].class, Symbol.intern("shorts"));
-		coerceFns.put(byte.class, Symbol.intern("byte"));
-		coerceFns.put(byte[].class, Symbol.intern("bytes"));
-		coerceFns.put(boolean.class, Symbol.intern("boolean"));
-		coerceFns.put(boolean[].class, Symbol.intern("booleans"));
-	}
+	private final Executable method;
 
 	public MethodValueExpr(Class c, Symbol sym){
 		this.c = c;
@@ -1360,6 +1340,26 @@ static class MethodValueExpr implements Expr {
 			return (Symbol) name.withMeta(PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName())));
 		}
 		return name;
+	}
+
+	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>();
+	static {
+		coerceFns.put(double.class, Symbol.intern("double"));
+		coerceFns.put(double[].class, Symbol.intern("doubles"));
+		coerceFns.put(long.class, Symbol.intern("long"));
+		coerceFns.put(long[].class, Symbol.intern("longs"));
+		coerceFns.put(int.class, Symbol.intern("int"));
+		coerceFns.put(int[].class, Symbol.intern("ints"));
+		coerceFns.put(float.class, Symbol.intern("float"));
+		coerceFns.put(float[].class, Symbol.intern("floats"));
+		coerceFns.put(char.class, Symbol.intern("char"));
+		coerceFns.put(char[].class, Symbol.intern("chars"));
+		coerceFns.put(short.class, Symbol.intern("short"));
+		coerceFns.put(short[].class, Symbol.intern("shorts"));
+		coerceFns.put(byte.class, Symbol.intern("byte"));
+		coerceFns.put(byte[].class, Symbol.intern("bytes"));
+		coerceFns.put(boolean.class, Symbol.intern("boolean"));
+		coerceFns.put(boolean[].class, Symbol.intern("booleans"));
 	}
 
 	static IPersistentVector maybeHintReturn(Executable target, PersistentVector params) {
