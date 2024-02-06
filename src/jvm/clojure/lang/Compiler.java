@@ -1151,7 +1151,7 @@ static class MethodValueExpr implements Expr {
 		List<Executable> methods = methodsWithName(c, methodName);
 
 		if(methods.isEmpty())
-			throw new IllegalArgumentException("Could not find " + methodErrorString(c, methodName));
+			throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
 
 		if(hintedSig != null) {
 			this.method = resolveHintedMethod(c, methodName, hintedSig);
@@ -1161,7 +1161,7 @@ static class MethodValueExpr implements Expr {
 		}
 		else if(methods.size() > 1) {
 			if(methodNamesConstructor(c, methodName)) {
-				throw new IllegalArgumentException("Multiple matches for " + methodErrorString(c, methodName)
+				throw new IllegalArgumentException("Multiple matches for " + methodDescription(c, methodName)
 						+ ", use param-tags to specify");
 			}
 
@@ -1169,7 +1169,7 @@ static class MethodValueExpr implements Expr {
 			if(methods.size() == 1)
 				this.method = methods.get(0);
 			else if(methods.isEmpty())
-				throw new IllegalArgumentException("Could not find " + methodErrorString(c, methodName));
+				throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
 			else
 				this.method = null;
 		}
@@ -1178,7 +1178,7 @@ static class MethodValueExpr implements Expr {
 		}
 	}
 
-	private static String methodErrorString(Class c, String methodName) {
+	private static String methodDescription(Class c, String methodName) {
 		boolean isCtor = methodNamesConstructor(c, methodName);
 		String type = isCtor ? "constructor" : "method";
 		return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
@@ -1193,7 +1193,7 @@ static class MethodValueExpr implements Expr {
 		final List<Executable> methods = methodsWithName(c, methodName);
 
 		if(methods.size() == 0)
-			throw new IllegalArgumentException("Could not find " + methodErrorString(c, methodName));
+			throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
 
 		List<Executable> filteredMethods = methods.stream()
 				.filter(m -> m.getParameterCount() == arity)
@@ -1204,7 +1204,7 @@ static class MethodValueExpr implements Expr {
 		if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
 		throw new IllegalArgumentException("Multiple matching signatures for "
-				+ methodErrorString(c, methodName)
+				+ methodDescription(c, methodName)
 				+ " found using param-tags " + PersistentVector.create(paramTagsSignature));
 	}
 
@@ -1263,7 +1263,7 @@ static class MethodValueExpr implements Expr {
 		// If not resolved by this point we were not given param-tags
 		// and named method was overloaded.
 		if(!mexpr.isResolved()) {
-			throw new IllegalArgumentException("Multiple matches for " + methodErrorString(c, methodName)
+			throw new IllegalArgumentException("Multiple matches for " + methodDescription(mexpr.c, mexpr.methodName)
 					+ ", use param-tags to specify");
 		}
 
@@ -1734,10 +1734,7 @@ static class InstanceMethodExpr extends MethodExpr{
 	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
 							  String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
 	{
-		if(preferredMethod.getParameterCount() != RT.count(args))
-			throw new IllegalArgumentException("Invocation of method " + methodName + " on " +
-					preferredMethod.getDeclaringClass().getName() + " expected " +
-					preferredMethod.getParameterCount() + " arguments, but received " + RT.count(args));
+		checkMethodArity(preferredMethod, RT.count(args));
 
 		this.source = source;
 		this.line = line;
@@ -1948,10 +1945,7 @@ static class StaticMethodExpr extends MethodExpr{
 	public StaticMethodExpr(String source, int line, int column, Symbol tag, Class c,
 							String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
 	{
-		if(preferredMethod.getParameterCount() != RT.count(args))
-			throw new IllegalArgumentException("Invocation of method " + methodName + " on " +
-					c.getName() + " expected " +
-					preferredMethod.getParameterCount() + " arguments, but received " + RT.count(args));
+		checkMethodArity(preferredMethod, RT.count(args));
 
 		this.c = c;
 		this.methodName = methodName;
@@ -2883,9 +2877,7 @@ public static class NewExpr implements Expr{
 	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
 
 	public NewExpr(Class c, Constructor preferredConstructor, IPersistentVector args, int line, int column) {
-		if(preferredConstructor.getParameterCount() != RT.count(args))
-			throw new IllegalArgumentException("Invocation of constructor on " + c.getName() + " expected "
-					+ preferredConstructor.getParameterCount() + " arguments, but received " + RT.count(args));
+		checkMethodArity(preferredConstructor, RT.count(args));
 
 		this.args = args;
 		this.c = c;
@@ -9481,5 +9473,12 @@ private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, i
 
 	return new StaticMethodExpr(source, line, column, tag, mexpr.c,
 			munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
+}
+
+private static void checkMethodArity(Executable method, int argCount) {
+	if(method.getParameterCount() != argCount)
+		throw new IllegalArgumentException("Invocation of "
+				+ MethodValueExpr.methodDescription(method.getDeclaringClass(), method.getName())
+				+ " expected " + method.getParameterCount() + " arguments, but received " + argCount);
 }
 }
