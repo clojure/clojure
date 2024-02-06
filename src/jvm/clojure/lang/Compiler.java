@@ -1128,36 +1128,36 @@ static class MethodValueExpr implements Expr {
 		this.methodName = sym.name;
 
 		List<Executable> methods = methodsWithName(c, methodName);
-
 		if(methods.isEmpty())
 			throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
 
-		this.hintedSig = paramTagsOf(sym) != null ? tagsToClasses(paramTagsOf(sym)) : null;
-
-		if(hintedSig != null) {
-			this.method = resolveHintedMethod(c, methodName, hintedSig);
+		IPersistentVector paramTags = paramTagsOf(sym);
+		List<Class> maybeSig = null;
+		Executable maybeMethod = null;
+		if(paramTags != null) {
+			maybeSig = tagsToClasses(paramTags);
+			maybeMethod = resolveHintedMethod(c, methodName, maybeSig);
 		}
-		else if(methods.size() == 1) {
-			this.method = methods.get(0);
+		else if(methods.size() == 1) { // no param-tags, but 1 method
+			maybeMethod = methods.get(0);
 		}
-		else if(methods.size() > 1) {
-			if(methodNamesConstructor(c, methodName)) {
+		else if(methods.size() > 1) {  // no param-tags, found overloads
+			// Must be inference at this point
+			if(methodNamesConstructor(c, methodName)) { // Inference on constructors not supported
 				throw new IllegalArgumentException("Multiple matches for " + methodDescription(c, methodName)
 						+ ", use param-tags to specify");
 			}
-			// Because Java static and instance methods can have the same name we should remove
-			// instance methods because we only support inference on statics
+
+			// Inference on instance methods not supported, so filter them out
 			methods = methods.stream().filter(m -> Modifier.isStatic(m.getModifiers())).collect(Collectors.toList());
 			if(methods.size() == 1)
-				this.method = methods.get(0);
+				maybeMethod = methods.get(0);
 			else if(methods.isEmpty())
 				throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
-			else // non-resolution at this point should default to static method inference
-				this.method = null;
+			// else not resolved, must be static method w/inference
 		}
-		else {
-			this.method = null;
-		}
+		this.hintedSig = maybeSig;
+		this.method = maybeMethod;
 	}
 
 	private static String methodDescription(Class c, String methodName) {
