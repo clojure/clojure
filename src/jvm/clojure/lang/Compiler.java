@@ -1186,11 +1186,7 @@ static class MethodValueExpr implements Expr {
 		return method != null;
 	}
 
-	private Expr buildThunk() {
-		if(!isResolved()) {
-			throw buildResolutionError(methodsWithName(c, memberName), null, c, memberName, paramTags);
-		}
-
+	private FnExpr buildThunk() {
 		if(isConstructor(method))
 			return buildCtorThunk(c, method, paramTags);
 		else if(isInstanceMethod(method))
