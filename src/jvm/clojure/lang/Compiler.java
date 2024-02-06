@@ -1149,21 +1149,37 @@ static class MethodValueExpr implements Expr {
 		this.c = c;
 		this.memberName = sym.name;
 		this.paramTags = paramTagsOf(sym);
-		this.method = maybeResolveMethod();
-	}
 
-	private Executable maybeResolveMethod() {
+		List<Executable> methods = methodsWithName(c, memberName);
+
+		if(methods.isEmpty())
+			throw new IllegalArgumentException("Could not find " + errorMsg(c, memberName));
+
 		if(paramTags != null) {
-			return findMethod(c, memberName, paramTags);
+			this.method = findMethod(c, memberName, paramTags);
+		}
+		else if(methods.size() == 1) {
+			this.method = methods.get(0);
+		}
+		else if(methods.size() > 1) {
+			methods = methods.stream().filter(m -> Modifier.isStatic(m.getModifiers())).collect(Collectors.toList());
+			if(methods.size() == 1)
+				this.method = methods.get(0);
+			else if(methods.isEmpty())
+				throw new IllegalArgumentException("Could not find " + errorMsg(c, memberName));
+			else
+				this.method = null;
 		}
 		else {
-			// Using qualifying class and name, try to resolve a unique method
-			List<Executable> methods = methodsWithName(c, memberName);
-			if(methods.size() == 1)
-				return methods.get(0);
+			this.method = null;
 		}
+	}
 
-		return null;
+	private static String errorMsg(Class c, String methodName) {
+		boolean isCtor = methodNamesConstructor(c, methodName);
+		String type = isCtor ? "constructor" : "method";
+		String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
+		return coord;
 	}
 
 	public boolean isResolved() {
