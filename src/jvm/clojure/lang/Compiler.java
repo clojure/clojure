@@ -1146,12 +1146,13 @@ static class MethodValueExpr implements Expr {
 	public MethodValueExpr(Class c, Symbol sym){
 		this.c = c;
 		this.methodName = sym.name;
-		this.hintedSig = paramTagsOf(sym) != null ? tagsToClasses(paramTagsOf(sym)) : null;
 
 		List<Executable> methods = methodsWithName(c, methodName);
 
 		if(methods.isEmpty())
 			throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
+
+		this.hintedSig = paramTagsOf(sym) != null ? tagsToClasses(paramTagsOf(sym)) : null;
 
 		if(hintedSig != null) {
 			this.method = resolveHintedMethod(c, methodName, hintedSig);
@@ -1165,13 +1166,13 @@ static class MethodValueExpr implements Expr {
 						+ ", use param-tags to specify");
 			}
 			// Because Java static and instance methods can have the same name we should remove
-			// the latter because we only support inference on statics
+			// instance methods because we only support inference on statics
 			methods = methods.stream().filter(m -> Modifier.isStatic(m.getModifiers())).collect(Collectors.toList());
 			if(methods.size() == 1)
 				this.method = methods.get(0);
 			else if(methods.isEmpty())
 				throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
-			else
+			else // non-resolution at this point should default to static method inference
 				this.method = null;
 		}
 		else {
@@ -1195,8 +1196,8 @@ static class MethodValueExpr implements Expr {
 	// is null then the method throws an exception. Also, if the method finds more than one valid
 	// method/ctor then it will throw an exception indicating that the signature was insufficient to
 	// disambiguate the desired method.
-	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> paramTagsSignature) {
-		final int arity = paramTagsSignature.size();
+	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSignature) {
+		final int arity = hintedSignature.size();
 		final List<Executable> methods = methodsWithName(c, methodName);
 
 		if(methods.size() == 0)
@@ -1205,7 +1206,7 @@ static class MethodValueExpr implements Expr {
 		List<Executable> filteredMethods = methods.stream()
 				.filter(m -> m.getParameterCount() == arity)
 				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
-				.filter(m -> signatureMatches(paramTagsSignature, m))
+				.filter(m -> signatureMatches(hintedSignature, m))
 				.collect(Collectors.toList());
 
 		if(filteredMethods.size() == 1) return filteredMethods.get(0);
@@ -1213,7 +1214,7 @@ static class MethodValueExpr implements Expr {
 		throw new IllegalArgumentException("Expected to find 1 matching signature for "
 				+ methodDescription(c, methodName)
 				+ " but found " + filteredMethods.size() + " using param-tags "
-				+ asParamTags(paramTagsSignature));
+				+ asParamTags(hintedSignature));
 	}
 
 	private static boolean methodNamesConstructor(Class c, String methodName) {
