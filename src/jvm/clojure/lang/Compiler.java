@@ -1151,7 +1151,7 @@ static class MethodValueExpr implements Expr {
 		List<Executable> methods = methodsWithName(c, methodName);
 
 		if(methods.isEmpty())
-			throw new IllegalArgumentException("Could not find " + errorMsg(c, methodName));
+			throw new IllegalArgumentException("Could not find " + methodErrorString(c, methodName));
 
 		if(hintedSig != null) {
 			this.method = resolveHintedMethod(c, methodName, hintedSig);
@@ -1161,7 +1161,7 @@ static class MethodValueExpr implements Expr {
 		}
 		else if(methods.size() > 1) {
 			if(methodNamesConstructor(c, methodName)) {
-				throw new IllegalArgumentException("Multiple matches for " + errorMsg(c, methodName)
+				throw new IllegalArgumentException("Multiple matches for " + methodErrorString(c, methodName)
 						+ ", use param-tags to specify");
 			}
 
@@ -1169,7 +1169,7 @@ static class MethodValueExpr implements Expr {
 			if(methods.size() == 1)
 				this.method = methods.get(0);
 			else if(methods.isEmpty())
-				throw new IllegalArgumentException("Could not find " + errorMsg(c, methodName));
+				throw new IllegalArgumentException("Could not find " + methodErrorString(c, methodName));
 			else
 				this.method = null;
 		}
@@ -1178,11 +1178,10 @@ static class MethodValueExpr implements Expr {
 		}
 	}
 
-	private static String errorMsg(Class c, String methodName) {
+	private static String methodErrorString(Class c, String methodName) {
 		boolean isCtor = methodNamesConstructor(c, methodName);
 		String type = isCtor ? "constructor" : "method";
-		String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
-		return coord;
+		return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 	}
 
 	// This method will attempt to find the method that matches the given paramTags. If paramTags
@@ -1194,7 +1193,7 @@ static class MethodValueExpr implements Expr {
 		final List<Executable> methods = methodsWithName(c, methodName);
 
 		if(methods.size() == 0)
-			throw new IllegalArgumentException("Could not find " + errorMsg(c, methodName));
+			throw new IllegalArgumentException("Could not find " + methodErrorString(c, methodName));
 
 		List<Executable> filteredMethods = methods.stream()
 				.filter(m -> m.getParameterCount() == arity)
@@ -1205,31 +1204,44 @@ static class MethodValueExpr implements Expr {
 		if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
 		throw new IllegalArgumentException("Multiple matching signatures for "
-				+ errorMsg(c, methodName)
+				+ methodErrorString(c, methodName)
 				+ " found using param-tags " + PersistentVector.create(paramTagsSignature));
+	}
+
+	private static boolean methodNamesConstructor(Class c, String methodName) {
+		return c != null && methodName.equals("new");
+	}
+
+	private static List<Executable> methodsWithName(Class c, String name) {
+		if(c == null || name == null) return null;
+		final Executable[] methods;
+		final String methodName;
+		if (methodNamesConstructor(c, name)) {
+			methods = c.getConstructors();
+			methodName = c.getName();
+		}
+		else {
+			methods = c.getMethods();
+			methodName = name;
+		}
+
+		return Arrays.stream(methods)
+				.filter(m -> m.getName().equals(methodName))
+				.collect(Collectors.toList());
 	}
 
 	public boolean isResolved() {
 		return method != null;
 	}
 
-	private FnExpr buildThunk() {
-		if(isConstructor(method))
-			return buildCtorThunk(c, method, hintedSig);
-		else if(isInstanceMethod(method))
-			return buildInstanceMethodThunk(c, method, methodName, hintedSig);
-		else
-			return buildStaticMethodThunk(c, method, methodName, hintedSig);
-	}
-
 	@Override
 	public Object eval() {
-		return buildThunk().eval();
+		return toFnExpr(this).eval();
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-		buildThunk().emit(context, objx, gen);
+		toFnExpr(this).emit(context, objx, gen);
 	}
 
 	@Override
@@ -1247,6 +1259,22 @@ static class MethodValueExpr implements Expr {
 			return null;
 	}
 
+	private static FnExpr toFnExpr(MethodValueExpr mexpr) {
+		// If not resolved by this point we were not given param-tags
+		// and named method was overloaded.
+		if(!mexpr.isResolved()) {
+			throw new IllegalArgumentException("Multiple matches for " + methodErrorString(c, methodName)
+					+ ", use param-tags to specify");
+		}
+
+		if(isConstructor(mexpr.method))
+			return buildCtorThunk(mexpr.c, mexpr.method, mexpr.hintedSig);
+		else if(isInstanceMethod(mexpr.method))
+			return buildInstanceMethodThunk(mexpr.c, mexpr.method, mexpr.methodName, mexpr.hintedSig);
+		else
+			return buildStaticMethodThunk(mexpr.c, mexpr.method, mexpr.methodName, mexpr.hintedSig);
+	}
+
 	// All buildThunk methods currently return a new FnExpr on every call
 	// caching is not implemented and is TBD.
 	static FnExpr buildStaticMethodThunk(Class c, Executable method, String methodName, List<Class> declaredSignature) {
@@ -1258,10 +1286,7 @@ static class MethodValueExpr implements Expr {
 					Symbol.intern(c.getName()), Symbol.intern(method.getName()),
 					maybeCoerceArgs(method, params.seq()));
 		};
-		String name = buildThunkName(methodName);
-		ISeq form = buildThunk(method, name, c, declaredSignature, null, staticCallBuilder);
-		Expr retExpr = analyzeSeq(C.EVAL, form, name);
-		return (FnExpr) retExpr;
+		return buildThunk(method, methodName, c, declaredSignature, null, staticCallBuilder);
 	}
 
 	static FnExpr buildInstanceMethodThunk(Class c, Executable method, String methodName, List<Class> declaredSignature) {
@@ -1273,35 +1298,29 @@ static class MethodValueExpr implements Expr {
 					params.seq().first(), Symbol.intern(method.getName()),
 					maybeCoerceArgs(method, params.seq().next()));
 		};
-		String name = buildThunkName(methodName);
 		IPersistentMap m = PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(c.getName()));
 		Symbol instanceParam = (Symbol) Symbol.intern(null, "this" + RT.nextID()).withMeta(m);
-		ISeq form = buildThunk(method, name, c, declaredSignature, instanceParam, instanceCallBuilder);
-		Expr retExpr = analyzeSeq(C.EVAL, form, name);
-		return (FnExpr) retExpr;
+		return buildThunk(method, methodName, c, declaredSignature, instanceParam, instanceCallBuilder);
 	}
 
 	static FnExpr buildCtorThunk(Class c, Executable ctor, List<Class> declaredSignature) {
 		Function<IPersistentVector, ISeq> ctorCallBuilder = (params) -> {
 			return RT.listStar(Symbol.intern("new"), Symbol.intern(c.getName()), maybeCoerceArgs(ctor, params.seq()));
 		};
-		String name = buildThunkName(c.getName() + "/new");
-		ISeq form = buildThunk(ctor, name, c, declaredSignature, null, ctorCallBuilder);
-		Expr retExpr = analyzeSeq(C.EVAL, form, name);
-		return (FnExpr) retExpr;
+		return buildThunk(ctor, "new", c, declaredSignature, null, ctorCallBuilder);
 	}
 
-	private static String buildThunkName(String methodName){
-		return "dot__" + munge(methodName) + RT.nextID();
-	}
-
-	private static ISeq buildThunk(Executable method, String name, Class c, List<Class> declaredSignature, Symbol instanceParam, Function<IPersistentVector, ISeq> callBuilder) {
+	private static FnExpr buildThunk(Executable method, String name, Class c, List<Class> declaredSignature, Symbol instanceParam, Function<IPersistentVector, ISeq> callBuilder) {
 		// (fn dot__new42 ([^T arg] (new Klass arg)))
 		// (fn dot__staticMethod42 (^r [^T arg] (. Klass staticMethod arg)))
 		// (fn dot__instanceMethod42 (^r [^Klass self ^T arg] (. ^Klass self instanceMethod arg)))
 		IPersistentVector params = buildThunkParams(method, instanceParam);
-		return	RT.list(Symbol.intern("fn"), Symbol.intern(name),
+		String thunkName = "dot__" + munge(name) + RT.nextID();
+		ISeq form =	RT.list(Symbol.intern("fn"), Symbol.intern(thunkName),
 				buildThunkBody(maybeHintReturn(method, (PersistentVector) params), callBuilder));
+
+		Expr retExpr = analyzeSeq(C.EVAL, form, thunkName);
+		return (FnExpr) retExpr;
 	}
 
 	static IPersistentVector buildThunkParams(Executable target, Symbol seedParam) {
@@ -9420,49 +9439,6 @@ private static List<Class> tagsToClasses(IPersistentVector paramTags) {
 			sig.add(HostExpr.tagToClass(t));
 	}
 	return sig;
-}
-
-private static RuntimeException buildResolutionError(List<Executable> methods, List<Executable> filteredMethods, Class c, String methodName, IPersistentVector paramTags) {
-	boolean isCtor = methodNamesConstructor(c, methodName);
-	String type = isCtor ? "constructor" : "method";
-	String coord = type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
-
-	if(paramTags != null) {
-		if(methods == null || methods.isEmpty())
-			return new IllegalArgumentException("Could not find " + coord);
-		else if(filteredMethods != null && filteredMethods.isEmpty())
-			return new IllegalArgumentException("No matching signature for " + coord + " found using param-tags " + paramTags);
-		else
-			return new IllegalArgumentException("Multiple matching signatures for " + coord + " found using param-tags " + paramTags);
-	}
-	else {
-		if(methods == null || methods.isEmpty())
-			return new IllegalArgumentException("Could not find " + coord);
-		else // methods.size() > 1
-			return new IllegalArgumentException("Multiple matches for " + coord + ", use param-tags to specify");
-	}
-}
-
-private static boolean methodNamesConstructor(Class c, String methodName) {
-	return c != null && methodName.equals("new");
-}
-
-private static List<Executable> methodsWithName(Class c, String name) {
-	if(c == null || name == null) return null;
-	final Executable[] methods;
-	final String methodName;
-	if (methodNamesConstructor(c, name)) {
-		methods = c.getConstructors();
-		methodName = c.getName();
-	}
-	else {
-		methods = c.getMethods();
-		methodName = name;
-	}
-
-	return Arrays.stream(methods)
-			.filter(m -> m.getName().equals(methodName))
-			.collect(Collectors.toList());
 }
 
 private static boolean signatureMatches(List<Class> sig, Executable method)
