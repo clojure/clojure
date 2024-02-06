@@ -1117,15 +1117,20 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	}
 }
 
+// In invocation position
+//   direct invocation of resolved constructor, static, or instance method
+//   OR legacy static method invocation with inference
+//     this is the ONLY valid case where method is unresolved by end of constructor
+// In value position, will emit as a method thunk (error if not resolved)
 static class MethodValueExpr implements Expr {
 	private final Class c;
 	private final String methodName;
 	private final List<Class> hintedSig;
 	private final Executable method;
 
-	public MethodValueExpr(Class c, Symbol sym){
-		this.c = c;
-		this.methodName = sym.name;
+	public MethodValueExpr(Class methodClass, Symbol sym){
+		c = methodClass;
+		methodName = sym.name;
 
 		List<Executable> methods = methodsWithName(c, methodName);
 		if(methods.isEmpty())
@@ -1136,7 +1141,7 @@ static class MethodValueExpr implements Expr {
 		Executable maybeMethod = null;
 		if(paramTags != null) {
 			maybeSig = tagsToClasses(paramTags);
-			maybeMethod = resolveHintedMethod(c, methodName, maybeSig);
+			maybeMethod = resolveHintedMethod(c, methodName, maybeSig, methods);
 		}
 		else if(methods.size() == 1) { // no param-tags, but 1 method
 			maybeMethod = methods.get(0);
@@ -1156,8 +1161,8 @@ static class MethodValueExpr implements Expr {
 				throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
 			// else not resolved, must be static method w/inference
 		}
-		this.hintedSig = maybeSig;
-		this.method = maybeMethod;
+		hintedSig = maybeSig;
+		method = maybeMethod;
 	}
 
 	private static String methodDescription(Class c, String methodName) {
@@ -1172,29 +1177,20 @@ static class MethodValueExpr implements Expr {
 				.collect(Collectors.toList()));
 	}
 
-	// This method will attempt to find the method that matches the given paramTags. If paramTags
-	// is null then the method throws an exception. Also, if the method finds more than one valid
-	// method/ctor then it will throw an exception indicating that the signature was insufficient to
-	// disambiguate the desired method.
-	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSignature) {
-		final int arity = hintedSignature.size();
-		final List<Executable> methods = methodsWithName(c, methodName);
-
-		if(methods.size() == 0)
-			throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
-
+	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
+		final int arity = hintedSig.size();
 		List<Executable> filteredMethods = methods.stream()
 				.filter(m -> m.getParameterCount() == arity)
 				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
-				.filter(m -> signatureMatches(hintedSignature, m))
+				.filter(m -> signatureMatches(hintedSig, m))
 				.collect(Collectors.toList());
 
-		if(filteredMethods.size() == 1) return filteredMethods.get(0);
-
-		throw new IllegalArgumentException("Expected to find 1 matching signature for "
+		if(filteredMethods.size() == 1)
+			return filteredMethods.get(0);
+		else throw new IllegalArgumentException("Expected to find 1 matching signature for "
 				+ methodDescription(c, methodName)
 				+ " but found " + filteredMethods.size() + " using param-tags "
-				+ asParamTags(hintedSignature));
+				+ asParamTags(hintedSig));
 	}
 
 	private static boolean methodNamesConstructor(Class c, String methodName) {
