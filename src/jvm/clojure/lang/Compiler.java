@@ -1164,7 +1164,8 @@ static class MethodValueExpr implements Expr {
 				throw new IllegalArgumentException("Multiple matches for " + methodDescription(c, methodName)
 						+ ", use param-tags to specify");
 			}
-
+			// Because Java static and instance methods can have the same name we should remove
+			// the latter because we only support inference on statics
 			methods = methods.stream().filter(m -> Modifier.isStatic(m.getModifiers())).collect(Collectors.toList());
 			if(methods.size() == 1)
 				this.method = methods.get(0);
@@ -1182,6 +1183,12 @@ static class MethodValueExpr implements Expr {
 		boolean isCtor = methodNamesConstructor(c, methodName);
 		String type = isCtor ? "constructor" : "method";
 		return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
+	}
+
+	private static IPersistentVector asParamTags(List<Class> sig) {
+		return PersistentVector.create(sig.stream()
+				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
+				.collect(Collectors.toList()));
 	}
 
 	// This method will attempt to find the method that matches the given paramTags. If paramTags
@@ -1203,9 +1210,14 @@ static class MethodValueExpr implements Expr {
 
 		if(filteredMethods.size() == 1) return filteredMethods.get(0);
 
-		throw new IllegalArgumentException("Multiple matching signatures for "
+		if(filteredMethods.size() == 0)
+			throw new IllegalArgumentException("No matching signature for "
+					+ methodDescription(c, methodName)
+					+ " found using param-tags " + asParamTags(paramTagsSignature));
+		else
+			throw new IllegalArgumentException("Multiple matching signatures for "
 				+ methodDescription(c, methodName)
-				+ " found using param-tags " + PersistentVector.create(paramTagsSignature));
+				+ " found using param-tags " + asParamTags(paramTagsSignature));
 	}
 
 	private static boolean methodNamesConstructor(Class c, String methodName) {
