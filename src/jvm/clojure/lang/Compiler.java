@@ -1137,32 +1137,34 @@ static class MethodValueExpr implements Expr {
 			throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
 
 		IPersistentVector paramTags = paramTagsOf(sym);
-		List<Class> maybeSig = null;
-		Executable maybeMethod = null;
 		if(paramTags != null) {
-			maybeSig = tagsToClasses(paramTags);
-			maybeMethod = resolveHintedMethod(c, methodName, maybeSig, methods);
-		}
-		else if(methods.size() == 1) { // no param-tags, but 1 method
-			maybeMethod = methods.get(0);
-		}
-		else if(methods.size() > 1) {  // no param-tags, found overloads
-			// Must be inference at this point
-			if(methodNamesConstructor(c, methodName)) { // Inference on constructors not supported
-				throw new IllegalArgumentException("Multiple matches for " + methodDescription(c, methodName)
-						+ ", use param-tags to specify");
-			}
-
-			// Inference on instance methods not supported, so filter them out
-			methods = methods.stream().filter(m -> Modifier.isStatic(m.getModifiers())).collect(Collectors.toList());
-			if(methods.size() == 1)
+			hintedSig = tagsToClasses(paramTags);
+			method = resolveHintedMethod(c, methodName, hintedSig, methods);
+		} else {
+			hintedSig = null; // no param-tags
+			Executable maybeMethod = null;
+			if(methods.size() == 1) { // but only 1 method so not needed
 				maybeMethod = methods.get(0);
-			else if(methods.isEmpty())
-				throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
-			// else not resolved, must be static method w/inference
+			}
+			else if(methods.size() > 1) {
+				// Must be inference at this point
+				if(methodNamesConstructor(c, methodName)) { // Inference on constructors not supported
+					throw new IllegalArgumentException("Multiple matches for " + methodDescription(c, methodName)
+							+ ", use param-tags to specify");
+				}
+
+				// Inference on instance methods not supported, so filter them out
+				List<Executable> staticMethods = methods.stream()
+						.filter(m -> Modifier.isStatic(m.getModifiers()))
+						.collect(Collectors.toList());
+				if(staticMethods.size() == 1)
+					maybeMethod = staticMethods.get(0);
+				else if(staticMethods.isEmpty())
+					throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
+				// else not resolved, static method w/inference
+			}
+			method = maybeMethod;
 		}
-		hintedSig = maybeSig;
-		method = maybeMethod;
 	}
 
 	private static String methodDescription(Class c, String methodName) {
@@ -1198,7 +1200,6 @@ static class MethodValueExpr implements Expr {
 	}
 
 	private static List<Executable> methodsWithName(Class c, String name) {
-		if(c == null || name == null) return null;
 		final Executable[] methods;
 		final String methodName;
 		if (methodNamesConstructor(c, name)) {
