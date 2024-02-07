@@ -6830,8 +6830,6 @@ fails, attempts to require sym's namespace and retries."
             `(let [~ge ~e] (case* ~ge ~shift ~mask ~default ~imap ~switch-type :hash-identity ~skip-check))))))))
 
 
-;; redefine reduce with internal-reduce
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
 (load "core_proxy")
@@ -6840,6 +6838,45 @@ fails, attempts to require sym's namespace and retries."
 (load "core_deftype")
 (load "core/protocols")
 (load "gvec")
+
+(defn stream-reduce!
+  "Works like reduce but takes a java.util.stream.BaseStream as its source.
+  Honors 'reduced', is a terminal operation on the stream"
+  {:added "1.12"}
+  ([f ^java.util.stream.BaseStream s]
+   (clojure.core.protocols/iterator-reduce! (.iterator s) f))
+  ([f init ^java.util.stream.BaseStream s]
+   (clojure.core.protocols/iterator-reduce! (.iterator s) f init)))
+
+(defn stream-seq!
+  "Takes a java.util.stream.BaseStream instance s and returns a seq of its
+  contents. This is a terminal operation on the stream."
+  {:added "1.12"}
+  [^java.util.stream.BaseStream stream]
+  (iterator-seq (.iterator stream)))
+
+(defn stream-transduce!
+  "Works like transduce but takes a java.util.stream.BaseStream as its source.
+  This is a terminal operation on the stream."
+  {:added "1.12"}
+  ([xform f ^java.util.stream.BaseStream stream] (stream-transduce! xform f (f) stream))
+  ([xform f init ^java.util.stream.BaseStream stream]
+   (let [f (xform f)
+         ret (stream-reduce! f init stream)]
+     (f ret))))
+
+(defn stream-into!
+  "Returns a new coll consisting of coll with all of the items of the
+  stream conjoined. This is a terminal operation on the stream."
+  {:added "1.12"}
+  ([to ^java.util.stream.BaseStream stream]
+   (if (instance? clojure.lang.IEditableCollection to)
+     (with-meta (persistent! (stream-reduce! conj! (transient to) stream)) (meta to))
+     (stream-reduce! conj to stream)))
+  ([to xform ^java.util.stream.BaseStream stream]
+   (if (instance? clojure.lang.IEditableCollection to)
+     (with-meta (persistent! (stream-transduce! xform conj! (transient to) stream)) (meta to))
+     (stream-transduce! xform conj to stream))))
 
 (defmacro ^:private when-class [class-name & body]
   `(try
@@ -6887,6 +6924,7 @@ fails, attempts to require sym's namespace and retries."
    :added "1.11"}
   ^java.util.UUID [] (java.util.UUID/randomUUID))
 
+;; redefine reduce with internal-reduce
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
   returns the result of applying f to the first 2 items in coll, then

@@ -30,27 +30,26 @@
      (let [s (seq coll)]
        (internal-reduce s f val))))
 
-(defn- iter-reduce
-  ([^java.lang.Iterable coll f]
-   (let [iter (.iterator coll)]
+;; mutates the iterator, respects reduced
+(defn iterator-reduce!
+  ([^java.util.Iterator iter f]
+   (if (.hasNext iter)
+     (iterator-reduce! iter f (.next iter))
+     (f)))
+  ([^java.util.Iterator iter f val]
+   (loop [ret val]
      (if (.hasNext iter)
-       (loop [ret (.next iter)]
-         (if (.hasNext iter)
-           (let [ret (f ret (.next iter))]
-             (if (reduced? ret)
-               @ret
-               (recur ret)))
-           ret))
-       (f))))
-  ([^java.lang.Iterable coll f val]
-   (let [iter (.iterator coll)]
-     (loop [ret val]
-       (if (.hasNext iter)
-         (let [ret (f ret (.next iter))]
-           (if (reduced? ret)
-             @ret
-             (recur ret)))
-         ret)))))
+       (let [ret (f ret (.next iter))]
+         (if (reduced? ret)
+           @ret
+           (recur ret)))
+       ret))))
+
+(defn- iter-reduce
+  ([^Iterable coll f]
+   (iterator-reduce! (.iterator coll) f))
+  ([^Iterable coll f val]
+   (iterator-reduce! (.iterator coll) f val)))
 
 (defn- naive-seq-reduce
   "Reduces a seq, ignoring any opportunities to switch to a more
