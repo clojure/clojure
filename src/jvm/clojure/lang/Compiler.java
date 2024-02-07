@@ -1148,10 +1148,10 @@ static class MethodValueExpr implements Expr {
 				maybeMethod = methods.get(0);
 			}
 			else if(methods.size() > 1) {
-				// Must be inference at this point
+				// Only statics supported at this point (inference)
 				if(methodNamesConstructor(c, methodName)) { 
 					// Inference on constructors not supported
-					complainAboutUnresolvedOverload(c, methodName);
+					throw unresolvedOverloadException(c, methodName);
 				}
 
 				// Inference on instance methods not supported, 
@@ -1162,15 +1162,15 @@ static class MethodValueExpr implements Expr {
 				if(staticMethods.size() == 1)
 					maybeMethod = staticMethods.get(0);
 				else if(staticMethods.isEmpty())
-					complainAboutUnresolvedOverload(c, methodName);
+					throw unresolvedOverloadException(c, methodName);
 				// else not resolved, static method w/inference
 			}
 			method = maybeMethod;
 		}
 	}
 
-	static void complainAboutUnresolvedOverload(Class c, String methodName) {
-		throw new IllegalArgumentException("Multiple matches for " 
+	static IllegalArgumentException unresolvedOverloadException(Class c, String methodName) {
+		return new IllegalArgumentException("Multiple matches for " 
 				+ methodDescription(c, methodName)
 				+ ", use param-tags to specify");
 	}
@@ -1253,7 +1253,7 @@ static class MethodValueExpr implements Expr {
 		// If not resolved by this point we were not given param-tags
 		// and named method was overloaded.
 		if(!mexpr.isResolved()) {
-			complainAboutUnresolvedOverload(mexpr.c, mexpr.methodName);
+			throw unresolvedOverloadException(mexpr.c, mexpr.methodName);
 		}
 
 		if(isInstanceMethod(mexpr.method)) {
