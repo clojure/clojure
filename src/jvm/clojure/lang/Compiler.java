@@ -1149,8 +1149,7 @@ static class MethodValueExpr implements Expr {
 				// Must be inference at this point
 				if(methodNamesConstructor(c, methodName)) { 
 					// Inference on constructors not supported
-					throw new IllegalArgumentException("Multiple matches for " + methodDescription(c, methodName)
-							+ ", use param-tags to specify");
+					complainAboutUnresolvedOverload(c, methodName);
 				}
 
 				// Inference on instance methods not supported, so filter them out
@@ -1160,12 +1159,17 @@ static class MethodValueExpr implements Expr {
 				if(staticMethods.size() == 1)
 					maybeMethod = staticMethods.get(0);
 				else if(staticMethods.isEmpty())
-					throw new IllegalArgumentException("Multiple matches for " + methodDescription(c, methodName)
-							+ ", use param-tags to specify");
+					complainAboutUnresolvedOverload(c, methodName);
 				// else not resolved, static method w/inference
 			}
 			method = maybeMethod;
 		}
+	}
+
+	private static void complainAboutUnresolvedOverload(Class c, String methodName) {
+		throw new IllegalArgumentException("Multiple matches for " 
+				+ methodDescription(c, methodName)
+				+ ", use param-tags to specify");
 	}
 
 	private static String methodDescription(Class c, String methodName) {
@@ -1245,8 +1249,7 @@ static class MethodValueExpr implements Expr {
 		// If not resolved by this point we were not given param-tags
 		// and named method was overloaded.
 		if(!mexpr.isResolved()) {
-			throw new IllegalArgumentException("Multiple matches for " + methodDescription(mexpr.c, mexpr.methodName)
-					+ ", use param-tags to specify");
+			complainAboutUnresolvedOverload(mexpr.c, mexpr.methodName);
 		}
 
 		if(isConstructor(mexpr.method))
