@@ -1148,9 +1148,9 @@ static class MethodValueExpr implements Expr {
 			}
 			else if(methods.size() > 1) {
 				// Only statics supported at this point (needs inference)
-				if(methodNamesConstructor(c, methodName)) {
+
+				if(methodNamesConstructor(c, methodName))
 					throw unresolvedOverloadException(c, methodName, null);
-				}
 
 				// Filter out instance methods (no inference allowed)
 				List<Executable> staticMethods = methods.stream()
@@ -1262,9 +1262,9 @@ static class MethodValueExpr implements Expr {
 	// All buildThunk methods currently return a new FnExpr on every call
 	// TBD: caching/reuse of thunks
 	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Symbol instanceParam) {
-		// (fn dot__new42 (^AClass [arg1] (^[T] AClass/new arg1)))
-		// (fn dot__staticMethod42 (^r [arg1] (^[T] AClass/staticMethod arg)))
-		// (fn dot__instanceMethod42 (^r [this arg1] (^[T] AClass/instanceMethod this arg1)))
+		// (fn invoke__new42 (^AClass [arg1] (^[T] AClass/new arg1)))
+		// (fn invoke__staticMethod42 (^r [arg1] (^[T] AClass/staticMethod arg)))
+		// (fn invoke__instanceMethod42 (^r [this arg1] (^[T] AClass/instanceMethod this arg1)))
 		IPersistentVector params = PersistentVector.EMPTY;
 		if(instanceParam != null) params = params.cons(instanceParam);
 		// hinted params
@@ -1285,7 +1285,7 @@ static class MethodValueExpr implements Expr {
 		}
 
 		ISeq body = RT.listStar(methodSymbol, params.seq());
-		String thunkName = "dot__" + munge(methodSymbol.name) + RT.nextID();
+		String thunkName = "invoke__" + munge(methodSymbol.name) + RT.nextID();
 		ISeq form = RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
 		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
 	}
