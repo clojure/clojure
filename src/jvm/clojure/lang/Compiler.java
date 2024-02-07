@@ -1303,10 +1303,6 @@ static class MethodValueExpr implements Expr {
 	}
 
 	static IllegalArgumentException noMatchingMethodException(Class c, String methodName, List<Class> hintedSig) {
-		IPersistentVector paramTags = PersistentVector.create(hintedSig.stream()
-				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
-				.collect(Collectors.toList()));
-
 		return new IllegalArgumentException("Could not find "
 				+ methodDescription(c, methodName)
 				+ (hintedSig != null ? " with param-tags " + toParamTags(hintedSig) : ""));
