@@ -1135,8 +1135,7 @@ static class MethodValueExpr implements Expr {
 
 		List<Executable> methods = methodsWithName(c, methodName);
 		if(methods.isEmpty())
-			throw new IllegalArgumentException("Could not find " 
-					+ methodDescription(c, methodName));
+			throw noMatchingMethodException(c, methodName, null);
 
 		hintedSig = tagsToClasses(paramTagsOf(sym));
 		if(hintedSig != null) {
@@ -1144,47 +1143,27 @@ static class MethodValueExpr implements Expr {
 		} else {
 			Executable maybeMethod = null;
 			if(methods.size() == 1) {
-				// but only 1 method so not needed
+				// Only 1 method - no inference needed
 				maybeMethod = methods.get(0);
 			}
 			else if(methods.size() > 1) {
-				// Only statics supported at this point (inference)
-				if(methodNamesConstructor(c, methodName)) { 
-					// Inference on constructors not supported
-					throw unresolvedOverloadException(c, methodName);
+				// Only statics supported at this point (needs inference)
+				if(methodNamesConstructor(c, methodName)) {
+					throw unresolvedOverloadException(c, methodName, null);
 				}
 
-				// Inference on instance methods not supported, 
-				// so filter them out
+				// Filter out instance methods (no inference allowed)
 				List<Executable> staticMethods = methods.stream()
 						.filter(m -> Modifier.isStatic(m.getModifiers()))
 						.collect(Collectors.toList());
 				if(staticMethods.size() == 1)
 					maybeMethod = staticMethods.get(0);
 				else if(staticMethods.isEmpty())
-					throw unresolvedOverloadException(c, methodName);
+					throw unresolvedOverloadException(c, methodName, null);
 				// else not resolved, static method w/inference
 			}
 			method = maybeMethod;
 		}
-	}
-
-	static IllegalArgumentException unresolvedOverloadException(Class c, String methodName) {
-		return new IllegalArgumentException("Multiple matches for " 
-				+ methodDescription(c, methodName)
-				+ ", use param-tags to specify");
-	}
-
-	private static String methodDescription(Class c, String methodName) {
-		boolean isCtor = methodNamesConstructor(c, methodName);
-		String type = isCtor ? "constructor" : "method";
-		return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
-	}
-
-	private static IPersistentVector asParamTags(List<Class> sig) {
-		return PersistentVector.create(sig.stream()
-				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
-				.collect(Collectors.toList()));
 	}
 
 	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
@@ -1197,11 +1176,10 @@ static class MethodValueExpr implements Expr {
 
 		if(filteredMethods.size() == 1)
 			return filteredMethods.get(0);
-		else 
-			throw new IllegalArgumentException("Expected to find 1 matching signature for "
-				+ methodDescription(c, methodName)
-				+ " but found " + filteredMethods.size() + " using param-tags "
-				+ asParamTags(hintedSig));
+		else if(filteredMethods.size() == 0)
+			throw noMatchingMethodException(c, methodName, hintedSig);
+		else
+			throw unresolvedOverloadException(c, methodName, hintedSig);
 	}
 
 	private static boolean methodNamesConstructor(Class c, String methodName) {
@@ -1253,7 +1231,7 @@ static class MethodValueExpr implements Expr {
 		// If not resolved by this point we were not given param-tags
 		// and named method was overloaded.
 		if(!mexpr.isResolved()) {
-			throw unresolvedOverloadException(mexpr.c, mexpr.methodName);
+			throw unresolvedOverloadException(mexpr.c, mexpr.methodName, null);
 		}
 
 		if(isInstanceMethod(mexpr.method)) {
@@ -1310,6 +1288,34 @@ static class MethodValueExpr implements Expr {
 		String thunkName = "dot__" + munge(methodSymbol.name) + RT.nextID();
 		ISeq form = RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
 		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
+	}
+
+	private static String methodDescription(Class c, String methodName) {
+		boolean isCtor = methodNamesConstructor(c, methodName);
+		String type = isCtor ? "constructor" : "method";
+		return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
+	}
+
+	static IPersistentVector toParamTags(List<Class> hintedSig) {
+		return PersistentVector.create(hintedSig.stream()
+				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
+				.collect(Collectors.toList()));
+	}
+
+	static IllegalArgumentException noMatchingMethodException(Class c, String methodName, List<Class> hintedSig) {
+		IPersistentVector paramTags = PersistentVector.create(hintedSig.stream()
+				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
+				.collect(Collectors.toList()));
+
+		return new IllegalArgumentException("Could not find "
+				+ methodDescription(c, methodName)
+				+ (hintedSig != null ? " with param-tags " + toParamTags(hintedSig) : ""));
+	}
+
+	static IllegalArgumentException unresolvedOverloadException(Class c, String methodName, List<Class> hintedSig) {
+		return new IllegalArgumentException("Multiple matches for "
+				+ methodDescription(c, methodName)
+				+ (hintedSig != null ? " with param-tags " + toParamTags(hintedSig) : ", use param-tags to specify"));
 	}
 }
 
