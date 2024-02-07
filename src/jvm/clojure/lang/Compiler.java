@@ -1160,7 +1160,8 @@ static class MethodValueExpr implements Expr {
 				if(staticMethods.size() == 1)
 					maybeMethod = staticMethods.get(0);
 				else if(staticMethods.isEmpty())
-					throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
+					throw new IllegalArgumentException("Multiple matches for " + methodDescription(c, methodName)
+							+ ", use param-tags to specify");
 				// else not resolved, static method w/inference
 			}
 			method = maybeMethod;
@@ -1276,7 +1277,7 @@ static class MethodValueExpr implements Expr {
 					maybeCoerceArgs(method, params.seq().next()));
 		};
 		IPersistentMap m = RT.map(Keyword.intern("tag"), Symbol.intern(c.getName()));
-		Symbol instanceParam = (Symbol) Symbol.intern(null, "this" + RT.nextID()).withMeta(m);
+		Symbol instanceParam = (Symbol) Symbol.intern(null, "this").withMeta(m);
 		return buildThunk(method, methodName, c, declaredSignature, instanceParam, instanceCallBuilder);
 	}
 
@@ -1288,6 +1289,10 @@ static class MethodValueExpr implements Expr {
 		return buildThunk(ctor, "new", c, declaredSignature, null, ctorCallBuilder);
 	}
 
+	private static boolean isHintable(Class c) {
+		return Long.TYPE.equals(c) || Double.TYPE.equals(c) || !c.isPrimitive()
+	}
+
 	private static FnExpr buildThunk(Executable method, String name, Class c, List<Class> declaredSignature, Symbol instanceParam, Function<IPersistentVector, ISeq> callBuilder) {
 		// (fn dot__new42 ([^T arg1] (new AClass arg1)))
 		// (fn dot__staticMethod42 (^r [^T arg1] (. AClass staticMethod arg)))
@@ -1295,16 +1300,17 @@ static class MethodValueExpr implements Expr {
 		IPersistentVector params = PersistentVector.EMPTY;
 		if(instanceParam != null) params = params.cons(instanceParam);
 		// hinted params
-		for(Class paramClass : method.getParameterTypes()) {
-			Symbol param = Symbol.intern("arg" + RT.nextID());
-			if(Long.TYPE.equals(paramClass) || Double.TYPE.equals(paramClass) || !paramClass.isPrimitive()) {
-				param = (Symbol) param.withMeta(RT.map(Keyword.intern("tag"), Symbol.intern(paramClass.getName())));
+		Class[] paramTypes = method.getParameterTypes();
+		for(int i = 0; i<paramTypes.length; i++) {
+			Symbol param = Symbol.intern(null, "arg" + (i+1));
+			if(isHintable(paramTypes[i])) {
+				param = (Symbol) param.withMeta(RT.map(Keyword.intern("tag"), Symbol.intern(null, paramTypes[i].getName())));
 			}
 			params = params.cons(param);
 		}
 		// hint return
 		Class retClass = method instanceof Constructor ? c : ((java.lang.reflect.Method)method).getReturnType();
-		if (Long.TYPE.equals(retClass) || Double.TYPE.equals(retClass) || !retClass.isPrimitive()) {
+		if (isHintable(retClass)) {
 			params = ((PersistentVector)params).withMeta(RT.map(Keyword.intern("tag"), coerceFns.get(retClass)));
 		}
 
