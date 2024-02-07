@@ -1361,6 +1361,63 @@ static class MethodValueExpr implements Expr {
 	}
 }
 
+final static Symbol PARAM_TAG_ANY = Symbol.intern(null, "_");
+
+private static IPersistentVector paramTagsOf(Object o){
+	Object paramTags = RT.get(RT.meta(o), RT.PARAM_TAGS_KEY);
+
+	if(paramTags != null && !(paramTags instanceof IPersistentVector))
+		throw new IllegalArgumentException("param-tags value should be a vector, but was type " + paramTags.getClass().getName());
+
+	return (IPersistentVector) paramTags;
+}
+
+// calls tagToClass on every element, unless it encounters _ which becomes null
+private static List<Class> tagsToClasses(IPersistentVector paramTags) {
+	List<Class> sig = new ArrayList<>();
+	for (ISeq s = RT.seq(paramTags); s!=null; s = s.next()) {
+		Object t = s.first();
+		if (t.equals(PARAM_TAG_ANY))
+			sig.add(null);
+		else
+			sig.add(HostExpr.tagToClass(t));
+	}
+	return sig;
+}
+
+private static boolean signatureMatches(List<Class> sig, Executable method)
+{
+	Class[] methodSig = method.getParameterTypes();
+	if(methodSig.length != sig.size()) return false;
+
+	for (int i = 0; i < methodSig.length; i++)
+		if (sig.get(i) != null && !sig.get(i).equals(methodSig[i]))
+			return false;
+
+	return true;
+};
+
+static boolean isStaticMethod(Executable method) {
+	return method instanceof java.lang.reflect.Method && Modifier.isStatic(method.getModifiers());
+}
+
+static boolean isInstanceMethod(Executable method) {
+	return method instanceof java.lang.reflect.Method && !Modifier.isStatic(method.getModifiers());
+}
+
+static boolean isConstructor(Executable method) {
+	return method instanceof Constructor;
+}
+
+private static void checkMethodArity(Executable method, int argCount) {
+	if(method.getParameterCount() != argCount)
+		throw new IllegalArgumentException("Invocation of "
+				+ MethodValueExpr.methodDescription(method.getDeclaringClass(), method.getName())
+				+ " expected " + method.getParameterCount() + " arguments, but received " + argCount);
+}
+
+
+
 static abstract class FieldExpr extends HostExpr{
 }
 
@@ -4191,6 +4248,24 @@ static class InvokeExpr implements Expr{
 //					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
 
 		return new InvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), fexpr, args, tailPosition);
+	}
+
+	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
+		if(!mexpr.isResolved()) {
+			// default to static method with inference
+			return new StaticMethodExpr(source, line, column, tag, mexpr.c, munge(mexpr.methodName), args, tailPosition);
+		}
+
+		if(isConstructor(mexpr.method))
+			return new NewExpr(mexpr.c, (Constructor) mexpr.method, args, line, column);
+
+		if(isInstanceMethod(mexpr.method))
+			return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
+					munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, PersistentVector.create(RT.next(args)),
+					tailPosition);
+
+		return new StaticMethodExpr(source, line, column, tag, mexpr.c,
+				munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
 	}
 }
 
@@ -9381,77 +9456,4 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 		    }
 		};
     }
-
-final static Symbol PARAM_TAG_ANY = Symbol.intern(null, "_");
-
-private static IPersistentVector paramTagsOf(Object o){
-	Object paramTags = RT.get(RT.meta(o), RT.PARAM_TAGS_KEY);
-
-	if(paramTags != null && !(paramTags instanceof IPersistentVector))
-		throw new IllegalArgumentException("param-tags value should be a vector, but was type " + paramTags.getClass().getName());
-
-	return (IPersistentVector) paramTags;
-}
-
-// calls tagToClass on every element, unless it encounters _ which becomes null
-private static List<Class> tagsToClasses(IPersistentVector paramTags) {
-	List<Class> sig = new ArrayList<>();
-	for (ISeq s = RT.seq(paramTags); s!=null; s = s.next()) {
-		Object t = s.first();
-		if (t.equals(PARAM_TAG_ANY))
-			sig.add(null);
-		else
-			sig.add(HostExpr.tagToClass(t));
-	}
-	return sig;
-}
-
-private static boolean signatureMatches(List<Class> sig, Executable method)
-{
-	Class[] methodSig = method.getParameterTypes();
-	if(methodSig.length != sig.size()) return false;
-
-	for (int i = 0; i < methodSig.length; i++)
-		if (sig.get(i) != null && !sig.get(i).equals(methodSig[i]))
-			return false;
-
-	return true;
-};
-
-static boolean isStaticMethod(Executable method) {
-	return method instanceof java.lang.reflect.Method && Modifier.isStatic(method.getModifiers());
-}
-
-static boolean isInstanceMethod(Executable method) {
-	return method instanceof java.lang.reflect.Method && !Modifier.isStatic(method.getModifiers());
-}
-
-static boolean isConstructor(Executable method) {
-	return method instanceof Constructor;
-}
-
-private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
-	if(!mexpr.isResolved()) {
-		// default to static method with inference
-		return new StaticMethodExpr(source, line, column, tag, mexpr.c, munge(mexpr.methodName), args, tailPosition);
-	}
-
-	if(isConstructor(mexpr.method))
-		return new NewExpr(mexpr.c, (Constructor) mexpr.method, args, line, column);
-
-	if(isInstanceMethod(mexpr.method))
-		return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
-				munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, PersistentVector.create(RT.next(args)),
-				tailPosition);
-
-	return new StaticMethodExpr(source, line, column, tag, mexpr.c,
-			munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
-}
-
-private static void checkMethodArity(Executable method, int argCount) {
-	if(method.getParameterCount() != argCount)
-		throw new IllegalArgumentException("Invocation of "
-				+ MethodValueExpr.methodDescription(method.getDeclaringClass(), method.getName())
-				+ " expected " + method.getParameterCount() + " arguments, but received " + argCount);
-}
 }
