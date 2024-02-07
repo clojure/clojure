@@ -1290,7 +1290,18 @@ static class MethodValueExpr implements Expr {
 	}
 
 	private static boolean isHintable(Class c) {
-		return Long.TYPE.equals(c) || Double.TYPE.equals(c) || !c.isPrimitive()
+		return Long.TYPE.equals(c) || Double.TYPE.equals(c) || !c.isPrimitive();
+	}
+
+	private static Symbol calculateCoerceType(Class c) {
+		String t = null;
+		if(c.isPrimitive()) {
+			t = c.getName();
+		}
+		else if(c.isArray() && c.getComponentType().isPrimitive()) {
+			t = c.getName() + "s";
+		}
+		return (t == null) ? null : Symbol.intern(null, t);
 	}
 
 	private static FnExpr buildThunk(Executable method, String name, Class c, List<Class> declaredSignature, Symbol instanceParam, Function<IPersistentVector, ISeq> callBuilder) {
@@ -1311,7 +1322,8 @@ static class MethodValueExpr implements Expr {
 		// hint return
 		Class retClass = method instanceof Constructor ? c : ((java.lang.reflect.Method)method).getReturnType();
 		if (isHintable(retClass)) {
-			params = ((PersistentVector)params).withMeta(RT.map(Keyword.intern("tag"), coerceFns.get(retClass)));
+			Symbol retTag = calculateCoerceType(retClass);
+			params = ((PersistentVector)params).withMeta(RT.map(Keyword.intern("tag"), (retTag != null) ? retTag : Symbol.intern(null, retClass.getName())));
 		}
 
 		ISeq body = callBuilder.apply(params);
@@ -1320,36 +1332,17 @@ static class MethodValueExpr implements Expr {
 		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
 	}
 
-	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>();
-	static {
-		coerceFns.put(double.class, Symbol.intern("double"));
-		coerceFns.put(double[].class, Symbol.intern("doubles"));
-		coerceFns.put(long.class, Symbol.intern("long"));
-		coerceFns.put(long[].class, Symbol.intern("longs"));
-		coerceFns.put(int.class, Symbol.intern("int"));
-		coerceFns.put(int[].class, Symbol.intern("ints"));
-		coerceFns.put(float.class, Symbol.intern("float"));
-		coerceFns.put(float[].class, Symbol.intern("floats"));
-		coerceFns.put(char.class, Symbol.intern("char"));
-		coerceFns.put(char[].class, Symbol.intern("chars"));
-		coerceFns.put(short.class, Symbol.intern("short"));
-		coerceFns.put(short[].class, Symbol.intern("shorts"));
-		coerceFns.put(byte.class, Symbol.intern("byte"));
-		coerceFns.put(byte[].class, Symbol.intern("bytes"));
-		coerceFns.put(boolean.class, Symbol.intern("boolean"));
-		coerceFns.put(boolean[].class, Symbol.intern("booleans"));
-	}
-
 	static protected ISeq maybeCoerceArgs(Executable target, ISeq args){
 		Class[] sig = target.getParameterTypes();
 		ArrayList ret = new ArrayList();
 
 		for(int i = 0; args != null; args = args.next(), i++)
 		{
-			if (coerceFns.containsKey(sig[i]))
+			Symbol coerceFn = calculateCoerceType(sig[i]);
+			if (coerceFn != null)
 			{
 				ArrayList coerceCall = new ArrayList();
-				coerceCall.add(coerceFns.get(sig[i]));
+				coerceCall.add(coerceFn);
 				coerceCall.add(args.first());
 				ret.add(RT.seq(coerceCall));
 			}
