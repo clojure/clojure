@@ -1231,17 +1231,12 @@ static class MethodValueExpr implements Expr {
 
 	@Override
 	public boolean hasJavaClass() {
-		return isResolved();
+		return false;
 	}
 
 	@Override
 	public Class getJavaClass() {
-		if(isConstructor(method))
-			return c;
-		else if(isResolved())
-			return ((java.lang.reflect.Method)method).getReturnType();
-		else
-			return null;
+		return null;
 	}
 
 	private static FnExpr toFnExpr(MethodValueExpr mexpr) {
