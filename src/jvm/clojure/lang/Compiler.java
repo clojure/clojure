@@ -1308,7 +1308,7 @@ static class MethodValueExpr implements Expr {
 
 		ISeq body = RT.listStar(methodSymbol, params.seq());
 		String thunkName = "dot__" + munge(methodSymbol.name) + RT.nextID();
-		ISeq form =	RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
+		ISeq form = RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
 		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
 	}
 }
@@ -1370,8 +1370,6 @@ private static void checkMethodArity(Executable method, int argCount) {
 				+ MethodValueExpr.methodDescription(method.getDeclaringClass(), method.getName())
 				+ " expected " + method.getParameterCount() + " arguments, but received " + argCount);
 }
-
-
 
 static abstract class FieldExpr extends HostExpr{
 }
