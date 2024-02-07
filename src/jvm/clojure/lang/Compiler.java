@@ -1127,14 +1127,17 @@ static class MethodValueExpr implements Expr {
 	private final String methodName;
 	private final List<Class> hintedSig;
 	private final Executable method;
+	private final Symbol methodSymbol;
 
 	public MethodValueExpr(Class methodClass, Symbol sym){
 		c = methodClass;
+		methodSymbol = sym;
 		methodName = sym.name;
 
 		List<Executable> methods = methodsWithName(c, methodName);
 		if(methods.isEmpty())
-			throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
+			throw new IllegalArgumentException("Could not find " 
+					+ methodDescription(c, methodName));
 
 		hintedSig = tagsToClasses(paramTagsOf(sym));
 		if(hintedSig != null) {
@@ -1152,7 +1155,8 @@ static class MethodValueExpr implements Expr {
 					complainAboutUnresolvedOverload(c, methodName);
 				}
 
-				// Inference on instance methods not supported, so filter them out
+				// Inference on instance methods not supported, 
+				// so filter them out
 				List<Executable> staticMethods = methods.stream()
 						.filter(m -> Modifier.isStatic(m.getModifiers()))
 						.collect(Collectors.toList());
@@ -1166,7 +1170,7 @@ static class MethodValueExpr implements Expr {
 		}
 	}
 
-	private static void complainAboutUnresolvedOverload(Class c, String methodName) {
+	static void complainAboutUnresolvedOverload(Class c, String methodName) {
 		throw new IllegalArgumentException("Multiple matches for " 
 				+ methodDescription(c, methodName)
 				+ ", use param-tags to specify");
@@ -1194,7 +1198,8 @@ static class MethodValueExpr implements Expr {
 
 		if(filteredMethods.size() == 1)
 			return filteredMethods.get(0);
-		else throw new IllegalArgumentException("Expected to find 1 matching signature for "
+		else 
+			throw new IllegalArgumentException("Expected to find 1 matching signature for "
 				+ methodDescription(c, methodName)
 				+ " but found " + filteredMethods.size() + " using param-tags "
 				+ asParamTags(hintedSig));
