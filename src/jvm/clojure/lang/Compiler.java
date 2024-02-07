@@ -1303,9 +1303,7 @@ static class MethodValueExpr implements Expr {
 		String thunkName = "dot__" + munge(name) + RT.nextID();
 		ISeq form =	RT.list(Symbol.intern("fn"), Symbol.intern(thunkName),
 				buildThunkBody(maybeHintReturn(method, (PersistentVector) params), callBuilder));
-
-		Expr retExpr = analyzeSeq(C.EVAL, form, thunkName);
-		return (FnExpr) retExpr;
+		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
 	}
 
 	static IPersistentVector buildThunkParams(Executable target, Symbol seedParam) {
