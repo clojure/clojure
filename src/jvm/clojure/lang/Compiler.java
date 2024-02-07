@@ -1257,12 +1257,10 @@ static class MethodValueExpr implements Expr {
 	}
 
 	// All buildThunk methods currently return a new FnExpr on every call
-	// caching is not implemented and is TBD.
+	// TBD: caching/reuse of thunks
 	static FnExpr buildStaticMethodThunk(Class c, Executable method, String methodName, List<Class> declaredSignature) {
+		// (. AClass staticMethod arg1 arg2)
 		Function<IPersistentVector, ISeq> staticCallBuilder = (params) -> {
-			// ([^T arg] (. Klass staticMethod arg))
-			// ([^long arg1 ^double arg2] (. Klass staticMethod arg1 arg2))
-			// ([prim] (. Klass staticMethod (coercefn prim)))
 			return RT.listStar(Symbol.intern("."),
 					Symbol.intern(c.getName()), Symbol.intern(method.getName()),
 					maybeCoerceArgs(method, params.seq()));
@@ -1271,10 +1269,8 @@ static class MethodValueExpr implements Expr {
 	}
 
 	static FnExpr buildInstanceMethodThunk(Class c, Executable method, String methodName, List<Class> declaredSignature) {
+		// (. this instanceMethod arg1 arg2)
 		Function<IPersistentVector, ISeq> instanceCallBuilder = (params) -> {
-			// ([^Klass this ^T arg] (. this instanceMethod arg))
-			// ([^long arg1 ^double arg2] (. this instanceMethod arg1 arg2))
-			// ([^Klass this prim] (. this instanceMethod (coercefn prim)))
 			return RT.listStar(Symbol.intern("."),
 					params.seq().first(), Symbol.intern(method.getName()),
 					maybeCoerceArgs(method, params.seq().next()));
@@ -1285,6 +1281,7 @@ static class MethodValueExpr implements Expr {
 	}
 
 	static FnExpr buildCtorThunk(Class c, Executable ctor, List<Class> declaredSignature) {
+		// (new AClass arg1 arg2)
 		Function<IPersistentVector, ISeq> ctorCallBuilder = (params) -> {
 			return RT.listStar(Symbol.intern("new"), Symbol.intern(c.getName()), maybeCoerceArgs(ctor, params.seq()));
 		};
@@ -1292,9 +1289,9 @@ static class MethodValueExpr implements Expr {
 	}
 
 	private static FnExpr buildThunk(Executable method, String name, Class c, List<Class> declaredSignature, Symbol instanceParam, Function<IPersistentVector, ISeq> callBuilder) {
-		// (fn dot__new42 ([^T arg] (new Klass arg)))
-		// (fn dot__staticMethod42 (^r [^T arg] (. Klass staticMethod arg)))
-		// (fn dot__instanceMethod42 (^r [^Klass self ^T arg] (. ^Klass self instanceMethod arg)))
+		// (fn dot__new42 ([^T arg1] (new AClass arg1)))
+		// (fn dot__staticMethod42 (^r [^T arg1] (. AClass staticMethod arg)))
+		// (fn dot__instanceMethod42 (^r [^AClass this ^T arg1] (. ^AClass this instanceMethod arg1)))
 		IPersistentVector params = PersistentVector.EMPTY;
 		if(instanceParam != null) params = params.cons(instanceParam);
 		// hinted params
