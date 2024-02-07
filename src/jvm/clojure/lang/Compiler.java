@@ -24,7 +24,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Executable;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -1124,10 +1123,10 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 // In value position, will emit as a method thunk (error if not resolved)
 static class MethodValueExpr implements Expr {
 	private final Class c;
-	private final String methodName;
 	private final List<Class> hintedSig;
 	private final Executable method;
 	private final Symbol methodSymbol;
+	private final String methodName;
 
 	public MethodValueExpr(Class methodClass, Symbol sym){
 		c = methodClass;
@@ -1257,51 +1256,23 @@ static class MethodValueExpr implements Expr {
 			complainAboutUnresolvedOverload(mexpr.c, mexpr.methodName);
 		}
 
-		if(isConstructor(mexpr.method))
-			return buildCtorThunk(mexpr.c, mexpr.method, mexpr.hintedSig);
-		else if(isInstanceMethod(mexpr.method))
-			return buildInstanceMethodThunk(mexpr.c, mexpr.method, mexpr.methodName, mexpr.hintedSig);
+		if(isInstanceMethod(mexpr.method))
+			return buildInstanceMethodThunk(mexpr.c, mexpr.method, mexpr.methodSymbol);
 		else
-			return buildStaticMethodThunk(mexpr.c, mexpr.method, mexpr.methodName, mexpr.hintedSig);
+			return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, null);
 	}
-
-	// All buildThunk methods currently return a new FnExpr on every call
-	// TBD: caching/reuse of thunks
-	static FnExpr buildStaticMethodThunk(Class c, Executable method, String methodName, List<Class> declaredSignature) {
-		// (. AClass staticMethod arg1 arg2)
-		Function<IPersistentVector, ISeq> staticCallBuilder = (params) -> {
-			return RT.listStar(Symbol.intern("."),
-					Symbol.intern(c.getName()), Symbol.intern(method.getName()),
-					maybeCoerceArgs(method, params.seq()));
-		};
-		return buildThunk(method, methodName, c, declaredSignature, null, staticCallBuilder);
-	}
-
-	static FnExpr buildInstanceMethodThunk(Class c, Executable method, String methodName, List<Class> declaredSignature) {
-		// (. this instanceMethod arg1 arg2)
-		Function<IPersistentVector, ISeq> instanceCallBuilder = (params) -> {
-			return RT.listStar(Symbol.intern("."),
-					params.seq().first(), Symbol.intern(method.getName()),
-					maybeCoerceArgs(method, params.seq().next()));
-		};
+	
+	static FnExpr buildInstanceMethodThunk(Class c, Executable method, Symbol methodSymbol) {
 		IPersistentMap m = RT.map(Keyword.intern("tag"), Symbol.intern(c.getName()));
 		Symbol instanceParam = (Symbol) Symbol.intern(null, "this").withMeta(m);
-		return buildThunk(method, methodName, c, declaredSignature, instanceParam, instanceCallBuilder);
+		return buildThunk(c, method, methodSymbol, instanceParam);
 	}
 
-	static FnExpr buildCtorThunk(Class c, Executable ctor, List<Class> declaredSignature) {
-		// (new AClass arg1 arg2)
-		Function<IPersistentVector, ISeq> ctorCallBuilder = (params) -> {
-			return RT.listStar(Symbol.intern("new"), Symbol.intern(c.getName()), maybeCoerceArgs(ctor, params.seq()));
-		};
-		return buildThunk(ctor, "new", c, declaredSignature, null, ctorCallBuilder);
+	private static boolean isHintablePrimitive(Class c) {
+		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
 	}
 
-	private static boolean isHintable(Class c) {
-		return Long.TYPE.equals(c) || Double.TYPE.equals(c) || !c.isPrimitive();
-	}
-
-	private static Symbol calculateCoerceType(Class c) {
+	private static Symbol primTag(Class c) {
 		String t = null;
 		if(c.isPrimitive()) {
 			t = c.getName();
@@ -1312,55 +1283,35 @@ static class MethodValueExpr implements Expr {
 		return (t == null) ? null : Symbol.intern(null, t);
 	}
 
-	private static FnExpr buildThunk(Executable method, String name, Class c, List<Class> declaredSignature, Symbol instanceParam, Function<IPersistentVector, ISeq> callBuilder) {
-		// (fn dot__new42 ([^T arg1] (new AClass arg1)))
-		// (fn dot__staticMethod42 (^r [^T arg1] (. AClass staticMethod arg)))
-		// (fn dot__instanceMethod42 (^r [^AClass this ^T arg1] (. ^AClass this instanceMethod arg1)))
+	// All buildThunk methods currently return a new FnExpr on every call
+	// TBD: caching/reuse of thunks
+	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Symbol instanceParam) {
+		// (fn dot__new42 (^AClass [arg1] (^[T] AClass/new arg1)))
+		// (fn dot__staticMethod42 (^r [arg1] (^[T] AClass/staticMethod arg)))
+		// (fn dot__instanceMethod42 (^r [this arg1] (^[T] AClass/instanceMethod this arg1)))
 		IPersistentVector params = PersistentVector.EMPTY;
 		if(instanceParam != null) params = params.cons(instanceParam);
 		// hinted params
 		Class[] paramTypes = method.getParameterTypes();
 		for(int i = 0; i<paramTypes.length; i++) {
 			Symbol param = Symbol.intern(null, "arg" + (i+1));
-			if(isHintable(paramTypes[i])) {
-				param = (Symbol) param.withMeta(RT.map(Keyword.intern("tag"), Symbol.intern(null, paramTypes[i].getName())));
+			if(isHintablePrimitive(paramTypes[i])) {
+				param = (Symbol) param.withMeta(RT.map(RT.TAG_KEY, primTag(paramTypes[i])));
 			}
 			params = params.cons(param);
 		}
 		// hint return
 		Class retClass = method instanceof Constructor ? c : ((java.lang.reflect.Method)method).getReturnType();
-		if (isHintable(retClass)) {
-			Symbol retTag = calculateCoerceType(retClass);
-			params = ((PersistentVector)params).withMeta(RT.map(Keyword.intern("tag"), (retTag != null) ? retTag : Symbol.intern(null, retClass.getName())));
+		if (isHintablePrimitive(retClass) || !retClass.isPrimitive()) {
+			Symbol retTag = primTag(retClass);
+			retTag = (retTag != null) ? retTag : Symbol.intern(null, retClass.getName());
+			params = ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, retTag));
 		}
 
-		ISeq body = callBuilder.apply(params);
-		String thunkName = "dot__" + munge(name) + RT.nextID();
+		ISeq body = RT.listStar(methodSymbol, params.seq());
+		String thunkName = "dot__" + munge(methodSymbol.name) + RT.nextID();
 		ISeq form =	RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
 		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
-	}
-
-	static protected ISeq maybeCoerceArgs(Executable target, ISeq args){
-		Class[] sig = target.getParameterTypes();
-		ArrayList ret = new ArrayList();
-
-		for(int i = 0; args != null; args = args.next(), i++)
-		{
-			Symbol coerceFn = calculateCoerceType(sig[i]);
-			if (coerceFn != null)
-			{
-				ArrayList coerceCall = new ArrayList();
-				coerceCall.add(coerceFn);
-				coerceCall.add(args.first());
-				ret.add(RT.seq(coerceCall));
-			}
-			else
-			{
-				ret.add(args.first());
-			}
-		}
-
-		return RT.seq(ret);
 	}
 }
 
