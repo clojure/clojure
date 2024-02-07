@@ -1279,7 +1279,7 @@ static class MethodValueExpr implements Expr {
 					params.seq().first(), Symbol.intern(method.getName()),
 					maybeCoerceArgs(method, params.seq().next()));
 		};
-		IPersistentMap m = PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(c.getName()));
+		IPersistentMap m = RT.map(Keyword.intern("tag"), Symbol.intern(c.getName()));
 		Symbol instanceParam = (Symbol) Symbol.intern(null, "this" + RT.nextID()).withMeta(m);
 		return buildThunk(method, methodName, c, declaredSignature, instanceParam, instanceCallBuilder);
 	}
@@ -1295,41 +1295,27 @@ static class MethodValueExpr implements Expr {
 		// (fn dot__new42 ([^T arg] (new Klass arg)))
 		// (fn dot__staticMethod42 (^r [^T arg] (. Klass staticMethod arg)))
 		// (fn dot__instanceMethod42 (^r [^Klass self ^T arg] (. ^Klass self instanceMethod arg)))
-		IPersistentVector params = buildThunkParams(method, instanceParam);
-		String thunkName = "dot__" + munge(name) + RT.nextID();
-		ISeq form =	RT.list(Symbol.intern("fn"), Symbol.intern(thunkName),
-				buildThunkBody(maybeHintReturn(method, (PersistentVector) params), callBuilder));
-		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
-	}
-
-	static IPersistentVector buildThunkParams(Executable target, Symbol seedParam) {
 		IPersistentVector params = PersistentVector.EMPTY;
-
-		if(seedParam != null) params = params.cons(seedParam);
-
-		// [^T arg1 ^U arg2]
-		for(Class klass : target.getParameterTypes())
-		{
-			params = params.cons(maybeHintParam(klass, Symbol.intern("arg" + RT.nextID())));
+		if(instanceParam != null) params = params.cons(instanceParam);
+		// hinted params
+		for(Class paramClass : method.getParameterTypes()) {
+			Symbol param = Symbol.intern("arg" + RT.nextID());
+			if(Long.TYPE.equals(paramClass) || Double.TYPE.equals(paramClass) || !paramClass.isPrimitive()) {
+				param = (Symbol) param.withMeta(RT.map(Keyword.intern("tag"), Symbol.intern(paramClass.getName())));
+			}
+			params = params.cons(param);
 		}
-
-		return params;
-	}
-
-	static ISeq buildThunkBody(IPersistentVector params, Function<IPersistentVector, ISeq> callBuilder){
-		// ([^T arg] (. Klass staticMethod arg))
-		// ([^Klass self ^T arg] (. self instanceMethod arg))
-		// ([^T arg] (new Klass arg))
-		ISeq body = RT.list(params, callBuilder.apply(params));
-		return body;
-	}
-
-	static protected Symbol maybeHintParam(Class klass, Symbol name){
-		if (klass.equals(Long.TYPE) || klass.equals(Double.TYPE) || !klass.isPrimitive())
-		{
-			return (Symbol) name.withMeta(PersistentHashMap.create(Keyword.intern("tag"), Symbol.intern(klass.getName())));
+		// hint return
+		if(method instanceof java.lang.reflect.Method) {
+			Class retClass = ((java.lang.reflect.Method)method).getReturnType();
+			if (Long.TYPE.equals(retClass) || Double.TYPE.equals(retClass)) {
+				params = ((PersistentVector)params).withMeta(RT.map(Keyword.intern("tag"), coerceFns.get(retClass)));
+			}
 		}
-		return name;
+		ISeq body = callBuilder.apply(params);
+		String thunkName = "dot__" + munge(name) + RT.nextID();
+		ISeq form =	RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
+		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
 	}
 
 	static HashMap<Class, Symbol> coerceFns = new HashMap<Class, Symbol>();
@@ -1350,18 +1336,6 @@ static class MethodValueExpr implements Expr {
 		coerceFns.put(byte[].class, Symbol.intern("bytes"));
 		coerceFns.put(boolean.class, Symbol.intern("boolean"));
 		coerceFns.put(boolean[].class, Symbol.intern("booleans"));
-	}
-
-	static IPersistentVector maybeHintReturn(Executable target, PersistentVector params) {
-		if(target instanceof Constructor) return params;
-
-		Class t = ((java.lang.reflect.Method) target).getReturnType();
-
-		if (t.isPrimitive() && (t.equals(Long.TYPE) || t.equals(Double.TYPE))) {
-			return params.withMeta(PersistentHashMap.create(Keyword.intern("tag"), coerceFns.get(t)));
-		}
-
-		return params;
 	}
 
 	static protected ISeq maybeCoerceArgs(Executable target, ISeq args){
