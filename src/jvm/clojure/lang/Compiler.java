@@ -1306,12 +1306,11 @@ static class MethodValueExpr implements Expr {
 			params = params.cons(param);
 		}
 		// hint return
-		if(method instanceof java.lang.reflect.Method) {
-			Class retClass = ((java.lang.reflect.Method)method).getReturnType();
-			if (Long.TYPE.equals(retClass) || Double.TYPE.equals(retClass)) {
-				params = ((PersistentVector)params).withMeta(RT.map(Keyword.intern("tag"), coerceFns.get(retClass)));
-			}
+		Class retClass = method instanceof Constructor ? c : ((java.lang.reflect.Method)method).getReturnType();
+		if (Long.TYPE.equals(retClass) || Double.TYPE.equals(retClass) || !retClass.isPrimitive()) {
+			params = ((PersistentVector)params).withMeta(RT.map(Keyword.intern("tag"), coerceFns.get(retClass)));
 		}
+
 		ISeq body = callBuilder.apply(params);
 		String thunkName = "dot__" + munge(name) + RT.nextID();
 		ISeq form =	RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
