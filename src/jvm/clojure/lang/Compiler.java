@@ -1141,12 +1141,14 @@ static class MethodValueExpr implements Expr {
 			method = resolveHintedMethod(c, methodName, hintedSig, methods);
 		} else {
 			Executable maybeMethod = null;
-			if(methods.size() == 1) { // but only 1 method so not needed
+			if(methods.size() == 1) {
+				// but only 1 method so not needed
 				maybeMethod = methods.get(0);
 			}
 			else if(methods.size() > 1) {
 				// Must be inference at this point
-				if(methodNamesConstructor(c, methodName)) { // Inference on constructors not supported
+				if(methodNamesConstructor(c, methodName)) { 
+					// Inference on constructors not supported
 					throw new IllegalArgumentException("Multiple matches for " + methodDescription(c, methodName)
 							+ ", use param-tags to specify");
 				}
@@ -1231,12 +1233,12 @@ static class MethodValueExpr implements Expr {
 
 	@Override
 	public boolean hasJavaClass() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public Class getJavaClass() {
-		return null;
+		return AFn.class;
 	}
 
 	private static FnExpr toFnExpr(MethodValueExpr mexpr) {
@@ -1356,11 +1358,12 @@ static class MethodValueExpr implements Expr {
 
 final static Symbol PARAM_TAG_ANY = Symbol.intern(null, "_");
 
-private static IPersistentVector paramTagsOf(Object o){
-	Object paramTags = RT.get(RT.meta(o), RT.PARAM_TAGS_KEY);
+private static IPersistentVector paramTagsOf(Symbol sym){
+	Object paramTags = RT.get(RT.meta(sym), RT.PARAM_TAGS_KEY);
 
 	if(paramTags != null && !(paramTags instanceof IPersistentVector))
-		throw new IllegalArgumentException("param-tags value should be a vector, but was type " + paramTags.getClass().getName());
+		throw new IllegalArgumentException("param-tags of symbol "
+				+ sym + " should be a vector.");
 
 	return (IPersistentVector) paramTags;
 }
