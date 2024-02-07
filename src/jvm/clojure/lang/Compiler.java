@@ -1136,12 +1136,10 @@ static class MethodValueExpr implements Expr {
 		if(methods.isEmpty())
 			throw new IllegalArgumentException("Could not find " + methodDescription(c, methodName));
 
-		IPersistentVector paramTags = paramTagsOf(sym);
-		if(paramTags != null) {
-			hintedSig = tagsToClasses(paramTags);
+		hintedSig = tagsToClasses(paramTagsOf(sym));
+		if(hintedSig != null) {
 			method = resolveHintedMethod(c, methodName, hintedSig, methods);
 		} else {
-			hintedSig = null; // no param-tags
 			Executable maybeMethod = null;
 			if(methods.size() == 1) { // but only 1 method so not needed
 				maybeMethod = methods.get(0);
@@ -1369,6 +1367,8 @@ private static IPersistentVector paramTagsOf(Object o){
 
 // calls tagToClass on every element, unless it encounters _ which becomes null
 private static List<Class> tagsToClasses(IPersistentVector paramTags) {
+	if(paramTags == null) return null;
+
 	List<Class> sig = new ArrayList<>();
 	for (ISeq s = RT.seq(paramTags); s!=null; s = s.next()) {
 		Object t = s.first();
