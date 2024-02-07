@@ -1243,7 +1243,7 @@ static class MethodValueExpr implements Expr {
 			return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, null);
 		}
 	}
-	
+
 	private static boolean isHintablePrimitive(Class c) {
 		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
 	}
