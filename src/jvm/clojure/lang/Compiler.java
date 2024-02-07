@@ -1256,18 +1256,16 @@ static class MethodValueExpr implements Expr {
 			complainAboutUnresolvedOverload(mexpr.c, mexpr.methodName);
 		}
 
-		if(isInstanceMethod(mexpr.method))
-			return buildInstanceMethodThunk(mexpr.c, mexpr.method, mexpr.methodSymbol);
-		else
+		if(isInstanceMethod(mexpr.method)) {
+			IPersistentMap m = RT.map(RT.TAG_KEY, Symbol.intern(null, mexpr.c.getName()));
+			Symbol instanceParam = (Symbol) Symbol.intern(null, "this").withMeta(m);
+			return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, instanceParam);
+		}
+		else {
 			return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, null);
+		}
 	}
 	
-	static FnExpr buildInstanceMethodThunk(Class c, Executable method, Symbol methodSymbol) {
-		IPersistentMap m = RT.map(Keyword.intern("tag"), Symbol.intern(c.getName()));
-		Symbol instanceParam = (Symbol) Symbol.intern(null, "this").withMeta(m);
-		return buildThunk(c, method, methodSymbol, instanceParam);
-	}
-
 	private static boolean isHintablePrimitive(Class c) {
 		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
 	}
