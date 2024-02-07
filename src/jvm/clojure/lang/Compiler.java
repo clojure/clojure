@@ -349,7 +349,7 @@ static final public Var CLEAR_SITES = Var.create(null).setDynamic();
 
 private class Recur {};
 static final public Class RECUR_CLASS = Recur.class;
-
+    
 interface Expr{
 	Object eval() ;
 
@@ -926,7 +926,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 					else if(paramType == byte.class)
 						m = Method.getMethod("byte uncheckedByteCast(Object)");
 					else if(paramType == short.class)
-						m = Method.getMethod("short uncheckedShortCast(Object)");
+						m = Method.getMethod("short uncheckedShortCast(Object)");					
 					}
 				else
 					{
@@ -3123,7 +3123,7 @@ public static class IfExpr implements Expr, MaybePrimitiveExpr{
 		       &&
 		       (thenExpr.getJavaClass() == elseExpr.getJavaClass()
 		        || thenExpr.getJavaClass() == RECUR_CLASS
-				|| elseExpr.getJavaClass() == RECUR_CLASS
+				|| elseExpr.getJavaClass() == RECUR_CLASS		        
 		        || (thenExpr.getJavaClass() == null && !elseExpr.getJavaClass().isPrimitive())
 		        || (elseExpr.getJavaClass() == null && !thenExpr.getJavaClass().isPrimitive()));
 	}
@@ -4019,7 +4019,7 @@ static class InvokeExpr implements Expr{
 					}
 				}
 			}
-
+		
 		if (tag != null) {
 		    this.tag = tag;
 		} else if (fexpr instanceof VarExpr) {
@@ -4065,7 +4065,7 @@ static class InvokeExpr implements Expr{
 			emitArgsAndCall(0, context,objx,gen);
 			}
 		if(context == C.STATEMENT)
-			gen.pop();
+			gen.pop();		
 	}
 
 	public void emitProto(C context, ObjExpr objx, GeneratorAdapter gen){
@@ -4083,7 +4083,7 @@ static class InvokeExpr implements Expr{
 		gen.visitJumpInsn(IF_ACMPEQ, callLabel); //target
 		if(protocolOn != null)
 			{
-			gen.dup(); //target, target
+			gen.dup(); //target, target			
 			gen.instanceOf(Type.getType(protocolOn));
 			gen.ifZCmp(GeneratorAdapter.NE, onLabel);
 			}
@@ -4647,7 +4647,7 @@ static public class ObjExpr implements Expr{
 		int i = name.lastIndexOf("__");
 		return i==-1?name:name.substring(0,i);
 	}
-
+	
 
 
 	Type[] ctorTypes(){
@@ -5502,7 +5502,7 @@ static public class ObjExpr implements Expr{
                         {
 //                        System.out.println("use: " + rep);
                         }
-                    }
+                    }     
 				}
 			else
 				{
@@ -5655,7 +5655,7 @@ static class PathNode{
 static PathNode clearPathRoot(){
     return (PathNode) CLEAR_ROOT.get();
 }
-
+    
 enum PSTATE{
 	REQ, REST, DONE
 }
@@ -5794,7 +5794,7 @@ public static class FnMethod extends ObjMethod{
 						throw Util.runtimeException("& arg cannot have type hint");
 					if(state == PSTATE.REST && method.prim != null)
 						throw Util.runtimeException("fns taking primitives cannot be variadic");
-
+					                        
 					if(state == PSTATE.REST)
 						pc = ISeq.class;
 					argtypes.add(Type.getType(pc));
@@ -6278,7 +6278,7 @@ abstract public static class ObjMethod{
 
     void emitClearLocals(GeneratorAdapter gen){
     }
-
+    
 	void emitClearLocalsOld(GeneratorAdapter gen){
 		for(int i=0;i<argLocals.count();i++)
 			{
@@ -6805,7 +6805,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
                                        CLEAR_ROOT, clearroot,
                                        NO_RECUR, null,
                                        METHOD_RETURN_CONTEXT, methodReturnContext));
-
+                                                       
 							}
 						bodyExpr = (new BodyExpr.Parser()).parse(isLoop ? C.RETURN : context, body);
 						}
@@ -7187,7 +7187,7 @@ private static Expr analyze(C context, Object form, String name) {
 
 static public class CompilerException extends RuntimeException implements IExceptionInfo{
 	final public String source;
-
+	
 	final public int line;
 
 	final public Object data;
@@ -7424,8 +7424,8 @@ public static Object macroexpand1(Object x) {
 //						Symbol meth = Symbol.intern(sname.substring(idx + 1));
 //						return RT.listStar(DOT, target, meth, form.rest());
 //						}
-					//(StringBuilder. "foo") => (new StringBuilder "foo")
-					//else
+					//(StringBuilder. "foo") => (new StringBuilder "foo")	
+					//else 
 					if(idx == sname.length() - 1)
 						return RT.listStar(NEW, Symbol.intern(sname.substring(0, idx)), form.next());
 					}
@@ -7797,7 +7797,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 			return null;
 		return v;
 		}
-	else if(sym.name.indexOf('.') > 0 && !sym.name.endsWith(".")
+	else if(sym.name.indexOf('.') > 0 && !sym.name.endsWith(".") 
 			|| sym.name.charAt(0) == '[')
 		{
 		try {
@@ -8389,7 +8389,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		Map covariants = mc[1];
 		ret.mmap = overrideables;
 		ret.covariants = covariants;
-
+		
 		String[] inames = interfaceNames(interfaces);
 
 		Class stub = compileStub(slashname(superClass),ret, inames, frm);
@@ -9417,7 +9417,7 @@ public static class CaseExpr implements Expr, MaybePrimitiveExpr{
                     }
 				thens.put(minhash, thenExpr);
 				}
-
+            
             Expr defaultExpr;
             try {
                 Var.pushThreadBindings(
