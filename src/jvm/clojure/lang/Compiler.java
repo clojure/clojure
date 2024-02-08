@@ -1135,7 +1135,7 @@ static class MethodValueExpr implements Expr {
 
 		List<Executable> methods = methodsWithName(c, methodName);
 		if(methods.isEmpty())
-			throw noMatchingMethodException(c, methodName, null);
+			throw noMethodWithNameException(c, methodName);
 
 		hintedSig = tagsToClasses(paramTagsOf(sym));
 		if(hintedSig != null) {
@@ -1150,7 +1150,7 @@ static class MethodValueExpr implements Expr {
 				// Only statics supported at this point (needs inference)
 
 				if(methodNamesConstructor(c, methodName))
-					throw unresolvedOverloadException(c, methodName, null);
+					throw overloadNeedsParamTagsException(c, methodName);
 
 				// Filter out instance methods (no inference allowed)
 				List<Executable> staticMethods = methods.stream()
@@ -1159,7 +1159,7 @@ static class MethodValueExpr implements Expr {
 				if(staticMethods.size() == 1)
 					maybeMethod = staticMethods.get(0);
 				else if(staticMethods.isEmpty())
-					throw unresolvedOverloadException(c, methodName, null);
+					throw overloadNeedsParamTagsException(c, methodName);
 				// else not resolved, static method w/inference
 			}
 			method = maybeMethod;
@@ -1176,10 +1176,8 @@ static class MethodValueExpr implements Expr {
 
 		if(filteredMethods.size() == 1)
 			return filteredMethods.get(0);
-		else if(filteredMethods.size() == 0)
-			throw noMatchingMethodException(c, methodName, hintedSig);
 		else
-			throw unresolvedOverloadException(c, methodName, hintedSig);
+			throw paramTagsDontResolveException(c, methodName, hintedSig, filteredMethods.size());
 	}
 
 	private static boolean methodNamesConstructor(Class c, String methodName) {
@@ -1231,7 +1229,7 @@ static class MethodValueExpr implements Expr {
 		// If not resolved by this point we were not given param-tags
 		// and named method was overloaded.
 		if(!mexpr.isResolved()) {
-			throw unresolvedOverloadException(mexpr.c, mexpr.methodName, null);
+			throw overloadNeedsParamTagsException(mexpr.c, mexpr.methodName);
 		}
 
 		if(isInstanceMethod(mexpr.method)) {
@@ -1302,16 +1300,22 @@ static class MethodValueExpr implements Expr {
 				.collect(Collectors.toList()));
 	}
 
-	static IllegalArgumentException noMatchingMethodException(Class c, String methodName, List<Class> hintedSig) {
+	static IllegalArgumentException noMethodWithNameException(Class c, String methodName) {
 		return new IllegalArgumentException("Could not find "
-				+ methodDescription(c, methodName)
-				+ (hintedSig != null ? " with param-tags " + toParamTags(hintedSig) : ""));
+				+ methodDescription(c, methodName));
 	}
 
-	static IllegalArgumentException unresolvedOverloadException(Class c, String methodName, List<Class> hintedSig) {
+	static IllegalArgumentException overloadNeedsParamTagsException(Class c, String methodName) {
 		return new IllegalArgumentException("Multiple matches for "
 				+ methodDescription(c, methodName)
-				+ (hintedSig != null ? " with param-tags " + toParamTags(hintedSig) : ", use param-tags to specify"));
+				+ ", use param-tags to specify");
+	}
+
+	static IllegalArgumentException paramTagsDontResolveException(Class c, String methodName, List<Class> hintedSig, int found) {
+		return new IllegalArgumentException("Expected to find 1 matching signature for "
+				+ methodDescription(c, methodName)
+				+ " but found " + found
+				+ " with param-tags " + toParamTags(hintedSig));
 	}
 }
 
