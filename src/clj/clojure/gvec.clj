@@ -87,7 +87,7 @@
       (.chunkedNext this)))
   (more [this]
     (let [s (.next this)]
-      (or s (clojure.lang.PersistentList/EMPTY))))
+      (or s clojure.lang.PersistentList/EMPTY)))
   (cons [this o]
     (clojure.lang.Cons. o this))
   (count [this]
@@ -124,7 +124,7 @@
        (new VecSeq am vec (.arrayFor vec nexti) nexti 0 nil))))
   (chunkedMore [this]
     (let [s (.chunkedNext this)]
-      (or s (clojure.lang.PersistentList/EMPTY))))
+      (or s clojure.lang.PersistentList/EMPTY)))
 
   clojure.lang.IMeta
   (meta [_]

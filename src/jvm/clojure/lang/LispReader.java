@@ -956,8 +956,10 @@ public static class MetaReader extends AFn{
 			meta = RT.map(RT.TAG_KEY, meta);
 		else if (meta instanceof Keyword)
 			meta = RT.map(meta, RT.T);
+		else if (meta instanceof IPersistentVector)
+			meta = RT.map(RT.PARAM_TAGS_KEY, meta);
 		else if(!(meta instanceof IPersistentMap))
-			throw new IllegalArgumentException("Metadata must be Symbol,Keyword,String or Map");
+			throw new IllegalArgumentException("Metadata must be Symbol,Keyword,String,Vector or Map");
 
 		Object o = read(r, true, null, true, opts, pendingForms);
 		if(o instanceof IMeta)
