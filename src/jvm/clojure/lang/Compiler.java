@@ -1262,8 +1262,8 @@ static class MethodValueExpr implements Expr {
 
 	// All buildThunk methods currently return a new FnExpr on every call
 	// TBD: caching/reuse of thunks
-	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Symbol instanceParam, Symbol primHintedRt) {
-		// (fn invoke__Class_meth (^primHintedRt [this? primHintedArgs*] (methodSymbol this? primHintedArgs*)))
+	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Symbol instanceParam, Symbol retHint) {
+		// (fn invoke__Class_meth (^retHint? [this? primHintedArgs*] (methodSymbol this? primHintedArgs*)))
 		IPersistentVector params = PersistentVector.EMPTY;
 		if(instanceParam != null) params = params.cons(instanceParam);
 		// hinted params
@@ -1276,8 +1276,8 @@ static class MethodValueExpr implements Expr {
 			params = params.cons(param);
 		}
 		// hint return
-		params = (primHintedRt == null) ? params 
-				: ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, primHintedRt));
+		params = (retHint == null) ? params 
+				: ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, retHint));
 
 		ISeq body = RT.listStar(methodSymbol, params.seq());
 		String thunkName = "invoke__" + c.getSimpleName() + "_" + methodSymbol.name;
