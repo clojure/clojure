@@ -1232,8 +1232,17 @@ static class MethodValueExpr implements Expr {
 			throw overloadNeedsParamTagsException(mexpr.c, mexpr.methodName);
 		}
 
+		// return hint symbol
+		Symbol retTag = null;
+		Class retClass = mexpr.method instanceof Constructor ? mexpr.c 
+				: ((java.lang.reflect.Method)mexpr.method).getReturnType();
+		if (isHintablePrimitive(retClass) || !retClass.isPrimitive()) {
+			retTag = primTag(retClass);
+			retTag = (retTag != null) ? retTag : Symbol.intern(null, retClass.getName());
+		}
+
 		return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, 
-				isInstanceMethod(mexpr.method) ? THIS : null);
+				isInstanceMethod(mexpr.method) ? THIS : null, retTag);
 	}
 
 	private static boolean isHintablePrimitive(Class c) {
@@ -1253,10 +1262,8 @@ static class MethodValueExpr implements Expr {
 
 	// All buildThunk methods currently return a new FnExpr on every call
 	// TBD: caching/reuse of thunks
-	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Symbol instanceParam) {
-		// (fn invoke__new42 (^AClass [arg1] (^[T] AClass/new arg1)))
-		// (fn invoke__staticMethod42 (^r [arg1] (^[T] AClass/staticMethod arg)))
-		// (fn invoke__instanceMethod42 (^r [this arg1] (^[T] AClass/instanceMethod this arg1)))
+	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Symbol instanceParam, Symbol primHintedRt) {
+		// (fn invoke__Class_meth (^primHintedRt [this? primHintedArgs*] (methodSymbol this? primHintedArgs*)))
 		IPersistentVector params = PersistentVector.EMPTY;
 		if(instanceParam != null) params = params.cons(instanceParam);
 		// hinted params
@@ -1269,15 +1276,11 @@ static class MethodValueExpr implements Expr {
 			params = params.cons(param);
 		}
 		// hint return
-		Class retClass = method instanceof Constructor ? c : ((java.lang.reflect.Method)method).getReturnType();
-		if (isHintablePrimitive(retClass) || !retClass.isPrimitive()) {
-			Symbol retTag = primTag(retClass);
-			retTag = (retTag != null) ? retTag : Symbol.intern(null, retClass.getName());
-			params = ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, retTag));
-		}
+		params = (primHintedRt == null) ? params 
+				: ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, primHintedRt));
 
 		ISeq body = RT.listStar(methodSymbol, params.seq());
-		String thunkName = "invoke__" + munge(methodSymbol.name) + RT.nextID();
+		String thunkName = "invoke__" + c.getSimpleName() + "_" + methodSymbol.name;
 		ISeq form = RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
 		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
 	}
