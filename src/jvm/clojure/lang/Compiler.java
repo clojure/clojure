@@ -1232,14 +1232,8 @@ static class MethodValueExpr implements Expr {
 			throw overloadNeedsParamTagsException(mexpr.c, mexpr.methodName);
 		}
 
-		if(isInstanceMethod(mexpr.method)) {
-			IPersistentMap m = RT.map(RT.TAG_KEY, Symbol.intern(null, mexpr.c.getName()));
-			Symbol instanceParam = (Symbol) Symbol.intern(null, "this").withMeta(m);
-			return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, instanceParam);
-		}
-		else {
-			return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, null);
-		}
+		return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, 
+				isInstanceMethod(mexpr.method) ? THIS : null);
 	}
 
 	private static boolean isHintablePrimitive(Class c) {
