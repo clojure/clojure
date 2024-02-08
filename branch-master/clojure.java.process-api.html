@@ -64,9 +64,6 @@ namespace.
   </div><div class="toc-section" style="margin-left: 1em;">
     <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
     <div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.java.process/capture" class="toc-entry-anchor">capture</a>
-      
-    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.java.process/exec" class="toc-entry-anchor">exec</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
@@ -103,10 +100,9 @@ streams as directed. It returns a map that contains keys to access the streams
 (if available) and the Java Process object. It is also deref-able to wait for
 process exit.
 
-Helper functions are available to 'capture' the output of the process stdout
-and to wait for an 'ok?' non-error exit. The 'exec' function handles the common
-case of `start'ing a process, waiting for process exit, capture and return
-stdout.</pre>
+Use ‘slurp' to capture the output of a process stream, and 'ok?’ to wait for a
+non-error exit. The 'exec' function handles the common case of `start'ing a
+process, waiting for process exit, slurp, and return stdout.</pre>
 
 
 <br />
@@ -119,19 +115,6 @@ stdout.</pre>
   <div id="var-entry">
     <br />
     <hr />
-    <h2 id="clojure.java.process/capture">capture</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (capture input-stream &amp; opts)
-</pre>
-    <pre id="var-docstr">Read from input-stream until EOF and return a String (or nil if 0 length).
-Takes same opts as clojure.java.io/copy - :buffer-size and :encoding</pre>
-    <pre id="var-specs"></pre>
-    <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L118">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
     <h2 id="clojure.java.process/exec">exec</h2>
     <span id="var-type">function</span><br />
     <pre id="var-usage">Usage: (exec &amp; opts+args)
@@ -142,7 +125,7 @@ if supplied override the default 'exec' settings.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L163">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/aa2c637f9512d14bd78ee30d6d030bba6d095e7d/src/clj/clojure/java/process.clj#L157">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -155,7 +138,7 @@ This can be passed to 'start' in :in.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L51">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/aa2c637f9512d14bd78ee30d6d030bba6d095e7d/src/clj/clojure/java/process.clj#L50">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -168,7 +151,7 @@ and then return true on success</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L111">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/aa2c637f9512d14bd78ee30d6d030bba6d095e7d/src/clj/clojure/java/process.clj#L116">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -176,13 +159,17 @@ and then return true on success</pre>
     <span id="var-type">function</span><br />
     <pre id="var-usage">Usage: (start &amp; opts+args)
 </pre>
-    <pre id="var-docstr">Starts an external command as args and optional leading opts map:
+    <pre id="var-docstr">Start an external command, defined in args.
+The process environment vars are inherited from the parent by
+default (use :clear-env to clear them).
 
+If needed, provide options in map as first arg:
   :in - a ProcessBuilder.Redirect (default = :pipe) or :inherit
   :out - a ProcessBuilder.Redirect (default = :pipe) or :inherit :discard
   :err - a ProcessBuilder.Redirect (default = :pipe) or :inherit :discard :stdout
-  :dir - directory to run the command from, default="."
-  :env - {env-var value} of environment variables (all strings)
+  :dir - current directory when the process runs (default=".")
+  :clear-env - if true, remove all inherited parent env vars
+  :env - {env-var value} of environment variables to set (all strings)
 
 Returns an ILookup containing the java.lang.Process in :process and the
 streams :in :out :err. The map is also an IDeref that waits for process exit
@@ -190,7 +177,7 @@ and returns the exit code.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L58">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/aa2c637f9512d14bd78ee30d6d030bba6d095e7d/src/clj/clojure/java/process.clj#L57">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -203,7 +190,7 @@ Set ':append' in opts to append. This can be passed to 'start' in :out or :err.<
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/5d81bb40dc3c48340c461b0d85c7363831140e24/src/clj/clojure/java/process.clj#L41">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/aa2c637f9512d14bd78ee30d6d030bba6d095e7d/src/clj/clojure/java/process.clj#L40">Source</a>
   </div>
 </div>
 
