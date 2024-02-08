@@ -34,11 +34,14 @@
         command-strs [command (str "-T" (or tool-alias tool-name)) "-"]
         _ (when (:debug opts) (apply println "Invoking: " command-strs))
         {:keys [in out]} (apply proc/start command-strs)]
-    (proc/io-task
-      #(with-open [w (jio/writer in)]
-         (doseq [a args]
-           (.write w (pr-str a))
-           (.write w " "))))
+    (binding [*print-length* nil
+              *print-level*  nil
+              *print-namespace-maps* false]
+      (proc/io-task
+        #(with-open [w (jio/writer in)]
+           (doseq [a args]
+             (.write w (pr-str a))
+             (.write w " ")))))
     (let [envelope (edn/read-string (slurp out))]
       (if preserve-envelope
         envelope
