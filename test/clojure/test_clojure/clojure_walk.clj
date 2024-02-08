@@ -63,14 +63,3 @@
   (let [coll [:html {:a ["b" 1]} ""]
         f (fn [e] (if (and (vector? e) (not (map-entry? e))) (apply list e) e))]
     (is (= (list :html {:a (list "b" 1)} "") (w/postwalk f coll)))))
-
-(defrecord RM [a])
-(deftest retain-meta
-  (let [m {:foo true}]
-    (are [o] (= m (meta (w/postwalk identity (with-meta o m))))
-      '(1 2)
-      [1 2]
-      #{1 2}
-      {1 2}
-      (map inc (range 3))
-      (->RM 1))))
