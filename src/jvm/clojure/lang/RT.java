@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-import java.net.*;
+import java.net.MalformedURLException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.Callable;
 import java.util.*;
@@ -20,12 +20,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.*;
 import java.lang.reflect.Array;
-import java.lang.IllegalArgumentException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.net.URL;
+import java.net.JarURLConnection;
 import java.nio.charset.Charset;
+import java.net.URLConnection;
 
 public class RT{
 
@@ -291,16 +293,8 @@ private static final class DefaultComparator implements Comparator, Serializable
 
 static AtomicInteger id = new AtomicInteger(1);
 
-static public URL toUrl(String url) throws URISyntaxException, MalformedURLException {
-	return new URI(url).toURL();
-}
-
-static public URL toUrl(File file) throws MalformedURLException {
-	return file.toURI().toURL();
-}
-
-static public void addURL(Object url) throws MalformedURLException, URISyntaxException, IllegalArgumentException {
-	URL u = (url instanceof String) ? toUrl((String) url) : (URL) url;
+static public void addURL(Object url) throws MalformedURLException{
+	URL u = (url instanceof String) ? (new URL((String) url)) : (URL) url;
 	ClassLoader ccl = Thread.currentThread().getContextClassLoader();
 	if(ccl instanceof DynamicClassLoader)
 		((DynamicClassLoader)ccl).addURL(u);
