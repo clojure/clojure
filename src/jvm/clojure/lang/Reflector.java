@@ -19,7 +19,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 public class Reflector{
@@ -367,7 +369,7 @@ public static Object setStaticField(Class c, String fieldName, Object val) {
 		{
 		try
 			{
-			f.set(null, boxArg(f.getType(), val));
+			f.set(null, boxArg(f.getType(), val, false));
 			}
 		catch(IllegalAccessException e)
 			{
@@ -404,7 +406,7 @@ public static Object setInstanceField(Object target, String fieldName, Object va
 		{
 		try
 			{
-			f.set(target, boxArg(f.getType(), val));
+			f.set(target, boxArg(f.getType(), val, false));
 			}
 		catch(IllegalAccessException e)
 			{
@@ -467,7 +469,7 @@ public static Object invokeInstanceMember(String name, Object target, Object arg
 		{
 		try
 			{
-			f.set(target, boxArg(f.getType(), arg1));
+			f.set(target, boxArg(f.getType(), arg1, false));
 			}
 		catch(IllegalAccessException e)
 			{
@@ -546,10 +548,74 @@ static public List<Method> getMethods(Class c, int arity, String name, boolean g
 	return methods;
 }
 
+// Adaptable functional nterface has @FunctionalInterface annotation
+// but excludes Runnable, Callable, Comparator because Clojure IFn/AFn already
+// extend those, so no adapting needed
+public static boolean isAdaptableFunctionalInterface(Class c){
+       return c != null &&
+                       c.isInterface() &&
+                       c.isAnnotationPresent(FunctionalInterface.class) &&
+                       c != Runnable.class && c != Callable.class && c != Comparator.class;
+}
 
-static Object boxArg(Class paramType, Object arg){
+// These return type coercions match the coercions done in FnAdapters for compiled adapters
+private static Object dynamicAdapterReturn(Object ret, Class targetType) {
+       switch(targetType.getName()) {
+               case "boolean": return RT.booleanCast(ret);
+               case "int": return RT.intCast(ret);
+               case "long": return RT.longCast(ret);
+               case "float": return RT.floatCast(ret);
+               case "double": return RT.doubleCast(ret);
+               default: return ret;
+       }
+}
+
+// Dynamically adapt fn to targetFnInterface using proxy
+private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
+       return Proxy.newProxyInstance(
+                       (ClassLoader)Compiler.LOADER.get(),
+                       new Class[] { targetFnInterface },
+                       (proxy,method,methodArgs)-> {
+                               if (fn instanceof IFn) {
+                                       Object ret = ((IFn) fn).applyTo(RT.seq(methodArgs));
+                                       return dynamicAdapterReturn(ret, method.getReturnType());
+                               } else {
+                                       throw new IllegalArgumentException("Expected function, but found " + (proxy == null ? "null" : proxy.getClass().getName()));
+                               }
+                       });
+}
+
+// Dynamically adapt Method reference
+private static Object dynamicAdapt(Class targetFnInterface, java.lang.reflect.Method srcMethod) {
+       return Proxy.newProxyInstance(
+                       (ClassLoader)Compiler.LOADER.get(),
+                       new Class[] { targetFnInterface },
+                       (proxy,method,methodArgs)-> {
+                               Object ret;
+                               if(Modifier.isStatic(method.getModifiers())) {
+                                       ret = srcMethod.invoke(null, methodArgs);
+                               } else {
+                                       Object obj = methodArgs[0];
+                                       Object[] restArgs = new Object[methodArgs.length-1];
+                                       System.arraycopy(methodArgs, 1, restArgs, 0, restArgs.length);
+                                       ret = srcMethod.invoke(obj, restArgs);
+                               }
+                               return dynamicAdapterReturn(ret, method.getReturnType());
+                       });
+}
+
+// deprecated
+static Object boxArg(Class paramType, Object arg) {
+       return boxArg(paramType, arg, true);
+}
+
+static Object boxArg(Class paramType, Object arg, boolean adaptFunctionalInterfaces){
 	if(!paramType.isPrimitive())
-		return paramType.cast(arg);
+		if(adaptFunctionalInterfaces && isAdaptableFunctionalInterface(paramType) && !(paramType.isInstance(arg))) {
+			return dynamicAdapt(paramType, arg);
+		} else {
+			return paramType.cast(arg);
+		}
 	else if(paramType == boolean.class)
 		return Boolean.class.cast(arg);
 	else if(paramType == char.class)
@@ -582,7 +648,7 @@ static Object[] boxArgs(Class[] params, Object[] args){
 		{
 		Object arg = args[i];
 		Class paramType = params[i];
-		ret[i] = boxArg(paramType, arg);
+		ret[i] = boxArg(paramType, arg, true);
 		}
 	return ret;
 }
