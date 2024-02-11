@@ -1736,12 +1736,13 @@ private static char encodeAdapterReturn(Class c) {
 /**
  * Given a target functional interface class, and an ASM generator with an
  * expr on the stack (either an instance of fnIfaceClass or an IFn), find the
- * SAM method in fnIfaceClass and a matching adapter method A in FnAdapters
- * and call emitInvokeDynamicAdapter(GeneratorAdapter, M, A).
+ * SAM method in fnIfaceClass and a matching adapter method A (name is based
+ * on a fixed set of supported types) in FnAdapters and call
+ * emitInvokeDynamicAdapter(GeneratorAdapter, M, A).
  *
  * @param gen ASM code generator
  * @param fnIfaceClass a FunctionalInterface class with method M(arg1, ...)
- * @return false if no adapter method was found, caller should handle
+ * @return false if no adapter method was found and caller should handle
  */
 private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIfaceClass) {
     java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fnIfaceClass);
@@ -1769,30 +1770,14 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIface
     java.lang.reflect.Method adapterMethod = null;
     try {
         adapterMethod = FnAdapters.class.getMethod(adapterMethodName, adapterParams);
+		emitInvokeDynamicAdapter(gen, targetMethod, adapterMethod);
+		gen.checkCast(Type.getType(fnIfaceClass));
+		return true;
+
     } catch(NoSuchMethodException e) {
+		// this should be rare, but we are using a finite set of generated adapter methods
         return false;
     }
-
-    // emit... if(! (exp instanceof FIType)) { adapt... }
-    gen.dup();
-    Type samType = Type.getType(fnIfaceClass);
-    gen.instanceOf(samType);
-
-    // if so, checkcast and go to end
-    Label adapterLabel = gen.newLabel();
-    gen.ifZCmp(Opcodes.IFEQ, adapterLabel);
-    gen.checkCast(samType);
-    Label endLabel = gen.newLabel();
-    gen.goTo(endLabel);
-
-    // if not, insert lambda adapter
-    gen.mark(adapterLabel);
-
-    // adapt adapter method to target method, closing over IFn instance
-    emitInvokeDynamicAdapter(gen, targetMethod, adapterMethod);
-    gen.mark(endLabel);
-
-    return true; // successfully emitted adapter
 }
 
 // LambdaMetafactory.metafactory() method handle - lambda bootstrap
