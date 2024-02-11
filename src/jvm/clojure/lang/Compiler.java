@@ -1795,6 +1795,14 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIface
     return true; // successfully emitted adapter
 }
 
+// LambdaMetafactory.metafactory() method handle - lambda bootstrap
+private static final Handle LMF_HANDLE =
+	new Handle(Opcodes.H_INVOKESTATIC,
+			   "java/lang/invoke/LambdaMetafactory",
+			   "metafactory",
+			   "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
+			   false);
+
 /**
  * Emit an invokedynamic to adapt an implMethod to act as a targetMethod.
  *
@@ -1804,52 +1812,33 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIface
  * The implMethod may close over objects on the stack - these are passed as the initial arguments
  * to implMethod. The trailing arguments must match the targetMethod arguments.
  *
- * @param gen ASM code generator
+ * @param gen ASM code generator, expects any closed-overs to be on the stack already
  * @param targetMethod The target method
- * @param implMethod The method that will be adapted
+ * @param implMethod The method that will be adapted, takes closed-overs + args of targetMethod
  */
 private static void emitInvokeDynamicAdapter(
-		GeneratorAdapter gen, java.lang.reflect.Method targetMethod, java.lang.reflect.Method implMethod) {
-    // Target method
-    Class targetClass = targetMethod.getDeclaringClass();
-    String targetMethodName = targetMethod.getName();
-    Class[] targetParamTypes = targetMethod.getParameterTypes();
-    MethodType targetSig = MethodType.methodType(targetMethod.getReturnType(), targetParamTypes);
-    String targetDescriptor = targetSig.toMethodDescriptorString();
+	GeneratorAdapter gen, java.lang.reflect.Method targetMethod, java.lang.reflect.Method implMethod) {
 
-    // Implementing method - takes closed overs + args
-	String implClassName = Type.getInternalName(implMethod.getDeclaringClass());
+	Type targetType = Type.getType(targetMethod);
+
+    // Implementing method - takes closed overs (on stack now) + args (when called)
 	Class[] implParams = implMethod.getParameterTypes();
+	Handle implHandle = new Handle(Opcodes.H_INVOKESTATIC,
+			Type.getInternalName(implMethod.getDeclaringClass()),
+			implMethod.getName(),
+			MethodType.methodType(implMethod.getReturnType(), implParams).toMethodDescriptorString(),
+			false);
 
-    List adapterParams = new ArrayList();
-	int closedOvers = implParams.length - targetParamTypes.length;
-	for(int i=0; i<closedOvers; i++) {
-		adapterParams.add(implParams[i]);
-	}
-    for (int i = 0; i < targetMethod.getParameterCount(); i++) {
-        char paramCode = encodeAdapterParam(targetParamTypes[i]);
-        adapterParams.add(decodeToClass(paramCode));
-    }
-    char adapterReturnCode = encodeAdapterReturn(targetSig.returnType());
-    Class adapterReturnType = decodeToClass(adapterReturnCode);
-    String adapterDescriptor = MethodType.methodType(adapterReturnType, adapterParams).toMethodDescriptorString();
+	// Adapter interface (if it was a lambda, this would be its interface):
+	//   FI adapt(closedOver*)
+	List lambdaParams = Arrays.asList(Arrays.copyOfRange(implParams, 0, implParams.length - targetMethod.getParameterCount()));
+	MethodType lambdaSig = MethodType.methodType(targetMethod.getDeclaringClass(), lambdaParams);
 
-	// Adapter interface: SAM adapt(closedOvers)
-	MethodType adapterSig = MethodType.methodType(targetClass, adapterParams.subList(0, closedOvers));
-
-	// invokedynamic calls the LambdaMetaFactory as a bootstrap method (like Java lambda)
     gen.visitInvokeDynamicInsn(
-        targetMethodName,
-	    adapterSig.toMethodDescriptorString(),  // adapter signature, closedOvers -> Target
-        new Handle(Opcodes.H_INVOKESTATIC,
-                   "java/lang/invoke/LambdaMetafactory",
-                   "metafactory",
-                   "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
-                   false),
-        new Object[]{Type.getType(targetDescriptor),
-                   new Handle(Opcodes.H_INVOKESTATIC, implClassName, implMethod.getName(), adapterDescriptor, false),
-                   Type.getType(targetDescriptor)});
-    gen.visitTypeInsn(CHECKCAST, Type.getType(targetClass).getInternalName());
+		targetMethod.getName(),
+		lambdaSig.toMethodDescriptorString(),  // adapter signature, closedOvers -> Target
+		LMF_HANDLE,  // bootstrap method handle: LambdaMetaFactory.metafactory()
+        new Object[]{targetType, implHandle, targetType}); // arg types of bootstrap method
 }
 
 static Class maybeJavaClass(Collection<Expr> exprs){
