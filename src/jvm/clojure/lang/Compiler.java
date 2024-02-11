@@ -1802,16 +1802,19 @@ private static final Handle LMF_HANDLE =
  * @param implMethod The method that will be adapted, takes closed-overs + args of targetMethod
  */
 private static void emitInvokeDynamicAdapter(
-	GeneratorAdapter gen, java.lang.reflect.Method targetMethod, java.lang.reflect.Method implMethod) {
+	GeneratorAdapter gen, java.lang.reflect.Method targetMethod, Executable implMethod) {
 
 	Type targetType = Type.getType(targetMethod);
 
     // Implementing method - takes closed overs (on stack now) + args (when called)
 	Class[] implParams = implMethod.getParameterTypes();
+	Class retClass = implMethod instanceof Constructor
+			? implMethod.getDeclaringClass()
+			: ((java.lang.reflect.Method)implMethod).getReturnType();
 	Handle implHandle = new Handle(Opcodes.H_INVOKESTATIC,
 			Type.getInternalName(implMethod.getDeclaringClass()),
 			implMethod.getName(),
-			MethodType.methodType(implMethod.getReturnType(), implParams).toMethodDescriptorString(),
+			MethodType.methodType(retClass, implParams).toMethodDescriptorString(),
 			false);
 
 	// Adapter interface (if it was a lambda, this would be its interface):
@@ -1908,21 +1911,19 @@ static abstract class MethodExpr extends HostExpr{
 				else
 					{
 					Class exprClass = e.hasJavaClass() ? e.getJavaClass() : null;
-					// TODO: when MethodValueExpr exists
-					//                                     if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]) && (e instanceof MethodValueExpr))
-					//                                             {
-					//                                             java.lang.reflect.Method methodValue = null;  // TODO
-					//                                             emitInvokeDynamicAdapter(gen, parameterTypes[i], methodValue, null);
-					//                                             }
-					//
-					//                                     else
                     if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
                     	{
-					    e.emit(C.EXPRESSION, objx, gen);
-						boolean adapted = emitFunctionalAdapter(gen, parameterTypes[i]);
-
-						if(!adapted) // No adapter method available, up to user
-							gen.checkCast(Type.getType(parameterTypes[i]));
+						if(e instanceof MethodValueExpr)
+							{
+							// don't emit e, just adapt the underlying method!
+							emitInvokeDynamicAdapter(gen, getAdaptableSAMMethod(parameterTypes[i]), ((MethodValueExpr) e).method);
+							}
+						else
+							{
+							e.emit(C.EXPRESSION, objx, gen);
+							emitFunctionalAdapter(gen, parameterTypes[i]);
+							}
+						gen.checkCast(Type.getType(parameterTypes[i]));
 						}
 					else
 						{
