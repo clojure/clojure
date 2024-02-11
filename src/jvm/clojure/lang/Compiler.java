@@ -1920,6 +1920,9 @@ static abstract class MethodExpr extends HostExpr{
                     	{
 					    e.emit(C.EXPRESSION, objx, gen);
 						boolean adapted = emitFunctionalAdapter(gen, parameterTypes[i]);
+
+						if(!adapted) // No adapter method available, up to user
+							gen.checkCast(Type.getType(parameterTypes[i]));
 						}
 					else
 						{

@@ -800,7 +800,7 @@
 
 (deftest eval-in-place-as-java-fn
 
-  (def stream (java.util.stream.Stream/generate (constantly 42)))
+  (def stream (java.util.stream.Stream/generate (atom 42)))
   (is (instance? java.util.stream.Stream stream))
 
   (def filtered-list (.removeIf (java.util.ArrayList. [1 2 3 4 5]) even?))
