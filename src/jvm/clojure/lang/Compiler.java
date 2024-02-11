@@ -1736,9 +1736,8 @@ private static char encodeAdapterReturn(Class c) {
 /**
  * Given a target functional interface class, and an ASM generator with an
  * expr on the stack (either an instance of fnIfaceClass or an IFn), find the
- * SAM method in fnIfaceClass and a matching adapter method A in FnAdapters.
- *
- * Call emitInvokeDynamicAdapter(GeneratorAdapter, M, A, [IFn.class])
+ * SAM method in fnIfaceClass and a matching adapter method A in FnAdapters
+ * and call emitInvokeDynamicAdapter(GeneratorAdapter, M, A).
  *
  * @param gen ASM code generator
  * @param fnIfaceClass a FunctionalInterface class with method M(arg1, ...)
@@ -1790,7 +1789,7 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIface
     gen.mark(adapterLabel);
 
     // adapt adapter method to target method, closing over IFn instance
-    emitInvokeDynamicAdapter(gen, targetMethod, adapterMethod, new Class[] {Object.class});
+    emitInvokeDynamicAdapter(gen, targetMethod, adapterMethod);
     gen.mark(endLabel);
 
     return true; // successfully emitted adapter
@@ -1799,40 +1798,34 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIface
 /**
  * Emit an invokedynamic to adapt an implMethod to act as a targetMethod.
  *
- * targetMethod may be a static method, a constructor, or an instance method. If it is an
- * instance method, the first argument of the targetFI method will be used as
- * the instance for invocation.
+ * implMethod may be a static method, a constructor, or an instance method. If it is an
+ * instance method, the first argument is the invocation instance.
  *
- * The implMethod may make use of available closed over objects on the stack, whose types
- * should be specified in closedOvers and will be passed as the initial arguments.
- *
- * The params of implMethod should match the closedOver params + the targetMethod params.
+ * The implMethod may close over objects on the stack - these are passed as the initial arguments
+ * to implMethod. The trailing arguments must match the targetMethod arguments.
  *
  * @param gen ASM code generator
  * @param targetMethod The target method
  * @param implMethod The method that will be adapted
- * @param closedOvers The closed over instance types that will be passed to implMethod (may be null)
  */
-private static void emitInvokeDynamicAdapter(GeneratorAdapter gen, java.lang.reflect.Method targetMethod,
-											 java.lang.reflect.Method implMethod, Class[] closedOvers) {
-    //
-    Class targetFI = targetMethod.getDeclaringClass();
+private static void emitInvokeDynamicAdapter(
+		GeneratorAdapter gen, java.lang.reflect.Method targetMethod, java.lang.reflect.Method implMethod) {
+    // Target method
+    Class targetClass = targetMethod.getDeclaringClass();
     String targetMethodName = targetMethod.getName();
     Class[] targetParamTypes = targetMethod.getParameterTypes();
     MethodType targetSig = MethodType.methodType(targetMethod.getReturnType(), targetParamTypes);
     String targetDescriptor = targetSig.toMethodDescriptorString();
 
-	// Impl
-    String implClassName = Type.getInternalName(implMethod.getDeclaringClass());
-
-	// Adapter interface: SAM adapt(closedOvers)
-    MethodType adapterSig = MethodType.methodType(targetMethod.getDeclaringClass(), closedOvers);
-
     // Implementing method - takes closed overs + args
+	String implClassName = Type.getInternalName(implMethod.getDeclaringClass());
+	Class[] implParams = implMethod.getParameterTypes();
+
     List adapterParams = new ArrayList();
-    if(closedOvers != null) {
-        adapterParams.addAll(Arrays.asList(closedOvers));
-    }
+	int closedOvers = implParams.length - targetParamTypes.length;
+	for(int i=0; i<closedOvers; i++) {
+		adapterParams.add(implParams[i]);
+	}
     for (int i = 0; i < targetMethod.getParameterCount(); i++) {
         char paramCode = encodeAdapterParam(targetParamTypes[i]);
         adapterParams.add(decodeToClass(paramCode));
@@ -1841,7 +1834,10 @@ private static void emitInvokeDynamicAdapter(GeneratorAdapter gen, java.lang.ref
     Class adapterReturnType = decodeToClass(adapterReturnCode);
     String adapterDescriptor = MethodType.methodType(adapterReturnType, adapterParams).toMethodDescriptorString();
 
-    // invokedynamic calls the LambdaMetaFactory as a bootstrap method (like Java lambda)
+	// Adapter interface: SAM adapt(closedOvers)
+	MethodType adapterSig = MethodType.methodType(targetClass, adapterParams.subList(0, closedOvers));
+
+	// invokedynamic calls the LambdaMetaFactory as a bootstrap method (like Java lambda)
     gen.visitInvokeDynamicInsn(
         targetMethodName,
 	    adapterSig.toMethodDescriptorString(),  // adapter signature, closedOvers -> Target
@@ -1853,7 +1849,7 @@ private static void emitInvokeDynamicAdapter(GeneratorAdapter gen, java.lang.ref
         new Object[]{Type.getType(targetDescriptor),
                    new Handle(Opcodes.H_INVOKESTATIC, implClassName, implMethod.getName(), adapterDescriptor, false),
                    Type.getType(targetDescriptor)});
-    gen.visitTypeInsn(CHECKCAST, Type.getType(targetFI).getInternalName());
+    gen.visitTypeInsn(CHECKCAST, Type.getType(targetClass).getInternalName());
 }
 
 static Class maybeJavaClass(Collection<Expr> exprs){
