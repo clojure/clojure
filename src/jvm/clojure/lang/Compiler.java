@@ -1679,58 +1679,52 @@ static Class maybePrimitiveType(Expr e){
 	return null;
 }
 
-// (let [^FI lb e] ...)
-private static boolean isAdaptableFunctionExpression(Class target, Expr e){
-       return Reflector.isAdaptableFunctionalInterface(target) &&
-                       !(e.hasJavaClass() && target.isAssignableFrom(e.getJavaClass()));
-}
-
 private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString", "hashCode");
 
 // The SAM method (there must be one) is abstract,
 // and not an override from Object of equals, toString, or hashCode
 private static java.lang.reflect.Method getAdaptableSAMMethod(Class target) {
-       if(Reflector.isAdaptableFunctionalInterface(target)) {
-               java.lang.reflect.Method[] methods = target.getMethods();
-               for (int i = 0; i < methods.length; i++)
-                       if (Modifier.isAbstract(methods[i].getModifiers()) && !OBJECT_METHODS.contains(methods[i].getName()))
-                               return methods[i];
-       }
-       return null;
+	if(Reflector.isAdaptableFunctionalInterface(target)) {
+		java.lang.reflect.Method[] methods = target.getMethods();
+		for (int i = 0; i < methods.length; i++)
+			if (Modifier.isAbstract(methods[i].getModifiers()) && !OBJECT_METHODS.contains(methods[i].getName()))
+				return methods[i];
+	}
+	return null;
 }
 
 private static Class decodeToClass(char c) {
-       switch(c) {
-               case 'L': return Long.TYPE;
-               case 'D': return Double.TYPE;
-               case 'B': return Boolean.TYPE;
-               case 'F': return Float.TYPE;
-               case 'I': return Integer.TYPE;
-               default: return Object.class;
-       }
+	switch(c) {
+		case 'L': return Long.TYPE;
+		case 'D': return Double.TYPE;
+		case 'B': return Boolean.TYPE;
+		case 'F': return Float.TYPE;
+		case 'I': return Integer.TYPE;
+		default: return Object.class;
+	}
 }
 
 // Support widening conversion from short, int, or float to long or double on adapter params
 private static char encodeAdapterParam(Class c) {
-       switch(c.getName()) {
-               case "short":
-               case "long": return 'L';
-               case "int":
-               case "float":
-               case "double": return 'D';
-               default: return 'O';
-       }
+	switch(c.getName()) {
+		case "short":
+		case "long": return 'L';
+		case "int":
+		case "float":
+		case "double": return 'D';
+		default: return 'O';
+	}
 }
 
 private static char encodeAdapterReturn(Class c) {
-       switch(c.getName()) {
-               case "long": return 'L';
-               case "double": return 'D';
-               case "int": return 'I';      // narrowing conversion from IFn$...L
-               case "float": return 'F';    // narrowing conversion from IFn$...D
-               case "boolean": return 'B';  // Clojure boolean logic from IFn$...O
-               default: return 'O';
-       }
+	switch(c.getName()) {
+		case "long": return 'L';
+		case "double": return 'D';
+		case "int": return 'I';      // narrowing conversion from IFn$...L
+		case "float": return 'F';    // narrowing conversion from IFn$...D
+		case "boolean": return 'B';  // Clojure boolean logic from IFn$...O
+		default: return 'O';
+	}
 }
 
 /**
@@ -1747,31 +1741,24 @@ private static char encodeAdapterReturn(Class c) {
  * @return false if no adapter method was found and caller should handle
  */
 private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIfaceClass) {
-    java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fnIfaceClass);
+	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fnIfaceClass);
 
-    // adapter method matches method in FnAdapters (closes over f), example:
-    //   public static boolean adaptDOB(Object f0, double a, Object b) {
-	//	  if(f0 instanceof IFn) {
-    //		return RT.booleanCast(((IFn)f0).invoke(a, b));
-    //	} else {
-    //		throw notIFnError(f0);
-    //	}
-    Class[] adapterParams = new Class[targetMethod.getParameterCount()+1];
-    adapterParams[0] = Object.class;  // close over fn as first arg
-    StringBuilder adaptMethodBuilder = new StringBuilder("adapt");
-    for (int i = 0; i < targetMethod.getParameterCount(); i++) {
-        char paramCode = encodeAdapterParam(targetMethod.getParameterTypes()[i]);
-        adaptMethodBuilder.append(paramCode);
-        adapterParams[i+1] = decodeToClass(paramCode);
-    }
-    char adapterReturnCode = encodeAdapterReturn(targetMethod.getReturnType());
-    adaptMethodBuilder.append(adapterReturnCode);
-    String adapterMethodName = adaptMethodBuilder.toString();
+	Class[] adapterParams = new Class[targetMethod.getParameterCount()+1];
+	adapterParams[0] = Object.class;  // close over fn as first arg
+	StringBuilder adaptMethodBuilder = new StringBuilder("adapt");
+	for (int i = 0; i < targetMethod.getParameterCount(); i++) {
+		char paramCode = encodeAdapterParam(targetMethod.getParameterTypes()[i]);
+		adaptMethodBuilder.append(paramCode);
+		adapterParams[i+1] = decodeToClass(paramCode);
+	}
+	char adapterReturnCode = encodeAdapterReturn(targetMethod.getReturnType());
+	adaptMethodBuilder.append(adapterReturnCode);
+	String adapterMethodName = adaptMethodBuilder.toString();
 
-    // Adapter method - takes IFn instance (closed over) + args, body calls IFn.invoke
-    java.lang.reflect.Method adapterMethod = null;
-    try {
-        adapterMethod = FnAdapters.class.getMethod(adapterMethodName, adapterParams);
+	// Adapter method - takes IFn instance (closed over) + args, body calls IFn.invoke
+	java.lang.reflect.Method adapterMethod = null;
+	try {
+		adapterMethod = FnAdapters.class.getMethod(adapterMethodName, adapterParams);
 
 		// emit... if(! (exp instanceof FIType)) { adapt... }
 		gen.dup();
@@ -1794,10 +1781,10 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIface
 		gen.checkCast(Type.getType(fnIfaceClass));
 		return true;
 
-    } catch(NoSuchMethodException e) {
+	} catch(NoSuchMethodException e) {
 		// this should be rare, but we are using a finite set of generated adapter methods
-        return false;
-    }
+		return false;
+	}
 }
 
 // LambdaMetafactory.metafactory() method handle - lambda bootstrap
@@ -1824,7 +1811,7 @@ private static final Handle LMF_HANDLE =
 private static void emitInvokeDynamicAdapter(
 	GeneratorAdapter gen, java.lang.reflect.Method targetMethod, Executable implMethod) {
 
-    // Implementing method - takes closed overs (on stack now) + args (when called)
+	// Implementing method - takes closed overs (on stack now) + args (when called)
 	Class[] implParams = implMethod.getParameterTypes();
 	Class retClass = implMethod instanceof Constructor
 			? implMethod.getDeclaringClass()
@@ -1841,11 +1828,11 @@ private static void emitInvokeDynamicAdapter(
 	MethodType lambdaSig = MethodType.methodType(targetMethod.getDeclaringClass(), lambdaParams);
 
 	Type targetType = Type.getType(targetMethod);
-    gen.visitInvokeDynamicInsn(
+	gen.visitInvokeDynamicInsn(
 		targetMethod.getName(),
 		lambdaSig.toMethodDescriptorString(),  // adapter signature, closedOvers -> Target
 		LMF_HANDLE,  // bootstrap method handle: LambdaMetaFactory.metafactory()
-        new Object[]{targetType, implHandle, targetType}); // arg types of bootstrap method
+		new Object[]{targetType, implHandle, targetType}); // arg types of bootstrap method
 }
 
 static Class maybeJavaClass(Collection<Expr> exprs){
@@ -7087,8 +7074,8 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 					{
                     Class bindingClass = tagClass(bi.binding.tag);
 					Class initClass = bi.init.hasJavaClass() ? bi.init.getJavaClass() : null;
-					if(isAdaptableFunctionExpression(bindingClass, bi.init)
-						  && (initClass == null || ! bindingClass.isAssignableFrom(initClass)))
+					if(Reflector.isAdaptableFunctionalInterface(bindingClass)
+							&& (initClass == null || ! bindingClass.isAssignableFrom(initClass)))
 						emitFunctionalAdapter(gen, bindingClass);
 					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
 					}
