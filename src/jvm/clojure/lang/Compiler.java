@@ -1737,8 +1737,10 @@ private static char encodeAdapterReturn(Class c) {
  * Given a target functional interface class, and an ASM generator with an
  * expr on the stack (either an instance of fnIfaceClass or an IFn), find the
  * SAM method in fnIfaceClass and a matching adapter method A (name is based
- * on a fixed set of supported types) in FnAdapters and call
- * emitInvokeDynamicAdapter(GeneratorAdapter, M, A).
+ * on a fixed set of supported types) in FnAdapters and emit effectively:
+ *
+ * if(!(expr instanceof fnIFaceClass))
+ *   // invokedynamic A closing over expr, as if it were an M
  *
  * @param gen ASM code generator
  * @param fnIfaceClass a FunctionalInterface class with method M(arg1, ...)
@@ -1770,7 +1772,25 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIface
     java.lang.reflect.Method adapterMethod = null;
     try {
         adapterMethod = FnAdapters.class.getMethod(adapterMethodName, adapterParams);
+
+		// emit... if(! (exp instanceof FIType)) { adapt... }
+		gen.dup();
+		Type samType = Type.getType(fnIfaceClass);
+		gen.instanceOf(samType);
+
+		// if so, checkcast and go to end
+		Label adapterLabel = gen.newLabel();
+		gen.ifZCmp(Opcodes.IFEQ, adapterLabel);
+		gen.checkCast(samType);
+		Label endLabel = gen.newLabel();
+		gen.goTo(endLabel);
+
+		// if not, insert lambda adapter
+		gen.mark(adapterLabel);
+
+		// adapt adapter method to target method, closing over IFn instance
 		emitInvokeDynamicAdapter(gen, targetMethod, adapterMethod);
+		gen.mark(endLabel);
 		gen.checkCast(Type.getType(fnIfaceClass));
 		return true;
 
@@ -1804,8 +1824,6 @@ private static final Handle LMF_HANDLE =
 private static void emitInvokeDynamicAdapter(
 	GeneratorAdapter gen, java.lang.reflect.Method targetMethod, Executable implMethod) {
 
-	Type targetType = Type.getType(targetMethod);
-
     // Implementing method - takes closed overs (on stack now) + args (when called)
 	Class[] implParams = implMethod.getParameterTypes();
 	Class retClass = implMethod instanceof Constructor
@@ -1822,6 +1840,7 @@ private static void emitInvokeDynamicAdapter(
 	List lambdaParams = Arrays.asList(Arrays.copyOfRange(implParams, 0, implParams.length - targetMethod.getParameterCount()));
 	MethodType lambdaSig = MethodType.methodType(targetMethod.getDeclaringClass(), lambdaParams);
 
+	Type targetType = Type.getType(targetMethod);
     gen.visitInvokeDynamicInsn(
 		targetMethod.getName(),
 		lambdaSig.toMethodDescriptorString(),  // adapter signature, closedOvers -> Target
