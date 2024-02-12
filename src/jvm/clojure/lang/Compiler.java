@@ -1917,7 +1917,7 @@ static abstract class MethodExpr extends HostExpr{
 				else
 					{
 					Class exprClass = e.hasJavaClass() ? e.getJavaClass() : null;
-                    if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
+					if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
                     	{
 						if(e instanceof MethodValueExpr)
 							{
@@ -7072,7 +7072,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 					gen.pop();
 				else
 					{
-                    Class bindingClass = tagClass(bi.binding.tag);
+					Class bindingClass = tagClass(bi.binding.tag);
 					Class initClass = bi.init.hasJavaClass() ? bi.init.getJavaClass() : null;
 					if(Reflector.isAdaptableFunctionalInterface(bindingClass)
 							&& (initClass == null || ! bindingClass.isAssignableFrom(initClass)))
