@@ -14,7 +14,7 @@
    [clojure.java.basis.impl :as basis-impl]
    [clojure.tools.deps.interop :as tool])
   (:import
-    [clojure.lang DynamicClassLoader]
+    [clojure.lang DynamicClassLoader RT]
     [java.io File]))
 
 (set! *warn-on-reflection* true)
@@ -22,7 +22,7 @@
 (defn- add-loader-url
   "Add url string or URL to the highest level DynamicClassLoader url set."
   [url]
-  (let [u (if (string? url) (java.net.URL. url) url)
+  (let [u (if (string? url) (RT/toUrl ^String url) url)
         loader (loop [loader (.getContextClassLoader (Thread/currentThread))]
                  (let [parent (.getParent loader)]
                    (if (instance? DynamicClassLoader parent)
@@ -48,7 +48,7 @@
             {:keys [added] :as _res} (tool/invoke-tool {:tool-alias :deps, :fn 'clojure.tools.deps/resolve-added-libs, :args tool-args})
             ;_ (clojure.pprint/pprint _res)
             paths (mapcat :paths (vals added))
-            urls (->> paths (map jio/file) (map #(.toURL ^File %)))]
+            urls (->> paths (map jio/file) (map #(RT/toUrl ^File %)))]
         (run! add-loader-url urls)
         (basis-impl/update-basis! update :libs merge added)
         (let [ret (-> added keys sort vec)]
