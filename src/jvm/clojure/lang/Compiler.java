@@ -1405,7 +1405,8 @@ static boolean isConstructor(Executable method) {
 private static void checkMethodArity(Executable method, int argCount) {
 	if(method.getParameterCount() != argCount)
 		throw new IllegalArgumentException("Invocation of "
-				+ MethodValueExpr.methodDescription(method.getDeclaringClass(), method.getName())
+				+ MethodValueExpr.methodDescription(method.getDeclaringClass(),
+				(method instanceof Constructor) ? "new" : method.getName())
 				+ " expected " + method.getParameterCount() + " arguments, but received " + argCount);
 }
 
