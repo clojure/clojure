@@ -2333,13 +2333,13 @@
   value is available. See also - realized?."
   {:added "1.0"
    :static true}
-  ([ref] (if (instance? java.util.concurrent.Future ref)
-           (deref-future ref)
-           (.deref ^clojure.lang.IDeref ref)))
+  ([ref] (if (instance? clojure.lang.IDeref ref)
+           (.deref ^clojure.lang.IDeref ref)
+           (deref-future ref)))
   ([ref timeout-ms timeout-val]
-     (if (instance? java.util.concurrent.Future ref)
-       (deref-future ref timeout-ms timeout-val)
-       (.deref ^clojure.lang.IBlockingDeref ref timeout-ms timeout-val))))
+     (if (instance? clojure.lang.IBlockingDeref ref)
+       (.deref ^clojure.lang.IBlockingDeref ref timeout-ms timeout-val)
+       (deref-future ref timeout-ms timeout-val))))
 
 (defn atom
   "Creates and returns an Atom with an initial value of x and zero or
