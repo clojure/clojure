@@ -63,7 +63,7 @@ static Keyword UNKNOWN = Keyword.intern(null, "unknown");
 static IFn[] macros = new IFn[256];
 static IFn[] dispatchMacros = new IFn[256];
 //static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
-static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
+static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/:]*)(?:::(\\d+))?");
 //static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
 //static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern intPat =
@@ -421,8 +421,7 @@ private static Object matchSymbol(String s, Resolver resolver){
 		String ns = m.group(1);
 		String name = m.group(2);
 		if(ns != null && ns.endsWith(":/")
-		   || name.endsWith(":")
-		   || s.indexOf("::", 1) != -1)
+		   || name.endsWith(":"))
 			return null;
 		if(s.startsWith("::"))
 			{

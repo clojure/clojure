@@ -1111,6 +1111,28 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			return c;
 		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
 	}
+	
+	public static List decodeArraySymbolComponents(Symbol as) {
+		if(!Character.isDigit(as.name.charAt(as.name.length()-1)))
+			return null;
+
+		Matcher m = LispReader.symbolPat.matcher(as.name);
+		
+		if(!m.matches())
+			return null;
+
+		String name = m.group(2);
+		String dim = m.group(3);
+		
+		if(dim == null)
+			return null;
+		
+		List components = new ArrayList();
+		components.add(Symbol.intern(null, name));
+		components.add(Long.parseLong(dim));
+		
+		return components;
+	}
 }
 
 static abstract class FieldExpr extends HostExpr{
