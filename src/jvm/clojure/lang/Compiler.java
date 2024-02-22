@@ -392,7 +392,12 @@ static Symbol resolveSymbol(Symbol sym){
 		}
 	Object o = currentNS().getMapping(sym);
 	if(o == null)
+		{
+		Class ac = HostExpr.maybeArrayClass(sym);
+		if(ac != null)
+			return HostExpr.arrayTypeToSymbol(ac);
 		return Symbol.intern(currentNS().name.name, sym.name);
+		}
 	else if(o instanceof Class)
 		return Symbol.intern(null, ((Class) o).getName());
 	else if(o instanceof Var)
@@ -1165,6 +1170,18 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		components.add(Long.parseLong(dim));
 		
 		return components;
+	}
+	
+	public static Symbol arrayTypeToSymbol(Class c) {
+		if(!c.isArray()) return null;
+		int dim = 0;
+		Class componentClass = c;
+		
+		while(componentClass.isArray()) {
+			dim++;
+			componentClass = componentClass.getComponentType();
+		}
+		return Symbol.intern(null, componentClass.getName() + "::" + dim);
 	}
 }
 

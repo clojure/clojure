@@ -39,4 +39,9 @@
   (testing "array hints"
     (util/should-not-reflect
      (let [^long::1 a (long-array [1 2 3 4 99 100])]
-       (java.util.Arrays/binarySearch a 99)))))
+       (java.util.Arrays/binarySearch a 99))))
+  (testing "syntax quote"
+    (is (= `byte::1 'byte::1))
+    (is (= `byte::33 'byte::33))
+    (is (= `java.util.UUID::1 'java.util.UUID::1))
+    (is (= `String::1 'java.lang.String::1))))
