@@ -13,4 +13,6 @@
   (is (= 'int::2 (read-string "int::2")))
   (is (= '[int 2] (clojure.lang.Compiler$HostExpr/decodeArraySymbolComponents 'int::2)))
   (is (= '[java.util.UUID 2] (clojure.lang.Compiler$HostExpr/decodeArraySymbolComponents 'java.util.UUID::2)))
-  (is (nil? (clojure.lang.Compiler$HostExpr/decodeArraySymbolComponents 'int2))))
+  (is (nil? (clojure.lang.Compiler$HostExpr/decodeArraySymbolComponents 'int2)))
+  (is (thrown? Exception (eval '(def int::2 2))))
+  (is (thrown? Exception (eval '(.importClass *ns* 'int::2 java.util.UUID)))))

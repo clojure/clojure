@@ -65,6 +65,10 @@ public Var intern(Symbol sym){
 		{
 		throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
 		}
+	if(Compiler.HostExpr.decodeArraySymbolComponents(sym) != null)
+		{
+			throw new IllegalArgumentException("Can't intern array symbol");
+		}
 
 	IPersistentMap map = getMappings();
 	Object o;
@@ -159,6 +163,10 @@ Class referenceClass(Symbol sym, Class val){
         {
         throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
         }
+	if(Compiler.HostExpr.decodeArraySymbolComponents(sym) != null)
+		{
+		throw new IllegalArgumentException("Can't intern array symbol");
+		}
     IPersistentMap map = getMappings();
     Class c = (Class) map.valAt(sym);
     while((c == null) || (areDifferentInstancesOfSameClassName(c, val)))
