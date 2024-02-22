@@ -1111,8 +1111,39 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			return c;
 		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
 	}
+
+	public static Class maybeArrayClass(Symbol sym) {
+		List symComponents = decodeArraySymbolComponents(sym);
+		if(symComponents == null)
+			return null;
+		
+		Symbol className = (Symbol) RT.first(symComponents);
+		long dim = (long) RT.second(symComponents);
+		Class componentClass = primClass(className);
+		
+		if(componentClass == null)
+			componentClass = maybeClass(className, false);
+		
+		if(componentClass == null)
+			return null;
+
+		StringBuilder arrayDescriptor = new StringBuilder();
+		for(int i=0; i<dim; i++)
+			arrayDescriptor.append('[');
+		arrayDescriptor.append(getArrayComponentClassDescriptor(componentClass));
+		return maybeClass(arrayDescriptor.toString(), true);
+	}
+
+	static String getArrayComponentClassDescriptor(Class c) {
+		if (c.isPrimitive()) 
+			return Type.getType(c).getDescriptor();
+		return "L" + c.getName() + ";";
+	}
 	
 	public static List decodeArraySymbolComponents(Symbol as) {
+		if(as.ns != null)
+			return null;
+		
 		if(!Character.isDigit(as.name.charAt(as.name.length()-1)))
 			return null;
 
