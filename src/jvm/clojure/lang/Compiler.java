@@ -1102,7 +1102,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			Symbol sym = (Symbol) tag;
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
-				c = maybeSpecialTag(sym);
+				c = maybeArrayClass(sym);	
+				if(c == null)
+					c = maybeSpecialTag(sym);
 				}
 			}
 		if(c == null)

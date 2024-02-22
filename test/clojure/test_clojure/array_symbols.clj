@@ -7,7 +7,8 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.test-clojure.array-symbols
-  (:use clojure.test))
+  (:use clojure.test)
+  (:require [clojure.test-helper :as util]))
 
 (deftest test-array-symbols
   (is (= 'int::2 (read-string "int::2")))
@@ -34,4 +35,8 @@
     (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'foo/java.lang.String::1)))
     (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'ThisIsNotAClassThatCouldBeFound138::2)))
     (is (thrown? ClassNotFoundException
-                 (clojure.lang.Compiler$HostExpr/maybeArrayClass 'foo.bar.ThisIsNotAClassThatCouldBeFound138::2)))))
+                 (clojure.lang.Compiler$HostExpr/maybeArrayClass 'foo.bar.ThisIsNotAClassThatCouldBeFound138::2))))
+  (testing "array hints"
+    (util/should-not-reflect
+     (let [^long::1 a (long-array [1 2 3 4 99 100])]
+       (java.util.Arrays/binarySearch a 99)))))
