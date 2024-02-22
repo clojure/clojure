@@ -7507,8 +7507,14 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 			|| sym.name.charAt(0) == '[')
 		{
 		try {
-			return RT.classForName(sym.name);
-		} catch (Exception e) {
+			Class ac = HostExpr.maybeArrayClass(sym);
+			if(ac == null)
+				return RT.classForName(sym.name);
+			else
+				return ac;
+			}
+		catch (Exception e)
+			{
 			if (e instanceof ClassNotFoundException)
 				return null;
 			else
@@ -7522,9 +7528,27 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 			else
 				{
 				Object o = n.getMapping(sym);
-				return o;
+				if(o != null)
+					{
+					return o;
+					}
+				else
+					{
+					try
+						{
+						return HostExpr.maybeArrayClass(sym);
+						}
+					catch (Exception e)
+						{
+						if (e instanceof ClassNotFoundException)
+							return null;
+						else
+							return Util.sneakyThrow(e);
+						}
+					}
 				}
-}
+			}
+
 
 
 static Var lookupVar(Symbol sym, boolean internNew, boolean registerMacro) {
