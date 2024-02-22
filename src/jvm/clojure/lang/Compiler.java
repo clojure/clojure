@@ -7369,6 +7369,12 @@ private static Expr analyzeSymbol(Symbol sym) {
             {
             return new LocalBindingExpr(b, tag);
             }
+		else
+			{
+			Class ac = HostExpr.maybeArrayClass(sym);
+			if(ac != null)
+				return new ConstantExpr(ac);
+			}
 		}
 	else
 		{

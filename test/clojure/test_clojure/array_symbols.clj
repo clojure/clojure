@@ -55,4 +55,8 @@
     (is (= (resolve 'java.lang.String::1) (class (make-array String 0))))
     (is (= (resolve 'java.util.UUID::1) (class (make-array java.util.UUID 0))))
     (is (= (resolve 'String::2)
-           (class (into-array (class (make-array String 0)) [(into-array String ["a" "b"])]))))))
+           (class (into-array (class (make-array String 0)) [(into-array String ["a" "b"])])))))
+  (testing "value position"
+    (is (= 42 (let [long::2 42] long::2)))
+    (is (= (class (make-array String 0)) String::1))
+    (is (= [(class (make-array String 0))] [String::1]))))
