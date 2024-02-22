@@ -59,4 +59,10 @@
   (testing "value position"
     (is (= 42 (let [long::2 42] long::2)))
     (is (= (class (make-array String 0)) String::1))
-    (is (= [(class (make-array String 0))] [String::1]))))
+    (is (= [(class (make-array String 0))] [String::1])))
+  (testing "printing"
+    (is (= "long::1" (print-str long::1)))
+    (is (= "byte::1" (print-str (class (make-array Byte/TYPE 0)))))
+    (is (= "java.lang.String::2" (print-str String::2)))
+    (is (= "[[java.lang.String::2]]" (print-str [[String::2]])))
+    (is (= "java.util.UUID::4" (print-str java.util.UUID::4)))))
