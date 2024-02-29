@@ -1107,7 +1107,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			Symbol sym = (Symbol) tag;
 			if(sym.ns == null) //if ns-qualified can't be classname
 				{
-				c = maybeArrayClass(sym);	
+				c = maybeArrayClass(sym);
 				if(c == null)
 					c = maybeSpecialTag(sym);
 				}
@@ -1123,14 +1123,14 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		List symComponents = decodeArraySymbolComponents(sym);
 		if(symComponents == null)
 			return null;
-		
+
 		Symbol className = (Symbol) RT.first(symComponents);
 		long dim = (long) RT.second(symComponents);
 		Class componentClass = primClass(className);
-		
+
 		if(componentClass == null)
 			componentClass = maybeClass(className, false);
-		
+
 		if(componentClass == null)
 			return null;
 
@@ -1149,33 +1149,33 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	static List decodeArraySymbolComponents(Symbol sym) {
 		if(sym.ns != null)
 			return null;
-		
+
 		if(!Character.isDigit(sym.name.charAt(sym.name.length()-1)))
 			return null;
 
 		Matcher m = LispReader.symbolPat.matcher(sym.name);
-		
+
 		if(!m.matches())
 			return null;
 
 		String name = m.group(2);
 		String dim = m.group(3);
-		
+
 		if(dim == null)
 			return null;
-		
+
 		List components = new ArrayList();
 		components.add(Symbol.intern(null, name));
 		components.add(Long.parseLong(dim));
-		
+
 		return components;
 	}
-	
+
 	public static Symbol arrayTypeToSymbol(Class c) {
 		if(!c.isArray()) return null;
 		int dim = 0;
 		Class componentClass = c;
-		
+
 		while(componentClass.isArray()) {
 			dim++;
 			componentClass = componentClass.getComponentType();
