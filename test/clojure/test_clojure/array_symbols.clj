@@ -12,9 +12,6 @@
 
 (deftest test-array-symbols
   (is (= 'int::2 (read-string "int::2")))
-  (is (= '[int 2] (clojure.lang.Compiler$HostExpr/decodeArraySymbolComponents 'int::2)))
-  (is (= '[java.util.UUID 2] (clojure.lang.Compiler$HostExpr/decodeArraySymbolComponents 'java.util.UUID::2)))
-  (is (nil? (clojure.lang.Compiler$HostExpr/decodeArraySymbolComponents 'int2)))
   (is (thrown? Exception (read-string "String::-2")))
   (is (thrown? Exception (read-string "String::foo")))
   (is (thrown? Exception (read-string "String::1:")))

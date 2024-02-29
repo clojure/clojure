@@ -1147,14 +1147,14 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return "L" + c.getName() + ";";
 	}
 	
-	public static List decodeArraySymbolComponents(Symbol as) {
-		if(as.ns != null)
+	static List decodeArraySymbolComponents(Symbol sym) {
+		if(sym.ns != null)
 			return null;
 		
-		if(!Character.isDigit(as.name.charAt(as.name.length()-1)))
+		if(!Character.isDigit(sym.name.charAt(sym.name.length()-1)))
 			return null;
 
-		Matcher m = LispReader.symbolPat.matcher(as.name);
+		Matcher m = LispReader.symbolPat.matcher(sym.name);
 		
 		if(!m.matches())
 			return null;
