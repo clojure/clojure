@@ -1137,16 +1137,15 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		StringBuilder arrayDescriptor = new StringBuilder();
 		for(int i=0; i<dim; i++)
 			arrayDescriptor.append('[');
-		arrayDescriptor.append(getArrayComponentClassDescriptor(componentClass));
+
+		String ccDescr = componentClass.isPrimitive() ?
+				Type.getType(componentClass).getDescriptor()
+				: "L" + componentClass.getName() + ";";
+
+		arrayDescriptor.append(ccDescr);
 		return maybeClass(arrayDescriptor.toString(), true);
 	}
 
-	static String getArrayComponentClassDescriptor(Class c) {
-		if (c.isPrimitive()) 
-			return Type.getType(c).getDescriptor();
-		return "L" + c.getName() + ";";
-	}
-	
 	static List decodeArraySymbolComponents(Symbol sym) {
 		if(sym.ns != null)
 			return null;
