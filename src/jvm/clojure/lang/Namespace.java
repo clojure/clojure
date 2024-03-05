@@ -65,7 +65,7 @@ public Var intern(Symbol sym){
 		{
 		throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
 		}
-	if(Compiler.HostExpr.decodeArraySymbolComponents(sym) != null)
+	if(Util.decodeArraySymbolComponents(sym.name) != null)
 		{
 			throw new IllegalArgumentException("Can't intern array symbol");
 		}
@@ -163,7 +163,7 @@ Class referenceClass(Symbol sym, Class val){
         {
         throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
         }
-	if(Compiler.HostExpr.decodeArraySymbolComponents(sym) != null)
+	if(Util.decodeArraySymbolComponents(sym.name) != null)
 		{
 		throw new IllegalArgumentException("Can't intern array symbol");
 		}

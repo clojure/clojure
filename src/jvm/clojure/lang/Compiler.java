@@ -395,7 +395,7 @@ static Symbol resolveSymbol(Symbol sym){
 		{
 		Class ac = HostExpr.maybeArrayClass(sym);
 		if(ac != null)
-			return HostExpr.arrayTypeToSymbol(ac);
+			return Util.arrayTypeToSymbol(ac);
 		return Symbol.intern(currentNS().name.name, sym.name);
 		}
 	else if(o instanceof Class)
@@ -1120,12 +1120,15 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	public static Class maybeArrayClass(Symbol sym) {
-		List symComponents = decodeArraySymbolComponents(sym);
+		if (sym.ns != null)
+			return null;
+
+		Map symComponents = Util.decodeArraySymbolComponents(sym.name);
 		if(symComponents == null)
 			return null;
 
-		Symbol className = (Symbol) RT.first(symComponents);
-		long dim = (long) RT.second(symComponents);
+		Symbol className = (Symbol) symComponents.get(RT.ARRAY_COMPONENT_KEY);
+		long dim = (long) symComponents.get(RT.ARRAY_DIM_KEY);
 		Class componentClass = primClass(className);
 
 		if(componentClass == null)
@@ -1144,43 +1147,6 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 
 		arrayDescriptor.append(ccDescr);
 		return maybeClass(arrayDescriptor.toString(), true);
-	}
-
-	static List decodeArraySymbolComponents(Symbol sym) {
-		if(sym.ns != null)
-			return null;
-
-		if(!Character.isDigit(sym.name.charAt(sym.name.length()-1)))
-			return null;
-
-		Matcher m = LispReader.symbolPat.matcher(sym.name);
-
-		if(!m.matches())
-			return null;
-
-		String name = m.group(2);
-		String dim = m.group(3);
-
-		if(dim == null)
-			return null;
-
-		List components = new ArrayList();
-		components.add(Symbol.intern(null, name));
-		components.add(Long.parseLong(dim));
-
-		return components;
-	}
-
-	public static Symbol arrayTypeToSymbol(Class c) {
-		if(!c.isArray()) return null;
-		int dim = 0;
-		Class componentClass = c;
-
-		while(componentClass.isArray()) {
-			dim++;
-			componentClass = componentClass.getComponentType();
-		}
-		return Symbol.intern(null, componentClass.getName() + "::" + dim);
 	}
 }
 

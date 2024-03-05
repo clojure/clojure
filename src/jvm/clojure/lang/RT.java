@@ -205,6 +205,8 @@ static Keyword COLUMN_KEY = Keyword.intern(null, "column");
 static Keyword FILE_KEY = Keyword.intern(null, "file");
 static Keyword DECLARED_KEY = Keyword.intern(null, "declared");
 static Keyword DOC_KEY = Keyword.intern(null, "doc");
+static Keyword ARRAY_COMPONENT_KEY = Keyword.intern(null, "component");
+static Keyword ARRAY_DIM_KEY = Keyword.intern(null, "dim");
 final static public Var USE_CONTEXT_CLASSLOADER =
 		Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), T).setDynamic();
 //boolean

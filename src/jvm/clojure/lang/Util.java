@@ -15,10 +15,13 @@ package clojure.lang;
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.ref.ReferenceQueue;
+import java.util.regex.Matcher;
 
 public class Util{
 static public boolean equiv(Object k1, Object k2){
@@ -256,5 +259,36 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
+static Map decodeArraySymbolComponents(String arrayStr) {
+	if(!Character.isDigit(arrayStr.charAt(arrayStr.length()-1)))
+		return null;
+
+	Matcher m = LispReader.symbolPat.matcher(arrayStr);
+
+	if(!m.matches())
+		return null;
+
+	String name = m.group(2);
+	String dim = m.group(3);
+
+	if(dim == null)
+		return null;
+
+	return PersistentHashMap.create(
+			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, name),
+			RT.ARRAY_DIM_KEY, Long.parseLong(dim));
+}
+
+public static Symbol arrayTypeToSymbol(Class c) {
+	if(!c.isArray()) return null;
+	int dim = 0;
+	Class componentClass = c;
+
+	while(componentClass.isArray()) {
+		dim++;
+		componentClass = componentClass.getComponentType();
+	}
+	return Symbol.intern(null, componentClass.getName() + "::" + dim);
+}
 }
 
