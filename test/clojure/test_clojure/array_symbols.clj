@@ -10,6 +10,8 @@
   (:use clojure.test)
   (:require [clojure.test-helper :as util]))
 
+(set! *warn-on-reflection* true)
+
 (deftest test-array-symbols
   (is (= 'int::2 (read-string "int::2")))
   (is (thrown? Exception (read-string "String::-2")))
@@ -18,6 +20,7 @@
   (is (thrown? Exception (eval '(def int::2 2))))
   (is (thrown? Exception (eval '(deftype Foo::2 [a]))))
   (is (thrown? Exception (eval '(.importClass *ns* 'int::2 java.util.UUID))))
+  (is (thrown? IllegalArgumentException (.addAlias *ns* 'String::1 *ns*)))
   (testing "array symbol resolution"
     (are [str-repr klass] (= (Class/forName str-repr) klass)
       "[Z" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'boolean::1)

@@ -254,6 +254,8 @@ public Namespace lookupAlias(Symbol alias){
 public void addAlias(Symbol alias, Namespace ns){
 	if (alias == null || ns == null)
 		throw new NullPointerException("Expecting Symbol + Namespace");
+	if(Util.decodeArraySymbolComponents(alias.name) != null)
+		throw new IllegalArgumentException("Can't use array symbols as a namespace alias");
 	IPersistentMap map = getAliases();
 	while(!map.containsKey(alias))
 		{
