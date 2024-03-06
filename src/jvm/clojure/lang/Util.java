@@ -15,13 +15,10 @@ package clojure.lang;
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.ref.ReferenceQueue;
-import java.util.regex.Matcher;
 
 public class Util{
 static public boolean equiv(Object k1, Object k2){
@@ -270,13 +267,15 @@ static public Map decodeArraySymbolComponents(String arrayStr) {
 	String className = arrayStr.substring(0, suffIndex);
 	String dimStr = arrayStr.substring(arrayStr.indexOf("::")+2, arrayStr.length());
 
-	long dim = -1;
-	try {
-		dim = Long.parseLong(dimStr);
-	} catch (Exception ignored) {}
-	
-	if(dim < 1)
+	if(dimStr.length() > 1)
 		return null;
+
+	char dimChar = dimStr.charAt(0);
+	
+	if(!(dimChar >= '1' && dimChar <= '9'))
+		return null;
+
+	long dim = dimChar - '0';
 
 	return PersistentHashMap.create(
 			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, className),

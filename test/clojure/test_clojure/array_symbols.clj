@@ -19,6 +19,8 @@
   (testing "error conditions"
     (is (thrown? Exception (read-string "String::-2")))
     (is (thrown? Exception (read-string "String::1:")))
+    (is (thrown? Exception (read-string "String::0")))
+    (is (thrown? Exception (read-string "String::42")))
     (is (thrown? Exception (read-string "String::foo")))
     (is (thrown? Exception (read-string "String::n2")))
     (is (thrown? Exception (read-string ":String::n2")))
@@ -52,7 +54,7 @@
        (java.util.Arrays/binarySearch a 99))))
   (testing "syntax quote"
     (is (= `byte::1 'byte::1))
-    (is (= `byte::33 'byte::33))
+    (is (= `byte::9 'byte::9))
     (is (= `java.util.UUID::1 'java.util.UUID::1))
     (is (= `String::1 'java.lang.String::1)))
   (testing "resolve"
