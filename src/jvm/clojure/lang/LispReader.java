@@ -63,7 +63,7 @@ static Keyword UNKNOWN = Keyword.intern(null, "unknown");
 static IFn[] macros = new IFn[256];
 static IFn[] dispatchMacros = new IFn[256];
 //static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
-static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?(/|:?[^:/]+(?::[\\D&&[^/:]]+)*)(?:::(\\d+))?");
+static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
 //static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
 //static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern intPat =
@@ -412,6 +412,9 @@ static private Object interpretToken(String s, Resolver resolver) {
 	throw Util.runtimeException("Invalid token: " + s);
 }
 
+static boolean looksLikeArraySymbol(String name){
+	return !name.startsWith(":") && name.indexOf("::") != -1;
+}
 
 private static Object matchSymbol(String s, Resolver resolver){
 	Matcher m = symbolPat.matcher(s);
@@ -420,9 +423,13 @@ private static Object matchSymbol(String s, Resolver resolver){
 		int gc = m.groupCount();
 		String ns = m.group(1);
 		String name = m.group(2);
-		if(ns != null && ns.endsWith(":/")
-		   || name.endsWith(":"))
-			return null;
+		if(ns != null && ns.endsWith(":/") || name.endsWith(":")) 
+			{
+			if(ns == null && Util.decodeArraySymbolComponents(name) != null)
+				return Symbol.intern(null, name);
+			else
+				return null;
+			}
 		if(s.startsWith("::"))
 			{
 			Symbol ks = Symbol.intern(s.substring(2));

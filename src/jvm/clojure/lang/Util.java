@@ -262,21 +262,20 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
 static Map decodeArraySymbolComponents(String arrayStr) {
 	if(!Character.isDigit(arrayStr.charAt(arrayStr.length()-1)))
 		return null;
-
-	Matcher m = LispReader.symbolPat.matcher(arrayStr);
-
-	if(!m.matches())
+	
+	if(!LispReader.looksLikeArraySymbol(arrayStr))
 		return null;
 
-	String name = m.group(2);
-	String dim = m.group(3);
-
-	if(dim == null)
-		return null;
+	String descriptor = arrayStr.substring(0, arrayStr.indexOf("::"));
+	String dimStr = arrayStr.substring(arrayStr.indexOf("::")+2, arrayStr.length());
+	long dim = Long.parseLong(dimStr);
+	
+	if(dim < 1)
+		throw new IllegalArgumentException("Array symbol dimension must be a positive integer");
 
 	return PersistentHashMap.create(
-			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, name),
-			RT.ARRAY_DIM_KEY, Long.parseLong(dim));
+			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, descriptor),
+			RT.ARRAY_DIM_KEY, dim);
 }
 
 public static Symbol arrayTypeToSymbol(Class c) {
