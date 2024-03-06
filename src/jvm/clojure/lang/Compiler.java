@@ -1193,6 +1193,7 @@ static class MethodValueExpr implements Expr {
 	private final Class c;
 	private final List<Class> hintedSig;
 	private final Executable method;
+	private final List<Executable> overloads;
 	private final Symbol methodSymbol;
 	private final String methodName;
 
@@ -1208,30 +1209,13 @@ static class MethodValueExpr implements Expr {
 		hintedSig = tagsToClasses(paramTagsOf(sym));
 		if(hintedSig != null) {
 			method = resolveHintedMethod(c, methodName, hintedSig, methods);
+		} else if(methods.size() == 1) {
+			// Only 1 method - no inference needed
+			method = methods.get(0);
 		} else {
-			Executable maybeMethod = null;
-			if(methods.size() == 1) {
-				// Only 1 method - no inference needed
-				maybeMethod = methods.get(0);
-			}
-			else if(methods.size() > 1) {
-				// Only statics supported at this point (needs inference)
-
-				if(methodNamesConstructor(c, methodName))
-					throw overloadNeedsParamTagsException(c, methodName);
-
-				// Filter out instance methods (no inference allowed)
-				List<Executable> staticMethods = methods.stream()
-						.filter(m -> Modifier.isStatic(m.getModifiers()))
-						.collect(Collectors.toList());
-				if(staticMethods.size() == 1)
-					maybeMethod = staticMethods.get(0);
-				else if(staticMethods.isEmpty())
-					throw overloadNeedsParamTagsException(c, methodName);
-				// else not resolved, static method w/inference
-			}
-			method = maybeMethod;
+			method = null;
 		}
+		overloads = method == null ? methods : null;
 	}
 
 	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
@@ -1272,6 +1256,10 @@ static class MethodValueExpr implements Expr {
 	public boolean isResolved() {
 		return method != null;
 	}
+	
+	public List<Executable> getOverloads() {
+		return overloads;
+	}
 
 	@Override
 	public Object eval() {
@@ -1293,11 +1281,12 @@ static class MethodValueExpr implements Expr {
 		return AFn.class;
 	}
 
-	private static FnExpr toFnExpr(MethodValueExpr mexpr) {
+	private static Expr toFnExpr(MethodValueExpr mexpr) {
 		// If not resolved by this point we were not given param-tags
-		// and named method was overloaded.
+		// and named method was overloaded. Therefore, we try to build
+		// a reflective thunk.
 		if(!mexpr.isResolved()) {
-			throw overloadNeedsParamTagsException(mexpr.c, mexpr.methodName);
+			return buildReflectiveThunk(mexpr.c, mexpr.methodSymbol);
 		}
 
 		// return hint symbol
@@ -1312,7 +1301,72 @@ static class MethodValueExpr implements Expr {
 		return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, 
 				isInstanceMethod(mexpr.method) ? THIS : null, retTag);
 	}
+	
+	private static LetExpr buildReflectiveThunk(Class c, Symbol methodSymbol) {
+		Symbol cacheName = Symbol.intern(null, "cache");
+		IPersistentVector cacheBinding = PersistentVector.create(
+				cacheName, RT.list(Symbol.intern(null, "clojure.lang.Box."), null));
+		ISeq fnForm = buildReflectiveFnForm(c, methodSymbol, cacheName);
+		ISeq letForm = buildLet(cacheBinding, fnForm);
+		return (LetExpr) analyzeSeq(C.EVAL, letForm, methodSymbol.name);
+	}
 
+	private static Symbol thunkName(Class c, Symbol methodSymbol) {
+		return Symbol.intern(null, "invoke__" + c.getSimpleName() + "_" + methodSymbol.name);
+	}
+	
+	private static ISeq buildReflectiveFnForm(Class c, Symbol methodSymbol, Symbol cacheName) {
+		Symbol thunkName = thunkName(c, methodSymbol);
+		Symbol argsName = Symbol.intern(null, "args");
+		Symbol mhName = (Symbol) Symbol.intern(null, "mh").withMeta(
+				RT.map(RT.TAG_KEY, Symbol.intern(null, "java.lang.invoke.MethodHandle")));
+		ISeq invokeForm = buildReflectiveInvokeForm(c, methodSymbol, mhName, argsName);
+		IPersistentVector bindings = PersistentVector.create(
+				argsName, RT.list(Symbol.intern(null, "to-array"), argsName),
+				mhName, buildCacheLookup(cacheName, c, methodSymbol, argsName));
+		ISeq fnForm = RT.list(Symbol.intern("fn"), thunkName, 
+				PersistentVector.create(_AMP_, argsName),
+				buildLet(bindings, invokeForm));
+		return fnForm;
+	}
+
+	private static ISeq buildReflectiveInvokeForm(Class c, Symbol methodSymbol, Symbol mhName, Symbol argsName) {
+		Symbol exName = Symbol.intern(null, "e");
+		return RT.list(TRY,
+				RT.list(Symbol.intern(null, ".invoke"), mhName, argsName),
+				RT.list(CATCH, Symbol.intern(null, "Throwable"), exName,
+						RT.list(Symbol.intern("clojure.lang.Reflector", "mismatchedHandle"),
+								exName,
+								Symbol.intern(null, c.getName()),
+								methodSymbol.name, argsName)));
+	}
+	
+	private static ISeq buildCacheLookup(Symbol cacheName, Class c, Symbol methodSymbol, Symbol argsName) {
+		return RT.list(Symbol.intern(null, "or"),
+				RT.list(Symbol.intern(null, ".val"), cacheName),
+				RT.list(ASSIGN, 
+						RT.list(DOT, cacheName, Symbol.intern(null, "val")),
+						RT.list(Symbol.intern("clojure.lang.Reflector", "findHandle"),
+								Symbol.intern(null, c.getName()),
+								methodSymbol.name, argsName))
+		);
+	}
+	
+	private static ISeq buildLet(IPersistentVector bindings, ISeq innerForm) {
+		return RT.list(Symbol.intern(null, "let"), // (let
+						bindings,
+					   	innerForm);
+	}
+	
+	private static Executable deriveRepresentationalMethod(Class c, Symbol methodSymbol, List<Executable> overloads) {
+		if(methodNamesConstructor(c, methodSymbol.name)) {
+			return overloads.get(0);
+		}
+		
+		// Static and instance methods may have the same name
+		return null;
+	}
+	
 	private static boolean isHintablePrimitive(Class c) {
 		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
 	}
@@ -1348,9 +1402,9 @@ static class MethodValueExpr implements Expr {
 				: ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, retHint));
 
 		ISeq body = RT.listStar(methodSymbol, params.seq());
-		String thunkName = "invoke__" + c.getSimpleName() + "_" + methodSymbol.name;
-		ISeq form = RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
-		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
+		Symbol thunkName = thunkName(c, methodSymbol);
+		ISeq form = RT.list(Symbol.intern("fn"), thunkName, RT.list(params, body));
+		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName.name);
 	}
 
 	private static String methodDescription(Class c, String methodName) {
