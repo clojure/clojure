@@ -13,14 +13,21 @@
 (set! *warn-on-reflection* true)
 
 (deftest test-array-symbols
+  (is (= 'java.lang.String::1 (read-string "java.lang.String::1")))
+  (is (= 'String::1 (read-string "String::1")))
   (is (= 'int::2 (read-string "int::2")))
-  (is (thrown? Exception (eval (read-string "String::-2"))))
-  (is (thrown? Exception (read-string "String::1:")))
-  (is (thrown? Exception (read-string "String::foo")))
-  (is (thrown? Exception (eval '(def int::2 2))))
-  (is (thrown? Exception (eval '(deftype Foo::2 [a]))))
-  (is (thrown? Exception (eval '(.importClass *ns* 'int::2 java.util.UUID))))
-  (is (thrown? IllegalArgumentException (.addAlias *ns* 'String::1 *ns*)))
+  (testing "error conditions"
+    (is (thrown? Exception (read-string "String::-2")))
+    (is (thrown? Exception (read-string "String::1:")))
+    (is (thrown? Exception (read-string "String::foo")))
+    (is (thrown? Exception (read-string "String::n2")))
+    (is (thrown? Exception (read-string ":String::n2")))
+    (is (thrown? Exception (read-string "::String::n2")))
+    (is (thrown? Exception (read-string "foo/java.lang.String::1")))
+    (is (thrown? Exception (eval '(def int::2 2))))
+    (is (thrown? Exception (eval '(deftype Foo::2 [a]))))
+    (is (thrown? Exception (eval '(.importClass *ns* 'int::2 java.util.UUID))))
+    (is (thrown? IllegalArgumentException (.addAlias *ns* 'String::1 *ns*))))
   (testing "array symbol resolution"
     (are [str-repr klass] (= (Class/forName str-repr) klass)
       "[Z" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'boolean::1)
@@ -36,7 +43,6 @@
       "[Ljava.lang.String;" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String::1)
       "[[Ljava.lang.String;" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String::2))
     (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'Object)))
-    (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'foo/java.lang.String::1)))
     (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'ThisIsNotAClassThatCouldBeFound138::2)))
     (is (thrown? ClassNotFoundException
                  (clojure.lang.Compiler$HostExpr/maybeArrayClass 'foo.bar.ThisIsNotAClassThatCouldBeFound138::2))))

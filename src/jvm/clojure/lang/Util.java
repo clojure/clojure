@@ -262,10 +262,12 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
 static public Map decodeArraySymbolComponents(String arrayStr) {
 	if(!Character.isDigit(arrayStr.charAt(arrayStr.length()-1)))
 		return null;
-	if(!LispReader.looksLikeArraySymbol(arrayStr))
+
+	int suffIndex = arrayStr.indexOf("::");
+	if(suffIndex <= 0)
 		return null;
 
-	String className = arrayStr.substring(0, arrayStr.indexOf("::"));
+	String className = arrayStr.substring(0, suffIndex);
 	String dimStr = arrayStr.substring(arrayStr.indexOf("::")+2, arrayStr.length());
 
 	long dim = -1;

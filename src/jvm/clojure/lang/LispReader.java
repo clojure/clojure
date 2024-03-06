@@ -413,7 +413,7 @@ static private Object interpretToken(String s, Resolver resolver) {
 }
 
 static boolean looksLikeArraySymbol(String name){
-	return !name.startsWith(":") && name.indexOf("::") != -1;
+	return name.indexOf("::") != -1;
 }
 
 private static Object matchSymbol(String s, Resolver resolver){
@@ -423,11 +423,12 @@ private static Object matchSymbol(String s, Resolver resolver){
 		int gc = m.groupCount();
 		String ns = m.group(1);
 		String name = m.group(2);
+		boolean isKeyword = s.charAt(0) == ':';
+
 		if(ns != null && ns.endsWith(":/") || name.endsWith(":")) 
 			return null;
-		else if(ns == null &&
-				looksLikeArraySymbol(name) &&
-				Util.decodeArraySymbolComponents(name) == null)
+		else if(looksLikeArraySymbol(name) &&
+				(isKeyword || ns != null || Util.decodeArraySymbolComponents(name) == null))
 			return null;
 		if(s.startsWith("::"))
 			{
@@ -459,7 +460,6 @@ private static Object matchSymbol(String s, Resolver resolver){
                     return null;
                 }
             }
-		boolean isKeyword = s.charAt(0) == ':';
 		Symbol sym = Symbol.intern(s.substring(isKeyword ? 1 : 0));
 		if(isKeyword)
 			return Keyword.intern(sym);
