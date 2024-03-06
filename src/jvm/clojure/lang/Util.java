@@ -259,22 +259,25 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
-static Map decodeArraySymbolComponents(String arrayStr) {
+static public Map decodeArraySymbolComponents(String arrayStr) {
 	if(!Character.isDigit(arrayStr.charAt(arrayStr.length()-1)))
 		return null;
-	
 	if(!LispReader.looksLikeArraySymbol(arrayStr))
 		return null;
 
-	String descriptor = arrayStr.substring(0, arrayStr.indexOf("::"));
+	String className = arrayStr.substring(0, arrayStr.indexOf("::"));
 	String dimStr = arrayStr.substring(arrayStr.indexOf("::")+2, arrayStr.length());
-	long dim = Long.parseLong(dimStr);
+
+	long dim = -1;
+	try {
+		dim = Long.parseLong(dimStr);
+	} catch (Exception ignored) {}
 	
 	if(dim < 1)
-		throw new IllegalArgumentException("Array symbol dimension must be a positive integer");
+		return null;
 
 	return PersistentHashMap.create(
-			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, descriptor),
+			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, className),
 			RT.ARRAY_DIM_KEY, dim);
 }
 

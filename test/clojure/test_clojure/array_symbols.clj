@@ -16,6 +16,7 @@
   (is (= 'int::2 (read-string "int::2")))
   (is (thrown? Exception (eval (read-string "String::-2"))))
   (is (thrown? Exception (read-string "String::1:")))
+  (is (thrown? Exception (read-string "String::foo")))
   (is (thrown? Exception (eval '(def int::2 2))))
   (is (thrown? Exception (eval '(deftype Foo::2 [a]))))
   (is (thrown? Exception (eval '(.importClass *ns* 'int::2 java.util.UUID))))
@@ -54,8 +55,7 @@
     (is (= (resolve 'java.lang.String::1) (class (make-array String 0))))
     (is (= (resolve 'java.util.UUID::1) (class (make-array java.util.UUID 0))))
     (is (= (resolve 'String::2)
-           (class (into-array (class (make-array String 0)) [(into-array String ["a" "b"])]))))
-    (is (nil? (resolve (read-string "String::foo")))))
+           (class (into-array (class (make-array String 0)) [(into-array String ["a" "b"])])))))
   (testing "value position"
     (is (= 42 (let [long::2 42] long::2)))
     (is (= (class (make-array String 0)) String::1))

@@ -424,12 +424,11 @@ private static Object matchSymbol(String s, Resolver resolver){
 		String ns = m.group(1);
 		String name = m.group(2);
 		if(ns != null && ns.endsWith(":/") || name.endsWith(":")) 
-			{
-			if(ns == null && Util.decodeArraySymbolComponents(name) != null)
-				return Symbol.intern(null, name);
-			else
-				return null;
-			}
+			return null;
+		else if(ns == null &&
+				looksLikeArraySymbol(name) &&
+				Util.decodeArraySymbolComponents(name) == null)
+			return null;
 		if(s.startsWith("::"))
 			{
 			Symbol ks = Symbol.intern(s.substring(2));
