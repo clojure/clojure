@@ -272,47 +272,51 @@ public static boolean isAccessibleMatch(Method lhs, Method rhs, Object target) {
 	return match;
 }
 
+public static Constructor findMatchingConstructor(Class c, Object[] args) {
+	Constructor[] allctors = c.getConstructors();
+	ArrayList ctors = new ArrayList();
+	for(int i = 0; i < allctors.length; i++)
+	{
+		Constructor ctor = allctors[i];
+		if(ctor.getParameterTypes().length == args.length)
+			ctors.add(ctor);
+	}
+	if(ctors.isEmpty())
+	{
+		return null;
+	}
+	else if(ctors.size() == 1)
+	{
+		Constructor ctor = (Constructor) ctors.get(0);
+		return ctor;
+	}
+	else //overloaded w/same arity
+	{
+		for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
+		{
+			Constructor ctor = (Constructor) iterator.next();
+			Class[] params = ctor.getParameterTypes();
+			if(isCongruent(params, args))
+			{
+				return ctor;
+			}
+		}
+		return null;
+	}
+}
+
 public static Object invokeConstructor(Class c, Object[] args) {
-	try
-		{
-		Constructor[] allctors = c.getConstructors();
-		ArrayList ctors = new ArrayList();
-		for(int i = 0; i < allctors.length; i++)
-			{
-			Constructor ctor = allctors[i];
-			if(ctor.getParameterTypes().length == args.length)
-				ctors.add(ctor);
-			}
-		if(ctors.isEmpty())
-			{
-			throw new IllegalArgumentException("No matching ctor found"
+	Constructor ctor = findMatchingConstructor(c, args);
+	if(ctor == null) {
+		throw new IllegalArgumentException("No matching ctor found"
 				+ " for " + c);
-			}
-		else if(ctors.size() == 1)
-			{
-			Constructor ctor = (Constructor) ctors.get(0);
+	} else {
+		try {
 			return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
-			}
-		else //overloaded w/same arity
-			{
-			for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
-				{
-				Constructor ctor = (Constructor) iterator.next();
-				Class[] params = ctor.getParameterTypes();
-				if(isCongruent(params, args))
-					{
-					Object[] boxedArgs = boxArgs(params, args);
-					return ctor.newInstance(boxedArgs);
-					}
-				}
-			throw new IllegalArgumentException("No matching ctor found"
-				+ " for " + c);
-			}
+		} catch(Exception e) {
+			throw Util.sneakyThrow(getCauseOrElse(e));
 		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(getCauseOrElse(e));
-		}
+	}
 }
 
 public static Object invokeStaticMethodVariadic(String className, String methodName, Object... args) {
