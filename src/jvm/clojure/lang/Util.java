@@ -265,19 +265,18 @@ static public Map decodeArraySymbolComponents(String arrayStr) {
 		return null;
 
 	String className = arrayStr.substring(0, suffIndex);
-	String dimStr = arrayStr.substring(suffIndex+2, arrayStr.length());
+	String dimStr = arrayStr.substring(suffIndex+2);
 
 	if(dimStr.length() > 1)
 		return null;
 
 	char dimChar = dimStr.charAt(0);
-	
 	if(!(dimChar >= '1' && dimChar <= '9'))
 		return null;
 
 	return PersistentHashMap.create(
 			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, className),
-			RT.ARRAY_DIM_KEY, dimChar - '0');
+			RT.ARRAY_DIM_KEY, (long) dimChar - '0');
 }
 
 public static Symbol arrayTypeToSymbol(Class c) {
@@ -286,7 +285,9 @@ public static Symbol arrayTypeToSymbol(Class c) {
 	Class componentClass = c;
 
 	while(componentClass.isArray()) {
-		dim++;
+		if(++dim > 9)
+			return Symbol.intern(null, c.getName());
+
 		componentClass = componentClass.getComponentType();
 	}
 	return Symbol.intern(null, componentClass.getName() + "::" + dim);

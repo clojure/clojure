@@ -73,4 +73,6 @@
     (is (= "byte::1" (print-str (class (make-array Byte/TYPE 0)))))
     (is (= "java.lang.String::2" (print-str String::2)))
     (is (= "[[java.lang.String::2]]" (print-str [[String::2]])))
-    (is (= "java.util.UUID::4" (print-str java.util.UUID::4)))))
+    (is (= "java.util.UUID::4" (print-str java.util.UUID::4)))
+    (is (= "[[[[[[[[[[Ljava.lang.Object;" (print-str (Class/forName "[[[[[[[[[[Ljava.lang.Object;"))))
+    (is (= "java.lang.Object::9" (print-str (Class/forName "[[[[[[[[[Ljava.lang.Object;"))))))

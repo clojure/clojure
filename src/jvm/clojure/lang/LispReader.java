@@ -412,10 +412,6 @@ static private Object interpretToken(String s, Resolver resolver) {
 	throw Util.runtimeException("Invalid token: " + s);
 }
 
-static boolean looksLikeArraySymbol(String name){
-	return name.indexOf("::") != -1;
-}
-
 private static Object matchSymbol(String s, Resolver resolver){
 	Matcher m = symbolPat.matcher(s);
 	if(m.matches())
@@ -427,7 +423,7 @@ private static Object matchSymbol(String s, Resolver resolver){
 
 		if(ns != null && ns.endsWith(":/") || name.endsWith(":")) 
 			return null;
-		else if(looksLikeArraySymbol(name) &&
+		else if(name.indexOf("::") != -1 &&
 				(isKeyword || ns != null || Util.decodeArraySymbolComponents(name) == null))
 			return null;
 		if(s.startsWith("::"))
