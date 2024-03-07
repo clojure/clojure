@@ -265,7 +265,7 @@ static public Map decodeArraySymbolComponents(String arrayStr) {
 		return null;
 
 	String className = arrayStr.substring(0, suffIndex);
-	String dimStr = arrayStr.substring(arrayStr.indexOf("::")+2, arrayStr.length());
+	String dimStr = arrayStr.substring(suffIndex+2, arrayStr.length());
 
 	if(dimStr.length() > 1)
 		return null;
@@ -275,11 +275,9 @@ static public Map decodeArraySymbolComponents(String arrayStr) {
 	if(!(dimChar >= '1' && dimChar <= '9'))
 		return null;
 
-	long dim = dimChar - '0';
-
 	return PersistentHashMap.create(
 			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, className),
-			RT.ARRAY_DIM_KEY, dim);
+			RT.ARRAY_DIM_KEY, dimChar - '0');
 }
 
 public static Symbol arrayTypeToSymbol(Class c) {
