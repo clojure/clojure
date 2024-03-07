@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 
 public class Reflector{
 
+private static final Class OBJ_ARRAY_CLASS;
+
 private static final MethodHandle CAN_ACCESS_PRED;
 
 // Java 8 is oldest JDK supported
@@ -33,6 +35,14 @@ private static boolean isJava8() {
 }
 
 static {
+	Class objArrClass = null;
+	try {
+		objArrClass = Class.forName("[Ljava.lang.Object;");
+	} catch(ClassNotFoundException e) {
+		// will not happen
+	}
+	OBJ_ARRAY_CLASS = objArrClass;
+
 	MethodHandle pred = null;
 	try {
 		if (! isJava8())
@@ -320,6 +330,28 @@ public static Method findMatchingMethod(Class c, String methodName, Object[] arg
 	} else {
 		return null;
 	}
+}
+
+public static MethodHandle findHandle(Class c, String methodName, Object[] args) {
+	MethodHandles.Lookup lookup = MethodHandles.publicLookup();
+	MethodHandle mh = null;
+	try {
+		if ("new".equals(methodName)) {
+			Constructor ctor = findMatchingConstructor(c, args);
+			mh = (ctor != null) ? lookup.unreflectConstructor(ctor) : null;
+		} else {
+			Method method = findMatchingMethod(c, methodName, args);
+			mh = (method != null) ? lookup.unreflect(method) : null;
+		}
+
+		return mh != null ? mh.asSpreader(OBJ_ARRAY_CLASS, 1) : null;
+	} catch(IllegalAccessException e) {
+		throw Util.sneakyThrow(e);
+	}
+}
+
+public static void mismatchedHandle(Throwable t, MethodHandle mh, Class c, Object[] args) {
+	// TODO
 }
 
 public static Object invokeConstructor(Class c, Object[] args) {
