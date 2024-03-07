@@ -1314,48 +1314,53 @@ static class MethodValueExpr implements Expr {
 	private static Symbol thunkName(Class c, Symbol methodSymbol) {
 		return Symbol.intern(null, "invoke__" + c.getSimpleName() + "_" + methodSymbol.name);
 	}
-	
+
+	private static Symbol S(String name) {
+		return Symbol.intern(null, name);
+	}
+
+	private static Symbol S(String ns, String name) {
+		return Symbol.intern(ns, name);
+	}
+
 	private static ISeq buildReflectiveFnForm(Class c, Symbol methodSymbol, Symbol cacheName) {
 		Symbol thunkName = thunkName(c, methodSymbol);
-		Symbol argsName = Symbol.intern(null, "args");
-		Symbol mhName = (Symbol) Symbol.intern(null, "mh").withMeta(
-				RT.map(RT.TAG_KEY, Symbol.intern(null, "java.lang.invoke.MethodHandle")));
+		Symbol argsName = S("args");
+		Symbol mhName = (Symbol) S("mh").withMeta(
+				RT.map(RT.TAG_KEY, S("java.lang.invoke.MethodHandle")));
 		ISeq invokeForm = buildReflectiveInvokeForm(c, methodSymbol, mhName, argsName);
 		IPersistentVector bindings = PersistentVector.create(
-				argsName, RT.list(Symbol.intern(null, "to-array"), argsName),
+				argsName, RT.list(S("to-array"), argsName),
 				mhName, buildCacheLookup(cacheName, c, methodSymbol, argsName));
-		ISeq fnForm = RT.list(Symbol.intern("fn"), thunkName, 
+		ISeq fnForm = RT.list(S("fn"), thunkName,
 				PersistentVector.create(_AMP_, argsName),
 				buildLet(bindings, invokeForm));
 		return fnForm;
 	}
 
 	private static ISeq buildReflectiveInvokeForm(Class c, Symbol methodSymbol, Symbol mhName, Symbol argsName) {
-		Symbol exName = Symbol.intern(null, "e");
+		Symbol exName = S("e");
 		return RT.list(TRY,
-				RT.list(Symbol.intern(null, ".invoke"), mhName, argsName),
-				RT.list(CATCH, Symbol.intern(null, "Throwable"), exName,
-						RT.list(Symbol.intern("clojure.lang.Reflector", "mismatchedHandle"),
+				RT.list(S(".invoke"), mhName, argsName),
+				RT.list(CATCH, S("Throwable"), exName,
+						RT.list(S("clojure.lang.Reflector", "mismatchedHandle"),
 								exName,
-								Symbol.intern(null, c.getName()),
+								S(c.getName()),
 								methodSymbol.name, argsName)));
 	}
 	
 	private static ISeq buildCacheLookup(Symbol cacheName, Class c, Symbol methodSymbol, Symbol argsName) {
-		return RT.list(Symbol.intern(null, "or"),
-				RT.list(Symbol.intern(null, ".val"), cacheName),
+		return RT.list(S("or"),
+				RT.list(S(".val"), cacheName),
 				RT.list(ASSIGN, 
 						RT.list(DOT, cacheName, Symbol.intern(null, "val")),
-						RT.list(Symbol.intern("clojure.lang.Reflector", "findHandle"),
-								Symbol.intern(null, c.getName()),
-								methodSymbol.name, argsName))
+						RT.list(S("clojure.lang.Reflector", "findHandle"),
+								S(c.getName()), methodSymbol.name, argsName))
 		);
 	}
 	
 	private static ISeq buildLet(IPersistentVector bindings, ISeq innerForm) {
-		return RT.list(Symbol.intern(null, "let"), // (let
-						bindings,
-					   	innerForm);
+		return RT.list(LET, bindings, innerForm);
 	}
 	
 	private static Executable deriveRepresentationalMethod(Class c, Symbol methodSymbol, List<Executable> overloads) {
