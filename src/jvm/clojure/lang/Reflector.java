@@ -16,6 +16,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -272,35 +273,51 @@ public static boolean isAccessibleMatch(Method lhs, Method rhs, Object target) {
 	return match;
 }
 
+// executables must be arity-matched to args
+private static Executable findMatchingExecutable(List executables, Object[] args) {
+	if (executables.isEmpty()) {
+		return null;
+	} else if (executables.size() == 1) {
+		return (Executable) executables.get(0);
+	}
+	Executable foundExec = null;
+	for(Iterator i = executables.iterator(); i.hasNext();)
+	{
+		Executable e = (Executable) i.next();
+		Class[] params = e.getParameterTypes();
+		if(isCongruent(params, args))
+		{
+			if(foundExec == null || Compiler.subsumes(params, foundExec.getParameterTypes()))
+			{
+				foundExec = e;
+			}
+		}
+	}
+	return foundExec;
+}
+
 public static Constructor findMatchingConstructor(Class c, Object[] args) {
 	Constructor[] allctors = c.getConstructors();
-	ArrayList ctors = new ArrayList();
+	List<Constructor> ctors = new ArrayList<Constructor>();
 	for(int i = 0; i < allctors.length; i++)
 	{
 		Constructor ctor = allctors[i];
 		if(ctor.getParameterTypes().length == args.length)
 			ctors.add(ctor);
 	}
-	if(ctors.isEmpty())
-	{
-		return null;
-	}
-	else if(ctors.size() == 1)
-	{
-		Constructor ctor = (Constructor) ctors.get(0);
-		return ctor;
-	}
-	else //overloaded w/same arity
-	{
-		for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
-		{
-			Constructor ctor = (Constructor) iterator.next();
-			Class[] params = ctor.getParameterTypes();
-			if(isCongruent(params, args))
-			{
-				return ctor;
-			}
-		}
+	return (Constructor) findMatchingExecutable(ctors, args);
+}
+
+// Match static method or instance method (first arg is target)
+public static Method findMatchingMethod(Class c, String methodName, Object[] args) {
+	// Try static method
+	Method staticMethod = (Method) findMatchingExecutable(getMethods(c, args.length, methodName, true), args);
+	if(staticMethod != null)
+		return staticMethod;
+	else if (args.length > 0) {
+		args = Arrays.copyOfRange(args, 1, args.length);
+		return (Method) findMatchingExecutable(getMethods(c, args.length, methodName, false), args);
+	} else {
 		return null;
 	}
 }
