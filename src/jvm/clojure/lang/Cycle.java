@@ -95,4 +95,13 @@ public Object reduce(IFn f, Object start){
             s = all;
     }
 }
+
+public int hashCode(){
+    throw new UnsupportedOperationException();
+}
+
+public int hasheq(){
+    throw new UnsupportedOperationException();
+}
+
 }
