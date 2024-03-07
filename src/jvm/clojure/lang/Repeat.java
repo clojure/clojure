@@ -97,4 +97,17 @@ public Object reduce(IFn f, Object start){
     }
 }
 
+public int hashCode(){
+    if(count <= 0)
+        throw new UnsupportedOperationException();
+    else
+        return super.hashCode();
+}
+
+public int hasheq(){
+    if(count <= 0)
+        throw new UnsupportedOperationException();
+    else
+        return super.hasheq();
+}
 }

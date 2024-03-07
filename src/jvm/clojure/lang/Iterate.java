@@ -84,4 +84,12 @@ public Object reduce(IFn rf, Object start){
         v = f.invoke(v);
     }
 }
+
+public int hashCode(){
+    throw new UnsupportedOperationException();
+}
+
+public int hasheq(){
+    throw new UnsupportedOperationException();
+}
 }

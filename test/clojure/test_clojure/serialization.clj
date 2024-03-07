@@ -184,3 +184,10 @@
     ;; stateful seqs
     (enumeration-seq (java.util.Collections/enumeration (range 50)))
     (iterator-seq (.iterator (range 50)))))
+
+;; necessary for CVE-2024-22871
+(deftest CLJ-2839
+  (are [e] (thrown? Exception (.hashCode ^Object (-> e serialize deserialize)))
+    (repeat 1)
+    (iterate identity nil)
+    (cycle [1])))
