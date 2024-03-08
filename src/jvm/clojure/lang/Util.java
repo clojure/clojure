@@ -260,7 +260,7 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
 
 static Pattern arraySymbolPat = Pattern.compile("(.*)::([1-9])$");
 
-static public Map maybeArrayComponents(String arrayStr) {
+public static Map maybeArrayComponents(String arrayStr) {
 	if(!Character.isDigit(arrayStr.charAt(arrayStr.length()-1)))
 		return null;
 
