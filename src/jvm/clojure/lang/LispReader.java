@@ -423,7 +423,7 @@ private static Object matchSymbol(String s, Resolver resolver){
 
 		if(ns != null && ns.endsWith(":/") || name.endsWith(":")) 
 			return null;
-		else if(name.indexOf("::") != -1 &&
+		else if(s.indexOf("::", 1) != -1 &&
 				(isKeyword || ns != null || Util.maybeArrayComponents(name) == null))
 			return null;
 		if(s.startsWith("::"))
