@@ -1,0 +1,19 @@
+name: Release on demand
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: "Version to release"
+        required: true
+      snapshotVersion:
+        description: "Snapshot version after release"
+        required: true
+
+jobs:
+  call-release:
+    uses: clojure/build.ci/.github/workflows/release.yml@master
+    with:
+      releaseVersion: ${{ github.event.inputs.releaseVersion }}
+      snapshotVersion: ${{ github.event.inputs.snapshotVersion }}
+    secrets: inherit

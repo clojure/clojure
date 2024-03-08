@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest] # macOS-latest, windows-latest]
+        java-version: ["8", "11", "17", "21"]
+        distribution: ["temurin", "corretto"]
+        profile: ["test-direct", "test-no-direct"]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: ${{ matrix.distribution }}
+        cache: 'maven'
+    - name: Build with Maven
+      run: mvn -ntp -B -P${{ matrix.profile }} clean test
