@@ -395,7 +395,7 @@ static Symbol resolveSymbol(Symbol sym){
 		{
 		Class ac = HostExpr.maybeArrayClass(sym);
 		if(ac != null)
-			return Util.arrayTypeToSymbol(ac);
+			return Util.toArraySymbol(ac);
 		return Symbol.intern(currentNS().name.name, sym.name);
 		}
 	else if(o instanceof Class)
@@ -1123,7 +1123,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		if (sym.ns != null)
 			return null;
 
-		Map symComponents = Util.decodeArraySymbolComponents(sym.name);
+		Map symComponents = Util.maybeArrayComponents(sym.name);
 		if(symComponents == null)
 			return null;
 

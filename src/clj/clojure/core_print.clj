@@ -381,7 +381,7 @@
 
 (defmethod print-method Class [^Class c, ^Writer w]
   (if (.isArray c)
-    (print-method (clojure.lang.Util/arrayTypeToSymbol c) w)
+    (print-method (clojure.lang.Util/toArraySymbol c) w)
     (.write w (.getName c))))
 
 (defmethod print-dup Class [^Class c, ^Writer w]

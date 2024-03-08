@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.ref.ReferenceQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Util{
 static public boolean equiv(Object k1, Object k2){
@@ -256,30 +258,26 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
-static public Map decodeArraySymbolComponents(String arrayStr) {
+static Pattern arraySymbolPat = Pattern.compile("(.*)::([1-9])$");
+
+static public Map maybeArrayComponents(String arrayStr) {
 	if(!Character.isDigit(arrayStr.charAt(arrayStr.length()-1)))
 		return null;
 
-	int suffIndex = arrayStr.indexOf("::");
-	if(suffIndex <= 0)
+	Matcher m = arraySymbolPat.matcher(arrayStr);
+
+	if(!m.matches())
 		return null;
 
-	String className = arrayStr.substring(0, suffIndex);
-	String dimStr = arrayStr.substring(suffIndex+2);
-
-	if(dimStr.length() > 1)
-		return null;
-
-	char dimChar = dimStr.charAt(0);
-	if(!(dimChar >= '1' && dimChar <= '9'))
-		return null;
+	String className = m.group(1);
+	String dimStr = m.group(2);
 
 	return PersistentHashMap.create(
 			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, className),
-			RT.ARRAY_DIM_KEY, (long) dimChar - '0');
+			RT.ARRAY_DIM_KEY, (long) Character.getNumericValue(dimStr.charAt(0)));
 }
 
-public static Symbol arrayTypeToSymbol(Class c) {
+public static Symbol toArraySymbol(Class c) {
 	if(!c.isArray()) return null;
 	int dim = 0;
 	Class componentClass = c;

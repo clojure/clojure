@@ -65,7 +65,7 @@ public Var intern(Symbol sym){
 		{
 		throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
 		}
-	if(Util.decodeArraySymbolComponents(sym.name) != null)
+	if(Util.maybeArrayComponents(sym.name) != null)
 		{
 			throw new IllegalArgumentException("Can't intern array symbol");
 		}
@@ -163,7 +163,7 @@ Class referenceClass(Symbol sym, Class val){
         {
         throw new IllegalArgumentException("Can't intern namespace-qualified symbol");
         }
-	if(Util.decodeArraySymbolComponents(sym.name) != null)
+	if(Util.maybeArrayComponents(sym.name) != null)
 		{
 		throw new IllegalArgumentException("Can't intern array symbol");
 		}
@@ -254,7 +254,7 @@ public Namespace lookupAlias(Symbol alias){
 public void addAlias(Symbol alias, Namespace ns){
 	if (alias == null || ns == null)
 		throw new NullPointerException("Expecting Symbol + Namespace");
-	if(Util.decodeArraySymbolComponents(alias.name) != null)
+	if(Util.maybeArrayComponents(alias.name) != null)
 		throw new IllegalArgumentException("Can't use array symbols as a namespace alias");
 	IPersistentMap map = getAliases();
 	while(!map.containsKey(alias))
