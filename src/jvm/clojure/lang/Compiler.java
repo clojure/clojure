@@ -1232,14 +1232,14 @@ static class MethodValueExpr implements Expr {
 			throw paramTagsDontResolveException(c, methodName, hintedSig, filteredMethods.size());
 	}
 
-	private static boolean methodNamesConstructor(Class c, String methodName) {
-		return c != null && methodName.equals("new");
+	private static boolean methodNamesConstructor(String methodName) {
+		return methodName.equals("new");
 	}
 
 	private static List<Executable> methodsWithName(Class c, String name) {
 		final Executable[] methods;
 		final String methodName;
-		if (methodNamesConstructor(c, name)) {
+		if (methodNamesConstructor(name)) {
 			methods = c.getConstructors();
 			methodName = c.getName();
 		}
@@ -1363,15 +1363,6 @@ static class MethodValueExpr implements Expr {
 		return RT.list(LET, bindings, innerForm);
 	}
 	
-	private static Executable deriveRepresentationalMethod(Class c, Symbol methodSymbol, List<Executable> overloads) {
-		if(methodNamesConstructor(c, methodSymbol.name)) {
-			return overloads.get(0);
-		}
-		
-		// Static and instance methods may have the same name
-		return null;
-	}
-	
 	private static boolean isHintablePrimitive(Class c) {
 		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
 	}
@@ -1413,7 +1404,7 @@ static class MethodValueExpr implements Expr {
 	}
 
 	private static String methodDescription(Class c, String methodName) {
-		boolean isCtor = methodNamesConstructor(c, methodName);
+		boolean isCtor = methodNamesConstructor(methodName);
 		String type = isCtor ? "constructor" : "method";
 		return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 	}
@@ -4335,8 +4326,7 @@ static class InvokeExpr implements Expr{
 
 	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
 		if(!mexpr.isResolved()) {
-			// default to static method with inference
-			return new StaticMethodExpr(source, line, column, tag, mexpr.c, munge(mexpr.methodName), args, tailPosition);
+			return buildFlowInvocation(mexpr, tag, args);
 		}
 
 		if(isConstructor(mexpr.method))
@@ -4349,6 +4339,47 @@ static class InvokeExpr implements Expr{
 
 		return new StaticMethodExpr(source, line, column, tag, mexpr.c,
 				munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
+	}
+
+	private static Expr buildFlowInvocation(MethodValueExpr mexpr, Symbol tag, IPersistentVector args) {
+		Executable method = null;
+		if(MethodValueExpr.methodNamesConstructor(mexpr.methodName)) {
+			method = mexpr.overloads.get(0);
+		}
+		
+		if(method == null) {
+			// filter by arg count eliminates static/instance ambiguity
+			List<Executable> overloads = mexpr.getOverloads().stream()
+					.filter(m -> m.getParameterCount() == args.count())
+					.collect(Collectors.toList());
+
+			if(!overloads.isEmpty()) 
+				method = overloads.get(0);
+		}
+
+		// TODO: throw if method still null?
+		
+		if(isConstructor(method))
+			return buildConstructorFlowForm(mexpr, method, tag, args);
+		else if(isStaticMethod(method))
+			return buildStaticMethodFlowForm(mexpr, method, tag, args);
+		else
+			return buildInstanceMethodFlowForm(mexpr, method, tag, args);
+	}
+
+	// (new Classname-symbol args*)
+	private static Expr buildConstructorFlowForm(MethodValueExpr mexpr, Executable method, Symbol tag, IPersistentVector args) {
+		ISeq form = RT.listStar(NEW, Symbol.intern(null, method.getDeclaringClass()), RT.seq(args));
+		return analyze(C.EVAL, form);
+	}
+
+	// (. Classname-symbol method-symbol args*)
+	private static Expr buildStaticMethodFlowForm(MethodValueExpr mexpr, Executable method, Symbol tag, IPersistentVector args) {
+		return null;
+	}
+
+	private static Expr buildInstanceMethodFlowForm(MethodValueExpr mexpr, Executable method, Symbol tag, IPersistentVector args) {
+		return null;
 	}
 }
 
