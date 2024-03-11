@@ -129,59 +129,26 @@ private static String noMethodReport(String methodName, Object target, Object[] 
 	 return "No matching method " + methodName + " found taking " + args.length + " args"
 			+ (target==null?"":" for " + target.getClass());
 }
-static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
-		{
-	Method m = null;
-	Object[] boxedArgs = null;
-	if(methods.isEmpty())
-		{
-		throw new IllegalArgumentException(noMethodReport(methodName,target,args));
-		}
-	else if(methods.size() == 1)
-		{
-		m = (Method) methods.get(0);
-		boxedArgs = boxArgs(m.getParameterTypes(), args);
-		}
-	else //overloaded w/same arity
-		{
-		Method foundm = null;
-		for(Iterator i = methods.iterator(); i.hasNext();)
-			{
-			m = (Method) i.next();
+static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args) {
+	Method m = (Method)matchExecutableByParams(methods, args);
 
-			Class[] params = m.getParameterTypes();
-			if(isCongruent(params, args))
-				{
-				if(foundm == null || Compiler.subsumes(params, foundm.getParameterTypes()))
-					{
-					foundm = m;
-					boxedArgs = boxArgs(params, args);
-					}
-				}
-			}
-		m = foundm;
-		}
 	if(m == null)
 		throw new IllegalArgumentException(noMethodReport(methodName,target,args));
 
-	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target))
-		{
+	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target)) {
 		//public method of non-public class, try to find it in hierarchy
 		Method oldm = m;
 		m = getAsMethodOfAccessibleBase(target.getClass(), m, target);
 		if(m == null)
 			throw new IllegalArgumentException("Can't call public method of non-public class: " +
-			                                    oldm.toString());
-		}
-	try
-		{
-		return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
-		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(getCauseOrElse(e));
-		}
+					oldm.toString());
+	}
 
+	try {
+		return prepRet(m.getReturnType(), m.invoke(target, boxArgs(m.getParameterTypes(), args)));
+	} catch(Exception e) {
+		throw Util.sneakyThrow(getCauseOrElse(e));
+	}
 }
 
 // DEPRECATED - replaced by getAsMethodOfAccessibleBase()
@@ -283,8 +250,8 @@ public static boolean isAccessibleMatch(Method lhs, Method rhs, Object target) {
 	return match;
 }
 
-// executables must be arity-matched to args
-private static Executable findMatchingExecutable(List executables, Object[] args) {
+// executables must be same arity as args
+private static Executable matchExecutableByParams(List executables, Object[] args) {
 	if (executables.isEmpty()) {
 		return null;
 	} else if (executables.size() == 1) {
@@ -315,21 +282,31 @@ public static Constructor findMatchingConstructor(Class c, Object[] args) {
 		if(ctor.getParameterTypes().length == args.length)
 			ctors.add(ctor);
 	}
-	return (Constructor) findMatchingExecutable(ctors, args);
+	return (Constructor) matchExecutableByParams(ctors, args);
 }
 
-// Match static method or instance method (first arg is target)
-public static Method findMatchingMethod(Class c, String methodName, Object[] args) {
-	// Try static method
-	Method staticMethod = (Method) findMatchingExecutable(getMethods(c, args.length, methodName, true), args);
-	if(staticMethod != null)
-		return staticMethod;
-	else if (args.length > 0) {
-		args = Arrays.copyOfRange(args, 1, args.length);
-		return (Method) findMatchingExecutable(getMethods(c, args.length, methodName, false), args);
-	} else {
+public static Method findStaticMethod(Class c, String methodName, Object[] args) {
+	return (Method) matchExecutableByParams(getMethods(c, args.length, methodName, false), args);
+}
+
+public static Method findInstanceMethod(Class c, Object target, String methodName, Object[] args) {
+	if(target == null)
 		return null;
+	if(c == null)
+		c = target.getClass();
+
+	Method m = (Method) matchExecutableByParams(getMethods(c, args.length, methodName, true), args);
+
+	// check accessibility
+	if(m != null && (!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target))) {
+		//public method of non-public class, try to find it in hierarchy
+		Method oldm = m;
+		m = getAsMethodOfAccessibleBase(c, m, target);
+		if(m == null)
+			throw new IllegalArgumentException("Can't call public method of non-public class: " +
+					oldm.toString());
 	}
+	return m;
 }
 
 public static MethodHandle findHandle(Class c, String methodName, Object[] args) {
@@ -340,10 +317,12 @@ public static MethodHandle findHandle(Class c, String methodName, Object[] args)
 			Constructor ctor = findMatchingConstructor(c, args);
 			mh = (ctor != null) ? lookup.unreflectConstructor(ctor) : null;
 		} else {
-			Method method = findMatchingMethod(c, methodName, args);
+			Method method = findStaticMethod(c, methodName, args);
+			if(method == null && args.length > 0) {
+				method = findInstanceMethod(c, args[0], methodName, Arrays.copyOfRange(args, 1, args.length));
+			}
 			mh = (method != null) ? lookup.unreflect(method) : null;
 		}
-
 		return mh != null ? mh.asSpreader(OBJ_ARRAY_CLASS, 1) : null;
 	} catch(IllegalAccessException e) {
 		throw Util.sneakyThrow(e);
