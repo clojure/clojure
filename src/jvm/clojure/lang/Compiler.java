@@ -4315,7 +4315,7 @@ static class InvokeExpr implements Expr{
 			}
 
 		if(fexpr instanceof MethodValueExpr)
-			return toHostExpr((MethodValueExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
+			return toHostExpr((MethodValueExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args, form.next());
 
 //		if(args.count() > MAX_POSITIONAL_ARITY)
 //			throw new IllegalArgumentException(
@@ -4324,9 +4324,9 @@ static class InvokeExpr implements Expr{
 		return new InvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), fexpr, args, tailPosition);
 	}
 
-	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
+	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args, ISeq unAnalyzedArgs) {
 		if(!mexpr.isResolved()) {
-			return buildFlowInvocation(mexpr, tag, args);
+			return buildFlowInvocation(mexpr, source, line, column, tag, tailPosition, args, unAnalyzedArgs);
 		}
 
 		if(isConstructor(mexpr.method))
@@ -4341,45 +4341,43 @@ static class InvokeExpr implements Expr{
 				munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
 	}
 
-	private static Expr buildFlowInvocation(MethodValueExpr mexpr, Symbol tag, IPersistentVector args) {
+	private static Expr buildFlowInvocation(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args, ISeq unAnalyzedArgs) {
 		Executable method = null;
 		if(MethodValueExpr.methodNamesConstructor(mexpr.methodName)) {
 			method = mexpr.overloads.get(0);
 		}
 		
-		if(method == null) {
+/*		if(method == null) {
 			// filter by arg count eliminates static/instance ambiguity
 			List<Executable> overloads = mexpr.getOverloads().stream()
 					.filter(m -> m.getParameterCount() == args.count())
 					.collect(Collectors.toList());
 
-			if(!overloads.isEmpty()) 
-				method = overloads.get(0);
-		}
+			if(!overloads.isEmpty()) */
+				method = mexpr.overloads.get(0);
+		//}
 
 		// TODO: throw if method still null?
 		
 		if(isConstructor(method))
-			return buildConstructorFlowForm(mexpr, method, tag, args);
+			return new NewExpr(mexpr.c, args, line, column);
 		else if(isStaticMethod(method))
-			return buildStaticMethodFlowForm(mexpr, method, tag, args);
+			return new StaticMethodExpr(source, line, column, tag, mexpr.c,
+					munge(mexpr.methodName), args, tailPosition);
+		else if(isInstanceMethod(method))
+			return buildInstanceMethodFlowForm(mexpr, method, tag, unAnalyzedArgs);
 		else
-			return buildInstanceMethodFlowForm(mexpr, method, tag, args);
+			return new StaticMethodExpr(source, line, column, tag, mexpr.c,
+					munge(mexpr.methodName), args, tailPosition);
 	}
 
-	// (new Classname-symbol args*)
-	private static Expr buildConstructorFlowForm(MethodValueExpr mexpr, Executable method, Symbol tag, IPersistentVector args) {
-		ISeq form = RT.listStar(NEW, Symbol.intern(null, method.getDeclaringClass()), RT.seq(args));
+	private static Expr buildInstanceMethodFlowForm(MethodValueExpr mexpr, Executable method, Symbol tag, ISeq args) {
+		Symbol thisName = (Symbol) Symbol.intern(null, "this-arg")
+				.withMeta(RT.map(RT.TAG_KEY, Symbol.intern(null, mexpr.c.getName())));
+		ISeq invokeForm = RT.listStar(DOT, thisName, Symbol.intern(null, method.getName()), RT.seq(RT.next(args)));
+		ISeq form = RT.list(LET, PersistentVector.create(thisName, RT.first(args)),
+				invokeForm);
 		return analyze(C.EVAL, form);
-	}
-
-	// (. Classname-symbol method-symbol args*)
-	private static Expr buildStaticMethodFlowForm(MethodValueExpr mexpr, Executable method, Symbol tag, IPersistentVector args) {
-		return null;
-	}
-
-	private static Expr buildInstanceMethodFlowForm(MethodValueExpr mexpr, Executable method, Symbol tag, IPersistentVector args) {
-		return null;
 	}
 }
 
