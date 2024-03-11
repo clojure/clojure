@@ -3034,7 +3034,8 @@
   [n x] (take n (repeat x)))
 
 (defn iterate
-  "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
+  "Returns a lazy (infinite!) sequence of x, (f x), (f (f x)) etc.
+  f must be free of side-effects"
   {:added "1.0"
    :static true}
   [f x] (clojure.lang.Iterate/create f x) )
