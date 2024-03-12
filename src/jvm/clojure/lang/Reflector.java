@@ -289,7 +289,7 @@ public static Method findStaticMethod(Class c, String methodName, Object[] args)
 	return (Method) matchExecutableByParams(getMethods(c, args.length, methodName, false), args);
 }
 
-public static Method findInstanceMethod(Class c, Object target, String methodName, Object[] args) {
+public static Method findInstanceMethod(Class c, String methodName, Object target, Object[] args) {
 	if(target == null)
 		return null;
 	if(c == null)
@@ -315,15 +315,19 @@ public static MethodHandle findHandle(Class c, String methodName, Object[] args)
 	try {
 		if ("new".equals(methodName)) {
 			Constructor ctor = findMatchingConstructor(c, args);
-			mh = (ctor != null) ? lookup.unreflectConstructor(ctor) : null;
+			if(ctor == null)
+				throw new IllegalArgumentException("No matching constructor found for " + c);
+			mh = lookup.unreflectConstructor(ctor);
 		} else {
 			Method method = findStaticMethod(c, methodName, args);
 			if(method == null && args.length > 0) {
-				method = findInstanceMethod(c, args[0], methodName, Arrays.copyOfRange(args, 1, args.length));
+				method = findInstanceMethod(c, methodName, args[0], Arrays.copyOfRange(args, 1, args.length));
+				if(method == null)
+					throw new IllegalArgumentException("No matching method " + methodName + " found in " + c);
 			}
-			mh = (method != null) ? lookup.unreflect(method) : null;
+			mh = lookup.unreflect(method);
 		}
-		return mh != null ? mh.asSpreader(OBJ_ARRAY_CLASS, 1) : null;
+		return mh.asSpreader(OBJ_ARRAY_CLASS, 1);
 	} catch(IllegalAccessException e) {
 		throw Util.sneakyThrow(e);
 	}
