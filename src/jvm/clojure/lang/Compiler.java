@@ -1256,10 +1256,6 @@ static class MethodValueExpr implements Expr {
 	public boolean isResolved() {
 		return method != null;
 	}
-	
-	public List<Executable> getOverloads() {
-		return overloads;
-	}
 
 	@Override
 	public Object eval() {
@@ -4341,24 +4337,32 @@ static class InvokeExpr implements Expr{
 				munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
 	}
 
+	private static boolean containsHomogenousMethodKind(List<Executable> overloads) {
+		boolean isStatic = isStaticMethod(overloads.get(0));
+		for(int i = 1; i < overloads.size(); i++)
+			if(isStaticMethod(overloads.get(i)) != isStatic)
+				return false;
+		return true;
+	}
+
 	private static Expr buildFlowInvocation(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args, ISeq unAnalyzedArgs) {
 		Executable method = null;
 		if(MethodValueExpr.methodNamesConstructor(mexpr.methodName)) {
 			method = mexpr.overloads.get(0);
 		}
 		
-/*		if(method == null) {
-			// filter by arg count eliminates static/instance ambiguity
-			List<Executable> overloads = mexpr.getOverloads().stream()
-					.filter(m -> m.getParameterCount() == args.count())
+		if(method == null) {
+			List<Executable> overloads = mexpr.overloads.stream()
+					.filter(m -> {
+						return (m.getParameterCount() == args.count())
+								|| (m.getParameterCount() == args.count()-1);
+					})
 					.collect(Collectors.toList());
 
-			if(!overloads.isEmpty()) */
-				method = mexpr.overloads.get(0);
-		//}
+			if(!overloads.isEmpty() && containsHomogenousMethodKind(overloads))
+				method = overloads.get(0);
+		}
 
-		// TODO: throw if method still null?
-		
 		if(isConstructor(method))
 			return new NewExpr(mexpr.c, args, line, column);
 		else if(isStaticMethod(method))
@@ -4367,6 +4371,8 @@ static class InvokeExpr implements Expr{
 		else if(isInstanceMethod(method))
 			return buildInstanceMethodFlowForm(mexpr, method, tag, unAnalyzedArgs);
 		else
+			// If method not set then assume static and fallback to existing inference
+			// and error conditions
 			return new StaticMethodExpr(source, line, column, tag, mexpr.c,
 					munge(mexpr.methodName), args, tailPosition);
 	}
