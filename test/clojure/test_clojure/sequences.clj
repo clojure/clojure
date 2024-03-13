@@ -1587,6 +1587,16 @@
     (range 1 2) 1 101
     (range 1 3) 3 103))
 
+(deftest infinite-seq-hash
+  (are [e] (thrown? Exception (.hashCode ^Object e))
+    (iterate identity nil)
+    (cycle [1])
+    (repeat 1))
+  (are [e] (thrown? Exception (.hasheq ^clojure.lang.IHashEq e))
+    (iterate identity nil)
+    (cycle [1])
+    (repeat 1)))
+
 (defspec iteration-seq-equals-reduce 1000
   (prop/for-all [initk gen/int
                  seed gen/int]

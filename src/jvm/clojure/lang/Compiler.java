@@ -1337,7 +1337,7 @@ static class MethodValueExpr implements Expr {
 	//      (try
 	//        (.invoke mh args)
 	//        (catch Throwable e
-	//          (Reflector/mismatchedHandle e CLASS MNAME args)))))
+	//          (Reflector/mismatchedHandle e mh CLASS args)))))
 	private static ISeq buildReflectiveFnForm(Class c, Symbol methodSymbol, Symbol cacheName) {
 		Symbol argsName = S("args");
 		Symbol mhName = (Symbol) S("mh").withMeta(
@@ -1355,16 +1355,14 @@ static class MethodValueExpr implements Expr {
 	//      (try
 	//          (.invoke mh args)
 	//          (catch Throwable e
-	//            (Reflector/mismatchedHandle e CLASS MNAME args))))
+	//            (Reflector/mismatchedHandle e mh CLASS args))))
 	private static ISeq buildReflectiveInvokeForm(Class c, Symbol methodSymbol, Symbol mhName, Symbol argsName) {
 		Symbol exName = S("e");
 		return RT.list(TRY,
 				RT.list(S(".invoke"), mhName, argsName),
 				RT.list(CATCH, S("Throwable"), exName,
 						RT.list(S("clojure.lang.Reflector", "mismatchedHandle"),
-								exName,
-								S(c.getName()),
-								methodSymbol.name, argsName)));
+								exName, mhName, S(c.getName()), argsName)));
 	}
 	
 	//      (or (.val cache)

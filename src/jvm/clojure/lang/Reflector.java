@@ -16,6 +16,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -23,6 +24,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Reflector{
+
+private static final Class OBJ_ARRAY_CLASS;
 
 private static final MethodHandle CAN_ACCESS_PRED;
 
@@ -32,6 +35,14 @@ private static boolean isJava8() {
 }
 
 static {
+	Class objArrClass = null;
+	try {
+		objArrClass = Class.forName("[Ljava.lang.Object;");
+	} catch(ClassNotFoundException e) {
+		// will not happen
+	}
+	OBJ_ARRAY_CLASS = objArrClass;
+
 	MethodHandle pred = null;
 	try {
 		if (! isJava8())
@@ -118,59 +129,26 @@ private static String noMethodReport(String methodName, Object target, Object[] 
 	 return "No matching method " + methodName + " found taking " + args.length + " args"
 			+ (target==null?"":" for " + target.getClass());
 }
-static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
-		{
-	Method m = null;
-	Object[] boxedArgs = null;
-	if(methods.isEmpty())
-		{
-		throw new IllegalArgumentException(noMethodReport(methodName,target,args));
-		}
-	else if(methods.size() == 1)
-		{
-		m = (Method) methods.get(0);
-		boxedArgs = boxArgs(m.getParameterTypes(), args);
-		}
-	else //overloaded w/same arity
-		{
-		Method foundm = null;
-		for(Iterator i = methods.iterator(); i.hasNext();)
-			{
-			m = (Method) i.next();
+static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args) {
+	Method m = (Method)matchExecutableByParams(methods, args);
 
-			Class[] params = m.getParameterTypes();
-			if(isCongruent(params, args))
-				{
-				if(foundm == null || Compiler.subsumes(params, foundm.getParameterTypes()))
-					{
-					foundm = m;
-					boxedArgs = boxArgs(params, args);
-					}
-				}
-			}
-		m = foundm;
-		}
 	if(m == null)
 		throw new IllegalArgumentException(noMethodReport(methodName,target,args));
 
-	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target))
-		{
+	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target)) {
 		//public method of non-public class, try to find it in hierarchy
 		Method oldm = m;
 		m = getAsMethodOfAccessibleBase(target.getClass(), m, target);
 		if(m == null)
 			throw new IllegalArgumentException("Can't call public method of non-public class: " +
-			                                    oldm.toString());
-		}
-	try
-		{
-		return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
-		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(getCauseOrElse(e));
-		}
+					oldm.toString());
+	}
 
+	try {
+		return prepRet(m.getReturnType(), m.invoke(target, boxArgs(m.getParameterTypes(), args)));
+	} catch(Exception e) {
+		throw Util.sneakyThrow(getCauseOrElse(e));
+	}
 }
 
 // DEPRECATED - replaced by getAsMethodOfAccessibleBase()
@@ -272,47 +250,101 @@ public static boolean isAccessibleMatch(Method lhs, Method rhs, Object target) {
 	return match;
 }
 
+// executables must be same arity as args
+private static Executable matchExecutableByParams(List executables, Object[] args) {
+	if (executables.isEmpty()) {
+		return null;
+	} else if (executables.size() == 1) {
+		return (Executable) executables.get(0);
+	}
+	Executable foundExec = null;
+	for(Iterator i = executables.iterator(); i.hasNext();)
+	{
+		Executable e = (Executable) i.next();
+		Class[] params = e.getParameterTypes();
+		if(isCongruent(params, args))
+		{
+			if(foundExec == null || Compiler.subsumes(params, foundExec.getParameterTypes()))
+			{
+				foundExec = e;
+			}
+		}
+	}
+	return foundExec;
+}
+
+public static Constructor findMatchingConstructor(Class c, Object[] args) {
+	Constructor[] allctors = c.getConstructors();
+	List<Constructor> ctors = new ArrayList<Constructor>();
+	for(int i = 0; i < allctors.length; i++)
+	{
+		Constructor ctor = allctors[i];
+		if(ctor.getParameterTypes().length == args.length)
+			ctors.add(ctor);
+	}
+	return (Constructor) matchExecutableByParams(ctors, args);
+}
+
+public static Method findStaticMethod(Class c, String methodName, Object[] args) {
+	return (Method) matchExecutableByParams(getMethods(c, args.length, methodName, false), args);
+}
+
+public static Method findInstanceMethod(Class c, Object target, String methodName, Object[] args) {
+	if(target == null)
+		return null;
+	if(c == null)
+		c = target.getClass();
+
+	Method m = (Method) matchExecutableByParams(getMethods(c, args.length, methodName, true), args);
+
+	// check accessibility
+	if(m != null && (!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target))) {
+		//public method of non-public class, try to find it in hierarchy
+		Method oldm = m;
+		m = getAsMethodOfAccessibleBase(c, m, target);
+		if(m == null)
+			throw new IllegalArgumentException("Can't call public method of non-public class: " +
+					oldm.toString());
+	}
+	return m;
+}
+
+public static MethodHandle findHandle(Class c, String methodName, Object[] args) {
+	MethodHandles.Lookup lookup = MethodHandles.publicLookup();
+	MethodHandle mh = null;
+	try {
+		if ("new".equals(methodName)) {
+			Constructor ctor = findMatchingConstructor(c, args);
+			mh = (ctor != null) ? lookup.unreflectConstructor(ctor) : null;
+		} else {
+			Method method = findStaticMethod(c, methodName, args);
+			if(method == null && args.length > 0) {
+				method = findInstanceMethod(c, args[0], methodName, Arrays.copyOfRange(args, 1, args.length));
+			}
+			mh = (method != null) ? lookup.unreflect(method) : null;
+		}
+		return mh != null ? mh.asSpreader(OBJ_ARRAY_CLASS, 1) : null;
+	} catch(IllegalAccessException e) {
+		throw Util.sneakyThrow(e);
+	}
+}
+
+public static void mismatchedHandle(Throwable t, MethodHandle mh, Class c, Object[] args) {
+	// TODO
+}
+
 public static Object invokeConstructor(Class c, Object[] args) {
-	try
-		{
-		Constructor[] allctors = c.getConstructors();
-		ArrayList ctors = new ArrayList();
-		for(int i = 0; i < allctors.length; i++)
-			{
-			Constructor ctor = allctors[i];
-			if(ctor.getParameterTypes().length == args.length)
-				ctors.add(ctor);
-			}
-		if(ctors.isEmpty())
-			{
-			throw new IllegalArgumentException("No matching ctor found"
+	Constructor ctor = findMatchingConstructor(c, args);
+	if(ctor == null) {
+		throw new IllegalArgumentException("No matching ctor found"
 				+ " for " + c);
-			}
-		else if(ctors.size() == 1)
-			{
-			Constructor ctor = (Constructor) ctors.get(0);
+	} else {
+		try {
 			return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
-			}
-		else //overloaded w/same arity
-			{
-			for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
-				{
-				Constructor ctor = (Constructor) iterator.next();
-				Class[] params = ctor.getParameterTypes();
-				if(isCongruent(params, args))
-					{
-					Object[] boxedArgs = boxArgs(params, args);
-					return ctor.newInstance(boxedArgs);
-					}
-				}
-			throw new IllegalArgumentException("No matching ctor found"
-				+ " for " + c);
-			}
+		} catch(Exception e) {
+			throw Util.sneakyThrow(getCauseOrElse(e));
 		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(getCauseOrElse(e));
-		}
+	}
 }
 
 public static Object invokeStaticMethodVariadic(String className, String methodName, Object... args) {
