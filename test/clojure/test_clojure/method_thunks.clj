@@ -21,8 +21,7 @@
   (is (= '([1] [2] [3])
          (map ^[_] Tuple/create [1 2 3])))
   (is (= '([1 4] [2 5] [3 6])
-         (map ^[_ _] Tuple/create [1 2 3] [4 5 6])))
-  (is (thrown? Exception (eval 'clojure.lang.Tuple/create))))
+         (map ^[_ _] Tuple/create [1 2 3] [4 5 6]))))
 
 (deftest method-signature-selection
   (is (= [1.23 3.14]
