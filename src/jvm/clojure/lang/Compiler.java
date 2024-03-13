@@ -1308,13 +1308,13 @@ static class MethodValueExpr implements Expr {
 	//          (.invoke mh args)
 	//          (catch Throwable e
 	//            (Reflector/mismatchedHandle e CLASS MNAME args))))))
-	private static LetExpr buildReflectiveThunk(Class c, Symbol methodSymbol) {
+	private static Expr buildReflectiveThunk(Class c, Symbol methodSymbol) {
 		Symbol cacheName = Symbol.intern(null, "cache");
 		IPersistentVector cacheBinding = PersistentVector.create(
 				cacheName, RT.list(Symbol.intern(null, "clojure.lang.Box."), null));
 		ISeq fnForm = buildReflectiveFnForm(c, methodSymbol, cacheName);
 		ISeq letForm = RT.list(LET, cacheBinding, fnForm);
-		return (LetExpr) analyzeSeq(C.EVAL, letForm, methodSymbol.name);
+		return analyzeSeq(C.EVAL, letForm, methodSymbol.name);
 	}
 
 	private static Symbol thunkName(Class c, Symbol methodSymbol) {
