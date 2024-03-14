@@ -130,7 +130,7 @@ private static String noMethodReport(String methodName, Object target, Object[] 
 			+ (target==null?"":" for " + target.getClass());
 }
 static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args) {
-	Method m = (Method)matchExecutableByParams(methods, args);
+	Method m = (Method) resolveOverload(methods, args);
 
 	if(m == null)
 		throw new IllegalArgumentException(noMethodReport(methodName,target,args));
@@ -251,7 +251,7 @@ public static boolean isAccessibleMatch(Method lhs, Method rhs, Object target) {
 }
 
 // executables must be same arity as args
-private static Executable matchExecutableByParams(List executables, Object[] args) {
+private static Executable resolveOverload(List executables, Object[] args) {
 	if (executables.isEmpty()) {
 		return null;
 	} else if (executables.size() == 1) {
@@ -273,59 +273,58 @@ private static Executable matchExecutableByParams(List executables, Object[] arg
 	return foundExec;
 }
 
-public static Constructor findMatchingConstructor(Class c, Object[] args) {
-	Constructor[] allctors = c.getConstructors();
-	List<Constructor> ctors = new ArrayList<Constructor>();
-	for(int i = 0; i < allctors.length; i++)
-	{
-		Constructor ctor = allctors[i];
-		if(ctor.getParameterTypes().length == args.length)
-			ctors.add(ctor);
+// for error printing
+private static String argsDescription(Object[] args) {
+	StringBuilder sb = new StringBuilder();
+	for(int i=0; i<args.length; i++) {
+		sb.append(args[i] != null ? args[i].getClass().getName() : "nil");
+		sb.append(", ");
 	}
-	return (Constructor) matchExecutableByParams(ctors, args);
+	return sb.toString();
 }
 
-public static Method findStaticMethod(Class c, String methodName, Object[] args) {
-	return (Method) matchExecutableByParams(getMethods(c, args.length, methodName, false), args);
-}
-
-public static Method findInstanceMethod(Class c, String methodName, Object target, Object[] args) {
-	if(target == null)
-		return null;
-	if(c == null)
-		c = target.getClass();
-
-	Method m = (Method) matchExecutableByParams(getMethods(c, args.length, methodName, true), args);
-
-	// check accessibility
-	if(m != null && (!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target))) {
-		//public method of non-public class, try to find it in hierarchy
-		Method oldm = m;
-		m = getAsMethodOfAccessibleBase(c, m, target);
-		if(m == null)
-			throw new IllegalArgumentException("Can't call public method of non-public class: " +
-					oldm.toString());
-	}
-	return m;
-}
-
+// finds handle or throws
 public static MethodHandle findHandle(Class c, String methodName, Object[] args) {
 	MethodHandles.Lookup lookup = MethodHandles.publicLookup();
 	MethodHandle mh = null;
 	try {
 		if ("new".equals(methodName)) {
-			Constructor ctor = findMatchingConstructor(c, args);
+			List<Constructor> ctors = constructorsWithArity(c, args.length);
+			if(ctors.isEmpty())
+				throw new IllegalArgumentException("No methods named " + methodName + " found in " + c.getName());
+
+			Constructor ctor = (Constructor) resolveOverload(ctors, args);
 			if(ctor == null)
-				throw new IllegalArgumentException("No matching constructor found for " + c);
+				throw new IllegalArgumentException("No matching constructor found for " + c.getName());
 			mh = lookup.unreflectConstructor(ctor);
 		} else {
-			Method method = findStaticMethod(c, methodName, args);
-			if(method == null && args.length > 0) {
-				method = findInstanceMethod(c, methodName, args[0], Arrays.copyOfRange(args, 1, args.length));
-				if(method == null)
-					throw new IllegalArgumentException("No matching method " + methodName + " found in " + c);
+			List<Method> methods = getMethods(c, args.length, methodName, true);
+			Object target = null;
+			if(methods.isEmpty()) {
+				// No statics, try instance
+				methods = getMethods(c, args.length - 1, methodName, false);
+				if (methods.isEmpty() && args.length > 0) {
+					throw new IllegalArgumentException("No methods named " + methodName + " found in " + c.getName());
+				} else { // drop target from args
+					target = args[0];
+					args = Arrays.copyOfRange(args, 1, args.length);
+				}
 			}
-			mh = lookup.unreflect(method);
+
+			Method m = (Method)resolveOverload(methods, args);
+			if(m == null) {
+				throw new IllegalArgumentException("No matching method " + methodName + " found in " + c.getName());
+			}
+
+			// check visibility (e.g. module visibility)
+			if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target)) {
+				//public method of non-public class, try to find it in hierarchy
+				Method oldm = m;
+				m = getAsMethodOfAccessibleBase(c, m, target);
+				if(m == null)
+					throw new IllegalArgumentException("Can't call public method of non-public class: " + oldm.toString());
+			}
+			mh = lookup.unreflect(m);
 		}
 		return mh.asSpreader(OBJ_ARRAY_CLASS, 1);
 	} catch(IllegalAccessException e) {
@@ -338,7 +337,8 @@ public static void mismatchedHandle(Throwable t, MethodHandle mh, Class c, Objec
 }
 
 public static Object invokeConstructor(Class c, Object[] args) {
-	Constructor ctor = findMatchingConstructor(c, args);
+	List<Constructor> ctors = constructorsWithArity(c, args.length);
+	Constructor ctor = (Constructor) resolveOverload(ctors, args);
 	if(ctor == null) {
 		throw new IllegalArgumentException("No matching ctor found"
 				+ " for " + c);
@@ -528,6 +528,18 @@ static public Field getField(Class c, String name, boolean getStatics){
 			return allfields[i];
 		}
 	return null;
+}
+
+static private List<Constructor> constructorsWithArity(Class c, int arity) {
+	Constructor[] allctors = c.getConstructors();
+	List<Constructor> ctors = new ArrayList<Constructor>();
+	for(int i = 0; i < allctors.length; i++)
+	{
+		Constructor ctor = allctors[i];
+		if(ctor.getParameterTypes().length == arity)
+			ctors.add(ctor);
+	}
+	return ctors;
 }
 
 static public List<Method> getMethods(Class c, int arity, String name, boolean getStatics){
