@@ -250,6 +250,33 @@ public static boolean isAccessibleMatch(Method lhs, Method rhs, Object target) {
 	return match;
 }
 
+public static Object invokeConstructor(Class c, Object[] args) {
+	List<Constructor> ctors = constructorsWithArity(c, args.length);
+	Constructor ctor = (Constructor) resolveOverload(ctors, args);
+	if(ctor == null) {
+		throw new IllegalArgumentException("No matching ctor found"
+				+ " for " + c);
+	} else {
+		try {
+			return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
+		} catch(Exception e) {
+			throw Util.sneakyThrow(getCauseOrElse(e));
+		}
+	}
+}
+
+static private List<Constructor> constructorsWithArity(Class c, int arity) {
+	Constructor[] allctors = c.getConstructors();
+	List<Constructor> ctors = new ArrayList<Constructor>();
+	for(int i = 0; i < allctors.length; i++)
+	{
+		Constructor ctor = allctors[i];
+		if(ctor.getParameterTypes().length == arity)
+			ctors.add(ctor);
+	}
+	return ctors;
+}
+
 // executables must be same arity as args
 private static Executable resolveOverload(List executables, Object[] args) {
 	if (executables.isEmpty()) {
@@ -334,21 +361,6 @@ public static MethodHandle findHandle(Class c, String methodName, Object[] args)
 
 public static void mismatchedHandle(Throwable t, MethodHandle mh, Class c, Object[] args) {
 	// TODO
-}
-
-public static Object invokeConstructor(Class c, Object[] args) {
-	List<Constructor> ctors = constructorsWithArity(c, args.length);
-	Constructor ctor = (Constructor) resolveOverload(ctors, args);
-	if(ctor == null) {
-		throw new IllegalArgumentException("No matching ctor found"
-				+ " for " + c);
-	} else {
-		try {
-			return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
-		} catch(Exception e) {
-			throw Util.sneakyThrow(getCauseOrElse(e));
-		}
-	}
 }
 
 public static Object invokeStaticMethodVariadic(String className, String methodName, Object... args) {
@@ -528,18 +540,6 @@ static public Field getField(Class c, String name, boolean getStatics){
 			return allfields[i];
 		}
 	return null;
-}
-
-static private List<Constructor> constructorsWithArity(Class c, int arity) {
-	Constructor[] allctors = c.getConstructors();
-	List<Constructor> ctors = new ArrayList<Constructor>();
-	for(int i = 0; i < allctors.length; i++)
-	{
-		Constructor ctor = allctors[i];
-		if(ctor.getParameterTypes().length == arity)
-			ctors.add(ctor);
-	}
-	return ctors;
 }
 
 static public List<Method> getMethods(Class c, int arity, String name, boolean getStatics){
