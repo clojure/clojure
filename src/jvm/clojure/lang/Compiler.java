@@ -4339,10 +4339,10 @@ static class InvokeExpr implements Expr{
 		return new InvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), fexpr, args, tailPosition);
 	}
 
-	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args, ISeq unAnalyzedArgs) {
-		if(!mexpr.isResolved()) {
-			return buildFlowInvocation(mexpr, source, line, column, tag, tailPosition, args, unAnalyzedArgs);
-		}
+	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, 
+								   boolean tailPosition, IPersistentVector args, ISeq unAnalyzedArgs) {
+		if(!mexpr.isResolved())
+			return toInferencingHostExpr(mexpr, source, line, column, tag, tailPosition, args, unAnalyzedArgs);
 
 		if(isConstructor(mexpr.method))
 			return new NewExpr(mexpr.c, (Constructor) mexpr.method, args, line, column);
@@ -4364,38 +4364,41 @@ static class InvokeExpr implements Expr{
 		return true;
 	}
 
-	private static Expr buildFlowInvocation(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args, ISeq unAnalyzedArgs) {
+	private static Expr toInferencingHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args, ISeq unAnalyzedArgs) {
 		Executable method = null;
 		if(MethodValueExpr.methodNamesConstructor(mexpr.methodName)) {
 			method = mexpr.overloads.get(0);
 		}
 		
 		if(method == null) {
-			List<Executable> overloads = mexpr.overloads.stream()
+			List<Executable> filtereredOverloads = mexpr.overloads.stream()
 					.filter(m -> {
 						return (m.getParameterCount() == args.count())
 								|| (m.getParameterCount() == args.count()-1);
 					})
 					.collect(Collectors.toList());
 
-			if(!overloads.isEmpty() && containsHomogenousMethodKind(overloads))
-				method = overloads.get(0);
+			if(!filtereredOverloads.isEmpty() &&
+					containsHomogenousMethodKind(filtereredOverloads))
+				method = filtereredOverloads.get(0);
 		}
 
 		if(isConstructor(method))
 			return new NewExpr(mexpr.c, args, line, column);
-		else if(isStaticMethod(method))
-			return new StaticMethodExpr(source, line, column, tag, mexpr.c,
-					munge(mexpr.methodName), args, tailPosition);
-		else if(isInstanceMethod(method))
+		
+		if(isInstanceMethod(method))
 			return buildInstanceMethodFlowForm(mexpr, method, tag, unAnalyzedArgs);
-		else
-			// If method not set then assume static and fallback to existing inference
-			// and error conditions
-			return new StaticMethodExpr(source, line, column, tag, mexpr.c,
-					munge(mexpr.methodName), args, tailPosition);
+
+		// If method not set nor the kinds above, assume static and fallback 
+		// to existing inference and error conditions
+		return new StaticMethodExpr(source, line, column, tag, mexpr.c, 
+				munge(mexpr.methodName), args, tailPosition);
 	}
 
+	/** Builds and analyzes the form:
+  	  (let [^QUAL-CLASS this-arg FIRST-ARGS]
+	    (. this-arg METHODNAME NEXT-ARGS)) 
+	 */
 	private static Expr buildInstanceMethodFlowForm(MethodValueExpr mexpr, Executable method, Symbol tag, ISeq args) {
 		Symbol thisName = (Symbol) Symbol.intern(null, "this-arg")
 				.withMeta(RT.map(RT.TAG_KEY, Symbol.intern(null, mexpr.c.getName())));
