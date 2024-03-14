@@ -7486,6 +7486,8 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 			}
 		catch (Exception e)
 			{
+			// Check what sneakyThrow threw during above class
+			// resolution attempts
 			if (e instanceof ClassNotFoundException)
 				return null;
 			else
@@ -7511,6 +7513,8 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 						}
 					catch (Exception e)
 						{
+						// Check what sneakyThrow threw during above class
+						// resolution attempt
 						if (e instanceof ClassNotFoundException)
 							return null;
 						else
