@@ -1297,7 +1297,7 @@ static class MethodValueExpr implements Expr {
 		return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, 
 				isInstanceMethod(mexpr.method) ? THIS : null, retTag);
 	}
-	
+
 	//  (let [cache (clojure.lang.Box. nil)]
 	//    (fn invoke__CLASS_MNAME [& args]
 	//      (let [args (to-array args)
@@ -1364,14 +1364,14 @@ static class MethodValueExpr implements Expr {
 						RT.list(S("clojure.lang.Reflector", "mismatchedHandle"),
 								exName, mhName, S(c.getName()), argsName)));
 	}
-	
+
 	//      (or (.val cache)
 	//          (set! (. cache val)
 	//                (Reflector/findHandle CLASS MNAME args)))
 	private static ISeq buildCacheLookup(Symbol cacheName, Class c, Symbol methodSymbol, Symbol argsName) {
 		return RT.list(S("or"),
 				RT.list(S(".val"), cacheName),
-				RT.list(ASSIGN, 
+				RT.list(ASSIGN,
 						RT.list(DOT, cacheName, S("val")),
 						RT.list(S("clojure.lang.Reflector", "findHandle"),
 								S(c.getName()), methodSymbol.name, argsName))
@@ -4339,7 +4339,7 @@ static class InvokeExpr implements Expr{
 		return new InvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), fexpr, args, tailPosition);
 	}
 
-	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, 
+	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag,
 								   boolean tailPosition, IPersistentVector args, ISeq unAnalyzedArgs) {
 		if(!mexpr.isResolved())
 			return toInferencingHostExpr(mexpr, source, line, column, tag, tailPosition, args, unAnalyzedArgs);
@@ -4369,7 +4369,7 @@ static class InvokeExpr implements Expr{
 		if(MethodValueExpr.methodNamesConstructor(mexpr.methodName)) {
 			method = mexpr.overloads.get(0);
 		}
-		
+
 		if(method == null) {
 			List<Executable> filtereredOverloads = mexpr.overloads.stream()
 					.filter(m -> {
@@ -4385,19 +4385,19 @@ static class InvokeExpr implements Expr{
 
 		if(isConstructor(method))
 			return new NewExpr(mexpr.c, args, line, column);
-		
+
 		if(isInstanceMethod(method))
 			return buildInstanceMethodFlowForm(mexpr, method, tag, unAnalyzedArgs);
 
-		// If method not set nor the kinds above, assume static and fallback 
+		// If method not set nor the kinds above, assume static and fallback
 		// to existing inference and error conditions
-		return new StaticMethodExpr(source, line, column, tag, mexpr.c, 
+		return new StaticMethodExpr(source, line, column, tag, mexpr.c,
 				munge(mexpr.methodName), args, tailPosition);
 	}
 
 	/** Builds and analyzes the form:
-  	  (let [^QUAL-CLASS this-arg FIRST-ARGS]
-	    (. this-arg METHODNAME NEXT-ARGS)) 
+	  (let [^QUAL-CLASS this-arg FIRST-ARGS]
+	    (. this-arg METHODNAME NEXT-ARGS))
 	 */
 	private static Expr buildInstanceMethodFlowForm(MethodValueExpr mexpr, Executable method, Symbol tag, ISeq args) {
 		Symbol thisName = (Symbol) Symbol.intern(null, "this-arg")
