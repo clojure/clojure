@@ -15,6 +15,7 @@ package clojure.lang;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
@@ -359,8 +360,24 @@ public static MethodHandle findHandle(Class c, String methodName, Object[] args)
 	}
 }
 
-public static void mismatchedHandle(Throwable t, MethodHandle mh, Class c, Object[] args) {
-	// TODO
+public static Object mismatchedHandle(Throwable t, MethodHandle mh, Class c, String methodName, Object[] args) {
+	if(t instanceof ClassCastException) {
+		MethodHandle newHandle = Reflector.findHandle(c, methodName, args);
+// No good condition to use here
+//		if(mh.type().equals(newHandle.type())) {
+//			throw Util.sneakyThrow(t);
+//		}
+
+		if("new".equals(methodName)) {
+			return invokeConstructor(c, args);
+		} else if(args.length == mh.type().parameterCount()) {
+			return invokeStaticMethod(c, methodName, args);
+		} else {
+			return invokeInstanceMethod(args[0], methodName, Arrays.copyOfRange(args, 1, args.length));
+		}
+	} else {
+		throw Util.sneakyThrow(t);
+	}
 }
 
 public static Object invokeStaticMethodVariadic(String className, String methodName, Object... args) {
