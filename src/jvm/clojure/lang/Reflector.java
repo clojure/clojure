@@ -313,7 +313,6 @@ private static String argsDescription(Object[] args) {
 
 // finds handle or throws
 public static MethodHandle findHandle(Class c, String methodName, Object[] args) {
-	MethodHandles.Lookup lookup = MethodHandles.publicLookup();
 	MethodHandle mh = null;
 	try {
 		if ("new".equals(methodName)) {
@@ -324,7 +323,7 @@ public static MethodHandle findHandle(Class c, String methodName, Object[] args)
 			Constructor ctor = (Constructor) resolveOverload(ctors, args);
 			if(ctor == null)
 				throw new IllegalArgumentException("No matching constructor found for " + c.getName());
-			mh = lookup.unreflectConstructor(ctor);
+			mh = MethodHandles.lookup().unreflectConstructor(ctor);
 		} else {
 			List<Method> methods = getMethods(c, args.length, methodName, true);
 			Object target = null;
@@ -352,7 +351,7 @@ public static MethodHandle findHandle(Class c, String methodName, Object[] args)
 				if(m == null)
 					throw new IllegalArgumentException("Can't call public method of non-public class: " + oldm.toString());
 			}
-			mh = lookup.unreflect(m);
+			mh = MethodHandles.lookup().unreflect(m);
 		}
 		return mh.asSpreader(OBJ_ARRAY_CLASS, 1);
 	} catch(IllegalAccessException e) {
