@@ -258,13 +258,14 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
+// todo
 static Pattern arraySymbolPat = Pattern.compile("(.*)::([1-9])$");
 
-public static Map maybeArrayComponents(String arrayStr) {
-	if(!Character.isDigit(arrayStr.charAt(arrayStr.length()-1)))
+public static Map maybeArrayComponents(String symName) {
+	if(!Character.isDigit(symName.charAt(symName.length()-1)))
 		return null;
 
-	Matcher m = arraySymbolPat.matcher(arrayStr);
+	Matcher m = arraySymbolPat.matcher(symName);
 
 	if(!m.matches())
 		return null;
@@ -272,6 +273,7 @@ public static Map maybeArrayComponents(String arrayStr) {
 	String className = m.group(1);
 	String dimStr = m.group(2);
 
+	// todo
 	return PersistentHashMap.create(
 			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, className),
 			RT.ARRAY_DIM_KEY, (long) Character.getNumericValue(dimStr.charAt(0)));

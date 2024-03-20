@@ -1127,15 +1127,15 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		if(symComponents == null)
 			return null;
 
-		Symbol className = (Symbol) symComponents.get(RT.ARRAY_COMPONENT_KEY);
+		Symbol componentClassName = (Symbol) symComponents.get(RT.ARRAY_COMPONENT_KEY);
 		long dim = (long) symComponents.get(RT.ARRAY_DIM_KEY);
-		Class componentClass = primClass(className);
+		Class componentClass = primClass(componentClassName);
 
 		if(componentClass == null)
-			componentClass = maybeClass(className, false);
+			componentClass = maybeClass(componentClassName, false);
 
 		if(componentClass == null)
-			return null;
+			return null; // todo error
 
 		StringBuilder arrayDescriptor = new StringBuilder();
 		for(int i=0; i<dim; i++)
@@ -7474,6 +7474,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 			return null;
 		return v;
 		}
+	//else if( :: ) maybeArrayClass...
 	else if(sym.name.indexOf('.') > 0 && !sym.name.endsWith(".") 
 			|| sym.name.charAt(0) == '[')
 		{
