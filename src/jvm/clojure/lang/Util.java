@@ -258,7 +258,7 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
-public static boolean containsArrayDimensionSuffix(String s) {
+public static boolean looksLikeArrayClassName(String s) {
 	return s.indexOf("::", 1) != -1;
 }
 
