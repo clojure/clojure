@@ -1135,7 +1135,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			componentClass = maybeClass(componentClassName, false);
 
 		if(componentClass == null)
-			return null; // todo error
+			Util.sneakyThrow(new ClassNotFoundException("Unable to resolve component classname: "
+					+ componentClassName));
 
 		StringBuilder arrayDescriptor = new StringBuilder();
 		for(int i=0; i<dim; i++)
@@ -7474,16 +7475,16 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 			return null;
 		return v;
 		}
-	//else if( :: ) maybeArrayClass...
-	else if(sym.name.indexOf('.') > 0 && !sym.name.endsWith(".") 
-			|| sym.name.charAt(0) == '[')
+	else if(sym.name.indexOf('.') > 0 && !sym.name.endsWith(".")
+			|| sym.name.charAt(0) == '['
+			|| Util.containsArrayDimensionSuffix(sym.name))
 		{
 		try {
 			Class ac = HostExpr.maybeArrayClass(sym);
-			if(ac == null)
-				return RT.classForName(sym.name);
-			else
+			if(ac != null)
 				return ac;
+			else
+				return RT.classForName(sym.name);
 			}
 		catch (Exception e)
 			{
@@ -7496,34 +7497,15 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 			}
 		}
 	else if(sym.equals(NS))
-			return RT.NS_VAR;
-		else if(sym.equals(IN_NS))
-				return RT.IN_NS_VAR;
-			else
-				{
-				Object o = n.getMapping(sym);
-				if(o != null)
-					{
-					return o;
-					}
-				else
-					{
-					try
-						{
-						return HostExpr.maybeArrayClass(sym);
-						}
-					catch (Exception e)
-						{
-						// Check what sneakyThrow threw during above class
-						// resolution attempt
-						if (e instanceof ClassNotFoundException)
-							return null;
-						else
-							return Util.sneakyThrow(e);
-						}
-					}
-				}
-			}
+		return RT.NS_VAR;
+	else if(sym.equals(IN_NS))
+		return RT.IN_NS_VAR;
+	else
+		{
+		Object o = n.getMapping(sym);
+		return o;
+		}
+}
 
 
 

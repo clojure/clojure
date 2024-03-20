@@ -31,7 +31,8 @@
       "[Ljava.lang.String;" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String::1)
       "[[Ljava.lang.String;" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String::2))
     (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'Object)))
-    (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'ThisIsNotAClassThatCouldBeFound138::2)))
+    (is (thrown? ClassNotFoundException
+                 (clojure.lang.Compiler$HostExpr/maybeArrayClass 'ThisIsNotAClassThatCouldBeFound138::2)))
     (is (thrown? ClassNotFoundException
                  (clojure.lang.Compiler$HostExpr/maybeArrayClass 'foo.bar.ThisIsNotAClassThatCouldBeFound138::2))))
   (testing "array hints"

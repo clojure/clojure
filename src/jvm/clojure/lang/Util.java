@@ -258,7 +258,11 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
-// todo
+public static boolean containsArrayDimensionSuffix(String s) {
+	return s.indexOf("::", 1) != -1;
+}
+
+// Matches the ComponentClass::N array class encoding
 static Pattern arraySymbolPat = Pattern.compile("(.*)::([1-9])$");
 
 public static Map maybeArrayComponents(String symName) {
@@ -273,7 +277,9 @@ public static Map maybeArrayComponents(String symName) {
 	String className = m.group(1);
 	String dimStr = m.group(2);
 
-	// todo
+	// Decodes the array components a map of:
+	// :component -> component class symbol
+	// :dim -> digit of 1-9
 	return PersistentHashMap.create(
 			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, className),
 			RT.ARRAY_DIM_KEY, (long) Character.getNumericValue(dimStr.charAt(0)));

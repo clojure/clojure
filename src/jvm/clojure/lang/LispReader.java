@@ -421,9 +421,14 @@ private static Object matchSymbol(String s, Resolver resolver){
 		String name = m.group(2);
 		boolean isKeyword = s.charAt(0) == ':';
 
-		if((ns != null && ns.endsWith(":/") || name.endsWith(":")) ||
-			(s.indexOf("::", 1) != -1 &&
-				(isKeyword || ns != null || Util.maybeArrayComponents(name) == null)))
+		if(ns != null && ns.endsWith(":/")
+			|| name.endsWith(":"))
+			return null;
+		//'::' ok iff array class syntax
+		else if(Util.containsArrayDimensionSuffix(s)
+			&& (isKeyword
+			|| ns != null
+			|| Util.maybeArrayComponents(name) == null))
 			return null;
 		if(s.startsWith("::"))
 			{
