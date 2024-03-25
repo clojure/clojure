@@ -7485,9 +7485,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 				return ac;
 			else
 				return RT.classForName(sym.name);
-			}
-		catch (Exception e)
-			{
+			} catch (Exception e) {
 			if (e instanceof ClassNotFoundException)
 				return null;
 			else
