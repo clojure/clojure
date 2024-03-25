@@ -258,12 +258,12 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
-public static boolean looksLikeArrayClassName(String s) {
+static boolean looksLikeArrayClassName(String s) {
 	return s.indexOf("::", 1) != -1;
 }
 
 // Matches the ComponentClass::N array class encoding
-static Pattern arraySymbolPat = Pattern.compile("(.*)::([1-9])$");
+final static Pattern arraySymbolPat = Pattern.compile("(.*)::([1-9])$");
 
 public static Map maybeArrayComponents(String symName) {
 	if(!Character.isDigit(symName.charAt(symName.length()-1)))
@@ -277,9 +277,7 @@ public static Map maybeArrayComponents(String symName) {
 	String className = m.group(1);
 	String dimStr = m.group(2);
 
-	// Decodes the array components a map of:
-	// :component -> component class symbol
-	// :dim -> digit of 1-9
+	// {:component class-or-primitive-symbol, :dim N}
 	return PersistentHashMap.create(
 			RT.ARRAY_COMPONENT_KEY, Symbol.intern(null, className),
 			RT.ARRAY_DIM_KEY, (long) Character.getNumericValue(dimStr.charAt(0)));

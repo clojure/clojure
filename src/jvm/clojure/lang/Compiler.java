@@ -7488,8 +7488,6 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 			}
 		catch (Exception e)
 			{
-			// Check what sneakyThrow threw during above class
-			// resolution attempts
 			if (e instanceof ClassNotFoundException)
 				return null;
 			else
@@ -7497,16 +7495,15 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 			}
 		}
 	else if(sym.equals(NS))
-		return RT.NS_VAR;
-	else if(sym.equals(IN_NS))
-		return RT.IN_NS_VAR;
-	else
-		{
-		Object o = n.getMapping(sym);
-		return o;
-		}
+			return RT.NS_VAR;
+		else if(sym.equals(IN_NS))
+				return RT.IN_NS_VAR;
+			else
+				{
+				Object o = n.getMapping(sym);
+				return o;
+				}
 }
-
 
 
 static Var lookupVar(Symbol sym, boolean internNew, boolean registerMacro) {

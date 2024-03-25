@@ -412,6 +412,7 @@ static private Object interpretToken(String s, Resolver resolver) {
 	throw Util.runtimeException("Invalid token: " + s);
 }
 
+
 private static Object matchSymbol(String s, Resolver resolver){
 	Matcher m = symbolPat.matcher(s);
 	if(m.matches())
@@ -420,9 +421,8 @@ private static Object matchSymbol(String s, Resolver resolver){
 		String ns = m.group(1);
 		String name = m.group(2);
 		boolean isKeyword = s.charAt(0) == ':';
-
 		if(ns != null && ns.endsWith(":/")
-			|| name.endsWith(":"))
+		   || name.endsWith(":"))
 			return null;
 		//'::' ok iff array class syntax
 		else if(Util.looksLikeArrayClassName(s)
