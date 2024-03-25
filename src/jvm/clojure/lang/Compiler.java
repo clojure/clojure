@@ -1298,84 +1298,57 @@ static class MethodValueExpr implements Expr {
 				isInstanceMethod(mexpr.method) ? THIS : null, retTag);
 	}
 
-	//  (let [cache (clojure.lang.Box. nil)]
-	//    (fn invoke__CLASS_MNAME [& args]
-	//      (let [args (to-array args)
-	//            ^MethodHandle mh (or (.val cache)
-	//             	                   (set! (. cache val)
-	//             	                         (Reflector/findHandle CLASS MNAME args)))
-	//        (try
-	//          (.invoke mh args)
-	//          (catch Throwable e
-	//            (Reflector/mismatchedHandle e mh CLASS MNAME args))))))
+	// (let [cache (clojure.lang.Box. nil)]
+	//  (fn invoke__CLASS_MNAME [& args]
+	//    (let [args (to-array args)
+	//          mh+exec (or (.val cache)
+	//                      (set! (. cache val)
+	//           	            (Reflector/findHandle CLASS MNAME args)))]
+	//      (try
+	//        (.invoke ^MethodHandle (nth mh+exec 0) args)
+	//        (catch Throwable e
+	//          (Reflector/mismatchedHandle e mh+exec CLASS MNAME args))))))
 	private static Expr buildReflectiveThunk(Class c, Symbol methodSymbol) {
-		Symbol cacheName = Symbol.intern(null, "cache");
-		IPersistentVector cacheBinding = PersistentVector.create(
-				cacheName, RT.list(Symbol.intern(null, "clojure.lang.Box."), null));
-		ISeq fnForm = buildReflectiveFnForm(c, methodSymbol, cacheName);
-		ISeq letForm = RT.list(LET, cacheBinding, fnForm);
-		return analyzeSeq(C.EVAL, letForm, methodSymbol.name);
+		Symbol cacheSym = sym("cache");
+		Symbol argsSym = sym("args");
+		Symbol mhExecSym = sym("mh+exec");
+		Symbol exSym = sym("e");
+
+		ISeq form = RT.list(LET,
+				PersistentVector.create(cacheSym, RT.list(sym("clojure.lang.Box."), null)),
+				RT.list(FN, thunkName(c, methodSymbol), PersistentVector.create(_AMP_, argsSym),
+						RT.list(LET,
+								PersistentVector.create(
+										argsSym, RT.list(sym("to-array"), argsSym),
+										mhExecSym,
+										RT.list(sym("or"),
+												RT.list(sym(".val"), cacheSym),
+												RT.list(ASSIGN,
+														RT.list(DOT, cacheSym, sym("val")),
+														RT.list(sym("clojure.lang.Reflector", "findHandle"),
+																sym(c.getName()), methodSymbol.name, argsSym)))),
+								RT.list(TRY,
+										RT.list(sym(".invoke"),
+												((IObj)RT.list(sym("nth"), mhExecSym, 0L)).withMeta(
+													RT.map(RT.TAG_KEY, sym("java.lang.invoke.MethodHandle"))),
+												argsSym),
+										RT.list(CATCH, sym("Throwable"), exSym,
+												RT.listStar(sym("clojure.lang.Reflector", "mismatchedHandle"),
+														exSym, mhExecSym, sym(c.getName()), methodSymbol.name, RT.list(argsSym)))))));
+
+		return analyzeSeq(C.EVAL, form, methodSymbol.name);
 	}
 
 	private static Symbol thunkName(Class c, Symbol methodSymbol) {
-		return Symbol.intern(null, "invoke__" + c.getSimpleName() + "_" + methodSymbol.name);
+		return sym("invoke__" + c.getSimpleName() + "_" + methodSymbol.name);
 	}
 
-	private static Symbol S(String name) {
+	private static Symbol sym(String name) {
 		return Symbol.intern(null, name);
 	}
 
-	private static Symbol S(String ns, String name) {
+	private static Symbol sym(String ns, String name) {
 		return Symbol.intern(ns, name);
-	}
-
-	//  (fn invoke__CLASS_MNAME [& args]
-	//    (let [args (to-array args)
-	//          ^MethodHandle mh (or (.val cache)
-	//                               (set! (. cache val)
-	//                                     (Reflector/findHandle CLASS MNAME args)))
-	//      (try
-	//        (.invoke mh args)
-	//        (catch Throwable e
-	//          (Reflector/mismatchedHandle e mh CLASS MNAME args)))))
-	private static ISeq buildReflectiveFnForm(Class c, Symbol methodSymbol, Symbol cacheName) {
-		Symbol argsName = S("args");
-		Symbol mhName = (Symbol) S("mh").withMeta(
-				RT.map(RT.TAG_KEY, S("java.lang.invoke.MethodHandle")));
-		ISeq invokeForm = buildReflectiveInvokeForm(c, methodSymbol, mhName, argsName);
-		IPersistentVector bindings = PersistentVector.create(
-				argsName, RT.list(S("to-array"), argsName),
-				mhName, buildCacheLookup(cacheName, c, methodSymbol, argsName));
-		ISeq fnForm = RT.list(FN, thunkName(c, methodSymbol),
-				PersistentVector.create(_AMP_, argsName),
-				RT.list(LET, bindings, invokeForm));
-		return fnForm;
-	}
-
-	//      (try
-	//          (.invoke mh args)
-	//          (catch Throwable e
-	//            (Reflector/mismatchedHandle e mh CLASS MNAME args))))
-	private static ISeq buildReflectiveInvokeForm(Class c, Symbol methodSymbol, Symbol mhName, Symbol argsName) {
-		Symbol exName = S("e");
-		return RT.list(TRY,
-				RT.list(S(".invoke"), mhName, argsName),
-				RT.list(CATCH, S("Throwable"), exName,
-						RT.listStar(S("clojure.lang.Reflector", "mismatchedHandle"),
-								exName, mhName, S(c.getName()), methodSymbol.name, RT.list(argsName))));
-	}
-
-	//      (or (.val cache)
-	//          (set! (. cache val)
-	//                (Reflector/findHandle CLASS MNAME args)))
-	private static ISeq buildCacheLookup(Symbol cacheName, Class c, Symbol methodSymbol, Symbol argsName) {
-		return RT.list(S("or"),
-				RT.list(S(".val"), cacheName),
-				RT.list(ASSIGN,
-						RT.list(DOT, cacheName, S("val")),
-						RT.list(S("clojure.lang.Reflector", "findHandle"),
-								S(c.getName()), methodSymbol.name, argsName))
-		);
 	}
 
 	private static boolean isHintablePrimitive(Class c) {

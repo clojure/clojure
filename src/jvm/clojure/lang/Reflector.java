@@ -311,8 +311,9 @@ private static String argsDescription(Object[] args) {
 	return sb.toString();
 }
 
-// finds handle or throws
-public static MethodHandle findHandle(Class c, String methodName, Object[] args) {
+// returns matching vector of [handle executable] or throws
+public static IPersistentVector findHandle(Class c, String methodName, Object[] args) {
+	Executable executable;
 	MethodHandle mh = null;
 	try {
 		if ("new".equals(methodName)) {
@@ -320,10 +321,10 @@ public static MethodHandle findHandle(Class c, String methodName, Object[] args)
 			if(ctors.isEmpty())
 				throw new IllegalArgumentException("No methods named " + methodName + " found in " + c.getName());
 
-			Constructor ctor = (Constructor) resolveOverload(ctors, args);
-			if(ctor == null)
+			executable = resolveOverload(ctors, args);
+			if(executable == null)
 				throw new IllegalArgumentException("No matching constructor found for " + c.getName());
-			mh = MethodHandles.lookup().unreflectConstructor(ctor);
+			mh = MethodHandles.lookup().unreflectConstructor((Constructor)executable);
 		} else {
 			List<Method> methods = getMethods(c, args.length, methodName, true);
 			Object target = null;
@@ -351,32 +352,32 @@ public static MethodHandle findHandle(Class c, String methodName, Object[] args)
 				if(m == null)
 					throw new IllegalArgumentException("Can't call public method of non-public class: " + oldm.toString());
 			}
+			executable = m;
 			mh = MethodHandles.lookup().unreflect(m);
 		}
-		return mh.asSpreader(OBJ_ARRAY_CLASS, 1);
+		return RT.vector(mh.asSpreader(OBJ_ARRAY_CLASS, 1), executable);
 	} catch(IllegalAccessException e) {
 		throw Util.sneakyThrow(e);
 	}
 }
 
-public static Object mismatchedHandle(Throwable t, MethodHandle mh, Class c, String methodName, Object[] args) {
+public static Object mismatchedHandle(Throwable t, IPersistentVector cachedHandleVec, Class c, String methodName, Object[] args) {
 	if(t instanceof ClassCastException) {
-		MethodHandle newHandle = Reflector.findHandle(c, methodName, args);
-// No good condition to use here
-//		if(mh.type().equals(newHandle.type())) {
-//			throw Util.sneakyThrow(t);
-//		}
+		Executable cachedExec = (Executable)cachedHandleVec.nth(1);
 
-		if("new".equals(methodName)) {
-			return invokeConstructor(c, args);
-		} else if(args.length == mh.type().parameterCount()) {
-			return invokeStaticMethod(c, methodName, args);
-		} else {
-			return invokeInstanceMethod(args[0], methodName, Arrays.copyOfRange(args, 1, args.length));
+		IPersistentVector newHandleVec = Reflector.findHandle(c, methodName, args);
+		MethodHandle newMh = (MethodHandle)newHandleVec.nth(0);
+		Executable newExec = (Executable)newHandleVec.nth(1);
+
+		if(! cachedExec.equals(newExec)) {
+			try {
+				return newMh.invoke(args);
+			} catch(Throwable t2) {
+				throw Util.sneakyThrow(t2);
+			}
 		}
-	} else {
-		throw Util.sneakyThrow(t);
 	}
+	throw Util.sneakyThrow(t);
 }
 
 public static Object invokeStaticMethodVariadic(String className, String methodName, Object... args) {
