@@ -50,3 +50,17 @@
 (deftest primitive-hinting
   (is (instance? clojure.lang.IFn$DO ^[double] String/valueOf))
   (is (instance? clojure.lang.IFn$LL ^[long] Math/abs)))
+
+(deftest qualified-method-resolution-exact-matches
+  (is (= [1 2 3] (map Math/abs [(int -1) (int -2) (int 3)])))
+  (is (= ["A" "B"] (map String/toUpperCase ["a" "b"])))
+  (is (= 0 (apply java.util.UUID/version [#uuid "00000000-0000-0001-0000-000000000002"])))
+  (is (= [[1] [2] [3]] (map clojure.lang.Tuple/create [1 2 3])))
+  (is (not (apply Double/isNaN [(double 42)])))  ;; currently dispatches to static
+  (is (not (apply Double/isNaN [(Double. "42.1")]))) ;; currently dispatches to static
+  (is (= #uuid "00000000-0000-0001-0000-000000000002" (apply UUID/new [1 2]))))
+
+#_(deftest qualified-method-resolution-failing-cases
+  (is (= [1 2 3] (map Math/abs [-1 -2 3])))
+  (is (= 1 (apply java.util.Arrays/binarySearch [(int-array [10 20 30]) (int 20)])))
+  (is (= "" (apply String/format ["Hello %s" (to-array ["World"])]))))
