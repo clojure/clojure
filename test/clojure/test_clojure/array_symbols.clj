@@ -44,7 +44,8 @@
     (is (= `byte::9 'byte::9))
     (is (= `java.util.UUID::1 'java.util.UUID::1))
     (is (= `String::1 'java.lang.String::1)))
-  (testing "resolve"
+  (testing "resolution"
+    (is (= (eval 'long::1) (class (make-array Long/TYPE 0))))
     (is (= (resolve 'long::1) (class (make-array Long/TYPE 0))))
     (is (= (resolve 'String::1) (class (make-array String 0))))
     (is (= (resolve 'java.lang.String::1) (class (make-array String 0))))
