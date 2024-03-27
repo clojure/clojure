@@ -7335,12 +7335,6 @@ private static Expr analyzeSymbol(Symbol sym) {
             {
             return new LocalBindingExpr(b, tag);
             }
-		else
-			{
-			Class ac = HostExpr.maybeArrayClass(sym);
-			if(ac != null)
-				return new ConstantExpr(ac);
-			}
 		}
 	else
 		{
@@ -7434,9 +7428,13 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
 			throw new IllegalStateException("var: " + sym + " is not public");
 		return v;
 		}
-	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[' || Util.hasDoubleColon(sym.name))
 		{
-		return RT.classForName(sym.name);
+		Class ac = HostExpr.maybeArrayClass(sym);
+		if(ac != null)
+			return ac;
+		else
+			return RT.classForName(sym.name);
 		}
 	else if(sym.equals(NS))
 			return RT.NS_VAR;
