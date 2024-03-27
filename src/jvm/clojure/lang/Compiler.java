@@ -7477,7 +7477,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 		}
 	else if(sym.name.indexOf('.') > 0 && !sym.name.endsWith(".")
 			|| sym.name.charAt(0) == '['
-			|| Util.looksLikeArrayClassName(sym.name))
+			|| Util.hasDoubleColon(sym.name))
 		{
 		try {
 			Class ac = HostExpr.maybeArrayClass(sym);

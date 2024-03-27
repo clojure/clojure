@@ -258,7 +258,7 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
-static boolean looksLikeArrayClassName(String s) {
+static boolean hasDoubleColon(String s) {
 	return s.indexOf("::", 1) != -1;
 }
 

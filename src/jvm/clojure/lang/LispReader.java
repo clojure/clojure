@@ -425,7 +425,7 @@ private static Object matchSymbol(String s, Resolver resolver){
 		   || name.endsWith(":"))
 			return null;
 		//'::' ok iff array class syntax
-		else if(Util.looksLikeArrayClassName(s)
+		else if(Util.hasDoubleColon(s)
 			&& (isKeyword
 			|| ns != null
 			|| Util.maybeArrayComponents(name) == null))
