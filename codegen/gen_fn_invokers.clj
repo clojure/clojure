@@ -2,7 +2,7 @@
 ;; Clojure 1.12. This code is not intended to be reused but might be
 ;; useful in the future as a template for other code gen.
 
-(ns gen-fn-adapters
+(ns gen-fn-invokers
   (:require
     [clojure.string :as str])
   (:import
@@ -21,7 +21,7 @@
 
 package clojure.lang;
 
-public class FnAdapters {
+public class FnInvokers {
 
     private static RuntimeException notIFnError(Object f) {
         return new RuntimeException(\"Expected function, but found \" + (f == null ? \"null\" : f.getClass().getName()));
@@ -32,8 +32,8 @@ public class FnAdapters {
 (def footer
   "}")
 
-(def adaptO-format
-  "    public static Object adapt%sO(Object f0%s) {
+(def invokeO-format
+  "    public static Object invoke%sO(Object f0%s) {
         if(f0 instanceof IFn) {
             return ((IFn)f0).invoke(%s);
         } else {
@@ -41,8 +41,8 @@ public class FnAdapters {
         }
     }")
 
-(def adaptO-with-l-or-d-arg-format
-  "    public static Object adapt%sO(Object f0%s) {
+(def invokeO-with-l-or-d-arg-format
+  "    public static Object invoke%sO(Object f0%s) {
         if(f0 instanceof IFn.%sO) {
             return ((IFn.%sO)f0).invokePrim(%s);
         } else if(f0 instanceof IFn) {
@@ -52,8 +52,8 @@ public class FnAdapters {
         }
     }")
 
-(def adaptB-format
-  "    public static boolean adapt%sB(Object f0%s) {
+(def invokeB-format
+  "    public static boolean invoke%sB(Object f0%s) {
         if(f0 instanceof IFn) {
             return RT.booleanCast(((IFn)f0).invoke(%s));
         } else {
@@ -61,8 +61,8 @@ public class FnAdapters {
         }
     }")
 
-(def adaptF-format
-  "    public static float adapt%sF(Object f0%s) {
+(def invokeF-format
+  "    public static float invoke%sF(Object f0%s) {
         if(f0 instanceof IFn) {
             return RT.FloatCast(((IFn)f0).invoke(%s));
         } else {
@@ -70,8 +70,8 @@ public class FnAdapters {
         }
     }")
 
-(def adaptL-format
-  "    public static long adapt%sL(Object f0%s) {
+(def invokeL-format
+  "    public static long invoke%sL(Object f0%s) {
         if(f0 instanceof IFn.%sL) {
             return ((IFn.%sL)f0).invokePrim(%s);
         } else if(f0 instanceof IFn) {
@@ -81,8 +81,8 @@ public class FnAdapters {
         }
     }")
 
-(def adaptD-format
-  "    public static double adapt%sD(Object f0%s) {
+(def invokeD-format
+  "    public static double invoke%sD(Object f0%s) {
         if(f0 instanceof IFn.%sD) {
             return ((IFn.%sD)f0).invokePrim(%s);
         } else if(f0 instanceof IFn) {
@@ -92,8 +92,8 @@ public class FnAdapters {
         }
     }")
 
-(def adaptI-format
-  "    public static int adapt%sI(Object f0%s) {
+(def invokeI-format
+  "    public static int invoke%sI(Object f0%s) {
         if(f0 instanceof IFn.%sL) {
             return RT.intCast(((IFn.%sL)f0).invokePrim(%s));
         } else if(f0 instanceof IFn) {
@@ -111,7 +111,7 @@ public class FnAdapters {
                 :I ", int "
                 :B ", boolean "})
 
-(defn gen-adapter [sig]
+(defn gen-invoke [sig]
   (let [formatter (str (last sig))
         args (map str (butlast sig))
         arg-types (map #(get arg-types (keyword %)) args)
@@ -120,13 +120,13 @@ public class FnAdapters {
         arg-str (str/join args)]
     (case formatter
       "O" (if (some #{"D" "L"} args)
-            (format adaptO-with-l-or-d-arg-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
-            (format adaptO-format arg-str fn-vars fn-vars-sans-type))
-      "L" (format adaptL-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
-      "I" (format adaptI-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
-      "D" (format adaptD-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
-      "B" (format adaptB-format arg-str fn-vars fn-vars-sans-type)
-      "F" (format adaptF-format arg-str fn-vars fn-vars-sans-type))))
+            (format invokeO-with-l-or-d-arg-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
+            (format invokeO-format arg-str fn-vars fn-vars-sans-type))
+      "L" (format invokeL-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
+      "I" (format invokeI-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
+      "D" (format invokeD-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
+      "B" (format invokeB-format arg-str fn-vars fn-vars-sans-type)
+      "F" (format invokeF-format arg-str fn-vars fn-vars-sans-type))))
 
 (defn sigs [args return-types]
   (let [fun-sig-reducer (fn [res ret]
@@ -147,11 +147,11 @@ public class FnAdapters {
         ten-arity   (sigs ["OOOOOOOOOO"] ["B" "O"])]
     (mapcat seq [single-arity two-arity three-arity four-arity five-arity six-arity seven-arity eight-arity nine-arity ten-arity])))
 
-(defn gen-adapters []
+(defn gen-invokers []
   (let [sb (StringBuilder. ^String header)
-        adapter-signatures (gen-sigs)]
-    (doseq [sig adapter-signatures]
-      (.append sb (gen-adapter sig))
+        invoker-signatures (gen-sigs)]
+    (doseq [sig invoker-signatures]
+      (.append sb (gen-invoker sig))
       (.append sb "\n\n"))
     (.append sb footer)
     (spit "src/jvm/clojure/lang/FnAdapters.java" (.toString sb))))

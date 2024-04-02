@@ -1731,7 +1731,7 @@ private static char encodeAdapterReturn(Class c) {
  * Given a target functional interface class, and an ASM generator with an
  * expr on the stack (either an instance of fnIfaceClass or an IFn), find the
  * SAM method in fnIfaceClass and a matching adapter method A (name is based
- * on a fixed set of supported types) in FnAdapters and emit effectively:
+ * on a fixed set of supported types) in FnInvokers and emit effectively:
  *
  * if(!(expr instanceof fnIFaceClass))
  *   // invokedynamic A closing over expr, as if it were an M
@@ -1745,7 +1745,7 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIface
 
 	Class[] adapterParams = new Class[targetMethod.getParameterCount()+1];
 	adapterParams[0] = Object.class;  // close over fn as first arg
-	StringBuilder adaptMethodBuilder = new StringBuilder("adapt");
+	StringBuilder adaptMethodBuilder = new StringBuilder("invoke");
 	for (int i = 0; i < targetMethod.getParameterCount(); i++) {
 		char paramCode = encodeAdapterParam(targetMethod.getParameterTypes()[i]);
 		adaptMethodBuilder.append(paramCode);
@@ -1758,9 +1758,9 @@ private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIface
 	// Adapter method - takes IFn instance (closed over) + args, body calls IFn.invoke
 	java.lang.reflect.Method adapterMethod = null;
 	try {
-		adapterMethod = FnAdapters.class.getMethod(adapterMethodName, adapterParams);
+		adapterMethod = FnInvokers.class.getMethod(adapterMethodName, adapterParams);
 
-		// emit... if(! (exp instanceof FIType)) { adapt... }
+		// emit... if(! (exp instanceof FIType)) { invoke... }
 		gen.dup();
 		Type samType = Type.getType(fnIfaceClass);
 		gen.instanceOf(samType);
@@ -1823,7 +1823,7 @@ private static void emitInvokeDynamicAdapter(
 			false);
 
 	// Adapter interface (if it was a lambda, this would be its interface):
-	//   FI adapt(closedOver*)
+	//   FI invoke(closedOver*)
 	List lambdaParams = Arrays.asList(Arrays.copyOfRange(implParams, 0, implParams.length - targetMethod.getParameterCount()));
 	MethodType lambdaSig = MethodType.methodType(targetMethod.getDeclaringClass(), lambdaParams);
 
