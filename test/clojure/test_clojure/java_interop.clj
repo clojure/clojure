@@ -798,11 +798,11 @@
         res (FIStatic/numbers hinted-pred)]
     (is (= [1 2] res))))
 
+(deftest eval-in-place-supplier-instance
+  (def stream (java.util.stream.Stream/generate ^java.util.function.Supplier (atom 42)))
+  (is (instance? java.util.stream.Stream stream)))
+
 (deftest eval-in-place-as-java-fn
-
-  (def stream (java.util.stream.Stream/generate (atom 42)))
-  (is (instance? java.util.stream.Stream stream))
-
   (def filtered-list (.removeIf (java.util.ArrayList. [1 2 3 4 5]) even?))
   (is (true? filtered-list))
 

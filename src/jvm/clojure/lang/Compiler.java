@@ -23,10 +23,8 @@ import java.io.*;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Executable;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -1705,7 +1703,7 @@ private static Class decodeToClass(char c) {
 }
 
 // Support widening conversion from short, int, or float to long or double on adapter params
-private static char encodeAdapterParam(Class c) {
+private static char encodeInvokerParam(Class c) {
 	switch(c.getName()) {
 		case "short":
 		case "long": return 'L';
@@ -1728,66 +1726,76 @@ private static char encodeAdapterReturn(Class c) {
 }
 
 /**
- * Given a target functional interface class, and an ASM generator with an
- * expr on the stack (either an instance of fnIfaceClass or an IFn), find the
- * SAM method in fnIfaceClass and a matching adapter method A (name is based
- * on a fixed set of supported types) in FnInvokers and emit effectively:
+ * assumes expr has been emitted to objx already
  *
- * if(!(expr instanceof fnIFaceClass))
- *   // invokedynamic A closing over expr, as if it were an M
+ * if expr.getJavaClass() is FI then checkcast
  *
- * @param gen ASM code generator
- * @param fnIfaceClass a FunctionalInterface class with method M(arg1, ...)
- * @return false if no adapter method was found and caller should handle
+ * if expr instanceof resolved MethodValueExpr
+ * then emitInvokeDynamicAdapter to the MVE method
+ *
+ * find matching invoker function
+ * if invoker then emit maybe-adapter (f on stack):
+ * if( !(f instanceof FI))
+ *   emitInvokeDynamicAdapter(FI::method, FnInvokers::adapt))
+ *
+ * else no invoker so throw and tell user to reify
  */
-private static boolean emitFunctionalAdapter(GeneratorAdapter gen, Class fnIfaceClass) {
-	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fnIfaceClass);
-
-	Class[] adapterParams = new Class[targetMethod.getParameterCount()+1];
-	adapterParams[0] = Object.class;  // close over fn as first arg
-	StringBuilder adaptMethodBuilder = new StringBuilder("invoke");
-	for (int i = 0; i < targetMethod.getParameterCount(); i++) {
-		char paramCode = encodeAdapterParam(targetMethod.getParameterTypes()[i]);
-		adaptMethodBuilder.append(paramCode);
-		adapterParams[i+1] = decodeToClass(paramCode);
-	}
-	char adapterReturnCode = encodeAdapterReturn(targetMethod.getReturnType());
-	adaptMethodBuilder.append(adapterReturnCode);
-	String adapterMethodName = adaptMethodBuilder.toString();
-
-	// Adapter method - takes IFn instance (closed over) + args, body calls IFn.invoke
-	java.lang.reflect.Method adapterMethod = null;
-	try {
-		adapterMethod = FnInvokers.class.getMethod(adapterMethodName, adapterParams);
-
-		// emit... if(! (exp instanceof FIType)) { invoke... }
-		gen.dup();
-		Type samType = Type.getType(fnIfaceClass);
-		gen.instanceOf(samType);
-
-		// if so, checkcast and go to end
-		Label adapterLabel = gen.newLabel();
-		gen.ifZCmp(Opcodes.IFEQ, adapterLabel);
-		gen.checkCast(samType);
-		Label endLabel = gen.newLabel();
-		gen.goTo(endLabel);
-
-		// if not, insert lambda adapter
-		gen.mark(adapterLabel);
-
-		// adapt adapter method to target method, closing over IFn instance
-		emitInvokeDynamicAdapter(gen, targetMethod, adapterMethod);
-		gen.mark(endLabel);
+private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fnIfaceClass) {
+	Class exprClass = expr.hasJavaClass() ? expr.getJavaClass() : null;
+	if(exprClass != null && fnIfaceClass.isAssignableFrom(exprClass)) {
 		gen.checkCast(Type.getType(fnIfaceClass));
-		return true;
+	} else if(expr instanceof MethodValueExpr) {
+		emitInvokeDynamicAdapter(gen, getAdaptableSAMMethod(fnIfaceClass), ((MethodValueExpr) expr).method);
+	} else {
+		java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fnIfaceClass);
 
-	} catch(NoSuchMethodException e) {
-		// this should be rare, but we are using a finite set of generated adapter methods
-		return false;
+		Class[] invokerParams = new Class[targetMethod.getParameterCount()+1];
+		invokerParams[0] = Object.class;  // close over Ifn as first arg
+		StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
+		for (int i = 0; i < targetMethod.getParameterCount(); i++) {
+			char paramCode = encodeInvokerParam(targetMethod.getParameterTypes()[i]);
+			invokeMethodBuilder.append(paramCode);
+			invokerParams[i+1] = decodeToClass(paramCode);
+		}
+		char invokerReturnCode = encodeAdapterReturn(targetMethod.getReturnType());
+		invokeMethodBuilder.append(invokerReturnCode);
+		String invokerMethodName = invokeMethodBuilder.toString();
+
+		// Invoker method - takes IFn instance (closed over) + args, body calls IFn.invoke
+		try {
+			java.lang.reflect.Method invokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
+
+			// if(! (exp instanceof FIType)) { emit invoker }
+			gen.dup();
+			Type samType = Type.getType(fnIfaceClass);
+			gen.instanceOf(samType);
+
+			// if so, checkcast and go to end
+			Label invokerLabel = gen.newLabel();
+			gen.ifZCmp(Opcodes.IFEQ, invokerLabel);
+			gen.checkCast(samType);
+			Label endLabel = gen.newLabel();
+			gen.goTo(endLabel);
+
+			// if not, insert lambda adapter
+			gen.mark(invokerLabel);
+
+			// adapt adapter method to target method, closing over IFn instance
+			emitInvokeDynamicAdapter(gen, targetMethod, invokerMethod);
+			gen.mark(endLabel);
+			gen.checkCast(Type.getType(fnIfaceClass));
+
+		} catch(NoSuchMethodException e) {
+			// no invoker method found (this should rarely happen)
+			throw Util.runtimeException(
+					"Can't convert function to " + fnIfaceClass.getName() +
+					", provide an instance of this type (perhaps with 'reify')");
+		}
+
 	}
 }
 
-// LambdaMetafactory.metafactory() method handle - lambda bootstrap
+// LambdaMetafactory.metafactory() method handle for lambda bootstrap
 private static final Handle LMF_HANDLE =
 	new Handle(Opcodes.H_INVOKESTATIC,
 			   "java/lang/invoke/LambdaMetafactory",
@@ -1916,26 +1924,12 @@ static abstract class MethodExpr extends HostExpr{
 					}
 				else
 					{
+					e.emit(C.EXPRESSION, objx, gen);
 					Class exprClass = e.hasJavaClass() ? e.getJavaClass() : null;
-					if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]) && (exprClass == null || ! parameterTypes[i].isAssignableFrom(exprClass)))
-                    	{
-						if(e instanceof MethodValueExpr)
-							{
-							// don't emit e, just adapt the underlying method!
-							emitInvokeDynamicAdapter(gen, getAdaptableSAMMethod(parameterTypes[i]), ((MethodValueExpr) e).method);
-							}
-						else
-							{
-							e.emit(C.EXPRESSION, objx, gen);
-							emitFunctionalAdapter(gen, parameterTypes[i]);
-							}
-						gen.checkCast(Type.getType(parameterTypes[i]));
-						}
+					if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]))
+						ensureFunctionalInterface(objx, gen, e, parameterTypes[i]);
 					else
-						{
-						e.emit(C.EXPRESSION, objx, gen);
 						HostExpr.emitUnboxArg(objx, gen, parameterTypes[i]);
-						}
 					}
 				}
 			catch(Exception e1)
@@ -7076,7 +7070,9 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 					Class initClass = bi.init.hasJavaClass() ? bi.init.getJavaClass() : null;
 					if(Reflector.isAdaptableFunctionalInterface(bindingClass)
 							&& (initClass == null || ! bindingClass.isAssignableFrom(initClass)))
-						emitFunctionalAdapter(gen, bindingClass);
+						{
+						ensureFunctionalInterface(objx, gen, bi.init, bindingClass);
+						}
 					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
 					}
 				}
