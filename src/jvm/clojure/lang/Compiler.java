@@ -1822,7 +1822,7 @@ private static void emitInvokeDynamicAdapter(
 			MethodType.methodType(retClass, implParams).toMethodDescriptorString(),
 			false);
 
-	// Adapter interface (if it was a lambda, this would be its interface):
+	// Invoker interface (if it was a lambda, this would be its interface):
 	//   FI invoke(closedOver*)
 	List lambdaParams = Arrays.asList(Arrays.copyOfRange(implParams, 0, implParams.length - targetMethod.getParameterCount()));
 	MethodType lambdaSig = MethodType.methodType(targetMethod.getDeclaringClass(), lambdaParams);
@@ -1830,7 +1830,7 @@ private static void emitInvokeDynamicAdapter(
 	Type targetType = Type.getType(targetMethod);
 	gen.visitInvokeDynamicInsn(
 		targetMethod.getName(),
-		lambdaSig.toMethodDescriptorString(),  // adapter signature, closedOvers -> Target
+		lambdaSig.toMethodDescriptorString(),  // invoker signature, closedOvers -> Target
 		LMF_HANDLE,  // bootstrap method handle: LambdaMetaFactory.metafactory()
 		new Object[]{targetType, implHandle, targetType}); // arg types of bootstrap method
 }
