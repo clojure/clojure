@@ -552,8 +552,8 @@ private static final IPersistentSet EXCLUDED_FN_INTERFACES = RT.set(
 	// Clojure fns already do these
 	"java.lang.Runnable", "java.util.concurrent.Callable", "java.util.Comparator",
 	// Suppliers excluded from conversion, use IDeref instead
-	"java.lang.function.Supplier", "java.lang.function.BooleanSupplier",
-	"java.lang.function.IntSupplier", "java.lang.function.LongSupplier");
+	"java.util.function.Supplier", "java.util.function.BooleanSupplier", "java.util.function.DoubleSupplier",
+	"java.util.function.IntSupplier", "java.util.function.LongSupplier");
 
 // Adaptable functional interface has @FunctionalInterface annotation
 public static boolean isAdaptableFunctionalInterface(Class c){
