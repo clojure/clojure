@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 public class Reflector{
@@ -548,14 +547,20 @@ static public List<Method> getMethods(Class c, int arity, String name, boolean g
 	return methods;
 }
 
-// Adaptable functional nterface has @FunctionalInterface annotation
-// but excludes Runnable, Callable, Comparator because Clojure IFn/AFn already
-// extend those, so no adapting needed
+// FunctionInterfaces excluded from functional conversion
+private static final IPersistentSet EXCLUDED_FN_INTERFACES = RT.set(
+	// Clojure fns already do these
+	"java.lang.Runnable", "java.util.concurrent.Callable", "java.util.Comparator",
+	// Suppliers excluded from conversion, use IDeref instead
+	"java.lang.function.Supplier", "java.lang.function.BooleanSupplier",
+	"java.lang.function.IntSupplier", "java.lang.function.LongSupplier");
+
+// Adaptable functional interface has @FunctionalInterface annotation
 public static boolean isAdaptableFunctionalInterface(Class c){
-       return c != null &&
-                       c.isInterface() &&
-                       c.isAnnotationPresent(FunctionalInterface.class) &&
-                       c != Runnable.class && c != Callable.class && c != Comparator.class;
+	return c != null &&
+		c.isInterface() &&
+		c.isAnnotationPresent(FunctionalInterface.class) &&
+		! EXCLUDED_FN_INTERFACES.contains(c.getName());
 }
 
 // These return type coercions match the coercions done in FnAdapters for compiled adapters
