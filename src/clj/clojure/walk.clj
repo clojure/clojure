@@ -41,10 +41,10 @@ the sorting function."}
   {:added "1.1"}
   [inner outer form]
   (cond
-   (list? form) (outer (apply list (map inner form)))
+   (list? form) (outer (with-meta (apply list (map inner form)) (meta form)))
    (instance? clojure.lang.IMapEntry form)
    (outer (clojure.lang.MapEntry/create (inner (key form)) (inner (val form))))
-   (seq? form) (outer (doall (map inner form)))
+   (seq? form) (outer (with-meta (doall (map inner form)) (meta form)))
    (instance? clojure.lang.IRecord form)
      (outer (reduce (fn [r x] (conj r (inner x))) form form))
    (coll? form) (outer (into (empty form) (map inner form)))

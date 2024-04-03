@@ -13,6 +13,7 @@
                     FileInputStream InputStreamReader InputStream
                     FileOutputStream OutputStreamWriter OutputStream
                     ByteArrayInputStream ByteArrayOutputStream)
+           (clojure.lang RT)
            (java.net URL URI Socket ServerSocket)))
 
 (defn temp-file
@@ -48,7 +49,7 @@
                                              (slurp read-from :encoding "UTF-8")))
            f f
            (.getAbsolutePath f) (.getAbsolutePath f)
-           (.toURL f) (.toURL f)
+           (RT/toUrl f) (RT/toUrl f)
            (.toURI f) (.toURI f)
            (FileOutputStream. f) (FileInputStream. f)
            (OutputStreamWriter. (FileOutputStream. f) "UTF-8") (reader f :encoding "UTF-8")
@@ -59,6 +60,9 @@
       (is (= content (slurp (.toCharArray content))))
       (finally
        (.delete f)))))
+
+(deftest clj-2783-slurp-maintains-backward-compatibility-errors
+  (is (thrown? java.io.FileNotFoundException (slurp "whitespace = #'\\s+'"))))
 
 (deftest test-streams-nil
   (is (thrown-with-msg? IllegalArgumentException #"Cannot open.*nil" (reader nil)))

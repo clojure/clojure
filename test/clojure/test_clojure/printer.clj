@@ -123,8 +123,9 @@
 
 (deftest print-throwable
   (binding [*data-readers* {'error identity}]
-    (are [e] (= (-> e Throwable->map)
-                (-> e pr-str read-string))
+    (are [e] (let [e' e] ;; use same templated exception object in both cases
+               (= (-> e' Throwable->map)
+                  (-> e' pr-str read-string)))
          (Exception. "heyo")
          (Throwable. "I can a throwable"
                      (Exception. "chain 1"

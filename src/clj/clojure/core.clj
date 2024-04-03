@@ -2333,13 +2333,13 @@
   value is available. See also - realized?."
   {:added "1.0"
    :static true}
-  ([ref] (if (instance? java.util.concurrent.Future ref)
-           (deref-future ref)
-           (.deref ^clojure.lang.IDeref ref)))
+  ([ref] (if (instance? clojure.lang.IDeref ref)
+           (.deref ^clojure.lang.IDeref ref)
+           (deref-future ref)))
   ([ref timeout-ms timeout-val]
-     (if (instance? java.util.concurrent.Future ref)
-       (deref-future ref timeout-ms timeout-val)
-       (.deref ^clojure.lang.IBlockingDeref ref timeout-ms timeout-val))))
+     (if (instance? clojure.lang.IBlockingDeref ref)
+       (.deref ^clojure.lang.IBlockingDeref ref timeout-ms timeout-val)
+       (deref-future ref timeout-ms timeout-val))))
 
 (defn atom
   "Creates and returns an Atom with an initial value of x and zero or
@@ -3034,7 +3034,8 @@
   [n x] (take n (repeat x)))
 
 (defn iterate
-  "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
+  "Returns a lazy (infinite!) sequence of x, (f x), (f (f x)) etc.
+  f must be free of side-effects"
   {:added "1.0"
    :static true}
   [f x] (clojure.lang.Iterate/create f x) )

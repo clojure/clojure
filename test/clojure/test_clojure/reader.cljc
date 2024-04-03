@@ -428,8 +428,9 @@
     (doseq [form top-levels]
       (clojure.walk/postwalk
         #(when (list? %)
-           (is (= (expected-metadata (first %))
-                  (meta %)))
+           (when (contains? expected-metadata (first %))
+             (is (= (expected-metadata (first %))
+                   (meta %))))
            (is (->> (meta %)
                  vals
                  (filter number?)
