@@ -1933,7 +1933,6 @@ static abstract class MethodExpr extends HostExpr{
 					}
 				else
 					{
-					Class exprClass = e.hasJavaClass() ? e.getJavaClass() : null;
 					if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]))
 						{
 						ensureFunctionalInterface(objx, gen, e, parameterTypes[i]);
@@ -7074,20 +7073,19 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 				}
 			else
 				{
-				bi.init.emit(C.EXPRESSION, objx, gen);
+				Class bindingClass = tagClass(bi.binding.tag);
+				Class initClass = bi.init.hasJavaClass() ? bi.init.getJavaClass() : null;
+				if(Reflector.isAdaptableFunctionalInterface(bindingClass)
+						&& (initClass == null || ! bindingClass.isAssignableFrom(initClass)))
+
+					ensureFunctionalInterface(objx, gen, bi.init, bindingClass);
+				else
+					bi.init.emit(C.EXPRESSION, objx, gen);
+
 				if (!bi.binding.used && bi.binding.canBeCleared)
 					gen.pop();
 				else
-					{
-					Class bindingClass = tagClass(bi.binding.tag);
-					Class initClass = bi.init.hasJavaClass() ? bi.init.getJavaClass() : null;
-					if(Reflector.isAdaptableFunctionalInterface(bindingClass)
-							&& (initClass == null || ! bindingClass.isAssignableFrom(initClass)))
-						{
-						ensureFunctionalInterface(objx, gen, bi.init, bindingClass);
-						}
 					gen.visitVarInsn(OBJECT_TYPE.getOpcode(Opcodes.ISTORE), bi.binding.idx);
-					}
 				}
 			bindingLabels.put(bi, gen.mark());
 			}
