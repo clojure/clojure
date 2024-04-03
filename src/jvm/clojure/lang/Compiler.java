@@ -1726,8 +1726,6 @@ private static char encodeAdapterReturn(Class c) {
 }
 
 /**
- * assumes expr has been emitted to objx already
- *
  * if expr.getJavaClass() is FI then checkcast
  *
  * if expr instanceof resolved MethodValueExpr
@@ -1743,8 +1741,10 @@ private static char encodeAdapterReturn(Class c) {
 private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fnIfaceClass) {
 	Class exprClass = expr.hasJavaClass() ? expr.getJavaClass() : null;
 	if(exprClass != null && fnIfaceClass.isAssignableFrom(exprClass)) {
+		expr.emit(C.EXPRESSION, objx, gen);
 		gen.checkCast(Type.getType(fnIfaceClass));
 	} else if(expr instanceof MethodValueExpr) {
+		// DON'T emit expr
 		emitInvokeDynamicAdapter(gen, getAdaptableSAMMethod(fnIfaceClass), ((MethodValueExpr) expr).method);
 	} else {
 		java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fnIfaceClass);
@@ -1762,6 +1762,7 @@ private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen
 		String invokerMethodName = invokeMethodBuilder.toString();
 
 		// Invoker method - takes IFn instance (closed over) + args, body calls IFn.invoke
+		expr.emit(C.EXPRESSION, objx, gen);
 		try {
 			java.lang.reflect.Method invokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
 
@@ -1819,12 +1820,17 @@ private static final Handle LMF_HANDLE =
 private static void emitInvokeDynamicAdapter(
 	GeneratorAdapter gen, java.lang.reflect.Method targetMethod, Executable implMethod) {
 
-	// Implementing method - takes closed overs (on stack now) + args (when called)
+	// Impl method - takes closed overs (on stack now) + args (when called)
 	Class[] implParams = implMethod.getParameterTypes();
 	Class retClass = implMethod instanceof Constructor
 			? implMethod.getDeclaringClass()
 			: ((java.lang.reflect.Method)implMethod).getReturnType();
-	Handle implHandle = new Handle(Opcodes.H_INVOKESTATIC,
+
+	int opCode = (implMethod instanceof Constructor) ? Opcodes.H_INVOKESPECIAL :
+					(Modifier.isStatic(implMethod.getModifiers()) ? Opcodes.H_INVOKESTATIC :
+						Opcodes.H_INVOKEVIRTUAL);
+
+	Handle implHandle = new Handle(opCode,
 			Type.getInternalName(implMethod.getDeclaringClass()),
 			implMethod.getName(),
 			MethodType.methodType(retClass, implParams).toMethodDescriptorString(),
@@ -1832,7 +1838,10 @@ private static void emitInvokeDynamicAdapter(
 
 	// Invoker interface (if it was a lambda, this would be its interface):
 	//   FI invoke(closedOver*)
-	List lambdaParams = Arrays.asList(Arrays.copyOfRange(implParams, 0, implParams.length - targetMethod.getParameterCount()));
+	int implArgCount = implParams.length;
+	if(implMethod instanceof java.lang.reflect.Method && (!Modifier.isStatic(implMethod.getModifiers())))
+		implArgCount++;
+	List lambdaParams = Arrays.asList(Arrays.copyOfRange(implParams, 0, implArgCount - targetMethod.getParameterCount()));
 	MethodType lambdaSig = MethodType.methodType(targetMethod.getDeclaringClass(), lambdaParams);
 
 	Type targetType = Type.getType(targetMethod);
@@ -1924,12 +1933,16 @@ static abstract class MethodExpr extends HostExpr{
 					}
 				else
 					{
-					e.emit(C.EXPRESSION, objx, gen);
 					Class exprClass = e.hasJavaClass() ? e.getJavaClass() : null;
 					if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]))
+						{
 						ensureFunctionalInterface(objx, gen, e, parameterTypes[i]);
+						}
 					else
+						{
+						e.emit(C.EXPRESSION, objx, gen);
 						HostExpr.emitUnboxArg(objx, gen, parameterTypes[i]);
+						}
 					}
 				}
 			catch(Exception e1)
