@@ -57,4 +57,7 @@
     (is (= 11 (.getAsLong a)))
 
     (is (instance? java.util.function.BooleanSupplier a))
-    (is (true? (.getAsBoolean a)))))
+    (is (true? (.getAsBoolean a)))
+
+    (is (instance? java.util.function.DoubleSupplier a))
+    (is (= 11.0 (.getAsDouble a)))))
