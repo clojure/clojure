@@ -256,5 +256,30 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
+static boolean namesArrayDimension(String s) {
+	if(s.length() > 1)
+		return false;
+
+	char ch = s.charAt(s.length()-1);
+
+	if(!(ch >= '1' && ch <= '9'))
+		return false;
+
+	return true;
+}
+
+public static Symbol toArraySymbol(Class c) {
+	if(!c.isArray()) return null;
+	int dim = 0;
+	Class componentClass = c;
+
+	while(componentClass.isArray()) {
+		if(++dim > 9)
+			return Symbol.intern(null, c.getName());
+
+		componentClass = componentClass.getComponentType();
+	}
+	return Symbol.intern(componentClass.getName(), Integer.toString(dim));
+}
 }
 
