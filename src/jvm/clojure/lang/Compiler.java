@@ -1739,11 +1739,12 @@ private static char encodeAdapterReturn(Class c) {
  * else no invoker so throw and tell user to reify
  */
 private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fnIfaceClass) {
-	Class exprClass = expr.hasJavaClass() ? expr.getJavaClass() : null;
-	if(exprClass != null && fnIfaceClass.isAssignableFrom(exprClass)) {
-		expr.emit(C.EXPRESSION, objx, gen);
-		gen.checkCast(Type.getType(fnIfaceClass));
-	} else if(expr instanceof MethodValueExpr) {
+//	Class exprClass = expr.hasJavaClass() ? expr.getJavaClass() : null;
+//	if(exprClass != null && fnIfaceClass.isAssignableFrom(exprClass)) {
+//		expr.emit(C.EXPRESSION, objx, gen);
+//		gen.checkCast(Type.getType(fnIfaceClass));
+//	} else
+	if(expr instanceof MethodValueExpr) {
 		// DON'T emit expr
 		emitInvokeDynamicAdapter(gen, getAdaptableSAMMethod(fnIfaceClass), ((MethodValueExpr) expr).method);
 	} else {
@@ -7074,9 +7075,10 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 			else
 				{
 				Class bindingClass = tagClass(bi.binding.tag);
-				Class initClass = bi.init.hasJavaClass() ? bi.init.getJavaClass() : null;
+				//Class initClass = bi.init.hasJavaClass() ? bi.init.getJavaClass() : null;
 				if(Reflector.isAdaptableFunctionalInterface(bindingClass)
-						&& (initClass == null || ! bindingClass.isAssignableFrom(initClass)))
+				//		&& (initClass == null || ! bindingClass.isAssignableFrom(initClass))
+				)
 
 					ensureFunctionalInterface(objx, gen, bi.init, bindingClass);
 				else
