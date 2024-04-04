@@ -7074,7 +7074,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 				}
 			else
 				{
-				Class bindingClass = tagClass(bi.binding.tag);
+				Class bindingClass = HostExpr.maybeClass(bi.binding.tag, true);
 				//Class initClass = bi.init.hasJavaClass() ? bi.init.getJavaClass() : null;
 				if(Reflector.isAdaptableFunctionalInterface(bindingClass)
 				//		&& (initClass == null || ! bindingClass.isAssignableFrom(initClass))
