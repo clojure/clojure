@@ -257,19 +257,10 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
 }
 
 static boolean namesArrayDimension(String s) {
-	if(s.length() > 1)
-		return false;
-
-	char ch = s.charAt(s.length()-1);
-
-	if(!(ch >= '1' && ch <= '9'))
-		return false;
-
-	return true;
+	return s.length() == 1 && s.charAt(0) >= '1' && s.charAt(0) <= '9';
 }
 
-public static Symbol toArraySymbol(Class c) {
-	if(!c.isArray()) return null;
+public static Symbol maybeArraySymbol(Class c) {
 	int dim = 0;
 	Class componentClass = c;
 
@@ -279,7 +270,7 @@ public static Symbol toArraySymbol(Class c) {
 
 		componentClass = componentClass.getComponentType();
 	}
-	return Symbol.intern(componentClass.getName(), Integer.toString(dim));
+	return (dim > 0) ? Symbol.intern(componentClass.getName(), Integer.toString(dim)) : null;
 }
 }
 

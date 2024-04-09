@@ -384,7 +384,7 @@ static Symbol resolveSymbol(Symbol sym){
 		{
 		Class ac = HostExpr.maybeArrayClass(sym);
 		if(ac != null)
-			return Util.toArraySymbol(ac);
+			return Util.maybeArraySymbol(ac);
 		}
 	//already qualified or classname?
 	if(sym.name.indexOf('.') > 0)
