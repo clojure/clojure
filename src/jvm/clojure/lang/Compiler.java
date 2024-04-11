@@ -1123,7 +1123,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	static Class maybeArrayClass(Symbol sym) {
-		int dim = sym.name.charAt(sym.name.length()-1) - '0';
+		int dim = sym.name.charAt(0) - '0';
 		Symbol componentClassName = Symbol.intern(null, sym.ns);
 		Class componentClass = primClass(componentClassName);
 
@@ -1131,7 +1131,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			componentClass = maybeClass(componentClassName, false);
 
 		if(componentClass == null)
-			Util.sneakyThrow(new ClassNotFoundException("Unable to resolve component classname: "
+			throw Util.sneakyThrow(new ClassNotFoundException("Unable to resolve component classname: "
 				+ componentClassName));
 
 		StringBuilder arrayDescriptor = new StringBuilder();
