@@ -257,14 +257,17 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
 }
 
 static boolean namesArrayDimension(String s) {
-	return s.length() == 1 && s.charAt(0) >= '1' && s.charAt(0) <= '9';
+	if(s.length() != 1)
+		return false;
+	char ch = s.charAt(0);
+	return ch <= '9' && ch >= '1';
 }
 
 public static Symbol maybeArraySymbol(Class c) {
 	int dim = 0;
 	Class componentClass = c;
 
-	while(componentClass.isArray()) {
+	while(componentClass != null && componentClass.isArray()) {
 		if(++dim > 9)
 			return Symbol.intern(null, c.getName());
 

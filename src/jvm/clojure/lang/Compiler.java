@@ -1123,6 +1123,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	static Class maybeArrayClass(Symbol sym) {
+		if(sym == null || !Util.namesArrayDimension(sym.name))
+			return null;
+
 		int dim = sym.name.charAt(0) - '0';
 		Symbol componentClassName = Symbol.intern(null, sym.ns);
 		Class componentClass = primClass(componentClassName);
