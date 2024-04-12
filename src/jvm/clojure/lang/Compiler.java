@@ -1120,9 +1120,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	}
 
 	static Class maybeArrayClass(Symbol sym) {
-		if(sym == null
-			|| sym.ns == null
-			|| !Util.isPosDigit(sym.name))
+		if(sym.ns == null || !Util.isPosDigit(sym.name))
 			return null;
 
 		int dim = sym.name.charAt(0) - '0';
