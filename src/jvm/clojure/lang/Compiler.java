@@ -380,12 +380,6 @@ static boolean inTailCall(C context) {
 }
 
 static Symbol resolveSymbol(Symbol sym){
-	if(Util.namesArrayDimension(sym.name))
-		{
-		Class ac = HostExpr.maybeArrayClass(sym);
-		if(ac != null)
-			return Util.maybeArraySymbol(ac);
-		}
 	//already qualified or classname?
 	if(sym.name.indexOf('.') > 0)
 		return sym;
@@ -393,7 +387,12 @@ static Symbol resolveSymbol(Symbol sym){
 		{
 		Namespace ns = namespaceFor(sym);
 		if(ns == null || (ns.name.name == null ? sym.ns == null : ns.name.name.equals(sym.ns)))
+			{
+			Class ac = HostExpr.maybeArrayClass(sym);
+			if(ac != null)
+				return Util.arrayTypeToSymbol(ac);
 			return sym;
+			}
 		return Symbol.intern(ns.name.name, sym.name);
 		}
 	Object o = currentNS().getMapping(sym);
@@ -1110,10 +1109,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				{
 				c = maybeSpecialTag(sym);
 				}
-			else if(Util.namesArrayDimension(sym.name))
-				{
+			if(c == null)
 				c = HostExpr.maybeArrayClass(sym);
-				}
 			}
 		if(c == null)
 		    c = maybeClass(tag, true);
@@ -1125,7 +1122,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 	static Class maybeArrayClass(Symbol sym) {
 		if(sym == null
 			|| sym.ns == null
-			|| !Util.namesArrayDimension(sym.name))
+			|| !Util.isPosDigit(sym.name))
 			return null;
 
 		int dim = sym.name.charAt(0) - '0';
@@ -7340,7 +7337,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 		}
 	else
 		{
-		if(namespaceFor(sym) == null && !Util.namesArrayDimension(sym.name))
+		if(namespaceFor(sym) == null && !Util.isPosDigit(sym.name))
 			{
 			Symbol nsSym = Symbol.intern(sym.ns);
 			Class c = HostExpr.maybeClass(nsSym, false);
@@ -7416,16 +7413,17 @@ static Namespace namespaceFor(Namespace inns, Symbol sym){
 }
 
 static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
-	if(Util.namesArrayDimension(sym.name))
-		{
-		return HostExpr.maybeArrayClass(sym);
-		}
 	//note - ns-qualified vars must already exist
-	else if(sym.ns != null)
+	if(sym.ns != null)
 		{
 		Namespace ns = namespaceFor(n, sym);
 		if(ns == null)
+			{
+			Class ac = HostExpr.maybeArrayClass(sym);
+			if(ac != null)
+				return ac;
 			throw Util.runtimeException("No such namespace: " + sym.ns);
+			}
 
 		Var v = ns.findInternedVar(Symbol.intern(sym.name));
 		if(v == null)
@@ -7464,16 +7462,12 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
 
 
 static public Object maybeResolveIn(Namespace n, Symbol sym) {
-	if(Util.namesArrayDimension(sym.name))
-		{
-		return HostExpr.maybeArrayClass(sym);
-		}
 	//note - ns-qualified vars must already exist
-	else if(sym.ns != null)
+	if(sym.ns != null)
 		{
 		Namespace ns = namespaceFor(n, sym);
 		if(ns == null)
-			return null;
+			return HostExpr.maybeArrayClass(sym);
 		Var v = ns.findInternedVar(Symbol.intern(sym.name));
 		if(v == null)
 			return null;

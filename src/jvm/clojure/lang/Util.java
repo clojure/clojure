@@ -256,24 +256,27 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
-static boolean namesArrayDimension(String s) {
+static boolean isPosDigit(String s) {
 	if(s.length() != 1)
 		return false;
 	char ch = s.charAt(0);
 	return ch <= '9' && ch >= '1';
 }
 
-public static Symbol maybeArraySymbol(Class c) {
+public static Symbol arrayTypeToSymbol(Class c) {
 	int dim = 0;
 	Class componentClass = c;
 
-	while(componentClass != null && componentClass.isArray()) {
+	while(componentClass.isArray()) {
 		if(++dim > 9)
-			return Symbol.intern(null, c.getName());
+			break;
 
 		componentClass = componentClass.getComponentType();
 	}
-	return (dim > 0) ? Symbol.intern(componentClass.getName(), Integer.toString(dim)) : null;
+	if (dim <= 9 && dim >= 1)
+		return Symbol.intern(componentClass.getName(), Integer.toString(dim));
+	else
+		return Symbol.intern(null, c.getName());
 }
 }
 

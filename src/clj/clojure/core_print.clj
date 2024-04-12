@@ -380,8 +380,8 @@
    Short/TYPE "Short/TYPE"})
 
 (defmethod print-method Class [^Class c, ^Writer w]
-  (if-let [asym (clojure.lang.Util/maybeArraySymbol c)]
-    (print-method asym w)
+  (if (.isArray c)
+    (print-method (clojure.lang.Util/arrayTypeToSymbol c) w)
     (.write w (.getName c))))
 
 (defmethod print-dup Class [^Class c, ^Writer w]
