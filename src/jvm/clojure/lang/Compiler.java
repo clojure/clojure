@@ -5340,7 +5340,7 @@ static public class ObjExpr implements Expr{
 			else
 				{
 				gen.push(destubClassName(cc.getName()));
-				gen.invokeStatic(RT_TYPE, Method.getMethod("Class classForName(String)"));
+				gen.invokeStatic(RT_TYPE, Method.getMethod("Class classForNameNonLoading(String)"));
 				}
 			}
 		else if(value instanceof Symbol)
