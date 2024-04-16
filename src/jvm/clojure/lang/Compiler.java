@@ -1725,7 +1725,7 @@ private static char encodeAdapterReturn(Class c) {
 	}
 }
 
-public static final IPersistentMap WIDENING = PersistentHashMap.create(
+private static final IPersistentMap WIDENING = PersistentHashMap.create(
 	Byte.TYPE, PersistentHashSet.create(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE),
 	Byte.class, PersistentHashSet.create(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE, Byte.TYPE),
 	Short.TYPE, PersistentHashSet.create(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE),
@@ -1740,7 +1740,7 @@ public static final IPersistentMap WIDENING = PersistentHashMap.create(
 	Float.class, PersistentHashSet.create(Double.TYPE, Float.TYPE),
 	Double.class, PersistentHashSet.create(Double.TYPE));
 
-public static final IPersistentMap PRIM_TO_WRAPPER = PersistentHashMap.create(
+private static final IPersistentMap PRIM_TO_WRAPPER = PersistentHashMap.create(
 	Byte.TYPE, Byte.class,
 	Short.TYPE, Short.class,
 	Character.TYPE, Character.class,
