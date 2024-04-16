@@ -614,7 +614,7 @@ static Object boxArg(Class paramType, Object arg) {
        return boxArg(paramType, arg, true);
 }
 
-static Object boxArg(Class paramType, Object arg, boolean adaptFunctionalInterfaces){
+private static Object boxArg(Class paramType, Object arg, boolean adaptFunctionalInterfaces){
 	if(!paramType.isPrimitive())
 		if(adaptFunctionalInterfaces && isAdaptableFunctionalInterface(paramType) && !(paramType.isInstance(arg))) {
 			return dynamicAdapt(paramType, arg);
