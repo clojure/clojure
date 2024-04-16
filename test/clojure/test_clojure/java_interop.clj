@@ -727,17 +727,15 @@
         filtered (.listFiles ^File dir ff)]
     (is (= 2 (count filtered))))
 
-  ;;; resolve method ambiguity using member symbol and arg-tags
-  ;(let [{:keys [dir file-id]} (make-test-files)
-  ;      ^FileFilter ff (fn [^File f]
-  ;                               (str/includes? (.getName f) file-id))
-  ;      filtered (^[FileFilter] .File/listFiles dir ff)]
-  ;  (is (= 2 (count filtered))))
+  ;;; resolve method ambiguity using member symbol and param-tags
+  (let [{:keys [dir file-id]} (make-test-files)
+        ^FileFilter ff (fn [^File f]
+                                 (str/includes? (.getName f) file-id))
+        filtered (^[FileFilter] File/listFiles dir ff)]
+    (is (= 2 (count filtered))))
 
-
-  ;(defn files-with-ext [^File dir ext]
-  ;  (vec (.list dir ^FilenameFilter #(str/ends-with? % ext))))
-  ;
+  (defn files-with-ext [^File dir ext]
+    (vec (.list dir ^FilenameFilter #(str/ends-with? % ext))))
 
   (let [{:keys [dir file-id]} (make-test-files)
         ^FilenameFilter ff (fn [dir file-name]
@@ -822,7 +820,7 @@
         ^AdapterExerciser$DI DIadapter (fn [^double a] 1)
         ^AdapterExerciser$OI OIadapter (fn [^AdapterExerciser a] 1)
         ^AdapterExerciser$LB LBadapter (fn [^long a] false)
-        ^AdapterExerciser$DB DBadapter (fn [^double a] false);
+        ^AdapterExerciser$DB DBadapter (fn [^double a] false)
         ^AdapterExerciser$OB OBadapter (fn [^AdapterExerciser a] false)
         ^AdapterExerciser$OD ODadapter (fn [^AdapterExerciser a] (double 1))
         ^AdapterExerciser$LD LDadapter (fn [^long a] (double 1))
