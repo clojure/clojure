@@ -1308,15 +1308,103 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 	}
 
 	// Expr impls
+
 	@Override
 	public Object eval() {
-		return null;
+		return toFnExpr(this, aritySet()).eval();
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-
+		toFnExpr(this, aritySet()).emit(context, objx, gen);
 	}
+
+	private Set aritySet() {
+		Set res = new java.util.TreeSet<>();
+
+		if(method != null) {
+			res.add(method.getParameterCount());
+			return res;
+		}
+
+		List<Executable> methods = methodsWithName(c, methodName, kind);
+
+		for(Executable exec : methods)
+			res.add(exec.getParameterCount());
+
+		return res;
+	}
+
+	private static FnExpr toFnExpr(QualifiedMethodExpr qmexpr, Set arities) {
+		// maybe return hint symbol
+		Symbol retTag = null;
+		if(qmexpr.method != null) {
+			Class retClass = qmexpr.method instanceof Constructor ? qmexpr.c
+					: ((java.lang.reflect.Method) qmexpr.method).getReturnType();
+			if (isHintablePrimitive(retClass) || !retClass.isPrimitive()) {
+				retTag = primTag(retClass);
+				retTag = (retTag != null) ? retTag : Symbol.intern(null, retClass.getName());
+			}
+		}
+
+		return buildThunk(qmexpr.c, qmexpr.method, qmexpr.methodSymbol, arities,
+				qmexpr.kind.equals(MethodKind.INSTANCE) ? THIS : null, retTag);
+	}
+
+	// The buildThunk method currently return a new FnExpr on every call
+	// TBD: caching/reuse of thunks
+	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Set arities, Symbol instanceParam, Symbol retHint) {
+		// When method is resolved:
+		// (fn invoke__Class_meth (^retHint? [this? primHintedArgs*] (methodSymbol this? primHintedArgs*)))
+		// When unresolved:
+		// (fn invoke__Class_meth ([this?] (Class/meth this?)) ([this? arg1] (Class/meth this? arg1)))
+		IPersistentCollection form = PersistentVector.EMPTY;
+		String thunkName = "invoke__" + c.getSimpleName() + "_" + methodSymbol.name;
+
+		for(Object a : arities) {
+			int arity = (int) a;
+			IPersistentVector params = buildParams(method, instanceParam, arity, retHint);
+			ISeq body = RT.listStar(methodSymbol, params.seq());
+			form = RT.conj(form, RT.list(params, body));
+		}
+
+		ISeq thunkForm = RT.listStar(Symbol.intern("fn"), Symbol.intern(thunkName), RT.seq(form));
+		return (FnExpr) analyzeSeq(C.EVAL, thunkForm, thunkName);
+	}
+
+	private static IPersistentVector buildParams(Executable method, Symbol instanceParam, int arity, Symbol retHint) {
+		IPersistentVector params = PersistentVector.EMPTY;
+		if(instanceParam != null) params = params.cons(instanceParam);
+		// maybe hinted params
+		Class[] paramTypes = method != null ? method.getParameterTypes() : new Class[arity];
+		for(int i = 0; i<paramTypes.length; i++) {
+			Symbol param = Symbol.intern(null, "arg" + (i+1));
+			if(method != null && isHintablePrimitive(paramTypes[i])) {
+				param = (Symbol) param.withMeta(RT.map(RT.TAG_KEY, primTag(paramTypes[i])));
+			}
+			params = params.cons(param);
+		}
+		// hint return
+		return (retHint == null) ? params
+				: ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, retHint));
+	}
+
+	private static boolean isHintablePrimitive(Class c) {
+		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
+	}
+
+	private static Symbol primTag(Class c) {
+		String t = null;
+		if(c.isPrimitive()) {
+			t = c.getName();
+		}
+		else if(c.isArray() && c.getComponentType().isPrimitive()) {
+			t = c.getName() + "s";
+		}
+		return (t == null) ? null : Symbol.intern(null, t);
+	}
+
+	// Type flow methods
 
 	@Override
 	public boolean hasJavaClass() {
