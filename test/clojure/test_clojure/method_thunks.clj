@@ -21,8 +21,7 @@
   (is (= '([1] [2] [3])
          (map ^[_] Tuple/create [1 2 3])))
   (is (= '([1 4] [2 5] [3 6])
-         (map ^[_ _] Tuple/create [1 2 3] [4 5 6])))
-  (is (thrown? Exception (eval 'clojure.lang.Tuple/create))))
+         (map ^[_ _] Tuple/create [1 2 3] [4 5 6]))))
 
 (deftest method-signature-selection
   (is (= [1.23 3.14]
@@ -36,7 +35,7 @@
   (is (= '("a" "12")
          (map ^[Object] String/valueOf ["a" 12])))
   (is (= ["A" "B" "C"]
-         (map ^[java.util.Locale] String/toUpperCase ["a" "b" "c"] (repeat java.util.Locale/ENGLISH))))
+         (map ^[java.util.Locale] String/.toUpperCase ["a" "b" "c"] (repeat java.util.Locale/ENGLISH))))
   (is (thrown? ClassCastException
                (doall (map ^[long] String/valueOf [12 "a"])))))
 
