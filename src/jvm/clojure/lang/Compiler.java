@@ -1186,6 +1186,195 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 
 // In invocation position
 //   direct invocation of resolved constructor, static, or instance method
+//   OR method invocation with inference
+// In value position, will emit as a multi-arity method thunk with
+//	 params matching the arity set of the named method
+static class QualifiedMethodExpr implements MaybePrimitiveExpr {
+	private final Class c;
+	private final Symbol methodSymbol;
+	private final String methodName;
+	private final List<Class> hintedSig;
+	private final MethodKind kind;
+	private Executable method;
+
+	private enum MethodKind {
+		CTOR, INSTANCE, STATIC
+	}
+
+	public QualifiedMethodExpr(Class methodClass, Symbol sym){
+		c = methodClass;
+		methodSymbol = sym;
+		kind = classifyMethodKind(sym.name, MethodKind.INSTANCE);
+		methodName = sym.name.substring(1); // TODO dev fix
+		hintedSig = tagsToClasses(paramTagsOf(sym));
+	}
+
+	private MethodKind classifyMethodKind(String name) {
+		if(name.startsWith("."))
+			return MethodKind.INSTANCE;
+		else if(name.equals("new"))
+			return MethodKind.CTOR;
+		else
+			return MethodKind.STATIC;
+	}
+
+	// TODO remove, dev purposes only
+	private MethodKind classifyMethodKind(String name, MethodKind def) {
+		if(def != null) return def;
+
+		if(name.startsWith("."))
+			return MethodKind.INSTANCE;
+		else if(name.equals("new"))
+			return MethodKind.CTOR;
+		else
+			return MethodKind.STATIC;
+	}
+
+	public boolean namesStaticMethod() {
+		return kind.equals(MethodKind.STATIC);
+	}
+
+	public boolean namesInstanceMethod() {
+		return kind.equals(MethodKind.INSTANCE);
+	}
+
+	public boolean namesConstructor() {
+		return kind.equals(MethodKind.CTOR);
+	}
+
+	public Expr ensureResolved(String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
+		if(method == null) {
+			List<Executable> methods = methodsWithName(c, methodName, kind);
+			if (methods.isEmpty())
+				throw noMethodWithNameException(c, methodName);
+
+			if (hintedSig != null)
+				method = resolveHintedMethod(c, methodName, hintedSig, methods);
+		}
+
+		if(method != null) {
+			if (namesConstructor())
+				return new NewExpr(c, (Constructor) method, args, line, column);
+
+			if (namesInstanceMethod())
+				return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
+						munge(methodName), (java.lang.reflect.Method) method, PersistentVector.create(RT.next(args)),
+						tailPosition);
+
+			return new StaticMethodExpr(source, line, column, tag, c,
+					munge(methodName), (java.lang.reflect.Method) method, args, tailPosition);
+		}
+		else {
+			if (namesConstructor())
+				return new NewExpr(c, args, line, column);
+
+			if (namesInstanceMethod())
+				return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
+						munge(methodName), PersistentVector.create(RT.next(args)), tailPosition);
+
+			return new StaticMethodExpr(source, line, column, tag, c, munge(methodName), args, tailPosition);
+		}
+	}
+
+	private static List<Executable> methodsWithName(Class c, String name, MethodKind targetKind) {
+		final Executable[] methods;
+		final String methodName;
+		if (methodNamesConstructor(c, name)) {
+			methods = c.getConstructors();
+			methodName = c.getName();
+		}
+		else {
+			methods = c.getMethods();
+			methodName = name;
+		}
+
+		return Arrays.stream(methods)
+				.filter(m -> m.getName().equals(methodName))
+				.filter(m -> {
+					return (targetKind == MethodKind.STATIC && isStaticMethod(m))
+							|| (targetKind == MethodKind.INSTANCE && isInstanceMethod(m))
+							|| (targetKind == MethodKind.CTOR && isConstructor(m));
+				})
+				.collect(Collectors.toList());
+	}
+
+	private static boolean methodNamesConstructor(Class c, String methodName) {
+		return c != null && methodName.equals("new");
+	}
+
+	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
+		final int arity = hintedSig.size();
+		List<Executable> filteredMethods = methods.stream()
+				.filter(m -> m.getParameterCount() == arity)
+				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
+				.filter(m -> signatureMatches(hintedSig, m))
+				.collect(Collectors.toList());
+
+		if(filteredMethods.size() == 1)
+			return filteredMethods.get(0);
+		else
+			throw paramTagsDontResolveException(c, methodName, hintedSig, filteredMethods.size());
+	}
+
+	// Expr impls
+	@Override
+	public Object eval() {
+		return null;
+	}
+
+	@Override
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
+
+	}
+
+	@Override
+	public boolean hasJavaClass() {
+		return false;
+	}
+
+	@Override
+	public Class getJavaClass() {
+		return null;
+	}
+
+	@Override
+	public boolean canEmitPrimitive() {
+		return false;
+	}
+
+	@Override
+	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen) {
+
+	}
+
+	// Exception reporting
+	private static String methodDescription(Class c, String methodName) {
+		boolean isCtor = methodNamesConstructor(c, methodName);
+		String type = isCtor ? "constructor" : "method";
+		return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
+	}
+
+	static IPersistentVector toParamTags(List<Class> hintedSig) {
+		return PersistentVector.create(hintedSig.stream()
+				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
+				.collect(Collectors.toList()));
+	}
+
+	static IllegalArgumentException noMethodWithNameException(Class c, String methodName) {
+		return new IllegalArgumentException("Could not find "
+				+ methodDescription(c, methodName));
+	}
+
+	static IllegalArgumentException paramTagsDontResolveException(Class c, String methodName, List<Class> hintedSig, int found) {
+		return new IllegalArgumentException("Expected to find 1 matching signature for "
+				+ methodDescription(c, methodName)
+				+ " but found " + found
+				+ " with param-tags " + toParamTags(hintedSig));
+	}
+}
+
+// In invocation position
+//   direct invocation of resolved constructor, static, or instance method
 //   OR legacy static method invocation with inference
 //     this is the ONLY valid case where method is unresolved by end of constructor
 // In value position, will emit as a method thunk (error if not resolved)
@@ -4267,11 +4456,18 @@ static class InvokeExpr implements Expr{
 		if(fexpr instanceof MethodValueExpr)
 			return toHostExpr((MethodValueExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
 
+		if(fexpr instanceof QualifiedMethodExpr)
+			return toHostExpr2((QualifiedMethodExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
+
 //		if(args.count() > MAX_POSITIONAL_ARITY)
 //			throw new IllegalArgumentException(
 //					String.format("No more than %d args supported", MAX_POSITIONAL_ARITY));
 
 		return new InvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), fexpr, args, tailPosition);
+	}
+
+	private static Expr toHostExpr2(QualifiedMethodExpr qmexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
+		return qmexpr.ensureResolved(source, line, column, tag, tailPosition, args);
 	}
 
 	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
@@ -4291,6 +4487,7 @@ static class InvokeExpr implements Expr{
 		return new StaticMethodExpr(source, line, column, tag, mexpr.c,
 				munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
 	}
+
 }
 
 static class SourceDebugExtensionAttribute extends Attribute{
@@ -7429,7 +7626,7 @@ public static Object macroexpand1(Object x) {
 				Symbol sym = (Symbol) op;
 				String sname = sym.name;
 				//(.substring s 2 5) => (. s substring 2 5)
-				if(sym.name.charAt(0) == '.')
+				if(sym.name.charAt(0) == '.' && sym.ns == null)
 					{
 					if(RT.length(form) < 2)
 						throw new IllegalArgumentException(
@@ -7702,7 +7899,11 @@ private static Expr analyzeSymbol(Symbol sym) {
 				if(Reflector.getField(c, sym.name, true) != null)
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
 				else
+					{
+					// TODO, testing
+					if(sym.name.startsWith(".")) return new QualifiedMethodExpr(c, sym);
 					return new MethodValueExpr(c, sym);
+					}
 				}
 
 			}
