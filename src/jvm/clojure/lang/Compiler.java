@@ -1231,16 +1231,22 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 		return kind.equals(MethodKind.CTOR);
 	}
 
+	private Executable findMethod() {
+		List<Executable> methods = methodsWithName(c, methodName, kind);
+		if (methods.isEmpty())
+			throw noMethodWithNameException(c, methodName);
+
+		if (hintedSig != null)
+			return resolveHintedMethod(c, methodName, hintedSig, methods);
+
+		return null;
+	}
+
 	public Expr ensureResolved(String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
 		argsContext = args;
 
 		if(method == null) {
-			List<Executable> methods = methodsWithName(c, methodName, kind);
-			if (methods.isEmpty())
-				throw noMethodWithNameException(c, methodName);
-
-			if (hintedSig != null)
-				method = resolveHintedMethod(c, methodName, hintedSig, methods);
+			method = findMethod();
 		}
 
 		if(method != null) {
@@ -1311,11 +1317,13 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 
 	@Override
 	public Object eval() {
+		method = findMethod();
 		return toFnExpr(this, aritySet()).eval();
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
+		method = findMethod();
 		toFnExpr(this, aritySet()).emit(context, objx, gen);
 	}
 
