@@ -93,14 +93,23 @@ private static Method toAccessibleSuperMethod(Method m, Object target) {
 	return null;
 }
 
+private static List getInstanceMethods(Object target, Class c, String methodName, Object[] args) {
+	return getMethods(c, args.length, methodName, false).stream()
+			.map(method -> toAccessibleSuperMethod(method, target))
+			.filter(method -> (method != null))
+			.collect(Collectors.toList());
+}
+
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) {
-	Class c = target.getClass();
-	List methods = getMethods(c, args.length, methodName, false).stream()
-					.map(method -> toAccessibleSuperMethod(method, target))
-					.filter(method -> (method != null))
-					.collect(Collectors.toList());
+	List methods = getInstanceMethods(target, target.getClass(), methodName, args);
 	return invokeMatchingMethod(methodName, methods, target, args);
 }
+
+public static Object invokeInstanceMethodOfClass(Object target, Class c, String methodName, Object[] args) {
+	List methods = getInstanceMethods(target, c, methodName, args);
+	return invokeMatchingMethod(methodName, methods, target, args);
+}
+
 
 private static Throwable getCauseOrElse(Exception e) {
 	if (e.getCause() != null)
