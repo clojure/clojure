@@ -1196,6 +1196,7 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 	private final List<Class> hintedSig;
 	private final MethodKind kind;
 	private Executable method;
+	private IPersistentVector argsContext;
 
 	private enum MethodKind {
 		CTOR, INSTANCE, STATIC
@@ -1204,24 +1205,12 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 	public QualifiedMethodExpr(Class methodClass, Symbol sym){
 		c = methodClass;
 		methodSymbol = sym;
-		kind = classifyMethodKind(sym.name, MethodKind.INSTANCE);
-		methodName = sym.name.substring(1); // TODO dev fix
+		kind = classifyMethodKind(sym.name);
+		methodName = kind.equals(MethodKind.INSTANCE) ? sym.name.substring(1) : sym.name;
 		hintedSig = tagsToClasses(paramTagsOf(sym));
 	}
 
 	private MethodKind classifyMethodKind(String name) {
-		if(name.startsWith("."))
-			return MethodKind.INSTANCE;
-		else if(name.equals("new"))
-			return MethodKind.CTOR;
-		else
-			return MethodKind.STATIC;
-	}
-
-	// TODO remove, dev purposes only
-	private MethodKind classifyMethodKind(String name, MethodKind def) {
-		if(def != null) return def;
-
 		if(name.startsWith("."))
 			return MethodKind.INSTANCE;
 		else if(name.equals("new"))
@@ -1243,6 +1232,8 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 	}
 
 	public Expr ensureResolved(String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
+		argsContext = args;
+
 		if(method == null) {
 			List<Executable> methods = methodsWithName(c, methodName, kind);
 			if (methods.isEmpty())
@@ -7900,9 +7891,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
 				else
 					{
-					// TODO, testing
-					if(sym.name.startsWith(".")) return new QualifiedMethodExpr(c, sym);
-					return new MethodValueExpr(c, sym);
+					return new QualifiedMethodExpr(c, sym);
 					}
 				}
 
