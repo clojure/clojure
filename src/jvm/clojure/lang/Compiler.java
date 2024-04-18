@@ -1196,7 +1196,7 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 	private final List<Class> hintedSig;
 	private final MethodKind kind;
 	private Executable method;
-	private IPersistentVector argsContext;
+	private volatile FnExpr backingFnExpr;
 
 	private enum MethodKind {
 		CTOR, INSTANCE, STATIC
@@ -1231,7 +1231,7 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 		return kind.equals(MethodKind.CTOR);
 	}
 
-	private Executable findMethod() {
+	private Executable maybeResolveMethod() {
 		List<Executable> methods = methodsWithName(c, methodName, kind);
 		if (methods.isEmpty())
 			throw noMethodWithNameException(c, methodName);
@@ -1240,37 +1240,6 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 			return resolveHintedMethod(c, methodName, hintedSig, methods);
 
 		return null;
-	}
-
-	public Expr ensureResolved(String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
-		argsContext = args;
-
-		if(method == null) {
-			method = findMethod();
-		}
-
-		if(method != null) {
-			if (namesConstructor())
-				return new NewExpr(c, (Constructor) method, args, line, column);
-
-			if (namesInstanceMethod())
-				return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
-						munge(methodName), (java.lang.reflect.Method) method, PersistentVector.create(RT.next(args)),
-						tailPosition);
-
-			return new StaticMethodExpr(source, line, column, tag, c,
-					munge(methodName), (java.lang.reflect.Method) method, args, tailPosition);
-		}
-		else {
-			if (namesConstructor())
-				return new NewExpr(c, args, line, column);
-
-			if (namesInstanceMethod())
-				return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
-						munge(methodName), PersistentVector.create(RT.next(args)), tailPosition);
-
-			return new StaticMethodExpr(source, line, column, tag, c, munge(methodName), args, tailPosition);
-		}
 	}
 
 	private static List<Executable> methodsWithName(Class c, String name, MethodKind targetKind) {
@@ -1315,23 +1284,37 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 
 	// Expr impls
 
+	private FnExpr ensureFnExpr() {
+		FnExpr fexpr = backingFnExpr;
+
+		if (fexpr == null) {
+			synchronized(this) {
+				fexpr = backingFnExpr;
+				if(fexpr == null) {
+					method = maybeResolveMethod();
+					fexpr = backingFnExpr = toFnExpr(this, aritySet(method, c, methodName, kind));
+				}
+			}
+		}
+
+		return fexpr;
+	}
+
 	@Override
 	public Object eval() {
-		method = findMethod();
-		return toFnExpr(this, aritySet()).eval();
+		return ensureFnExpr().eval();
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-		method = findMethod();
-		toFnExpr(this, aritySet()).emit(context, objx, gen);
+		ensureFnExpr().emit(context, objx, gen);
 	}
 
-	private Set aritySet() {
+	private static Set aritySet(Executable maybeMethod, Class c, String methodName, MethodKind kind) {
 		Set res = new java.util.TreeSet<>();
 
-		if(method != null) {
-			res.add(method.getParameterCount());
+		if(maybeMethod != null) {
+			res.add(maybeMethod.getParameterCount());
 			return res;
 		}
 
@@ -4554,7 +4537,30 @@ static class InvokeExpr implements Expr{
 	}
 
 	private static Expr toHostExpr2(QualifiedMethodExpr qmexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
-		return qmexpr.ensureResolved(source, line, column, tag, tailPosition, args);
+		Executable method = qmexpr.maybeResolveMethod();
+
+		if(method != null) {
+			if (qmexpr.namesConstructor())
+				return new NewExpr(qmexpr.c, (Constructor) method, args, line, column);
+
+			if(qmexpr.namesInstanceMethod())
+				return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
+						munge(qmexpr.methodName), (java.lang.reflect.Method) method, PersistentVector.create(RT.next(args)),
+						tailPosition);
+
+			return new StaticMethodExpr(source, line, column, tag, qmexpr.c,
+					munge(qmexpr.methodName), (java.lang.reflect.Method) method, args, tailPosition);
+		}
+		else {
+			if(qmexpr.namesConstructor())
+				return new NewExpr(qmexpr.c, args, line, column);
+
+			if(qmexpr.namesInstanceMethod())
+				return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
+						munge(qmexpr.methodName), PersistentVector.create(RT.next(args)), tailPosition);
+
+			return new StaticMethodExpr(source, line, column, tag, qmexpr.c, munge(qmexpr.methodName), args, tailPosition);
+		}
 	}
 
 	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
