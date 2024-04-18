@@ -1247,7 +1247,7 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 	private static List<Executable> methodsWithName(Class c, String name, MethodKind targetKind) {
 		final Executable[] methods;
 		final String methodName;
-		if (methodNamesConstructor(c, name)) {
+		if (targetKind == MethodKind.CTOR) {
 			methods = c.getConstructors();
 			methodName = c.getName();
 		}
@@ -1264,10 +1264,6 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 							|| (targetKind == MethodKind.CTOR && isConstructor(m));
 				})
 				.collect(Collectors.toList());
-	}
-
-	private static boolean methodNamesConstructor(Class c, String methodName) {
-		return c != null && methodName.equals("new");
 	}
 
 	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
@@ -1421,7 +1417,7 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 
 	// Exception reporting
 	private static String methodDescription(Class c, String methodName) {
-		boolean isCtor = methodNamesConstructor(c, methodName);
+		boolean isCtor = c != null && methodName.equals("new");
 		String type = isCtor ? "constructor" : "method";
 		return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 	}
@@ -1435,206 +1431,6 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 	static IllegalArgumentException noMethodWithNameException(Class c, String methodName) {
 		return new IllegalArgumentException("Could not find "
 				+ methodDescription(c, methodName));
-	}
-
-	static IllegalArgumentException paramTagsDontResolveException(Class c, String methodName, List<Class> hintedSig, int found) {
-		return new IllegalArgumentException("Expected to find 1 matching signature for "
-				+ methodDescription(c, methodName)
-				+ " but found " + found
-				+ " with param-tags " + toParamTags(hintedSig));
-	}
-}
-
-// In invocation position
-//   direct invocation of resolved constructor, static, or instance method
-//   OR legacy static method invocation with inference
-//     this is the ONLY valid case where method is unresolved by end of constructor
-// In value position, will emit as a method thunk (error if not resolved)
-static class MethodValueExpr implements Expr {
-	private final Class c;
-	private final List<Class> hintedSig;
-	private final Executable method;
-	private final Symbol methodSymbol;
-	private final String methodName;
-
-	public MethodValueExpr(Class methodClass, Symbol sym){
-		c = methodClass;
-		methodSymbol = sym;
-		methodName = sym.name;
-
-		List<Executable> methods = methodsWithName(c, methodName);
-		if(methods.isEmpty())
-			throw noMethodWithNameException(c, methodName);
-
-		hintedSig = tagsToClasses(paramTagsOf(sym));
-		if(hintedSig != null) {
-			method = resolveHintedMethod(c, methodName, hintedSig, methods);
-		} else {
-			Executable maybeMethod = null;
-			if(methods.size() == 1) {
-				// Only 1 method - no inference needed
-				maybeMethod = methods.get(0);
-			}
-			else if(methods.size() > 1) {
-				// Only statics supported at this point (needs inference)
-
-				if(methodNamesConstructor(c, methodName))
-					throw overloadNeedsParamTagsException(c, methodName);
-
-				// Filter out instance methods (no inference allowed)
-				List<Executable> staticMethods = methods.stream()
-						.filter(m -> Modifier.isStatic(m.getModifiers()))
-						.collect(Collectors.toList());
-				if(staticMethods.size() == 1)
-					maybeMethod = staticMethods.get(0);
-				else if(staticMethods.isEmpty())
-					throw overloadNeedsParamTagsException(c, methodName);
-				// else not resolved, static method w/inference
-			}
-			method = maybeMethod;
-		}
-	}
-
-	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
-		final int arity = hintedSig.size();
-		List<Executable> filteredMethods = methods.stream()
-				.filter(m -> m.getParameterCount() == arity)
-				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
-				.filter(m -> signatureMatches(hintedSig, m))
-				.collect(Collectors.toList());
-
-		if(filteredMethods.size() == 1)
-			return filteredMethods.get(0);
-		else
-			throw paramTagsDontResolveException(c, methodName, hintedSig, filteredMethods.size());
-	}
-
-	private static boolean methodNamesConstructor(Class c, String methodName) {
-		return c != null && methodName.equals("new");
-	}
-
-	private static List<Executable> methodsWithName(Class c, String name) {
-		final Executable[] methods;
-		final String methodName;
-		if (methodNamesConstructor(c, name)) {
-			methods = c.getConstructors();
-			methodName = c.getName();
-		}
-		else {
-			methods = c.getMethods();
-			methodName = name;
-		}
-
-		return Arrays.stream(methods)
-				.filter(m -> m.getName().equals(methodName))
-				.collect(Collectors.toList());
-	}
-
-	public boolean isResolved() {
-		return method != null;
-	}
-
-	@Override
-	public Object eval() {
-		return toFnExpr(this).eval();
-	}
-
-	@Override
-	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-		toFnExpr(this).emit(context, objx, gen);
-	}
-
-	@Override
-	public boolean hasJavaClass() {
-		return true;
-	}
-
-	@Override
-	public Class getJavaClass() {
-		return AFn.class;
-	}
-
-	private static FnExpr toFnExpr(MethodValueExpr mexpr) {
-		// If not resolved by this point we were not given param-tags
-		// and named method was overloaded.
-		if(!mexpr.isResolved()) {
-			throw overloadNeedsParamTagsException(mexpr.c, mexpr.methodName);
-		}
-
-		// return hint symbol
-		Symbol retTag = null;
-		Class retClass = mexpr.method instanceof Constructor ? mexpr.c 
-				: ((java.lang.reflect.Method)mexpr.method).getReturnType();
-		if (isHintablePrimitive(retClass) || !retClass.isPrimitive()) {
-			retTag = primTag(retClass);
-			retTag = (retTag != null) ? retTag : Symbol.intern(null, retClass.getName());
-		}
-
-		return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, 
-				isInstanceMethod(mexpr.method) ? THIS : null, retTag);
-	}
-
-	private static boolean isHintablePrimitive(Class c) {
-		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
-	}
-
-	private static Symbol primTag(Class c) {
-		String t = null;
-		if(c.isPrimitive()) {
-			t = c.getName();
-		}
-		else if(c.isArray() && c.getComponentType().isPrimitive()) {
-			t = c.getName() + "s";
-		}
-		return (t == null) ? null : Symbol.intern(null, t);
-	}
-
-	// All buildThunk methods currently return a new FnExpr on every call
-	// TBD: caching/reuse of thunks
-	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Symbol instanceParam, Symbol retHint) {
-		// (fn invoke__Class_meth (^retHint? [this? primHintedArgs*] (methodSymbol this? primHintedArgs*)))
-		IPersistentVector params = PersistentVector.EMPTY;
-		if(instanceParam != null) params = params.cons(instanceParam);
-		// hinted params
-		Class[] paramTypes = method.getParameterTypes();
-		for(int i = 0; i<paramTypes.length; i++) {
-			Symbol param = Symbol.intern(null, "arg" + (i+1));
-			if(isHintablePrimitive(paramTypes[i])) {
-				param = (Symbol) param.withMeta(RT.map(RT.TAG_KEY, primTag(paramTypes[i])));
-			}
-			params = params.cons(param);
-		}
-		// hint return
-		params = (retHint == null) ? params 
-				: ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, retHint));
-
-		ISeq body = RT.listStar(methodSymbol, params.seq());
-		String thunkName = "invoke__" + c.getSimpleName() + "_" + methodSymbol.name;
-		ISeq form = RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
-		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
-	}
-
-	private static String methodDescription(Class c, String methodName) {
-		boolean isCtor = methodNamesConstructor(c, methodName);
-		String type = isCtor ? "constructor" : "method";
-		return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
-	}
-
-	static IPersistentVector toParamTags(List<Class> hintedSig) {
-		return PersistentVector.create(hintedSig.stream()
-				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
-				.collect(Collectors.toList()));
-	}
-
-	static IllegalArgumentException noMethodWithNameException(Class c, String methodName) {
-		return new IllegalArgumentException("Could not find "
-				+ methodDescription(c, methodName));
-	}
-
-	static IllegalArgumentException overloadNeedsParamTagsException(Class c, String methodName) {
-		return new IllegalArgumentException("Multiple matches for "
-				+ methodDescription(c, methodName)
-				+ ", use param-tags to specify");
 	}
 
 	static IllegalArgumentException paramTagsDontResolveException(Class c, String methodName, List<Class> hintedSig, int found) {
@@ -1699,7 +1495,7 @@ static boolean isConstructor(Executable method) {
 private static void checkMethodArity(Executable method, int argCount) {
 	if(method.getParameterCount() != argCount)
 		throw new IllegalArgumentException("Invocation of "
-				+ MethodValueExpr.methodDescription(method.getDeclaringClass(), method.getName())
+				+ QualifiedMethodExpr.methodDescription(method.getDeclaringClass(), method.getName())
 				+ " expected " + method.getParameterCount() + " arguments, but received " + argCount);
 }
 
@@ -4542,11 +4338,8 @@ static class InvokeExpr implements Expr{
 			args = args.cons(analyze(context, s.first()));
 			}
 
-		if(fexpr instanceof MethodValueExpr)
-			return toHostExpr((MethodValueExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
-
 		if(fexpr instanceof QualifiedMethodExpr)
-			return toHostExpr2((QualifiedMethodExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
+			return toHostExpr((QualifiedMethodExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
 
 //		if(args.count() > MAX_POSITIONAL_ARITY)
 //			throw new IllegalArgumentException(
@@ -4555,7 +4348,7 @@ static class InvokeExpr implements Expr{
 		return new InvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), fexpr, args, tailPosition);
 	}
 
-	private static Expr toHostExpr2(QualifiedMethodExpr qmexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
+	private static Expr toHostExpr(QualifiedMethodExpr qmexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
 		Executable method = qmexpr.maybeResolveMethod();
 
 		if(method != null) {
@@ -4581,25 +4374,6 @@ static class InvokeExpr implements Expr{
 			return new StaticMethodExpr(source, line, column, tag, qmexpr.c, munge(qmexpr.methodName), args, tailPosition);
 		}
 	}
-
-	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
-		if(!mexpr.isResolved()) {
-			// default to static method with inference
-			return new StaticMethodExpr(source, line, column, tag, mexpr.c, munge(mexpr.methodName), args, tailPosition);
-		}
-
-		if(isConstructor(mexpr.method))
-			return new NewExpr(mexpr.c, (Constructor) mexpr.method, args, line, column);
-
-		if(isInstanceMethod(mexpr.method))
-			return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
-					munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, PersistentVector.create(RT.next(args)),
-					tailPosition);
-
-		return new StaticMethodExpr(source, line, column, tag, mexpr.c,
-				munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
-	}
-
 }
 
 static class SourceDebugExtensionAttribute extends Attribute{
