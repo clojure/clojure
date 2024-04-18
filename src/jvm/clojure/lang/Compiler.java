@@ -1235,6 +1235,8 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 		List<Executable> methods = methodsWithName(c, methodName, kind);
 		if (methods.isEmpty())
 			throw noMethodWithNameException(c, methodName);
+		else if(methods.size() == 1)
+			return methods.get(0);
 
 		if (hintedSig != null)
 			return resolveHintedMethod(c, methodName, hintedSig, methods);
