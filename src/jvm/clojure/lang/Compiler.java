@@ -1397,12 +1397,12 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 
 	@Override
 	public boolean hasJavaClass() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public Class getJavaClass() {
-		return null;
+		return AFn.class;
 	}
 
 	@Override
