@@ -1389,7 +1389,7 @@ static class QualifiedMethodExpr implements Expr {
 		return (t == null) ? null : Symbol.intern(null, t);
 	}
 
-	// Type flow methods
+	// Type flow methods - used for QME as method value, not in invocation position
 
 	@Override
 	public boolean hasJavaClass() {
