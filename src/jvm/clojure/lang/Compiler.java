@@ -1337,7 +1337,6 @@ static class QualifiedMethodExpr implements Expr {
 				qmexpr.kind.equals(MethodKind.INSTANCE) ? THIS : null, retTag);
 	}
 
-	// The buildThunk method currently return a new FnExpr on every call
 	// TBD: caching/reuse of thunks
 	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Set arities, Symbol instanceParam, Symbol retHint) {
 		// When method is resolved:
