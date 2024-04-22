@@ -1285,22 +1285,22 @@ static class QualifiedMethodExpr implements Expr {
 
 	// Expr impls
 
-	private FnExpr ensureFnExpr() {
+	private FnExpr ensureFnExpr(C context) {
 		if (backingFnExpr == null) {
 			Executable method = maybeResolveMethod(c, methodName, kind, hintedSig);
-			backingFnExpr = toFnExpr(this, aritySet(method, c, methodName, kind));
+			backingFnExpr = toFnExpr(context, this, aritySet(method, c, methodName, kind));
 		}
 		return backingFnExpr;
 	}
 
 	@Override
 	public Object eval() {
-		return ensureFnExpr().eval();
+		return ensureFnExpr(C.EVAL).eval();
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-		ensureFnExpr().emit(context, objx, gen);
+		ensureFnExpr(context).emit(context, objx, gen);
 	}
 
 	private static Set aritySet(Executable maybeMethod, Class c, String methodName, MethodKind kind) {
@@ -1319,7 +1319,7 @@ static class QualifiedMethodExpr implements Expr {
 		return res;
 	}
 
-	private static FnExpr toFnExpr(QualifiedMethodExpr qmexpr, Set arities) {
+	private static FnExpr toFnExpr(C context, QualifiedMethodExpr qmexpr, Set arities) {
 		Executable method = QualifiedMethodExpr.maybeResolveMethod(qmexpr.c,
 				qmexpr.methodName, qmexpr.kind, qmexpr.hintedSig);
 		// maybe return hint symbol
@@ -1333,12 +1333,12 @@ static class QualifiedMethodExpr implements Expr {
 			}
 		}
 
-		return buildThunk(qmexpr.c, method, qmexpr.methodSymbol, arities,
+		return buildThunk(context, qmexpr.c, method, qmexpr.methodSymbol, arities,
 				qmexpr.kind.equals(MethodKind.INSTANCE) ? THIS : null, retTag);
 	}
 
 	// TBD: caching/reuse of thunks
-	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Set arities, Symbol instanceParam, Symbol retHint) {
+	private static FnExpr buildThunk(C context, Class c, Executable method, Symbol methodSymbol, Set arities, Symbol instanceParam, Symbol retHint) {
 		// When method is resolved:
 		// (fn invoke__Class_meth (^retHint? [this? primHintedArgs*] (methodSymbol this? primHintedArgs*)))
 		// When unresolved:
@@ -1354,7 +1354,7 @@ static class QualifiedMethodExpr implements Expr {
 		}
 
 		ISeq thunkForm = RT.listStar(Symbol.intern("fn"), Symbol.intern(thunkName), RT.seq(form));
-		return (FnExpr) analyzeSeq(C.EVAL, thunkForm, thunkName);
+		return (FnExpr) analyzeSeq(context, thunkForm, thunkName);
 	}
 
 	private static IPersistentVector buildParams(Executable method, Symbol instanceParam, int arity, Symbol retHint) {
