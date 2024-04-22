@@ -1189,7 +1189,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 //   OR method invocation with inference
 // In value position, will emit as a multi-arity method thunk with
 //	 params matching the arity set of the named method
-static class QualifiedMethodExpr implements MaybePrimitiveExpr {
+static class QualifiedMethodExpr implements Expr {
 	private final Class c;
 	private final Symbol methodSymbol;
 	private final String methodName;
@@ -1403,16 +1403,6 @@ static class QualifiedMethodExpr implements MaybePrimitiveExpr {
 	@Override
 	public Class getJavaClass() {
 		return AFn.class;
-	}
-
-	@Override
-	public boolean canEmitPrimitive() {
-		return false;
-	}
-
-	@Override
-	public void emitUnboxed(C context, ObjExpr objx, GeneratorAdapter gen) {
-
 	}
 
 	// Exception reporting
