@@ -1195,7 +1195,7 @@ static class QualifiedMethodExpr implements Expr {
 	private final String methodName;
 	private final List<Class> hintedSig;
 	private final MethodKind kind;
-	private volatile FnExpr backingFnExpr;
+	private FnExpr backingFnExpr;
 
 	private enum MethodKind {
 		CTOR, INSTANCE, STATIC
@@ -1282,20 +1282,11 @@ static class QualifiedMethodExpr implements Expr {
 	// Expr impls
 
 	private FnExpr ensureFnExpr() {
-		FnExpr fexpr = backingFnExpr;
-		Executable method;
-
-		if (fexpr == null) {
-			synchronized(this) {
-				fexpr = backingFnExpr;
-				if(fexpr == null) {
-					method = maybeResolveMethod(c, methodName, kind, hintedSig);
-					fexpr = backingFnExpr = toFnExpr(this, aritySet(method, c, methodName, kind));
-				}
-			}
+		if (backingFnExpr == null) {
+			Executable method = maybeResolveMethod(c, methodName, kind, hintedSig);
+			backingFnExpr = toFnExpr(this, aritySet(method, c, methodName, kind));
 		}
-
-		return fexpr;
+		return backingFnExpr;
 	}
 
 	@Override
