@@ -1230,6 +1230,10 @@ static class QualifiedMethodExpr implements Expr {
 		return kind.equals(MethodKind.CTOR);
 	}
 
+	// 1. no methods with name -> error
+	// 2. param-tags -> resolve to 1 method or error
+	// 3. only method with name -> return
+	// 4. else null (no param-tags, overloaded)
 	static Executable maybeResolveMethod(Class c, String methodName, MethodKind kind, List<Class> hintedSig) {
 		List<Executable> methods = methodsWithName(c, methodName, kind);
 		if (methods.isEmpty())
