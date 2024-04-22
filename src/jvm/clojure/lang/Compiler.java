@@ -1265,7 +1265,7 @@ static class QualifiedMethodExpr implements Expr {
 				.collect(Collectors.toList());
 	}
 
-	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
+	static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
 		final int arity = hintedSig.size();
 		List<Executable> filteredMethods = methods.stream()
 				.filter(m -> m.getParameterCount() == arity)
