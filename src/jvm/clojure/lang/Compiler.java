@@ -1195,7 +1195,6 @@ static class QualifiedMethodExpr implements Expr {
 	private final String methodName;
 	private final List<Class> hintedSig;
 	private final MethodKind kind;
-	private Executable method;
 	private volatile FnExpr backingFnExpr;
 
 	private enum MethodKind {
@@ -1231,7 +1230,7 @@ static class QualifiedMethodExpr implements Expr {
 		return kind.equals(MethodKind.CTOR);
 	}
 
-	private Executable maybeResolveMethod() {
+	static Executable maybeResolveMethod(Class c, String methodName, MethodKind kind, List<Class> hintedSig) {
 		List<Executable> methods = methodsWithName(c, methodName, kind);
 		if (methods.isEmpty())
 			throw noMethodWithNameException(c, methodName);
@@ -1284,12 +1283,13 @@ static class QualifiedMethodExpr implements Expr {
 
 	private FnExpr ensureFnExpr() {
 		FnExpr fexpr = backingFnExpr;
+		Executable method;
 
 		if (fexpr == null) {
 			synchronized(this) {
 				fexpr = backingFnExpr;
 				if(fexpr == null) {
-					method = maybeResolveMethod();
+					method = maybeResolveMethod(c, methodName, kind, hintedSig);
 					fexpr = backingFnExpr = toFnExpr(this, aritySet(method, c, methodName, kind));
 				}
 			}
@@ -1325,18 +1325,20 @@ static class QualifiedMethodExpr implements Expr {
 	}
 
 	private static FnExpr toFnExpr(QualifiedMethodExpr qmexpr, Set arities) {
+		Executable method = QualifiedMethodExpr.maybeResolveMethod(qmexpr.c,
+				qmexpr.methodName, qmexpr.kind, qmexpr.hintedSig);
 		// maybe return hint symbol
 		Symbol retTag = null;
-		if(qmexpr.method != null) {
-			Class retClass = qmexpr.method instanceof Constructor ? qmexpr.c
-					: ((java.lang.reflect.Method) qmexpr.method).getReturnType();
+		if(method != null) {
+			Class retClass = method instanceof Constructor ? qmexpr.c
+					: ((java.lang.reflect.Method) method).getReturnType();
 			if (isHintablePrimitive(retClass) || !retClass.isPrimitive()) {
 				retTag = primTag(retClass);
 				retTag = (retTag != null) ? retTag : Symbol.intern(null, retClass.getName());
 			}
 		}
 
-		return buildThunk(qmexpr.c, qmexpr.method, qmexpr.methodSymbol, arities,
+		return buildThunk(qmexpr.c, method, qmexpr.methodSymbol, arities,
 				qmexpr.kind.equals(MethodKind.INSTANCE) ? THIS : null, retTag);
 	}
 
@@ -4339,7 +4341,8 @@ static class InvokeExpr implements Expr{
 	}
 
 	private static Expr toHostExpr(QualifiedMethodExpr qmexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
-		Executable method = qmexpr.maybeResolveMethod();
+		Executable method = QualifiedMethodExpr.maybeResolveMethod(qmexpr.c,
+				qmexpr.methodName, qmexpr.kind, qmexpr.hintedSig);
 
 		if(method != null) {
 			if (qmexpr.namesConstructor())
