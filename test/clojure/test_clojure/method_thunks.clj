@@ -41,11 +41,13 @@
 
 (def mt ^[_] Tuple/create)
 (def mts {:fromString ^[_] UUID/fromString})
+(def gbs ^[] String/.getBytes)
 
 (deftest method-thunks-in-structs
   (is (= #uuid "00000000-0000-0001-0000-000000000002"
          ((:fromString mts) "00000000-0000-0001-0000-000000000002")))
-  (is (= [1] (mt 1))))
+  (is (= [1] (mt 1)))
+  (is (= 97 (first (seq (gbs "a"))))))
 
 (deftest primitive-hinting
   (is (instance? clojure.lang.IFn$DO ^[double] String/valueOf))

@@ -1380,11 +1380,8 @@ static class QualifiedMethodExpr implements Expr {
 
 	private static Symbol primTag(Class c) {
 		String t = null;
-		if(c.isPrimitive()) {
+		if(c.isPrimitive() || (c.isArray() && c.getComponentType().isPrimitive())) {
 			t = c.getName();
-		}
-		else if(c.isArray() && c.getComponentType().isPrimitive()) {
-			t = c.getName() + "s";
 		}
 		return (t == null) ? null : Symbol.intern(null, t);
 	}
