@@ -22,7 +22,7 @@
            (java.io File FileFilter FilenameFilter)
            (java.util UUID)
            (java.util.concurrent.atomic AtomicLong AtomicInteger)
-           (clojure.test FIConstructor FIStatic
+           (clojure.test FIConstructor FIStatic FunctionalTester
                          AdapterExerciser AdapterExerciser$LL AdapterExerciser$DL AdapterExerciser$OL AdapterExerciser$LI AdapterExerciser$DI
                          AdapterExerciser$LF AdapterExerciser$DF AdapterExerciser$OF
                          AdapterExerciser$OI AdapterExerciser$LB AdapterExerciser$DB AdapterExerciser$OB AdapterExerciser$OD AdapterExerciser$LD
@@ -1366,3 +1366,16 @@
         Long/TYPE    Long            true
         Long/TYPE    Number          true
         Long/TYPE    Integer/TYPE    false)))
+
+(deftest class-methods-with-fi-args
+  (testing "Constructor accepting FI arg, provided overloaded static class FI"
+    (let [fi (FunctionalTester. "Constructor" 0 FunctionalTester/getChar)]
+      (is (= \C (.testVar fi)))))
+
+   (testing "Instance method accepting FI arg, provided overloaded static class FI"
+     (let [fi (FunctionalTester. "asf" 0 FunctionalTester/getChar)]
+       (.instanceMethodWithFIArg fi "Instance" 0 FunctionalTester/getChar)
+       (is (= \I (.testVar fi)))))
+
+   (testing "Static method accepting FI arg, provided overloaded static class FI"
+     (is (= \S (FunctionalTester/staticMethodWithFIArg "Static" 0 FunctionalTester/getChar)))))
