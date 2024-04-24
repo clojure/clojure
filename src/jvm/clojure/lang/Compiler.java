@@ -1209,25 +1209,18 @@ static class QualifiedMethodExpr implements Expr {
 		hintedSig = tagsToClasses(paramTagsOf(sym));
 	}
 
-	private MethodKind classifyMethodKind(String name) {
-		if(name.startsWith("."))
-			return MethodKind.INSTANCE;
-		else if(name.equals("new"))
-			return MethodKind.CTOR;
+	static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
+		final int arity = hintedSig.size();
+		List<Executable> filteredMethods = methods.stream()
+				.filter(m -> m.getParameterCount() == arity)
+				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
+				.filter(m -> signatureMatches(hintedSig, m))
+				.collect(Collectors.toList());
+
+		if(filteredMethods.size() == 1)
+			return filteredMethods.get(0);
 		else
-			return MethodKind.STATIC;
-	}
-
-	public boolean namesStaticMethod() {
-		return kind.equals(MethodKind.STATIC);
-	}
-
-	public boolean namesInstanceMethod() {
-		return kind.equals(MethodKind.INSTANCE);
-	}
-
-	public boolean namesConstructor() {
-		return kind.equals(MethodKind.CTOR);
+			throw paramTagsDontResolveException(c, methodName, hintedSig, filteredMethods.size());
 	}
 
 	// 1. no methods with name -> error
@@ -1269,20 +1262,6 @@ static class QualifiedMethodExpr implements Expr {
 				.collect(Collectors.toList());
 	}
 
-	static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
-		final int arity = hintedSig.size();
-		List<Executable> filteredMethods = methods.stream()
-				.filter(m -> m.getParameterCount() == arity)
-				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
-				.filter(m -> signatureMatches(hintedSig, m))
-				.collect(Collectors.toList());
-
-		if(filteredMethods.size() == 1)
-			return filteredMethods.get(0);
-		else
-			throw paramTagsDontResolveException(c, methodName, hintedSig, filteredMethods.size());
-	}
-
 	// Expr impls
 
 	private FnExpr ensureFnExpr(C context) {
@@ -1303,26 +1282,19 @@ static class QualifiedMethodExpr implements Expr {
 		ensureFnExpr(context).emit(context, objx, gen);
 	}
 
-	private static Set aritySet(Executable maybeMethod, Class c, String methodName, MethodKind kind) {
-		Set res = new java.util.TreeSet<>();
+	@Override
+	public boolean hasJavaClass() {
+		return true;
+	}
 
-		if(maybeMethod != null) {
-			res.add(maybeMethod.getParameterCount());
-			return res;
-		}
-
-		List<Executable> methods = methodsWithName(c, methodName, kind);
-
-		for(Executable exec : methods)
-			res.add(exec.getParameterCount());
-
-		return res;
+	@Override
+	public Class getJavaClass() {
+		return AFn.class;
 	}
 
 	private static FnExpr toFnExpr(C context, QualifiedMethodExpr qmexpr, Set arities) {
 		Executable method = QualifiedMethodExpr.maybeResolveMethod(qmexpr.c,
 				qmexpr.methodName, qmexpr.kind, qmexpr.hintedSig);
-		// maybe return hint symbol
 		Symbol retTag = null;
 		if(method != null) {
 			Class retClass = method instanceof Constructor ? qmexpr.c
@@ -1335,6 +1307,18 @@ static class QualifiedMethodExpr implements Expr {
 
 		return buildThunk(context, qmexpr.c, method, qmexpr.methodSymbol, arities,
 				qmexpr.kind.equals(MethodKind.INSTANCE) ? THIS : null, retTag);
+	}
+
+	private static boolean isHintablePrimitive(Class c) {
+		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
+	}
+
+	private static Symbol primTag(Class c) {
+		String t = null;
+		if(c.isPrimitive() || (c.isArray() && c.getComponentType().isPrimitive())) {
+			t = c.getName();
+		}
+		return (t == null) ? null : Symbol.intern(null, t);
 	}
 
 	// TBD: caching/reuse of thunks
@@ -1374,30 +1358,6 @@ static class QualifiedMethodExpr implements Expr {
 				: ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, retHint));
 	}
 
-	private static boolean isHintablePrimitive(Class c) {
-		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
-	}
-
-	private static Symbol primTag(Class c) {
-		String t = null;
-		if(c.isPrimitive() || (c.isArray() && c.getComponentType().isPrimitive())) {
-			t = c.getName();
-		}
-		return (t == null) ? null : Symbol.intern(null, t);
-	}
-
-	// Type flow methods - used for QME as method value, not in invocation position
-
-	@Override
-	public boolean hasJavaClass() {
-		return true;
-	}
-
-	@Override
-	public Class getJavaClass() {
-		return AFn.class;
-	}
-
 	// Exception reporting
 	private static String methodDescription(Class c, String methodName) {
 		boolean isCtor = c != null && methodName.equals("new");
@@ -1421,6 +1381,44 @@ static class QualifiedMethodExpr implements Expr {
 				+ methodDescription(c, methodName)
 				+ " but found " + found
 				+ " with param-tags " + toParamTags(hintedSig));
+	}
+
+	// Helpers
+	private static Set aritySet(Executable maybeMethod, Class c, String methodName, MethodKind kind) {
+		Set res = new java.util.TreeSet<>();
+
+		if(maybeMethod != null) {
+			res.add(maybeMethod.getParameterCount());
+			return res;
+		}
+
+		List<Executable> methods = methodsWithName(c, methodName, kind);
+
+		for(Executable exec : methods)
+			res.add(exec.getParameterCount());
+
+		return res;
+	}
+
+	private MethodKind classifyMethodKind(String name) {
+		if(name.startsWith("."))
+			return MethodKind.INSTANCE;
+		else if(name.equals("new"))
+			return MethodKind.CTOR;
+		else
+			return MethodKind.STATIC;
+	}
+
+	public boolean namesStaticMethod() {
+		return kind.equals(MethodKind.STATIC);
+	}
+
+	public boolean namesInstanceMethod() {
+		return kind.equals(MethodKind.INSTANCE);
+	}
+
+	public boolean namesConstructor() {
+		return kind.equals(MethodKind.CTOR);
 	}
 }
 
