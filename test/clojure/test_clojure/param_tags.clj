@@ -175,11 +175,4 @@
     (let [e (try
               (eval '(^[long] Math/abs -1 -2 -3))
               (catch Compiler$CompilerException e (str "-> " (.getMessage (.getCause e)))))]
-      (is (not (nil? (re-find #"expected 1.*received 3" e))) "Error message was expected to indicate 1 argument was expected but 2 were provided")))
-
-  ;; TODO find a workable test below
-  #_(testing "Invocation without param-tags having incorrect number of args"
-    (let [e (try
-             (eval '(java.util.UUID/fromString "a" 1))
-             (catch Compiler$CompilerException e (str "-> " (.getMessage (.getCause e)))))]
-     (is (not (nil? (re-find #"expected 1.*received 2" e))) "Error message was expected to indicate 1 argument was expected but 2 were provided"))))
+      (is (not (nil? (re-find #"expected 1.*received 3" e))) "Error message was expected to indicate 1 argument was expected but 2 were provided"))))

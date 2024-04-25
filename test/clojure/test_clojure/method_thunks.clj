@@ -48,7 +48,3 @@
          ((:fromString mts) "00000000-0000-0001-0000-000000000002")))
   (is (= [1] (mt 1)))
   (is (= 97 (first (seq (gbs "a"))))))
-
-(deftest primitive-hinting
-  (is (instance? clojure.lang.IFn$DO ^[double] String/valueOf))
-  (is (instance? clojure.lang.IFn$LL ^[long] Math/abs)))

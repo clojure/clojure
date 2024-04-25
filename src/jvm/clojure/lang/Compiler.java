@@ -1233,21 +1233,6 @@ static class QualifiedMethodExpr implements Expr {
 					qmexpr.hintedSig, filteredMethods.size());
 	}
 
-	// 1. no methods with name -> error
-	// 2. param-tags -> resolve to 1 method or error
-	// 3. only method with name -> return
-	// 4. else null (no param-tags, overloaded)
-	static Executable maybeResolveMethod(Class c, String methodName, MethodKind kind, List<Class> hintedSig) {
-		List<Executable> methods = methodsWithName(c, methodName, kind);
-
-		if (hintedSig != null)
-			return resolveHintedMethod(c, methodName, hintedSig, methods);
-		else if(methods.size() == 1)
-			return methods.get(0);
-
-		return null;
-	}
-
 	private static List<Executable> methodsWithName(Class c, String name, MethodKind targetKind) {
 		final Executable[] methods;
 		final String methodName;
@@ -1273,10 +1258,8 @@ static class QualifiedMethodExpr implements Expr {
 	// Expr impls
 
 	private FnExpr ensureFnExpr(C context) {
-		if (backingFnExpr == null) {
-			Executable method = maybeResolveMethod(c, methodName, kind, hintedSig);
+		if (backingFnExpr == null)
 			backingFnExpr = buildThunk(context, this);
-		}
 		return backingFnExpr;
 	}
 
@@ -1766,19 +1749,19 @@ static class InstanceMethodExpr extends MethodExpr{
 	public final Symbol tag;
 	public final boolean tailPosition;
 	public final java.lang.reflect.Method method;
-	public final Class contextClass;
+	public final Class qualifyingClass;
     Class jc;
 
 	final static Method invokeInstanceMethodMethod =
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
 	final static Method invokeInstanceMethodOfClassMethod =
-			Method.getMethod("Object invokeInstanceMethodOfClass(Object,Class,String,Object[])");
-	final static Method forNameMethod = Method.getMethod("Class classForName(String)");
+			Method.getMethod("Object invokeInstanceMethodOfClass(Object,String,String,Object[])");
 
-	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
-							  String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
+	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target, 
+			Class qualifyingClass, String methodName, java.lang.reflect.Method resolvedMethod,
+			IPersistentVector args, boolean tailPosition)
 	{
-		checkMethodArity(preferredMethod, RT.count(args));
+		checkMethodArity(resolvedMethod, RT.count(args));
 
 		this.source = source;
 		this.line = line;
@@ -1788,12 +1771,12 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-		this.method = preferredMethod;
-		this.contextClass = preferredMethod.getDeclaringClass();
+		this.method = resolvedMethod;
+		this.qualifyingClass = qualifyingClass;
 	}
 
 	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
-			Class contextClass, String methodName, IPersistentVector args, boolean tailPosition)
+			Class qualifyingClass, String methodName, IPersistentVector args, boolean tailPosition)
 			{
 		this.source = source;
 		this.line = line;
@@ -1803,7 +1786,7 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-		this.contextClass = contextClass;
+		this.qualifyingClass = qualifyingClass;
 		if(target.hasJavaClass() && target.getJavaClass() != null)
 			{
 			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
@@ -1873,8 +1856,8 @@ static class InstanceMethodExpr extends MethodExpr{
 				ms.add(method);
 				return Reflector.invokeMatchingMethod(methodName, ms, targetval, argvals);
 				}
-			if(contextClass != null)
-				return Reflector.invokeInstanceMethodOfClass(targetval, contextClass, methodName, argvals);
+			if(qualifyingClass != null)
+				return Reflector.invokeInstanceMethodOfClass(targetval, qualifyingClass, methodName, argvals);
 			else
 				return Reflector.invokeInstanceMethod(targetval, methodName, argvals);
 			}
@@ -1948,11 +1931,8 @@ static class InstanceMethodExpr extends MethodExpr{
 		else
 			{
 			target.emit(C.EXPRESSION, objx, gen);
-			if(contextClass != null)
-				{
-				gen.push(contextClass.getName());
-				gen.invokeStatic(RT_TYPE, forNameMethod);
-				}
+			if(qualifyingClass != null)
+				gen.push(qualifyingClass.getName());
 			gen.push(methodName);
 			emitArgsAsArray(args, objx, gen);
 			gen.visitLineNumber(line, gen.mark());
@@ -1961,7 +1941,7 @@ static class InstanceMethodExpr extends MethodExpr{
 				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
-			if(contextClass != null)
+			if(qualifyingClass != null)
 				gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodOfClassMethod);
 			else
 				gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
@@ -4285,7 +4265,8 @@ static class InvokeExpr implements Expr{
 					return new NewExpr(qmexpr.c, (Constructor) method, args, line, column);
 				case INSTANCE:
 					return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
-							munge(qmexpr.methodName), (java.lang.reflect.Method) method, PersistentVector.create(RT.next(args)),
+							qmexpr.c, munge(qmexpr.methodName), (java.lang.reflect.Method) method,
+							PersistentVector.create(RT.next(args)),
 							tailPosition);
 				default:
 					return new StaticMethodExpr(source, line, column, tag, qmexpr.c,
@@ -7443,6 +7424,7 @@ public static Object macroexpand1(Object x) {
 				Symbol sym = (Symbol) op;
 				String sname = sym.name;
 				//(.substring s 2 5) => (. s substring 2 5)
+				// ns == null ensures that Class/.instanceMethod isn't expanded to . form 
 				if(sym.name.charAt(0) == '.' && sym.ns == null)
 					{
 					if(RT.length(form) < 2)
@@ -7716,9 +7698,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 				if(Reflector.getField(c, sym.name, true) != null)
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
 				else
-					{
 					return new QualifiedMethodExpr(c, sym);
-					}
 				}
 
 			}
