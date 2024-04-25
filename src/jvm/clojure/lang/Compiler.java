@@ -21,7 +21,9 @@ import clojure.asm.commons.Method;
 
 import java.io.*;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Executable;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -1712,7 +1714,7 @@ private static char encodeInvokerParam(Class c) {
 	}
 }
 
-private static char encodeAdapterReturn(Class c) {
+private static char encodeInvokerReturn(Class c) {
 	switch(c.getName()) {
 		case "long": return 'L';
 		case "double": return 'D';
@@ -1724,15 +1726,15 @@ private static char encodeAdapterReturn(Class c) {
 }
 
 /**
- * find matching invoker function
+ * find invoker function matching SAM method of fiClass
  * if invoker then emit maybe-adapter (f on stack):
  * if( !(f instanceof FI))
  *   emitInvokeDynamicAdapter(FI::method, FnInvokers::adapt))
  *
  * else no invoker so throw and tell user to reify
  */
-private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fnIfaceClass) {
-	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fnIfaceClass);
+private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fiClass) {
+	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fiClass);
 
 	Class[] invokerParams = new Class[targetMethod.getParameterCount()+1];
 	invokerParams[0] = Object.class;  // close over Ifn as first arg
@@ -1742,7 +1744,7 @@ private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen
 		invokeMethodBuilder.append(paramCode);
 		invokerParams[i+1] = decodeToClass(paramCode);
 	}
-	char invokerReturnCode = encodeAdapterReturn(targetMethod.getReturnType());
+	char invokerReturnCode = encodeInvokerReturn(targetMethod.getReturnType());
 	invokeMethodBuilder.append(invokerReturnCode);
 	String invokerMethodName = invokeMethodBuilder.toString();
 
@@ -1753,7 +1755,7 @@ private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen
 
 		// if(! (exp instanceof FIType)) { emit invoker }
 		gen.dup();
-		Type samType = Type.getType(fnIfaceClass);
+		Type samType = Type.getType(fiClass);
 		gen.instanceOf(samType);
 
 		// if so, checkcast and go to end
@@ -1769,12 +1771,12 @@ private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen
 		// adapt adapter method to target method, closing over IFn instance
 		emitInvokeDynamicAdapter(gen, targetMethod, invokerMethod);
 		gen.mark(endLabel);
-		gen.checkCast(Type.getType(fnIfaceClass));
+		gen.checkCast(Type.getType(fiClass));
 
 	} catch(NoSuchMethodException e) {
 		// no invoker method found (this should rarely happen)
 		throw Util.runtimeException(
-				"Can't convert function to " + fnIfaceClass.getName() +
+				"Can't convert function to " + fiClass.getName() +
 				", provide an instance of this type (perhaps with 'reify')");
 	}
 }
@@ -7057,11 +7059,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 			else
 				{
 				Class bindingClass = HostExpr.maybeClass(bi.binding.tag, true);
-				//Class initClass = bi.init.hasJavaClass() ? bi.init.getJavaClass() : null;
-				if(Reflector.isAdaptableFunctionalInterface(bindingClass)
-				//		&& (initClass == null || ! bindingClass.isAssignableFrom(initClass))
-				)
-
+				if(Reflector.isAdaptableFunctionalInterface(bindingClass))
 					ensureFunctionalInterface(objx, gen, bi.init, bindingClass);
 				else
 					bi.init.emit(C.EXPRESSION, objx, gen);
