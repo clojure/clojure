@@ -52,3 +52,12 @@
 
   ;; CLJ-2414 - find default method on interface of inaccessible class
   (checkCLJ2414 (java.nio.file.Paths/get "src" (into-array String []))))
+
+(defn sleep [ms]
+  ;; in Java <19, does not reflect. Java >= 19, does reflect
+  (Thread/sleep ms))
+
+
+(deftest check-CLJ-2843
+  (sleep 1)
+  (sleep (Integer/valueOf 1)))

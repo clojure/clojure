@@ -119,10 +119,38 @@ private static String noMethodReport(String methodName, Object target, Object[] 
 	 return "No matching method " + methodName + " found taking " + args.length + " args"
 			+ (target==null?"":" for " + target.getClass());
 }
+
+private static Method matchMethod(List methods, Object[] args) {
+	Method foundm = null;
+	for(Iterator i = methods.iterator(); i.hasNext();) {
+		Method m = (Method) i.next();
+		Class[] params = m.getParameterTypes();
+		if(isCongruent(params, args) && (foundm == null || Compiler.subsumes(params, foundm.getParameterTypes())))
+			foundm = m;
+	}
+	return foundm;
+}
+
+private static Object[] widenBoxedArgs(Object[] args) {
+	Object[] widenedArgs = new Object[args.length];
+	for(int i=0; i<args.length; i++) {
+		if(args[i] != null) {
+			Class valClass = args[i].getClass();
+			if(valClass == Integer.class || valClass == Short.class || valClass == Byte.class) {
+				widenedArgs[i] = ((Number)args[i]).longValue();
+			} else if(valClass == Float.class) {
+				widenedArgs[i] = ((Number)args[i]).doubleValue();
+			} else {
+				widenedArgs[i] = args[i];
+			}
+		}
+	}
+	return widenedArgs;
+}
+
 static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
 		{
 	Method m = null;
-	Object[] boxedArgs = null;
 	if(methods.isEmpty())
 		{
 		throw new IllegalArgumentException(noMethodReport(methodName,target,args));
@@ -130,26 +158,15 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 	else if(methods.size() == 1)
 		{
 		m = (Method) methods.get(0);
-		boxedArgs = boxArgs(m.getParameterTypes(), args);
 		}
 	else //overloaded w/same arity
 		{
-		Method foundm = null;
-		for(Iterator i = methods.iterator(); i.hasNext();)
+		m = matchMethod(methods, args);
+		if(m == null) // widen boxed args and re-try matchMethod
 			{
-			m = (Method) i.next();
-
-			Class[] params = m.getParameterTypes();
-			if(isCongruent(params, args))
-				{
-				if(foundm == null || Compiler.subsumes(params, foundm.getParameterTypes()))
-					{
-					foundm = m;
-					boxedArgs = boxArgs(params, args);
-					}
-				}
+			args = widenBoxedArgs(args);
+			m = matchMethod(methods, args);
 			}
-		m = foundm;
 		}
 	if(m == null)
 		throw new IllegalArgumentException(noMethodReport(methodName,target,args));
@@ -165,7 +182,7 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 		}
 	try
 		{
-		return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
+		return prepRet(m.getReturnType(), m.invoke(target, boxArgs(m.getParameterTypes(), args)));
 		}
 	catch(Exception e)
 		{
