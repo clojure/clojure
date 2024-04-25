@@ -1185,8 +1185,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 }
 
 // In invocation position
-//   direct invocation of resolved constructor, static, or instance method
-//   OR method invocation with inference
+//   param-tags - direct invocation of resolved constructor, static, or instance method
+//   else method invocation with inference + reflection
 // In value position, will emit as a multi-arity method thunk with
 //	 params matching the arity set of the named method
 static class QualifiedMethodExpr implements Expr {
@@ -1218,55 +1218,7 @@ static class QualifiedMethodExpr implements Expr {
 		}
 	}
 
-	static Executable resolveHintedMethod(QualifiedMethodExpr qmexpr) {
-		List<Executable> methods = methodsWithName(qmexpr);
-		if (methods.isEmpty())
-			throw noMethodWithNameException(qmexpr.c, qmexpr.methodName);
-
-		final int arity = qmexpr.hintedSig.size();
-		List<Executable> filteredMethods = methods.stream()
-				.filter(m -> m.getParameterCount() == arity)
-				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
-				.filter(m -> signatureMatches(qmexpr.hintedSig, m))
-				.collect(Collectors.toList());
-
-		if(filteredMethods.size() == 1)
-			return filteredMethods.get(0);
-		else
-			throw paramTagsDontResolveException(qmexpr.c, qmexpr.methodName,
-					qmexpr.hintedSig, filteredMethods.size());
-	}
-
-	private static List<Executable> methodsWithName(QualifiedMethodExpr qmexpr) {
-		final Executable[] methods;
-		final String methodName;
-		if (qmexpr.kind == QualifiedMethodExpr.MethodKind.CTOR) {
-			methods = qmexpr.c.getConstructors();
-			methodName = qmexpr.c.getName();
-		}
-		else {
-			methods = qmexpr.c.getMethods();
-			methodName = qmexpr.methodName;
-		}
-
-		return Arrays.stream(methods)
-				.filter(m -> m.getName().equals(methodName))
-				.filter(m -> {
-					switch(qmexpr.kind) {
-						case STATIC:
-							return isStaticMethod(m);
-						case INSTANCE:
-							return isInstanceMethod(m);
-						case CTOR:
-							return isConstructor(m);
-						default:
-							return false;
-					}
-				})
-				.collect(Collectors.toList());
-	}
-
-	// Expr impls
+	// Expr impl - invocation, convert to fn expr
 
 	@Override
 	public Object eval() {
@@ -1277,6 +1229,8 @@ static class QualifiedMethodExpr implements Expr {
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
 		buildThunk(context, this).emit(context, objx, gen);
 	}
+
+	// Expr impl - method value, always an AFn
 
 	@Override
 	public boolean hasJavaClass() {
@@ -1291,9 +1245,10 @@ static class QualifiedMethodExpr implements Expr {
 	// TBD: caching/reuse of thunks
 	private static FnExpr buildThunk(C context, QualifiedMethodExpr qmexpr) {
 		// When qualified symbol has param-tags:
-		// (fn invoke__Class_meth ([this? args*] (methodSymbol this? args*)))
+		//   (fn invoke__Class_meth ([this? args*] (methodSymbol this? args*)))
 		// When no param-tags:
-		// (fn invoke__Class_meth ([this?] (methodSymbol this?)) ([this? arg1] (methodSymbol this? arg1)) ...)
+		//   (fn invoke__Class_meth ([this?] (methodSymbol this?))
+		//                          ([this? arg1] (methodSymbol this? arg1)) ...)
 		IPersistentCollection form = PersistentVector.EMPTY;
 		Symbol instanceParam = qmexpr.kind == MethodKind.INSTANCE ? THIS : null;
 		String thunkName = "invoke__" + qmexpr.c.getSimpleName() + "_" + qmexpr.methodSymbol.name;
@@ -1330,6 +1285,54 @@ static class QualifiedMethodExpr implements Expr {
 			res.add(exec.getParameterCount());
 
 		return res;
+	}
+
+	private static List<Executable> methodsWithName(QualifiedMethodExpr qmexpr) {
+		final Executable[] methods;
+		final String methodName;
+		if (qmexpr.kind == MethodKind.CTOR) {
+			methods = qmexpr.c.getConstructors();
+			methodName = qmexpr.c.getName();
+		}
+		else {
+			methods = qmexpr.c.getMethods();
+			methodName = qmexpr.methodName;
+		}
+
+		return Arrays.stream(methods)
+				.filter(m -> m.getName().equals(methodName))
+				.filter(m -> {
+					switch(qmexpr.kind) {
+						case STATIC:
+							return isStaticMethod(m);
+						case INSTANCE:
+							return isInstanceMethod(m);
+						case CTOR:
+							return isConstructor(m);
+						default:
+							return false;
+					}
+				})
+				.collect(Collectors.toList());
+	}
+
+	static Executable resolveHintedMethod(QualifiedMethodExpr qmexpr) {
+		List<Executable> methods = methodsWithName(qmexpr);
+		if (methods.isEmpty())
+			throw noMethodWithNameException(qmexpr.c, qmexpr.methodName);
+
+		final int arity = qmexpr.hintedSig.size();
+		List<Executable> filteredMethods = methods.stream()
+				.filter(m -> m.getParameterCount() == arity)
+				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
+				.filter(m -> signatureMatches(qmexpr.hintedSig, m))
+				.collect(Collectors.toList());
+
+		if(filteredMethods.size() == 1)
+			return filteredMethods.get(0);
+		else
+			throw paramTagsDontResolveException(qmexpr.c, qmexpr.methodName,
+					qmexpr.hintedSig, filteredMethods.size());
 	}
 
 	static IPersistentVector toParamTags(List<Class> hintedSig) {
