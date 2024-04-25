@@ -1,5 +1,19 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.11.3
+
+[CLJ-2843](https://clojure.atlassian.net/browse/CLJ-2843) - Reflective calls to
+Java methods that take primitive long or double now work when passed a narrower
+boxed number at runtime (Integer, Short, Byte, Float). Previously, these methods
+were not matched during reflection and an error was thrown.
+
+Java 21 added an overload to the method `Thread/sleep` in the 1-arity. When
+upgrading to Java 21, existing Clojure calls to `Thread/sleep` become reflective,
+but continue to work. As usual, you can detect reflection with
+`*warn-on-reflection*` and address with a type hint (here, `^long`) to choose the
+desired overload. Previously, passing a Short or Integer value to a reflective
+call like `Thread/sleep` that takes a `long` would not match, that has been corrected.
+
 # Changes to Clojure in Version 1.11.2
 
 These releases include a fix for CVE [CVE-2024-22871](https://nvd.nist.gov/vuln/detail/CVE-2024-22871)
