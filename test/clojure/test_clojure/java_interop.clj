@@ -1342,40 +1342,15 @@
   (def OOOOOOOOOOBadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g ^AdapterExerciser h ^AdapterExerciser i ^AdapterExerciser j] false))
   (is (= (.methodOOOOOOOOOOB exerciser OOOOOOOOOOBadapter) 81)))
 
-(deftest type-adaptable-test
-  (testing "typeAdaptable primitive and ref pairs"
-    (are [source target expected]
-      (= expected (clojure.lang.Compiler/typeAdaptable source target))
-        Integer      Long            false
-        Integer      Number          true
-        Integer      Integer/TYPE    true
-        Integer      Long/TYPE       true
-        Long         Integer         false
-        Long         Number          true
-        Long         Integer/TYPE    false
-        Long         Long/TYPE       true
-        Number       Integer         false
-        Number       Long            false
-        Number       Integer/TYPE    false
-        Number       Long/TYPE       false
-        Integer/TYPE Integer         true
-        Integer/TYPE Long            false
-        Integer/TYPE Number          true
-        Integer/TYPE Long/TYPE       true
-        Long/TYPE    Integer         false
-        Long/TYPE    Long            true
-        Long/TYPE    Number          true
-        Long/TYPE    Integer/TYPE    false)))
-
-(deftest class-methods-with-fi-args
-  (testing "Constructor accepting FI arg, provided overloaded static class FI"
-    (let [fi (FunctionalTester. "Constructor" 0 FunctionalTester/getChar)]
-      (is (= \C (.testVar fi)))))
-
-   (testing "Instance method accepting FI arg, provided overloaded static class FI"
-     (let [fi (FunctionalTester. "asf" 0 FunctionalTester/getChar)]
-       (.instanceMethodWithFIArg fi "Instance" 0 FunctionalTester/getChar)
-       (is (= \I (.testVar fi)))))
-
-   (testing "Static method accepting FI arg, provided overloaded static class FI"
-     (is (= \S (FunctionalTester/staticMethodWithFIArg "Static" 0 FunctionalTester/getChar)))))
+;(deftest class-methods-with-fi-args
+;  (testing "Constructor accepting FI arg, provided overloaded static class FI"
+;    (let [fi (FunctionalTester. "Constructor" 0 FunctionalTester/getChar)]
+;      (is (= \C (.testVar fi)))))
+;
+;   (testing "Instance method accepting FI arg, provided overloaded static class FI"
+;     (let [fi (FunctionalTester. "asf" 0 FunctionalTester/getChar)]
+;       (.instanceMethodWithFIArg fi "Instance" 0 FunctionalTester/getChar)
+;       (is (= \I (.testVar fi)))))
+;
+;   (testing "Static method accepting FI arg, provided overloaded static class FI"
+;     (is (= \S (FunctionalTester/staticMethodWithFIArg "Static" 0 FunctionalTester/getChar)))))

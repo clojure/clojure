@@ -21,9 +21,7 @@ import clojure.asm.commons.Method;
 
 import java.io.*;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Executable;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -1725,125 +1723,7 @@ private static char encodeAdapterReturn(Class c) {
 	}
 }
 
-private static final IPersistentMap WIDENING = PersistentHashMap.create(
-	Byte.TYPE, PersistentHashSet.create(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE),
-	Byte.class, PersistentHashSet.create(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE, Byte.TYPE),
-	Short.TYPE, PersistentHashSet.create(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE),
-	Short.class, PersistentHashSet.create(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE, Short.TYPE),
-	Character.TYPE, PersistentHashSet.create(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE),
-	Character.class, PersistentHashSet.create(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE, Character.TYPE),
-	Integer.TYPE, PersistentHashSet.create(Long.TYPE, Float.TYPE, Double.TYPE),
-	Integer.class, PersistentHashSet.create(Long.TYPE, Float.TYPE, Double.TYPE, Integer.TYPE),
-	Long.TYPE, PersistentHashSet.create(Float.TYPE, Double.TYPE),
-	Long.class, PersistentHashSet.create(Float.TYPE, Double.TYPE, Long.TYPE),
-	Float.TYPE, PersistentHashSet.create(Double.TYPE),
-	Float.class, PersistentHashSet.create(Double.TYPE, Float.TYPE),
-	Double.class, PersistentHashSet.create(Double.TYPE));
-
-private static final IPersistentMap PRIM_TO_WRAPPER = PersistentHashMap.create(
-	Byte.TYPE, Byte.class,
-	Short.TYPE, Short.class,
-	Character.TYPE, Character.class,
-	Integer.TYPE, Integer.class,
-	Long.TYPE, Long.class,
-	Float.TYPE, Float.class,
-	Double.TYPE, Double.class);
-
 /**
- * Can sourceClass be adapted to targetClass per the rules at:
- * https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/LambdaMetafactory.html
- * https://docs.oracle.com/javase/specs/jls/se8/html/jls-5.html#jls-5.1.2
- * @param sourceClass Source type (Q in the docs)
- * @param targetClass Target type (S in the docs)
- * @return true if adaptable
- */
-public static boolean typeAdaptable(Class sourceClass, Class targetClass) {
-	if(sourceClass.equals(targetClass)) {
-		return true;
-	} else if(targetClass.isPrimitive()) {
-		return ((IPersistentSet)WIDENING.valAt(sourceClass, PersistentHashSet.EMPTY)).contains(targetClass);
-	} else if(sourceClass.isPrimitive()) {
-		return targetClass.isAssignableFrom((Class)PRIM_TO_WRAPPER.valAt(sourceClass));
-	} else {
-		return targetClass.isAssignableFrom(sourceClass);
-	}
-}
-
-private static RuntimeException noSingleMatch(Class targetClass, String targetMethod, Class implClass, String implMethod) {
-	return new IllegalArgumentException("No single implementation match to "
-			+ targetClass.getName() + "/" + targetMethod
-			+ " from " + implClass.getName() + "/" + implMethod
-			+ ", use param-tags");
-}
-private static Executable findOneCompatibleMethod(MethodValueExpr expr, java.lang.reflect.Method targetMethod) {
-	Class fnIfaceClass = targetMethod.getDeclaringClass();
-	Class[] targetParams = targetMethod.getParameterTypes();
-
-	// Collect methods of the proper type with matching arity
-	// TODO: if QME is resolved, use the single resolved method (for example, from using param tags)
-	// else, try to find a matching one based on the target method
-	Class c = expr.c;
-	String methodName = expr.methodName;
-	boolean isInstance = true;  // HACK FOR NOW - get from QME later
-	List execs = new ArrayList();
-	if("new".equals(methodName)) {
-		Constructor[] allctors = c.getConstructors();
-		for(int i = 0; i < allctors.length; i++)
-		{
-			if(allctors[i].getParameterTypes().length == targetParams.length)
-				execs.add(allctors[i]);
-		}
-	} else { // TODO: determine whether instance or static from QME
-		// TEMP: try instance, then static. QME will know which of these to do
-		execs = Reflector.getMethods(c, targetParams.length, methodName, true);
-		if(execs.size() > 0) {
-			isInstance = false;
-		} else if(targetParams.length > 0) {
-			isInstance = true;
-			execs = Reflector.getMethods(c, targetParams.length-1, methodName, false);
-		}
-	}
-
-	// Find one match
-	List matches = new ArrayList();
-	for(int i=0; i<execs.size(); i++) {
-		Executable e = (Executable)execs.get(i);
-		List<Class> paramTypes = new ArrayList<>();
-		if(isInstance) {
-			paramTypes.add(expr.c);
-		}
-		Collections.addAll(paramTypes, e.getParameterTypes());
-
-		boolean match = true;
-		for(int p=0; p<paramTypes.size(); p++) {
-			if(! typeAdaptable(targetParams[p], paramTypes.get(p))) {
-				match = false;
-				break;
-			}
-		}
-		if(! typeAdaptable(targetMethod.getReturnType(),
-				e instanceof Constructor ? c : ((java.lang.reflect.Method)e).getReturnType())) {
-			match = false;
-		}
-
-		if(match) {
-			matches.add(e);
-		}
-	}
-
-	if(matches.size() != 1) {
-		throw noSingleMatch(fnIfaceClass, targetMethod.getName(), c, methodName);
-	} else {
-		return (Executable) matches.get(0);
-	}
-}
-
-/**
- * // if expr.getJavaClass() is FI then checkcast
- *
- * if expr instanceof resolved MethodValueExpr
- * then emitInvokeDynamicAdapter to the MVE method
- *
  * find matching invoker function
  * if invoker then emit maybe-adapter (f on stack):
  * if( !(f instanceof FI))
@@ -1852,63 +1732,50 @@ private static Executable findOneCompatibleMethod(MethodValueExpr expr, java.lan
  * else no invoker so throw and tell user to reify
  */
 private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fnIfaceClass) {
-//	Class exprClass = expr.hasJavaClass() ? expr.getJavaClass() : null;
-//	if(exprClass != null && fnIfaceClass.isAssignableFrom(exprClass)) {
-//		expr.emit(C.EXPRESSION, objx, gen);
-//		gen.checkCast(Type.getType(fnIfaceClass));
-//	} else
-	if(expr instanceof MethodValueExpr) {
-		// DON'T emit expr
-		java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fnIfaceClass);
-		Executable e = findOneCompatibleMethod((MethodValueExpr)expr, targetMethod);
-		emitInvokeDynamicAdapter(gen, getAdaptableSAMMethod(fnIfaceClass), e);
-	} else {
-		java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fnIfaceClass);
+	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fnIfaceClass);
 
-		Class[] invokerParams = new Class[targetMethod.getParameterCount()+1];
-		invokerParams[0] = Object.class;  // close over Ifn as first arg
-		StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
-		for (int i = 0; i < targetMethod.getParameterCount(); i++) {
-			char paramCode = encodeInvokerParam(targetMethod.getParameterTypes()[i]);
-			invokeMethodBuilder.append(paramCode);
-			invokerParams[i+1] = decodeToClass(paramCode);
-		}
-		char invokerReturnCode = encodeAdapterReturn(targetMethod.getReturnType());
-		invokeMethodBuilder.append(invokerReturnCode);
-		String invokerMethodName = invokeMethodBuilder.toString();
+	Class[] invokerParams = new Class[targetMethod.getParameterCount()+1];
+	invokerParams[0] = Object.class;  // close over Ifn as first arg
+	StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
+	for (int i = 0; i < targetMethod.getParameterCount(); i++) {
+		char paramCode = encodeInvokerParam(targetMethod.getParameterTypes()[i]);
+		invokeMethodBuilder.append(paramCode);
+		invokerParams[i+1] = decodeToClass(paramCode);
+	}
+	char invokerReturnCode = encodeAdapterReturn(targetMethod.getReturnType());
+	invokeMethodBuilder.append(invokerReturnCode);
+	String invokerMethodName = invokeMethodBuilder.toString();
 
-		// Invoker method - takes IFn instance (closed over) + args, body calls IFn.invoke
-		expr.emit(C.EXPRESSION, objx, gen);
-		try {
-			java.lang.reflect.Method invokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
+	// Invoker method - takes IFn instance (closed over) + args, body calls IFn.invoke
+	expr.emit(C.EXPRESSION, objx, gen);
+	try {
+		java.lang.reflect.Method invokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
 
-			// if(! (exp instanceof FIType)) { emit invoker }
-			gen.dup();
-			Type samType = Type.getType(fnIfaceClass);
-			gen.instanceOf(samType);
+		// if(! (exp instanceof FIType)) { emit invoker }
+		gen.dup();
+		Type samType = Type.getType(fnIfaceClass);
+		gen.instanceOf(samType);
 
-			// if so, checkcast and go to end
-			Label invokerLabel = gen.newLabel();
-			gen.ifZCmp(Opcodes.IFEQ, invokerLabel);
-			gen.checkCast(samType);
-			Label endLabel = gen.newLabel();
-			gen.goTo(endLabel);
+		// if so, checkcast and go to end
+		Label invokerLabel = gen.newLabel();
+		gen.ifZCmp(Opcodes.IFEQ, invokerLabel);
+		gen.checkCast(samType);
+		Label endLabel = gen.newLabel();
+		gen.goTo(endLabel);
 
-			// if not, insert lambda adapter
-			gen.mark(invokerLabel);
+		// if not, insert lambda adapter
+		gen.mark(invokerLabel);
 
-			// adapt adapter method to target method, closing over IFn instance
-			emitInvokeDynamicAdapter(gen, targetMethod, invokerMethod);
-			gen.mark(endLabel);
-			gen.checkCast(Type.getType(fnIfaceClass));
+		// adapt adapter method to target method, closing over IFn instance
+		emitInvokeDynamicAdapter(gen, targetMethod, invokerMethod);
+		gen.mark(endLabel);
+		gen.checkCast(Type.getType(fnIfaceClass));
 
-		} catch(NoSuchMethodException e) {
-			// no invoker method found (this should rarely happen)
-			throw Util.runtimeException(
-					"Can't convert function to " + fnIfaceClass.getName() +
-					", provide an instance of this type (perhaps with 'reify')");
-		}
-
+	} catch(NoSuchMethodException e) {
+		// no invoker method found (this should rarely happen)
+		throw Util.runtimeException(
+				"Can't convert function to " + fnIfaceClass.getName() +
+				", provide an instance of this type (perhaps with 'reify')");
 	}
 }
 
