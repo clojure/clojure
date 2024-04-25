@@ -1253,7 +1253,7 @@ static class QualifiedMethodExpr implements Expr {
 		Symbol instanceParam = qmexpr.kind == MethodKind.INSTANCE ? THIS : null;
 		String thunkName = "invoke__" + qmexpr.c.getSimpleName() + "_" + qmexpr.methodSymbol.name;
 		Set arities = (qmexpr.hintedSig != null) ? PersistentHashSet.create(qmexpr.hintedSig.size())
-				: aritySet(qmexpr);
+				: aritySet(qmexpr.c, qmexpr.methodName, qmexpr.kind);
 
 		for(Object a : arities) {
 			int arity = (int) a;
@@ -1277,9 +1277,9 @@ static class QualifiedMethodExpr implements Expr {
 
 	// Given a class, method name, and method kind, returns a sorted set of
 	// arity counts pertaining to the method's overloads
-	private static Set aritySet(QualifiedMethodExpr qmexpr) {
+	private static Set aritySet(Class c, String methodName, MethodKind kind) {
 		Set res = new java.util.TreeSet<>();
-		List<Executable> methods = methodsWithName(qmexpr);
+		List<Executable> methods = methodsWithName(c, methodName, kind);
 
 		for(Executable exec : methods)
 			res.add(exec.getParameterCount());
@@ -1287,37 +1287,26 @@ static class QualifiedMethodExpr implements Expr {
 		return res;
 	}
 
-	private static List<Executable> methodsWithName(QualifiedMethodExpr qmexpr) {
-		final Executable[] methods;
-		final String methodName;
-		if (qmexpr.kind == MethodKind.CTOR) {
-			methods = qmexpr.c.getConstructors();
-			methodName = qmexpr.c.getName();
-		}
-		else {
-			methods = qmexpr.c.getMethods();
-			methodName = qmexpr.methodName;
+	private static List<Executable> methodsWithName(Class c, String methodName, MethodKind kind) {
+		if (kind == MethodKind.CTOR) {
+			return Arrays.asList(c.getConstructors());
 		}
 
+		final Executable[] methods = c.getMethods();
 		return Arrays.stream(methods)
 				.filter(m -> m.getName().equals(methodName))
 				.filter(m -> {
-					switch(qmexpr.kind) {
-						case STATIC:
-							return isStaticMethod(m);
-						case INSTANCE:
-							return isInstanceMethod(m);
-						case CTOR:
-							return isConstructor(m);
-						default:
-							return false;
+					switch(kind) {
+						case STATIC: return isStaticMethod(m);
+						case INSTANCE: return isInstanceMethod(m);
+						default: return false;
 					}
 				})
 				.collect(Collectors.toList());
 	}
 
 	static Executable resolveHintedMethod(QualifiedMethodExpr qmexpr) {
-		List<Executable> methods = methodsWithName(qmexpr);
+		List<Executable> methods = methodsWithName(qmexpr.c, qmexpr.methodName, qmexpr.kind);
 		if (methods.isEmpty())
 			throw noMethodWithNameException(qmexpr.c, qmexpr.methodName);
 
@@ -1335,22 +1324,19 @@ static class QualifiedMethodExpr implements Expr {
 					qmexpr.hintedSig, filteredMethods.size());
 	}
 
-	static IPersistentVector toParamTags(List<Class> hintedSig) {
-		return PersistentVector.create(hintedSig.stream()
-				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
-				.collect(Collectors.toList()));
-	}
-
 	static IllegalArgumentException noMethodWithNameException(Class c, String methodName) {
 		return new IllegalArgumentException("Could not find "
 				+ methodDescription(c, methodName));
 	}
 
 	static IllegalArgumentException paramTagsDontResolveException(Class c, String methodName, List<Class> hintedSig, int found) {
+		IPersistentVector paramTags = PersistentVector.create(hintedSig.stream()
+				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
+				.collect(Collectors.toList()));
 		return new IllegalArgumentException("Expected to find 1 matching signature for "
 				+ methodDescription(c, methodName)
 				+ " but found " + found
-				+ " with param-tags " + toParamTags(hintedSig));
+				+ " with param-tags " + paramTags);
 	}
 }
 
