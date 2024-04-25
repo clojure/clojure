@@ -1195,7 +1195,6 @@ static class QualifiedMethodExpr implements Expr {
 	private final Symbol methodSymbol;
 	private final String methodName;
 	private final MethodKind kind;
-	private FnExpr backingFnExpr;
 
 	private enum MethodKind {
 		CTOR, INSTANCE, STATIC
@@ -1268,20 +1267,15 @@ static class QualifiedMethodExpr implements Expr {
 	}
 
 	// Expr impls
-	private FnExpr ensureFnExpr(C context) {
-		if (backingFnExpr == null)
-			backingFnExpr = buildThunk(context, this);
-		return backingFnExpr;
-	}
 
 	@Override
 	public Object eval() {
-		return ensureFnExpr(C.EVAL).eval();
+		return buildThunk(C.EVAL, this).eval();
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-		ensureFnExpr(context).emit(context, objx, gen);
+		buildThunk(context, this).emit(context, objx, gen);
 	}
 
 	@Override
