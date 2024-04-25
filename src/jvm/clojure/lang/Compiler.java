@@ -1305,23 +1305,22 @@ static class QualifiedMethodExpr implements Expr {
 				.collect(Collectors.toList());
 	}
 
-	static Executable resolveHintedMethod(QualifiedMethodExpr qmexpr) {
-		List<Executable> methods = methodsWithName(qmexpr.c, qmexpr.methodName, qmexpr.kind);
+	static Executable resolveHintedMethod(Class c, String methodName, MethodKind kind, List<Class> hintedSig) {
+		List<Executable> methods = methodsWithName(c, methodName, kind);
 		if (methods.isEmpty())
-			throw noMethodWithNameException(qmexpr.c, qmexpr.methodName);
+			throw noMethodWithNameException(c, methodName);
 
-		final int arity = qmexpr.hintedSig.size();
+		final int arity = hintedSig.size();
 		List<Executable> filteredMethods = methods.stream()
 				.filter(m -> m.getParameterCount() == arity)
 				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
-				.filter(m -> signatureMatches(qmexpr.hintedSig, m))
+				.filter(m -> signatureMatches(hintedSig, m))
 				.collect(Collectors.toList());
 
 		if(filteredMethods.size() == 1)
 			return filteredMethods.get(0);
 		else
-			throw paramTagsDontResolveException(qmexpr.c, qmexpr.methodName,
-					qmexpr.hintedSig, filteredMethods.size());
+			throw paramTagsDontResolveException(c, methodName, hintedSig, filteredMethods.size());
 	}
 
 	static IllegalArgumentException noMethodWithNameException(Class c, String methodName) {
@@ -4252,7 +4251,7 @@ static class InvokeExpr implements Expr{
 
 	private static Expr toHostExpr(QualifiedMethodExpr qmexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
 		if(qmexpr.hintedSig != null) {
-			Executable method = QualifiedMethodExpr.resolveHintedMethod(qmexpr);
+			Executable method = QualifiedMethodExpr.resolveHintedMethod(qmexpr.c, qmexpr.methodName, qmexpr.kind, qmexpr.hintedSig);
 			switch(qmexpr.kind) {
 				case CTOR:
 					return new NewExpr(qmexpr.c, (Constructor) method, args, line, column);
