@@ -1,4 +1,4 @@
-;; This code was used to generate the clojure.lang.FnAdapters class in
+;; This code was used to generate the clojure.lang.FnInvokers class in
 ;; Clojure 1.12. This code is not intended to be reused but might be
 ;; useful in the future as a template for other code gen.
 
