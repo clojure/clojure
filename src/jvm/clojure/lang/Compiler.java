@@ -1215,7 +1215,6 @@ static class QualifiedMethodExpr implements Expr {
 	}
 
 	// Expr impls
-
 	private FnExpr ensureFnExpr(C context) {
 		if (backingFnExpr == null)
 			backingFnExpr = buildThunk(context, this);
@@ -1763,7 +1762,7 @@ static class InstanceMethodExpr extends MethodExpr{
 	final static Method invokeInstanceMethodOfClassMethod =
 			Method.getMethod("Object invokeInstanceMethodOfClass(Object,String,String,Object[])");
 
-	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target, 
+	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
 			Class qualifyingClass, String methodName, java.lang.reflect.Method resolvedMethod,
 			IPersistentVector args, boolean tailPosition)
 	{
@@ -7430,7 +7429,7 @@ public static Object macroexpand1(Object x) {
 				Symbol sym = (Symbol) op;
 				String sname = sym.name;
 				//(.substring s 2 5) => (. s substring 2 5)
-				// ns == null ensures that Class/.instanceMethod isn't expanded to . form 
+				// ns == null ensures that Class/.instanceMethod isn't expanded to . form
 				if(sym.name.charAt(0) == '.' && sym.ns == null)
 					{
 					if(RT.length(form) < 2)
