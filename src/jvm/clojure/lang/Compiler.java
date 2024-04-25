@@ -1348,9 +1348,16 @@ private static List<Executable> methodsWithName(Class c, String name, QualifiedM
 	return Arrays.stream(methods)
 			.filter(m -> m.getName().equals(methodName))
 			.filter(m -> {
-				return (targetKind == QualifiedMethodExpr.MethodKind.STATIC && isStaticMethod(m))
-						|| (targetKind == QualifiedMethodExpr.MethodKind.INSTANCE && isInstanceMethod(m))
-						|| (targetKind == QualifiedMethodExpr.MethodKind.CTOR && isConstructor(m));
+				switch(targetKind) {
+					case STATIC:
+						return isStaticMethod(m);
+					case INSTANCE:
+						return isInstanceMethod(m);
+					case CTOR:
+						return isConstructor(m);
+					default:
+						return false;
+				}
 			})
 			.collect(Collectors.toList());
 }
