@@ -385,7 +385,7 @@ public static Object setStaticField(Class c, String fieldName, Object val) {
 		{
 		try
 			{
-			f.set(null, boxArg(f.getType(), val, false));
+			f.set(null, boxArg(f.getType(), val));
 			}
 		catch(IllegalAccessException e)
 			{
@@ -422,7 +422,7 @@ public static Object setInstanceField(Object target, String fieldName, Object va
 		{
 		try
 			{
-			f.set(target, boxArg(f.getType(), val, false));
+			f.set(target, boxArg(f.getType(), val));
 			}
 		catch(IllegalAccessException e)
 			{
@@ -485,7 +485,7 @@ public static Object invokeInstanceMember(String name, Object target, Object arg
 		{
 		try
 			{
-			f.set(target, boxArg(f.getType(), arg1, false));
+			f.set(target, boxArg(f.getType(), arg1));
 			}
 		catch(IllegalAccessException e)
 			{
@@ -626,14 +626,9 @@ private static Object dynamicAdapt(Class targetFnInterface, java.lang.reflect.Me
                        });
 }
 
-// deprecated
 static Object boxArg(Class paramType, Object arg) {
-       return boxArg(paramType, arg, true);
-}
-
-private static Object boxArg(Class paramType, Object arg, boolean adaptFunctionalInterfaces){
 	if(!paramType.isPrimitive())
-		if(adaptFunctionalInterfaces && isAdaptableFunctionalInterface(paramType) && !(paramType.isInstance(arg))) {
+		if(isAdaptableFunctionalInterface(paramType) && !(paramType.isInstance(arg))) {
 			return dynamicAdapt(paramType, arg);
 		} else {
 			return paramType.cast(arg);
@@ -670,7 +665,7 @@ static Object[] boxArgs(Class[] params, Object[] args){
 		{
 		Object arg = args[i];
 		Class paramType = params[i];
-		ret[i] = boxArg(paramType, arg, true);
+		ret[i] = boxArg(paramType, arg);
 		}
 	return ret;
 }
