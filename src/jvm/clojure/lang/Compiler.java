@@ -1729,7 +1729,7 @@ private static char encodeInvokerReturn(Class c) {
  * find invoker function matching SAM method of fiClass
  * if invoker then emit maybe-adapter (f on stack):
  * if( !(f instanceof FI))
- *   emitInvokeDynamicAdapter(FI::method, FnInvokers::adapt))
+ *   emitInvokeDynamicAdapter(FI::method, FnInvokers::invoke))
  *
  * else no invoker so throw and tell user to reify
  */
