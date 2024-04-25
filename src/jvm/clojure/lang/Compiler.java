@@ -1304,7 +1304,7 @@ static class QualifiedMethodExpr implements Expr {
 		Symbol instanceParam = qmexpr.kind == MethodKind.INSTANCE ? THIS : null;
 		String thunkName = "invoke__" + qmexpr.c.getSimpleName() + "_" + qmexpr.methodSymbol.name;
 		Set arities = (qmexpr.hintedSig != null) ? PersistentHashSet.create(qmexpr.hintedSig.size())
-				: aritySet(qmexpr.c, qmexpr.methodName, qmexpr.kind);
+				: aritySet(qmexpr);
 
 		for(Object a : arities) {
 			int arity = (int) a;
@@ -1326,11 +1326,11 @@ static class QualifiedMethodExpr implements Expr {
 		return params;
 	}
 
-	// Given a class, method name, and method kind, returns a set of
-	// arity counts for the method
-	private static Set aritySet(Class c, String methodName, MethodKind kind) {
+	// Given a class, method name, and method kind, returns a sorted set of
+	// arity counts pertaining to the method's overloads
+	private static Set aritySet(QualifiedMethodExpr qmexpr) {
 		Set res = new java.util.TreeSet<>();
-		List<Executable> methods = methodsWithName(c, methodName, kind);
+		List<Executable> methods = methodsWithName(qmexpr);
 
 		for(Executable exec : methods)
 			res.add(exec.getParameterCount());
