@@ -1204,23 +1204,33 @@ static class QualifiedMethodExpr implements Expr {
 	public QualifiedMethodExpr(Class methodClass, Symbol sym){
 		c = methodClass;
 		methodSymbol = sym;
-		kind = classifyMethodKind(sym.name);
+		if(sym.name.startsWith("."))
+			kind = MethodKind.INSTANCE;
+		else if(sym.name.equals("new"))
+			kind = MethodKind.CTOR;
+		else
+			kind = MethodKind.STATIC;
 		methodName = kind.equals(MethodKind.INSTANCE) ? sym.name.substring(1) : sym.name;
 		hintedSig = tagsToClasses(paramTagsOf(sym));
 	}
 
-	static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
-		final int arity = hintedSig.size();
+	static Executable resolveHintedMethod(QualifiedMethodExpr qmexpr) {
+		List<Executable> methods = methodsWithName(qmexpr.c, qmexpr.methodName, qmexpr.kind);
+		if (methods.isEmpty())
+			throw noMethodWithNameException(qmexpr.c, qmexpr.methodName);
+
+		final int arity = qmexpr.hintedSig.size();
 		List<Executable> filteredMethods = methods.stream()
 				.filter(m -> m.getParameterCount() == arity)
 				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
-				.filter(m -> signatureMatches(hintedSig, m))
+				.filter(m -> signatureMatches(qmexpr.hintedSig, m))
 				.collect(Collectors.toList());
 
 		if(filteredMethods.size() == 1)
 			return filteredMethods.get(0);
 		else
-			throw paramTagsDontResolveException(c, methodName, hintedSig, filteredMethods.size());
+			throw paramTagsDontResolveException(qmexpr.c, qmexpr.methodName,
+					qmexpr.hintedSig, filteredMethods.size());
 	}
 
 	// 1. no methods with name -> error
@@ -1229,8 +1239,6 @@ static class QualifiedMethodExpr implements Expr {
 	// 4. else null (no param-tags, overloaded)
 	static Executable maybeResolveMethod(Class c, String methodName, MethodKind kind, List<Class> hintedSig) {
 		List<Executable> methods = methodsWithName(c, methodName, kind);
-		if (methods.isEmpty())
-			throw noMethodWithNameException(c, methodName);
 
 		if (hintedSig != null)
 			return resolveHintedMethod(c, methodName, hintedSig, methods);
@@ -1267,7 +1275,7 @@ static class QualifiedMethodExpr implements Expr {
 	private FnExpr ensureFnExpr(C context) {
 		if (backingFnExpr == null) {
 			Executable method = maybeResolveMethod(c, methodName, kind, hintedSig);
-			backingFnExpr = toFnExpr(context, this, aritySet(method, c, methodName, kind));
+			backingFnExpr = buildThunk(context, this);
 		}
 		return backingFnExpr;
 	}
@@ -1292,48 +1300,22 @@ static class QualifiedMethodExpr implements Expr {
 		return AFn.class;
 	}
 
-	private static FnExpr toFnExpr(C context, QualifiedMethodExpr qmexpr, Set arities) {
-		Executable method = QualifiedMethodExpr.maybeResolveMethod(qmexpr.c,
-				qmexpr.methodName, qmexpr.kind, qmexpr.hintedSig);
-		Symbol retTag = null;
-		if(method != null) {
-			Class retClass = method instanceof Constructor ? qmexpr.c
-					: ((java.lang.reflect.Method) method).getReturnType();
-			if (isHintablePrimitive(retClass) || !retClass.isPrimitive()) {
-				retTag = primTag(retClass);
-				retTag = (retTag != null) ? retTag : Symbol.intern(null, retClass.getName());
-			}
-		}
-
-		return buildThunk(context, qmexpr.c, method, qmexpr.methodSymbol, arities,
-				qmexpr.kind.equals(MethodKind.INSTANCE) ? THIS : null, retTag);
-	}
-
-	private static boolean isHintablePrimitive(Class c) {
-		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
-	}
-
-	private static Symbol primTag(Class c) {
-		String t = null;
-		if(c.isPrimitive() || (c.isArray() && c.getComponentType().isPrimitive())) {
-			t = c.getName();
-		}
-		return (t == null) ? null : Symbol.intern(null, t);
-	}
-
 	// TBD: caching/reuse of thunks
-	private static FnExpr buildThunk(C context, Class c, Executable method, Symbol methodSymbol, Set arities, Symbol instanceParam, Symbol retHint) {
-		// When method is resolved:
-		// (fn invoke__Class_meth (^retHint? [this? primHintedArgs*] (methodSymbol this? primHintedArgs*)))
+	private static FnExpr buildThunk(C context, QualifiedMethodExpr qmexpr) {
+		// When qualified symbol has paramtags:
+		// (fn invoke__Class_meth ([this? args*] (methodSymbol this? args*)))
 		// When unresolved:
-		// (fn invoke__Class_meth ([this?] (Class/meth this?)) ([this? arg1] (Class/meth this? arg1)))
+		// (fn invoke__Class_meth ([this?] (Class/meth this?)) ([this? arg1] (Class/meth this? arg1)) ...)
 		IPersistentCollection form = PersistentVector.EMPTY;
-		String thunkName = "invoke__" + c.getSimpleName() + "_" + methodSymbol.name;
+		Symbol instanceParam = qmexpr.kind.equals(MethodKind.INSTANCE) ? THIS : null;
+		String thunkName = "invoke__" + qmexpr.c.getSimpleName() + "_" + qmexpr.methodSymbol.name;
+		Set arities = (qmexpr.hintedSig != null) ? PersistentHashSet.create(qmexpr.hintedSig.size())
+				: aritySet(qmexpr.c, qmexpr.methodName, qmexpr.kind);
 
 		for(Object a : arities) {
 			int arity = (int) a;
-			IPersistentVector params = buildParams(method, instanceParam, arity, retHint);
-			ISeq body = RT.listStar(methodSymbol, params.seq());
+			IPersistentVector params = buildParams(instanceParam, arity);
+			ISeq body = RT.listStar(qmexpr.methodSymbol, params.seq());
 			form = RT.conj(form, RT.list(params, body));
 		}
 
@@ -1341,21 +1323,13 @@ static class QualifiedMethodExpr implements Expr {
 		return (FnExpr) analyzeSeq(context, thunkForm, thunkName);
 	}
 
-	private static IPersistentVector buildParams(Executable method, Symbol instanceParam, int arity, Symbol retHint) {
+	private static IPersistentVector buildParams(Symbol instanceParam, int arity) {
 		IPersistentVector params = PersistentVector.EMPTY;
 		if(instanceParam != null) params = params.cons(instanceParam);
-		// maybe hinted params
-		Class[] paramTypes = method != null ? method.getParameterTypes() : new Class[arity];
-		for(int i = 0; i<paramTypes.length; i++) {
-			Symbol param = Symbol.intern(null, "arg" + (i+1));
-			if(method != null && isHintablePrimitive(paramTypes[i])) {
-				param = (Symbol) param.withMeta(RT.map(RT.TAG_KEY, primTag(paramTypes[i])));
-			}
-			params = params.cons(param);
-		}
-		// hint return
-		return (retHint == null) ? params
-				: ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, retHint));
+		for(int i = 0; i<arity; i++)
+			params = params.cons(Symbol.intern(null, "arg" + (i+1)));
+
+		return params;
 	}
 
 	// Exception reporting
@@ -1383,42 +1357,16 @@ static class QualifiedMethodExpr implements Expr {
 				+ " with param-tags " + toParamTags(hintedSig));
 	}
 
-	// Helpers
-	private static Set aritySet(Executable maybeMethod, Class c, String methodName, MethodKind kind) {
+	// Given a class, method name, and method kind, returns a set of
+	// arity counts for the method
+	private static Set aritySet(Class c, String methodName, MethodKind kind) {
 		Set res = new java.util.TreeSet<>();
-
-		if(maybeMethod != null) {
-			res.add(maybeMethod.getParameterCount());
-			return res;
-		}
-
 		List<Executable> methods = methodsWithName(c, methodName, kind);
 
 		for(Executable exec : methods)
 			res.add(exec.getParameterCount());
 
 		return res;
-	}
-
-	private MethodKind classifyMethodKind(String name) {
-		if(name.startsWith("."))
-			return MethodKind.INSTANCE;
-		else if(name.equals("new"))
-			return MethodKind.CTOR;
-		else
-			return MethodKind.STATIC;
-	}
-
-	public boolean namesStaticMethod() {
-		return kind.equals(MethodKind.STATIC);
-	}
-
-	public boolean namesInstanceMethod() {
-		return kind.equals(MethodKind.INSTANCE);
-	}
-
-	public boolean namesConstructor() {
-		return kind.equals(MethodKind.CTOR);
 	}
 }
 
@@ -4330,30 +4278,31 @@ static class InvokeExpr implements Expr{
 	}
 
 	private static Expr toHostExpr(QualifiedMethodExpr qmexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
-		Executable method = QualifiedMethodExpr.maybeResolveMethod(qmexpr.c,
-				qmexpr.methodName, qmexpr.kind, qmexpr.hintedSig);
-
-		if(method != null) {
-			if (qmexpr.namesConstructor())
-				return new NewExpr(qmexpr.c, (Constructor) method, args, line, column);
-
-			if(qmexpr.namesInstanceMethod())
-				return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
-						munge(qmexpr.methodName), (java.lang.reflect.Method) method, PersistentVector.create(RT.next(args)),
-						tailPosition);
-
-			return new StaticMethodExpr(source, line, column, tag, qmexpr.c,
-					munge(qmexpr.methodName), (java.lang.reflect.Method) method, args, tailPosition);
+		if(qmexpr.hintedSig != null) {
+			Executable method = QualifiedMethodExpr.resolveHintedMethod(qmexpr);
+			switch(qmexpr.kind) {
+				case CTOR:
+					return new NewExpr(qmexpr.c, (Constructor) method, args, line, column);
+				case INSTANCE:
+					return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
+							munge(qmexpr.methodName), (java.lang.reflect.Method) method, PersistentVector.create(RT.next(args)),
+							tailPosition);
+				default:
+					return new StaticMethodExpr(source, line, column, tag, qmexpr.c,
+							munge(qmexpr.methodName), (java.lang.reflect.Method) method, args, tailPosition);
+			}
 		}
 		else {
-			if(qmexpr.namesConstructor())
-				return new NewExpr(qmexpr.c, args, line, column);
-
-			if(qmexpr.namesInstanceMethod())
-				return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args), qmexpr.c,
-						munge(qmexpr.methodName), PersistentVector.create(RT.next(args)), tailPosition);
-
-			return new StaticMethodExpr(source, line, column, tag, qmexpr.c, munge(qmexpr.methodName), args, tailPosition);
+			switch(qmexpr.kind) {
+				case CTOR:
+					return new NewExpr(qmexpr.c, args, line, column);
+				case INSTANCE:
+					return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args), qmexpr.c,
+							munge(qmexpr.methodName), PersistentVector.create(RT.next(args)), tailPosition);
+				default:
+					return new StaticMethodExpr(source, line, column, tag, qmexpr.c,
+							munge(qmexpr.methodName), args, tailPosition);
+			}
 		}
 	}
 }
