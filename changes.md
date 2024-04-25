@@ -1,5 +1,12 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.11.2
+
+These releases include a fix for CVE [CVE-2024-22871](https://nvd.nist.gov/vuln/detail/CVE-2024-22871)
+detailed in [GHSA-vr64-r9qj-h27f](https://github.com/advisories/GHSA-vr64-r9qj-h27f):
+
+* [CLJ-2839](https://clojure.atlassian.net/browse/CLJ-2839) - `iterate`, `cycle`, `repeat` - infinite seqs have infinite hashCode()
+
 # Changes to Clojure in Version 1.11.1
 
 * [CLJ-2701](https://clojure.atlassian.net/browse/CLJ-2701)
