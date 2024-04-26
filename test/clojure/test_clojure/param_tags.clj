@@ -23,13 +23,13 @@
 (deftest no-hints-with-param-tags
   (should-not-reflect
    (defn touc-no-reflect [s]
-     (^[] String/toUpperCase s)))
+     (^[] String/.toUpperCase s)))
   (should-not-reflect
    (defn touc-no-reflectq [s]
-     (^[] java.lang.String/toUpperCase s)))
+     (^[] java.lang.String/.toUpperCase s)))
   (should-not-reflect
    (defn touc-no-reflect-arg-tags [s]
-     (^[java.util.Locale] String/toUpperCase s java.util.Locale/ENGLISH))))
+     (^[java.util.Locale] String/.toUpperCase s java.util.Locale/ENGLISH))))
 
 (deftest param-tags-in-invocation-positions
   (testing "qualified static method invocation"
@@ -41,11 +41,11 @@
     (is (= (^[long long] java.util.UUID/new 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
     (is (= "a" (^[String] String/new "a"))))
   (testing "qualified instance method invocation"
-    (is (= \A (String/charAt "A" 0)))
-    (is (= "A" (^[java.util.Locale] String/toUpperCase "a" java.util.Locale/ENGLISH)))
-    (is (= "A" (^[Locale] String/toUpperCase "a" java.util.Locale/ENGLISH)))
-    (is (= 65 (aget (^[String] String/getBytes "A" "US-ASCII") 0)))
-    (is (= "42" (^[] Long/toString 42))))
+    (is (= \A (String/.charAt "A" 0)))
+    (is (= "A" (^[java.util.Locale] String/.toUpperCase "a" java.util.Locale/ENGLISH)))
+    (is (= "A" (^[Locale] String/.toUpperCase "a" java.util.Locale/ENGLISH)))
+    (is (= 65 (aget (^[String] String/.getBytes "A" "US-ASCII") 0)))
+    (is (= "42" (^[] Long/.toString 42))))
   (testing "string repr array type resolutions"
      (let [lary (long-array [1 2 3 4 99 100])
            oary (into-array [1 2 3 4 99 100])
@@ -133,7 +133,7 @@
    Call the method providing the appropriate arg-tags and return a map containing
    the actual and expected response."
   [{:keys [name declaring-class parameter-types]}]
-  (let [method (str name)
+  (let [method (str "." name)
         args (str/join " " (map #(-> % reflected-parameter-types :arg-type) parameter-types))
         arg-tags (str/join " " (map #(-> % reflected-parameter-types :arg-tag) parameter-types))
         expected-response (str/join "-" parameter-types)
@@ -162,11 +162,11 @@
 (deftest bridge-methods
   (testing "Allows correct intended usage."
     (let [concrete (ConcreteClass.)]
-     (is (= 42 (^[Integer] ConcreteClass/stampWidgets concrete (int 99))))))
+     (is (= 42 (^[Integer] ConcreteClass/.stampWidgets concrete (int 99))))))
   (testing "Will not call bridge method."
     (is (thrown? Compiler$CompilerException
                  (eval '(let [concrete (clojure.test.ConcreteClass.)]
-                          (^[Object] ConcreteClass/stampWidgets concrete (int 99))))))))
+                          (^[Object] ConcreteClass/.stampWidgets concrete (int 99))))))))
 
 
 (deftest incorrect-arity-invocation-error-messages
@@ -175,10 +175,4 @@
     (let [e (try
               (eval '(^[long] Math/abs -1 -2 -3))
               (catch Compiler$CompilerException e (str "-> " (.getMessage (.getCause e)))))]
-      (is (not (nil? (re-find #"expected 1.*received 3" e))) "Error message was expected to indicate 1 argument was expected but 2 were provided")))
-
-  (testing "Invocation without param-tags having incorrect number of args"
-    (let [e (try
-             (eval '(java.util.UUID/fromString "a" 1))
-             (catch Compiler$CompilerException e (str "-> " (.getMessage (.getCause e)))))]
-     (is (not (nil? (re-find #"expected 1.*received 2" e))) "Error message was expected to indicate 1 argument was expected but 2 were provided"))))
+      (is (not (nil? (re-find #"expected 1.*received 3" e))) "Error message was expected to indicate 1 argument was expected but 2 were provided"))))
