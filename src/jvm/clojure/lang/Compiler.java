@@ -1691,6 +1691,41 @@ private static java.lang.reflect.Method getAdaptableSAMMethod(Class target) {
 	return null;
 }
 
+// Given an FI method parameter type (any class or primitive),
+// which type code specifies what the invoker method should take
+private static char encodeInvokerParam(Class c) {
+    if (c.equals(Byte.TYPE) || c.equals(Short.TYPE) || c.equals(Integer.TYPE) || c.equals(Long.TYPE)) {
+        return 'L';
+    } else if (c.equals(Float.TYPE) || c.equals(Double.TYPE)) {
+        return 'D';
+    }
+    return 'O';
+}
+
+// Given an FI method return type (any class or primitive),
+// which type code specifies what the invoker method should return
+private static char encodeInvokerReturn(Class c) {
+	// Direct match primitives we support
+    if (c.equals(Long.TYPE)) {
+        return 'L';
+    } else if (c.equals(Double.TYPE)) {
+        return 'D';
+
+	// If FI method returns a boolean, apply boolean coercion logic in invoker
+    } else if (c.equals(Boolean.TYPE)) {
+        return 'B';
+
+	// If FI method returns int or float (common), support a narrowing conversion
+	// from primitive long or double in invoker method to stay primitive
+    } else if (c.equals(Integer.TYPE)) {
+        return 'I';
+    } else if (c.equals(Float.TYPE)) {
+        return 'F';
+    }
+    return 'O';
+}
+
+// Decode invoker type code to class
 private static Class decodeToClass(char c) {
 	switch(c) {
 		case 'L': return Long.TYPE;
@@ -1699,29 +1734,6 @@ private static Class decodeToClass(char c) {
 		case 'F': return Float.TYPE;
 		case 'I': return Integer.TYPE;
 		default: return Object.class;
-	}
-}
-
-// Support widening conversion from short, int, or float to long or double on adapter params
-private static char encodeInvokerParam(Class c) {
-	switch(c.getName()) {
-		case "short":
-		case "long": return 'L';
-		case "int":
-		case "float":
-		case "double": return 'D';
-		default: return 'O';
-	}
-}
-
-private static char encodeInvokerReturn(Class c) {
-	switch(c.getName()) {
-		case "long": return 'L';
-		case "double": return 'D';
-		case "int": return 'I';      // narrowing conversion from IFn$...L
-		case "float": return 'F';    // narrowing conversion from IFn$...D
-		case "boolean": return 'B';  // Clojure boolean logic from IFn$...O
-		default: return 'O';
 	}
 }
 
