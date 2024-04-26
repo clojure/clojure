@@ -95,12 +95,19 @@ private static Method toAccessibleSuperMethod(Method m, Object target) {
 }
 
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) {
-	Class c = target.getClass();
+	return invokeInstanceMethodOfClass(target, target.getClass(), methodName, args);
+}
+
+public static Object invokeInstanceMethodOfClass(Object target, Class c, String methodName, Object[] args) {
 	List methods = getMethods(c, args.length, methodName, false).stream()
-					.map(method -> toAccessibleSuperMethod(method, target))
-					.filter(method -> (method != null))
-					.collect(Collectors.toList());
+			.map(method -> toAccessibleSuperMethod(method, target))
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
 	return invokeMatchingMethod(methodName, methods, target, args);
+}
+
+public static Object invokeInstanceMethodOfClass(Object target, String className, String methodName, Object[] args) {
+	return invokeInstanceMethodOfClass(target, RT.classForName(className), methodName, args);
 }
 
 private static Throwable getCauseOrElse(Exception e) {

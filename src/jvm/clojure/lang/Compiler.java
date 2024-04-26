@@ -391,17 +391,17 @@ static Symbol resolveSymbol(Symbol sym){
 		{
 		Namespace ns = namespaceFor(sym);
 		if(ns == null || (ns.name.name == null ? sym.ns == null : ns.name.name.equals(sym.ns)))
+			{
+			Class ac = HostExpr.maybeArrayClass(sym);
+			if(ac != null)
+				return Util.arrayTypeToSymbol(ac);
 			return sym;
+			}
 		return Symbol.intern(ns.name.name, sym.name);
 		}
 	Object o = currentNS().getMapping(sym);
 	if(o == null)
-		{
-		Class ac = HostExpr.maybeArrayClass(sym);
-		if(ac != null)
-			return HostExpr.arrayTypeToSymbol(ac);
 		return Symbol.intern(currentNS().name.name, sym.name);
-		}
 	else if(o instanceof Class)
 		return Symbol.intern(null, ((Class) o).getName());
 	else if(o instanceof Var)
@@ -1013,7 +1013,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				if(c != null)
 					return new StaticMethodExpr(source, line, column, tag, c, munge(sym.name), args, tailPosition);
 				else
-					return new InstanceMethodExpr(source, line, column, tag, instance, munge(sym.name), args, tailPosition);
+					return new InstanceMethodExpr(source, line, column, tag, instance, null, munge(sym.name), args, tailPosition);
 				}
 		}
 	}
@@ -1029,12 +1029,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				{
 				if(Util.equals(sym,COMPILE_STUB_SYM.get()))
 					return (Class) COMPILE_STUB_CLASS.get();
-				else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
-					{
-					c = maybeArrayClass(sym);
-					if (c == null)
-						c = RT.classForNameNonLoading(sym.name);
-					}
+				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+					c = RT.classForNameNonLoading(sym.name);
 				else
 					{
 					Object o = currentNS().getMapping(sym);
@@ -1045,12 +1041,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 					else
 						{
 						try{
-						if(c == null)
-							{
-							c = maybeArrayClass(sym);
-							if(c == null)
-								c = RT.classForNameNonLoading(sym.name);
-							}
+						c = RT.classForNameNonLoading(sym.name);
 						}
 						catch(Exception e){
 							// aargh
@@ -1112,70 +1103,18 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return c;
     }
 
-	static String getArrayComponentClassDescriptor(Class c) {
-		if (c.isPrimitive())
-			return Type.getType(c).getDescriptor();
-
-		return "L" + c.getName() + ";";
-	}
-
-	// componentArrayType (maybe qualified or prim) ending in 1+ *'s, e.g. java.lang.String**
-	// capture group 1 = componentArrayType, group 2 = dimension *'s
-	final static Pattern ARRAY_TYPE_PATTERN = Pattern.compile("([^*]+)(\\*+)");
-
-	public static Class maybeArrayClass(Symbol sym) {
-		if(!sym.name.endsWith("*")) return null;
-
-		Matcher matcher = ARRAY_TYPE_PATTERN.matcher(sym.name);
-
-		if(!matcher.matches()) return null;
-
-		Symbol rootSymbol = Symbol.intern(matcher.group(1));
-		String stars = matcher.group(2);
-		Class componentClass = maybeClass(rootSymbol, false);
-
-		if(componentClass == null)
-			componentClass = primClass(rootSymbol);
-
-		if(componentClass == null) return null;
-
-		String componentDescriptor = getArrayComponentClassDescriptor(componentClass);
-		StringBuilder arrayDescriptor = new StringBuilder();
-		arrayDescriptor.append(stars.replace('*', '['));
-		arrayDescriptor.append(componentDescriptor);
-		return maybeClass(arrayDescriptor.toString(), true);
-	}
-
-	public static Symbol arrayTypeToSymbol(Class c) {
-		if(!c.isArray()) return null;
-
-		int dim = 1;
-
-		Class componentClass = c.getComponentType();
-
-		while(componentClass.isArray()) {
-			dim++;
-			componentClass = componentClass.getComponentType();
-		}
-
-		String componentClassName = componentClass.getName();
-		StringBuilder repr = new StringBuilder(componentClassName.length() + dim);
-		repr.append(componentClassName);
-		for(int i=0; i<dim; i++)
-			repr.append("*");
-
-		return Symbol.intern(null, repr.toString());
-	}
 
 	static Class tagToClass(Object tag) {
 		Class c = null;
         if(tag instanceof Symbol)
 			{
 			Symbol sym = (Symbol) tag;
-			if(sym.ns == null) //if ns-qualified can't be classname
+			if(sym.ns == null)
 				{
 				c = maybeSpecialTag(sym);
 				}
+			if(c == null)
+				c = HostExpr.maybeArrayClass(sym);
 			}
 		if(c == null)
 		    c = maybeClass(tag, true);
@@ -1183,59 +1122,162 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			return c;
 		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
 	}
+
+	static Class maybeArrayClass(Symbol sym) {
+		if(sym.ns == null || !Util.isPosDigit(sym.name))
+			return null;
+
+		int dim = sym.name.charAt(0) - '0';
+		Symbol componentClassName = Symbol.intern(null, sym.ns);
+		Class componentClass = primClass(componentClassName);
+
+		if(componentClass == null)
+			componentClass = maybeClass(componentClassName, false);
+
+		if(componentClass == null)
+			throw Util.sneakyThrow(new ClassNotFoundException("Unable to resolve component classname: "
+				+ componentClassName));
+
+		StringBuilder arrayDescriptor = new StringBuilder();
+
+		for(int i=0; i<dim; i++)
+			arrayDescriptor.append('[');
+
+		String ccDescr = componentClass.isPrimitive() ?
+				Type.getType(componentClass).getDescriptor()
+				: "L" + componentClass.getName() + ";";
+
+		arrayDescriptor.append(ccDescr);
+		return maybeClass(arrayDescriptor.toString(), true);
+	}
 }
 
 // In invocation position
-//   direct invocation of resolved constructor, static, or instance method
-//   OR legacy static method invocation with inference
-//     this is the ONLY valid case where method is unresolved by end of constructor
-// In value position, will emit as a method thunk (error if not resolved)
-static class MethodValueExpr implements Expr {
+//   param-tags - direct invocation of resolved constructor, static, or instance method
+//   else method invocation with inference + reflection
+// In value position, will emit as a multi-arity method thunk with
+//	 params matching the arity set of the named method
+static class QualifiedMethodExpr implements Expr {
 	private final Class c;
 	private final List<Class> hintedSig;
-	private final Executable method;
 	private final Symbol methodSymbol;
 	private final String methodName;
+	private final MethodKind kind;
 
-	public MethodValueExpr(Class methodClass, Symbol sym){
+	private enum MethodKind {
+		CTOR, INSTANCE, STATIC
+	}
+
+	public QualifiedMethodExpr(Class methodClass, Symbol sym){
 		c = methodClass;
 		methodSymbol = sym;
-		methodName = sym.name;
-
-		List<Executable> methods = methodsWithName(c, methodName);
-		if(methods.isEmpty())
-			throw noMethodWithNameException(c, methodName);
-
 		hintedSig = tagsToClasses(paramTagsOf(sym));
-		if(hintedSig != null) {
-			method = resolveHintedMethod(c, methodName, hintedSig, methods);
-		} else {
-			Executable maybeMethod = null;
-			if(methods.size() == 1) {
-				// Only 1 method - no inference needed
-				maybeMethod = methods.get(0);
-			}
-			else if(methods.size() > 1) {
-				// Only statics supported at this point (needs inference)
-
-				if(methodNamesConstructor(c, methodName))
-					throw overloadNeedsParamTagsException(c, methodName);
-
-				// Filter out instance methods (no inference allowed)
-				List<Executable> staticMethods = methods.stream()
-						.filter(m -> Modifier.isStatic(m.getModifiers()))
-						.collect(Collectors.toList());
-				if(staticMethods.size() == 1)
-					maybeMethod = staticMethods.get(0);
-				else if(staticMethods.isEmpty())
-					throw overloadNeedsParamTagsException(c, methodName);
-				// else not resolved, static method w/inference
-			}
-			method = maybeMethod;
+		if(sym.name.startsWith(".")) {
+			kind = MethodKind.INSTANCE;
+			methodName = sym.name.substring(1);
+		}
+		else if(sym.name.equals("new")) {
+			kind = MethodKind.CTOR;
+			methodName = sym.name;
+		}
+		else {
+			kind = MethodKind.STATIC;
+			methodName = sym.name;
 		}
 	}
 
-	private static Executable resolveHintedMethod(Class c, String methodName, List<Class> hintedSig, List<Executable> methods) {
+	// Expr impl - invocation, convert to fn expr
+
+	@Override
+	public Object eval() {
+		return buildThunk(C.EVAL, this).eval();
+	}
+
+	@Override
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
+		buildThunk(context, this).emit(context, objx, gen);
+	}
+
+	// Expr impl - method value, always an AFn
+
+	@Override
+	public boolean hasJavaClass() {
+		return true;
+	}
+
+	@Override
+	public Class getJavaClass() {
+		return AFn.class;
+	}
+
+	// TBD: caching/reuse of thunks
+	private static FnExpr buildThunk(C context, QualifiedMethodExpr qmexpr) {
+		// When qualified symbol has param-tags:
+		//   (fn invoke__Class_meth ([this? args*] (methodSymbol this? args*)))
+		// When no param-tags:
+		//   (fn invoke__Class_meth ([this?] (methodSymbol this?))
+		//                          ([this? arg1] (methodSymbol this? arg1)) ...)
+		IPersistentCollection form = PersistentVector.EMPTY;
+		Symbol instanceParam = qmexpr.kind == MethodKind.INSTANCE ? THIS : null;
+		String thunkName = "invoke__" + qmexpr.c.getSimpleName() + "_" + qmexpr.methodSymbol.name;
+		Set arities = (qmexpr.hintedSig != null) ? PersistentHashSet.create(qmexpr.hintedSig.size())
+				: aritySet(qmexpr.c, qmexpr.methodName, qmexpr.kind);
+
+		for(Object a : arities) {
+			int arity = (int) a;
+			IPersistentVector params = buildParams(instanceParam, arity);
+			ISeq body = RT.listStar(qmexpr.methodSymbol, params.seq());
+			form = RT.conj(form, RT.list(params, body));
+		}
+
+		ISeq thunkForm = RT.listStar(Symbol.intern("fn"), Symbol.intern(thunkName), RT.seq(form));
+		return (FnExpr) analyzeSeq(context, thunkForm, thunkName);
+	}
+
+	private static IPersistentVector buildParams(Symbol instanceParam, int arity) {
+		IPersistentVector params = PersistentVector.EMPTY;
+		if(instanceParam != null) params = params.cons(instanceParam);
+		for(int i = 0; i<arity; i++)
+			params = params.cons(Symbol.intern(null, "arg" + (i+1)));
+
+		return params;
+	}
+
+	// Given a class, method name, and method kind, returns a sorted set of
+	// arity counts pertaining to the method's overloads
+	private static Set aritySet(Class c, String methodName, MethodKind kind) {
+		Set res = new java.util.TreeSet<>();
+		List<Executable> methods = methodsWithName(c, methodName, kind);
+
+		for(Executable exec : methods)
+			res.add(exec.getParameterCount());
+
+		return res;
+	}
+
+	private static List<Executable> methodsWithName(Class c, String methodName, MethodKind kind) {
+		if (kind == MethodKind.CTOR) {
+			return Arrays.asList(c.getConstructors());
+		}
+
+		final Executable[] methods = c.getMethods();
+		return Arrays.stream(methods)
+				.filter(m -> m.getName().equals(methodName))
+				.filter(m -> {
+					switch(kind) {
+						case STATIC: return isStaticMethod(m);
+						case INSTANCE: return isInstanceMethod(m);
+						default: return false;
+					}
+				})
+				.collect(Collectors.toList());
+	}
+
+	static Executable resolveHintedMethod(Class c, String methodName, MethodKind kind, List<Class> hintedSig) {
+		List<Executable> methods = methodsWithName(c, methodName, kind);
+		if (methods.isEmpty())
+			throw noMethodWithNameException(c, methodName);
+
 		final int arity = hintedSig.size();
 		List<Executable> filteredMethods = methods.stream()
 				.filter(m -> m.getParameterCount() == arity)
@@ -1249,139 +1291,19 @@ static class MethodValueExpr implements Expr {
 			throw paramTagsDontResolveException(c, methodName, hintedSig, filteredMethods.size());
 	}
 
-	private static boolean methodNamesConstructor(Class c, String methodName) {
-		return c != null && methodName.equals("new");
-	}
-
-	private static List<Executable> methodsWithName(Class c, String name) {
-		final Executable[] methods;
-		final String methodName;
-		if (methodNamesConstructor(c, name)) {
-			methods = c.getConstructors();
-			methodName = c.getName();
-		}
-		else {
-			methods = c.getMethods();
-			methodName = name;
-		}
-
-		return Arrays.stream(methods)
-				.filter(m -> m.getName().equals(methodName))
-				.collect(Collectors.toList());
-	}
-
-	public boolean isResolved() {
-		return method != null;
-	}
-
-	@Override
-	public Object eval() {
-		return toFnExpr(this).eval();
-	}
-
-	@Override
-	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-		toFnExpr(this).emit(context, objx, gen);
-	}
-
-	@Override
-	public boolean hasJavaClass() {
-		return true;
-	}
-
-	@Override
-	public Class getJavaClass() {
-		return AFn.class;
-	}
-
-	private static FnExpr toFnExpr(MethodValueExpr mexpr) {
-		// If not resolved by this point we were not given param-tags
-		// and named method was overloaded.
-		if(!mexpr.isResolved()) {
-			throw overloadNeedsParamTagsException(mexpr.c, mexpr.methodName);
-		}
-
-		// return hint symbol
-		Symbol retTag = null;
-		Class retClass = mexpr.method instanceof Constructor ? mexpr.c 
-				: ((java.lang.reflect.Method)mexpr.method).getReturnType();
-		if (isHintablePrimitive(retClass) || !retClass.isPrimitive()) {
-			retTag = primTag(retClass);
-			retTag = (retTag != null) ? retTag : Symbol.intern(null, retClass.getName());
-		}
-
-		return buildThunk(mexpr.c, mexpr.method, mexpr.methodSymbol, 
-				isInstanceMethod(mexpr.method) ? THIS : null, retTag);
-	}
-
-	private static boolean isHintablePrimitive(Class c) {
-		return Long.TYPE.equals(c) || Double.TYPE.equals(c);
-	}
-
-	private static Symbol primTag(Class c) {
-		String t = null;
-		if(c.isPrimitive()) {
-			t = c.getName();
-		}
-		else if(c.isArray() && c.getComponentType().isPrimitive()) {
-			t = c.getName() + "s";
-		}
-		return (t == null) ? null : Symbol.intern(null, t);
-	}
-
-	// All buildThunk methods currently return a new FnExpr on every call
-	// TBD: caching/reuse of thunks
-	private static FnExpr buildThunk(Class c, Executable method, Symbol methodSymbol, Symbol instanceParam, Symbol retHint) {
-		// (fn invoke__Class_meth (^retHint? [this? primHintedArgs*] (methodSymbol this? primHintedArgs*)))
-		IPersistentVector params = PersistentVector.EMPTY;
-		if(instanceParam != null) params = params.cons(instanceParam);
-		// hinted params
-		Class[] paramTypes = method.getParameterTypes();
-		for(int i = 0; i<paramTypes.length; i++) {
-			Symbol param = Symbol.intern(null, "arg" + (i+1));
-			if(isHintablePrimitive(paramTypes[i])) {
-				param = (Symbol) param.withMeta(RT.map(RT.TAG_KEY, primTag(paramTypes[i])));
-			}
-			params = params.cons(param);
-		}
-		// hint return
-		params = (retHint == null) ? params 
-				: ((PersistentVector)params).withMeta(RT.map(RT.TAG_KEY, retHint));
-
-		ISeq body = RT.listStar(methodSymbol, params.seq());
-		String thunkName = "invoke__" + c.getSimpleName() + "_" + methodSymbol.name;
-		ISeq form = RT.list(Symbol.intern("fn"), Symbol.intern(thunkName), RT.list(params, body));
-		return (FnExpr) analyzeSeq(C.EVAL, form, thunkName);
-	}
-
-	private static String methodDescription(Class c, String methodName) {
-		boolean isCtor = methodNamesConstructor(c, methodName);
-		String type = isCtor ? "constructor" : "method";
-		return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
-	}
-
-	static IPersistentVector toParamTags(List<Class> hintedSig) {
-		return PersistentVector.create(hintedSig.stream()
-				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
-				.collect(Collectors.toList()));
-	}
-
 	static IllegalArgumentException noMethodWithNameException(Class c, String methodName) {
 		return new IllegalArgumentException("Could not find "
 				+ methodDescription(c, methodName));
 	}
 
-	static IllegalArgumentException overloadNeedsParamTagsException(Class c, String methodName) {
-		return new IllegalArgumentException("Multiple matches for "
-				+ methodDescription(c, methodName)
-				+ ", use param-tags to specify");
-	}
-
 	static IllegalArgumentException paramTagsDontResolveException(Class c, String methodName, List<Class> hintedSig, int found) {
+		IPersistentVector paramTags = PersistentVector.create(hintedSig.stream()
+				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
+				.collect(Collectors.toList()));
 		return new IllegalArgumentException("Expected to find 1 matching signature for "
 				+ methodDescription(c, methodName)
 				+ " but found " + found
-				+ " with param-tags " + toParamTags(hintedSig));
+				+ " with param-tags " + paramTags);
 	}
 }
 
@@ -1437,10 +1359,17 @@ static boolean isConstructor(Executable method) {
 }
 
 private static void checkMethodArity(Executable method, int argCount) {
-	if(method.getParameterCount() != argCount)
-		throw new IllegalArgumentException("Invocation of "
-				+ MethodValueExpr.methodDescription(method.getDeclaringClass(), method.getName())
-				+ " expected " + method.getParameterCount() + " arguments, but received " + argCount);
+        if(method.getParameterCount() != argCount)
+                throw new IllegalArgumentException("Invocation of "
+                                + methodDescription(method.getDeclaringClass(),
+                                (method instanceof Constructor) ? "new" : method.getName())
+                                + " expected " + method.getParameterCount() + " arguments, but received " + argCount);
+}
+
+private static String methodDescription(Class c, String methodName) {
+	boolean isCtor = c != null && methodName.equals("new");
+	String type = isCtor ? "constructor" : "method";
+	return type + (isCtor ? "" : " " + methodName) + " in class " + c.getName();
 }
 
 static abstract class FieldExpr extends HostExpr{
@@ -1960,15 +1889,19 @@ static class InstanceMethodExpr extends MethodExpr{
 	public final Symbol tag;
 	public final boolean tailPosition;
 	public final java.lang.reflect.Method method;
+	public final Class qualifyingClass;
     Class jc;
 
 	final static Method invokeInstanceMethodMethod =
 			Method.getMethod("Object invokeInstanceMethod(Object,String,Object[])");
+	final static Method invokeInstanceMethodOfClassMethod =
+			Method.getMethod("Object invokeInstanceMethodOfClass(Object,String,String,Object[])");
 
 	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
-							  String methodName, java.lang.reflect.Method preferredMethod, IPersistentVector args, boolean tailPosition)
+			Class qualifyingClass, String methodName, java.lang.reflect.Method resolvedMethod,
+			IPersistentVector args, boolean tailPosition)
 	{
-		checkMethodArity(preferredMethod, RT.count(args));
+		checkMethodArity(resolvedMethod, RT.count(args));
 
 		this.source = source;
 		this.line = line;
@@ -1978,11 +1911,12 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
-		this.method = preferredMethod;
+		this.method = resolvedMethod;
+		this.qualifyingClass = qualifyingClass;
 	}
 
 	public InstanceMethodExpr(String source, int line, int column, Symbol tag, Expr target,
-			String methodName, IPersistentVector args, boolean tailPosition)
+			Class qualifyingClass, String methodName, IPersistentVector args, boolean tailPosition)
 			{
 		this.source = source;
 		this.line = line;
@@ -1992,6 +1926,7 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.target = target;
 		this.tag = tag;
 		this.tailPosition = tailPosition;
+		this.qualifyingClass = qualifyingClass;
 		if(target.hasJavaClass() && target.getJavaClass() != null)
 			{
 			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
@@ -2061,7 +1996,10 @@ static class InstanceMethodExpr extends MethodExpr{
 				ms.add(method);
 				return Reflector.invokeMatchingMethod(methodName, ms, targetval, argvals);
 				}
-			return Reflector.invokeInstanceMethod(targetval, methodName, argvals);
+			if(qualifyingClass != null)
+				return Reflector.invokeInstanceMethodOfClass(targetval, qualifyingClass, methodName, argvals);
+			else
+				return Reflector.invokeInstanceMethod(targetval, methodName, argvals);
 			}
 		catch(Throwable e)
 			{
@@ -2133,6 +2071,8 @@ static class InstanceMethodExpr extends MethodExpr{
 		else
 			{
 			target.emit(C.EXPRESSION, objx, gen);
+			if(qualifyingClass != null)
+				gen.push(qualifyingClass.getName());
 			gen.push(methodName);
 			emitArgsAsArray(args, objx, gen);
 			gen.visitLineNumber(line, gen.mark());
@@ -2141,7 +2081,10 @@ static class InstanceMethodExpr extends MethodExpr{
 				ObjMethod method = (ObjMethod) METHOD.deref();
 				method.emitClearLocals(gen);
 				}
-			gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
+			if(qualifyingClass != null)
+				gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodOfClassMethod);
+			else
+				gen.invokeStatic(REFLECTOR_TYPE, invokeInstanceMethodMethod);
 			if(context == C.STATEMENT)
 				gen.pop();
 			}
@@ -4444,8 +4387,8 @@ static class InvokeExpr implements Expr{
 			args = args.cons(analyze(context, s.first()));
 			}
 
-		if(fexpr instanceof MethodValueExpr)
-			return toHostExpr((MethodValueExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
+		if(fexpr instanceof QualifiedMethodExpr)
+			return toHostExpr((QualifiedMethodExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
 
 //		if(args.count() > MAX_POSITIONAL_ARITY)
 //			throw new IllegalArgumentException(
@@ -4454,22 +4397,34 @@ static class InvokeExpr implements Expr{
 		return new InvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), fexpr, args, tailPosition);
 	}
 
-	private static Expr toHostExpr(MethodValueExpr mexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
-		if(!mexpr.isResolved()) {
-			// default to static method with inference
-			return new StaticMethodExpr(source, line, column, tag, mexpr.c, munge(mexpr.methodName), args, tailPosition);
+	private static Expr toHostExpr(QualifiedMethodExpr qmexpr, String source, int line, int column, Symbol tag, boolean tailPosition, IPersistentVector args) {
+		if(qmexpr.hintedSig != null) {
+			Executable method = QualifiedMethodExpr.resolveHintedMethod(qmexpr.c, qmexpr.methodName, qmexpr.kind, qmexpr.hintedSig);
+			switch(qmexpr.kind) {
+				case CTOR:
+					return new NewExpr(qmexpr.c, (Constructor) method, args, line, column);
+				case INSTANCE:
+					return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
+							qmexpr.c, munge(qmexpr.methodName), (java.lang.reflect.Method) method,
+							PersistentVector.create(RT.next(args)),
+							tailPosition);
+				default:
+					return new StaticMethodExpr(source, line, column, tag, qmexpr.c,
+							munge(qmexpr.methodName), (java.lang.reflect.Method) method, args, tailPosition);
+			}
 		}
-
-		if(isConstructor(mexpr.method))
-			return new NewExpr(mexpr.c, (Constructor) mexpr.method, args, line, column);
-
-		if(isInstanceMethod(mexpr.method))
-			return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args),
-					munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, PersistentVector.create(RT.next(args)),
-					tailPosition);
-
-		return new StaticMethodExpr(source, line, column, tag, mexpr.c,
-				munge(mexpr.methodName), (java.lang.reflect.Method) mexpr.method, args, tailPosition);
+		else {
+			switch(qmexpr.kind) {
+				case CTOR:
+					return new NewExpr(qmexpr.c, args, line, column);
+				case INSTANCE:
+					return new InstanceMethodExpr(source, line, column, tag, (Expr) RT.first(args), qmexpr.c,
+							munge(qmexpr.methodName), PersistentVector.create(RT.next(args)), tailPosition);
+				default:
+					return new StaticMethodExpr(source, line, column, tag, qmexpr.c,
+							munge(qmexpr.methodName), args, tailPosition);
+			}
+		}
 	}
 }
 
@@ -7614,7 +7569,8 @@ public static Object macroexpand1(Object x) {
 				Symbol sym = (Symbol) op;
 				String sname = sym.name;
 				//(.substring s 2 5) => (. s substring 2 5)
-				if(sym.name.charAt(0) == '.')
+				// ns == null ensures that Class/.instanceMethod isn't expanded to . form
+				if(sym.name.charAt(0) == '.' && sym.ns == null)
 					{
 					if(RT.length(form) < 2)
 						throw new IllegalArgumentException(
@@ -7878,7 +7834,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 		}
 	else
 		{
-		if(namespaceFor(sym) == null)
+		if(namespaceFor(sym) == null && !Util.isPosDigit(sym.name))
 			{
 			Symbol nsSym = Symbol.intern(sym.ns);
 			Class c = HostExpr.maybeClass(nsSym, false);
@@ -7887,7 +7843,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 				if(Reflector.getField(c, sym.name, true) != null)
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
 				else
-					return new MethodValueExpr(c, sym);
+					return new QualifiedMethodExpr(c, sym);
 				}
 
 			}
@@ -7961,7 +7917,12 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
 		{
 		Namespace ns = namespaceFor(n, sym);
 		if(ns == null)
+			{
+			Class ac = HostExpr.maybeArrayClass(sym);
+			if(ac != null)
+				return ac;
 			throw Util.runtimeException("No such namespace: " + sym.ns);
+			}
 
 		Var v = ns.findInternedVar(Symbol.intern(sym.name));
 		if(v == null)
@@ -7972,11 +7933,7 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
 		}
 	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 		{
-		Class ac = HostExpr.maybeArrayClass(sym);
-		if(ac != null)
-			return ac;
-		else
-			return RT.classForName(sym.name);
+		return RT.classForName(sym.name);
 		}
 	else if(sym.equals(NS))
 			return RT.NS_VAR;
@@ -7989,12 +7946,7 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
 		Object o = n.getMapping(sym);
 		if(o == null)
 			{
-			o = HostExpr.maybeArrayClass(sym);
-			if(o != null)
-				{
-				return o;
-				}
-			else if(RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
+			if(RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
 				{
 				return sym;
 				}
@@ -8014,7 +7966,7 @@ static public Object maybeResolveIn(Namespace n, Symbol sym) {
 		{
 		Namespace ns = namespaceFor(n, sym);
 		if(ns == null)
-			return null;
+			return HostExpr.maybeArrayClass(sym);
 		Var v = ns.findInternedVar(Symbol.intern(sym.name));
 		if(v == null)
 			return null;

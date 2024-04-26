@@ -21,8 +21,7 @@
   (is (= '([1] [2] [3])
          (map ^[_] Tuple/create [1 2 3])))
   (is (= '([1 4] [2 5] [3 6])
-         (map ^[_ _] Tuple/create [1 2 3] [4 5 6])))
-  (is (thrown? Exception (eval 'clojure.lang.Tuple/create))))
+         (map ^[_ _] Tuple/create [1 2 3] [4 5 6]))))
 
 (deftest method-signature-selection
   (is (= [1.23 3.14]
@@ -36,18 +35,16 @@
   (is (= '("a" "12")
          (map ^[Object] String/valueOf ["a" 12])))
   (is (= ["A" "B" "C"]
-         (map ^[java.util.Locale] String/toUpperCase ["a" "b" "c"] (repeat java.util.Locale/ENGLISH))))
+         (map ^[java.util.Locale] String/.toUpperCase ["a" "b" "c"] (repeat java.util.Locale/ENGLISH))))
   (is (thrown? ClassCastException
                (doall (map ^[long] String/valueOf [12 "a"])))))
 
 (def mt ^[_] Tuple/create)
 (def mts {:fromString ^[_] UUID/fromString})
+(def gbs ^[] String/.getBytes)
 
 (deftest method-thunks-in-structs
   (is (= #uuid "00000000-0000-0001-0000-000000000002"
          ((:fromString mts) "00000000-0000-0001-0000-000000000002")))
-  (is (= [1] (mt 1))))
-
-(deftest primitive-hinting
-  (is (instance? clojure.lang.IFn$DO ^[double] String/valueOf))
-  (is (instance? clojure.lang.IFn$LL ^[long] Math/abs)))
+  (is (= [1] (mt 1)))
+  (is (= 97 (first (seq (gbs "a"))))))

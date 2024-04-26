@@ -665,24 +665,22 @@
   (is (= 1 (.get (doto (AtomicLong. 0) inc-atomic-long)))))
 
 (deftest array-type-symbols
-  (is (= long* (class (make-array Long/TYPE 0))))
-  (is (= int* (class (make-array Integer/TYPE 0))))
-  (is (= double* (class (make-array Double/TYPE 0))))
-  (is (= short* (class (make-array Short/TYPE 0))))
-  (is (= boolean* (class (make-array Boolean/TYPE 0))))
-  (is (= byte* (class (make-array Byte/TYPE 0))))
-  (is (= float* (class (make-array Float/TYPE 0))))
-  (is (= String* (class (make-array String 0))))
-  (is (= java.lang.String* (class (make-array String 0))))
-  (is (= java.util.UUID* (class (make-array java.util.UUID 0))))
-  (is (= `byte* 'byte*))
-  (is (= `byte*** 'byte***))
-  (is (= `java.util.UUID* 'java.util.UUID*))
-  (is (= `String* 'java.lang.String*))
-  (is (= `java.lang.String* 'java.lang.String*))
-  (is (= `[NotAClassThatWasImported*] '[clojure.test-clojure.java-interop/NotAClassThatWasImported*]))
-  (is (= [long**] `[~long**]))
-  (is (= [42] (let [long** 42] `[~long**]))))
+  (is (= long/1 (class (make-array Long/TYPE 0))))
+  (is (= int/1 (class (make-array Integer/TYPE 0))))
+  (is (= double/1 (class (make-array Double/TYPE 0))))
+  (is (= short/1 (class (make-array Short/TYPE 0))))
+  (is (= boolean/1 (class (make-array Boolean/TYPE 0))))
+  (is (= byte/1 (class (make-array Byte/TYPE 0))))
+  (is (= float/1 (class (make-array Float/TYPE 0))))
+  (is (= String/1 (class (make-array String 0))))
+  (is (= java.lang.String/1 (class (make-array String 0))))
+  (is (= java.util.UUID/1 (class (make-array java.util.UUID 0))))
+  (is (= `byte/1 'byte/1))
+  (is (= `byte/3 'byte/3))
+  (is (= `java.util.UUID/1 'java.util.UUID/1))
+  (is (= `String/1 'java.lang.String/1))
+  (is (= `java.lang.String/1 'java.lang.String/1))
+  (is (= ['long/2] `[~'long/2])))
 
 
 (defn make-test-files []
@@ -731,7 +729,7 @@
   (let [{:keys [dir file-id]} (make-test-files)
         ^FileFilter ff (fn [^File f]
                                  (str/includes? (.getName f) file-id))
-        filtered (^[FileFilter] File/listFiles dir ff)]
+        filtered (^[FileFilter] File/.listFiles dir ff)]
     (is (= 2 (count filtered))))
 
   (defn files-with-ext [^File dir ext]

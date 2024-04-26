@@ -593,23 +593,6 @@ Math/pow overflows to Infinity."
        "[I" (int-array 1) (ints (int-array 1 1))
        "[J" (long-array 1) (longs (long-array 1 1))))
 
-(deftest test-array-type-symbols
-  (are [str-repr klass] (= (Class/forName str-repr) klass)
-       "[Z" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'boolean*)
-       "[B" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'byte*)
-       "[C" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'char*)
-       "[S" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'short*)
-       "[F" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'float*)
-       "[D" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'double*)
-       "[I" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'int*)
-       "[J" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'long*)
-       "[[J" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'long**)
-       "[Ljava.lang.Object;" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'Object*)
-       "[Ljava.lang.String;" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String*)
-       "[[Ljava.lang.String;" (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String**))
-  (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'Object)))
-  (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'ThisIsNotAClassThatCouldBeFound138)))
-  (is (nil? (clojure.lang.Compiler$HostExpr/maybeArrayClass 'String-*IJ*))))
 
 (deftest test-ratios
   (is (== (denominator 1/2) 2))

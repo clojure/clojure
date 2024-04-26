@@ -13,11 +13,12 @@
 package clojure.lang;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
-public interface IDeref extends Supplier, BooleanSupplier, IntSupplier, LongSupplier {
+public interface IDeref extends Supplier, BooleanSupplier, IntSupplier, LongSupplier, DoubleSupplier {
 Object deref() ;
 
 @Override
@@ -38,6 +39,11 @@ default int getAsInt() {
 @Override
 default long getAsLong() {
     return RT.longCast(deref());
+}
+
+@Override
+default double getAsDouble() {
+    return RT.doubleCast(deref());
 }
 
 }

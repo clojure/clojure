@@ -64,6 +64,7 @@ static IFn[] macros = new IFn[256];
 static IFn[] dispatchMacros = new IFn[256];
 //static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^:/]][^:/]*/)?[\\D&&[^:/]][^:/]*");
 static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
+static Pattern arraySymbolPat = Pattern.compile("([\\D&&[^/:]].*)/([1-9])");
 //static Pattern varPat = Pattern.compile("([\\D&&[^:\\.]][^:\\.]*):([\\D&&[^:\\.]][^:\\.]*)");
 //static Pattern intPat = Pattern.compile("[-+]?[0-9]+\\.?");
 static Pattern intPat =
@@ -460,6 +461,12 @@ private static Object matchSymbol(String s, Resolver resolver){
 		if(isKeyword)
 			return Keyword.intern(sym);
 		return sym;
+		}
+	else
+		{
+		Matcher am = arraySymbolPat.matcher(s);
+		if(am.matches())
+			return Symbol.intern(am.group(1), am.group(2));
 		}
 	return null;
 }

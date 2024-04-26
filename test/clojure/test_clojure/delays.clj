@@ -85,4 +85,5 @@
     (is (instance? java.util.function.LongSupplier di))
     (is (= 100 (.get ^java.util.function.Supplier di)))
     (is (= 100 (.getAsInt ^java.util.function.IntSupplier di)))
-    (is (= 100 (.getAsLong ^java.util.function.LongSupplier di)))))
+    (is (= 100 (.getAsLong ^java.util.function.LongSupplier di)))
+    (is (= 100.0 (.getAsDouble ^java.util.function.DoubleSupplier di)))))
