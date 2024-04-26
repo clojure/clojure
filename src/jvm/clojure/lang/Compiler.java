@@ -395,12 +395,7 @@ static Symbol resolveSymbol(Symbol sym){
 		}
 	Object o = currentNS().getMapping(sym);
 	if(o == null)
-		{
-		Class ac = HostExpr.maybeArrayClass(sym);
-		if(ac != null)
-			return HostExpr.arrayTypeToSymbol(ac);
 		return Symbol.intern(currentNS().name.name, sym.name);
-		}
 	else if(o instanceof Class)
 		return Symbol.intern(null, ((Class) o).getName());
 	else if(o instanceof Var)
@@ -1028,12 +1023,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				{
 				if(Util.equals(sym,COMPILE_STUB_SYM.get()))
 					return (Class) COMPILE_STUB_CLASS.get();
-				else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
-					{
-					c = maybeArrayClass(sym);
-					if (c == null)
-						c = RT.classForNameNonLoading(sym.name);
-					}
+				if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
+					c = RT.classForNameNonLoading(sym.name);
 				else
 					{
 					Object o = currentNS().getMapping(sym);
@@ -1044,12 +1035,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 					else
 						{
 						try{
-						if(c == null)
-							{
-							c = maybeArrayClass(sym);
-							if(c == null)
-								c = RT.classForNameNonLoading(sym.name);
-							}
+						c = RT.classForNameNonLoading(sym.name);
 						}
 						catch(Exception e){
 							// aargh
@@ -1111,60 +1097,6 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		return c;
     }
 
-	static String getArrayComponentClassDescriptor(Class c) {
-		if (c.isPrimitive())
-			return Type.getType(c).getDescriptor();
-
-		return "L" + c.getName() + ";";
-	}
-
-	// componentArrayType (maybe qualified or prim) ending in 1+ *'s, e.g. java.lang.String**
-	// capture group 1 = componentArrayType, group 2 = dimension *'s
-	final static Pattern ARRAY_TYPE_PATTERN = Pattern.compile("([^*]+)(\\*+)");
-
-	public static Class maybeArrayClass(Symbol sym) {
-		if(!sym.name.endsWith("*")) return null;
-
-		Matcher matcher = ARRAY_TYPE_PATTERN.matcher(sym.name);
-
-		if(!matcher.matches()) return null;
-
-		Symbol rootSymbol = Symbol.intern(matcher.group(1));
-		String stars = matcher.group(2);
-		Class componentClass = maybeClass(rootSymbol, false);
-
-		if(componentClass == null)
-			componentClass = primClass(rootSymbol);
-
-		if(componentClass == null) return null;
-
-		String componentDescriptor = getArrayComponentClassDescriptor(componentClass);
-		StringBuilder arrayDescriptor = new StringBuilder();
-		arrayDescriptor.append(stars.replace('*', '['));
-		arrayDescriptor.append(componentDescriptor);
-		return maybeClass(arrayDescriptor.toString(), true);
-	}
-
-	public static Symbol arrayTypeToSymbol(Class c) {
-		if(!c.isArray()) return null;
-
-		int dim = 1;
-
-		Class componentClass = c.getComponentType();
-
-		while(componentClass.isArray()) {
-			dim++;
-			componentClass = componentClass.getComponentType();
-		}
-
-		String componentClassName = componentClass.getName();
-		StringBuilder repr = new StringBuilder(componentClassName.length() + dim);
-		repr.append(componentClassName);
-		for(int i=0; i<dim; i++)
-			repr.append("*");
-
-		return Symbol.intern(null, repr.toString());
-	}
 
 	static Class tagToClass(Object tag) {
 		Class c = null;
@@ -7787,11 +7719,7 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
 		}
 	else if(sym.name.indexOf('.') > 0 || sym.name.charAt(0) == '[')
 		{
-		Class ac = HostExpr.maybeArrayClass(sym);
-		if(ac != null)
-			return ac;
-		else
-			return RT.classForName(sym.name);
+		return RT.classForName(sym.name);
 		}
 	else if(sym.equals(NS))
 			return RT.NS_VAR;
@@ -7804,12 +7732,7 @@ static public Object resolveIn(Namespace n, Symbol sym, boolean allowPrivate) {
 		Object o = n.getMapping(sym);
 		if(o == null)
 			{
-			o = HostExpr.maybeArrayClass(sym);
-			if(o != null)
-				{
-				return o;
-				}
-			else if(RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
+			if(RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
 				{
 				return sym;
 				}
