@@ -571,69 +571,7 @@ static public List<Method> getMethods(Class c, int arity, String name, boolean g
 	return methods;
 }
 
-// FunctionInterfaces excluded from functional conversion
-private static final IPersistentSet EXCLUDED_FN_INTERFACES = RT.set(
-	// Clojure fns already do these
-	"java.lang.Runnable", "java.util.concurrent.Callable", "java.util.Comparator",
-	// Suppliers excluded from conversion, use IDeref instead
-	"java.util.function.Supplier", "java.util.function.BooleanSupplier", "java.util.function.DoubleSupplier",
-	"java.util.function.IntSupplier", "java.util.function.LongSupplier");
-
-// Adaptable functional interface has @FunctionalInterface annotation
-public static boolean isAdaptableFunctionalInterface(Class c){
-	return c != null &&
-		c.isInterface() &&
-		c.isAnnotationPresent(FunctionalInterface.class) &&
-		! EXCLUDED_FN_INTERFACES.contains(c.getName());
-}
-
-// These return type coercions match the coercions done in FnAdapters for compiled adapters
-private static Object dynamicAdapterReturn(Object ret, Class targetType) {
-       switch(targetType.getName()) {
-               case "boolean": return RT.booleanCast(ret);
-               case "int": return RT.intCast(ret);
-               case "long": return RT.longCast(ret);
-               case "float": return RT.floatCast(ret);
-               case "double": return RT.doubleCast(ret);
-               default: return ret;
-       }
-}
-
-// Dynamically adapt fn to targetFnInterface using proxy
-private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
-       return Proxy.newProxyInstance(
-                       (ClassLoader)Compiler.LOADER.get(),
-                       new Class[] { targetFnInterface },
-                       (proxy,method,methodArgs)-> {
-                               if (fn instanceof IFn) {
-                                       Object ret = ((IFn) fn).applyTo(RT.seq(methodArgs));
-                                       return dynamicAdapterReturn(ret, method.getReturnType());
-                               } else {
-                                       throw new IllegalArgumentException("Expected function, but found " + (proxy == null ? "null" : proxy.getClass().getName()));
-                               }
-                       });
-}
-
-// Dynamically adapt Method reference
-private static Object dynamicAdapt(Class targetFnInterface, java.lang.reflect.Method srcMethod) {
-       return Proxy.newProxyInstance(
-                       (ClassLoader)Compiler.LOADER.get(),
-                       new Class[] { targetFnInterface },
-                       (proxy,method,methodArgs)-> {
-                               Object ret;
-                               if(Modifier.isStatic(method.getModifiers())) {
-                                       ret = srcMethod.invoke(null, methodArgs);
-                               } else {
-                                       Object obj = methodArgs[0];
-                                       Object[] restArgs = new Object[methodArgs.length-1];
-                                       System.arraycopy(methodArgs, 1, restArgs, 0, restArgs.length);
-                                       ret = srcMethod.invoke(obj, restArgs);
-                               }
-                               return dynamicAdapterReturn(ret, method.getReturnType());
-                       });
-}
-
-static Object boxArg(Class paramType, Object arg) {
+static Object boxArg(Class paramType, Object arg){
 	if(!paramType.isPrimitive())
 		if(isAdaptableFunctionalInterface(paramType) && !(paramType.isInstance(arg))) {
 			return dynamicAdapt(paramType, arg);
@@ -741,4 +679,67 @@ public static Object prepRet(Class c, Object x){
 //			return Double.valueOf(((Float) x).doubleValue());
 	return x;
 }
+
+// FunctionInterfaces excluded from functional conversion
+private static final IPersistentSet EXCLUDED_FN_INTERFACES = RT.set(
+		// Clojure fns already do these
+		"java.lang.Runnable", "java.util.concurrent.Callable", "java.util.Comparator",
+		// Suppliers excluded from conversion, use IDeref instead
+		"java.util.function.Supplier", "java.util.function.BooleanSupplier", "java.util.function.DoubleSupplier",
+		"java.util.function.IntSupplier", "java.util.function.LongSupplier");
+
+// Adaptable functional interface has @FunctionalInterface annotation
+public static boolean isAdaptableFunctionalInterface(Class c){
+	return c != null &&
+			c.isInterface() &&
+			c.isAnnotationPresent(FunctionalInterface.class) &&
+			! EXCLUDED_FN_INTERFACES.contains(c.getName());
+}
+
+// These return type coercions match the coercions done in FnAdapters for compiled adapters
+private static Object dynamicAdapterReturn(Object ret, Class targetType) {
+	switch(targetType.getName()) {
+		case "boolean": return RT.booleanCast(ret);
+		case "int": return RT.intCast(ret);
+		case "long": return RT.longCast(ret);
+		case "float": return RT.floatCast(ret);
+		case "double": return RT.doubleCast(ret);
+		default: return ret;
+	}
+}
+
+// Dynamically adapt fn to targetFnInterface using proxy
+private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
+	return Proxy.newProxyInstance(
+			(ClassLoader)Compiler.LOADER.get(),
+			new Class[] { targetFnInterface },
+			(proxy,method,methodArgs)-> {
+				if (fn instanceof IFn) {
+					Object ret = ((IFn) fn).applyTo(RT.seq(methodArgs));
+					return dynamicAdapterReturn(ret, method.getReturnType());
+				} else {
+					throw new IllegalArgumentException("Expected function, but found " + (proxy == null ? "null" : proxy.getClass().getName()));
+				}
+			});
+}
+
+// Dynamically adapt Method reference
+private static Object dynamicAdapt(Class targetFnInterface, java.lang.reflect.Method srcMethod) {
+	return Proxy.newProxyInstance(
+			(ClassLoader)Compiler.LOADER.get(),
+			new Class[] { targetFnInterface },
+			(proxy,method,methodArgs)-> {
+				Object ret;
+				if(Modifier.isStatic(method.getModifiers())) {
+					ret = srcMethod.invoke(null, methodArgs);
+				} else {
+					Object obj = methodArgs[0];
+					Object[] restArgs = new Object[methodArgs.length-1];
+					System.arraycopy(methodArgs, 1, restArgs, 0, restArgs.length);
+					ret = srcMethod.invoke(obj, restArgs);
+				}
+				return dynamicAdapterReturn(ret, method.getReturnType());
+			});
+}
+
 }
