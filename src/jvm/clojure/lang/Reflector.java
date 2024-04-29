@@ -707,23 +707,4 @@ private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
 			});
 }
 
-// Dynamically adapt Method reference
-private static Object dynamicAdapt(Class targetFnInterface, java.lang.reflect.Method srcMethod) {
-	return Proxy.newProxyInstance(
-			(ClassLoader)Compiler.LOADER.get(),
-			new Class[] { targetFnInterface },
-			(proxy,method,methodArgs)-> {
-				Object ret;
-				if(Modifier.isStatic(method.getModifiers())) {
-					ret = srcMethod.invoke(null, methodArgs);
-				} else {
-					Object obj = methodArgs[0];
-					Object[] restArgs = new Object[methodArgs.length-1];
-					System.arraycopy(methodArgs, 1, restArgs, 0, restArgs.length);
-					ret = srcMethod.invoke(obj, restArgs);
-				}
-				return dynamicAdapterReturn(ret, method.getReturnType());
-			});
-}
-
 }
