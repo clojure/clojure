@@ -808,6 +808,19 @@
   (def fi-static (FIStatic/numbers (fn [i] (< i 0))))
   (is (= [-2 -1] fi-static)))
 
+;; newDirectoryStream is overloaded, takes ^[Path String] or ^[Path DirectoryStream$Filter]
+;; so this method will reflect
+(defn get-dir-stream [^java.nio.file.Path dir-path glob-pattern]
+  (let [path (.toPath (java.io.File. dir-path))]
+    (java.nio.file.Files/newDirectoryStream path glob-pattern)))
+
+(deftest test-reflection-to-overloaded-method-taking-FI
+  ;; all of these should resolve at runtime in reflection
+  (is (not (nil? (get-dir-stream "." "*"))))
+  (get-dir-stream "." (reify java.nio.file.DirectoryStream$Filter (accept [_ path] (.isDirectory (.toFile path)))))
+  ;; this one gets FI converted from IFn to DirectoryStream$Filter
+  (get-dir-stream "." (fn [^java.nio.file.Path path] (.isDirectory (.toFile path)))))
+
 (deftest test-all-fi-adapters-in-let
 
   (let [^AdapterExerciser exerciser (AdapterExerciser.)
