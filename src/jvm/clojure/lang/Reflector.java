@@ -680,16 +680,20 @@ public static Object prepRet(Class c, Object x){
 	return x;
 }
 
-// These return type coercions match the coercions done in FnAdapters for compiled adapters
+// These return type coercions match the coercions done in FnInvokers for compiled invokers
 private static Object dynamicAdapterReturn(Object ret, Class targetType) {
-	switch(targetType.getName()) {
-		case "boolean": return RT.booleanCast(ret);
-		case "int": return RT.intCast(ret);
-		case "long": return RT.longCast(ret);
-		case "float": return RT.floatCast(ret);
-		case "double": return RT.doubleCast(ret);
-		default: return ret;
-	}
+    if (targetType.equals(Boolean.TYPE)) {
+        return RT.booleanCast(ret);
+    } else if (targetType.equals(Integer.TYPE)) {
+        return RT.intCast(ret);
+    } else if (targetType.equals(Long.TYPE)) {
+        return RT.longCast(ret);
+    } else if (targetType.equals(Float.TYPE)) {
+        return RT.floatCast(ret);
+    } else if (targetType.equals(Double.TYPE)) {
+        return RT.doubleCast(ret);
+    }
+    return ret;
 }
 
 // Dynamically adapt fn to targetFnInterface using proxy
