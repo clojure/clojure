@@ -620,6 +620,8 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 		return !paramType.isPrimitive();
 	if(paramType == argType || paramType.isAssignableFrom(argType))
 		return true;
+	if(Compiler.isAdaptableFunctionalInterface(paramType) && IFn.class.isAssignableFrom(argType))
+		return true;
 	if(paramType == int.class)
 		return argType == Integer.class
 		       || argType == long.class
