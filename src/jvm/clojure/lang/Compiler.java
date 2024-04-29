@@ -1606,12 +1606,29 @@ static Class maybePrimitiveType(Expr e){
 	return null;
 }
 
+// FunctionInterfaces excluded from functional conversion
+private static final IPersistentSet EXCLUDED_FN_INTERFACES = RT.set(
+		// Clojure fns already do these
+		"java.lang.Runnable", "java.util.concurrent.Callable", "java.util.Comparator",
+		// Suppliers excluded from conversion, use IDeref instead
+		"java.util.function.Supplier", "java.util.function.BooleanSupplier", "java.util.function.DoubleSupplier",
+		"java.util.function.IntSupplier", "java.util.function.LongSupplier");
+
+// Adaptable functional interface has @FunctionalInterface annotation
+static boolean isAdaptableFunctionalInterface(Class c){
+	return c != null &&
+			c.isInterface() &&
+			c.isAnnotationPresent(FunctionalInterface.class) &&
+			! EXCLUDED_FN_INTERFACES.contains(c.getName());
+}
+
+
 private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString", "hashCode");
 
 // The SAM method (there must be one) is abstract,
 // and not an override from Object of equals, toString, or hashCode
 private static java.lang.reflect.Method getAdaptableSAMMethod(Class target) {
-	if(Reflector.isAdaptableFunctionalInterface(target)) {
+	if(isAdaptableFunctionalInterface(target)) {
 		java.lang.reflect.Method[] methods = target.getMethods();
 		for (int i = 0; i < methods.length; i++)
 			if (Modifier.isAbstract(methods[i].getModifiers()) && !OBJECT_METHODS.contains(methods[i].getName()))
@@ -1859,7 +1876,7 @@ static abstract class MethodExpr extends HostExpr{
 					}
 				else
 					{
-					if(Reflector.isAdaptableFunctionalInterface(parameterTypes[i]))
+					if(isAdaptableFunctionalInterface(parameterTypes[i]))
 						{
 						ensureFunctionalInterface(objx, gen, e, parameterTypes[i]);
 						}
@@ -7026,7 +7043,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 			else
 				{
 				Class bindingClass = HostExpr.maybeClass(bi.binding.tag, true);
-				if(Reflector.isAdaptableFunctionalInterface(bindingClass))
+				if(isAdaptableFunctionalInterface(bindingClass))
 					ensureFunctionalInterface(objx, gen, bi.init, bindingClass);
 				else
 					bi.init.emit(C.EXPRESSION, objx, gen);

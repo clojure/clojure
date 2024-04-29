@@ -573,7 +573,7 @@ static public List<Method> getMethods(Class c, int arity, String name, boolean g
 
 static Object boxArg(Class paramType, Object arg){
 	if(!paramType.isPrimitive())
-		if(isAdaptableFunctionalInterface(paramType) && !(paramType.isInstance(arg))) {
+		if(Compiler.isAdaptableFunctionalInterface(paramType) && !(paramType.isInstance(arg))) {
 			return dynamicAdapt(paramType, arg);
 		} else {
 			return paramType.cast(arg);
@@ -678,22 +678,6 @@ public static Object prepRet(Class c, Object x){
 //	else if(x instanceof Float)
 //			return Double.valueOf(((Float) x).doubleValue());
 	return x;
-}
-
-// FunctionInterfaces excluded from functional conversion
-private static final IPersistentSet EXCLUDED_FN_INTERFACES = RT.set(
-		// Clojure fns already do these
-		"java.lang.Runnable", "java.util.concurrent.Callable", "java.util.Comparator",
-		// Suppliers excluded from conversion, use IDeref instead
-		"java.util.function.Supplier", "java.util.function.BooleanSupplier", "java.util.function.DoubleSupplier",
-		"java.util.function.IntSupplier", "java.util.function.LongSupplier");
-
-// Adaptable functional interface has @FunctionalInterface annotation
-public static boolean isAdaptableFunctionalInterface(Class c){
-	return c != null &&
-			c.isInterface() &&
-			c.isAnnotationPresent(FunctionalInterface.class) &&
-			! EXCLUDED_FN_INTERFACES.contains(c.getName());
 }
 
 // These return type coercions match the coercions done in FnAdapters for compiled adapters
