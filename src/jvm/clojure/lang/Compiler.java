@@ -1694,6 +1694,8 @@ private static Class decodeToClass(char c) {
 private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fiClass) {
 	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fiClass);
 
+	// Future: optimize expr instanceof QualifiedMethodExpr
+
 	Class[] invokerParams = new Class[targetMethod.getParameterCount()+1];
 	invokerParams[0] = Object.class;  // close over Ifn as first arg
 	StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
@@ -1874,17 +1876,14 @@ static abstract class MethodExpr extends HostExpr{
 					pe.emitUnboxed(C.EXPRESSION, objx, gen);
 					gen.visitInsn(D2F);
 					}
+				else if(isAdaptableFunctionalInterface(parameterTypes[i]))
+					{
+					ensureFunctionalInterface(objx, gen, e, parameterTypes[i]);
+					}
 				else
 					{
-					if(isAdaptableFunctionalInterface(parameterTypes[i]))
-						{
-						ensureFunctionalInterface(objx, gen, e, parameterTypes[i]);
-						}
-					else
-						{
-						e.emit(C.EXPRESSION, objx, gen);
-						HostExpr.emitUnboxArg(objx, gen, parameterTypes[i]);
-						}
+					e.emit(C.EXPRESSION, objx, gen);
+					HostExpr.emitUnboxArg(objx, gen, parameterTypes[i]);
 					}
 				}
 			catch(Exception e1)
