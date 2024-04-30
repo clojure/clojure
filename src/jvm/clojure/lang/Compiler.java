@@ -1689,9 +1689,9 @@ private static Class decodeToClass(char c) {
  * if( !(f instanceof FI))
  *   emitInvokeDynamicAdapter(FI::method, FnInvokers::invoke))
  *
- * else no invoker so throw and tell user to reify
+ * return whether a matching invoker method was found
  */
-private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fiClass) {
+private static boolean ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fiClass) {
 	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fiClass);
 
 	// Future: optimize expr instanceof QualifiedMethodExpr
@@ -1709,13 +1709,13 @@ private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen
 	String invokerMethodName = invokeMethodBuilder.toString();
 
 	// Invoker method - takes IFn instance (closed over) + args, body calls IFn.invoke
+	Type samType = Type.getType(fiClass);
 	expr.emit(C.EXPRESSION, objx, gen);
 	try {
 		java.lang.reflect.Method invokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
 
 		// if(! (exp instanceof FIType)) { emit invoker }
 		gen.dup();
-		Type samType = Type.getType(fiClass);
 		gen.instanceOf(samType);
 
 		// if so, checkcast and go to end
@@ -1731,14 +1731,14 @@ private static void ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen
 		// adapt adapter method to target method, closing over IFn instance
 		emitInvokeDynamicAdapter(gen, targetMethod, invokerMethod);
 		gen.mark(endLabel);
-		gen.checkCast(Type.getType(fiClass));
+		gen.checkCast(samType);
+		return true;
 
 	} catch(NoSuchMethodException e) {
 		// no invoker method found (this should rarely happen)
-		throw Util.runtimeException(
-				"Can't convert function to " + fiClass.getName() +
-				", provide an instance of this type (perhaps with 'reify')");
+		return false;
 	}
+
 }
 
 // LambdaMetafactory.metafactory() method handle for lambda bootstrap
@@ -7043,9 +7043,17 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 				{
 				Class bindingClass = HostExpr.maybeClass(bi.binding.tag, true);
 				if(isAdaptableFunctionalInterface(bindingClass))
-					ensureFunctionalInterface(objx, gen, bi.init, bindingClass);
+				    {
+					if(!ensureFunctionalInterface(objx, gen, bi.init, bindingClass))
+					    {
+                        throw Util.runtimeException("Can't coerce function to " + bindingClass.getName() +
+                            ", provide an instance of this type (perhaps with 'reify')");
+						}
+				    }
 				else
+				    {
 					bi.init.emit(C.EXPRESSION, objx, gen);
+				    }
 
 				if (!bi.binding.used && bi.binding.canBeCleared)
 					gen.pop();

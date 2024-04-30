@@ -821,6 +821,31 @@
   ;; this one gets FI converted from IFn to DirectoryStream$Filter
   (get-dir-stream "." (fn [^java.nio.file.Path path] (.isDirectory (.toFile path)))))
 
+;; we only support FI invoke coercion up to 10 args, this has 11
+(definterface ^{java.lang.FunctionalInterface true} FIWontWork
+  (invoke [a b c d e f g h i j k]))
+
+(definterface ReceivesFI
+  (call [^clojure.test_clojure.java_interop.FIWontWork fi]))
+
+(deftest test-reify-to-FI-allowed
+  ;; throws because there is no 11-arity invoker method and thus it is not possible to coerce
+  (is (thrown? clojure.lang.Compiler$CompilerException
+        (eval '(let [^clojure.test_clojure.java_interop.FIWontWork f
+                     (fn [p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11] p11)]
+                 (.invoke f 1 2 3 4 5 6 7 8 9 10 11)))))
+
+  (let [r (reify clojure.test_clojure.java_interop.ReceivesFI
+            (call [_ fi] (.invoke fi 0 0 0 0 0 0 0 0 0 0 1)))]
+
+    ;; doesn't throw at compilation time, but throws at runtime
+    ;; because IFn cannot be implicitly converted
+    (is (thrown? ClassCastException
+      (.call r (fn [a b c d e f g h i j k] k))))
+
+    ;; works because the reify implements the FI, no conversion necessary
+    (is (= 1 (.call r (reify clojure.test_clojure.java_interop.FIWontWork (invoke [_ a b c d e f g h i j k] k)))))))
+
 (deftest test-all-fi-adapters-in-let
 
   (let [^AdapterExerciser exerciser (AdapterExerciser.)
