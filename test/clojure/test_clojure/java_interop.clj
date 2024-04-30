@@ -846,6 +846,17 @@
     ;; works because the reify implements the FI, no conversion necessary
     (is (= 1 (.call r (reify clojure.test_clojure.java_interop.FIWontWork (invoke [_ a b c d e f g h i j k] k)))))))
 
+(definterface ^{java.lang.FunctionalInterface true} FIPrims
+  (invoke [^long a ^long b ^long c ^long d]))
+
+(definterface ReceivesFIPrims
+  (call [^clojure.test_clojure.java_interop.FIPrims fi]))
+
+(deftest test-match-prim-args-only-to-2
+  (let [r (reify clojure.test_clojure.java_interop.ReceivesFIPrims
+            (call [_ fi] (.invoke fi 1 2 3 4)))]
+    (is (= 4 (.call r (fn [^long a ^long b ^long c ^long d] d))))))
+
 (deftest test-all-fi-adapters-in-let
 
   (let [^AdapterExerciser exerciser (AdapterExerciser.)

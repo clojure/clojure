@@ -1692,15 +1692,23 @@ private static Class decodeToClass(char c) {
  * return whether a matching invoker method was found
  */
 private static boolean ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fiClass) {
-	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fiClass);
-
 	// Future: optimize expr instanceof QualifiedMethodExpr
 
+	// emit the expr
+	expr.emit(C.EXPRESSION, objx, gen);
+
+	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fiClass);
+	int paramCount = targetMethod.getParameterCount();
+	if(paramCount == 0 || paramCount > 10) {
+		return false;
+	}
+
+	// compute invoker method name
 	Class[] invokerParams = new Class[targetMethod.getParameterCount()+1];
 	invokerParams[0] = Object.class;  // close over Ifn as first arg
 	StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
-	for (int i = 0; i < targetMethod.getParameterCount(); i++) {
-		char paramCode = encodeInvokerParam(targetMethod.getParameterTypes()[i]);
+	for (int i = 0; i < paramCount; i++) {
+		char paramCode = paramCount <= 2 ? encodeInvokerParam(targetMethod.getParameterTypes()[i]) : 'O';
 		invokeMethodBuilder.append(paramCode);
 		invokerParams[i+1] = decodeToClass(paramCode);
 	}
@@ -1708,9 +1716,8 @@ private static boolean ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter 
 	invokeMethodBuilder.append(invokerReturnCode);
 	String invokerMethodName = invokeMethodBuilder.toString();
 
-	// Invoker method - takes IFn instance (closed over) + args, body calls IFn.invoke
+	// Emit invoker method - takes IFn instance (closed over) + args, body calls IFn.invoke
 	Type samType = Type.getType(fiClass);
-	expr.emit(C.EXPRESSION, objx, gen);
 	try {
 		java.lang.reflect.Method invokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
 
@@ -1735,10 +1742,8 @@ private static boolean ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter 
 		return true;
 
 	} catch(NoSuchMethodException e) {
-		// no invoker method found (this should rarely happen)
-		return false;
+		throw Util.sneakyThrow(e); // should never happen
 	}
-
 }
 
 // LambdaMetafactory.metafactory() method handle for lambda bootstrap
