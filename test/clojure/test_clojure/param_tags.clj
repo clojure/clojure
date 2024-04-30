@@ -53,7 +53,11 @@
        (is (= 4 (^[longs long] Arrays/binarySearch lary (long 99))))
        (is (= 4 (^[objects _] Arrays/binarySearch oary 99)))
        (is (= 4 (^["[Ljava.lang.Object;" _] Arrays/binarySearch oary 99)))
-       (is (= 1 (^["[Ljava.lang.Object;" _] Arrays/binarySearch sary "b"))))))
+       (is (= 1 (^["[Ljava.lang.Object;" _] Arrays/binarySearch sary "b")))))
+  (testing "bad method names"
+    (is (thrown? Exception (eval '(^[] java.lang.String/foo "a"))))
+    (is (thrown? Exception (eval '(^[] java.lang.String/.foo "a"))))
+    (is (thrown? Exception (eval '(^[] Math/new "a"))))))
 
 
 ;; Mapping of symbols returned from reflect call to :parameter-type used as arguments to .getDeclaredMethod,
