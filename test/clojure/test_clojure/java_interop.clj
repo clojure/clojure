@@ -857,6 +857,9 @@
             (call [_ fi] (.invoke fi 1 2 3 4)))]
     (is (= 4 (.call r (fn [^long a ^long b ^long c ^long d] d))))))
 
+(deftest test-null-reify
+  ((fn [x] (FIStatic/allowsNullFI x)) nil))
+
 (deftest test-all-fi-adapters-in-let
 
   (let [^AdapterExerciser exerciser (AdapterExerciser.)

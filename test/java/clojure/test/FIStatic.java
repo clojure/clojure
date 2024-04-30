@@ -11,4 +11,16 @@ public class FIStatic {
         Object[] filteredNumbers =  numbers.stream().filter(pred).toArray();
         return Arrays.asList(filteredNumbers);
     }
+
+    public static String allowsNullFI(Predicate<String> pred) {
+        if(pred == null) {
+            return "null";
+        } else {
+            if(pred.test("abc")) {
+                return "pass";
+            } else {
+                return "fail";
+            }
+        }
+    }
 }
