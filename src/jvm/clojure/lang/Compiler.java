@@ -1718,30 +1718,22 @@ private static boolean ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter 
 
 	// Emit invoker method - takes IFn instance (closed over) + args, body calls IFn.invoke
 	Type samType = Type.getType(fiClass);
+	Type ifnType = Type.getType(IFn.class);
 	try {
 		java.lang.reflect.Method invokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
 
-		// if(! (exp instanceof FIType)) { if(exp != null) { emit invoker } }
+		// if(exp instanceof FI) { emit adapter to invoker method }
 		gen.dup();
-		gen.instanceOf(samType);
+		gen.instanceOf(ifnType);
 
-		// if so, checkcast and go to end
-		Label invokerLabel = gen.newLabel();
-		gen.ifZCmp(Opcodes.IFEQ, invokerLabel);
-		gen.checkCast(samType);
+		// if so, go to end
 		Label endLabel = gen.newLabel();
-		gen.goTo(endLabel);
+		gen.ifZCmp(Opcodes.IFEQ, endLabel);
 
-		// if not, insert lambda adapter
-		gen.mark(invokerLabel);
-
-		// if null, go to end
-		gen.dup();
-		gen.ifNull(endLabel);
-
-		// adapt invoker method to target method, closing over IFn instance
+		// else adapt invoker method to target method, closing over IFn instance
 		emitInvokeDynamicAdapter(gen, targetMethod, invokerMethod);
 
+		// end - check that we have the FI type
 		gen.mark(endLabel);
 		gen.checkCast(samType);
 		return true;
