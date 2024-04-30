@@ -1753,9 +1753,11 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.tag = tag;
 		this.tailPosition = tailPosition;
 		this.qualifyingClass = qualifyingClass;
-		if(target.hasJavaClass() && target.getJavaClass() != null)
+		Class contextClass = qualifyingClass != null ? qualifyingClass :
+				(target.hasJavaClass() ? target.getJavaClass() : null);
+		if(contextClass != null)
 			{
-			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
+			List methods = Reflector.getMethods(contextClass, args.count(), methodName, false);
 			if(methods.isEmpty())
 				{
 				method = null;
@@ -1763,7 +1765,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName());
+							SOURCE_PATH.deref(), line, column, methodName, contextClass.getName());
 					}
 				}
 			else
@@ -1793,7 +1795,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName(), getTypeStringForArgs(args));
+							SOURCE_PATH.deref(), line, column, methodName, contextClass.getName(), getTypeStringForArgs(args));
 					}
 				}
 			}
