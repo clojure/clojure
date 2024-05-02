@@ -1368,7 +1368,7 @@ private static void checkMethodArity(Executable method, int argCount) {
         if(method.getParameterCount() != argCount)
                 throw new IllegalArgumentException("Invocation of "
                                 + methodDescription(method.getDeclaringClass(),
-                                (method instanceof Constructor) ? "new" : method.getName())
+                                isConstructor(method) ? "new" : method.getName())
                                 + " expected " + method.getParameterCount() + " arguments, but received " + argCount);
 }
 
@@ -1772,12 +1772,12 @@ private static void emitInvokeDynamicAdapter(
 
 	// Impl method - takes closed overs (on stack now) + args (when called)
 	Class[] implParams = implMethod.getParameterTypes();
-	Class retClass = implMethod instanceof Constructor
+	Class retClass = isConstructor(implMethod)
 			? implMethod.getDeclaringClass()
 			: ((java.lang.reflect.Method)implMethod).getReturnType();
 
-	int opCode = (implMethod instanceof Constructor) ? Opcodes.H_INVOKESPECIAL :
-					(Modifier.isStatic(implMethod.getModifiers()) ? Opcodes.H_INVOKESTATIC :
+	int opCode = isConstructor(implMethod) ? Opcodes.H_INVOKESPECIAL :
+					(isStaticMethod(implMethod) ? Opcodes.H_INVOKESTATIC :
 						Opcodes.H_INVOKEVIRTUAL);
 
 	Handle implHandle = new Handle(opCode,
@@ -1789,7 +1789,7 @@ private static void emitInvokeDynamicAdapter(
 	// Invoker interface (if it was a lambda, this would be its interface):
 	//   FI invoke(closedOver*)
 	int implArgCount = implParams.length;
-	if(implMethod instanceof java.lang.reflect.Method && (!Modifier.isStatic(implMethod.getModifiers())))
+	if(isInstanceMethod(implMethod))
 		implArgCount++;
 	List lambdaParams = Arrays.asList(Arrays.copyOfRange(implParams, 0, implArgCount - targetMethod.getParameterCount()));
 	MethodType lambdaSig = MethodType.methodType(targetMethod.getDeclaringClass(), lambdaParams);
