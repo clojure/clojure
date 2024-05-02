@@ -1691,10 +1691,7 @@ private static Class decodeToClass(char c) {
 
 /**
  * find invoker function matching SAM method of fiClass
- * if invoker then emit maybe-adapter (f on stack):
- * if( !(f instanceof FI))
- *   emitInvokeDynamicAdapter(FI::method, FnInvokers::invoke))
- *
+ * Emit (with f on stack): if(f instanceof IFn) { emit adapter to invoker method }
  * return whether a matching invoker method was found
  */
 private static boolean ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fiClass) {
@@ -1711,7 +1708,7 @@ private static boolean ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter 
 
 	// compute invoker method name
 	Class[] invokerParams = new Class[targetMethod.getParameterCount()+1];
-	invokerParams[0] = Object.class;  // close over Ifn as first arg
+	invokerParams[0] = IFn.class;  // close over Ifn as first arg
 	StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
 	for (int i = 0; i < paramCount; i++) {
 		char paramCode = paramCount <= 2 ? encodeInvokerParam(targetMethod.getParameterTypes()[i]) : 'O';
@@ -1728,7 +1725,7 @@ private static boolean ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter 
 	try {
 		java.lang.reflect.Method invokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
 
-		// if(exp instanceof FI) { emit adapter to invoker method }
+		// if(exp instanceof IFn) { emit adapter to invoker method }
 		gen.dup();
 		gen.instanceOf(ifnType);
 

@@ -4,15 +4,13 @@
 
 (ns gen-fn-invokers
   (:require
-    [clojure.string :as str])
-  (:import
-    [java.io StringWriter Writer]))
+    [clojure.string :as str]))
 
 (def header
   "/**
  *   Copyright (c) Rich Hickey. All rights reserved.
  *   The use and distribution terms for this software are covered by the
- *   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+ *   Eclipse Public License 1.0 (https://opensource.org/license/epl-1-0)
  *   which can be found in the file epl-v10.html at the root of this distribution.
  *   By using this software in any fashion, you are agreeing to be bound by
  * 	 the terms of this license.
@@ -23,83 +21,59 @@ package clojure.lang;
 
 public class FnInvokers {
 
-    private static RuntimeException notIFnError(Object f) {
-        return new RuntimeException(\"Expected function, but found \" + (f == null ? \"null\" : f.getClass().getName()));
-    }
-
 ")
 
 (def footer
   "}")
 
 (def invokeO-format
-  "    public static Object invoke%sO(Object f0%s) {
-        if(f0 instanceof IFn) {
-            return ((IFn)f0).invoke(%s);
-        } else {
-            throw notIFnError(f0);
-        }
+  "    public static Object invoke%sO(IFn f0%s) {
+        return f0.invoke(%s);
     }")
 
 (def invokeO-with-l-or-d-arg-format
-  "    public static Object invoke%sO(Object f0%s) {
+  "    public static Object invoke%sO(IFn f0%s) {
         if(f0 instanceof IFn.%sO) {
             return ((IFn.%sO)f0).invokePrim(%s);
-        } else if(f0 instanceof IFn) {
-            return ((IFn)f0).invoke(%s);
         } else {
-            throw notIFnError(f0);
+            return f0.invoke(%s);
         }
     }")
 
 (def invokeB-format
-  "    public static boolean invoke%sB(Object f0%s) {
-        if(f0 instanceof IFn) {
-            return RT.booleanCast(((IFn)f0).invoke(%s));
-        } else {
-            throw notIFnError(f0);
-        }
+  "    public static boolean invoke%sB(IFn f0%s) {
+        return RT.booleanCast(f0.invoke(%s));
     }")
 
 (def invokeF-format
-  "    public static float invoke%sF(Object f0%s) {
-        if(f0 instanceof IFn) {
-            return RT.FloatCast(((IFn)f0).invoke(%s));
-        } else {
-            throw notIFnError(f0);
-        }
+  "    public static float invoke%sF(IFn f0%s) {
+        return RT.floatCast(f0.invoke(%s));
     }")
 
 (def invokeL-format
-  "    public static long invoke%sL(Object f0%s) {
+  "    public static long invoke%sL(IFn f0%s) {
         if(f0 instanceof IFn.%sL) {
             return ((IFn.%sL)f0).invokePrim(%s);
-        } else if(f0 instanceof IFn) {
-            return RT.longCast(((IFn)f0).invoke(%s));
         } else {
-            throw notIFnError(f0);
+            return RT.longCast(f0.invoke(%s));
         }
     }")
 
 (def invokeD-format
-  "    public static double invoke%sD(Object f0%s) {
+  "    public static double invoke%sD(IFn f0%s) {
         if(f0 instanceof IFn.%sD) {
             return ((IFn.%sD)f0).invokePrim(%s);
-        } else if(f0 instanceof IFn) {
-            return RT.doubleCast(((IFn)f0).invoke(%s));
         } else {
-            throw notIFnError(f0);
+            return RT.doubleCast(f0.invoke(%s));
         }
     }")
 
 (def invokeI-format
-  "    public static int invoke%sI(Object f0%s) {
+  "    public static int invoke%sI(IFn f0%s) {
         if(f0 instanceof IFn.%sL) {
             return RT.intCast(((IFn.%sL)f0).invokePrim(%s));
-        } else if(f0 instanceof IFn) {
-            return RT.intCast(((IFn)f0).invoke(%s));
         } else {
-            throw notIFnError(f0);
+            return RT.intCast(f0.invoke(%s));
         }
     }")
 
@@ -151,7 +125,11 @@ public class FnInvokers {
   (let [sb (StringBuilder. ^String header)
         invoker-signatures (gen-sigs)]
     (doseq [sig invoker-signatures]
-      (.append sb (gen-invoker sig))
+      (.append sb (gen-invoke sig))
       (.append sb "\n\n"))
     (.append sb footer)
-    (spit "src/jvm/clojure/lang/FnAdapters.java" (.toString sb))))
+    (spit "src/jvm/clojure/lang/FnInvokers.java" (.toString sb))))
+
+(comment
+  (gen-invokers)
+  )
