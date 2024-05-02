@@ -37,7 +37,11 @@
   (is (= ["A" "B" "C"]
          (map ^[java.util.Locale] String/.toUpperCase ["a" "b" "c"] (repeat java.util.Locale/ENGLISH))))
   (is (thrown? ClassCastException
-               (doall (map ^[long] String/valueOf [12 "a"])))))
+               (doall (map ^[long] String/valueOf [12 "a"]))))
+  (testing "bad method names"
+    (is (thrown-with-msg? Exception #"static method" (eval 'java.lang.String/foo)))
+    (is (thrown-with-msg? Exception #"instance method" (eval 'java.lang.String/.foo)))
+    (is (thrown-with-msg? Exception #"constructor" (eval 'Math/new)))))
 
 (def mt ^[_] Tuple/create)
 (def mts {:fromString ^[_] UUID/fromString})

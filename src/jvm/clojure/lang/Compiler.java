@@ -1255,13 +1255,18 @@ static class QualifiedMethodExpr implements Expr {
 		return res;
 	}
 
+	// Returns a list of methods or ctors matching the name and kind given.
+	// Otherwise, will throw if the information provided results in no matches
 	private static List<Executable> methodsWithName(Class c, String methodName, MethodKind kind) {
 		if (kind == MethodKind.CTOR) {
-			return Arrays.asList(c.getConstructors());
+			List<Executable> ctors = Arrays.asList(c.getConstructors());
+			if(ctors.isEmpty())
+				throw noMethodWithNameException(c, methodName, kind);
+			return ctors;
 		}
 
 		final Executable[] methods = c.getMethods();
-		return Arrays.stream(methods)
+		List<Executable> res = Arrays.stream(methods)
 				.filter(m -> m.getName().equals(methodName))
 				.filter(m -> {
 					switch(kind) {
@@ -1271,13 +1276,14 @@ static class QualifiedMethodExpr implements Expr {
 					}
 				})
 				.collect(Collectors.toList());
+
+		if(res.isEmpty())
+			throw noMethodWithNameException(c, methodName, kind);
+		return res;
 	}
 
 	static Executable resolveHintedMethod(Class c, String methodName, MethodKind kind, List<Class> hintedSig) {
 		List<Executable> methods = methodsWithName(c, methodName, kind);
-		if (methods.isEmpty())
-			throw noMethodWithNameException(c, methodName);
-
 		final int arity = hintedSig.size();
 		List<Executable> filteredMethods = methods.stream()
 				.filter(m -> m.getParameterCount() == arity)
@@ -1288,22 +1294,22 @@ static class QualifiedMethodExpr implements Expr {
 		if(filteredMethods.size() == 1)
 			return filteredMethods.get(0);
 		else
-			throw paramTagsDontResolveException(c, methodName, hintedSig, filteredMethods.size());
+			throw paramTagsDontResolveException(c, methodName, hintedSig);
 	}
 
-	static IllegalArgumentException noMethodWithNameException(Class c, String methodName) {
-		return new IllegalArgumentException("Could not find "
+	static IllegalArgumentException noMethodWithNameException(Class c, String methodName, MethodKind kind) {
+		return new IllegalArgumentException("Error - no matches found for "
+				+ (kind != MethodKind.CTOR ? kind.toString().toLowerCase() + " " : "")
 				+ methodDescription(c, methodName));
 	}
 
-	static IllegalArgumentException paramTagsDontResolveException(Class c, String methodName, List<Class> hintedSig, int found) {
+	static IllegalArgumentException paramTagsDontResolveException(Class c, String methodName, List<Class> hintedSig) {
 		IPersistentVector paramTags = PersistentVector.create(hintedSig.stream()
 				.map(tag -> tag == null ? PARAM_TAG_ANY : tag)
 				.collect(Collectors.toList()));
-		return new IllegalArgumentException("Expected to find 1 matching signature for "
-				+ methodDescription(c, methodName)
-				+ " but found " + found
-				+ " with param-tags " + paramTags);
+		return new IllegalArgumentException("Error - param-tags " + paramTags
+				+ " insufficient to resolve "
+				+ methodDescription(c, methodName));
 	}
 }
 
@@ -1945,9 +1951,11 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.tag = tag;
 		this.tailPosition = tailPosition;
 		this.qualifyingClass = qualifyingClass;
-		if(target.hasJavaClass() && target.getJavaClass() != null)
+		Class contextClass = qualifyingClass != null ? qualifyingClass :
+				(target.hasJavaClass() ? target.getJavaClass() : null);
+		if(contextClass != null)
 			{
-			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
+			List methods = Reflector.getMethods(contextClass, args.count(), methodName, false);
 			if(methods.isEmpty())
 				{
 				method = null;
@@ -1955,7 +1963,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName());
+							SOURCE_PATH.deref(), line, column, methodName, contextClass.getName());
 					}
 				}
 			else
@@ -1985,7 +1993,7 @@ static class InstanceMethodExpr extends MethodExpr{
 					{
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
-							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName(), getTypeStringForArgs(args));
+							SOURCE_PATH.deref(), line, column, methodName, contextClass.getName(), getTypeStringForArgs(args));
 					}
 				}
 			}

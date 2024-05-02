@@ -29,7 +29,21 @@
      (^[] java.lang.String/.toUpperCase s)))
   (should-not-reflect
    (defn touc-no-reflect-arg-tags [s]
-     (^[java.util.Locale] String/.toUpperCase s java.util.Locale/ENGLISH))))
+     (^[java.util.Locale] String/.toUpperCase s java.util.Locale/ENGLISH)))
+  (should-not-reflect
+   (defn no-overloads-no-reflect [v]
+     (java.time.OffsetDateTime/.getYear v))))
+
+(deftest no-param-tags-use-qualifier
+  ;; both Date and OffsetDateTime have .getYear - want to show here the qualifier is used
+  (let [f (fn [^java.util.Date d] (java.time.OffsetDateTime/.getYear d))
+        date (java.util.Date. 1714495523100)]
+    ;; works when passed OffsetDateTime
+    (is (= 2024 (f (-> date .toInstant (.atOffset java.time.ZoneOffset/UTC)))))
+
+    ;; fails when passed Date, expects OffsetDateTime
+    (is (thrown? ClassCastException
+          (f date)))))
 
 (deftest param-tags-in-invocation-positions
   (testing "qualified static method invocation"
@@ -53,7 +67,11 @@
        (is (= 4 (^[longs long] Arrays/binarySearch lary (long 99))))
        (is (= 4 (^[objects _] Arrays/binarySearch oary 99)))
        (is (= 4 (^["[Ljava.lang.Object;" _] Arrays/binarySearch oary 99)))
-       (is (= 1 (^["[Ljava.lang.Object;" _] Arrays/binarySearch sary "b"))))))
+       (is (= 1 (^["[Ljava.lang.Object;" _] Arrays/binarySearch sary "b")))))
+  (testing "bad method names"
+    (is (thrown? Exception (eval '(^[] java.lang.String/foo "a"))))
+    (is (thrown? Exception (eval '(^[] java.lang.String/.foo "a"))))
+    (is (thrown? Exception (eval '(^[] Math/new "a"))))))
 
 
 ;; Mapping of symbols returned from reflect call to :parameter-type used as arguments to .getDeclaredMethod,
