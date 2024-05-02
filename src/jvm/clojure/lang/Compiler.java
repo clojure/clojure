@@ -1612,7 +1612,7 @@ static Class maybePrimitiveType(Expr e){
 	return null;
 }
 
-// FunctionInterfaces excluded from functional conversion
+// FunctionalInterfaces excluded from functional conversion
 private static final IPersistentSet EXCLUDED_FN_INTERFACES = RT.set(
 		// Clojure fns already do these
 		"java.lang.Runnable", "java.util.concurrent.Callable", "java.util.Comparator",
