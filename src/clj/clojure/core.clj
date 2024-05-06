@@ -3188,14 +3188,16 @@
   {:added "1.3"
    :static true}
   [coll n]
-  (if (instance? clojure.lang.IDrop coll)
-    (if (pos? n)
-      (or (.drop ^clojure.lang.IDrop coll (if (int? n) n (Math/ceil n))) ())
-      coll)
-    (loop [n n xs coll]
-      (if-let [xs (and (pos? n) (seq xs))]
-        (recur (dec n) (rest xs))
-        xs))))
+  (if (pos? n)
+    (or
+      (if (instance? clojure.lang.IDrop coll)
+        (.drop ^clojure.lang.IDrop coll (if (int? n) n (Math/ceil n)))
+        (loop [n n xs coll]
+          (if-let [xs (and (pos? n) (seq xs))]
+            (recur (dec n) (rest xs))
+            (seq xs))))
+      ())
+    coll))
 
 (defn partition
   "Returns a lazy sequence of lists of n items each, at offsets step
