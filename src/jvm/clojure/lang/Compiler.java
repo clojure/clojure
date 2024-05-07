@@ -5304,14 +5304,24 @@ static public class ObjExpr implements Expr{
 			}
 	}
 
+	boolean isLocalField(LocalBinding lb) {
+		if(RT.booleanCast(RT.contains(fields, lb.sym)))
+			return true;
+
+		// check if enclosed in method that has local field
+		ObjMethod enclosingMethod = (ObjMethod) METHOD.deref();
+		return enclosingMethod != null && enclosingMethod.parent != null &&
+				RT.booleanCast(RT.contains(enclosingMethod.parent.objx.fields, lb.sym));
+	}
+
 	boolean isMutable(LocalBinding lb){
 		return isVolatile(lb) ||
-		       RT.booleanCast(RT.contains(fields, lb.sym)) &&
-		       RT.booleanCast(RT.get(lb.sym.meta(), Keyword.intern("unsynchronized-mutable")));
+				(isLocalField(lb) &&
+				 RT.booleanCast(RT.get(lb.sym.meta(), Keyword.intern("unsynchronized-mutable"))));
 	}
 
 	boolean isVolatile(LocalBinding lb){
-		return RT.booleanCast(RT.contains(fields, lb.sym)) &&
+		return isLocalField(lb) &&
 		       RT.booleanCast(RT.get(lb.sym.meta(), Keyword.intern("volatile-mutable")));
 	}
 
