@@ -705,3 +705,29 @@
   (f [s] (seq s)))
 (deftest test-resolve-type-hints-in-protocol-methods
   (is (= 4 (clojure.test-clojure.protocols/f "test"))))
+
+;; CLJ-2743 - set! of deftype fields in nested contexts
+
+(defprotocol P2
+  (f [_]))
+
+(deftype T1 [^:volatile-mutable x lock]
+  P2
+  (f [_this]
+    (locking lock
+      (set! x true)
+      (prn ""))))
+
+(deftype T2 [^:volatile-mutable x lock]
+  P2
+  (f [_this]
+    (locking lock
+      (set! x true))
+    (prn "")))
+
+(deftype T3 [^:unsynchronized-mutable stuff]
+  Runnable
+  (run [_]
+    (loop []
+      (set! stuff (inc stuff)))
+    10))
