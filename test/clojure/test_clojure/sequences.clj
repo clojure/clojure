@@ -413,6 +413,49 @@
     (next (to-array [(into-array []) nil])) '(nil)
     (next (to-array [(into-array []) 2 nil])) '(2 nil) ))
 
+(deftest test-nthnext+rest-on-0
+  (are [coll]
+       (and (= (seq coll) (nthnext coll 0))
+            (= coll       (nthrest coll 0)))
+    nil
+    ""
+    ()
+    '(0)
+    []
+    [0]
+    #{}
+    {}
+    {:a 1}
+    (range 5)))
+
+(deftest test-nthnext+rest-on-pos
+  (are [coll n nthnext-expected nthrest-expected]
+       (and (= nthnext-expected (nthnext coll n))
+            (= nthrest-expected (nthrest coll n)))
+
+    ;coll  n  nthnext  nthrest
+    nil    1  nil      ()
+    "abc"  1  '(\b \c) '(\b \c)
+    "abc"  3  nil      ()
+    "abc"  4  nil      ()
+    ()     1  nil      ()
+    '(1)   1  nil      ()
+    '(1)   2  nil      ()
+    '(())  1  nil      ()
+    #{}    1  nil      ()
+    {:a 1} 1  nil      ()
+    []     1  nil      ()
+    [0]    1  nil      ()
+    [0]    2  nil      ()
+    [[] 2 nil] 1 '(2 nil) '(2 nil)
+    [[] 2 nil] 2 '(nil) '(nil)
+    [[] 2 nil] 3 nil ()
+    (sorted-set 1 2 3)     2 '(3)      '(3)
+    (sorted-map :a 1 :b 2) 1 '([:b 2]) '([:b 2])
+    (into-array [])        1 nil       ()
+    (into-array [1])       1 nil       ()
+    (range 5)              3 '(3 4)    '(3 4)
+    (range 5)              5 nil       ()))
 
 (deftest test-last
   (are [x y] (= x y)
