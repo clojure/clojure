@@ -25,6 +25,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Executable;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -1368,7 +1369,7 @@ private static void checkMethodArity(Executable method, int argCount) {
         if(method.getParameterCount() != argCount)
                 throw new IllegalArgumentException("Invocation of "
                                 + methodDescription(method.getDeclaringClass(),
-                                isConstructor(method) ? "new" : method.getName())
+                                (method instanceof Constructor) ? "new" : method.getName())
                                 + " expected " + method.getParameterCount() + " arguments, but received " + argCount);
 }
 
@@ -1612,18 +1613,14 @@ static Class maybePrimitiveType(Expr e){
 	return null;
 }
 
-private static final Collection<Class> AFUNCTION_INTERFACES = Reflector.interfaces(AFunction.class);
+private static final IPersistentSet IFN_INTERFACES = RT.set(Callable.class, Runnable.class, Comparator.class);
 private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString", "hashCode");
 
-// If target is non-null, an interface, annotated as @FunctionalInterface,
-// not a super-interface of AFn (no need to adapt),
-// and has a SAM method of acceptable arity (1 <= arity <= 10),
-// then return it, else null
-static java.lang.reflect.Method maybeAdaptableSAMMethod(Class target) {
+// If target is a functional interface w/ method adaptable to a fn invoker method, return it
+static java.lang.reflect.Method maybeAdaptableFunctionalMethod(Class target) {
 	if(target != null && target.isInterface()
 			&& target.isAnnotationPresent(FunctionalInterface.class)
-			&& !AFUNCTION_INTERFACES.contains(target))
-	{
+			&& !IFN_INTERFACES.contains(target)) {
 		java.lang.reflect.Method[] methods = target.getMethods();
 		for (int i = 0; i < methods.length; i++)
 			if (methods[i].getParameterCount() >= 1 && methods[i].getParameterCount() <= 10
@@ -1635,7 +1632,7 @@ static java.lang.reflect.Method maybeAdaptableSAMMethod(Class target) {
 }
 
 // Given an FI method parameter type (any class or primitive),
-// which type code specifies what the invoker method should take
+// what is the type code for the fn invoker method parameter
 private static char encodeInvokerParam(Class c) {
     if (c.equals(Byte.TYPE) || c.equals(Short.TYPE) || c.equals(Integer.TYPE) || c.equals(Long.TYPE)) {
         return 'L';
@@ -1646,7 +1643,7 @@ private static char encodeInvokerParam(Class c) {
 }
 
 // Given an FI method return type (any class or primitive),
-// which type code specifies what the invoker method should return
+// what is the type code for the fn invoker method return
 private static char encodeInvokerReturn(Class c) {
 	// Exact match primitives we support
     if (c.equals(Long.TYPE)) {
@@ -1654,11 +1651,11 @@ private static char encodeInvokerReturn(Class c) {
     } else if (c.equals(Double.TYPE)) {
         return 'D';
 
-	// Apply Clojure logical truth in invoker method
+	// Clojure logical truth in fn invoker method
     } else if (c.equals(Boolean.TYPE)) {
         return 'Z';
 
-	// Narrowing conversions from primitive long or double IFn in invoker method
+	// Narrowing conversion to target type in fn invoker method
     } else if (c.equals(Integer.TYPE)) {
         return 'I';
 	} else if (c.equals(Short.TYPE)) {
@@ -1674,69 +1671,70 @@ private static char encodeInvokerReturn(Class c) {
 // Decode invoker type code to class
 private static Class decodeToClass(char c) {
 	switch(c) {
+		case 'B': return Byte.TYPE;
+		case 'S': return Short.TYPE;
+		case 'I': return Integer.TYPE;
 		case 'L': return Long.TYPE;
+		case 'F': return Float.TYPE;
 		case 'D': return Double.TYPE;
 		case 'Z': return Boolean.TYPE;
-		case 'I': return Integer.TYPE;
-		case 'S': return Short.TYPE;
-		case 'B': return Byte.TYPE;
-		case 'F': return Float.TYPE;
 		default: return Object.class;
 	}
 }
 
 /**
- * find invoker function matching SAM method of fiClass
- * Emit (with f on stack): if(f instanceof IFn) { emit adapter to invoker method }
- * return whether a matching invoker method was found
+ * Emit expr
+ * If targetClass has an adaptable functional method
+ *   Find fn invoker method matching adaptable method of FI
+ *   Emit: if(expr instanceof IFn)
+ *            emitInvokeDynamic(targetMethod, fnInvokerImplMethod)
  */
-private static void emitAdaptIfIFn(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fiClass) {
-	// Future: optimize expr instanceof QualifiedMethodExpr
+private static void emitAdaptIfIFn(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class targetClass) {
+	// Optimization:
+	// if(expr instanceof QualifiedMethodExpr)
+	//   emitInvokeDynamic(targetMethod, QME method) // DON'T emit expr
 
-	// emit the expr
 	expr.emit(C.EXPRESSION, objx, gen);
+	java.lang.reflect.Method targetMethod = maybeAdaptableFunctionalMethod(targetClass);
+	if(targetMethod != null) {
+		// compute fn invoker method
+		int paramCount = targetMethod.getParameterCount();
+		Class[] invokerParams = new Class[paramCount + 1];
+		invokerParams[0] = IFn.class;  // close over Ifn as first arg
+		StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
+		for (int i = 0; i < paramCount; i++) {
+			char paramCode = paramCount <= 2 ? encodeInvokerParam(targetMethod.getParameterTypes()[i]) : 'O';
+			invokeMethodBuilder.append(paramCode);
+			invokerParams[i + 1] = decodeToClass(paramCode);
+		}
+		char invokerReturnCode = encodeInvokerReturn(targetMethod.getReturnType());
+		invokeMethodBuilder.append(invokerReturnCode);
+		String invokerMethodName = invokeMethodBuilder.toString();
 
-	java.lang.reflect.Method targetMethod = maybeAdaptableSAMMethod(fiClass);
-	if(targetMethod == null)
-		return;
+		// Emit adapter to fn invoker method
+		Type samType = Type.getType(targetClass);
+		Type ifnType = Type.getType(IFn.class);
+		try {
+			java.lang.reflect.Method fnInvokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
 
-	// compute invoker method name
-	int paramCount = targetMethod.getParameterCount();
-	Class[] invokerParams = new Class[paramCount+1];
-	invokerParams[0] = IFn.class;  // close over Ifn as first arg
-	StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
-	for (int i = 0; i < paramCount; i++) {
-		char paramCode = paramCount <= 2 ? encodeInvokerParam(targetMethod.getParameterTypes()[i]) : 'O';
-		invokeMethodBuilder.append(paramCode);
-		invokerParams[i+1] = decodeToClass(paramCode);
-	}
-	char invokerReturnCode = encodeInvokerReturn(targetMethod.getReturnType());
-	invokeMethodBuilder.append(invokerReturnCode);
-	String invokerMethodName = invokeMethodBuilder.toString();
+			// if(exp instanceof IFn) { emitInvokeDynamic(targetMethod, fnInvokerMethod) }
+			gen.dup();
+			gen.instanceOf(ifnType);
 
-	// Emit invoker method - takes IFn instance (closed over) + args, body calls IFn.invoke
-	Type samType = Type.getType(fiClass);
-	Type ifnType = Type.getType(IFn.class);
-	try {
-		java.lang.reflect.Method invokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
+			// if not instanceof IFn, go to end
+			Label endLabel = gen.newLabel();
+			gen.ifZCmp(Opcodes.IFEQ, endLabel);
 
-		// if(exp instanceof IFn) { emit adapter to invoker method }
-		gen.dup();
-		gen.instanceOf(ifnType);
+			// else adapt fn invoker method as impl for target method
+			emitInvokeDynamicAdapter(gen, targetMethod, fnInvokerMethod);
 
-		// if so, go to end
-		Label endLabel = gen.newLabel();
-		gen.ifZCmp(Opcodes.IFEQ, endLabel);
+			// end - checkcast that we have the target FI type
+			gen.mark(endLabel);
+			gen.checkCast(samType);
 
-		// else adapt invoker method to target method, closing over IFn instance
-		emitInvokeDynamicAdapter(gen, targetMethod, invokerMethod);
-
-		// end - check that we have the FI type
-		gen.mark(endLabel);
-		gen.checkCast(samType);
-
-	} catch(NoSuchMethodException e) {
-		throw Util.sneakyThrow(e); // should never happen
+		} catch(NoSuchMethodException e) {
+			throw Util.sneakyThrow(e); // should never happen
+		}
 	}
 }
 
@@ -1780,10 +1778,9 @@ private static void emitInvokeDynamicAdapter(
 			MethodType.methodType(retClass, implParams).toMethodDescriptorString(),
 			false);
 
-	// Invoker interface (if it was a lambda, this would be its interface):
-	//   FI invoke(closedOver*)
+	// Adapter interface lambda-style: (closedOver*) -> targetType
 	int implArgCount = implParams.length;
-	if(isInstanceMethod(implMethod))
+	if(isInstanceMethod(implMethod))  // instance is first "arg"
 		implArgCount++;
 	List lambdaParams = Arrays.asList(Arrays.copyOfRange(implParams, 0, implArgCount - targetMethod.getParameterCount()));
 	MethodType lambdaSig = MethodType.methodType(targetMethod.getDeclaringClass(), lambdaParams);
@@ -1791,7 +1788,7 @@ private static void emitInvokeDynamicAdapter(
 	Type targetType = Type.getType(targetMethod);
 	gen.visitInvokeDynamicInsn(
 		targetMethod.getName(),
-		lambdaSig.toMethodDescriptorString(),  // invoker signature, closedOvers -> Target
+		lambdaSig.toMethodDescriptorString(),  // adapter signature, closedOvers -> target
 		LMF_HANDLE,  // bootstrap method handle: LambdaMetaFactory.metafactory()
 		new Object[]{targetType, implHandle, targetType}); // arg types of bootstrap method
 }

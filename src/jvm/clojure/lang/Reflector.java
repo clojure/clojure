@@ -57,7 +57,7 @@ private static boolean canAccess(Method m, Object target) {
 	}
 }
 
-static Collection<Class> interfaces(Class c) {
+private static Collection<Class> interfaces(Class c) {
 	Set<Class> interfaces = new HashSet<Class>();
 	Deque<Class> toWalk = new ArrayDeque<Class>();
 	toWalk.addAll(Arrays.asList(c.getInterfaces()));
@@ -616,7 +616,7 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 		return !paramType.isPrimitive();
 	if(paramType == argType || paramType.isAssignableFrom(argType))
 		return true;
-	if(Compiler.maybeAdaptableSAMMethod(paramType) != null && IFn.class.isAssignableFrom(argType))
+	if(Compiler.maybeAdaptableFunctionalMethod(paramType) != null && IFn.class.isAssignableFrom(argType))
 		return true;
 	if(paramType == int.class)
 		return argType == Integer.class
@@ -678,26 +678,25 @@ public static Object prepRet(Class c, Object x){
 	return x;
 }
 
-// These return type coercions match the coercions done in FnInvokers for compiled invokers
+// Return type coercions match coercions in FnInvokers for compiled invokers
 private static Object dynamicAdapterReturn(Object ret, Class targetType) {
-    if (targetType.equals(Boolean.TYPE)) {
-        return RT.booleanCast(ret);
-    } else if (targetType.equals(Integer.TYPE)) {
-        return RT.intCast(ret);
-    } else if (targetType.equals(Long.TYPE)) {
-        return RT.longCast(ret);
-    } else if (targetType.equals(Float.TYPE)) {
-        return RT.floatCast(ret);
-    } else if (targetType.equals(Double.TYPE)) {
-        return RT.doubleCast(ret);
-    }
-    return ret;
+	switch(targetType.getName()) {
+		case "boolean": return RT.booleanCast(ret);
+		case "long": return RT.longCast(ret);
+		case "double": return RT.doubleCast(ret);
+		case "int": return RT.intCast(ret);
+		case "short": return RT.shortCast(ret);
+		case "byte": return RT.byteCast(ret);
+		case "float": return RT.floatCast(ret);
+		default: return ret;
+	}
 }
 
-// If needed, dynamically adapt fn to targetType using proxy, else return obj
+// If needed, adapt IFn obj to targetType using dynamic proxy,
+// else cast obj to targetType
 private static Object adaptIfIFn(Object obj, Class targetType) {
 	if(obj instanceof IFn) {
-		Method targetMethod = Compiler.maybeAdaptableSAMMethod(targetType);
+		Method targetMethod = Compiler.maybeAdaptableFunctionalMethod(targetType);
 		if (targetMethod != null) {
 			return Proxy.newProxyInstance(
 					(ClassLoader) Compiler.LOADER.get(),
