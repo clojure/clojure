@@ -40,23 +40,9 @@ public class FnInvokers {
         }
     }")
 
-(def invokeB-format
-  "    public static boolean invoke%sB(IFn f0%s) {
+(def invokeZ-format
+  "    public static boolean invoke%sZ(IFn f0%s) {
         return RT.booleanCast(f0.invoke(%s));
-    }")
-
-(def invokeF-format
-  "    public static float invoke%sF(IFn f0%s) {
-        return RT.floatCast(f0.invoke(%s));
-    }")
-
-(def invokeL-format
-  "    public static long invoke%sL(IFn f0%s) {
-        if(f0 instanceof IFn.%sL) {
-            return ((IFn.%sL)f0).invokePrim(%s);
-        } else {
-            return RT.longCast(f0.invoke(%s));
-        }
     }")
 
 (def invokeD-format
@@ -65,6 +51,24 @@ public class FnInvokers {
             return ((IFn.%sD)f0).invokePrim(%s);
         } else {
             return RT.doubleCast(f0.invoke(%s));
+        }
+    }")
+
+(def invokeF-format
+  "    public static float invoke%sF(IFn f0%s) {
+        if(f0 instanceof IFn.%sD) {
+            return RT.floatCast(((IFn.%sD)f0).invokePrim(%s));
+        } else {
+            return RT.floatCast(f0.invoke(%s));
+        }
+    }")
+
+(def invokeL-format
+  "    public static long invoke%sL(IFn f0%s) {
+        if(f0 instanceof IFn.%sL) {
+            return ((IFn.%sL)f0).invokePrim(%s);
+        } else {
+            return RT.longCast(f0.invoke(%s));
         }
     }")
 
@@ -77,13 +81,29 @@ public class FnInvokers {
         }
     }")
 
+(def invokeS-format
+  "    public static short invoke%sS(IFn f0%s) {
+        if(f0 instanceof IFn.%sL) {
+            return RT.shortCast(((IFn.%sL)f0).invokePrim(%s));
+        } else {
+            return RT.shortCast(f0.invoke(%s));
+        }
+    }")
+
+(def invokeB-format
+  "    public static byte invoke%sB(IFn f0%s) {
+        if(f0 instanceof IFn.%sL) {
+            return RT.byteCast(((IFn.%sL)f0).invokePrim(%s));
+        } else {
+            return RT.byteCast(f0.invoke(%s));
+        }
+    }")
+
 (def alphabet (map char (range 97 122)))
 
 (def arg-types {:D ", double "
-                :O ", Object "
                 :L ", long "
-                :I ", int "
-                :B ", boolean "})
+                :O ", Object "})
 
 (defn gen-invoke [sig]
   (let [formatter (str (last sig))
@@ -98,9 +118,11 @@ public class FnInvokers {
             (format invokeO-format arg-str fn-vars fn-vars-sans-type))
       "L" (format invokeL-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
       "I" (format invokeI-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
+      "S" (format invokeS-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
+      "B" (format invokeB-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
       "D" (format invokeD-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
-      "B" (format invokeB-format arg-str fn-vars fn-vars-sans-type)
-      "F" (format invokeF-format arg-str fn-vars fn-vars-sans-type))))
+      "F" (format invokeF-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
+      "Z" (format invokeZ-format arg-str fn-vars fn-vars-sans-type))))
 
 (defn sigs [args return-types]
   (let [fun-sig-reducer (fn [res ret]
@@ -109,16 +131,18 @@ public class FnInvokers {
     (reduce fun-sig-reducer [] return-types)))
 
 (defn gen-sigs []
-  (let [single-arity (sigs ["L" "D" "O"] ["L" "I" "B" "D" "O" "F"])
-        two-arity (sigs ["LL" "LO" "OL" "DD" "LD" "DL" "OO" "OD" "DO"] ["L" "I" "B" "D" "O" "F"])
-        three-arity (sigs ["OOO"] ["B" "O"])
-        four-arity  (sigs ["OOOO"] ["B" "O"])
-        five-arity  (sigs ["OOOOO"] ["B" "O"])
-        six-arity   (sigs ["OOOOOO"] ["B" "O"])
-        seven-arity (sigs ["OOOOOOO"] ["B" "O"])
-        eight-arity (sigs ["OOOOOOOO"] ["B" "O"])
-        nine-arity  (sigs ["OOOOOOOOO"] ["B" "O"])
-        ten-arity   (sigs ["OOOOOOOOOO"] ["B" "O"])]
+  (let [small-rets ["L" "I" "S" "B" "D" "F" "Z" "O"]
+        single-arity (sigs ["L" "D" "O"] small-rets)
+        two-arity (sigs ["LL" "LO" "OL" "DD" "LD" "DL" "OO" "OD" "DO"] small-rets)
+        big-rets ["Z" "O"]
+        three-arity (sigs ["OOO"] big-rets)
+        four-arity  (sigs ["OOOO"] big-rets)
+        five-arity  (sigs ["OOOOO"] big-rets)
+        six-arity   (sigs ["OOOOOO"] big-rets)
+        seven-arity (sigs ["OOOOOOO"] big-rets)
+        eight-arity (sigs ["OOOOOOOO"] big-rets)
+        nine-arity  (sigs ["OOOOOOOOO"] big-rets)
+        ten-arity   (sigs ["OOOOOOOOOO"] big-rets)]
     (mapcat seq [single-arity two-arity three-arity four-arity five-arity six-arity seven-arity eight-arity nine-arity ten-arity])))
 
 (defn gen-invokers []

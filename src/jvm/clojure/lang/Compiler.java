@@ -1665,12 +1665,16 @@ private static char encodeInvokerReturn(Class c) {
 
 	// If FI method returns a boolean, apply boolean coercion logic in invoker
     } else if (c.equals(Boolean.TYPE)) {
-        return 'B';
+        return 'Z';
 
 	// If FI method returns int or float (common), support a narrowing conversion
 	// from primitive long or double in invoker method to stay primitive
     } else if (c.equals(Integer.TYPE)) {
         return 'I';
+	} else if (c.equals(Short.TYPE)) {
+		return 'S';
+	} else if (c.equals(Byte.TYPE)) {
+		return 'B';
     } else if (c.equals(Float.TYPE)) {
         return 'F';
     }
@@ -1682,9 +1686,11 @@ private static Class decodeToClass(char c) {
 	switch(c) {
 		case 'L': return Long.TYPE;
 		case 'D': return Double.TYPE;
-		case 'B': return Boolean.TYPE;
-		case 'F': return Float.TYPE;
+		case 'Z': return Boolean.TYPE;
 		case 'I': return Integer.TYPE;
+		case 'S': return Short.TYPE;
+		case 'B': return Byte.TYPE;
+		case 'F': return Float.TYPE;
 		default: return Object.class;
 	}
 }

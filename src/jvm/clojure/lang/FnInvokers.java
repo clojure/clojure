@@ -60,16 +60,52 @@ public class FnInvokers {
         }
     }
 
-    public static boolean invokeLB(IFn f0, long a) {
-        return RT.booleanCast(f0.invoke(a));
+    public static short invokeLS(IFn f0, long a) {
+        if(f0 instanceof IFn.LL) {
+            return RT.shortCast(((IFn.LL)f0).invokePrim(a));
+        } else {
+            return RT.shortCast(f0.invoke(a));
+        }
     }
 
-    public static boolean invokeDB(IFn f0, double a) {
-        return RT.booleanCast(f0.invoke(a));
+    public static short invokeDS(IFn f0, double a) {
+        if(f0 instanceof IFn.DL) {
+            return RT.shortCast(((IFn.DL)f0).invokePrim(a));
+        } else {
+            return RT.shortCast(f0.invoke(a));
+        }
     }
 
-    public static boolean invokeOB(IFn f0, Object a) {
-        return RT.booleanCast(f0.invoke(a));
+    public static short invokeOS(IFn f0, Object a) {
+        if(f0 instanceof IFn.OL) {
+            return RT.shortCast(((IFn.OL)f0).invokePrim(a));
+        } else {
+            return RT.shortCast(f0.invoke(a));
+        }
+    }
+
+    public static byte invokeLB(IFn f0, long a) {
+        if(f0 instanceof IFn.LL) {
+            return RT.byteCast(((IFn.LL)f0).invokePrim(a));
+        } else {
+            return RT.byteCast(f0.invoke(a));
+        }
+    }
+
+    public static byte invokeDB(IFn f0, double a) {
+        if(f0 instanceof IFn.DL) {
+            return RT.byteCast(((IFn.DL)f0).invokePrim(a));
+        } else {
+            return RT.byteCast(f0.invoke(a));
+        }
+    }
+
+    public static byte invokeOB(IFn f0, Object a) {
+        if(f0 instanceof IFn.OL) {
+            return RT.byteCast(((IFn.OL)f0).invokePrim(a));
+        } else {
+            return RT.byteCast(f0.invoke(a));
+        }
     }
 
     public static double invokeLD(IFn f0, long a) {
@@ -96,6 +132,42 @@ public class FnInvokers {
         }
     }
 
+    public static float invokeLF(IFn f0, long a) {
+        if(f0 instanceof IFn.LD) {
+            return RT.floatCast(((IFn.LD)f0).invokePrim(a));
+        } else {
+            return RT.floatCast(f0.invoke(a));
+        }
+    }
+
+    public static float invokeDF(IFn f0, double a) {
+        if(f0 instanceof IFn.DD) {
+            return RT.floatCast(((IFn.DD)f0).invokePrim(a));
+        } else {
+            return RT.floatCast(f0.invoke(a));
+        }
+    }
+
+    public static float invokeOF(IFn f0, Object a) {
+        if(f0 instanceof IFn.OD) {
+            return RT.floatCast(((IFn.OD)f0).invokePrim(a));
+        } else {
+            return RT.floatCast(f0.invoke(a));
+        }
+    }
+
+    public static boolean invokeLZ(IFn f0, long a) {
+        return RT.booleanCast(f0.invoke(a));
+    }
+
+    public static boolean invokeDZ(IFn f0, double a) {
+        return RT.booleanCast(f0.invoke(a));
+    }
+
+    public static boolean invokeOZ(IFn f0, Object a) {
+        return RT.booleanCast(f0.invoke(a));
+    }
+
     public static Object invokeLO(IFn f0, long a) {
         if(f0 instanceof IFn.LO) {
             return ((IFn.LO)f0).invokePrim(a);
@@ -114,18 +186,6 @@ public class FnInvokers {
 
     public static Object invokeOO(IFn f0, Object a) {
         return f0.invoke(a);
-    }
-
-    public static float invokeLF(IFn f0, long a) {
-        return RT.floatCast(f0.invoke(a));
-    }
-
-    public static float invokeDF(IFn f0, double a) {
-        return RT.floatCast(f0.invoke(a));
-    }
-
-    public static float invokeOF(IFn f0, Object a) {
-        return RT.floatCast(f0.invoke(a));
     }
 
     public static long invokeLLL(IFn f0, long a, long b) {
@@ -272,40 +332,148 @@ public class FnInvokers {
         }
     }
 
-    public static boolean invokeLLB(IFn f0, long a, long b) {
-        return RT.booleanCast(f0.invoke(a, b));
+    public static short invokeLLS(IFn f0, long a, long b) {
+        if(f0 instanceof IFn.LLL) {
+            return RT.shortCast(((IFn.LLL)f0).invokePrim(a, b));
+        } else {
+            return RT.shortCast(f0.invoke(a, b));
+        }
     }
 
-    public static boolean invokeLOB(IFn f0, long a, Object b) {
-        return RT.booleanCast(f0.invoke(a, b));
+    public static short invokeLOS(IFn f0, long a, Object b) {
+        if(f0 instanceof IFn.LOL) {
+            return RT.shortCast(((IFn.LOL)f0).invokePrim(a, b));
+        } else {
+            return RT.shortCast(f0.invoke(a, b));
+        }
     }
 
-    public static boolean invokeOLB(IFn f0, Object a, long b) {
-        return RT.booleanCast(f0.invoke(a, b));
+    public static short invokeOLS(IFn f0, Object a, long b) {
+        if(f0 instanceof IFn.OLL) {
+            return RT.shortCast(((IFn.OLL)f0).invokePrim(a, b));
+        } else {
+            return RT.shortCast(f0.invoke(a, b));
+        }
     }
 
-    public static boolean invokeDDB(IFn f0, double a, double b) {
-        return RT.booleanCast(f0.invoke(a, b));
+    public static short invokeDDS(IFn f0, double a, double b) {
+        if(f0 instanceof IFn.DDL) {
+            return RT.shortCast(((IFn.DDL)f0).invokePrim(a, b));
+        } else {
+            return RT.shortCast(f0.invoke(a, b));
+        }
     }
 
-    public static boolean invokeLDB(IFn f0, long a, double b) {
-        return RT.booleanCast(f0.invoke(a, b));
+    public static short invokeLDS(IFn f0, long a, double b) {
+        if(f0 instanceof IFn.LDL) {
+            return RT.shortCast(((IFn.LDL)f0).invokePrim(a, b));
+        } else {
+            return RT.shortCast(f0.invoke(a, b));
+        }
     }
 
-    public static boolean invokeDLB(IFn f0, double a, long b) {
-        return RT.booleanCast(f0.invoke(a, b));
+    public static short invokeDLS(IFn f0, double a, long b) {
+        if(f0 instanceof IFn.DLL) {
+            return RT.shortCast(((IFn.DLL)f0).invokePrim(a, b));
+        } else {
+            return RT.shortCast(f0.invoke(a, b));
+        }
     }
 
-    public static boolean invokeOOB(IFn f0, Object a, Object b) {
-        return RT.booleanCast(f0.invoke(a, b));
+    public static short invokeOOS(IFn f0, Object a, Object b) {
+        if(f0 instanceof IFn.OOL) {
+            return RT.shortCast(((IFn.OOL)f0).invokePrim(a, b));
+        } else {
+            return RT.shortCast(f0.invoke(a, b));
+        }
     }
 
-    public static boolean invokeODB(IFn f0, Object a, double b) {
-        return RT.booleanCast(f0.invoke(a, b));
+    public static short invokeODS(IFn f0, Object a, double b) {
+        if(f0 instanceof IFn.ODL) {
+            return RT.shortCast(((IFn.ODL)f0).invokePrim(a, b));
+        } else {
+            return RT.shortCast(f0.invoke(a, b));
+        }
     }
 
-    public static boolean invokeDOB(IFn f0, double a, Object b) {
-        return RT.booleanCast(f0.invoke(a, b));
+    public static short invokeDOS(IFn f0, double a, Object b) {
+        if(f0 instanceof IFn.DOL) {
+            return RT.shortCast(((IFn.DOL)f0).invokePrim(a, b));
+        } else {
+            return RT.shortCast(f0.invoke(a, b));
+        }
+    }
+
+    public static byte invokeLLB(IFn f0, long a, long b) {
+        if(f0 instanceof IFn.LLL) {
+            return RT.byteCast(((IFn.LLL)f0).invokePrim(a, b));
+        } else {
+            return RT.byteCast(f0.invoke(a, b));
+        }
+    }
+
+    public static byte invokeLOB(IFn f0, long a, Object b) {
+        if(f0 instanceof IFn.LOL) {
+            return RT.byteCast(((IFn.LOL)f0).invokePrim(a, b));
+        } else {
+            return RT.byteCast(f0.invoke(a, b));
+        }
+    }
+
+    public static byte invokeOLB(IFn f0, Object a, long b) {
+        if(f0 instanceof IFn.OLL) {
+            return RT.byteCast(((IFn.OLL)f0).invokePrim(a, b));
+        } else {
+            return RT.byteCast(f0.invoke(a, b));
+        }
+    }
+
+    public static byte invokeDDB(IFn f0, double a, double b) {
+        if(f0 instanceof IFn.DDL) {
+            return RT.byteCast(((IFn.DDL)f0).invokePrim(a, b));
+        } else {
+            return RT.byteCast(f0.invoke(a, b));
+        }
+    }
+
+    public static byte invokeLDB(IFn f0, long a, double b) {
+        if(f0 instanceof IFn.LDL) {
+            return RT.byteCast(((IFn.LDL)f0).invokePrim(a, b));
+        } else {
+            return RT.byteCast(f0.invoke(a, b));
+        }
+    }
+
+    public static byte invokeDLB(IFn f0, double a, long b) {
+        if(f0 instanceof IFn.DLL) {
+            return RT.byteCast(((IFn.DLL)f0).invokePrim(a, b));
+        } else {
+            return RT.byteCast(f0.invoke(a, b));
+        }
+    }
+
+    public static byte invokeOOB(IFn f0, Object a, Object b) {
+        if(f0 instanceof IFn.OOL) {
+            return RT.byteCast(((IFn.OOL)f0).invokePrim(a, b));
+        } else {
+            return RT.byteCast(f0.invoke(a, b));
+        }
+    }
+
+    public static byte invokeODB(IFn f0, Object a, double b) {
+        if(f0 instanceof IFn.ODL) {
+            return RT.byteCast(((IFn.ODL)f0).invokePrim(a, b));
+        } else {
+            return RT.byteCast(f0.invoke(a, b));
+        }
+    }
+
+    public static byte invokeDOB(IFn f0, double a, Object b) {
+        if(f0 instanceof IFn.DOL) {
+            return RT.byteCast(((IFn.DOL)f0).invokePrim(a, b));
+        } else {
+            return RT.byteCast(f0.invoke(a, b));
+        }
     }
 
     public static double invokeLLD(IFn f0, long a, long b) {
@@ -380,6 +548,114 @@ public class FnInvokers {
         }
     }
 
+    public static float invokeLLF(IFn f0, long a, long b) {
+        if(f0 instanceof IFn.LLD) {
+            return RT.floatCast(((IFn.LLD)f0).invokePrim(a, b));
+        } else {
+            return RT.floatCast(f0.invoke(a, b));
+        }
+    }
+
+    public static float invokeLOF(IFn f0, long a, Object b) {
+        if(f0 instanceof IFn.LOD) {
+            return RT.floatCast(((IFn.LOD)f0).invokePrim(a, b));
+        } else {
+            return RT.floatCast(f0.invoke(a, b));
+        }
+    }
+
+    public static float invokeOLF(IFn f0, Object a, long b) {
+        if(f0 instanceof IFn.OLD) {
+            return RT.floatCast(((IFn.OLD)f0).invokePrim(a, b));
+        } else {
+            return RT.floatCast(f0.invoke(a, b));
+        }
+    }
+
+    public static float invokeDDF(IFn f0, double a, double b) {
+        if(f0 instanceof IFn.DDD) {
+            return RT.floatCast(((IFn.DDD)f0).invokePrim(a, b));
+        } else {
+            return RT.floatCast(f0.invoke(a, b));
+        }
+    }
+
+    public static float invokeLDF(IFn f0, long a, double b) {
+        if(f0 instanceof IFn.LDD) {
+            return RT.floatCast(((IFn.LDD)f0).invokePrim(a, b));
+        } else {
+            return RT.floatCast(f0.invoke(a, b));
+        }
+    }
+
+    public static float invokeDLF(IFn f0, double a, long b) {
+        if(f0 instanceof IFn.DLD) {
+            return RT.floatCast(((IFn.DLD)f0).invokePrim(a, b));
+        } else {
+            return RT.floatCast(f0.invoke(a, b));
+        }
+    }
+
+    public static float invokeOOF(IFn f0, Object a, Object b) {
+        if(f0 instanceof IFn.OOD) {
+            return RT.floatCast(((IFn.OOD)f0).invokePrim(a, b));
+        } else {
+            return RT.floatCast(f0.invoke(a, b));
+        }
+    }
+
+    public static float invokeODF(IFn f0, Object a, double b) {
+        if(f0 instanceof IFn.ODD) {
+            return RT.floatCast(((IFn.ODD)f0).invokePrim(a, b));
+        } else {
+            return RT.floatCast(f0.invoke(a, b));
+        }
+    }
+
+    public static float invokeDOF(IFn f0, double a, Object b) {
+        if(f0 instanceof IFn.DOD) {
+            return RT.floatCast(((IFn.DOD)f0).invokePrim(a, b));
+        } else {
+            return RT.floatCast(f0.invoke(a, b));
+        }
+    }
+
+    public static boolean invokeLLZ(IFn f0, long a, long b) {
+        return RT.booleanCast(f0.invoke(a, b));
+    }
+
+    public static boolean invokeLOZ(IFn f0, long a, Object b) {
+        return RT.booleanCast(f0.invoke(a, b));
+    }
+
+    public static boolean invokeOLZ(IFn f0, Object a, long b) {
+        return RT.booleanCast(f0.invoke(a, b));
+    }
+
+    public static boolean invokeDDZ(IFn f0, double a, double b) {
+        return RT.booleanCast(f0.invoke(a, b));
+    }
+
+    public static boolean invokeLDZ(IFn f0, long a, double b) {
+        return RT.booleanCast(f0.invoke(a, b));
+    }
+
+    public static boolean invokeDLZ(IFn f0, double a, long b) {
+        return RT.booleanCast(f0.invoke(a, b));
+    }
+
+    public static boolean invokeOOZ(IFn f0, Object a, Object b) {
+        return RT.booleanCast(f0.invoke(a, b));
+    }
+
+    public static boolean invokeODZ(IFn f0, Object a, double b) {
+        return RT.booleanCast(f0.invoke(a, b));
+    }
+
+    public static boolean invokeDOZ(IFn f0, double a, Object b) {
+        return RT.booleanCast(f0.invoke(a, b));
+    }
+
     public static Object invokeLLO(IFn f0, long a, long b) {
         if(f0 instanceof IFn.LLO) {
             return ((IFn.LLO)f0).invokePrim(a, b);
@@ -448,43 +724,7 @@ public class FnInvokers {
         }
     }
 
-    public static float invokeLLF(IFn f0, long a, long b) {
-        return RT.floatCast(f0.invoke(a, b));
-    }
-
-    public static float invokeLOF(IFn f0, long a, Object b) {
-        return RT.floatCast(f0.invoke(a, b));
-    }
-
-    public static float invokeOLF(IFn f0, Object a, long b) {
-        return RT.floatCast(f0.invoke(a, b));
-    }
-
-    public static float invokeDDF(IFn f0, double a, double b) {
-        return RT.floatCast(f0.invoke(a, b));
-    }
-
-    public static float invokeLDF(IFn f0, long a, double b) {
-        return RT.floatCast(f0.invoke(a, b));
-    }
-
-    public static float invokeDLF(IFn f0, double a, long b) {
-        return RT.floatCast(f0.invoke(a, b));
-    }
-
-    public static float invokeOOF(IFn f0, Object a, Object b) {
-        return RT.floatCast(f0.invoke(a, b));
-    }
-
-    public static float invokeODF(IFn f0, Object a, double b) {
-        return RT.floatCast(f0.invoke(a, b));
-    }
-
-    public static float invokeDOF(IFn f0, double a, Object b) {
-        return RT.floatCast(f0.invoke(a, b));
-    }
-
-    public static boolean invokeOOOB(IFn f0, Object a, Object b, Object c) {
+    public static boolean invokeOOOZ(IFn f0, Object a, Object b, Object c) {
         return RT.booleanCast(f0.invoke(a, b, c));
     }
 
@@ -492,7 +732,7 @@ public class FnInvokers {
         return f0.invoke(a, b, c);
     }
 
-    public static boolean invokeOOOOB(IFn f0, Object a, Object b, Object c, Object d) {
+    public static boolean invokeOOOOZ(IFn f0, Object a, Object b, Object c, Object d) {
         return RT.booleanCast(f0.invoke(a, b, c, d));
     }
 
@@ -500,7 +740,7 @@ public class FnInvokers {
         return f0.invoke(a, b, c, d);
     }
 
-    public static boolean invokeOOOOOB(IFn f0, Object a, Object b, Object c, Object d, Object e) {
+    public static boolean invokeOOOOOZ(IFn f0, Object a, Object b, Object c, Object d, Object e) {
         return RT.booleanCast(f0.invoke(a, b, c, d, e));
     }
 
@@ -508,7 +748,7 @@ public class FnInvokers {
         return f0.invoke(a, b, c, d, e);
     }
 
-    public static boolean invokeOOOOOOB(IFn f0, Object a, Object b, Object c, Object d, Object e, Object f) {
+    public static boolean invokeOOOOOOZ(IFn f0, Object a, Object b, Object c, Object d, Object e, Object f) {
         return RT.booleanCast(f0.invoke(a, b, c, d, e, f));
     }
 
@@ -516,7 +756,7 @@ public class FnInvokers {
         return f0.invoke(a, b, c, d, e, f);
     }
 
-    public static boolean invokeOOOOOOOB(IFn f0, Object a, Object b, Object c, Object d, Object e, Object f, Object g) {
+    public static boolean invokeOOOOOOOZ(IFn f0, Object a, Object b, Object c, Object d, Object e, Object f, Object g) {
         return RT.booleanCast(f0.invoke(a, b, c, d, e, f, g));
     }
 
@@ -524,7 +764,7 @@ public class FnInvokers {
         return f0.invoke(a, b, c, d, e, f, g);
     }
 
-    public static boolean invokeOOOOOOOOB(IFn f0, Object a, Object b, Object c, Object d, Object e, Object f, Object g, Object h) {
+    public static boolean invokeOOOOOOOOZ(IFn f0, Object a, Object b, Object c, Object d, Object e, Object f, Object g, Object h) {
         return RT.booleanCast(f0.invoke(a, b, c, d, e, f, g, h));
     }
 
@@ -532,7 +772,7 @@ public class FnInvokers {
         return f0.invoke(a, b, c, d, e, f, g, h);
     }
 
-    public static boolean invokeOOOOOOOOOB(IFn f0, Object a, Object b, Object c, Object d, Object e, Object f, Object g, Object h, Object i) {
+    public static boolean invokeOOOOOOOOOZ(IFn f0, Object a, Object b, Object c, Object d, Object e, Object f, Object g, Object h, Object i) {
         return RT.booleanCast(f0.invoke(a, b, c, d, e, f, g, h, i));
     }
 
@@ -540,7 +780,7 @@ public class FnInvokers {
         return f0.invoke(a, b, c, d, e, f, g, h, i);
     }
 
-    public static boolean invokeOOOOOOOOOOB(IFn f0, Object a, Object b, Object c, Object d, Object e, Object f, Object g, Object h, Object i, Object j) {
+    public static boolean invokeOOOOOOOOOOZ(IFn f0, Object a, Object b, Object c, Object d, Object e, Object f, Object g, Object h, Object i, Object j) {
         return RT.booleanCast(f0.invoke(a, b, c, d, e, f, g, h, i, j));
     }
 
