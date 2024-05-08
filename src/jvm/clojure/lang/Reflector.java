@@ -679,17 +679,19 @@ public static Object prepRet(Class c, Object x){
 }
 
 // Return type coercions match coercions in FnInvokers for compiled invokers
-private static Object dynamicAdapterReturn(Object ret, Class targetType) {
-	switch(targetType.getName()) {
-		case "boolean": return RT.booleanCast(ret);
-		case "long": return RT.longCast(ret);
-		case "double": return RT.doubleCast(ret);
-		case "int": return RT.intCast(ret);
-		case "short": return RT.shortCast(ret);
-		case "byte": return RT.byteCast(ret);
-		case "float": return RT.floatCast(ret);
-		default: return ret;
+private static Object coerceAdapterReturn(Object ret, Class targetType) {
+	if(targetType.isPrimitive()) {
+		switch (targetType.getName()) {
+			case "boolean": return RT.booleanCast(ret);
+			case "long":    return RT.longCast(ret);
+			case "double":  return RT.doubleCast(ret);
+			case "int":     return RT.intCast(ret);
+			case "short":   return RT.shortCast(ret);
+			case "byte":    return RT.byteCast(ret);
+			case "float":   return RT.floatCast(ret);
+		}
 	}
+	return ret;
 }
 
 // If needed, adapt IFn obj to targetType using dynamic proxy,
@@ -702,15 +704,12 @@ private static Object adaptIfIFn(Object obj, Class targetType) {
 					(ClassLoader) Compiler.LOADER.get(),
 					new Class[]{targetType},
 					(proxy, method, methodArgs) -> {
-						if (obj instanceof IFn) {
-							Object ret = ((IFn) obj).applyTo(RT.seq(methodArgs));
-							return dynamicAdapterReturn(ret, method.getReturnType());
-						} else {
-							throw new IllegalArgumentException("Expected function, but found " + (proxy == null ? "null" : proxy.getClass().getName()));
-						}
+						Object ret = ((IFn) obj).applyTo(RT.seq(methodArgs));
+						return coerceAdapterReturn(ret, method.getReturnType());
 					});
 		}
 	}
+	// if not adapted...
 	return targetType.cast(obj);
 }
 
