@@ -57,7 +57,7 @@ private static boolean canAccess(Method m, Object target) {
 	}
 }
 
-private static Collection<Class> interfaces(Class c) {
+static Collection<Class> interfaces(Class c) {
 	Set<Class> interfaces = new HashSet<Class>();
 	Deque<Class> toWalk = new ArrayDeque<Class>();
 	toWalk.addAll(Arrays.asList(c.getInterfaces()));
@@ -573,11 +573,7 @@ static public List<Method> getMethods(Class c, int arity, String name, boolean g
 
 static Object boxArg(Class paramType, Object arg){
 	if(!paramType.isPrimitive())
-		if(Compiler.isAdaptableFunctionalInterface(paramType) && !(paramType.isInstance(arg))) {
-			return dynamicAdapt(paramType, arg);
-		} else {
-			return paramType.cast(arg);
-		}
+		return adaptIfIFn(arg, paramType);
 	else if(paramType == boolean.class)
 		return Boolean.class.cast(arg);
 	else if(paramType == char.class)
@@ -620,7 +616,7 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 		return !paramType.isPrimitive();
 	if(paramType == argType || paramType.isAssignableFrom(argType))
 		return true;
-	if(Compiler.isAdaptableFunctionalInterface(paramType) && IFn.class.isAssignableFrom(argType))
+	if(Compiler.maybeAdaptableSAMMethod(paramType) != null && IFn.class.isAssignableFrom(argType))
 		return true;
 	if(paramType == int.class)
 		return argType == Integer.class
@@ -698,19 +694,25 @@ private static Object dynamicAdapterReturn(Object ret, Class targetType) {
     return ret;
 }
 
-// Dynamically adapt fn to targetFnInterface using proxy
-private static Object dynamicAdapt(Class targetFnInterface, Object fn) {
-	return Proxy.newProxyInstance(
-			(ClassLoader)Compiler.LOADER.get(),
-			new Class[] { targetFnInterface },
-			(proxy,method,methodArgs)-> {
-				if (fn instanceof IFn) {
-					Object ret = ((IFn) fn).applyTo(RT.seq(methodArgs));
-					return dynamicAdapterReturn(ret, method.getReturnType());
-				} else {
-					throw new IllegalArgumentException("Expected function, but found " + (proxy == null ? "null" : proxy.getClass().getName()));
-				}
-			});
+// If needed, dynamically adapt fn to targetType using proxy, else return obj
+private static Object adaptIfIFn(Object obj, Class targetType) {
+	if(obj instanceof IFn) {
+		Method targetMethod = Compiler.maybeAdaptableSAMMethod(targetType);
+		if (targetMethod != null) {
+			return Proxy.newProxyInstance(
+					(ClassLoader) Compiler.LOADER.get(),
+					new Class[]{targetType},
+					(proxy, method, methodArgs) -> {
+						if (obj instanceof IFn) {
+							Object ret = ((IFn) obj).applyTo(RT.seq(methodArgs));
+							return dynamicAdapterReturn(ret, method.getReturnType());
+						} else {
+							throw new IllegalArgumentException("Expected function, but found " + (proxy == null ? "null" : proxy.getClass().getName()));
+						}
+					});
+		}
+	}
+	return targetType.cast(obj);
 }
 
 }

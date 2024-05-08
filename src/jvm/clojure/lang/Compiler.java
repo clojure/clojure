@@ -1612,32 +1612,23 @@ static Class maybePrimitiveType(Expr e){
 	return null;
 }
 
-// FunctionalInterfaces excluded from functional conversion
-private static final IPersistentSet EXCLUDED_FN_INTERFACES = RT.set(
-		// Clojure fns already do these
-		"java.lang.Runnable", "java.util.concurrent.Callable", "java.util.Comparator",
-		// Suppliers excluded from conversion, use IDeref instead
-		"java.util.function.Supplier", "java.util.function.BooleanSupplier", "java.util.function.DoubleSupplier",
-		"java.util.function.IntSupplier", "java.util.function.LongSupplier");
-
-// Adaptable functional interface has @FunctionalInterface annotation
-static boolean isAdaptableFunctionalInterface(Class c){
-	return c != null &&
-			c.isInterface() &&
-			c.isAnnotationPresent(FunctionalInterface.class) &&
-			! EXCLUDED_FN_INTERFACES.contains(c.getName());
-}
-
-
+private static final Collection<Class> AFUNCTION_INTERFACES = Reflector.interfaces(AFunction.class);
 private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString", "hashCode");
 
-// The SAM method (there must be one) is abstract,
-// and not an override from Object of equals, toString, or hashCode
-private static java.lang.reflect.Method getAdaptableSAMMethod(Class target) {
-	if(isAdaptableFunctionalInterface(target)) {
+// If target is non-null, an interface, annotated as @FunctionalInterface,
+// not a super-interface of AFn (no need to adapt),
+// and has a SAM method of acceptable arity (1 <= arity <= 10),
+// then return it, else null
+static java.lang.reflect.Method maybeAdaptableSAMMethod(Class target) {
+	if(target != null && target.isInterface()
+			&& target.isAnnotationPresent(FunctionalInterface.class)
+			&& !AFUNCTION_INTERFACES.contains(target))
+	{
 		java.lang.reflect.Method[] methods = target.getMethods();
 		for (int i = 0; i < methods.length; i++)
-			if (Modifier.isAbstract(methods[i].getModifiers()) && !OBJECT_METHODS.contains(methods[i].getName()))
+			if (methods[i].getParameterCount() >= 1 && methods[i].getParameterCount() <= 10
+					&& Modifier.isAbstract(methods[i].getModifiers())
+					&& !OBJECT_METHODS.contains(methods[i].getName()))
 				return methods[i];
 	}
 	return null;
@@ -1657,18 +1648,17 @@ private static char encodeInvokerParam(Class c) {
 // Given an FI method return type (any class or primitive),
 // which type code specifies what the invoker method should return
 private static char encodeInvokerReturn(Class c) {
-	// Direct match primitives we support
+	// Exact match primitives we support
     if (c.equals(Long.TYPE)) {
         return 'L';
     } else if (c.equals(Double.TYPE)) {
         return 'D';
 
-	// If FI method returns a boolean, apply boolean coercion logic in invoker
+	// Apply Clojure logical truth in invoker method
     } else if (c.equals(Boolean.TYPE)) {
         return 'Z';
 
-	// If FI method returns int or float (common), support a narrowing conversion
-	// from primitive long or double in invoker method to stay primitive
+	// Narrowing conversions from primitive long or double IFn in invoker method
     } else if (c.equals(Integer.TYPE)) {
         return 'I';
 	} else if (c.equals(Short.TYPE)) {
@@ -1700,20 +1690,19 @@ private static Class decodeToClass(char c) {
  * Emit (with f on stack): if(f instanceof IFn) { emit adapter to invoker method }
  * return whether a matching invoker method was found
  */
-private static boolean ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fiClass) {
+private static void emitAdaptIfIFn(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class fiClass) {
 	// Future: optimize expr instanceof QualifiedMethodExpr
 
 	// emit the expr
 	expr.emit(C.EXPRESSION, objx, gen);
 
-	java.lang.reflect.Method targetMethod = getAdaptableSAMMethod(fiClass);
-	int paramCount = targetMethod.getParameterCount();
-	if(paramCount == 0 || paramCount > 10) {
-		return false;
-	}
+	java.lang.reflect.Method targetMethod = maybeAdaptableSAMMethod(fiClass);
+	if(targetMethod == null)
+		return;
 
 	// compute invoker method name
-	Class[] invokerParams = new Class[targetMethod.getParameterCount()+1];
+	int paramCount = targetMethod.getParameterCount();
+	Class[] invokerParams = new Class[paramCount+1];
 	invokerParams[0] = IFn.class;  // close over Ifn as first arg
 	StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
 	for (int i = 0; i < paramCount; i++) {
@@ -1745,7 +1734,6 @@ private static boolean ensureFunctionalInterface(ObjExpr objx, GeneratorAdapter 
 		// end - check that we have the FI type
 		gen.mark(endLabel);
 		gen.checkCast(samType);
-		return true;
 
 	} catch(NoSuchMethodException e) {
 		throw Util.sneakyThrow(e); // should never happen
@@ -1887,13 +1875,9 @@ static abstract class MethodExpr extends HostExpr{
 					pe.emitUnboxed(C.EXPRESSION, objx, gen);
 					gen.visitInsn(D2F);
 					}
-				else if(isAdaptableFunctionalInterface(parameterTypes[i]))
-					{
-					ensureFunctionalInterface(objx, gen, e, parameterTypes[i]);
-					}
 				else
 					{
-					e.emit(C.EXPRESSION, objx, gen);
+					emitAdaptIfIFn(objx, gen, e, parameterTypes[i]);
 					HostExpr.emitUnboxArg(objx, gen, parameterTypes[i]);
 					}
 				}
@@ -7055,18 +7039,7 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 			else
 				{
 				Class bindingClass = HostExpr.maybeClass(bi.binding.tag, true);
-				if(isAdaptableFunctionalInterface(bindingClass))
-				    {
-					if(!ensureFunctionalInterface(objx, gen, bi.init, bindingClass))
-					    {
-                        throw Util.runtimeException("Can't coerce function to " + bindingClass.getName() +
-                            ", provide an instance of this type (perhaps with 'reify')");
-						}
-				    }
-				else
-				    {
-					bi.init.emit(C.EXPRESSION, objx, gen);
-				    }
+				emitAdaptIfIFn(objx, gen, bi.init, bindingClass);
 
 				if (!bi.binding.used && bi.binding.canBeCleared)
 					gen.pop();

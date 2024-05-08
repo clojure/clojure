@@ -830,7 +830,7 @@
 
 (deftest test-reify-to-FI-allowed
   ;; throws because there is no 11-arity invoker method and thus it is not possible to coerce
-  (is (thrown? clojure.lang.Compiler$CompilerException
+  (is (thrown? ClassCastException
         (eval '(let [^clojure.test_clojure.java_interop.FIWontWork f
                      (fn [p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11] p11)]
                  (.invoke f 1 2 3 4 5 6 7 8 9 10 11)))))
