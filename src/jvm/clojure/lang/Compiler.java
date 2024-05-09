@@ -1689,53 +1689,55 @@ private static Class decodeToClass(char c) {
  *   Emit: if(expr instanceof IFn)
  *            emitInvokeDynamic(targetMethod, fnInvokerImplMethod)
  */
-private static void emitAdaptIfIFn(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class targetClass) {
+private static boolean maybeEmitFIAdapter(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class targetClass) {
 	// Optimization:
 	// if(expr instanceof QualifiedMethodExpr)
 	//   emitInvokeDynamic(targetMethod, QME method) // DON'T emit expr
 
-	expr.emit(C.EXPRESSION, objx, gen);
 	java.lang.reflect.Method targetMethod = maybeAdaptableFunctionalMethod(targetClass);
-	if(targetMethod != null) {
-		// compute fn invoker method
-		int paramCount = targetMethod.getParameterCount();
-		Class[] invokerParams = new Class[paramCount + 1];
-		invokerParams[0] = IFn.class;  // close over Ifn as first arg
-		StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
-		for (int i = 0; i < paramCount; i++) {
-			char paramCode = paramCount <= 2 ? encodeInvokerParam(targetMethod.getParameterTypes()[i]) : 'O';
-			invokeMethodBuilder.append(paramCode);
-			invokerParams[i + 1] = decodeToClass(paramCode);
-		}
-		char invokerReturnCode = encodeInvokerReturn(targetMethod.getReturnType());
-		invokeMethodBuilder.append(invokerReturnCode);
-		String invokerMethodName = invokeMethodBuilder.toString();
+	if(targetMethod == null)
+		return false;
 
-		// Emit adapter to fn invoker method
-		Type samType = Type.getType(targetClass);
-		Type ifnType = Type.getType(IFn.class);
-		try {
-			java.lang.reflect.Method fnInvokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
-
-			// if(exp instanceof IFn) { emitInvokeDynamic(targetMethod, fnInvokerMethod) }
-			gen.dup();
-			gen.instanceOf(ifnType);
-
-			// if not instanceof IFn, go to end
-			Label endLabel = gen.newLabel();
-			gen.ifZCmp(Opcodes.IFEQ, endLabel);
-
-			// else adapt fn invoker method as impl for target method
-			emitInvokeDynamicAdapter(gen, targetClass, targetMethod, FnInvokers.class, fnInvokerMethod);
-
-			// end - checkcast that we have the target FI type
-			gen.mark(endLabel);
-			gen.checkCast(samType);
-
-		} catch(NoSuchMethodException e) {
-			throw Util.sneakyThrow(e); // should never happen
-		}
+	// compute fn invoker method
+	int paramCount = targetMethod.getParameterCount();
+	Class[] invokerParams = new Class[paramCount + 1];
+	invokerParams[0] = IFn.class;  // close over Ifn as first arg
+	StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
+	for (int i = 0; i < paramCount; i++) {
+		char paramCode = paramCount <= 2 ? encodeInvokerParam(targetMethod.getParameterTypes()[i]) : 'O';
+		invokeMethodBuilder.append(paramCode);
+		invokerParams[i + 1] = decodeToClass(paramCode);
 	}
+	char invokerReturnCode = encodeInvokerReturn(targetMethod.getReturnType());
+	invokeMethodBuilder.append(invokerReturnCode);
+	String invokerMethodName = invokeMethodBuilder.toString();
+
+	// Emit adapter to fn invoker method
+	Type samType = Type.getType(targetClass);
+	Type ifnType = Type.getType(IFn.class);
+	try {
+		java.lang.reflect.Method fnInvokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
+
+		// if(exp instanceof IFn) { emitInvokeDynamic(targetMethod, fnInvokerMethod) }
+		expr.emit(C.EXPRESSION, objx, gen);
+		gen.dup();
+		gen.instanceOf(ifnType);
+
+		// if not instanceof IFn, go to end
+		Label endLabel = gen.newLabel();
+		gen.ifZCmp(Opcodes.IFEQ, endLabel);
+
+		// else adapt fn invoker method as impl for target method
+		emitInvokeDynamicAdapter(gen, targetClass, targetMethod, FnInvokers.class, fnInvokerMethod);
+
+		// end - checkcast that we have the target FI type
+		gen.mark(endLabel);
+		gen.checkCast(samType);
+		return true;
+	} catch(NoSuchMethodException e) {
+		throw Util.sneakyThrow(e); // should never happen
+	}
+
 }
 
 // LambdaMetafactory.metafactory() method handle for lambda bootstrap
@@ -1874,9 +1876,9 @@ static abstract class MethodExpr extends HostExpr{
 					pe.emitUnboxed(C.EXPRESSION, objx, gen);
 					gen.visitInsn(D2F);
 					}
-				else
-					{
-					emitAdaptIfIFn(objx, gen, e, parameterTypes[i]);
+				else if(!maybeEmitFIAdapter(objx, gen, e, parameterTypes[i]))
+				{
+					e.emit(C.EXPRESSION, objx, gen);
 					HostExpr.emitUnboxArg(objx, gen, parameterTypes[i]);
 					}
 				}
@@ -7038,7 +7040,8 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 			else
 				{
 				Class bindingClass = HostExpr.maybeClass(bi.binding.tag, true);
-				emitAdaptIfIFn(objx, gen, bi.init, bindingClass);
+				if(!maybeEmitFIAdapter(objx, gen, bi.init, bindingClass))
+					bi.init.emit(C.EXPRESSION, objx, gen);
 
 				if (!bi.binding.used && bi.binding.canBeCleared)
 					gen.pop();
