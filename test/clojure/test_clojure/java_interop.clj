@@ -817,9 +817,9 @@
 (deftest test-reflection-to-overloaded-method-taking-FI
   ;; all of these should resolve at runtime in reflection
   (is (not (nil? (get-dir-stream "." "*"))))
-  (get-dir-stream "." (reify java.nio.file.DirectoryStream$Filter (accept [_ path] (.isDirectory (.toFile path)))))
+  (is (not (nil? (get-dir-stream "." (reify java.nio.file.DirectoryStream$Filter (accept [_ path] (.isDirectory (.toFile path))))))))
   ;; this one gets FI converted from IFn to DirectoryStream$Filter
-  (get-dir-stream "." (fn [^java.nio.file.Path path] (.isDirectory (.toFile path)))))
+  (is (not (nil? (get-dir-stream "." (fn [^java.nio.file.Path path] (.isDirectory (.toFile path))))))))
 
 ;; we only support FI invoke coercion up to 10 args, this has 11
 (definterface ^{java.lang.FunctionalInterface true} FIWontWork
@@ -858,7 +858,10 @@
     (is (= 4 (.call r (fn [^long a ^long b ^long c ^long d] d))))))
 
 (deftest test-null-reify
-  ((fn [x] (FIStatic/allowsNullFI x)) nil))
+  (is (= "null" ((fn [x] (FIStatic/allowsNullFI x)) nil))))
+
+(deftest test-FI-subtype
+  (is (= [1 2 3 4 5] (->> (java.util.stream.Stream/iterate 1 inc) stream-seq! (take 5)))))
 
 (deftest test-all-fi-adapters-in-let
 

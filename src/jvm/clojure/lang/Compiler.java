@@ -1726,7 +1726,7 @@ private static void emitAdaptIfIFn(ObjExpr objx, GeneratorAdapter gen, Expr expr
 			gen.ifZCmp(Opcodes.IFEQ, endLabel);
 
 			// else adapt fn invoker method as impl for target method
-			emitInvokeDynamicAdapter(gen, targetMethod, fnInvokerMethod);
+			emitInvokeDynamicAdapter(gen, targetClass, targetMethod, FnInvokers.class, fnInvokerMethod);
 
 			// end - checkcast that we have the target FI type
 			gen.mark(endLabel);
@@ -1756,16 +1756,18 @@ private static final Handle LMF_HANDLE =
  * to implMethod. The trailing arguments must match the targetMethod arguments.
  *
  * @param gen ASM code generator, expects any closed-overs to be on the stack already
+ * @param targetClass The target class
  * @param targetMethod The target method
- * @param implMethod The method that will be adapted, takes closed-overs + args of targetMethod
+ * @param implClass The impl class
+ * @param implMethod The impl method that will be adapted, takes closed-overs + args of targetMethod
  */
-private static void emitInvokeDynamicAdapter(
-	GeneratorAdapter gen, java.lang.reflect.Method targetMethod, Executable implMethod) {
+private static void emitInvokeDynamicAdapter(GeneratorAdapter gen,
+	Class targetClass, java.lang.reflect.Method targetMethod,
+	Class implClass, Executable implMethod) {
 
 	// Impl method - takes closed overs (on stack now) + args (when called)
 	Class[] implParams = implMethod.getParameterTypes();
-	Class retClass = isConstructor(implMethod)
-			? implMethod.getDeclaringClass()
+	Class retClass = isConstructor(implMethod) ? implClass
 			: ((java.lang.reflect.Method)implMethod).getReturnType();
 
 	int opCode = isConstructor(implMethod) ? Opcodes.H_INVOKESPECIAL :
@@ -1773,7 +1775,7 @@ private static void emitInvokeDynamicAdapter(
 						Opcodes.H_INVOKEVIRTUAL);
 
 	Handle implHandle = new Handle(opCode,
-			Type.getInternalName(implMethod.getDeclaringClass()),
+			Type.getInternalName(implClass),
 			implMethod.getName(),
 			MethodType.methodType(retClass, implParams).toMethodDescriptorString(),
 			false);
@@ -1783,7 +1785,7 @@ private static void emitInvokeDynamicAdapter(
 	if(isInstanceMethod(implMethod))  // instance is first "arg"
 		implArgCount++;
 	List lambdaParams = Arrays.asList(Arrays.copyOfRange(implParams, 0, implArgCount - targetMethod.getParameterCount()));
-	MethodType lambdaSig = MethodType.methodType(targetMethod.getDeclaringClass(), lambdaParams);
+	MethodType lambdaSig = MethodType.methodType(targetClass, lambdaParams);
 
 	Type targetType = Type.getType(targetMethod);
 	gen.visitInvokeDynamicInsn(
