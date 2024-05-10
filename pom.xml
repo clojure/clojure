@@ -41,17 +41,17 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>spec.alpha</artifactId>
-       <version>0.3.218</version>
+       <version>0.5.238</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>core.specs.alpha</artifactId>
-      <version>0.2.62</version>
+      <version>0.4.74</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>test.generative</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -75,7 +75,7 @@
     <dependency>
       <groupId>javax.xml.ws</groupId>
       <artifactId>jaxws-api</artifactId>
-      <version>2.3.0</version>
+      <version>2.3.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -103,7 +103,7 @@
       <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-compiler-plugin</artifactId>
-	<version>3.1</version>
+	<version>3.13.0</version>
 	<configuration>
 	  <source>1.8</source>
 	  <target>1.8</target>
@@ -112,7 +112,7 @@
       </plugin>
       <plugin>
 	<artifactId>maven-antrun-plugin</artifactId>
-	<version>1.6</version>
+	<version>3.1.0</version>
 	<executions>
 	  <execution>
 	    <id>clojure-compile</id>
@@ -145,7 +145,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.5</version>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <id>add-clojure-source-dirs</id>
@@ -163,7 +163,7 @@
       </plugin>
       <plugin>
 	<artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2</version>
+        <version>3.7.1</version>
 	<executions>
 	  <execution>
 	    <id>clojure-slim-jar</id>
@@ -181,11 +181,11 @@
       </plugin>
       <plugin>
 	<artifactId>maven-jar-plugin</artifactId>
-	<version>2.3.1</version>
+	<version>3.4.1</version>
       </plugin>
       <plugin>
 	<artifactId>maven-source-plugin</artifactId>
-	<version>2.1.2</version>
+	<version>3.3.1</version>
 	<executions>
 	  <execution>
 	    <id>attach-sources</id>
@@ -207,7 +207,7 @@
 	     instead, push SCM changes in Hudson configuration -->
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-release-plugin</artifactId>
-	<version>2.5.3</version>
+	<version>3.0.1</version>
 	<configuration>
 	  <pushChanges>false</pushChanges>
 	  <localCheckout>true</localCheckout>
@@ -217,7 +217,7 @@
 	<!-- disable the Surefire testing plugin -->
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-surefire-plugin</artifactId>
-	<version>2.6</version>
+	<version>3.2.5</version>
 	<configuration>
 	  <skip>true</skip>
 	</configuration>
@@ -227,7 +227,7 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.8</version>
+        <version>1.6.13</version>
         <extensions>true</extensions>
         <configuration>
           <!-- The server "id" element from settings to use authentication from -->
@@ -261,7 +261,7 @@
 	<plugins>
 	  <plugin>
 	    <artifactId>maven-assembly-plugin</artifactId>
-	    <version>2.2</version>
+	    <version>3.7.1</version>
 	    <executions>
 	      <execution>
 		<id>clojure-distribution</id>
@@ -289,7 +289,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
+            <version>3.2.4</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -309,7 +309,7 @@
         <dependency>
           <groupId>org.clojure</groupId>
           <artifactId>test.check</artifactId>
-          <version>0.9.0</version>
+          <version>1.1.1</version>
           <exclusions>
             <exclusion>
               <groupId>org.clojure</groupId>
@@ -323,7 +323,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>3.1.0</version>
+            <version>3.5.3</version>
             <executions>
               <execution>
                 <phase>package</phase>
