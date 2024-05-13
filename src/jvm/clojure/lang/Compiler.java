@@ -1621,7 +1621,7 @@ static class FISupport {
 	// 1) Target is a functional interface
 	// 2) Target method matches ones of our fn invoker methods (0 < arity <= 10)
 	static java.lang.reflect.Method maybeFIMethod(Class target) {
-		if (target != null && target.isInterface()
+		if (target != null
 				&& target.isAnnotationPresent(FunctionalInterface.class)
 				&& !AFN_FIS.contains(target)) {
 			java.lang.reflect.Method[] methods = target.getMethods();
