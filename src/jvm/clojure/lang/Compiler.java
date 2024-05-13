@@ -1635,62 +1635,34 @@ static class FISupport {
 		return null;
 	}
 
-	// Given an FI method parameter type (any class or primitive),
-	// what is the type code for the fn invoker method parameter
-	private static char encodeInvokerParam(Class c) {
+	// Invokers support only long, double, Object params; widen numerics
+	private static Class toInvokerParamType(Class c) {
 		if (c.equals(Byte.TYPE) || c.equals(Short.TYPE) || c.equals(Integer.TYPE) || c.equals(Long.TYPE)) {
-			return 'L';
+			return Long.TYPE;
 		} else if (c.equals(Float.TYPE) || c.equals(Double.TYPE)) {
-			return 'D';
+			return Double.TYPE;
 		}
-		return 'O';
+		return Object.class;
 	}
 
-	// Given an FI method return type (any class or primitive),
-	// what is the type code for the fn invoker method return
-	private static char encodeInvokerReturn(Class c) {
-		// Exact match primitives we support
-		if (c.equals(Long.TYPE)) {
+	// Encode invoker param/return class to code for method name
+	private static char encodeInvokerType(Class c) {
+		if(Long.TYPE.equals(c)) {
 			return 'L';
-		} else if (c.equals(Double.TYPE)) {
+		} else if(Double.TYPE.equals(c)) {
 			return 'D';
-
-			// Clojure logical truth in fn invoker method
-		} else if (c.equals(Boolean.TYPE)) {
-			return 'Z';
-
-			// Narrowing conversion to target type in fn invoker method
-		} else if (c.equals(Integer.TYPE)) {
+		} else if(Integer.TYPE.equals(c)) {
 			return 'I';
-		} else if (c.equals(Short.TYPE)) {
+		} else if(Short.TYPE.equals(c)) {
 			return 'S';
-		} else if (c.equals(Byte.TYPE)) {
+		} else if(Byte.TYPE.equals(c)) {
 			return 'B';
-		} else if (c.equals(Float.TYPE)) {
+		} else if(Float.TYPE.equals(c)) {
 			return 'F';
-		}
-		return 'O';
-	}
-
-	// Decode invoker type code to class
-	private static Class decodeToClass(char c) {
-		switch (c) {
-			case 'B':
-				return Byte.TYPE;
-			case 'S':
-				return Short.TYPE;
-			case 'I':
-				return Integer.TYPE;
-			case 'L':
-				return Long.TYPE;
-			case 'F':
-				return Float.TYPE;
-			case 'D':
-				return Double.TYPE;
-			case 'Z':
-				return Boolean.TYPE;
-			default:
-				return Object.class;
+		} else if(Boolean.TYPE.equals(c)) {
+			return 'Z';
+		} else {
+			return 'O';
 		}
 	}
 
@@ -1716,11 +1688,11 @@ static class FISupport {
 		invokerParams[0] = IFn.class;  // close over Ifn as first arg
 		StringBuilder invokeMethodBuilder = new StringBuilder("invoke");
 		for (int i = 0; i < paramCount; i++) {
-			char paramCode = paramCount <= 2 ? encodeInvokerParam(targetMethod.getParameterTypes()[i]) : 'O';
-			invokeMethodBuilder.append(paramCode);
-			invokerParams[i + 1] = decodeToClass(paramCode);
+			// FnInvokers only has prims for first 2 args
+			invokerParams[i + 1] = paramCount <= 2 ? toInvokerParamType(targetMethod.getParameterTypes()[i]) : Object.class;
+			invokeMethodBuilder.append(encodeInvokerType(invokerParams[i + 1]));
 		}
-		char invokerReturnCode = encodeInvokerReturn(targetMethod.getReturnType());
+		char invokerReturnCode = encodeInvokerType(targetMethod.getReturnType());
 		invokeMethodBuilder.append(invokerReturnCode);
 		String invokerMethodName = invokeMethodBuilder.toString();
 
