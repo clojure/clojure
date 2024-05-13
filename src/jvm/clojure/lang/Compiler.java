@@ -1621,16 +1621,17 @@ static class FISupport {
 	// 1) Target is a functional interface
 	// 2) Target method matches ones of our fn invoker methods (0 < arity <= 10)
 	static java.lang.reflect.Method maybeFIMethod(Class target) {
-		if (target != null
-				&& target.isAnnotationPresent(FunctionalInterface.class)
+		if (target != null && target.isAnnotationPresent(FunctionalInterface.class)
 				&& !AFN_FIS.contains(target)) {
+
 			java.lang.reflect.Method[] methods = target.getMethods();
-            // We do not support arity=0 (e.g. Supplier) b/c not functional - use IDeref instead
-            for (java.lang.reflect.Method method : methods)
-                if (method.getParameterCount() > 0 && method.getParameterCount() <= 10
-                        && Modifier.isAbstract(method.getModifiers())
-                        && !OBJECT_METHODS.contains(method.getName()))
-                    return method;
+            for (java.lang.reflect.Method method : methods) {
+				// We do not support arity=0 (e.g. Supplier) b/c not functional - use IDeref instead
+				if (method.getParameterCount() > 0 && method.getParameterCount() <= 10
+						&& Modifier.isAbstract(method.getModifiers())
+						&& !OBJECT_METHODS.contains(method.getName()))
+					return method;
+			}
 		}
 		return null;
 	}
@@ -1669,8 +1670,9 @@ static class FISupport {
 	/**
 	 * If targetClass is FI and has an adaptable functional method
 	 *   Find fn invoker method matching adaptable method of FI
-	 *   Emit expr
-	 *   Emit if(expr instanceof IFn) emitInvokeDynamic(targetMethod, fnInvokerImplMethod)
+	 *   Emit bytecode for (expr is emitted):
+	 *     if(expr instanceof IFn)
+	 *       invokeDynamic(targetMethod, fnInvokerImplMethod)
 	 * Else emit nothing
 	 */
 	static boolean maybeEmitFIAdapter(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class targetClass) {
@@ -1863,7 +1865,7 @@ static abstract class MethodExpr extends HostExpr{
 					gen.visitInsn(D2F);
 					}
 				else if(!FISupport.maybeEmitFIAdapter(objx, gen, e, parameterTypes[i]))
-				{
+					{
 					e.emit(C.EXPRESSION, objx, gen);
 					HostExpr.emitUnboxArg(objx, gen, parameterTypes[i]);
 					}

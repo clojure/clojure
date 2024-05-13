@@ -167,4 +167,3 @@ public class AdapterExerciser {")
   (gen-test-functional-adapters-in-def)
   (gen-test-functional-adapters-in-def-requiring-reflection)
   (gen-adapter-exerciser-class))
-
