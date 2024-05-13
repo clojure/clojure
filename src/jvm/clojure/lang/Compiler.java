@@ -1613,17 +1613,20 @@ static Class maybePrimitiveType(Expr e){
 	return null;
 }
 
-private static final IPersistentSet IFN_INTERFACES = RT.set(Callable.class, Runnable.class, Comparator.class);
+private static final IPersistentSet AFN_FIS = RT.set(Callable.class, Runnable.class, Comparator.class);
 private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString", "hashCode");
 
-// If target is a functional interface w/ method adaptable to a fn invoker method, return it
-static java.lang.reflect.Method maybeAdaptableFunctionalMethod(Class target) {
+// Return FI method if:
+// 1) Target is a functional interface
+// 2) Target method matches ones of our fn invoker methods (0 < arity <= 10)
+static java.lang.reflect.Method maybeFIMethod(Class target) {
 	if(target != null && target.isInterface()
 			&& target.isAnnotationPresent(FunctionalInterface.class)
-			&& !IFN_INTERFACES.contains(target)) {
+			&& !AFN_FIS.contains(target)) {
 		java.lang.reflect.Method[] methods = target.getMethods();
 		for (int i = 0; i < methods.length; i++)
-			if (methods[i].getParameterCount() >= 1 && methods[i].getParameterCount() <= 10
+			// We do not support arity=0 (e.g. Supplier) b/c not functional - use IDeref instead
+			if (methods[i].getParameterCount() > 0 && methods[i].getParameterCount() <= 10
 					&& Modifier.isAbstract(methods[i].getModifiers())
 					&& !OBJECT_METHODS.contains(methods[i].getName()))
 				return methods[i];
@@ -1683,18 +1686,18 @@ private static Class decodeToClass(char c) {
 }
 
 /**
- * Emit expr
- * If targetClass has an adaptable functional method
+ * If targetClass is FI and has an adaptable functional method
  *   Find fn invoker method matching adaptable method of FI
- *   Emit: if(expr instanceof IFn)
- *            emitInvokeDynamic(targetMethod, fnInvokerImplMethod)
+ *   Emit expr
+ *   Emit if(expr instanceof IFn) emitInvokeDynamic(targetMethod, fnInvokerImplMethod)
+ * Else emit nothing
  */
 private static boolean maybeEmitFIAdapter(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class targetClass) {
 	// Optimization:
 	// if(expr instanceof QualifiedMethodExpr)
 	//   emitInvokeDynamic(targetMethod, QME method) // DON'T emit expr
 
-	java.lang.reflect.Method targetMethod = maybeAdaptableFunctionalMethod(targetClass);
+	java.lang.reflect.Method targetMethod = maybeFIMethod(targetClass);
 	if(targetMethod == null)
 		return false;
 
@@ -1757,6 +1760,7 @@ private static final Handle LMF_HANDLE =
  * The implMethod may close over objects on the stack - these are passed as the initial arguments
  * to implMethod. The trailing arguments must match the targetMethod arguments.
  *
+ * See: https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/LambdaMetafactory.html
  * @param gen ASM code generator, expects any closed-overs to be on the stack already
  * @param targetClass The target class
  * @param targetMethod The target method

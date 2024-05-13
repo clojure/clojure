@@ -588,7 +588,7 @@ private static Object coerceAdapterReturn(Object ret, Class targetType) {
 }
 
 static Object boxArg(Class paramType, Object arg){
-	if(arg instanceof IFn && Compiler.maybeAdaptableFunctionalMethod(paramType) != null)
+	if(arg instanceof IFn && Compiler.maybeFIMethod(paramType) != null)
 		// Adapt IFn obj to targetType using dynamic proxy
 		return Proxy.newProxyInstance((ClassLoader) Compiler.LOADER.get(),
 				new Class[]{paramType},
@@ -640,7 +640,7 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 		return !paramType.isPrimitive();
 	if(paramType == argType || paramType.isAssignableFrom(argType))
 		return true;
-	if(Compiler.maybeAdaptableFunctionalMethod(paramType) != null && IFn.class.isAssignableFrom(argType))
+	if(Compiler.maybeFIMethod(paramType) != null && IFn.class.isAssignableFrom(argType))
 		return true;
 	if(paramType == int.class)
 		return argType == Integer.class
