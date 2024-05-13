@@ -1618,8 +1618,8 @@ static class FISupport {
 	private static final IPersistentSet OBJECT_METHODS = RT.set("equals", "toString", "hashCode");
 
 	// Return FI method if:
-	// 1) Target is a functional interface
-	// 2) Target method matches ones of our fn invoker methods (0 < arity <= 10)
+	// 1) Target is a functional interface and not already implemented by AFn
+	// 2) Target method matches one of our fn invoker methods (0 < arity <= 10)
 	static java.lang.reflect.Method maybeFIMethod(Class target) {
 		if (target != null && target.isAnnotationPresent(FunctionalInterface.class)
 				&& !AFN_FIS.contains(target)) {
