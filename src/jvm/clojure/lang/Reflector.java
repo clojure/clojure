@@ -19,6 +19,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -570,9 +571,32 @@ static public List<Method> getMethods(Class c, int arity, String name, boolean g
 	return methods;
 }
 
+// Return type coercions match coercions in FnInvokers for compiled invokers
+private static Object coerceAdapterReturn(Object ret, Class targetType) {
+	if(targetType.isPrimitive()) {
+		switch (targetType.getName()) {
+			case "boolean": return RT.booleanCast(ret);
+			case "long":    return RT.longCast(ret);
+			case "double":  return RT.doubleCast(ret);
+			case "int":     return RT.intCast(ret);
+			case "short":   return RT.shortCast(ret);
+			case "byte":    return RT.byteCast(ret);
+			case "float":   return RT.floatCast(ret);
+		}
+	}
+	return ret;
+}
 
 static Object boxArg(Class paramType, Object arg){
-	if(!paramType.isPrimitive())
+	if(arg instanceof IFn && Compiler.FISupport.maybeFIMethod(paramType) != null)
+		// Adapt IFn obj to targetType using dynamic proxy
+		return Proxy.newProxyInstance((ClassLoader) Compiler.LOADER.get(),
+				new Class[]{paramType},
+				(proxy, method, methodArgs) -> {
+					Object ret = ((IFn) arg).applyTo(RT.seq(methodArgs));
+					return coerceAdapterReturn(ret, method.getReturnType());
+				});
+	else if(!paramType.isPrimitive())
 		return paramType.cast(arg);
 	else if(paramType == boolean.class)
 		return Boolean.class.cast(arg);
@@ -615,6 +639,8 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 	if(argType == null)
 		return !paramType.isPrimitive();
 	if(paramType == argType || paramType.isAssignableFrom(argType))
+		return true;
+	if(Compiler.FISupport.maybeFIMethod(paramType) != null && IFn.class.isAssignableFrom(argType))
 		return true;
 	if(paramType == int.class)
 		return argType == Integer.class
@@ -675,4 +701,5 @@ public static Object prepRet(Class c, Object x){
 //			return Double.valueOf(((Float) x).doubleValue());
 	return x;
 }
+
 }

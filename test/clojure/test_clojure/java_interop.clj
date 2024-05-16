@@ -15,9 +15,14 @@
             [clojure.inspector]
             [clojure.pprint :as pp]
             [clojure.set :as set]
-            [clojure.test-clojure.proxy.examples :as proxy-examples])
+            [clojure.string :as str]
+            [clojure.test-clojure.proxy.examples :as proxy-examples]
+            [clojure.test-helper :refer [should-not-reflect]])
   (:import java.util.Base64
-           (java.util.concurrent.atomic AtomicLong AtomicInteger)))
+           (java.io File FileFilter FilenameFilter)
+           (java.util UUID)
+           (java.util.concurrent.atomic AtomicLong AtomicInteger)
+           (clojure.test FIConstructor FIStatic FunctionalTester)))
 
 ; http://clojure.org/java_interop
 ; http://clojure.org/compilation
@@ -639,3 +644,215 @@
 (deftest test-boxing-prevention-when-compiling-statements
   (is (= 1 (.get (doto (AtomicInteger. 0) inc-atomic-int))))
   (is (= 1 (.get (doto (AtomicLong. 0) inc-atomic-long)))))
+
+(deftest array-type-symbols
+  (is (= long/1 (class (make-array Long/TYPE 0))))
+  (is (= int/1 (class (make-array Integer/TYPE 0))))
+  (is (= double/1 (class (make-array Double/TYPE 0))))
+  (is (= short/1 (class (make-array Short/TYPE 0))))
+  (is (= boolean/1 (class (make-array Boolean/TYPE 0))))
+  (is (= byte/1 (class (make-array Byte/TYPE 0))))
+  (is (= float/1 (class (make-array Float/TYPE 0))))
+  (is (= String/1 (class (make-array String 0))))
+  (is (= java.lang.String/1 (class (make-array String 0))))
+  (is (= java.util.UUID/1 (class (make-array java.util.UUID 0))))
+  (is (= `byte/1 'byte/1))
+  (is (= `byte/3 'byte/3))
+  (is (= `java.util.UUID/1 'java.util.UUID/1))
+  (is (= `String/1 'java.lang.String/1))
+  (is (= `java.lang.String/1 'java.lang.String/1))
+  (is (= ['long/2] `[~'long/2])))
+
+
+(defn make-test-files []
+  (let [id (str (UUID/randomUUID))
+        temp-1 (java.io.File/createTempFile (str "test-1-" id)".edn")
+        temp-2 (java.io.File/createTempFile "test-2"".xml")
+        temp-3 (java.io.File/createTempFile (str "test-3-" id)".edn")
+        dir (File. (.getParent temp-3))]
+    {:dir dir :file-id id}))
+
+(defn return-long ^long []
+  (let [^java.util.function.ToLongFunction f (fn ^long [x] 1)]
+    (Long/highestOneBit (.applyAsLong f :x))))
+
+(deftest clojure-fn-as-java-fn
+  ;; pass Clojure fn as Java Predicate
+  (let [coll (java.util.ArrayList. [1 2 3 4 5])]
+    (is (true? (.removeIf coll even?)))
+    (is (= coll [1 3 5])))
+
+  ;; pass Clojure set as Java predicate - function return
+  ;; should use Clojure semantics to return logical true
+  (let [coll (java.util.ArrayList. [1 2 3 4 5])]
+    (is (true? (.removeIf coll #{1 2})))
+    (is (= coll [3 4 5])))
+
+  ;; binding type hint triggers coercion
+  (is (instance? FileFilter
+    (let [^FileFilter ff (fn [f] true)] ff)))
+
+  ;; coercion in let - reflection has types that should work
+  (let [{:keys [dir file-id]} (make-test-files)
+        ^FileFilter ff (fn [^File f]
+                                 (str/includes? (.getName f) file-id))
+        filtered (.listFiles dir ff)]
+    (is (= 2 (count filtered))))
+
+  ;; coercion in let
+  (let [{:keys [dir file-id]} (make-test-files)
+        ^FileFilter ff (fn [^File f]
+                                 (str/includes? (.getName f) file-id))
+        filtered (.listFiles ^File dir ff)]
+    (is (= 2 (count filtered))))
+
+  ;;; resolve method ambiguity using member symbol and param-tags
+  (let [{:keys [dir file-id]} (make-test-files)
+        ^FileFilter ff (fn [^File f]
+                                 (str/includes? (.getName f) file-id))
+        filtered (^[FileFilter] File/.listFiles dir ff)]
+    (is (= 2 (count filtered))))
+
+  (defn files-with-ext [^File dir ext]
+    (vec (.list dir ^FilenameFilter #(str/ends-with? % ext))))
+
+  (let [{:keys [dir file-id]} (make-test-files)
+        ^FilenameFilter ff (fn [dir file-name]
+                             (str/includes? file-name file-id))
+        filtered (.list ^File dir ff)]
+    (is (= 2 (count filtered))))
+
+  (let [^java.util.function.DoubleToLongFunction f (fn [d] (int d))]
+    (is (instance? java.util.function.DoubleToLongFunction f))
+    (is (= 10 (.applyAsLong f (double 10.6)))))
+
+  (let [^java.util.function.IntConsumer f (fn [i] nil)]
+    (is (nil? (.accept f 42))))
+
+  (let [^java.util.function.IntPredicate f (fn [i] true)]
+    (is (true? (.test f 42))))
+
+  (let [arr (java.util.ArrayList. [1 2 3 4 5])
+        ^java.util.function.ObjDoubleConsumer f (fn [arr i] nil)]
+    (is (nil? (.accept f arr 42))))
+
+  (let [f (constantly 100)
+        ^Runnable g f]
+    (is (identical? f g) "has been unintentionally adapted"))
+
+  (let [^java.util.function.Predicate pred even?
+        coll1 (java.util.ArrayList. [1 2 3 4 5])
+        coll2 (java.util.ArrayList. [6 7 8 9 10])]
+    (is (instance? java.util.function.Predicate pred))
+    (is (true? (.removeIf coll1 pred)))
+    (is (= coll1 [1 3 5]))
+    (is (true? (.removeIf coll2 pred)))
+    (is (= coll2 [7 9])))
+
+  (let [^java.util.function.Predicate pred even?
+        coll1 (java.util.ArrayList. [1 2 3 4 5])
+        cup-fn (java.util.ArrayList. [1 2 3 4 5])]
+    (is (instance? java.util.function.Predicate pred))
+    (is (true? (.removeIf coll1 pred)))
+    (is (= coll1 [1 3 5]))
+    (is (true? (.removeIf cup-fn pred)))
+    (is (= cup-fn [1 3 5])))
+
+  (should-not-reflect #(clojure.test-clojure.java-interop/return-long))
+
+  ;; FI in class constructor
+  (let [^java.util.function.Predicate hinted-pred (fn [i] (> i 0))
+        clj-pred (fn [i] (> i 0))
+        fi-constructor-1 (FIConstructor. hinted-pred)
+        fi-constructor-2 (FIConstructor. clj-pred)
+        fi-constructor-3 (FIConstructor. (fn [i] (> i 0)))]
+    (is (= [1 2] (.numbers fi-constructor-1)))
+    (is (= [1 2] (.numbers fi-constructor-2)))
+    (is (= [1 2] (.numbers fi-constructor-3))))
+
+  ;; FI as arg to static
+  (let [^java.util.function.Predicate hinted-pred (fn [i] (> i 0))
+        res (FIStatic/numbers hinted-pred)]
+    (is (= [1 2] res))))
+
+(deftest eval-in-place-supplier-instance
+  (def stream (java.util.stream.Stream/generate ^java.util.function.Supplier (atom 42)))
+  (is (instance? java.util.stream.Stream stream)))
+
+(deftest eval-in-place-as-java-fn
+  (def filtered-list (.removeIf (java.util.ArrayList. [1 2 3 4 5]) even?))
+  (is (true? filtered-list))
+
+  (def fi-constructor-numbers (.numbers (FIConstructor. (fn [i] (> i 0)))))
+  (is (= [1 2] fi-constructor-numbers))
+
+  (def fi-static (FIStatic/numbers (fn [i] (< i 0))))
+  (is (= [-2 -1] fi-static)))
+
+;; newDirectoryStream is overloaded, takes ^[Path String] or ^[Path DirectoryStream$Filter]
+;; so this method will reflect
+(defn get-dir-stream [^java.nio.file.Path dir-path glob-pattern]
+  (let [path (.toPath (java.io.File. dir-path))]
+    (java.nio.file.Files/newDirectoryStream path glob-pattern)))
+
+(deftest test-reflection-to-overloaded-method-taking-FI
+  ;; all of these should resolve at runtime in reflection
+  (is (not (nil? (get-dir-stream "." "*"))))
+  (is (not (nil? (get-dir-stream "." (reify java.nio.file.DirectoryStream$Filter (accept [_ path] (.isDirectory (.toFile path))))))))
+  ;; this one gets FI converted from IFn to DirectoryStream$Filter
+  (is (not (nil? (get-dir-stream "." (fn [^java.nio.file.Path path] (.isDirectory (.toFile path))))))))
+
+;; we only support FI invoke coercion up to 10 args, this has 11
+(definterface ^{java.lang.FunctionalInterface true} FIWontWork
+  (invoke [a b c d e f g h i j k]))
+
+(definterface ReceivesFI
+  (call [^clojure.test_clojure.java_interop.FIWontWork fi]))
+
+(deftest test-reify-to-FI-allowed
+  ;; throws because there is no 11-arity invoker method and thus it is not possible to coerce
+  (is (thrown? ClassCastException
+        (eval '(let [^clojure.test_clojure.java_interop.FIWontWork f
+                     (fn [p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11] p11)]
+                 (.invoke f 1 2 3 4 5 6 7 8 9 10 11)))))
+
+  (let [r (reify clojure.test_clojure.java_interop.ReceivesFI
+            (call [_ fi] (.invoke fi 0 0 0 0 0 0 0 0 0 0 1)))]
+
+    ;; doesn't throw at compilation time, but throws at runtime
+    ;; because IFn cannot be implicitly converted
+    (is (thrown? ClassCastException
+      (.call r (fn [a b c d e f g h i j k] k))))
+
+    ;; works because the reify implements the FI, no conversion necessary
+    (is (= 1 (.call r (reify clojure.test_clojure.java_interop.FIWontWork (invoke [_ a b c d e f g h i j k] k)))))))
+
+(definterface ^{java.lang.FunctionalInterface true} FIPrims
+  (invoke [^long a ^long b ^long c ^long d]))
+
+(definterface ReceivesFIPrims
+  (call [^clojure.test_clojure.java_interop.FIPrims fi]))
+
+(deftest test-match-prim-args-only-to-2
+  (let [r (reify clojure.test_clojure.java_interop.ReceivesFIPrims
+            (call [_ fi] (.invoke fi 1 2 3 4)))]
+    (is (= 4 (.call r (fn [^long a ^long b ^long c ^long d] d))))))
+
+(deftest test-null-reify
+  (is (= "null" ((fn [x] (FIStatic/allowsNullFI x)) nil))))
+
+(deftest test-FI-subtype
+  (is (= [1 2 3 4 5] (->> (java.util.stream.Stream/iterate 1 inc) stream-seq! (take 5)))))
+
+(deftest class-methods-with-fi-args
+  (testing "Constructor accepting FI arg, provided overloaded static class FI"
+    (let [fi (FunctionalTester. "Constructor" 0 FunctionalTester/getChar)]
+      (is (= \C (.testVar fi)))))
+
+   (testing "Instance method accepting FI arg, provided overloaded static class FI"
+     (let [fi (FunctionalTester. "asf" 0 FunctionalTester/getChar)]
+       (.instanceMethodWithFIArg fi "Instance" 0 FunctionalTester/getChar)
+       (is (= \I (.testVar fi)))))
+
+   (testing "Static method accepting FI arg, provided overloaded static class FI"
+     (is (= \S (FunctionalTester/staticMethodWithFIArg "Static" 0 FunctionalTester/getChar)))))
