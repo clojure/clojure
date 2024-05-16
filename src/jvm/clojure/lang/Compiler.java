@@ -1750,7 +1750,7 @@ static class FISupport {
 	 * @param implClass    The impl class
 	 * @param implMethod   The impl method that will be adapted, takes closed-overs + args of targetMethod
 	 */
-	private static void emitInvokeDynamicAdapter(GeneratorAdapter gen,
+	static void emitInvokeDynamicAdapter(GeneratorAdapter gen,
 												 Class targetClass, java.lang.reflect.Method targetMethod,
 												 Class implClass, Executable implMethod) {
 
