@@ -1646,27 +1646,6 @@ static class FISupport {
 		return Object.class;
 	}
 
-	// Encode invoker param/return class to code for method name
-	private static char encodeInvokerType(Class c) {
-		if(Long.TYPE.equals(c)) {
-			return 'L';
-		} else if(Double.TYPE.equals(c)) {
-			return 'D';
-		} else if(Integer.TYPE.equals(c)) {
-			return 'I';
-		} else if(Short.TYPE.equals(c)) {
-			return 'S';
-		} else if(Byte.TYPE.equals(c)) {
-			return 'B';
-		} else if(Float.TYPE.equals(c)) {
-			return 'F';
-		} else if(Boolean.TYPE.equals(c)) {
-			return 'Z';
-		} else {
-			return 'O';
-		}
-	}
-
 	/**
 	 * If targetClass is FI and has an adaptable functional method
 	 *   Find fn invoker method matching adaptable method of FI
@@ -1692,9 +1671,9 @@ static class FISupport {
 		for (int i = 0; i < paramCount; i++) {
 			// FnInvokers only has prims for first 2 args
 			invokerParams[i + 1] = paramCount <= 2 ? toInvokerParamType(targetMethod.getParameterTypes()[i]) : Object.class;
-			invokeMethodBuilder.append(encodeInvokerType(invokerParams[i + 1]));
+			invokeMethodBuilder.append(FnInvokers.encodeInvokerType(invokerParams[i + 1]));
 		}
-		char invokerReturnCode = encodeInvokerType(targetMethod.getReturnType());
+		char invokerReturnCode = FnInvokers.encodeInvokerType(targetMethod.getReturnType());
 		invokeMethodBuilder.append(invokerReturnCode);
 		String invokerMethodName = invokeMethodBuilder.toString();
 

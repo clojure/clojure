@@ -21,6 +21,27 @@ package clojure.lang;
 
 public class FnInvokers {
 
+    // Encode invoker param/return class to code for method name
+    static char encodeInvokerType(Class c) {
+        if(Long.TYPE.equals(c)) {
+            return 'L';
+        } else if(Double.TYPE.equals(c)) {
+            return 'D';
+        } else if(Integer.TYPE.equals(c)) {
+            return 'I';
+        } else if(Short.TYPE.equals(c)) {
+            return 'S';
+        } else if(Byte.TYPE.equals(c)) {
+            return 'B';
+        } else if(Float.TYPE.equals(c)) {
+            return 'F';
+        } else if(Boolean.TYPE.equals(c)) {
+            return 'Z';
+        } else {
+            return 'O';
+        }
+    }
+
 ")
 
 (def footer
