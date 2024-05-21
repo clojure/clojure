@@ -561,10 +561,13 @@
 (defn ^java.io.PrintWriter PrintWriter-on
   "implements java.io.PrintWriter given flush-fn, which will be called
   when .flush() is called, with a string built up since the last call to .flush().
-  if not nil, close-fn will be called with no arguments when .close is called"
+  if not nil, close-fn will be called with no arguments when .close is called.
+  autoflush? determines if the PrintWriter will autoflush, false by default."
   {:added "1.10"}
-  [flush-fn close-fn]
-  (let [sb (StringBuilder.)]
+  ([flush-fn close-fn]
+   (PrintWriter-on flush-fn close-fn false))
+  ([flush-fn close-fn autoflush?]
+   (let [sb (StringBuilder.)]
     (-> (proxy [Writer] []
           (flush []
                  (when (pos? (.length sb))
@@ -580,4 +583,4 @@
                      (.append sb ^String str-cbuf ^int off ^int len)
                      (.append sb ^chars str-cbuf ^int off ^int len)))))
         java.io.BufferedWriter.
-        java.io.PrintWriter.)))
+        (java.io.PrintWriter. ^boolean autoflush?)))))
