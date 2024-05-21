@@ -782,53 +782,6 @@
    :added "1.0"}
   ([x y] (clojure.lang.Util/identical x y)))
 
-;equiv-based
-(defn =
-  "Equality. Returns true if x equals y, false if not. Same as
-  Java x.equals(y) except it also works for nil, and compares
-  numbers and collections in a type-independent manner.  Clojure's immutable data
-  structures define equals() (and thus =) as a value, not an identity,
-  comparison."
-  {:inline (fn [x y] `(. clojure.lang.Util equiv ~x ~y))
-   :inline-arities #{2}
-   :added "1.0"}
-  ([x] true)
-  ([x y] (clojure.lang.Util/equiv x y))
-  ([x y & more]
-   (if (clojure.lang.Util/equiv x y)
-     (if (next more)
-       (recur y (first more) (next more))
-       (clojure.lang.Util/equiv y (first more)))
-     false)))
-
-;equals-based
-#_(defn =
-  "Equality. Returns true if x equals y, false if not. Same as Java
-  x.equals(y) except it also works for nil. Boxed numbers must have
-  same type. Clojure's immutable data structures define equals() (and
-  thus =) as a value, not an identity, comparison."
-  {:inline (fn [x y] `(. clojure.lang.Util equals ~x ~y))
-   :inline-arities #{2}
-   :added "1.0"}
-  ([x] true)
-  ([x y] (clojure.lang.Util/equals x y))
-  ([x y & more]
-   (if (= x y)
-     (if (next more)
-       (recur y (first more) (next more))
-       (= y (first more)))
-     false)))
-
-(defn not=
-  "Same as (not (= obj1 obj2))"
-  {:tag Boolean
-   :added "1.0"
-   :static true}
-  ([x] false)
-  ([x y] (not (= x y)))
-  ([x y & more]
-   (not (apply = x y more))))
-
 
 
 (defn compare
@@ -866,6 +819,68 @@
       `(let [or# ~x]
          (if or# or# (or ~@next)))))
 
+
+
+;equiv-based
+(defn =
+  "Equality. Returns true if x equals y, false if not. Same as
+  Java x.equals(y) except it also works for nil, and compares
+  numbers and collections in a type-independent manner.  Clojure's immutable data
+  structures define equals() (and thus =) as a value, not an identity,
+  comparison."
+  {:inline (fn ([x y]   `(. clojure.lang.Util equiv ~x ~y))
+               ([x y z] `(let [a# ~x b# ~y c# ~z]
+                           (and (. clojure.lang.Util equiv a# b#)
+                                (. clojure.lang.Util equiv b# c#)))))
+   :inline-arities #{2 3}
+   :added "1.0"}
+  ([x] true)
+  ([x y] (clojure.lang.Util/equiv x y))
+  ([x y z] (let [a x b y c z]
+             (and (. clojure.lang.Util equiv a b)
+                  (. clojure.lang.Util equiv b c))))
+  ([x y z & more]
+   (if (= x y)
+     (if (next more)
+       (recur y z (first more) (next more))
+       (= y z (first more)))
+     false)))
+
+;equals-based
+#_(defn =
+    "Equality. Returns true if x equals y, false if not. Same as Java
+    x.equals(y) except it also works for nil. Boxed numbers must have
+    same type. Clojure's immutable data structures define equals() (and
+    thus =) as a value, not an identity, comparison."
+    {:inline (fn ([x y] `(. clojure.lang.Util equals ~x ~y))
+                 ([x y z] `(let [a# ~x b# ~y c# ~z]
+                             (and (. clojure.lang.Util equals a# b#)
+                                  (. clojure.lang.Util equals b# c#)))))
+     :inline-arities #{2 3}
+     :added "1.0"}
+    ([x] true)
+    ([x y] (clojure.lang.Util/equals x y))
+    ([x y z] (let [a x b y c z]
+               (and (. clojure.lang.Util equals a b)
+                    (. clojure.lang.Util equals b c))))
+    ([x y z & more]
+     (if (= x y)
+       (if (next more)
+         (recur y z (first more) (next more))
+         (= y z (first more)))
+       false)))
+
+(defn not=
+  "Same as (not (= obj1 obj2))"
+  {:tag Boolean
+   :added "1.0"
+   :static true}
+  ([x] false)
+  ([x y] (not (= x y)))
+  ([x y z] (not (= x y z)))
+  ([x y z & more]
+   (not (apply = x y z more))))
+
 ;;;;;;;;;;;;;;;;;;; sequence fns  ;;;;;;;;;;;;;;;;;;;;;;;
 (defn zero?
   "Returns true if num is zero, else false"
@@ -899,21 +914,6 @@
    :added "1.0"}
   ([coll index] (. clojure.lang.RT (nth coll index)))
   ([coll index not-found] (. clojure.lang.RT (nth coll index not-found))))
-
-(defn <
-  "Returns non-nil if nums are in monotonically increasing order,
-  otherwise false."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (lt ~x ~y)))
-   :inline-arities #{2}
-   :added "1.0"}
-  ([x] true)
-  ([x y] (. clojure.lang.Numbers (lt x y)))
-  ([x y & more]
-   (if (< x y)
-     (if (next more)
-       (recur y (first more) (next more))
-       (< y (first more)))
-     false)))
 
 (defn inc'
   "Returns a number one greater than num. Supports arbitrary precision.
@@ -1057,64 +1057,109 @@
   ([x y & more]
      (reduce1 - (- x y) more)))
 
+(defn <
+  "Returns non-nil if nums are in monotonically increasing order,
+  otherwise false."
+  {:inline         (fn ([x y]   `(. clojure.lang.Numbers (lt ~x ~y)))
+                       ([x y z] `(let [a# ~x b# ~y c# ~z]
+                                   (and (. clojure.lang.Numbers (lt a# b#))
+                                        (. clojure.lang.Numbers (lt b# c#))))))
+   :inline-arities #{2 3}
+   :added          "1.0"}
+  ([x] true)
+  ([x y] (. clojure.lang.Numbers (lt x y)))
+  ([x y z] (let [a x b y c z]
+             (and (. clojure.lang.Numbers (lt a b))
+                  (. clojure.lang.Numbers (lt b c)))))
+  ([x y z & more]
+   (if (< x y)
+     (if (next more)
+       (recur y z (first more) (next more))
+       (< y z (first more)))
+     false)))
+
 (defn <=
   "Returns non-nil if nums are in monotonically non-decreasing order,
   otherwise false."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (lte ~x ~y)))
-   :inline-arities #{2}
+  {:inline (fn ([x y] `(. clojure.lang.Numbers (lte ~x ~y)))
+               ([x y z] `(let [a# ~x b# ~y c# ~z]
+                           (and (. clojure.lang.Numbers (lte a# b#))
+                                (. clojure.lang.Numbers (lte b# c#))))))
+   :inline-arities #{2 3}
    :added "1.0"}
   ([x] true)
   ([x y] (. clojure.lang.Numbers (lte x y)))
-  ([x y & more]
+  ([x y z] (let [a x b y c z]
+             (and (. clojure.lang.Numbers (lte a b))
+                  (. clojure.lang.Numbers (lte b c)))))
+  ([x y z & more]
    (if (<= x y)
      (if (next more)
-       (recur y (first more) (next more))
-       (<= y (first more)))
+       (recur y z (first more) (next more))
+       (<= y z (first more)))
      false)))
 
 (defn >
   "Returns non-nil if nums are in monotonically decreasing order,
   otherwise false."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (gt ~x ~y)))
-   :inline-arities #{2}
+  {:inline (fn ([x y] `(. clojure.lang.Numbers (gt ~x ~y)))
+               ([x y z] `(let [a# ~x b# ~y c# ~z]
+                           (and (. clojure.lang.Numbers (gt a# b#))
+                                (. clojure.lang.Numbers (gt b# c#))))))
+   :inline-arities #{2 3}
    :added "1.0"}
   ([x] true)
   ([x y] (. clojure.lang.Numbers (gt x y)))
-  ([x y & more]
+  ([x y z] (let [a x b y c z]
+             (and (. clojure.lang.Numbers (gt a b))
+                  (. clojure.lang.Numbers (gt b c)))))
+  ([x y z & more]
    (if (> x y)
      (if (next more)
-       (recur y (first more) (next more))
-       (> y (first more)))
+       (recur y z (first more) (next more))
+       (> y z (first more)))
      false)))
 
 (defn >=
   "Returns non-nil if nums are in monotonically non-increasing order,
   otherwise false."
-  {:inline (fn [x y] `(. clojure.lang.Numbers (gte ~x ~y)))
-   :inline-arities #{2}
+  {:inline (fn ([x y] `(. clojure.lang.Numbers (gte ~x ~y)))
+               ([x y z] `(let [a# ~x b# ~y c# ~z]
+                           (and (. clojure.lang.Numbers (gte a# b#))
+                                (. clojure.lang.Numbers (gte b# c#))))))
+   :inline-arities #{2 3}
    :added "1.0"}
   ([x] true)
   ([x y] (. clojure.lang.Numbers (gte x y)))
-  ([x y & more]
+  ([x y z] (let [a x b y c z]
+             (and (. clojure.lang.Numbers (gte a b))
+                  (. clojure.lang.Numbers (gte b c)))))
+  ([x y z & more]
    (if (>= x y)
      (if (next more)
-       (recur y (first more) (next more))
-       (>= y (first more)))
+       (recur y z (first more) (next more))
+       (>= y z (first more)))
      false)))
 
 (defn ==
   "Returns non-nil if nums all have the equivalent
   value (type-independent), otherwise false"
-  {:inline (fn [x y] `(. clojure.lang.Numbers (equiv ~x ~y)))
-   :inline-arities #{2}
+  {:inline (fn ([x y] `(. clojure.lang.Numbers (equiv ~x ~y)))
+               ([x y z] `(let [a# ~x b# ~y c# ~z]
+                           (and (. clojure.lang.Numbers (equiv a# b#))
+                                (. clojure.lang.Numbers (equiv b# c#))))))
+   :inline-arities #{2 3}
    :added "1.0"}
   ([x] true)
   ([x y] (. clojure.lang.Numbers (equiv x y)))
-  ([x y & more]
+  ([x y z] (let [a x b y c z]
+             (and (. clojure.lang.Numbers (equiv a b))
+                  (. clojure.lang.Numbers (equiv b c)))))
+  ([x y z & more]
    (if (== x y)
      (if (next more)
-       (recur y (first more) (next more))
-       (== y (first more)))
+       (recur y z (first more) (next more))
+       (== y z (first more)))
      false)))
 
 (defn max
