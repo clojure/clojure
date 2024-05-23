@@ -122,9 +122,9 @@ private static RuntimeException throwCauseOrElseException(Exception e) {
 	throw Util.sneakyThrow(e);
 }
 
-private static String noMethodReport(String methodName, Class contextClass, Object target, Object[] args){
+private static String noMethodReport(String methodName, Class contextClass, Object[] args){
 	 return "No matching method " + methodName + " found taking " + args.length + " args"
-			+ (contextClass != null ? " for " + contextClass : (target==null?"":" for " + target.getClass()));
+			+ (contextClass != null ? " for " + contextClass : "");
 }
 
 private static Method matchMethod(List methods, Object[] args) {
@@ -164,7 +164,7 @@ static Object invokeMatchingMethod(String methodName, List methods, Class contex
 	Method m = null;
 	if(methods.isEmpty())
 		{
-		throw new IllegalArgumentException(noMethodReport(methodName,contextClass,target,args));
+		throw new IllegalArgumentException(noMethodReport(methodName,contextClass,args));
 		}
 	else if(methods.size() == 1)
 		{
@@ -180,7 +180,7 @@ static Object invokeMatchingMethod(String methodName, List methods, Class contex
 			}
 		}
 	if(m == null)
-		throw new IllegalArgumentException(noMethodReport(methodName,contextClass,target,args));
+		throw new IllegalArgumentException(noMethodReport(methodName,contextClass,args));
 
 	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target))
 		{
