@@ -155,10 +155,9 @@ private static Object[] widenBoxedArgs(Object[] args) {
 	return widenedArgs;
 }
 
-static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
-		{
+static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args){
 	return invokeMatchingMethod(methodName, methods, target != null ? target.getClass() : null, target, args);
-		}
+}
 
 static Object invokeMatchingMethod(String methodName, List methods, Class contextClass, Object target, Object[] args)
 		{
