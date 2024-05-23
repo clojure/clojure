@@ -1621,19 +1621,26 @@ static class FISupport {
 	// 1) Target is a functional interface and not already implemented by AFn
 	// 2) Target method matches one of our fn invoker methods (0 < arity <= 10)
 	static java.lang.reflect.Method maybeFIMethod(Class target) {
-		if (target != null && target.isAnnotationPresent(FunctionalInterface.class)
+		java.lang.reflect.Method fiMethod = null;
+		if (target != null
+				&& target.isInterface()
 				&& !AFN_FIS.contains(target)) {
 
 			java.lang.reflect.Method[] methods = target.getMethods();
             for (java.lang.reflect.Method method : methods) {
 				// We do not support arity=0 (e.g. Supplier) b/c not functional - use IDeref instead
-				if (method.getParameterCount() > 0 && method.getParameterCount() <= 10
-						&& Modifier.isAbstract(method.getModifiers())
-						&& !OBJECT_METHODS.contains(method.getName()))
-					return method;
+				if (Modifier.isAbstract(method.getModifiers()) && !OBJECT_METHODS.contains(method.getName()))
+					if(fiMethod == null)
+						fiMethod = method;
+					else
+						return null;
 			}
 		}
-		return null;
+		if(fiMethod != null && fiMethod.getParameterCount() > 0 && fiMethod.getParameterCount() <= 10) {
+			return fiMethod;
+		} else {
+			return null;
+		}
 	}
 
 	// Invokers support only long, double, Object params; widen numerics
