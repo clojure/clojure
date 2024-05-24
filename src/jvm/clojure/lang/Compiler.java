@@ -1681,7 +1681,7 @@ static class FISupport {
 			invokeMethodBuilder.append(FnInvokers.encodeInvokerType(invokerParams[i + 1]));
 		}
 		Class retType = targetMethod.getReturnType();
-		char invokerReturnCode = FnInvokers.encodeInvokerType(Boolean.class.equals(retType) ? retType : Object.class);
+		char invokerReturnCode = FnInvokers.encodeInvokerType(Boolean.TYPE.equals(retType) ? retType : Object.class);
 		invokeMethodBuilder.append(invokerReturnCode);
 		String invokerMethodName = invokeMethodBuilder.toString();
 
