@@ -1646,6 +1646,24 @@ static class FISupport {
 		return Object.class;
 	}
 
+	// If QME resolves to exactly one method (either via param-tags or no overload), return it
+	private static Executable maybeResolveExactMethod(QualifiedMethodExpr qme, java.lang.reflect.Method targetMethod) {
+		if(qme.hintedSig != null) {
+			return QualifiedMethodExpr.resolveHintedMethod(qme.c, qme.methodName, qme.kind, qme.hintedSig);
+		} else {
+			int targetArity = targetMethod.getParameterCount();
+			List<Executable> methods = QualifiedMethodExpr.methodsWithName(qme.c, qme.methodName, qme.kind);
+			List<Executable> filteredMethods = methods.stream()
+					.filter(m -> m.getParameterCount() == targetArity)
+					.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
+					.collect(Collectors.toList());
+			if(filteredMethods.size() == 1)
+				return filteredMethods.get(0);
+			else
+				return null;
+		}
+	}
+
 	/**
 	 * If targetClass is FI and has an adaptable functional method
 	 *   Find fn invoker method matching adaptable method of FI
@@ -1655,13 +1673,19 @@ static class FISupport {
 	 * Else emit nothing
 	 */
 	static boolean maybeEmitFIAdapter(ObjExpr objx, GeneratorAdapter gen, Expr expr, Class targetClass) {
-		// Optimization:
-		// if(expr instanceof QualifiedMethodExpr)
-		//   emitInvokeDynamic(targetMethod, QME method) // DON'T emit expr
-
 		java.lang.reflect.Method targetMethod = maybeFIMethod(targetClass);
 		if (targetMethod == null)
 			return false;
+
+		// if possible, optimize with direct adapter to QME method (DON'T emit expr)
+		if(expr instanceof QualifiedMethodExpr) {
+			QualifiedMethodExpr qme = (QualifiedMethodExpr)expr;
+			Executable implMethod = maybeResolveExactMethod(qme, targetMethod);
+			if(implMethod != null) {
+				emitInvokeDynamicAdapter(gen, targetClass, targetMethod, qme.c, implMethod);
+				return true;
+			}
+		}
 
 		// compute fn invoker method
 		int paramCount = targetMethod.getParameterCount();
