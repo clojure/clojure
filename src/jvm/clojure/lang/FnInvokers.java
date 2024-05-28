@@ -33,6 +33,62 @@ public class FnInvokers {
         }
     }
 
+    public static long invokeL(IFn f0) {
+        if(f0 instanceof IFn.L) {
+            return ((IFn.L)f0).invokePrim();
+        } else {
+            return RT.longCast(f0.invoke());
+        }
+    }
+
+    public static int invokeI(IFn f0) {
+        if(f0 instanceof IFn.L) {
+            return RT.intCast(((IFn.L)f0).invokePrim());
+        } else {
+            return RT.intCast(f0.invoke());
+        }
+    }
+
+    public static short invokeS(IFn f0) {
+        if(f0 instanceof IFn.L) {
+            return RT.shortCast(((IFn.L)f0).invokePrim());
+        } else {
+            return RT.shortCast(f0.invoke());
+        }
+    }
+
+    public static byte invokeB(IFn f0) {
+        if(f0 instanceof IFn.L) {
+            return RT.byteCast(((IFn.L)f0).invokePrim());
+        } else {
+            return RT.byteCast(f0.invoke());
+        }
+    }
+
+    public static double invokeD(IFn f0) {
+        if(f0 instanceof IFn.D) {
+            return ((IFn.D)f0).invokePrim();
+        } else {
+            return RT.doubleCast(f0.invoke());
+        }
+    }
+
+    public static float invokeF(IFn f0) {
+        if(f0 instanceof IFn.D) {
+            return RT.floatCast(((IFn.D)f0).invokePrim());
+        } else {
+            return RT.floatCast(f0.invoke());
+        }
+    }
+
+    public static boolean invokeZ(IFn f0) {
+        return RT.booleanCast(f0.invoke());
+    }
+
+    public static Object invokeO(IFn f0) {
+        return f0.invoke();
+    }
+
     public static long invokeLL(IFn f0, long a) {
         if(f0 instanceof IFn.LL) {
             return ((IFn.LL)f0).invokePrim(a);

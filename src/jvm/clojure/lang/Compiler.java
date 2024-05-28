@@ -1619,15 +1619,14 @@ static class FISupport {
 
 	// Return FI method if:
 	// 1) Target is a functional interface and not already implemented by AFn
-	// 2) Target method matches one of our fn invoker methods (0 < arity <= 10)
+	// 2) Target method matches one of our fn invoker methods (0 <= arity <= 10)
 	static java.lang.reflect.Method maybeFIMethod(Class target) {
 		if (target != null && target.isAnnotationPresent(FunctionalInterface.class)
 				&& !AFN_FIS.contains(target)) {
 
 			java.lang.reflect.Method[] methods = target.getMethods();
             for (java.lang.reflect.Method method : methods) {
-				// We do not support arity=0 (e.g. Supplier) b/c not functional - use IDeref instead
-				if (method.getParameterCount() > 0 && method.getParameterCount() <= 10
+				if (method.getParameterCount() >= 0 && method.getParameterCount() <= 10
 						&& Modifier.isAbstract(method.getModifiers())
 						&& !OBJECT_METHODS.contains(method.getName()))
 					return method;

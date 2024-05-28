@@ -153,6 +153,7 @@ public class FnInvokers {
 
 (defn gen-sigs []
   (let [small-rets ["L" "I" "S" "B" "D" "F" "Z" "O"]
+        zero-arity (sigs [""] small-rets)
         single-arity (sigs ["L" "D" "O"] small-rets)
         two-arity (sigs ["LL" "LO" "OL" "DD" "LD" "DL" "OO" "OD" "DO"] small-rets)
         big-rets ["Z" "O"]
@@ -164,7 +165,7 @@ public class FnInvokers {
         eight-arity (sigs ["OOOOOOOO"] big-rets)
         nine-arity  (sigs ["OOOOOOOOO"] big-rets)
         ten-arity   (sigs ["OOOOOOOOOO"] big-rets)]
-    (mapcat seq [single-arity two-arity three-arity four-arity five-arity six-arity seven-arity eight-arity nine-arity ten-arity])))
+    (mapcat seq [zero-arity single-arity two-arity three-arity four-arity five-arity six-arity seven-arity eight-arity nine-arity ten-arity])))
 
 (defn gen-invokers []
   (let [sb (StringBuilder. ^String header)

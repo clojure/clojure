@@ -1,6 +1,39 @@
+
 package clojure.test;
 
 public class AdapterExerciser {
+    @FunctionalInterface
+    public interface L {
+        public long takesRetL();
+    }
+    @FunctionalInterface
+    public interface I {
+        public int takesRetI();
+    }
+    @FunctionalInterface
+    public interface S {
+        public short takesRetS();
+    }
+    @FunctionalInterface
+    public interface B {
+        public byte takesRetB();
+    }
+    @FunctionalInterface
+    public interface D {
+        public double takesRetD();
+    }
+    @FunctionalInterface
+    public interface F {
+        public float takesRetF();
+    }
+    @FunctionalInterface
+    public interface Z {
+        public boolean takesRetZ();
+    }
+    @FunctionalInterface
+    public interface O {
+        public AdapterExerciser takesRetO();
+    }
     @FunctionalInterface
     public interface LL {
         public long takesLRetL(long a);
@@ -449,115 +482,123 @@ public class AdapterExerciser {
     public interface OOOOOOOOOOO {
         public AdapterExerciser takesOOOOOOOOOORetO(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f, AdapterExerciser g, AdapterExerciser h, AdapterExerciser i, AdapterExerciser j);
     }
-    public int methodLL(LL a) { return 0; }
-    public int methodDL(DL a) { return 1; }
-    public int methodOL(OL a) { return 2; }
-    public int methodLI(LI a) { return 3; }
-    public int methodDI(DI a) { return 4; }
-    public int methodOI(OI a) { return 5; }
-    public int methodLS(LS a) { return 6; }
-    public int methodDS(DS a) { return 7; }
-    public int methodOS(OS a) { return 8; }
-    public int methodLB(LB a) { return 9; }
-    public int methodDB(DB a) { return 10; }
-    public int methodOB(OB a) { return 11; }
-    public int methodLD(LD a) { return 12; }
-    public int methodDD(DD a) { return 13; }
-    public int methodOD(OD a) { return 14; }
-    public int methodLF(LF a) { return 15; }
-    public int methodDF(DF a) { return 16; }
-    public int methodOF(OF a) { return 17; }
-    public int methodLZ(LZ a) { return 18; }
-    public int methodDZ(DZ a) { return 19; }
-    public int methodOZ(OZ a) { return 20; }
-    public int methodLO(LO a) { return 21; }
-    public int methodDO(DO a) { return 22; }
-    public int methodOO(OO a) { return 23; }
-    public int methodLLL(LLL a) { return 24; }
-    public int methodLOL(LOL a) { return 25; }
-    public int methodOLL(OLL a) { return 26; }
-    public int methodDDL(DDL a) { return 27; }
-    public int methodLDL(LDL a) { return 28; }
-    public int methodDLL(DLL a) { return 29; }
-    public int methodOOL(OOL a) { return 30; }
-    public int methodODL(ODL a) { return 31; }
-    public int methodDOL(DOL a) { return 32; }
-    public int methodLLI(LLI a) { return 33; }
-    public int methodLOI(LOI a) { return 34; }
-    public int methodOLI(OLI a) { return 35; }
-    public int methodDDI(DDI a) { return 36; }
-    public int methodLDI(LDI a) { return 37; }
-    public int methodDLI(DLI a) { return 38; }
-    public int methodOOI(OOI a) { return 39; }
-    public int methodODI(ODI a) { return 40; }
-    public int methodDOI(DOI a) { return 41; }
-    public int methodLLS(LLS a) { return 42; }
-    public int methodLOS(LOS a) { return 43; }
-    public int methodOLS(OLS a) { return 44; }
-    public int methodDDS(DDS a) { return 45; }
-    public int methodLDS(LDS a) { return 46; }
-    public int methodDLS(DLS a) { return 47; }
-    public int methodOOS(OOS a) { return 48; }
-    public int methodODS(ODS a) { return 49; }
-    public int methodDOS(DOS a) { return 50; }
-    public int methodLLB(LLB a) { return 51; }
-    public int methodLOB(LOB a) { return 52; }
-    public int methodOLB(OLB a) { return 53; }
-    public int methodDDB(DDB a) { return 54; }
-    public int methodLDB(LDB a) { return 55; }
-    public int methodDLB(DLB a) { return 56; }
-    public int methodOOB(OOB a) { return 57; }
-    public int methodODB(ODB a) { return 58; }
-    public int methodDOB(DOB a) { return 59; }
-    public int methodLLD(LLD a) { return 60; }
-    public int methodLOD(LOD a) { return 61; }
-    public int methodOLD(OLD a) { return 62; }
-    public int methodDDD(DDD a) { return 63; }
-    public int methodLDD(LDD a) { return 64; }
-    public int methodDLD(DLD a) { return 65; }
-    public int methodOOD(OOD a) { return 66; }
-    public int methodODD(ODD a) { return 67; }
-    public int methodDOD(DOD a) { return 68; }
-    public int methodLLF(LLF a) { return 69; }
-    public int methodLOF(LOF a) { return 70; }
-    public int methodOLF(OLF a) { return 71; }
-    public int methodDDF(DDF a) { return 72; }
-    public int methodLDF(LDF a) { return 73; }
-    public int methodDLF(DLF a) { return 74; }
-    public int methodOOF(OOF a) { return 75; }
-    public int methodODF(ODF a) { return 76; }
-    public int methodDOF(DOF a) { return 77; }
-    public int methodLLZ(LLZ a) { return 78; }
-    public int methodLOZ(LOZ a) { return 79; }
-    public int methodOLZ(OLZ a) { return 80; }
-    public int methodDDZ(DDZ a) { return 81; }
-    public int methodLDZ(LDZ a) { return 82; }
-    public int methodDLZ(DLZ a) { return 83; }
-    public int methodOOZ(OOZ a) { return 84; }
-    public int methodODZ(ODZ a) { return 85; }
-    public int methodDOZ(DOZ a) { return 86; }
-    public int methodLLO(LLO a) { return 87; }
-    public int methodLOO(LOO a) { return 88; }
-    public int methodOLO(OLO a) { return 89; }
-    public int methodDDO(DDO a) { return 90; }
-    public int methodLDO(LDO a) { return 91; }
-    public int methodDLO(DLO a) { return 92; }
-    public int methodOOO(OOO a) { return 93; }
-    public int methodODO(ODO a) { return 94; }
-    public int methodDOO(DOO a) { return 95; }
-    public int methodOOOZ(OOOZ a) { return 96; }
-    public int methodOOOO(OOOO a) { return 97; }
-    public int methodOOOOZ(OOOOZ a) { return 98; }
-    public int methodOOOOO(OOOOO a) { return 99; }
-    public int methodOOOOOZ(OOOOOZ a) { return 100; }
-    public int methodOOOOOO(OOOOOO a) { return 101; }
-    public int methodOOOOOOZ(OOOOOOZ a) { return 102; }
-    public int methodOOOOOOO(OOOOOOO a) { return 103; }
-    public int methodOOOOOOOZ(OOOOOOOZ a) { return 104; }
-    public int methodOOOOOOOO(OOOOOOOO a) { return 105; }
-    public int methodOOOOOOOOZ(OOOOOOOOZ a) { return 106; }
-    public int methodOOOOOOOOO(OOOOOOOOO a) { return 107; }
-    public int methodOOOOOOOOOZ(OOOOOOOOOZ a) { return 108; }
-    public int methodOOOOOOOOOO(OOOOOOOOOO a) { return 109; }
-    public int methodOOOOOOOOOOZ(OOOOOOOOOOZ a) { return 110; }
-    public int methodOOOOOOOOOOO(OOOOOOOOOOO a) { return 111; }}
+   public int methodL(L a) { return 0; }
+   public int methodI(I a) { return 1; }
+   public int methodS(S a) { return 2; }
+   public int methodB(B a) { return 3; }
+   public int methodD(D a) { return 4; }
+   public int methodF(F a) { return 5; }
+   public int methodZ(Z a) { return 6; }
+   public int methodO(O a) { return 7; }
+   public int methodLL(LL a) { return 8; }
+   public int methodDL(DL a) { return 9; }
+   public int methodOL(OL a) { return 10; }
+   public int methodLI(LI a) { return 11; }
+   public int methodDI(DI a) { return 12; }
+   public int methodOI(OI a) { return 13; }
+   public int methodLS(LS a) { return 14; }
+   public int methodDS(DS a) { return 15; }
+   public int methodOS(OS a) { return 16; }
+   public int methodLB(LB a) { return 17; }
+   public int methodDB(DB a) { return 18; }
+   public int methodOB(OB a) { return 19; }
+   public int methodLD(LD a) { return 20; }
+   public int methodDD(DD a) { return 21; }
+   public int methodOD(OD a) { return 22; }
+   public int methodLF(LF a) { return 23; }
+   public int methodDF(DF a) { return 24; }
+   public int methodOF(OF a) { return 25; }
+   public int methodLZ(LZ a) { return 26; }
+   public int methodDZ(DZ a) { return 27; }
+   public int methodOZ(OZ a) { return 28; }
+   public int methodLO(LO a) { return 29; }
+   public int methodDO(DO a) { return 30; }
+   public int methodOO(OO a) { return 31; }
+   public int methodLLL(LLL a) { return 32; }
+   public int methodLOL(LOL a) { return 33; }
+   public int methodOLL(OLL a) { return 34; }
+   public int methodDDL(DDL a) { return 35; }
+   public int methodLDL(LDL a) { return 36; }
+   public int methodDLL(DLL a) { return 37; }
+   public int methodOOL(OOL a) { return 38; }
+   public int methodODL(ODL a) { return 39; }
+   public int methodDOL(DOL a) { return 40; }
+   public int methodLLI(LLI a) { return 41; }
+   public int methodLOI(LOI a) { return 42; }
+   public int methodOLI(OLI a) { return 43; }
+   public int methodDDI(DDI a) { return 44; }
+   public int methodLDI(LDI a) { return 45; }
+   public int methodDLI(DLI a) { return 46; }
+   public int methodOOI(OOI a) { return 47; }
+   public int methodODI(ODI a) { return 48; }
+   public int methodDOI(DOI a) { return 49; }
+   public int methodLLS(LLS a) { return 50; }
+   public int methodLOS(LOS a) { return 51; }
+   public int methodOLS(OLS a) { return 52; }
+   public int methodDDS(DDS a) { return 53; }
+   public int methodLDS(LDS a) { return 54; }
+   public int methodDLS(DLS a) { return 55; }
+   public int methodOOS(OOS a) { return 56; }
+   public int methodODS(ODS a) { return 57; }
+   public int methodDOS(DOS a) { return 58; }
+   public int methodLLB(LLB a) { return 59; }
+   public int methodLOB(LOB a) { return 60; }
+   public int methodOLB(OLB a) { return 61; }
+   public int methodDDB(DDB a) { return 62; }
+   public int methodLDB(LDB a) { return 63; }
+   public int methodDLB(DLB a) { return 64; }
+   public int methodOOB(OOB a) { return 65; }
+   public int methodODB(ODB a) { return 66; }
+   public int methodDOB(DOB a) { return 67; }
+   public int methodLLD(LLD a) { return 68; }
+   public int methodLOD(LOD a) { return 69; }
+   public int methodOLD(OLD a) { return 70; }
+   public int methodDDD(DDD a) { return 71; }
+   public int methodLDD(LDD a) { return 72; }
+   public int methodDLD(DLD a) { return 73; }
+   public int methodOOD(OOD a) { return 74; }
+   public int methodODD(ODD a) { return 75; }
+   public int methodDOD(DOD a) { return 76; }
+   public int methodLLF(LLF a) { return 77; }
+   public int methodLOF(LOF a) { return 78; }
+   public int methodOLF(OLF a) { return 79; }
+   public int methodDDF(DDF a) { return 80; }
+   public int methodLDF(LDF a) { return 81; }
+   public int methodDLF(DLF a) { return 82; }
+   public int methodOOF(OOF a) { return 83; }
+   public int methodODF(ODF a) { return 84; }
+   public int methodDOF(DOF a) { return 85; }
+   public int methodLLZ(LLZ a) { return 86; }
+   public int methodLOZ(LOZ a) { return 87; }
+   public int methodOLZ(OLZ a) { return 88; }
+   public int methodDDZ(DDZ a) { return 89; }
+   public int methodLDZ(LDZ a) { return 90; }
+   public int methodDLZ(DLZ a) { return 91; }
+   public int methodOOZ(OOZ a) { return 92; }
+   public int methodODZ(ODZ a) { return 93; }
+   public int methodDOZ(DOZ a) { return 94; }
+   public int methodLLO(LLO a) { return 95; }
+   public int methodLOO(LOO a) { return 96; }
+   public int methodOLO(OLO a) { return 97; }
+   public int methodDDO(DDO a) { return 98; }
+   public int methodLDO(LDO a) { return 99; }
+   public int methodDLO(DLO a) { return 100; }
+   public int methodOOO(OOO a) { return 101; }
+   public int methodODO(ODO a) { return 102; }
+   public int methodDOO(DOO a) { return 103; }
+   public int methodOOOZ(OOOZ a) { return 104; }
+   public int methodOOOO(OOOO a) { return 105; }
+   public int methodOOOOZ(OOOOZ a) { return 106; }
+   public int methodOOOOO(OOOOO a) { return 107; }
+   public int methodOOOOOZ(OOOOOZ a) { return 108; }
+   public int methodOOOOOO(OOOOOO a) { return 109; }
+   public int methodOOOOOOZ(OOOOOOZ a) { return 110; }
+   public int methodOOOOOOO(OOOOOOO a) { return 111; }
+   public int methodOOOOOOOZ(OOOOOOOZ a) { return 112; }
+   public int methodOOOOOOOO(OOOOOOOO a) { return 113; }
+   public int methodOOOOOOOOZ(OOOOOOOOZ a) { return 114; }
+   public int methodOOOOOOOOO(OOOOOOOOO a) { return 115; }
+   public int methodOOOOOOOOOZ(OOOOOOOOOZ a) { return 116; }
+   public int methodOOOOOOOOOO(OOOOOOOOOO a) { return 117; }
+   public int methodOOOOOOOOOOZ(OOOOOOOOOOZ a) { return 118; }
+   public int methodOOOOOOOOOOO(OOOOOOOOOOO a) { return 119; }}

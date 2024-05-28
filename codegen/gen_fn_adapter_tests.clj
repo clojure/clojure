@@ -17,7 +17,7 @@
 (ns clojure.test-clojure.generated-all-fi-adapters-in-let
   (:use clojure.test)
   (:require [clojure.string :as str])
-  (:import (clojure.test %s)))
+  (:import (clojure.test AdapterExerciser %s)))
 
   (deftest test-all-fi-adapters-in-let
     (let [^AdapterExerciser exerciser (AdapterExerciser.)" imported-methods))
@@ -45,6 +45,7 @@ public class AdapterExerciser {")
 
 (defn gen-sigs []
       (let [small-rets ["L" "I" "S" "B" "D" "F" "Z" "O"]
+            zero-arity (sigs [""] small-rets)
             single-arity (sigs ["L" "D" "O"] small-rets)
             two-arity (sigs ["LL" "LO" "OL" "DD" "LD" "DL" "OO" "OD" "DO"] small-rets)
             big-rets ["Z" "O"]
@@ -56,7 +57,7 @@ public class AdapterExerciser {")
             eight-arity (sigs ["OOOOOOOO"] big-rets)
             nine-arity  (sigs ["OOOOOOOOO"] big-rets)
             ten-arity   (sigs ["OOOOOOOOOO"] big-rets)]
-           (mapcat seq [single-arity two-arity three-arity four-arity five-arity six-arity seven-arity eight-arity nine-arity ten-arity])))
+           (mapcat seq [zero-arity single-arity two-arity three-arity four-arity five-arity six-arity seven-arity eight-arity nine-arity ten-arity])))
 
 (def alphabet (map char (range 97 122)))
 (def type-hints {:D "^double "
