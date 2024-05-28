@@ -21,17 +21,16 @@
     :args - map of args to pass to function
 
   Options:
-    :command - CLI command, default=\"clojure\"
     :preserve-envelope - if true, return the full invocation envelope, default=false"
   {:added "1.12"}
-  [{:keys [tool-name tool-alias fn args command preserve-envelope]
-    :or {command "clojure", preserve-envelope false}
+  [{:keys [tool-name tool-alias fn args preserve-envelope]
+    :or {preserve-envelope false}
     :as opts}]
   (when-not (or tool-name tool-alias) (throw (ex-info "Either :tool-alias or :tool-name must be provided" (or opts {}))))
   (when-not (symbol? fn) (throw (ex-info (str "fn should be a symbol " fn) (or opts {}))))
   (let [args (conj [fn] (assoc args :clojure.exec/invoke :fn))
         _ (when (:debug opts) (println "args" args))
-        command-strs [command (str "-T" (or tool-alias tool-name)) "-"]
+        command-strs ["clojure" (str "-T" (or tool-alias tool-name)) "-"]
         _ (when (:debug opts) (apply println "Invoking: " command-strs))
         {:keys [in out]} (apply proc/start command-strs)]
     (binding [*print-length* nil
