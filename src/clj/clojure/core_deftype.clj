@@ -654,14 +654,14 @@
         sigs (when sigs
                (reduce1 (fn [m s]
                           (let [tag-to-class (fn [tag]
-                                               (let [prim-blacklist '#{int long float double char short byte boolean void
-                                                                       ints longs floats doubles chars shorts bytes booleans objects}]
+                                               (when (not (contains? '#{int long float double char short byte boolean void
+                                                                        ints longs floats doubles chars shorts bytes booleans objects}
+                                                                     tag))
                                                  (if-let [c (and (instance? clojure.lang.Symbol tag)
                                                                  (= (.indexOf (.getName ^clojure.lang.Symbol tag) ".") -1)
-                                                                 (not (contains? prim-blacklist tag))
                                                                  (resolve tag))]
                                                    (symbol (.getName c))
-                                                   (when (not (contains? prim-blacklist tag)) tag))))
+                                                   tag)))
                                 name-meta (update-in (meta (first s)) [:tag] tag-to-class)
                                 mname (with-meta (first s) nil)
                                 [arglists doc]
