@@ -705,3 +705,17 @@
   (f [s] (seq s)))
 (deftest test-resolve-type-hints-in-protocol-methods
   (is (= 4 (clojure.test-clojure.protocols/f "test"))))
+
+;; CLJ-2698 - Ignore primitive hints in defprotocol return
+
+(defprotocol PrimHinted
+  (^double f1 [p a])
+  (^void f2 [p]))
+
+(deftest test-prim-ret-hints-ignored
+  (is (thrown-with-msg?
+       Exception
+       #"Receiver class"
+       (eval '(f1 (reify PrimHinted) :foo))))
+  (is (= :foo  (f1 (reify PrimHinted (f1 [_ x] x)) :foo)))
+  (is (= "foo" (f2 (reify PrimHinted (f2 [_] "foo"))))))
