@@ -1646,21 +1646,101 @@ static class FISupport {
 		return Object.class;
 	}
 
+	// allowed source type (prim or boxed) -> primitive (only) target types
+	private static final IPersistentMap WIDENING = PersistentHashMap.create(
+			Byte.TYPE, PersistentHashSet.create(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE),
+			Byte.class, PersistentHashSet.create(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE, Byte.TYPE),
+			Short.TYPE, PersistentHashSet.create(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE),
+			Short.class, PersistentHashSet.create(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE, Short.TYPE),
+			Character.TYPE, PersistentHashSet.create(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE),
+			Character.class, PersistentHashSet.create(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE, Character.TYPE),
+			Integer.TYPE, PersistentHashSet.create(Long.TYPE, Float.TYPE, Double.TYPE),
+			Integer.class, PersistentHashSet.create(Long.TYPE, Float.TYPE, Double.TYPE, Integer.TYPE),
+			Long.TYPE, PersistentHashSet.create(Float.TYPE, Double.TYPE),
+			Long.class, PersistentHashSet.create(Float.TYPE, Double.TYPE, Long.TYPE),
+			Float.TYPE, PersistentHashSet.create(Double.TYPE),
+			Float.class, PersistentHashSet.create(Double.TYPE, Float.TYPE),
+			Double.class, PersistentHashSet.create(Double.TYPE));
+
+	private static final IPersistentMap PRIM_TO_WRAPPER = PersistentHashMap.create(
+			Byte.TYPE, Byte.class,
+			Short.TYPE, Short.class,
+			Character.TYPE, Character.class,
+			Integer.TYPE, Integer.class,
+			Long.TYPE, Long.class,
+			Float.TYPE, Float.class,
+			Double.TYPE, Double.class);
+
+	/**
+	 * Can sourceClass be adapted to targetClass per the rules at:
+	 * https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/LambdaMetafactory.html
+	 * https://docs.oracle.com/javase/specs/jls/se8/html/jls-5.html#jls-5.1.2
+	 * @param sourceClass Source type (Q in the docs)
+	 * @param targetClass Target type (S in the docs)
+	 * @return true if adaptable
+	 */
+	public static boolean typeAdaptable(Class sourceClass, Class targetClass) {
+		if(sourceClass.equals(targetClass)) {
+			return true;
+		} else if(targetClass.isPrimitive()) {
+			// can widen from either prim or box to target prim
+			// like: int -> long or Integer -> long
+			return ((IPersistentSet)WIDENING.valAt(sourceClass, PersistentHashSet.EMPTY)).contains(targetClass);
+		} else if(sourceClass.isPrimitive()) {
+			// if source is prim, box it, and see if target can be assigned from that
+			// like: long -> Long or long -> Number
+			return targetClass.isAssignableFrom((Class)PRIM_TO_WRAPPER.valAt(sourceClass));
+		} else {
+			return true;  // difficult to check with generics (not just targetClass.isAssignableFrom(sourceClass))
+		}
+	}
+
+	private static boolean canImplementFI(Executable implMethod, java.lang.reflect.Method targetMethod) {
+		Class[] targetParamTypes = targetMethod.getParameterTypes();
+		Class targetRetType = targetMethod.getReturnType();
+
+		List<Class> implParamTypes = new ArrayList<>();
+		if(isInstanceMethod(implMethod))
+			implParamTypes.add(((java.lang.reflect.Method)implMethod).getDeclaringClass());
+		implParamTypes.addAll(Arrays.asList(implMethod.getParameterTypes()));
+		Class implRetType = (implMethod instanceof java.lang.reflect.Method)
+				? ((java.lang.reflect.Method)implMethod).getReturnType()
+				: ((Constructor)implMethod).getDeclaringClass();
+
+		for(int i=0; i<targetParamTypes.length; i++) {
+			if(!typeAdaptable(targetParamTypes[i], implParamTypes.get(i)))
+				return false;
+		}
+
+		return typeAdaptable(implRetType, targetRetType);
+	}
+
 	// If QME resolves to exactly one method (either via param-tags or no overload), return it
 	private static Executable maybeResolveExactMethod(QualifiedMethodExpr qme, java.lang.reflect.Method targetMethod) {
+		List<Executable> candidateMethods;
 		if(qme.hintedSig != null) {
-			return QualifiedMethodExpr.resolveHintedMethod(qme.c, qme.methodName, qme.kind, qme.hintedSig);
+			candidateMethods = new ArrayList<Executable>();
+			candidateMethods.add(QualifiedMethodExpr.resolveHintedMethod(qme.c, qme.methodName, qme.kind, qme.hintedSig));
 		} else {
-			int targetArity = targetMethod.getParameterCount();
-			List<Executable> methods = QualifiedMethodExpr.methodsWithName(qme.c, qme.methodName, qme.kind);
-			List<Executable> filteredMethods = methods.stream()
-					.filter(m -> m.getParameterCount() == targetArity)
-					.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
-					.collect(Collectors.toList());
-			if(filteredMethods.size() == 1)
-				return filteredMethods.get(0);
-			else
-				return null;
+			candidateMethods = QualifiedMethodExpr.methodsWithName(qme.c, qme.methodName, qme.kind);
+		}
+
+		int targetArity = targetMethod.getParameterCount();
+		List<Executable> filteredMethods = candidateMethods.stream()
+				.filter(m -> m.getParameterCount() == targetArity)
+				.filter(m -> !m.isSynthetic()) // remove bridge/lambda methods
+				.filter(m -> canImplementFI(m, targetMethod))
+				.collect(Collectors.toList());
+
+		if(filteredMethods.size() == 0) {
+			throw new IllegalArgumentException("Error - " + methodDescription(qme.c, qme.methodName)
+					+ " is not a valid implementation of "
+					+ methodDescription(targetMethod.getDeclaringClass(), targetMethod.getName()));
+		} else if(filteredMethods.size() == 1) {
+			return filteredMethods.get(0);
+		} else {
+			// overloaded, create a reflective thunk instead and try to do at runtime
+			return null;
 		}
 	}
 
