@@ -103,7 +103,7 @@ public static Object invokeInstanceMethodOfClass(Object target, Class c, String 
 			.map(method -> toAccessibleSuperMethod(method, target))
 			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
-	return invokeMatchingMethod(methodName, methods, target, args);
+	return invokeMatchingMethod(methodName, methods, c, target, args);
 }
 
 public static Object invokeInstanceMethodOfClass(Object target, String className, String methodName, Object[] args) {
@@ -122,9 +122,9 @@ private static RuntimeException throwCauseOrElseException(Exception e) {
 	throw Util.sneakyThrow(e);
 }
 
-private static String noMethodReport(String methodName, Object target, Object[] args){
+private static String noMethodReport(String methodName, Class contextClass, Object[] args){
 	 return "No matching method " + methodName + " found taking " + args.length + " args"
-			+ (target==null?"":" for " + target.getClass());
+			+ (contextClass != null ? " for " + contextClass : "");
 }
 
 private static Method matchMethod(List methods, Object[] args) {
@@ -155,12 +155,16 @@ private static Object[] widenBoxedArgs(Object[] args) {
 	return widenedArgs;
 }
 
-static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
+static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args){
+	return invokeMatchingMethod(methodName, methods, target != null ? target.getClass() : null, target, args);
+}
+
+static Object invokeMatchingMethod(String methodName, List methods, Class contextClass, Object target, Object[] args)
 		{
 	Method m = null;
 	if(methods.isEmpty())
 		{
-		throw new IllegalArgumentException(noMethodReport(methodName,target,args));
+		throw new IllegalArgumentException(noMethodReport(methodName,contextClass,args));
 		}
 	else if(methods.size() == 1)
 		{
@@ -176,13 +180,13 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 			}
 		}
 	if(m == null)
-		throw new IllegalArgumentException(noMethodReport(methodName,target,args));
+		throw new IllegalArgumentException(noMethodReport(methodName,contextClass,args));
 
 	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()) || !canAccess(m, target))
 		{
 		//public method of non-public class, try to find it in hierarchy
 		Method oldm = m;
-		m = getAsMethodOfAccessibleBase(target.getClass(), m, target);
+		m = getAsMethodOfAccessibleBase(contextClass, m, target);
 		if(m == null)
 			throw new IllegalArgumentException("Can't call public method of non-public class: " +
 			                                    oldm.toString());
