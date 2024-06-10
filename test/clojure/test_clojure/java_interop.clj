@@ -22,7 +22,7 @@
            (java.io File FileFilter FilenameFilter)
            (java.util UUID)
            (java.util.concurrent.atomic AtomicLong AtomicInteger)
-           (clojure.test FIConstructor FIStatic FunctionalTester)))
+           (clojure.test FIConstructor FIStatic FunctionalTester AdapterExerciser)))
 
 ; http://clojure.org/java_interop
 ; http://clojure.org/compilation
@@ -828,7 +828,7 @@
     (is (= 1 (.call r (reify clojure.test_clojure.java_interop.FIWontWork (invoke [_ a b c d e f g h i j k] k)))))))
 
 (definterface ^{java.lang.FunctionalInterface true} FIPrims
-  (invoke [^long a ^long b ^long c ^long d]))
+  (^long invoke [^long a ^long b ^long c ^long d]))
 
 (definterface ReceivesFIPrims
   (call [^clojure.test_clojure.java_interop.FIPrims fi]))
@@ -837,6 +837,16 @@
   (let [r (reify clojure.test_clojure.java_interop.ReceivesFIPrims
             (call [_ fi] (.invoke fi 1 2 3 4)))]
     (is (= 4 (.call r (fn [^long a ^long b ^long c ^long d] d))))))
+
+(deftest test-invoke-fiprim-rets
+  (let [^clojure.test_clojure.java_interop.FIPrims f (fn [a b c d] a)]
+    (is (instance? clojure.test_clojure.java_interop.FIPrims f))
+    (is (= 1 (.invoke f 1 2 3 4))))
+
+  (is (= "LLL" (AdapterExerciser/.methodLLL (AdapterExerciser.) (fn ^long [^long a ^long b]))))
+  (is (= "OOOO" (AdapterExerciser/.methodOOOO (AdapterExerciser.) (fn ^long [^long a ^long b ^long c]))))
+  (is (= "OOOZ" (AdapterExerciser/.methodOOOZ (AdapterExerciser.) (fn [^long a ^long b ^long c]))))
+  )
 
 (deftest test-null-reify
   (is (= "null" ((fn [x] (FIStatic/allowsNullFI x)) nil))))

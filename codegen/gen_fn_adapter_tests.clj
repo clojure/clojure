@@ -126,24 +126,24 @@ public class AdapterExerciser {")
 (defn gen-test-functional-adapters-in-def []
       (let [sb (StringBuilder. ^String (def-test-header "generated-functional-adapters-in-def"))
             adapter-signatures (gen-sigs)]
-           (doseq [[idx sig] (map-indexed (fn [idx itm] [idx itm]) adapter-signatures)]
+           (doseq [sig adapter-signatures]
                   (let [{:keys [fn-vars fn-body]} (format-parts sig)]
                        (.append sb "\n")
                        (.append sb (format "           (def %sadapter (fn [%s] %s))" sig fn-vars fn-body))
                        (.append sb "\n")
-                       (.append sb (format "           (is (= (.method%s ^AdapterExerciser exerciser %sadapter) %s))" sig sig idx))))
+                       (.append sb (format "           (is (= (.method%s ^AdapterExerciser exerciser %sadapter) %s))" sig sig (str "\"" sig "\"")))))
            (.append sb ")")
            (spit "generated_functional_adapters_in_def.clj" (.toString sb))))
 
 (defn gen-test-functional-adapters-in-def-requiring-reflection []
       (let [sb (StringBuilder. ^String (def-test-header "generated-functional-adapters-in-def-requiring-reflection"))
             adapter-signatures (gen-sigs)]
-           (doseq [[idx sig] (map-indexed (fn [idx itm] [idx itm]) adapter-signatures)]
+           (doseq [sig adapter-signatures]
                   (let [{:keys [fn-vars fn-body]} (format-parts sig)]
                        (.append sb "\n")
                        (.append sb (format "           (def %sadapter (fn [%s] %s))" sig fn-vars fn-body))
                        (.append sb "\n")
-                       (.append sb (format "           (is (= (.method%s exerciser %sadapter) %s))" sig sig idx))))
+                       (.append sb (format "           (is (= (.method%s exerciser %sadapter) %s))" sig sig (str "\"" sig "\"")))))
            (.append sb ")")
            (spit "generated_functional_adapters_in_def_requiring_reflection.clj" (.toString sb))))
 
@@ -157,13 +157,20 @@ public class AdapterExerciser {")
                        (.append sb (format "    public interface %s {\n" sig))
                        (.append sb (format "        public %s takes%sRet%s(%s);\n" return-type (str/join "" input-types) return-type-initial java-vars))
                        (.append sb "    }")))
-           (doseq [[idx sig] (map-indexed (fn [idx itm] [idx itm]) adapter-signatures)]
+           (doseq [sig adapter-signatures]
                   (.append sb "\n")
-                  (.append sb (format "   public int method%s(%s a) { return %s; }" sig sig idx)))
+                  (.append sb (format "   public String method%s(%s a) { return %s; }" sig sig (str "\"" sig "\""))))
            (.append sb "}")
            (spit "AdapterExerciser.java" (.toString sb))))
 
+(defn gen-all []
+  (gen-test-all-fi-adapters-in-let)
+  (gen-test-functional-adapters-in-def)
+  (gen-test-functional-adapters-in-def-requiring-reflection)
+  (gen-adapter-exerciser-class))
+
 (comment
+  (gen-all)
   (gen-test-all-fi-adapters-in-let)
   (gen-test-functional-adapters-in-def)
   (gen-test-functional-adapters-in-def-requiring-reflection)

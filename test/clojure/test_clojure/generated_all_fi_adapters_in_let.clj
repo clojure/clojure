@@ -2,7 +2,7 @@
 (ns clojure.test-clojure.generated-all-fi-adapters-in-let
   (:use clojure.test)
   (:require [clojure.string :as str])
-  (:import (clojure.test AdapterExerciser AdapterExerciser$L
+  (:import (clojure.test AdapterExerciser  AdapterExerciser$L
 AdapterExerciser$I
 AdapterExerciser$S
 AdapterExerciser$B
