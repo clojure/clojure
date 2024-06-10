@@ -653,12 +653,13 @@
             [opts sigs]))
         sigs (when sigs
                (reduce1 (fn [m s]
-                          (let [type-allowed? (fn [tag] (not (contains? '#{int long float double char short byte boolean void} tag)))
+                          (let [disallowed? '#{int long float double char short byte boolean void}
+                                array-tag? '#{ints longs floats doubles chars shorts bytes booleans objects}
                                 resolve-class-symbol (fn [tag]
-                                                       (when (type-allowed? tag)
+                                                       (when-not (disallowed? tag)
                                                          (if-let [c (and (instance? clojure.lang.Symbol tag)
                                                                          (= (.indexOf (.getName ^clojure.lang.Symbol tag) ".") -1)
-                                                                         (not (contains? '#{ints longs floats doubles chars shorts bytes booleans objects} tag))
+                                                                         (not (array-tag? tag))
                                                                          (resolve tag))]
                                                            (symbol (.getName c))
                                                            tag)))
