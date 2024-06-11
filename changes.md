@@ -1,5 +1,212 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.12.0
+
+## 1 Compatibility
+
+### 1.1 Java 8 - Compatiblity EOL notice
+
+Clojure 1.12 produces Java 8 bytecode (same as Clojure 1.10 and 1.11), but this is expected to be the last release using a Java 8 baseline. Future releases will move the bytecode and minimum Java compatibility to a newer Java LTS release.
+
+### 1.2 Java 21 - Virtual thread pinning from user code under `synchronized`
+
+Clojure users want to use virtual threads on JDK 21. Prior to 1.12, Clojure lazy-seqs and delays, in order to enforce run-once behavior, ran user code under synchronized blocks, which as of JDK 21 don't yet participate in cooperative blocking. Thus if that code did e.g. blocking I/O it would pin a real thread. JDK 21 may emit warnings for this when using `-Djdk.tracePinnedThreads=full`.
+
+To avoid this pinning, in 1.12 `lazy-seq` and `delay` use locks instead of synchronized blocks.
+
+See: [CLJ-2804](https://clojure.atlassian.net/browse/CLJ-2804)
+
+### 1.3 Security
+
+Fix [CVE-2024-22871](https://nvd.nist.gov/vuln/detail/CVE-2024-22871) detailed in [GHSA-vr64-r9qj-h27f](https://github.com/advisories/GHSA-vr64-r9qj-h27f):
+
+* [CLJ-2839](https://clojure.atlassian.net/browse/CLJ-2839) `iterate`, `cycle`, `repeat` - infinite seqs have infinite `hashCode()`
+
+### 1.4 Serialization
+
+[CLJ-1327](https://clojure.atlassian.net/browse/CLJ-1327) explicitly sets the Java serialization identifier for the classes in Clojure that implement Java serialization. In Clojure 1.11.0 this changed for two classes unnecessarily and we reverted those changes in Clojure 1.11.1 - this completes that work for the rest of the classes.
+
+Clojure data types have implemented the Java serialization interfaces since Clojure 1.0. Java serialization is designed to save graphs of Java instances into a byte stream. Every class has an identifier (the serialVersionUID) that is automatically generated based on the class name, it's type hierarchy, and the serialized fields. At deserialization time, deserialization can only occur when the available class has an identifier that matches the class id recorded in the serialized bytes.
+
+Clojure has never provided a guarantee of serialization consistency across Clojure versions, but we do not wish to break compatibility any more than necessary and these changes will give us more control over that in the future.
+
+See: [CLJ-1327](https://clojure.atlassian.net/browse/CLJ-1327)
+
+### 1.5 Dependencies
+
+Updated dependencies:
+
+* spec.alpha dependency to 0.5.238 - [changes](https://github.com/clojure/spec.alpha/blob/master/CHANGES.md)
+* core.specs.alpha dependency to 0.4.74 - [changes](https://github.com/clojure/core.specs.alpha/blob/master/CHANGES.md)
+
+See: [CLJ-2852](https://clojure.atlassian.net/browse/CLJ-2852)
+
+## 2 Features
+
+### 2.1 Add libraries for interactive use
+
+There are many development-time cases where it would be useful to add a library interactively without restarting the JVM - speculative evaluation, adding a known dependency to your project, or adding a library to accomplish a specific task.
+
+Clojure now provides new functions to add libraries interactively, without restarting the JVM or losing the state of your work:
+
+* [add-lib](https://clojure.github.io/clojure/branch-master/clojure.repl-api.html#clojure.repl.deps/add-lib) takes a lib that is not available on the classpath, and makes it available by downloading (if necessary) and adding to the classloader. Libs already on the classpath are not updated. If the coordinate is not provided, the newest Maven or git (if the library has an inferred git repo name) version or tag are used.
+* [add-libs](https://clojure.github.io/clojure/branch-master/clojure.repl-api.html#clojure.repl.deps/add-libs) is like `add-lib`, but resolves a set of new libraries and versions together.
+* [sync-deps](https://clojure.github.io/clojure/branch-master/clojure.repl-api.html#clojure.repl.deps/sync-deps) calls `add-libs` with any libs present in deps.edn, but not yet present on the classpath.
+
+These new functions are intended only for development-time interactive use at the repl - using a deps.edn is still the proper way to build and maintain production code. To this end, these functions all check that [\*repl*](https://clojure.github.io/clojure/branch-master/clojure.core-api.html#clojure.core/%2Arepl%2A) is bound to true (that flag is bound automatically by `clojure.main/repl`). In a clojure.main REPL, these new functions are automatically referred in the `user` namespace. In other repls, you may need to `(require '[clojure.repl.deps :refer :all])` before use.
+
+Library resolution and download are provided by [tools.deps](https://github.com/clojure/tools.deps). However, you do not want to add tools.deps and its many dependencies to your project classpath during development, and thus we have also added a new api for invoking functions out of process via the Clojure CLI.
+
+See: [CLJ-2761](https://clojure.atlassian.net/browse/CLJ-2761), [CLJ-2757](https://clojure.atlassian.net/browse/CLJ-2757), [CLJ-2788](https://clojure.atlassian.net/browse/CLJ-2788), [CLJ-2767](https://clojure.atlassian.net/browse/CLJ-2767), [CLJ-2769](https://clojure.atlassian.net/browse/CLJ-2769), [CLJ-2770](https://clojure.atlassian.net/browse/CLJ-2770)
+
+### 2.2 Invoke tool functions out of process
+
+There are many useful tools you can use at development time, but which are not part of your project's actual dependencies. The Clojure CLI provides explicit support for [tools](https://clojure.org/reference/clojure_cli#tool_install) with their own classpath, but there was not previously a way to invoke these interactively.
+
+Clojure now includes [clojure.tools.deps.interop/invoke-tool](https://clojure.github.io/clojure/branch-master/clojure.tools.deps.interop-api.html#clojure.tools.deps.interop/invoke-tool) to invoke a tool function out of process. The classpath for the tool is defined in deps.edn and you do not need to add the tool's dependencies to your project classpath.
+
+`add-lib` functionality is built using `invoke-tool` but you can also use it to build or invoke your own tools for interactive use. Find more about the function execution protocol on the [CLI reference](https://clojure.org/reference/clojure_cli#function_protocol).
+
+See: [CLJ-2760](https://clojure.atlassian.net/browse/CLJ-2760)
+
+### 2.3 Start and control external processes
+
+For a long time, we've had the `clojure.java.shell` namespace, but over time Java has provided new APIs for process info, process control, and I/O redirection. This release adds a new namespace [clojure.java.process](https://clojure.github.io/clojure/branch-master/index.html#clojure.java.process) that takes advantage of these APIs and is easier to use. See:
+
+* [start](https://clojure.github.io/clojure/branch-master/clojure.java.process-api.html#clojure.java.process/start) - full control over streams with access to the underlying Java objects for advanced usage
+* [exec](https://clojure.github.io/clojure/branch-master/clojure.java.process-api.html#clojure.java.process/exec) - covers the common case of executing an external process and returning its stdout on completion
+
+See: [CLJ-2759](https://clojure.atlassian.net/browse/CLJ-2759), [CLJ-2777](https://clojure.atlassian.net/browse/CLJ-2777), [CLJ-2828](https://clojure.atlassian.net/browse/CLJ-2828), [CLJ-2773](https://clojure.atlassian.net/browse/CLJ-2773), [CLJ-2776](https://clojure.atlassian.net/browse/CLJ-2776), [CLJ-2774](https://clojure.atlassian.net/browse/CLJ-2774), [CLJ-2778](https://clojure.atlassian.net/browse/CLJ-2778), [CLJ-2779](https://clojure.atlassian.net/browse/CLJ-2779)
+
+### 2.4 Method values
+
+Clojure programmers often want to use Java methods in higher-order functions (e.g. passing a Java method to `map`). Until now, programmers have had to manually wrap methods in functions. This is verbose, and might require manual hinting for overload disambiguation, or incur incidental reflection or boxing.
+
+Programmers can now use [qualified methods](#25-qualified-methods---classmethod-classmethod-and-classnew) as ordinary functions in value contexts - the compiler will automatically generate the wrapping function. The compiler will generate a reflective call when a qualified method does not resolve due to overloading. Developers can supply [:param-tags](#26-param-tags-metadata) metadata on qualified methods to specify the signature of a single desired method, 'resolving' it.
+
+See: [CLJ-2793](https://clojure.atlassian.net/browse/CLJ-2793), [CLJ-2844](https://clojure.atlassian.net/browse/CLJ-2844), [CLJ-2835](https://clojure.atlassian.net/browse/CLJ-2835)
+
+### 2.5 Qualified methods - `Class/method`, `Class/.method`, and `Class/new`
+
+Java members inherently exist in a class.  For method values we need a way to explicitly specify the class of an instance method because there is no possibility for inference.
+
+Qualified methods have value semantics when used in non-invocation positions:
+
+* `Classname/method` - value is a Clojure function that invokes a static method
+* `Classname/.method` - value is a Clojure function that invokes an instance method
+* `Classname/new` - value is a Clojure function that invokes a constructor
+
+Note: developers must use `Classname/method` and `Classname/.method` syntax to differentiate between static and instance methods.
+
+Qualified method invocations with [param-tags](#26-param-tags-metadata) use only the tags to resolve the method. Without param-tags they behave like the equivalent [dot syntax](https://clojure.org/reference/java_interop#_the_dot_special_form), except the qualifying class takes precedence over hints of the target object, and over its runtime type when invoked via reflection.
+
+Note: Static fields are values and should be referenced without parens unless they are intended as function calls, e.g `(System/out)` should be `System/out`. Future Clojure releases will treat the field's value as something invokable and invoke it.
+
+See: [CLJ-2844](https://clojure.atlassian.net/browse/CLJ-2844), [CLJ-2848](https://clojure.atlassian.net/browse/CLJ-2848), [CLJ-2847](https://clojure.atlassian.net/browse/CLJ-2847), [CLJ-2853](https://clojure.atlassian.net/browse/CLJ-2853)
+
+### 2.6 :param-tags metadata
+
+When used as values, qualified methods supply only the class and method name, and thus cannot resolve overloaded methods.
+
+Developers can supply `:param-tags` metadata on qualified methods to specify the signature of a single desired method, 'resolving' it. The `:param-tags` metadata is a vector of zero or more tags: `[tag ...]`. A tag is any existing valid `:tag` metadata value. Each tag corresponds to a parameter in the desired signature (arity should match the number of tags). Parameters with non-overloaded types can use the placeholder `_` in lieu of the tag. When you supply :param-tags metadata on a qualified method, the metadata must allow the compiler to resolve it to a single method at compile time.
+
+A new metadata reader syntax `^[tag ...]` attaches `:param-tags` metadata to member symbols, just as `^tag` attaches `:tag` metadata to a symbol.
+
+See: [CLJ-2805](https://clojure.atlassian.net/browse/CLJ-2805)
+
+### 2.7 Array class syntax
+
+Clojure supports symbols naming classes both as a value (for class object) and as a type hint, but has not provided syntax for array classes other than strings.
+
+Developers can now refer to an array class using a symbol of the form `ComponentClass/#dimensions`, eg `String/2` refers to the class of a 2 dimensional array of Strings. Component classes can be fully-qualified classes, imported classes, or primitives. Array class syntax can be used as both type hints and values.
+
+Examples: `String/1`, `java.lang.String/1`, `long/2`. 
+
+See: [CLJ-2807](https://clojure.atlassian.net/browse/CLJ-2807)
+
+### 2.8 Functional interfaces
+
+Java programs define "functions" with Java functional interfaces (marked with the [@FunctionalInterface](https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html) annotation), which have a single method.
+
+Clojure developers can now invoke Java methods taking functional interfaces by passing functions with matching arity. The Clojure compiler implicitly converts Clojure functions to the required functional interface by constructing a lambda adapter. You can explicitly coerce a Clojure function to a functional interface by hinting the binding name in a `let` binding, e.g. to avoid repeated adapter construction in a loop, e.g. `(let [^java.util.function.Predicate p even?] ...)`.
+
+See: [CLJ-2799](https://clojure.atlassian.net/browse/CLJ-2799), [CLJ-2858](https://clojure.atlassian.net/browse/CLJ-2858), [CLJ-2856](https://clojure.atlassian.net/browse/CLJ-2856)
+
+### 2.9 Java Supplier interop
+
+Calling methods that take a [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html) (a method that supplies a value) had required writing an adapter with reify. Clojure has a "value supplier" interface with semantic support already - `IDeref`. All `IDeref` impls (`delay`, `future`, `atom`, etc) now implement the `Supplier` interface directly.
+
+See: [CLJ-2792](https://clojure.atlassian.net/browse/CLJ-2792), [CLJ-2841](https://clojure.atlassian.net/browse/CLJ-2841)
+
+### 2.10 Streams with seq, into, reduce, and transduce support
+
+Java APIs increasingly return [Stream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html)s and are hard to consume because they do not implement interfaces that Clojure already supports, and hard to interop with because Clojure doesn't directly implement Java functional interfaces.
+
+In addition to functional interface support, Clojure now provides these functions to interoperate with streams in an idiomatic manner, all functions behave analogously to their Clojure counterparts:
+
+* `(stream-seq! stream) => seq`
+* `(stream-reduce! f [init-val] stream) => val`
+* `(stream-transduce! xf f [init-val] stream) => val`
+* `(stream-into! to-coll [xf] stream) => to-coll`
+
+All of these operations are terminal stream operations (they consume the stream).
+
+See: [CLJ-2775](https://clojure.atlassian.net/browse/CLJ-2775)
+
+### 2.11 PersistentVector implements Spliterable
+
+Java collections implement streams via ["spliterators"](https://docs.oracle.com/javase/8/docs/api/java/util/Spliterator.html), iterators that can be split for faster parallel traversal. `PersistentVector` now provides a custom spliterator that supports parallelism, with greatly improved performance.
+
+See: [CLJ-2791](https://clojure.atlassian.net/browse/CLJ-2791)
+
+### 2.12 Efficient drop and partition for persistent or algorithmic collections
+
+Partitioning of a collection uses a series of takes (to build a partition) and drops (to skip past that partition). [CLJ-2713](https://clojure.atlassian.net/browse/CLJ-2713) adds a new internal interface (IDrop) indicating that a collection can drop more efficiently than sequential traversal, and implements that for persistent collections and algorithmic collections like `range` and `repeat`. These optimizations are used in `drop`, `nthrest`, and `nthnext`.
+
+Additionally, there are new functions `partitionv`, `partitionv-all`, and `splitv-at` that are more efficient than their existing counterparts and produce vector partitions instead of realized seq partitions.
+
+See: [CLJ-2713](https://clojure.atlassian.net/browse/CLJ-2713), [CLJ-2742](https://clojure.atlassian.net/browse/CLJ-2742), [CLJ-2740](https://clojure.atlassian.net/browse/CLJ-2740), [CLJ-2715](https://clojure.atlassian.net/browse/CLJ-2715), [CLJ-2718](https://clojure.atlassian.net/browse/CLJ-2718), [CLJ-2772](https://clojure.atlassian.net/browse/CLJ-2772), [CLJ-2741](https://clojure.atlassian.net/browse/CLJ-2741)
+
+### 2.13 Var interning policy
+
+[Interning](https://clojure.org/reference/vars#interning) a var in a namespace (vs aliasing) must create a stable reference that is never displaced, so that all references to an interned var get the same object. There were some cases where interned vars could get displaced and those have been tightened up in 1.12.0-alpha1. If you encounter this situation, you'll see a warning like "REJECTED: attempt to replace interned var #'some-ns/foo with #'other-ns/foo in some-ns, you must ns-unmap first".
+
+This addresses the root cause of an issue encountered with Clojure 1.11.0, which added new functions to clojure.core (particularly `abs`). Compiled code from an earlier version of Clojure with var names that matched the newly added functions in clojure.core would be unbound when loaded in a 1.11.0 runtime. In addition to [CLJ-2711](https://clojure.atlassian.net/browse/CLJ-2711), we rolled back a previous fix in this area ([CLJ-1604](https://clojure.atlassian.net/browse/CLJ-1604)).
+
+See: [CLJ-2711](https://clojure.atlassian.net/browse/CLJ-2711)
+
+## 3 Fixes and enhancements
+
+### 3.1 Reader and Compiler
+
+* [CLJ-2726](https://clojure.atlassian.net/browse/CLJ-2726) `#uuid` data reader - Fix exception on invalid input so it flows through reader
+* [CLJ-2813](https://clojure.atlassian.net/browse/CLJ-2813) anonymous function arg reader - no longer accepts invalid arg symbols
+* [CLJ-2843](https://clojure.atlassian.net/browse/CLJ-2843) Reflective calls to Java methods that take primitive long or double now work when passed a narrower boxed number at runtime (Integer, Short, Byte, Float). Previously, these methods were not matched during reflection and an error was thrown.
+
+### 3.2 Core
+
+* [CLJ-2739](https://clojure.atlassian.net/browse/CLJ-2739) ArityException - Fix message when function incorrectly called with >20 args
+* [CLJ-2709](https://clojure.atlassian.net/browse/CLJ-2709) `range` - Use optimized range for int args
+* [CLJ-2721](https://clojure.atlassian.net/browse/CLJ-2721) `range` - Fix invalid arg order when adding meta to non-optimized range
+* [CLJ-2683](https://clojure.atlassian.net/browse/CLJ-2683) `with-open` - Fix to not qualify `.close` method on expansion
+* [CLJ-2724](https://clojure.atlassian.net/browse/CLJ-2724) `clojure.java.io/do-copy` - Fix incorrect type hint
+* [CLJ-2640](https://clojure.atlassian.net/browse/CLJ-2640) `ex-info` - now handles nil data map
+* [CLJ-2717](https://clojure.atlassian.net/browse/CLJ-2717) `nthrest` now returns rest output on n=0 or past end of seq
+* [CLJ-1872](https://clojure.atlassian.net/browse/CLJ-1872) `empty?` - adds support for `counted?` collections
+* [CLJ-2694](https://clojure.atlassian.net/browse/CLJ-2694) Fix ratio invariants violated when using Long/MIN_VALUE
+* [CLJ-2568](https://clojure.atlassian.net/browse/CLJ-2568) `clojure.walk/walk` - preserve metadata on lists and seqs
+* [CLJ-2686](https://clojure.atlassian.net/browse/CLJ-2686) `clojure.core.server/parse-props` - Fix exception if system properties concurrently modified during initialization
+* [CLJ-2645](https://clojure.atlassian.net/browse/CLJ-2645) `PrintWriter-on` should support auto-flush, and prepl should use it for the err stream
+* [CLJ-2698](https://clojure.atlassian.net/browse/CLJ-2698) `defprotocol` - ignore unused primitive return type hints
+* [CLJ-2783](https://clojure.atlassian.net/browse/CLJ-2783) replace calls to deprecated URL constructor
+
+### 3.3 Docstrings
+
+* [CLJ-2225](https://clojure.atlassian.net/browse/CLJ-2225) `assert` and `\*assert*` - improve docstrings to add context
+* [CLJ-2290](https://clojure.atlassian.net/browse/CLJ-2290) `into` - add 0- and 1-arity to docstring
+* [CLJ-2552](https://clojure.atlassian.net/browse/CLJ-2552) `reify` - improve docstring and fix example
+* [CLJ-1385](https://clojure.atlassian.net/browse/CLJ-1385) `transient` - include usage model from reference docs
+
 # Changes to Clojure in Version 1.11.3
 
 * [CLJ-2843](https://clojure.atlassian.net/browse/CLJ-2843) - Reflective calls to Java methods that take primitive long or double now work when passed a narrower boxed number at runtime (Integer, Short, Byte, Float). Previously, these methods were not matched during reflection and an error was thrown.
