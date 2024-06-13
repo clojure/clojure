@@ -1688,7 +1688,8 @@ static class FISupport {
 			Integer.TYPE, Integer.class,
 			Long.TYPE, Long.class,
 			Float.TYPE, Float.class,
-			Double.TYPE, Double.class);
+			Double.TYPE, Double.class,
+			Boolean.TYPE, Boolean.class);
 
 	/**
 	 * Can sourceClass be adapted to targetClass per the rules at:
