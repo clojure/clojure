@@ -35,8 +35,6 @@ public class FnInvokers {
             return 'B';
         } else if(Float.TYPE.equals(c)) {
             return 'F';
-        } else if(Boolean.TYPE.equals(c)) {
-            return 'Z';
         } else {
             return 'O';
         }
@@ -59,11 +57,6 @@ public class FnInvokers {
         } else {
             return f0.invoke(%s);
         }
-    }")
-
-(def invokeZ-format
-  "    public static boolean invoke%sZ(IFn f0%s) {
-        return RT.booleanCast(f0.invoke(%s));
     }")
 
 (def invokeD-format
@@ -142,8 +135,7 @@ public class FnInvokers {
       "S" (format invokeS-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
       "B" (format invokeB-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
       "D" (format invokeD-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
-      "F" (format invokeF-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type)
-      "Z" (format invokeZ-format arg-str fn-vars fn-vars-sans-type))))
+      "F" (format invokeF-format arg-str fn-vars arg-str arg-str fn-vars-sans-type fn-vars-sans-type))))
 
 (defn sigs [args return-types]
   (let [fun-sig-reducer (fn [res ret]
@@ -152,11 +144,11 @@ public class FnInvokers {
     (reduce fun-sig-reducer [] return-types)))
 
 (defn gen-sigs []
-  (let [small-rets ["L" "I" "S" "B" "D" "F" "Z" "O"]
+  (let [small-rets ["L" "I" "S" "B" "D" "F" "O"]
         zero-arity (sigs [""] small-rets)
         single-arity (sigs ["L" "D" "O"] small-rets)
         two-arity (sigs ["LL" "LO" "OL" "DD" "LD" "DL" "OO" "OD" "DO"] small-rets)
-        big-rets ["Z" "O"]
+        big-rets ["O"]
         three-arity (sigs ["OOO"] big-rets)
         four-arity  (sigs ["OOOO"] big-rets)
         five-arity  (sigs ["OOOOO"] big-rets)

@@ -8,7 +8,6 @@ AdapterExerciser$S
 AdapterExerciser$B
 AdapterExerciser$D
 AdapterExerciser$F
-AdapterExerciser$Z
 AdapterExerciser$O
 AdapterExerciser$LL
 AdapterExerciser$DL
@@ -28,9 +27,6 @@ AdapterExerciser$OD
 AdapterExerciser$LF
 AdapterExerciser$DF
 AdapterExerciser$OF
-AdapterExerciser$LZ
-AdapterExerciser$DZ
-AdapterExerciser$OZ
 AdapterExerciser$LO
 AdapterExerciser$DO
 AdapterExerciser$OO
@@ -88,15 +84,6 @@ AdapterExerciser$DLF
 AdapterExerciser$OOF
 AdapterExerciser$ODF
 AdapterExerciser$DOF
-AdapterExerciser$LLZ
-AdapterExerciser$LOZ
-AdapterExerciser$OLZ
-AdapterExerciser$DDZ
-AdapterExerciser$LDZ
-AdapterExerciser$DLZ
-AdapterExerciser$OOZ
-AdapterExerciser$ODZ
-AdapterExerciser$DOZ
 AdapterExerciser$LLO
 AdapterExerciser$LOO
 AdapterExerciser$OLO
@@ -106,21 +93,13 @@ AdapterExerciser$DLO
 AdapterExerciser$OOO
 AdapterExerciser$ODO
 AdapterExerciser$DOO
-AdapterExerciser$OOOZ
 AdapterExerciser$OOOO
-AdapterExerciser$OOOOZ
 AdapterExerciser$OOOOO
-AdapterExerciser$OOOOOZ
 AdapterExerciser$OOOOOO
-AdapterExerciser$OOOOOOZ
 AdapterExerciser$OOOOOOO
-AdapterExerciser$OOOOOOOZ
 AdapterExerciser$OOOOOOOO
-AdapterExerciser$OOOOOOOOZ
 AdapterExerciser$OOOOOOOOO
-AdapterExerciser$OOOOOOOOOZ
 AdapterExerciser$OOOOOOOOOO
-AdapterExerciser$OOOOOOOOOOZ
 AdapterExerciser$OOOOOOOOOOO
 )))
 
@@ -132,7 +111,6 @@ AdapterExerciser$OOOOOOOOOOO
           ^AdapterExerciser$B Badapter (fn [] (byte 1))
           ^AdapterExerciser$D Dadapter (fn [] (double 1))
           ^AdapterExerciser$F Fadapter (fn [] (float 1))
-          ^AdapterExerciser$Z Zadapter (fn [] false)
           ^AdapterExerciser$O Oadapter (fn [] exerciser)
           ^AdapterExerciser$LL LLadapter (fn [^long a] (long 1))
           ^AdapterExerciser$DL DLadapter (fn [^double a] (long 1))
@@ -152,9 +130,6 @@ AdapterExerciser$OOOOOOOOOOO
           ^AdapterExerciser$LF LFadapter (fn [^long a] (float 1))
           ^AdapterExerciser$DF DFadapter (fn [^double a] (float 1))
           ^AdapterExerciser$OF OFadapter (fn [^AdapterExerciser a] (float 1))
-          ^AdapterExerciser$LZ LZadapter (fn [^long a] false)
-          ^AdapterExerciser$DZ DZadapter (fn [^double a] false)
-          ^AdapterExerciser$OZ OZadapter (fn [^AdapterExerciser a] false)
           ^AdapterExerciser$LO LOadapter (fn [^long a] exerciser)
           ^AdapterExerciser$DO DOadapter (fn [^double a] exerciser)
           ^AdapterExerciser$OO OOadapter (fn [^AdapterExerciser a] exerciser)
@@ -212,15 +187,6 @@ AdapterExerciser$OOOOOOOOOOO
           ^AdapterExerciser$OOF OOFadapter (fn [^AdapterExerciser a ^AdapterExerciser b] (float 1))
           ^AdapterExerciser$ODF ODFadapter (fn [^AdapterExerciser a ^double b] (float 1))
           ^AdapterExerciser$DOF DOFadapter (fn [^double a ^AdapterExerciser b] (float 1))
-          ^AdapterExerciser$LLZ LLZadapter (fn [^long a ^long b] false)
-          ^AdapterExerciser$LOZ LOZadapter (fn [^long a ^AdapterExerciser b] false)
-          ^AdapterExerciser$OLZ OLZadapter (fn [^AdapterExerciser a ^long b] false)
-          ^AdapterExerciser$DDZ DDZadapter (fn [^double a ^double b] false)
-          ^AdapterExerciser$LDZ LDZadapter (fn [^long a ^double b] false)
-          ^AdapterExerciser$DLZ DLZadapter (fn [^double a ^long b] false)
-          ^AdapterExerciser$OOZ OOZadapter (fn [^AdapterExerciser a ^AdapterExerciser b] false)
-          ^AdapterExerciser$ODZ ODZadapter (fn [^AdapterExerciser a ^double b] false)
-          ^AdapterExerciser$DOZ DOZadapter (fn [^double a ^AdapterExerciser b] false)
           ^AdapterExerciser$LLO LLOadapter (fn [^long a ^long b] exerciser)
           ^AdapterExerciser$LOO LOOadapter (fn [^long a ^AdapterExerciser b] exerciser)
           ^AdapterExerciser$OLO OLOadapter (fn [^AdapterExerciser a ^long b] exerciser)
@@ -230,21 +196,13 @@ AdapterExerciser$OOOOOOOOOOO
           ^AdapterExerciser$OOO OOOadapter (fn [^AdapterExerciser a ^AdapterExerciser b] exerciser)
           ^AdapterExerciser$ODO ODOadapter (fn [^AdapterExerciser a ^double b] exerciser)
           ^AdapterExerciser$DOO DOOadapter (fn [^double a ^AdapterExerciser b] exerciser)
-          ^AdapterExerciser$OOOZ OOOZadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c] false)
           ^AdapterExerciser$OOOO OOOOadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c] exerciser)
-          ^AdapterExerciser$OOOOZ OOOOZadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d] false)
           ^AdapterExerciser$OOOOO OOOOOadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d] exerciser)
-          ^AdapterExerciser$OOOOOZ OOOOOZadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e] false)
           ^AdapterExerciser$OOOOOO OOOOOOadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e] exerciser)
-          ^AdapterExerciser$OOOOOOZ OOOOOOZadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f] false)
           ^AdapterExerciser$OOOOOOO OOOOOOOadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f] exerciser)
-          ^AdapterExerciser$OOOOOOOZ OOOOOOOZadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g] false)
           ^AdapterExerciser$OOOOOOOO OOOOOOOOadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g] exerciser)
-          ^AdapterExerciser$OOOOOOOOZ OOOOOOOOZadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g ^AdapterExerciser h] false)
           ^AdapterExerciser$OOOOOOOOO OOOOOOOOOadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g ^AdapterExerciser h] exerciser)
-          ^AdapterExerciser$OOOOOOOOOZ OOOOOOOOOZadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g ^AdapterExerciser h ^AdapterExerciser i] false)
           ^AdapterExerciser$OOOOOOOOOO OOOOOOOOOOadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g ^AdapterExerciser h ^AdapterExerciser i] exerciser)
-          ^AdapterExerciser$OOOOOOOOOOZ OOOOOOOOOOZadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g ^AdapterExerciser h ^AdapterExerciser i ^AdapterExerciser j] false)
           ^AdapterExerciser$OOOOOOOOOOO OOOOOOOOOOOadapter (fn [^AdapterExerciser a ^AdapterExerciser b ^AdapterExerciser c ^AdapterExerciser d ^AdapterExerciser e ^AdapterExerciser f ^AdapterExerciser g ^AdapterExerciser h ^AdapterExerciser i ^AdapterExerciser j] exerciser)]
       (is (= (.takesRetL Ladapter ) (long 1)))
       (is (= (.takesRetI Iadapter ) 1))
@@ -252,7 +210,6 @@ AdapterExerciser$OOOOOOOOOOO
       (is (= (.takesRetB Badapter ) (byte 1)))
       (is (= (.takesRetD Dadapter ) (double 1)))
       (is (= (.takesRetF Fadapter ) (float 1)))
-      (is (= (.takesRetZ Zadapter ) false))
       (is (= (.takesRetO Oadapter ) exerciser))
       (is (= (.takesLRetL LLadapter (long 1)) (long 1)))
       (is (= (.takesDRetL DLadapter (double 1)) (long 1)))
@@ -272,9 +229,6 @@ AdapterExerciser$OOOOOOOOOOO
       (is (= (.takesLRetF LFadapter (long 1)) (float 1)))
       (is (= (.takesDRetF DFadapter (double 1)) (float 1)))
       (is (= (.takesORetF OFadapter exerciser) (float 1)))
-      (is (= (.takesLRetZ LZadapter (long 1)) false))
-      (is (= (.takesDRetZ DZadapter (double 1)) false))
-      (is (= (.takesORetZ OZadapter exerciser) false))
       (is (= (.takesLRetO LOadapter (long 1)) exerciser))
       (is (= (.takesDRetO DOadapter (double 1)) exerciser))
       (is (= (.takesORetO OOadapter exerciser) exerciser))
@@ -332,15 +286,6 @@ AdapterExerciser$OOOOOOOOOOO
       (is (= (.takesOORetF OOFadapter exerciser exerciser) (float 1)))
       (is (= (.takesODRetF ODFadapter exerciser (double 1)) (float 1)))
       (is (= (.takesDORetF DOFadapter (double 1) exerciser) (float 1)))
-      (is (= (.takesLLRetZ LLZadapter (long 1) (long 1)) false))
-      (is (= (.takesLORetZ LOZadapter (long 1) exerciser) false))
-      (is (= (.takesOLRetZ OLZadapter exerciser (long 1)) false))
-      (is (= (.takesDDRetZ DDZadapter (double 1) (double 1)) false))
-      (is (= (.takesLDRetZ LDZadapter (long 1) (double 1)) false))
-      (is (= (.takesDLRetZ DLZadapter (double 1) (long 1)) false))
-      (is (= (.takesOORetZ OOZadapter exerciser exerciser) false))
-      (is (= (.takesODRetZ ODZadapter exerciser (double 1)) false))
-      (is (= (.takesDORetZ DOZadapter (double 1) exerciser) false))
       (is (= (.takesLLRetO LLOadapter (long 1) (long 1)) exerciser))
       (is (= (.takesLORetO LOOadapter (long 1) exerciser) exerciser))
       (is (= (.takesOLRetO OLOadapter exerciser (long 1)) exerciser))
@@ -350,19 +295,11 @@ AdapterExerciser$OOOOOOOOOOO
       (is (= (.takesOORetO OOOadapter exerciser exerciser) exerciser))
       (is (= (.takesODRetO ODOadapter exerciser (double 1)) exerciser))
       (is (= (.takesDORetO DOOadapter (double 1) exerciser) exerciser))
-      (is (= (.takesOOORetZ OOOZadapter exerciser exerciser exerciser) false))
       (is (= (.takesOOORetO OOOOadapter exerciser exerciser exerciser) exerciser))
-      (is (= (.takesOOOORetZ OOOOZadapter exerciser exerciser exerciser exerciser) false))
       (is (= (.takesOOOORetO OOOOOadapter exerciser exerciser exerciser exerciser) exerciser))
-      (is (= (.takesOOOOORetZ OOOOOZadapter exerciser exerciser exerciser exerciser exerciser) false))
       (is (= (.takesOOOOORetO OOOOOOadapter exerciser exerciser exerciser exerciser exerciser) exerciser))
-      (is (= (.takesOOOOOORetZ OOOOOOZadapter exerciser exerciser exerciser exerciser exerciser exerciser) false))
       (is (= (.takesOOOOOORetO OOOOOOOadapter exerciser exerciser exerciser exerciser exerciser exerciser) exerciser))
-      (is (= (.takesOOOOOOORetZ OOOOOOOZadapter exerciser exerciser exerciser exerciser exerciser exerciser exerciser) false))
       (is (= (.takesOOOOOOORetO OOOOOOOOadapter exerciser exerciser exerciser exerciser exerciser exerciser exerciser) exerciser))
-      (is (= (.takesOOOOOOOORetZ OOOOOOOOZadapter exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser) false))
       (is (= (.takesOOOOOOOORetO OOOOOOOOOadapter exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser) exerciser))
-      (is (= (.takesOOOOOOOOORetZ OOOOOOOOOZadapter exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser) false))
       (is (= (.takesOOOOOOOOORetO OOOOOOOOOOadapter exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser) exerciser))
-      (is (= (.takesOOOOOOOOOORetZ OOOOOOOOOOZadapter exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser) false))
       (is (= (.takesOOOOOOOOOORetO OOOOOOOOOOOadapter exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser exerciser) exerciser))))

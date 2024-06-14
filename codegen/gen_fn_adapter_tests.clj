@@ -44,11 +44,11 @@ public class AdapterExerciser {")
            (reduce fun-sig-reducer [] return-types)))
 
 (defn gen-sigs []
-      (let [small-rets ["L" "I" "S" "B" "D" "F" "Z" "O"]
+      (let [small-rets ["L" "I" "S" "B" "D" "F" "O"]
             zero-arity (sigs [""] small-rets)
             single-arity (sigs ["L" "D" "O"] small-rets)
             two-arity (sigs ["LL" "LO" "OL" "DD" "LD" "DL" "OO" "OD" "DO"] small-rets)
-            big-rets ["Z" "O"]
+            big-rets ["O"]
             three-arity (sigs ["OOO"] big-rets)
             four-arity  (sigs ["OOOO"] big-rets)
             five-arity  (sigs ["OOOOO"] big-rets)
