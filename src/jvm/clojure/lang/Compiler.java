@@ -1672,11 +1672,9 @@ static class FISupport {
 			invokerParams[i + 1] = paramCount <= 2 ? toInvokerParamType(targetMethod.getParameterTypes()[i]) : Object.class;
 			invokeMethodBuilder.append(FnInvokers.encodeInvokerType(invokerParams[i + 1]));
 		}
-		// FnInvokers has prim returns for <= 2 params, only boolean or Object for higher
+		// FnInvokers has prim returns for <= 2 params, only Object for higher
 		Class retType = targetMethod.getReturnType();
-		char invokerReturnCode = FnInvokers.encodeInvokerType(
-				paramCount <= 2 ? retType :
-						(Boolean.TYPE.equals(retType) ? retType : Object.class));
+		char invokerReturnCode = FnInvokers.encodeInvokerType(paramCount <= 2 ? retType : Object.class);
 		invokeMethodBuilder.append(invokerReturnCode);
 		String invokerMethodName = invokeMethodBuilder.toString();
 

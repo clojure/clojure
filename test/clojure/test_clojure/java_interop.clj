@@ -681,13 +681,7 @@
   (let [coll (java.util.ArrayList. [1 2 3 4 5])]
     (is (true? (.removeIf coll even?)))
     (is (= coll [1 3 5])))
-
-  ;; pass Clojure set as Java predicate - function return
-  ;; should use Clojure semantics to return logical true
-  (let [coll (java.util.ArrayList. [1 2 3 4 5])]
-    (is (true? (.removeIf coll #{1 2})))
-    (is (= coll [3 4 5])))
-
+  
   ;; binding type hint triggers coercion
   (is (instance? FileFilter
     (let [^FileFilter ff (fn [f] true)] ff)))
@@ -845,7 +839,6 @@
 
   (is (= "LLL" (AdapterExerciser/.methodLLL (AdapterExerciser.) (fn ^long [^long a ^long b]))))
   (is (= "OOOO" (AdapterExerciser/.methodOOOO (AdapterExerciser.) (fn ^long [^long a ^long b ^long c]))))
-  (is (= "OOOZ" (AdapterExerciser/.methodOOOZ (AdapterExerciser.) (fn [^long a ^long b ^long c]))))
   )
 
 (deftest test-null-reify

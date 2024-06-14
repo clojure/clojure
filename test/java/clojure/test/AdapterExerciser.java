@@ -27,10 +27,6 @@ public class AdapterExerciser {
         public float takesRetF();
     }
     @FunctionalInterface
-    public interface Z {
-        public boolean takesRetZ();
-    }
-    @FunctionalInterface
     public interface O {
         public AdapterExerciser takesRetO();
     }
@@ -105,18 +101,6 @@ public class AdapterExerciser {
     @FunctionalInterface
     public interface OF {
         public float takesORetF(AdapterExerciser a);
-    }
-    @FunctionalInterface
-    public interface LZ {
-        public boolean takesLRetZ(long a);
-    }
-    @FunctionalInterface
-    public interface DZ {
-        public boolean takesDRetZ(double a);
-    }
-    @FunctionalInterface
-    public interface OZ {
-        public boolean takesORetZ(AdapterExerciser a);
     }
     @FunctionalInterface
     public interface LO {
@@ -347,42 +331,6 @@ public class AdapterExerciser {
         public float takesDORetF(double a, AdapterExerciser b);
     }
     @FunctionalInterface
-    public interface LLZ {
-        public boolean takesLLRetZ(long a, long b);
-    }
-    @FunctionalInterface
-    public interface LOZ {
-        public boolean takesLORetZ(long a, AdapterExerciser b);
-    }
-    @FunctionalInterface
-    public interface OLZ {
-        public boolean takesOLRetZ(AdapterExerciser a, long b);
-    }
-    @FunctionalInterface
-    public interface DDZ {
-        public boolean takesDDRetZ(double a, double b);
-    }
-    @FunctionalInterface
-    public interface LDZ {
-        public boolean takesLDRetZ(long a, double b);
-    }
-    @FunctionalInterface
-    public interface DLZ {
-        public boolean takesDLRetZ(double a, long b);
-    }
-    @FunctionalInterface
-    public interface OOZ {
-        public boolean takesOORetZ(AdapterExerciser a, AdapterExerciser b);
-    }
-    @FunctionalInterface
-    public interface ODZ {
-        public boolean takesODRetZ(AdapterExerciser a, double b);
-    }
-    @FunctionalInterface
-    public interface DOZ {
-        public boolean takesDORetZ(double a, AdapterExerciser b);
-    }
-    @FunctionalInterface
     public interface LLO {
         public AdapterExerciser takesLLRetO(long a, long b);
     }
@@ -419,64 +367,32 @@ public class AdapterExerciser {
         public AdapterExerciser takesDORetO(double a, AdapterExerciser b);
     }
     @FunctionalInterface
-    public interface OOOZ {
-        public boolean takesOOORetZ(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c);
-    }
-    @FunctionalInterface
     public interface OOOO {
         public AdapterExerciser takesOOORetO(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c);
-    }
-    @FunctionalInterface
-    public interface OOOOZ {
-        public boolean takesOOOORetZ(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d);
     }
     @FunctionalInterface
     public interface OOOOO {
         public AdapterExerciser takesOOOORetO(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d);
     }
     @FunctionalInterface
-    public interface OOOOOZ {
-        public boolean takesOOOOORetZ(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e);
-    }
-    @FunctionalInterface
     public interface OOOOOO {
         public AdapterExerciser takesOOOOORetO(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e);
-    }
-    @FunctionalInterface
-    public interface OOOOOOZ {
-        public boolean takesOOOOOORetZ(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f);
     }
     @FunctionalInterface
     public interface OOOOOOO {
         public AdapterExerciser takesOOOOOORetO(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f);
     }
     @FunctionalInterface
-    public interface OOOOOOOZ {
-        public boolean takesOOOOOOORetZ(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f, AdapterExerciser g);
-    }
-    @FunctionalInterface
     public interface OOOOOOOO {
         public AdapterExerciser takesOOOOOOORetO(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f, AdapterExerciser g);
-    }
-    @FunctionalInterface
-    public interface OOOOOOOOZ {
-        public boolean takesOOOOOOOORetZ(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f, AdapterExerciser g, AdapterExerciser h);
     }
     @FunctionalInterface
     public interface OOOOOOOOO {
         public AdapterExerciser takesOOOOOOOORetO(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f, AdapterExerciser g, AdapterExerciser h);
     }
     @FunctionalInterface
-    public interface OOOOOOOOOZ {
-        public boolean takesOOOOOOOOORetZ(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f, AdapterExerciser g, AdapterExerciser h, AdapterExerciser i);
-    }
-    @FunctionalInterface
     public interface OOOOOOOOOO {
         public AdapterExerciser takesOOOOOOOOORetO(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f, AdapterExerciser g, AdapterExerciser h, AdapterExerciser i);
-    }
-    @FunctionalInterface
-    public interface OOOOOOOOOOZ {
-        public boolean takesOOOOOOOOOORetZ(AdapterExerciser a, AdapterExerciser b, AdapterExerciser c, AdapterExerciser d, AdapterExerciser e, AdapterExerciser f, AdapterExerciser g, AdapterExerciser h, AdapterExerciser i, AdapterExerciser j);
     }
     @FunctionalInterface
     public interface OOOOOOOOOOO {
@@ -488,7 +404,6 @@ public class AdapterExerciser {
    public String methodB(B a) { return "B"; }
    public String methodD(D a) { return "D"; }
    public String methodF(F a) { return "F"; }
-   public String methodZ(Z a) { return "Z"; }
    public String methodO(O a) { return "O"; }
    public String methodLL(LL a) { return "LL"; }
    public String methodDL(DL a) { return "DL"; }
@@ -508,9 +423,6 @@ public class AdapterExerciser {
    public String methodLF(LF a) { return "LF"; }
    public String methodDF(DF a) { return "DF"; }
    public String methodOF(OF a) { return "OF"; }
-   public String methodLZ(LZ a) { return "LZ"; }
-   public String methodDZ(DZ a) { return "DZ"; }
-   public String methodOZ(OZ a) { return "OZ"; }
    public String methodLO(LO a) { return "LO"; }
    public String methodDO(DO a) { return "DO"; }
    public String methodOO(OO a) { return "OO"; }
@@ -568,15 +480,6 @@ public class AdapterExerciser {
    public String methodOOF(OOF a) { return "OOF"; }
    public String methodODF(ODF a) { return "ODF"; }
    public String methodDOF(DOF a) { return "DOF"; }
-   public String methodLLZ(LLZ a) { return "LLZ"; }
-   public String methodLOZ(LOZ a) { return "LOZ"; }
-   public String methodOLZ(OLZ a) { return "OLZ"; }
-   public String methodDDZ(DDZ a) { return "DDZ"; }
-   public String methodLDZ(LDZ a) { return "LDZ"; }
-   public String methodDLZ(DLZ a) { return "DLZ"; }
-   public String methodOOZ(OOZ a) { return "OOZ"; }
-   public String methodODZ(ODZ a) { return "ODZ"; }
-   public String methodDOZ(DOZ a) { return "DOZ"; }
    public String methodLLO(LLO a) { return "LLO"; }
    public String methodLOO(LOO a) { return "LOO"; }
    public String methodOLO(OLO a) { return "OLO"; }
@@ -586,19 +489,11 @@ public class AdapterExerciser {
    public String methodOOO(OOO a) { return "OOO"; }
    public String methodODO(ODO a) { return "ODO"; }
    public String methodDOO(DOO a) { return "DOO"; }
-   public String methodOOOZ(OOOZ a) { return "OOOZ"; }
    public String methodOOOO(OOOO a) { return "OOOO"; }
-   public String methodOOOOZ(OOOOZ a) { return "OOOOZ"; }
    public String methodOOOOO(OOOOO a) { return "OOOOO"; }
-   public String methodOOOOOZ(OOOOOZ a) { return "OOOOOZ"; }
    public String methodOOOOOO(OOOOOO a) { return "OOOOOO"; }
-   public String methodOOOOOOZ(OOOOOOZ a) { return "OOOOOOZ"; }
    public String methodOOOOOOO(OOOOOOO a) { return "OOOOOOO"; }
-   public String methodOOOOOOOZ(OOOOOOOZ a) { return "OOOOOOOZ"; }
    public String methodOOOOOOOO(OOOOOOOO a) { return "OOOOOOOO"; }
-   public String methodOOOOOOOOZ(OOOOOOOOZ a) { return "OOOOOOOOZ"; }
    public String methodOOOOOOOOO(OOOOOOOOO a) { return "OOOOOOOOO"; }
-   public String methodOOOOOOOOOZ(OOOOOOOOOZ a) { return "OOOOOOOOOZ"; }
    public String methodOOOOOOOOOO(OOOOOOOOOO a) { return "OOOOOOOOOO"; }
-   public String methodOOOOOOOOOOZ(OOOOOOOOOOZ a) { return "OOOOOOOOOOZ"; }
    public String methodOOOOOOOOOOO(OOOOOOOOOOO a) { return "OOOOOOOOOOO"; }}
