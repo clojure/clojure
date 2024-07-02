@@ -9,8 +9,10 @@
 
 (ns clojure.test-clojure.method-thunks
   (:use clojure.test)
+  (:require [clojure.java.io :as jio])
   (:import (clojure.lang Compiler Tuple)
            (java.util Arrays UUID Locale)
+           (java.io File FileFilter)
            clojure.lang.IFn$LL))
 
 (set! *warn-on-reflection* true)
@@ -52,3 +54,9 @@
          ((:fromString mts) "00000000-0000-0001-0000-000000000002")))
   (is (= [1] (mt 1)))
   (is (= 97 (first (seq (gbs "a"))))))
+
+(deftest hinted-method-values
+  (is (thrown? Exception (eval '(.listFiles (jio/file ".") #(File/.isDirectory %)))))
+  (is (seq (.listFiles (jio/file ".") ^FileFilter File/.isDirectory)))
+  (is (seq (File/.listFiles (jio/file ".") ^FileFilter File/.isDirectory)))
+  (is (seq (^[FileFilter] File/.listFiles (jio/file ".") ^FileFilter File/.isDirectory))))
