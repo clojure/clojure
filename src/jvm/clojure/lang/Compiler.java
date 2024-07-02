@@ -1164,6 +1164,7 @@ static class QualifiedMethodExpr implements Expr {
 	private final Symbol methodSymbol;
 	private final String methodName;
 	private final MethodKind kind;
+	private final Class tagClass;
 
 	private enum MethodKind {
 		CTOR, INSTANCE, STATIC
@@ -1172,6 +1173,7 @@ static class QualifiedMethodExpr implements Expr {
 	public QualifiedMethodExpr(Class methodClass, Symbol sym){
 		c = methodClass;
 		methodSymbol = sym;
+		tagClass = tagOf(sym) != null ? HostExpr.tagToClass(tagOf(sym)) : AFn.class;
 		hintedSig = tagsToClasses(paramTagsOf(sym));
 		if(sym.name.startsWith(".")) {
 			kind = MethodKind.INSTANCE;
@@ -1208,7 +1210,7 @@ static class QualifiedMethodExpr implements Expr {
 
 	@Override
 	public Class getJavaClass() {
-		return AFn.class;
+		return tagClass;
 	}
 
 	// TBD: caching/reuse of thunks
