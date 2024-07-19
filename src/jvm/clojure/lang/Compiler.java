@@ -7453,8 +7453,10 @@ static public class CompilerException extends RuntimeException implements IExcep
 	private static String verb(Keyword phase) {
 		if(PHASE_READ.equals(phase)){
 			return "reading source";
-		} else if(PHASE_COMPILE_SYNTAX_CHECK.equals(phase) || PHASE_COMPILATION.equals(phase)){
+		} else if(PHASE_COMPILE_SYNTAX_CHECK.equals(phase) || PHASE_COMPILATION.equals(phase)) {
 			return "compiling";
+		} else if(PHASE_EXECUTION.equals(phase)) {
+			return "executing";
 		} else {
 			return "macroexpanding";
 		}
