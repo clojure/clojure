@@ -5803,6 +5803,12 @@ static class PathNode{
 static PathNode clearPathRoot(){
     return (PathNode) CLEAR_ROOT.get();
 }
+
+static PathNode methodHead(PathNode p) {
+	while (p.parent != null)
+		p = p.parent;
+	return p;
+}
     
 enum PSTATE{
 	REQ, REST, DONE
@@ -5860,9 +5866,7 @@ public static class FnMethod extends ObjMethod{
 			method.line = lineDeref();
 			method.column = columnDeref();
 			//register as the current method and set up a new env frame
-            PathNode pnode =  (PathNode) CLEAR_PATH.get();
-			if(pnode == null)
-				pnode = new PathNode(PATHTYPE.PATH,null);
+            PathNode pnode = new PathNode(PATHTYPE.PATH,null);
 			Var.pushThreadBindings(
 					RT.mapUniqueKeys(
 							METHOD, method,
@@ -6547,6 +6551,13 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
             {
 //            Object dummy;
 
+			ObjMethod method = (ObjMethod) METHOD.deref();
+			boolean closedOver = method.objx.closes.containsKey(b);
+			if(closedOver && !method.objx.onceOnly) {
+				// Never clear closed over - may need again if not :once
+				return;
+			}
+
             if(sites != null)
                 {
                 for(ISeq s = sites.seq();s!=null;s = s.next())
@@ -6560,7 +6571,8 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
                     }
                 }
 
-            if(clearRoot == b.clearPathRoot)
+            PathNode bindingRoot = closedOver ? methodHead(clearPath) : b.clearPathRoot;
+            if(clearRoot == bindingRoot)
                 {
                 this.shouldClear = true;
                 sites = RT.conj(sites,this);
@@ -8062,7 +8074,6 @@ static void closeOver(LocalBinding b, ObjMethod method){
 		}
 }
 
-
 static LocalBinding referenceLocal(Symbol sym) {
 	if(!LOCAL_ENV.isBound())
 		return null;
@@ -8967,7 +8978,7 @@ public static class NewInstanceMethod extends ObjMethod{
 			method.line = lineDeref();
 			method.column = columnDeref();
 			//register as the current method and set up a new env frame
-            PathNode pnode =  new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
+            PathNode pnode = new PathNode(PATHTYPE.PATH, null);
 			Var.pushThreadBindings(
 					RT.mapUniqueKeys(
 							METHOD, method,
