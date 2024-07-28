@@ -12,6 +12,8 @@
    [clojure.edn :as edn]
    [clojure.java.io :as jio]))
 
+(set! *warn-on-reflection* true)
+
 (defn ^:dynamic invoke-tool
   "Invoke tool using Clojure CLI. Args (one of :tool-alias or :tool-name, and :fn
   are required):
@@ -32,7 +34,9 @@
         _ (when (:debug opts) (println "args" args))
         command-strs ["clojure" (str "-T" (or tool-alias tool-name)) "-"]
         _ (when (:debug opts) (apply println "Invoking: " command-strs))
-        {:keys [in out]} (apply proc/start command-strs)]
+        proc (apply proc/start command-strs)
+        in (proc/stdin proc)
+        out (proc/stdout proc)]
     (binding [*print-length* nil
               *print-level*  nil
               *print-namespace-maps* false]

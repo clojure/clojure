@@ -22,4 +22,7 @@
   ;; redirect, then capture to string
   (is (not (str/blank? (p/exec {:err :stdout} "bash" "-c" "ls >&2")))))
 
-
+(deftest test-process-deref
+  (is (zero? @(p/exit-ref (p/start "sleep" "1"))))
+  (is (zero? (deref (p/exit-ref (p/start "sleep" "1")) 2500 :timeout)))
+  (is (= :timeout (deref (p/exit-ref (p/start "sleep" "1")) 1 :timeout))))

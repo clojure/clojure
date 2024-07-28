@@ -9,19 +9,15 @@
 (ns clojure.java.process
   "A process invocation API wrapping the Java process API.
 
-   The primary function here is 'start' which starts a process and handles the
-   streams as directed. It returns a map that contains keys to access the streams
-   (if available) and the Java Process object. It is also deref-able to wait for
-   process exit.
-
-   Use ‘slurp' to capture the output of a process stream, and 'ok?’ to wait for a
-   non-error exit. The 'exec' function handles the common case of `start'ing a
-   process, waiting for process exit, slurp, and return stdout."
+   The primary function is 'start' which starts a process and handles the
+   streams as directed. It returns the Process object. Use 'exit-ref' to wait
+   for completion and receive the exit value, and ‘stdout', 'stderr', 'stdin'
+   to access the process streams. The 'exec' function handles the common case
+   to 'start' a process, wait for process exit, and return stdout."
   (:require
-   [clojure.java.io :as jio]
-   [clojure.string :as str])
+   [clojure.java.io :as jio])
   (:import
-    [java.io StringWriter File]
+    [java.io File InputStream OutputStream]
     [java.lang ProcessBuilder ProcessBuilder$Redirect Process]
     [java.util List]
     [clojure.lang IDeref IBlockingDeref]
@@ -67,11 +63,9 @@
     :clear-env - if true, remove all inherited parent env vars
     :env - {env-var value} of environment variables to set (all strings)
 
-  Returns an ILookup containing the java.lang.Process in :process and the
-  streams :in :out :err. The map is also an IDeref that waits for process exit
-  and returns the exit code."
+  Returns the java.lang.Process."
   {:added "1.12"}
-  [& opts+args]
+  ^Process [& opts+args]
   (let [[opts command] (if (map? (first opts+args))
                          [(first opts+args) (rest opts+args)]
                          [{} opts+args])
@@ -97,28 +91,36 @@
     (when env
       (let [pb-env (.environment pb)]
         (run! (fn [[k v]] (.put pb-env k v)) env)))
-    (let [proc (.start pb)
-          m {:process proc
-             :in (.getOutputStream proc)
-             :out (.getInputStream proc)
-             :err (.getErrorStream proc)}]
-      (reify
-        clojure.lang.ILookup
-        (valAt [_ key] (get m key))
-        (valAt [_ key not-found] (get m key not-found))
+    (.start pb)))
 
-        IDeref
-        (deref [_] (.waitFor proc))
+(defn stdin
+  "Given a process, return the stdin of the external process (an OutputStream)"
+  ^OutputStream [^Process process]
+  (.getOutputStream process))
 
-        IBlockingDeref
-        (deref [_ timeout unit] (.waitFor proc timeout unit))))))
+(defn stdout
+  "Given a process, return the stdout of the external process (an InputStream)"
+  ^InputStream [^Process process]
+  (.getInputStream process))
 
-(defn ok?
-  "Given the map returned from 'start', wait for the process to exit
-  and then return true on success"
-  {:added "1.12"}
-  [process-map]
-  (zero? (.waitFor ^Process (:process process-map))))
+(defn stderr
+  "Given a process, return the stderr of the external process (an InputStream)"
+  ^InputStream [^Process process]
+  (.getErrorStream process))
+
+(defn exit-ref
+  "Given a Process (the output of 'start'), return a reference that can be
+  used to wait for process completion then returns the exit value."
+  [^Process process]
+  (reify
+    IDeref
+    (deref [_] (long (.waitFor process)))
+
+    IBlockingDeref
+    (deref [_ timeout-ms timeout-val]
+      (if (.waitFor process timeout-ms java.util.concurrent.TimeUnit/MILLISECONDS)
+        (long (.exitValue process))
+        timeout-val))))
 
 ;; A thread factory for daemon threads
 (defonce ^:private io-thread-factory
@@ -164,25 +166,26 @@
                          [(first opts+args) (rest opts+args)]
                          [{} opts+args])
         opts (merge {:err :inherit} opts)]
-    (let [state (apply start opts command)
-          captured (io-task #(slurp (:out state)))]
-      (if (ok? state)
+    (let [proc (apply start opts command)
+          captured (io-task #(slurp (stdout proc)))
+          exit (deref (exit-ref proc))]
+      (if (zero? exit)
         @captured
-        (throw (RuntimeException. (str "Process failed with exit=" (.exitValue ^Process (:process state)))))))))
+        (throw (RuntimeException. (str "Process failed with exit=" exit)))))))
 
 (comment
   ;; shell out and inherit the i/o
   (start {:out :inherit, :err :stdout} "ls" "-l")
 
   ;; write out and err to files, wait for process to exit, return exit code
-  @(start {:out (to-file "out") :err (to-file "err")} "ls" "-l")
+  @(exit-ref (start {:out (to-file "out") :err (to-file "err")} "ls" "-l"))
 
   ;; capture output to string
-  (-> (start "ls" "-l") :out slurp)
+  (-> (start "ls" "-l") stdout slurp)
 
   ;; with exec
   (exec "ls" "-l")
 
   ;; read input from file
-  (exec {:in (from-file "deps.edn")} "wc" "-l")
+  (-> (exec {:in (from-file "deps.edn")} "wc" "-l") clojure.string/trim parse-long)
   )
