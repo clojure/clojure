@@ -67,13 +67,22 @@ namespace.
       <a href="#clojure.java.process/exec" class="toc-entry-anchor">exec</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.process/exit-ref" class="toc-entry-anchor">exit-ref</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.java.process/from-file" class="toc-entry-anchor">from-file</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.java.process/ok?" class="toc-entry-anchor">ok?</a>
+      <a href="#clojure.java.process/start" class="toc-entry-anchor">start</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
-      <a href="#clojure.java.process/start" class="toc-entry-anchor">start</a>
+      <a href="#clojure.java.process/stderr" class="toc-entry-anchor">stderr</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.process/stdin" class="toc-entry-anchor">stdin</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.process/stdout" class="toc-entry-anchor">stdout</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.java.process/to-file" class="toc-entry-anchor">to-file</a>
@@ -95,14 +104,11 @@ namespace.
 
 <pre id="namespace-docstr">A process invocation API wrapping the Java process API.
 
-The primary function here is 'start' which starts a process and handles the
-streams as directed. It returns a map that contains keys to access the streams
-(if available) and the Java Process object. It is also deref-able to wait for
-process exit.
-
-Use ‘slurp' to capture the output of a process stream, and 'ok?’ to wait for a
-non-error exit. The 'exec' function handles the common case of `start'ing a
-process, waiting for process exit, slurp, and return stdout.</pre>
+The primary function is 'start' which starts a process and handles the
+streams as directed. It returns the Process object. Use 'exit-ref' to wait
+for completion and receive the exit value, and ‘stdout', 'stderr', 'stdin'
+to access the process streams. The 'exec' function handles the common case
+to 'start' a process, wait for process exit, and return stdout.</pre>
 
 
 <br />
@@ -125,7 +131,20 @@ if supplied override the default 'exec' settings.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/aa2c637f9512d14bd78ee30d6d030bba6d095e7d/src/clj/clojure/java/process.clj#L157">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L159">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.process/exit-ref">exit-ref</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (exit-ref process)
+</pre>
+    <pre id="var-docstr">Given a Process (the output of 'start'), return a reference that can be
+used to wait for process completion then returns the exit value.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L111">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -138,20 +157,7 @@ This can be passed to 'start' in :in.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/aa2c637f9512d14bd78ee30d6d030bba6d095e7d/src/clj/clojure/java/process.clj#L50">Source</a>
-  </div><div id="var-entry">
-    <br />
-    <hr />
-    <h2 id="clojure.java.process/ok?">ok?</h2>
-    <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (ok? process-map)
-</pre>
-    <pre id="var-docstr">Given the map returned from 'start', wait for the process to exit
-and then return true on success</pre>
-    <pre id="var-specs"></pre>
-    <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
-    
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/aa2c637f9512d14bd78ee30d6d030bba6d095e7d/src/clj/clojure/java/process.clj#L116">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L46">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -171,13 +177,47 @@ If needed, provide options in map as first arg:
   :clear-env - if true, remove all inherited parent env vars
   :env - {env-var value} of environment variables to set (all strings)
 
-Returns an ILookup containing the java.lang.Process in :process and the
-streams :in :out :err. The map is also an IDeref that waits for process exit
-and returns the exit code.</pre>
+Returns the java.lang.Process.</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/aa2c637f9512d14bd78ee30d6d030bba6d095e7d/src/clj/clojure/java/process.clj#L57">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L53">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.process/stderr">stderr</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (stderr process)
+</pre>
+    <pre id="var-docstr">Given a process, return the stderr of the external process (an InputStream)</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L106">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.process/stdin">stdin</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (stdin process)
+</pre>
+    <pre id="var-docstr">Given a process, return the stdin of the external process (an OutputStream)</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L96">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.process/stdout">stdout</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (stdout process)
+</pre>
+    <pre id="var-docstr">Given a process, return the stdout of the external process (an InputStream)</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L101">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -190,7 +230,7 @@ Set ':append' in opts to append. This can be passed to 'start' in :out or :err.<
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/aa2c637f9512d14bd78ee30d6d030bba6d095e7d/src/clj/clojure/java/process.clj#L40">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L36">Source</a>
   </div>
 </div>
 

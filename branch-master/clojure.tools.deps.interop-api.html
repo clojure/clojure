@@ -96,7 +96,7 @@ namespace.
     <hr />
     <h2 id="clojure.tools.deps.interop/invoke-tool">invoke-tool</h2>
     <span id="var-type">dynamic function</span><br />
-    <pre id="var-usage">Usage: (invoke-tool {:keys [tool-name tool-alias fn args command preserve-envelope], :or {command clojure, preserve-envelope false}, :as opts})
+    <pre id="var-usage">Usage: (invoke-tool {:keys [tool-name tool-alias fn args preserve-envelope], :or {preserve-envelope false}, :as opts})
 </pre>
     <pre id="var-docstr">Invoke tool using Clojure CLI. Args (one of :tool-alias or :tool-name, and :fn
 are required):
@@ -106,12 +106,11 @@ are required):
   :args - map of args to pass to function
 
 Options:
-  :command - CLI command, default="clojure"
   :preserve-envelope - if true, return the full invocation envelope, default=false</pre>
     <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Clojure version 1.12</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/clojure/blob/00bf414696223354ea9d6c5f2e8e8142707f241b/src/clj/clojure/tools/deps/interop.clj#L15">Source</a>
+    <a id="var-source" href="https://github.com/clojure/clojure/blob/d1de868e66a8d46cae164202a0e9ca9e670df204/src/clj/clojure/tools/deps/interop.clj#L41">Source</a>
   </div>
 </div>
 
