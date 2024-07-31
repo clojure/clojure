@@ -5860,8 +5860,9 @@ public static class FnMethod extends ObjMethod{
 			method.line = lineDeref();
 			method.column = columnDeref();
 			//register as the current method and set up a new env frame
-            PathNode pnode = new PathNode(PATHTYPE.PATH,null);
-			method.clearRoot = pnode;
+            PathNode pnode =  (PathNode) CLEAR_PATH.get();
+			if(pnode == null)
+				pnode = new PathNode(PATHTYPE.PATH,null);
 			Var.pushThreadBindings(
 					RT.mapUniqueKeys(
 							METHOD, method,
@@ -6305,7 +6306,6 @@ abstract public static class ObjMethod{
 	boolean usesThis = false;
 	PersistentHashSet localsUsedInCatchFinally = PersistentHashSet.EMPTY;
 	protected IPersistentMap methodMeta;
-	PathNode clearRoot;
 
 
 	public final IPersistentMap locals(){
@@ -6560,20 +6560,12 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
                     }
                 }
 
-            ObjMethod method = ((ObjMethod) METHOD.deref());
-            boolean closedOver = method.objx.closes.containsKey(b);
-            boolean oldd = clearRoot == b.clearPathRoot;
-            boolean newd = closedOver && (clearRoot == method.clearRoot);
-            if (oldd || newd)
+            if(clearRoot == b.clearPathRoot)
                 {
                 this.shouldClear = true;
                 sites = RT.conj(sites,this);
                 CLEAR_SITES.set(RT.assoc(CLEAR_SITES.get(), b, sites));
                 }
-            if (!oldd && newd && method.objx.onceOnly) {
-				RT.errPrintWriter().format("%s:%d closed-over %s improperly retained\n",
-						currentNS(), lineDeref(), b.sym);
-            }
 //            else
 //                dummy = null;
             }
@@ -8070,6 +8062,7 @@ static void closeOver(LocalBinding b, ObjMethod method){
 		}
 }
 
+
 static LocalBinding referenceLocal(Symbol sym) {
 	if(!LOCAL_ENV.isBound())
 		return null;
@@ -8974,8 +8967,7 @@ public static class NewInstanceMethod extends ObjMethod{
 			method.line = lineDeref();
 			method.column = columnDeref();
 			//register as the current method and set up a new env frame
-            PathNode pnode = new PathNode(PATHTYPE.PATH, null);
-			method.clearRoot = pnode;
+            PathNode pnode =  new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
 			Var.pushThreadBindings(
 					RT.mapUniqueKeys(
 							METHOD, method,
