@@ -5860,9 +5860,8 @@ public static class FnMethod extends ObjMethod{
 			method.line = lineDeref();
 			method.column = columnDeref();
 			//register as the current method and set up a new env frame
-            PathNode pnode =  (PathNode) CLEAR_PATH.get();
-			if(pnode == null)
-				pnode = new PathNode(PATHTYPE.PATH,null);
+            PathNode pnode = new PathNode(PATHTYPE.PATH,null);
+			method.clearRoot = pnode;
 			Var.pushThreadBindings(
 					RT.mapUniqueKeys(
 							METHOD, method,
@@ -6306,6 +6305,7 @@ abstract public static class ObjMethod{
 	boolean usesThis = false;
 	PersistentHashSet localsUsedInCatchFinally = PersistentHashSet.EMPTY;
 	protected IPersistentMap methodMeta;
+	PathNode clearRoot;
 
 
 	public final IPersistentMap locals(){
@@ -6560,7 +6560,9 @@ public static class LocalBindingExpr implements Expr, MaybePrimitiveExpr, Assign
                     }
                 }
 
-            if(clearRoot == b.clearPathRoot)
+            ObjMethod method = ((ObjMethod) METHOD.deref());
+            boolean closedOver = method.objx.closes.containsKey(b);
+            if(clearRoot == b.clearPathRoot || (closedOver && clearRoot == method.clearRoot))
                 {
                 this.shouldClear = true;
                 sites = RT.conj(sites,this);
@@ -7180,6 +7182,11 @@ public static class RecurExpr implements Expr, MaybePrimitiveExpr{
 			int line = lineDeref();
 			int column = columnDeref();
 			String source = (String) SOURCE.deref();
+
+			// In :once fn, recur to head invalidates :once
+			ObjMethod method = (ObjMethod)METHOD.deref();
+			if(method.objx.onceOnly && method.clearRoot == CLEAR_ROOT.deref())
+				method.objx.onceOnly = false;
 
 			ISeq form = (ISeq) frm;
 			IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.deref();
@@ -8061,7 +8068,6 @@ static void closeOver(LocalBinding b, ObjMethod method){
             }
 		}
 }
-
 
 static LocalBinding referenceLocal(Symbol sym) {
 	if(!LOCAL_ENV.isBound())
@@ -8967,7 +8973,8 @@ public static class NewInstanceMethod extends ObjMethod{
 			method.line = lineDeref();
 			method.column = columnDeref();
 			//register as the current method and set up a new env frame
-            PathNode pnode =  new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
+            PathNode pnode = new PathNode(PATHTYPE.PATH, null);
+			method.clearRoot = pnode;
 			Var.pushThreadBindings(
 					RT.mapUniqueKeys(
 							METHOD, method,
