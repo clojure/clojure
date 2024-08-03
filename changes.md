@@ -67,7 +67,7 @@ Clojure now includes [clojure.tools.deps.interop/invoke-tool](https://clojure.gi
 
 `add-lib` functionality is built using `invoke-tool` but you can also use it to build or invoke your own tools for interactive use. Find more about the function execution protocol on the [CLI reference](https://clojure.org/reference/clojure_cli#function_protocol).
 
-See: [CLJ-2760](https://clojure.atlassian.net/browse/CLJ-2760)
+See: [CLJ-2760](https://clojure.atlassian.net/browse/CLJ-2760), [CLJ-2819](https://clojure.atlassian.net/browse/CLJ-2819)
 
 ### 2.3 Start and control external processes
 
@@ -76,7 +76,7 @@ For a long time, we've had the `clojure.java.shell` namespace, but over time Jav
 * [start](https://clojure.github.io/clojure/branch-master/clojure.java.process-api.html#clojure.java.process/start) - full control over streams with access to the underlying Java objects for advanced usage
 * [exec](https://clojure.github.io/clojure/branch-master/clojure.java.process-api.html#clojure.java.process/exec) - covers the common case of executing an external process and returning its stdout on completion
 
-See: [CLJ-2759](https://clojure.atlassian.net/browse/CLJ-2759), [CLJ-2777](https://clojure.atlassian.net/browse/CLJ-2777), [CLJ-2828](https://clojure.atlassian.net/browse/CLJ-2828), [CLJ-2773](https://clojure.atlassian.net/browse/CLJ-2773), [CLJ-2776](https://clojure.atlassian.net/browse/CLJ-2776), [CLJ-2774](https://clojure.atlassian.net/browse/CLJ-2774), [CLJ-2778](https://clojure.atlassian.net/browse/CLJ-2778), [CLJ-2779](https://clojure.atlassian.net/browse/CLJ-2779)
+See: [CLJ-2759](https://clojure.atlassian.net/browse/CLJ-2759), [CLJ-2777](https://clojure.atlassian.net/browse/CLJ-2777), [CLJ-2828](https://clojure.atlassian.net/browse/CLJ-2828), [CLJ-2773](https://clojure.atlassian.net/browse/CLJ-2773), [CLJ-2776](https://clojure.atlassian.net/browse/CLJ-2776), [CLJ-2774](https://clojure.atlassian.net/browse/CLJ-2774), [CLJ-2778](https://clojure.atlassian.net/browse/CLJ-2778), [CLJ-2779](https://clojure.atlassian.net/browse/CLJ-2779), [CLJ-2865](https://clojure.atlassian.net/browse/CLJ-2865)
 
 ### 2.4 Method values
 
@@ -102,7 +102,7 @@ Qualified method invocations with [param-tags](#26-param-tags-metadata) use only
 
 Note: Static fields are values and should be referenced without parens unless they are intended as function calls, e.g `(System/out)` should be `System/out`. Future Clojure releases will treat the field's value as something invokable and invoke it.
 
-See: [CLJ-2844](https://clojure.atlassian.net/browse/CLJ-2844), [CLJ-2848](https://clojure.atlassian.net/browse/CLJ-2848), [CLJ-2847](https://clojure.atlassian.net/browse/CLJ-2847), [CLJ-2853](https://clojure.atlassian.net/browse/CLJ-2853)
+See: [CLJ-2844](https://clojure.atlassian.net/browse/CLJ-2844), [CLJ-2848](https://clojure.atlassian.net/browse/CLJ-2848), [CLJ-2847](https://clojure.atlassian.net/browse/CLJ-2847), [CLJ-2853](https://clojure.atlassian.net/browse/CLJ-2853), [CLJ-2867](https://clojure.atlassian.net/browse/CLJ-2867)
 
 ### 2.6 :param-tags metadata
 
@@ -130,7 +130,7 @@ Java programs define "functions" with Java functional interfaces (marked with th
 
 Clojure developers can now invoke Java methods taking functional interfaces by passing functions with matching arity. The Clojure compiler implicitly converts Clojure functions to the required functional interface by constructing a lambda adapter. You can explicitly coerce a Clojure function to a functional interface by hinting the binding name in a `let` binding, e.g. to avoid repeated adapter construction in a loop, e.g. `(let [^java.util.function.Predicate p even?] ...)`.
 
-See: [CLJ-2799](https://clojure.atlassian.net/browse/CLJ-2799), [CLJ-2858](https://clojure.atlassian.net/browse/CLJ-2858), [CLJ-2856](https://clojure.atlassian.net/browse/CLJ-2856)
+See: [CLJ-2799](https://clojure.atlassian.net/browse/CLJ-2799), [CLJ-2858](https://clojure.atlassian.net/browse/CLJ-2858), [CLJ-2856](https://clojure.atlassian.net/browse/CLJ-2856), [CLJ-2863](https://clojure.atlassian.net/browse/CLJ-2863), [CLJ-2864](https://clojure.atlassian.net/browse/CLJ-2864)
 
 ### 2.9 Java Supplier interop
 
@@ -182,6 +182,8 @@ See: [CLJ-2711](https://clojure.atlassian.net/browse/CLJ-2711)
 * [CLJ-2726](https://clojure.atlassian.net/browse/CLJ-2726) `#uuid` data reader - Fix exception on invalid input so it flows through reader
 * [CLJ-2813](https://clojure.atlassian.net/browse/CLJ-2813) anonymous function arg reader - no longer accepts invalid arg symbols
 * [CLJ-2843](https://clojure.atlassian.net/browse/CLJ-2843) Reflective calls to Java methods that take primitive long or double now work when passed a narrower boxed number at runtime (Integer, Short, Byte, Float). Previously, these methods were not matched during reflection and an error was thrown.
+* [CLJ-2145](https://clojure.atlassian.net/browse/CLJ-2145) - Fix clearing of closed overs in `^:once` fns
+* [CLJ-2317](https://clojure.atlassian.net/browse/CLJ-2317) - `recur` to head of `:once` fn cancels once
 
 ### 3.2 Core
 
@@ -206,6 +208,11 @@ See: [CLJ-2711](https://clojure.atlassian.net/browse/CLJ-2711)
 * [CLJ-2290](https://clojure.atlassian.net/browse/CLJ-2290) `into` - add 0- and 1-arity to docstring
 * [CLJ-2552](https://clojure.atlassian.net/browse/CLJ-2552) `reify` - improve docstring and fix example
 * [CLJ-1385](https://clojure.atlassian.net/browse/CLJ-1385) `transient` - include usage model from reference docs
+
+# Changes to Clojure in Version 1.11.4
+
+* [CLJ-2145](https://clojure.atlassian.net/browse/CLJ-2145) - Fix clearing of closed overs in `^:once` fns
+* [CLJ-2317](https://clojure.atlassian.net/browse/CLJ-2317) - `recur` to head of `:once` fn cancels once
 
 # Changes to Clojure in Version 1.11.3
 
