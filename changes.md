@@ -1,5 +1,10 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.11.4
+
+* [CLJ-2145](https://clojure.atlassian.net/browse/CLJ-2145) - Fix clearing of closed overs in `^:once` fns
+* [CLJ-2317](https://clojure.atlassian.net/browse/CLJ-2317) - `recur` to head of `:once` fn cancels once
+
 # Changes to Clojure in Version 1.11.3
 
 * [CLJ-2843](https://clojure.atlassian.net/browse/CLJ-2843) - Reflective calls to Java methods that take primitive long or double now work when passed a narrower boxed number at runtime (Integer, Short, Byte, Float). Previously, these methods were not matched during reflection and an error was thrown.
