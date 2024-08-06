@@ -800,3 +800,7 @@
   (eval (-> "^{:line 42 :column 99} (defn explicit-line-numbering [])" str->lnpr read))
   (is (= {:line 42 :column 99}
          (-> 'explicit-line-numbering resolve meta (select-keys [:line :column])))))
+
+(deftest unicode-in-tagged
+  (binding [*data-readers* (assoc *data-readers* 'λ #'str)]
+    (is (= "10" (read-string "#λ 10")))))

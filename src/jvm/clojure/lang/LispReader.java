@@ -845,7 +845,7 @@ public static class DispatchReader extends AFn{
 		int ch = read1((Reader) reader);
 		if(ch == -1)
 			throw Util.runtimeException("EOF while reading character");
-		IFn fn = dispatchMacros[ch];
+		IFn fn = ch < dispatchMacros.length ? dispatchMacros[ch] : null;
 
 		// Try the ctor reader first
 		if(fn == null) {
