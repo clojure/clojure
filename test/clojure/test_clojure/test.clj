@@ -17,7 +17,8 @@
 
 (ns clojure.test-clojure.test
   (:use clojure.test)
-  (:require [clojure.stacktrace :as stack]))
+  (:require [clojure.stacktrace :as stack]
+            [clojure.string :as str]))
 
 (deftest can-test-symbol
   (let [x true]
@@ -115,6 +116,60 @@
                         :expected expected, :actual actual})
       (original-report {:type :fail, :message (str msg " but got " event)
                         :expected expected, :actual actual}))))
+
+(defn reporter-1 [data]
+  (case (:type data)
+    :pass (println "reporter 1" (:message data))
+    :summary (println :summary-1)
+    #_:else nil))
+
+(defn reporter-2 [data]
+  (case (:type data)
+    :pass (println "reporter 2" (:message data))
+    :summary (println :summary-2)
+    #_:else nil))
+
+(deftest multiple-reporters-test
+  (let [ret (with-out-str
+              (with-reporters [reporter-1 reporter-2]
+                (is (= 1 1) "test 1")
+                (is (= 1 1) "test 2")))]
+    (is (= (str/join "\n" ["reporter 1 test 1"
+                           "reporter 2 test 1"
+                           "reporter 1 test 2"
+                           "reporter 2 test 2"])
+           (str/trim ret))
+        "Should pass"))
+  (let [ret (with-out-str
+              (with-reporters [reporter-2 reporter-1]
+                (is (= 1 1) "test 1")
+                (is (= 1 1) "test 2")))]
+    (is (= (str/join "\n" ["reporter 2 test 1"
+                           "reporter 1 test 1"
+                           "reporter 2 test 2"
+                           "reporter 1 test 2"])
+           (str/trim ret))
+        "Should pass")))
+
+(deftest reporters-helper-test
+  (is (= 1 1) "Should pass"))
+
+;; If this were the real `test-ns-hook`, it would call `run-tests`.
+(defn fake-test-ns-hook []
+  (let [ret (with-out-str
+              (with-reporters [reporter-1 reporter-1 reporter-2]
+                (run-test clojure.test-clojure.test/reporters-helper-test)))]
+    (is (= (str/join "\n" ["reporter 1 Should pass"
+                           "reporter 1 Should pass"
+                           "reporter 2 Should pass"
+                           ":summary-1"
+                           ":summary-1"
+                           ":summary-2"])
+           (str/trim ret))
+        "Should pass")))
+
+(deftest fake-test-wrapper
+  (fake-test-ns-hook))
 
 ;; test-ns-hook will be used by test/test-ns to run tests in this
 ;; namespace.

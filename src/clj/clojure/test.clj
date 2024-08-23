@@ -239,6 +239,16 @@
 ;; Nothing is marked "private" here, so you can rebind things to plug
 ;; in your own testing or reporting frameworks.
 
+(defmulti
+  ^{:doc "Generic reporting function.  To use different reporting functions
+   (e.g., TAP, JUnit), bind `*reporter*`.  Assertions such as
+   'is' call 'report' to indicate results.  The argument given to
+   'report' will be a map with a :type key.  See the documentation at
+   the top of test_is.clj for more information on the types of
+   arguments for 'report'."
+     :dynamic true
+     :added "1.1"}
+  report :type)
 
 ;;; USER-MODIFIABLE GLOBALS
 
@@ -256,6 +266,12 @@
    :added "1.1"}
  *stack-trace-depth* nil)
 
+(def
+  ^{:dynamic true
+    :doc "The functions that will print the results. Defaults to `report`.
+    To combine multiple reporters, bind this to the output of combine-reporters."
+    :added "<<next>>"}
+  *reporter* #'report)
 
 ;;; GLOBALS USED BY THE REPORTING FUNCTIONS
 
@@ -275,6 +291,22 @@
   {:added "1.1"}
   [& body]
   `(binding [*out* *test-out*]
+     ~@body))
+
+(defn combine-reporters
+  "Combine the given reporter functions into a single function.
+  Each function will be called on the report data in the order given"
+  {:added "<<next>>"}
+  [reporter & reporters]
+  (fn [m]
+    (run! (fn [reporter] (reporter m) (flush) nil)
+          (cons reporter reporters))))
+
+(defmacro with-reporters
+  "Use given sequence of reporters in body."
+  {:added "<<next>>"}
+  [reporters & body]
+  `(binding [*reporter* (apply combine-reporters ~reporters)]
      ~@body))
 
 ;;; UTILITIES FOR REPORTING FUNCTIONS
@@ -321,17 +353,6 @@
 
 ;;; TEST RESULT REPORTING
 
-(defmulti
-  ^{:doc "Generic reporting function, may be overridden to plug in
-   different report formats (e.g., TAP, JUnit).  Assertions such as
-   'is' call 'report' to indicate results.  The argument given to
-   'report' will be a map with a :type key.  See the documentation at
-   the top of test_is.clj for more information on the types of
-   arguments for 'report'."
-     :dynamic true
-     :added "1.1"}
-  report :type)
-
 (defn- file-and-line
   {:deprecated "1.8"}
   [^Throwable exception depth]
@@ -354,7 +375,7 @@
    to pass test results to report."
   {:added "1.2"}
   [m]
-  (report
+  (*reporter*
    (case
     (:type m)
     :fail (merge (stacktrace-file-and-line (drop-while
