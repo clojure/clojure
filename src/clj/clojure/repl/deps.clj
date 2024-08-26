@@ -51,6 +51,8 @@
             urls (->> paths (map jio/file) (map #(RT/toUrl ^File %)))]
         (run! add-loader-url urls)
         (basis-impl/update-basis! update :libs merge added)
+        ;; reload root *data-readers* from classpath
+        (set! *data-readers* (merge (#'clojure.core/load-data-readers) *data-readers*))
         (let [ret (-> added keys sort vec)]
           (when (seq ret) ret))))))
 
