@@ -61,7 +61,7 @@ See: [CLJ-2761](https://clojure.atlassian.net/browse/CLJ-2761), [CLJ-2757](https
 
 ### 2.2 Invoke tool functions out of process
 
-There are many useful tools you can use at development time, but which are not part of your project's actual dependencies. The Clojure CLI provides explicit support for [tools](https://clojure.org/reference/clojure_cli#tool_install) with their own classpath, but there was not previously a way to invoke these interactively.
+There are many useful tools you can use at development time, but which are not part of your project's actual dependencies. The Clojure CLI provides explicit support for [tools](https://clojure.org/reference/clojure_cli#tools) with their own classpath, but there was not previously a way to invoke these interactively.
 
 Clojure now includes [clojure.tools.deps.interop/invoke-tool](https://clojure.github.io/clojure/branch-master/clojure.tools.deps.interop-api.html#clojure.tools.deps.interop/invoke-tool) to invoke a tool function out of process. The classpath for the tool is defined in deps.edn and you do not need to add the tool's dependencies to your project classpath.
 
