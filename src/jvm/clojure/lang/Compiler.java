@@ -1124,7 +1124,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
 	}
 
-	static Class maybeArrayClass(Symbol sym) {
+	public static Class maybeArrayClass(Symbol sym) {
 		if(sym.ns == null || !Util.isPosDigit(sym.name))
 			return null;
 

@@ -65,3 +65,17 @@
     (is (thrown? Exception (read-string "String/0")))
     (is (thrown? Exception (read-string "String/42")))
     (is (thrown? Exception (eval '(deftype Foo/2 [a]))))))
+
+(definterface ArrayClassSymbolFoo (^String/1 bar []))
+(definterface ArrayClassSymbolFooAsHint (^ArrayClassSymbolFoo/1 baz []))
+
+(deftest test-definterface-acs
+  (testing "definterface"
+    (let [obj (reify ArrayClassSymbolFoo (bar [this] (into-array String ["a"])))]
+      (is (= ["a"] (seq (.bar obj)))))
+    (let [obj (reify ArrayClassSymbolFooAsHint
+                (baz [this]
+                  (into-array ArrayClassSymbolFoo [(reify ArrayClassSymbolFoo
+                                                     (bar [this] (into-array String ["a"])))])))]
+      (is (= ["a"] (let [^ArrayClassSymbolFoo acsf (first (.baz obj))]
+                    (seq (.bar acsf))))))))
