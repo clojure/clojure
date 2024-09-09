@@ -536,9 +536,7 @@ static public List<Method> getMethods(Class c, int arity, String name, boolean g
 			{
 			try
 				{
-				if(method.isBridge()
-				   && c.getMethod(method.getName(), method.getParameterTypes())
-						.equals(method))
+				if(method.isBridge())
 					bridgeMethods.add(method);
 				else
 					methods.add(method);
