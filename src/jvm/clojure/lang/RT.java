@@ -234,6 +234,9 @@ final static Var PRINT_DUP = Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*")
 final static Var WARN_ON_REFLECTION = Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), F).setDynamic();
 final static Var ALLOW_UNRESOLVED_VARS = Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), F).setDynamic();
 final static Var READER_RESOLVER = Var.intern(CLOJURE_NS, Symbol.intern("*reader-resolver*"), null).setDynamic();
+final static Var LOADING_FROM_SOURCE = Var.intern(CLOJURE_NS, Symbol.intern("*loading-from-source*"), F).setDynamic();
+final static Var MAYBE_PROVIDING_MACROS = Var.intern(CLOJURE_NS, Symbol.intern("*maybe-providing-macros*"), null).setDynamic();
+final static Var MACRO_LIBS = Var.intern(CLOJURE_NS, Symbol.intern("*macro-libs*"), new Ref(null)).setDynamic();
 
 final static Var IN_NS_VAR = Var.intern(CLOJURE_NS, Symbol.intern("in-ns"), F);
 final static Var NS_VAR = Var.intern(CLOJURE_NS, Symbol.intern("ns"), F);
@@ -475,8 +478,15 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 	if(!loaded && cljURL != null) {
 		if(booleanCast(Compiler.COMPILE_FILES.deref()))
 			compile(scriptfile);
-		else
-			loadResourceScript(RT.class, scriptfile);
+		else {
+			try {
+				Var.pushThreadBindings(RT.mapUniqueKeys(LOADING_FROM_SOURCE, T));
+				loadResourceScript(RT.class, scriptfile);
+			}
+			finally {
+				Var.popThreadBindings();
+			}
+		}
 	}
 	else if(!loaded && failIfNotFound)
 		throw new FileNotFoundException(String.format("Could not locate %s, %s or %s on classpath.%s", classfile, cljfile, cljcfile,

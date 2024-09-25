@@ -5997,10 +5997,14 @@
 
         filter-opts (select-keys opts '(:exclude :only :rename :refer))
         undefined-on-entry (not (find-ns lib))]
-    (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
+    (binding [*loading-verbosely* (or *loading-verbosely* verbose)
+              *maybe-providing-macros* (when *loading-from-source* lib)]
       (if load
         (try
           (load lib need-ns require)
+          (when-let [defr-libs (and *loading-from-source* (seq (get *macro-libs* lib)))]
+            (doseq [dl defr-libs]
+              (load-lib (namespace dl) dl)))
           (catch Exception e
             (when undefined-on-entry
               (remove-ns lib))
@@ -6025,6 +6029,8 @@
           (printf ")\n"))
         (apply refer lib (mapcat seq filter-opts))))))
 
+(declare update)
+
 (defn- load-libs
   "Loads libs, interpreting libspecs, prefix lists, and flags for
   forwarding to load-lib"
@@ -6033,13 +6039,17 @@
         opts (interleave flags (repeat true))
         args (filter (complement keyword?) args)]
     ; check for unsupported options
-    (let [supported #{:as :reload :reload-all :require :use :verbose :refer :as-alias}
+    (let [supported #{:as :reload :reload-all :require :use :verbose :refer :as-alias :when-providing-macros}
           unsupported (seq (remove supported flags))]
       (throw-if unsupported
                 (apply str "Unsupported option(s) supplied: "
                      (interpose \, unsupported))))
     ; check a load target was specified
     (throw-if (not (seq args)) "Nothing specified to load")
+    (when (and *maybe-providing-macros* (some #{:when-providing-macros} opts))
+      (let [defers (map #(prependss % opts) args)]
+        (dosync
+         (commute *macro-libs* update *maybe-providing-macros* #(vec (concat %1 %2)) defers))))
     (doseq [arg args]
       (if (libspec? arg)
         (apply load-lib nil (prependss arg opts))
