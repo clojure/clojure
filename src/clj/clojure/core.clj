@@ -6046,17 +6046,17 @@
                      (interpose \, unsupported))))
     ; check a load target was specified
     (throw-if (not (seq args)) "Nothing specified to load")
-    (when (and *maybe-providing-macros* (some #{:when-providing-macros} opts))
+    (if (and *maybe-providing-macros* (some #{:when-providing-macros} opts))
       (let [defers (map #(prependss % opts) args)]
         (dosync
-         (commute *macro-libs* update *maybe-providing-macros* #(vec (concat %1 %2)) defers))))
-    (doseq [arg args]
-      (if (libspec? arg)
-        (apply load-lib nil (prependss arg opts))
-        (let [[prefix & args] arg]
-          (throw-if (nil? prefix) "prefix cannot be nil")
-          (doseq [arg args]
-            (apply load-lib prefix (prependss arg opts))))))))
+         (commute *macro-libs* update *maybe-providing-macros* #(vec (concat %1 %2)) defers)))
+      (doseq [arg args]
+        (if (libspec? arg)
+          (apply load-lib nil (prependss arg opts))
+          (let [[prefix & args] arg]
+            (throw-if (nil? prefix) "prefix cannot be nil")
+            (doseq [arg args]
+              (apply load-lib prefix (prependss arg opts)))))))))
 
 (defn- check-cyclic-dependency
   "Detects and rejects non-trivial cyclic load dependencies. The
