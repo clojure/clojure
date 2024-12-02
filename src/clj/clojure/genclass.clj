@@ -101,7 +101,27 @@
       'char Character/TYPE
       'chars (Class/forName "[C")})
 
-(defn- ^Class the-class [x] 
+(defn- maybe-array-descriptor [x]
+  (if-let  [dim (and (symbol? x)
+                     (namespace x)
+                     (clojure.lang.Util/isPosDigit (name x))
+                     (-> x name (.charAt 0) int (- (int \0))))]
+    (let [cn (namespace x)
+          classname (if (some #{\.} cn) cn (str "java.lang." cn))]
+      (str (String/join "" ^Iterable (repeat dim "[")) "L" classname ";"))
+    (str x)))
+
+(defn- ^Class the-class [x]
+  (cond
+   (class? x) x
+   (contains? prim->class x) (prim->class x)
+   :else (let [strx (maybe-array-descriptor x)]
+           (clojure.lang.RT/classForName
+            (if (some #{\. \[} strx)
+              strx
+              (str "java.lang." strx))))))
+
+#_(defn- ^Class the-class [x] 
   (cond 
    (class? x) x
    (contains? prim->class x) (prim->class x)
