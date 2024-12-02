@@ -256,7 +256,7 @@ static public Object loadWithClass(String scriptbase, Class<?> loadFrom) throws 
     }
 }
 
-public static boolean isPosDigit(String s) {
+static boolean isPosDigit(String s) {
 	if(s.length() != 1)
 		return false;
 	char ch = s.charAt(0);
