@@ -9184,7 +9184,7 @@ public static class NewInstanceMethod extends ObjMethod{
         return tc;
     }
 
-	static Class primClass(Symbol sym){
+	public static Class primClass(Symbol sym){
 		if(sym == null)
 			return null;
 		Class c = null;
