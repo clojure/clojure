@@ -125,16 +125,6 @@
               strx
               (str "java.lang." strx))))))
 
-#_(defn- ^Class the-class [x] 
-  (cond 
-   (class? x) x
-   (contains? prim->class x) (prim->class x)
-   :else (let [strx (str x)]
-           (clojure.lang.RT/classForName 
-            (if (some #{\. \[} strx)
-              strx
-              (str "java.lang." strx))))))
-
 ;; someday this can be made codepoint aware
 (defn- valid-java-method-name
   [^String s]
