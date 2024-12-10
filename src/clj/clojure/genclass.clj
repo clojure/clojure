@@ -107,8 +107,14 @@
                      (clojure.lang.Util/isPosDigit (name x))
                      (-> x name (.charAt 0) int (- (int \0))))]
     (let [cn (namespace x)
-          classname (if (some #{\.} cn) cn (str "java.lang." cn))]
-      (str (String/join "" ^Iterable (repeat dim "[")) "L" classname ";"))
+          ^Class pc (prim->class (symbol cn))
+          classname (cond (some #{\.} cn) cn
+                          pc (-> pc Type/getType Type/.getDescriptor)
+                          :default (str "java.lang." cn))
+          ^Iterable dim-descr (repeat dim "[")]
+      (if pc
+        (str (String/join "" dim-descr) classname)
+        (str (String/join "" dim-descr) "L" classname ";")))
     (str x)))
 
 (defn- ^Class the-class [x]
