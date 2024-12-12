@@ -101,29 +101,33 @@
       'char Character/TYPE
       'chars (Class/forName "[C")})
 
-(defn- maybe-array-descriptor [x]
-  (if-let  [dim (and (symbol? x)
-                     (namespace x)
-                     (clojure.lang.Util/isPosDigit (name x))
-                     (-> x name (.charAt 0) int (- (int \0))))]
-    (let [cn (namespace x)
-          ^Iterable dim-descr (repeat dim "[")]
-      (if-let [^Class pc (clojure.lang.Compiler/primClass (symbol cn))]
-        (str (String/join "" dim-descr) (-> pc Type/getType Type/.getDescriptor))
-        (str (String/join "" dim-descr) "L"
-             (if (some #{\.} cn) cn (str "java.lang." cn))
-             ";")))
-    (str x)))
+(defn- array-class? [x]
+  (and (symbol? x)
+       (namespace x)
+       (clojure.lang.Util/isPosDigit (name x))))
+
+(defn- resolve-array-class [x]
+  (clojure.lang.RT/classForName
+   (let [dim (-> x name (.charAt 0) int (- (int \0)))
+         cn (namespace x)
+         ^Iterable dim-descr (repeat dim "[")]
+     (if-let [^Class pc (clojure.lang.Compiler/primClass (symbol cn))]
+       (str (String/join "" dim-descr) (-> pc Type/getType Type/.getDescriptor))
+       (str (String/join "" dim-descr) "L"
+            (if (some #{\.} cn) cn (str "java.lang." cn))
+            ";")))))
 
 (defn- ^Class the-class [x]
   (cond
-   (class? x) x
-   (contains? prim->class x) (prim->class x)
-   :else (let [strx (maybe-array-descriptor x)]
-           (clojure.lang.RT/classForName
-            (if (some #{\. \[} strx)
-              strx
-              (str "java.lang." strx))))))
+    (class? x) x
+    (symbol? x) (cond (contains? prim->class x) (prim->class x)
+                      (array-class? x) (resolve-array-class x)
+                      :else (let [strx (str x)]
+                              (clojure.lang.RT/classForName
+                               (if (some #{\. \[} strx)
+                                 strx
+                                 (str "java.lang." strx)))))
+    :else (clojure.lang.RT/classForName x)))
 
 ;; someday this can be made codepoint aware
 (defn- valid-java-method-name
