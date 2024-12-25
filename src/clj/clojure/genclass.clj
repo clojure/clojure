@@ -101,7 +101,7 @@
       'char Character/TYPE
       'chars (Class/forName "[C")})
 
-(defn- resolve-array-class [sym]
+(defn- the-array-class [sym]
   (clojure.lang.RT/classForName
    (let [cn (namespace sym)]
      (clojure.lang.Compiler$HostExpr/buildArrayClassDescriptor
@@ -114,7 +114,7 @@
     (class? x) x
     (symbol? x) (cond (contains? prim->class x) (prim->class x)
                       (clojure.lang.Compiler$HostExpr/looksLikeArrayClass x)
-                        (resolve-array-class x)
+                        (the-array-class x)
                       :else (let [strx (str x)]
                               (clojure.lang.RT/classForName
                                (if (some #{\. \[} strx)
