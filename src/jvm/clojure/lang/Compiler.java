@@ -1124,10 +1124,11 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 		throw new IllegalArgumentException("Unable to resolve classname: " + tag);
 	}
 
-	public static Class maybeArrayClass(Symbol sym) {
-		if(sym.ns == null || !Util.isPosDigit(sym.name))
-			return null;
+	public static boolean looksLikeArrayClass(Symbol sym) {
+		return sym.ns != null && Util.isPosDigit(sym.name);
+	}
 
+	public static String buildArrayClassDescriptor(Symbol sym) {
 		int dim = sym.name.charAt(0) - '0';
 		Symbol componentClassName = Symbol.intern(null, sym.ns);
 		Class componentClass = primClass(componentClassName);
@@ -1137,7 +1138,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 
 		if(componentClass == null)
 			throw Util.sneakyThrow(new ClassNotFoundException("Unable to resolve component classname: "
-				+ componentClassName));
+					+ componentClassName));
 
 		StringBuilder arrayDescriptor = new StringBuilder();
 
@@ -1149,7 +1150,14 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				: "L" + componentClass.getName() + ";";
 
 		arrayDescriptor.append(ccDescr);
-		return maybeClass(arrayDescriptor.toString(), true);
+		return arrayDescriptor.toString();
+	}
+
+	public static Class maybeArrayClass(Symbol sym) {
+		if(!looksLikeArrayClass(sym))
+			return null;
+
+		return maybeClass(buildArrayClassDescriptor(sym), true);
 	}
 }
 
@@ -9222,7 +9230,7 @@ public static class NewInstanceMethod extends ObjMethod{
         return tc;
     }
 
-	static Class primClass(Symbol sym){
+	public static Class primClass(Symbol sym){
 		if(sym == null)
 			return null;
 		Class c = null;

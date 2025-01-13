@@ -101,15 +101,26 @@
       'char Character/TYPE
       'chars (Class/forName "[C")})
 
-(defn- ^Class the-class [x] 
-  (cond 
-   (class? x) x
-   (contains? prim->class x) (prim->class x)
-   :else (let [strx (str x)]
-           (clojure.lang.RT/classForName 
-            (if (some #{\. \[} strx)
-              strx
-              (str "java.lang." strx))))))
+(defn- the-array-class [sym]
+  (clojure.lang.RT/classForName
+   (let [cn (namespace sym)]
+     (clojure.lang.Compiler$HostExpr/buildArrayClassDescriptor
+      (if (or (clojure.lang.Compiler/primClass (symbol cn)) (some #{\.} cn))
+        sym
+        (symbol (str "java.lang." cn) (name sym)))))))
+
+(defn- ^Class the-class [x]
+  (cond
+    (class? x) x
+    (symbol? x) (cond (contains? prim->class x) (prim->class x)
+                      (clojure.lang.Compiler$HostExpr/looksLikeArrayClass x)
+                        (the-array-class x)
+                      :else (let [strx (str x)]
+                              (clojure.lang.RT/classForName
+                               (if (some #{\. \[} strx)
+                                 strx
+                                 (str "java.lang." strx)))))
+    :else (clojure.lang.RT/classForName x)))
 
 ;; someday this can be made codepoint aware
 (defn- valid-java-method-name
