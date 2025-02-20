@@ -239,8 +239,8 @@
        (and (branch? loc) (down loc))
        (right loc)
        (loop [p loc]
-         (if (up p)
-           (or (right (up p)) (recur (up p)))
+         (if-let [uloc (up p)]
+           (or (right uloc) (recur uloc))
            [(node p) :end])))))
 
 (defn prev
