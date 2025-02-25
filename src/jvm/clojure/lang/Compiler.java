@@ -1651,7 +1651,7 @@ static class FISupport {
 	 * If targetClass is FI and has an adaptable functional method
 	 *   Find fn invoker method matching adaptable method of FI
 	 *   Emit bytecode for (expr is emitted):
-	 *     if(expr instanceof IFn)
+	 *     if(expr instanceof IFn && !(expr instanceof FI))
 	 *       invokeDynamic(targetMethod, fnInvokerImplMethod)
 	 * Else emit nothing
 	 */
@@ -1686,14 +1686,17 @@ static class FISupport {
 		try {
 			java.lang.reflect.Method fnInvokerMethod = FnInvokers.class.getMethod(invokerMethodName, invokerParams);
 
-			// if(exp instanceof IFn) { emitInvokeDynamic(targetMethod, fnInvokerMethod) }
+			// if not (expr instanceof IFn), go to end label
 			expr.emit(C.EXPRESSION, objx, gen);
 			gen.dup();
 			gen.instanceOf(ifnType);
-
-			// if not instanceof IFn, go to end
 			Label endLabel = gen.newLabel();
 			gen.ifZCmp(Opcodes.IFEQ, endLabel);
+
+			// if (expr instanceof FI), go to end label
+			gen.dup();
+			gen.instanceOf(samType);
+			gen.ifZCmp(Opcodes.IFNE, endLabel);
 
 			// else adapt fn invoker method as impl for target method
 			emitInvokeDynamicAdapter(gen, targetClass, targetMethod, FnInvokers.class, fnInvokerMethod);

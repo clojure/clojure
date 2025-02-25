@@ -859,3 +859,15 @@
 
    (testing "Static method accepting FI arg, provided overloaded static class FI"
      (is (= \S (FunctionalTester/staticMethodWithFIArg "Static" 0 FunctionalTester/getChar)))))
+
+(deftest CLJ-2898-reified-objs-both-IFn-and-FI
+  (let [tl (ThreadLocal/withInitial
+             (reify
+               java.util.function.Supplier
+               (get [_] 100)
+
+               clojure.lang.IFn
+               (applyTo [_ _] 201)
+               (invoke [_] 200)))]
+    ;; should not be adapted and use Supplier.get() impl on tl
+    (is (= 100 (.get tl)))))
