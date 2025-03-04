@@ -859,3 +859,28 @@
 
    (testing "Static method accepting FI arg, provided overloaded static class FI"
      (is (= \S (FunctionalTester/staticMethodWithFIArg "Static" 0 FunctionalTester/getChar)))))
+
+;; call is reflective and one overload takes an FI (Supplier)
+(definterface TakesFIOverloaded
+  (call [^java.util.function.Supplier s])
+  (call [^String s]))
+
+(deftest CLJ-2898-reified-objs-both-IFn-and-FI
+  ;; f is both IFn and FI (Supplier)
+  (let [f (reify
+            java.util.function.Supplier
+            (get [_] 100)
+
+            clojure.lang.IFn
+            (applyTo [_ _] 201)
+            (invoke [_] 200))]
+
+    ;; should not be adapted. use Supplier.get() impl on tl
+    (is (= 100 (.get (ThreadLocal/withInitial f))))
+
+    (let [tfio (reify TakesFIOverloaded
+                 (call [_ ^java.util.function.Supplier o] (.get o))
+                 (call [_ ^String s] "string"))]
+      ;; reflective call to TakesFIOverloaded.call()
+      ;; as above, should not be adapted and use Supplier.get()
+      (is (= 100 (.call tfio (identity f)))))))
