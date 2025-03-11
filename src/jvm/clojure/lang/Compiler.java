@@ -1260,7 +1260,7 @@ static class QualifiedMethodExpr implements Expr {
 
 	// Returns a list of methods or ctors matching the name and kind given.
 	// Otherwise, will throw if the information provided results in no matches
-	private static List<Executable> methodsWithName(Class c, String methodName, MethodKind kind) {
+	public static List<Executable> methodsWithName(Class c, String methodName, MethodKind kind) {
 		if (kind == MethodKind.CTOR) {
 			List<Executable> ctors = Arrays.asList(c.getConstructors());
 			if(ctors.isEmpty())
@@ -4359,16 +4359,22 @@ static class InvokeExpr implements Expr{
 			                             (KeywordExpr) fexpr, target);
 			}
 
-		// Preserving the existing static field bug that replaces a reference in parens with
-		// the field itself rather than trying to invoke the value in the field. This is
-		// an exception to the uniform Class/member qualification per CLJ-2806 ticket.
-		if(fexpr instanceof StaticFieldExpr)
-			return fexpr;
-
 		PersistentVector args = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form.next()); s != null; s = s.next())
 			{
 			args = args.cons(analyze(context, s.first()));
+			}
+
+		// Preserving the existing static field bug that replaces a reference in parens with
+		// the field itself rather than trying to invoke the value in the field. This is
+		// an exception to the uniform Class/member qualification per CLJ-2806 ticket.
+		if(fexpr instanceof StaticFieldExpr)
+			if(RT.count(args) == 0)
+				return fexpr;
+			else {
+				Class c = ((StaticFieldExpr)fexpr).c;
+				Symbol sym = Symbol.intern(c.getName(), ((StaticFieldExpr)fexpr).fieldName);
+				return toHostExpr(new QualifiedMethodExpr(c, sym), (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
 			}
 
 		if(fexpr instanceof QualifiedMethodExpr)

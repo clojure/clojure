@@ -1,6 +1,7 @@
 package clojure.test;
 
 public class SwissArmy {
+    public static String doppelganger = "static-field";
     public String ctorId;
 
     public SwissArmy() {this.ctorId = "1";}

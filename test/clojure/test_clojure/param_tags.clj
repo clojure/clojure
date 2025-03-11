@@ -165,8 +165,7 @@
     (case (:type m)
       :constructor (let [{:keys [expected actual]} (exercise-constructor m)]
                      (is (instance? expected actual)))
-      :static (let [{:keys [expected actual]} (exercise-static-method m)]
-                (is (= expected actual)))
+      :static (let [{:keys [expected actual]} (exercise-static-method m)] (is (= expected actual)))
       :instance (let [{:keys [expected actual]} (exercise-instance-method m)]
                   (is (= expected actual))))))
 
