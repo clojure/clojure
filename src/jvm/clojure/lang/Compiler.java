@@ -4372,7 +4372,9 @@ static class InvokeExpr implements Expr{
 			Class c = ((StaticFieldExpr) fexpr).c;
 			String name = ((StaticFieldExpr) fexpr).fieldName;
 
-			if (RT.count(args) == 0 && QualifiedMethodExpr.methodsWithName(c, name, QualifiedMethodExpr.MethodKind.STATIC).isEmpty())
+			if (RT.count(args) == 0
+//					&& ((form.first() instanceof Symbol) && (paramTagsOf((Symbol)form.first()) == null))
+					&& QualifiedMethodExpr.methodsWithName(c, name, QualifiedMethodExpr.MethodKind.STATIC).isEmpty())
 				return fexpr;
 			else {
 				Symbol sym = Symbol.intern(c.getName(), name);
@@ -7838,7 +7840,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 			Class c = HostExpr.maybeClass(nsSym, false);
 			if(c != null)
 				{
-				if(Reflector.getField(c, sym.name, true) != null)
+				if((paramTagsOf(sym) == null) && (Reflector.getField(c, sym.name, true) != null))
 					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
 				else
 					return new QualifiedMethodExpr(c, sym);

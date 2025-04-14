@@ -175,8 +175,9 @@
   (is (= "" (clojure.test.SwissArmy/doppelganger))) ;; favor 0-arity call over unwrap static field bug
   (is (= "int-int" (clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2))))
   (is (= "int-int" (apply clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2) [])))
-  ;; Can't distinguish field vs static method in value position
+  ;; Can't distinguish field vs static method in value position w/o param-tags
   ;; (is (= "int-int-long" (apply clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42) [])))
+  (is (= "" (apply ^[] clojure.test.SwissArmy/doppelganger [])))
   (is (= "int-int-long" (clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42)))))
 
 (defmacro arg-tags-called-in-macro
