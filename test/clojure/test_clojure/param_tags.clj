@@ -165,9 +165,19 @@
     (case (:type m)
       :constructor (let [{:keys [expected actual]} (exercise-constructor m)]
                      (is (instance? expected actual)))
-      :static (let [{:keys [expected actual]} (exercise-static-method m)] (is (= expected actual)))
+      :static (let [{:keys [expected actual]} (exercise-static-method m)]
+                (is (= expected actual)))
       :instance (let [{:keys [expected actual]} (exercise-instance-method m)]
                   (is (= expected actual))))))
+
+(deftest field-shadows-method-CLJ-2899-regression
+  (is (= "static-field" clojure.test.SwissArmy/doppelganger))
+  (is (= "" (clojure.test.SwissArmy/doppelganger))) ;; favor 0-arity call over unwrap static field bug
+  (is (= "int-int" (clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2))))
+  (is (= "int-int" (apply clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2) [])))
+  ;; Can't distinguish field vs static method in value position
+  ;; (is (= "int-int-long" (apply clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42) [])))
+  (is (= "int-int-long" (clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42)))))
 
 (defmacro arg-tags-called-in-macro
   [a-type b-type a b]

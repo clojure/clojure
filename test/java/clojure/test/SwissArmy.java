@@ -37,4 +37,5 @@ public class SwissArmy {
     public static String staticArityOverloadMethod(int a, int b) {return "int-int";}
     public static String staticArityOverloadMethod(int a, int b, int c) {return "int-int-int";}
     public static String doppelganger(int a, int b, long c) {return "int-int-long";}
+    public static String doppelganger() {return "";}
 }

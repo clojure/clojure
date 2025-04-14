@@ -4368,14 +4368,17 @@ static class InvokeExpr implements Expr{
 		// Preserving the existing static field bug that replaces a reference in parens with
 		// the field itself rather than trying to invoke the value in the field. This is
 		// an exception to the uniform Class/member qualification per CLJ-2806 ticket.
-		if(fexpr instanceof StaticFieldExpr)
-			if(RT.count(args) == 0)
+		if(fexpr instanceof StaticFieldExpr) {
+			Class c = ((StaticFieldExpr) fexpr).c;
+			String name = ((StaticFieldExpr) fexpr).fieldName;
+
+			if (RT.count(args) == 0 && QualifiedMethodExpr.methodsWithName(c, name, QualifiedMethodExpr.MethodKind.STATIC).isEmpty())
 				return fexpr;
 			else {
-				Class c = ((StaticFieldExpr)fexpr).c;
-				Symbol sym = Symbol.intern(c.getName(), ((StaticFieldExpr)fexpr).fieldName);
+				Symbol sym = Symbol.intern(c.getName(), name);
 				return toHostExpr(new QualifiedMethodExpr(c, sym), (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
 			}
+		}
 
 		if(fexpr instanceof QualifiedMethodExpr)
 			return toHostExpr((QualifiedMethodExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
