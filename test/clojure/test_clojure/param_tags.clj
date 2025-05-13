@@ -178,7 +178,8 @@
   ;; Can't distinguish field vs static method in value position w/o param-tags
   ;; (is (= "int-int-long" (apply clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42) [])))
   (is (= "" (apply ^[] clojure.test.SwissArmy/doppelganger [])))
-  (is (= "int-int-long" (clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42)))))
+  (is (= "int-int-long" (clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42))))
+  (is (thrown? Exception (eval '(clojure.test.SwissArmy/idFn 42)))))
 
 (defmacro arg-tags-called-in-macro
   [a-type b-type a b]

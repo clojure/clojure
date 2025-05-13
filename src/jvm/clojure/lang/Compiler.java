@@ -4378,17 +4378,25 @@ static class InvokeExpr implements Expr{
 			                             (KeywordExpr) fexpr, target);
 			}
 
-		// Preserving the existing static field bug that replaces a reference in parens with
-		// the field itself rather than trying to invoke the value in the field. This is
-		// an exception to the uniform Class/member qualification per CLJ-2806 ticket.
-		if(fexpr instanceof StaticFieldExpr)
-			return fexpr;
-
 		PersistentVector args = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form.next()); s != null; s = s.next())
 			{
 			args = args.cons(analyze(context, s.first()));
 			}
+
+		// Preserving the existing static field syntax that replaces a reference in parens with
+		// the field itself rather than trying to invoke the value in the field. This is
+		// an exception to the uniform Class/member qualification per CLJ-2806 ticket.
+		if(fexpr instanceof StaticFieldExpr)
+		{
+			if(RT.count(args) == 0)
+				return fexpr;
+			else
+				throw new IllegalArgumentException("No matching method " +
+						((StaticFieldExpr) fexpr).fieldName +
+						" found taking " + RT.count(args) + " args for " +
+						((StaticFieldExpr) fexpr).c);
+		}
 
 		if(fexpr instanceof QualifiedMethodExpr)
 			return toHostExpr((QualifiedMethodExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);

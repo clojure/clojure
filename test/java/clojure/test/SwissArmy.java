@@ -1,8 +1,12 @@
 package clojure.test;
 
+import clojure.java.api.Clojure;
+import clojure.lang.IFn;
+
 public class SwissArmy {
     public static String doppelganger = "static-field";
     public String ctorId;
+    public static IFn idFn = Clojure.var("clojure.core", "identity");
 
     public SwissArmy() {this.ctorId = "1";}
     public SwissArmy(int a, long b) {this.ctorId = "2";}
