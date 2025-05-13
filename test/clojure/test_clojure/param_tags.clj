@@ -170,18 +170,29 @@
       :instance (let [{:keys [expected actual]} (exercise-instance-method m)]
                   (is (= expected actual))))))
 
-(deftest field-shadows-method-CLJ-2899-regression
-  (is (= "static-field" clojure.test.SwissArmy/doppelganger))
-  (is (= "" (clojure.test.SwissArmy/doppelganger))) ;; favor 0-arity call over unwrap static field bug
-  (is (= "int-int" (clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2))))
-  (is (= "int-int" (apply clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2) [])))
-  ;; Can't distinguish field vs static method in value position w/o param-tags
-  ;; (is (= "int-int-long" (apply clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42) [])))
-  (is (= "" (apply ^[] clojure.test.SwissArmy/doppelganger [])))
-  (is (= "int-int-long" (clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42))))
-  (is (thrown? Exception (eval '(clojure.test.SwissArmy/idFn 42))))
-  (is (= #'clojure.core/identity clojure.test.SwissArmy/idFn))
-  (is (= #'clojure.core/identity (clojure.test.SwissArmy/idFn))))
+(deftest field-overloads-method-CLJ-2899-regression
+  (testing "overloaded in value position"
+    (is (= "static-field" clojure.test.SwissArmy/doppelganger)))
+
+  (testing "overloaded in value position, w/paramtags"
+    (is (= "" (apply ^[] clojure.test.SwissArmy/doppelganger []))))
+
+  (testing "overloaded, invoke no args"
+    (is (= "" (clojure.test.SwissArmy/doppelganger))))
+
+  (testing "overloaded, invoke w/args"
+    (is (= "int-int-long" (clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42)))))
+
+  (tesing "non-overloaded, field holds IFn, invoke w/args fails"
+    (is (thrown? Exception (eval '(clojure.test.SwissArmy/idFn 42))))
+    (is (= #'clojure.core/identity clojure.test.SwissArmy/idFn)))
+
+  (testing "non-overloaded, field holds IFn, invoke  no args"
+    (is (= #'clojure.core/identity (clojure.test.SwissArmy/idFn))))
+
+  (testing "instance method overloads"
+    (is (= "int-int" (clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2))))
+    (is (= "int-int" (apply clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2) [])))))
 
 (defmacro arg-tags-called-in-macro
   [a-type b-type a b]
