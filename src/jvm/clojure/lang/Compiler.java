@@ -1165,12 +1165,17 @@ static class QualifiedMethodExpr implements Expr {
 	private final String methodName;
 	private final MethodKind kind;
 	private final Class tagClass;
+	private final StaticFieldExpr fieldOverload;
 
 	private enum MethodKind {
 		CTOR, INSTANCE, STATIC
 	}
 
-	public QualifiedMethodExpr(Class methodClass, Symbol sym){
+	public QualifiedMethodExpr(Class methodClass, Symbol sym) {
+		this(methodClass, sym, null);
+	}
+
+	public QualifiedMethodExpr(Class methodClass, Symbol sym, StaticFieldExpr fieldOL) {
 		c = methodClass;
 		methodSymbol = sym;
 		tagClass = tagOf(sym) != null ? HostExpr.tagToClass(tagOf(sym)) : AFn.class;
@@ -1187,18 +1192,28 @@ static class QualifiedMethodExpr implements Expr {
 			kind = MethodKind.STATIC;
 			methodName = sym.name;
 		}
+		fieldOverload = fieldOL;
 	}
 
 	// Expr impl - invocation, convert to fn expr
+	private boolean overloadsField() {
+		return fieldOverload != null && paramTagsOf(methodSymbol) == null;
+	}
 
 	@Override
 	public Object eval() {
-		return buildThunk(C.EVAL, this).eval();
+		if(overloadsField())
+			return fieldOverload.eval();
+		else
+			return buildThunk(C.EVAL, this).eval();
 	}
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-		buildThunk(context, this).emit(context, objx, gen);
+		if(overloadsField())
+			fieldOverload.emit(context, objx, gen);
+		else
+			buildThunk(context, this).emit(context, objx, gen);
 	}
 
 	// Expr impl - method value, always an AFn
@@ -1258,18 +1273,9 @@ static class QualifiedMethodExpr implements Expr {
 		return res;
 	}
 
-	// Returns a list of methods or ctors matching the name and kind given.
-	// Otherwise, will throw if the information provided results in no matches
-	public static List<Executable> methodsWithName(Class c, String methodName, MethodKind kind) {
-		if (kind == MethodKind.CTOR) {
-			List<Executable> ctors = Arrays.asList(c.getConstructors());
-			if(ctors.isEmpty())
-				throw noMethodWithNameException(c, methodName, kind);
-			return ctors;
-		}
-
+	public static List<Executable> methodOverloads(Class c, String methodName, MethodKind kind) {
 		final Executable[] methods = c.getMethods();
-		List<Executable> res = Arrays.stream(methods)
+		return Arrays.stream(methods)
 				.filter(m -> m.getName().equals(methodName))
 				.filter(m -> {
 					switch(kind) {
@@ -1279,6 +1285,19 @@ static class QualifiedMethodExpr implements Expr {
 					}
 				})
 				.collect(Collectors.toList());
+	}
+
+	// Returns a list of methods or ctors matching the name and kind given.
+	// Otherwise, will throw if the information provided results in no matches
+	private static List<Executable> methodsWithName(Class c, String methodName, MethodKind kind) {
+		if (kind == MethodKind.CTOR) {
+			List<Executable> ctors = Arrays.asList(c.getConstructors());
+			if(ctors.isEmpty())
+				throw noMethodWithNameException(c, methodName, kind);
+			return ctors;
+		}
+
+		List<Executable> res = methodOverloads(c, methodName, kind);
 
 		if(res.isEmpty())
 			throw noMethodWithNameException(c, methodName, kind);
@@ -4115,7 +4134,7 @@ static class InvokeExpr implements Expr{
                 return tagOf(sig);
             }
         return null;
-        }
+	}
 
 	public InvokeExpr(String source, int line, int column, Symbol tag, Expr fexpr, IPersistentVector args, boolean tailPosition) {
 		this.source = source;
@@ -4359,26 +4378,17 @@ static class InvokeExpr implements Expr{
 			                             (KeywordExpr) fexpr, target);
 			}
 
+		// Preserving the existing static field bug that replaces a reference in parens with
+		// the field itself rather than trying to invoke the value in the field. This is
+		// an exception to the uniform Class/member qualification per CLJ-2806 ticket.
+		if(fexpr instanceof StaticFieldExpr)
+			return fexpr;
+
 		PersistentVector args = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form.next()); s != null; s = s.next())
 			{
 			args = args.cons(analyze(context, s.first()));
 			}
-
-		if(fexpr instanceof StaticFieldExpr) {
-			Class c = ((StaticFieldExpr) fexpr).c;
-			String name = ((StaticFieldExpr) fexpr).fieldName;
-
-			// Preserving the existing static field bug that replaces a reference in parens with
-			// the field itself rather than trying to invoke the value in the field. This is
-			// an exception to the uniform Class/member qualification per CLJ-2806 ticket.
-			if (RT.count(args) == 0 && QualifiedMethodExpr.methodsWithName(c, name, QualifiedMethodExpr.MethodKind.STATIC).isEmpty())
-				return fexpr;
-			else {
-				Symbol sym = Symbol.intern(c.getName(), name);
-				return toHostExpr(new QualifiedMethodExpr(c, sym), (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
-			}
-		}
 
 		if(fexpr instanceof QualifiedMethodExpr)
 			return toHostExpr((QualifiedMethodExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
@@ -7838,8 +7848,15 @@ private static Expr analyzeSymbol(Symbol sym) {
 			Class c = HostExpr.maybeClass(nsSym, false);
 			if(c != null)
 				{
-				if((paramTagsOf(sym) == null) && (Reflector.getField(c, sym.name, true) != null))
-					return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
+				if(Reflector.getField(c, sym.name, true) != null)
+					{
+					List<Executable> maybeOverloads = QualifiedMethodExpr.methodOverloads(c, sym.name, QualifiedMethodExpr.MethodKind.STATIC);
+
+					if(maybeOverloads.isEmpty())
+						return new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag);
+					else
+						return new QualifiedMethodExpr(c, sym, new StaticFieldExpr(lineDeref(), columnDeref(), c, sym.name, tag));
+					}
 				else
 					return new QualifiedMethodExpr(c, sym);
 				}
