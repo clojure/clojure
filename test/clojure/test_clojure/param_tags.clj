@@ -183,7 +183,7 @@
   (testing "overloaded, invoke w/args"
     (is (= "int-int-long" (clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42)))))
 
-  (tesing "non-overloaded, field holds IFn, invoke w/args fails"
+  (testing "non-overloaded, field holds IFn, invoke w/args fails"
     (is (thrown? Exception (eval '(clojure.test.SwissArmy/idFn 42))))
     (is (= #'clojure.core/identity clojure.test.SwissArmy/idFn)))
 
