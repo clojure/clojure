@@ -170,6 +170,30 @@
       :instance (let [{:keys [expected actual]} (exercise-instance-method m)]
                   (is (= expected actual))))))
 
+(deftest field-overloads-method-CLJ-2899-regression
+  (testing "overloaded in value position"
+    (is (= "static-field" clojure.test.SwissArmy/doppelganger)))
+
+  (testing "overloaded in value position, w/paramtags"
+    (is (= "" (apply ^[] clojure.test.SwissArmy/doppelganger []))))
+
+  (testing "overloaded, invoke no args"
+    (is (= "" (clojure.test.SwissArmy/doppelganger))))
+
+  (testing "overloaded, invoke w/args"
+    (is (= "int-int-long" (clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42)))))
+
+  (testing "non-overloaded, field holds IFn, invoke w/args fails"
+    (is (thrown? Exception (eval '(clojure.test.SwissArmy/idFn 42))))
+    (is (= #'clojure.core/identity clojure.test.SwissArmy/idFn)))
+
+  (testing "non-overloaded, field holds IFn, invoke  no args"
+    (is (= #'clojure.core/identity (clojure.test.SwissArmy/idFn))))
+
+  (testing "instance method overloads"
+    (is (= "int-int" (clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2))))
+    (is (= "int-int" (apply clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2) [])))))
+
 (defmacro arg-tags-called-in-macro
   [a-type b-type a b]
   `(^[~a-type ~b-type] SwissArmy/staticArityOverloadMethod ~a ~b))

@@ -1,7 +1,12 @@
 package clojure.test;
 
+import clojure.java.api.Clojure;
+import clojure.lang.IFn;
+
 public class SwissArmy {
+    public static String doppelganger = "static-field";
     public String ctorId;
+    public static IFn idFn = Clojure.var("clojure.core", "identity");
 
     public SwissArmy() {this.ctorId = "1";}
     public SwissArmy(int a, long b) {this.ctorId = "2";}
@@ -36,4 +41,5 @@ public class SwissArmy {
     public static String staticArityOverloadMethod(int a, int b) {return "int-int";}
     public static String staticArityOverloadMethod(int a, int b, int c) {return "int-int-int";}
     public static String doppelganger(int a, int b, long c) {return "int-int-long";}
+    public static String doppelganger() {return "";}
 }
