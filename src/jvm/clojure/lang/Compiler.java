@@ -1195,14 +1195,15 @@ static class QualifiedMethodExpr implements Expr {
 		fieldOverload = fieldOL;
 	}
 
-	// Expr impl - invocation, convert to fn expr
-	private boolean overloadsField() {
+	private boolean preferOverloadedField() {
 		return fieldOverload != null && paramTagsOf(methodSymbol) == null;
 	}
 
+	// Expr impl - invocation, convert to fn expr
+
 	@Override
 	public Object eval() {
-		if(overloadsField())
+		if(preferOverloadedField())
 			return fieldOverload.eval();
 		else
 			return buildThunk(C.EVAL, this).eval();
@@ -1210,7 +1211,7 @@ static class QualifiedMethodExpr implements Expr {
 
 	@Override
 	public void emit(C context, ObjExpr objx, GeneratorAdapter gen) {
-		if(overloadsField())
+		if(preferOverloadedField())
 			fieldOverload.emit(context, objx, gen);
 		else
 			buildThunk(context, this).emit(context, objx, gen);
