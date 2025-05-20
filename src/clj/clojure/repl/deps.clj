@@ -43,7 +43,7 @@
         lib-coords (reduce-kv #(if (contains? current-libs %2) %1 (assoc %1 %2 %3))
                      {} lib-coords)]
     (when-not (empty? lib-coords)
-      (let [procurer (dissoc basis [:basis-config :paths :deps :aliases :argmap :classpath :classpath-roots])
+      (let [procurer (reduce-kv (fn [m k v] (if (contains? #{"mvn" "git" "local"} (namespace k)) (assoc m k v) m)) {} basis)
             tool-args {:existing libs, :add lib-coords, :procurer procurer}
             {:keys [added] :as _res} (tool/invoke-tool {:tool-alias :deps, :fn 'clojure.tools.deps/resolve-added-libs, :args tool-args})
             ;_ (clojure.pprint/pprint _res)
