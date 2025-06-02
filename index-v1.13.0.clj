@@ -71,7 +71,7 @@
    :wiki-url
    "https://clojure.github.io/clojure/clojure.java.process-api.html",
    :source-url
-   "https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj"}
+   "https://github.com/clojure/clojure/blob/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj"}
   {:doc
    "Conveniently launch a sub-process providing its stdin and\ncollecting its stdout",
    :author "Chris Houser, Stuart Halloway",
@@ -218,7 +218,7 @@
    :wiki-url
    "https://clojure.github.io/clojure/clojure.repl-api.html#clojure.repl.deps",
    :source-url
-   "https://github.com/clojure/clojure/blob/5ae95872738b3e0aacfa5d38069d528b590a5059/src/clj/clojure/repl/deps.clj"}
+   "https://github.com/clojure/clojure/blob/be32516234961396581685b485ed8a88f8fe17e6/src/clj/clojure/repl/deps.clj"}
   {:doc
    "clojure.test extension for JUnit-compatible XML output.\n\nJUnit (http://junit.org/) is the most popular unit-testing library\nfor Java.  As such, tool support for JUnit output formats is\ncommon.  By producing compatible output from tests, this tool\nsupport can be exploited.\n\nTo use, wrap any calls to clojure.test/run-tests in the\nwith-junit-output macro, like this:\n\n  (use 'clojure.test)\n  (use 'clojure.test.junit)\n\n  (with-junit-output\n    (run-tests 'my.cool.library))\n\nTo write the output to a file, rebind clojure.test/*test-out* to\nyour own PrintWriter (perhaps opened using\nclojure.java.io/writer).",
    :author "Jason Sankey",
@@ -4099,13 +4099,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/future?"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/ad54fecd0bdff38bde8ae057887ad8b724fdd661/src/clj/clojure/genclass.clj",
+   "https://github.com/clojure/clojure/raw/641933ea85ea83d475aaeaa2303779bd29223fa1/src/clj/clojure/genclass.clj",
    :added "1.0",
    :name "gen-class",
    :file "src/clj/clojure/genclass.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/ad54fecd0bdff38bde8ae057887ad8b724fdd661/src/clj/clojure/genclass.clj#L507",
-   :line 507,
+   "https://github.com/clojure/clojure/blob/641933ea85ea83d475aaeaa2303779bd29223fa1/src/clj/clojure/genclass.clj#L518",
+   :line 518,
    :var-type "macro",
    :arglists ([& options]),
    :doc
@@ -4114,13 +4114,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.core-api.html#clojure.core/gen-class"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/ad54fecd0bdff38bde8ae057887ad8b724fdd661/src/clj/clojure/genclass.clj",
+   "https://github.com/clojure/clojure/raw/641933ea85ea83d475aaeaa2303779bd29223fa1/src/clj/clojure/genclass.clj",
    :added "1.0",
    :name "gen-interface",
    :file "src/clj/clojure/genclass.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/ad54fecd0bdff38bde8ae057887ad8b724fdd661/src/clj/clojure/genclass.clj#L689",
-   :line 689,
+   "https://github.com/clojure/clojure/blob/641933ea85ea83d475aaeaa2303779bd29223fa1/src/clj/clojure/genclass.clj#L700",
+   :line 700,
    :var-type "macro",
    :arglists ([& options]),
    :doc
@@ -10489,13 +10489,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.javadoc-api.html#clojure.java.javadoc/javadoc"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj",
+   "https://github.com/clojure/clojure/raw/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj",
    :added "1.12",
    :name "exec",
    :file "src/clj/clojure/java/process.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L159",
-   :line 159,
+   "https://github.com/clojure/clojure/blob/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj#L163",
+   :line 163,
    :var-type "function",
    :arglists ([& opts+args]),
    :doc
@@ -10504,12 +10504,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.process-api.html#clojure.java.process/exec"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj",
+   "https://github.com/clojure/clojure/raw/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj",
+   :added "1.12",
    :name "exit-ref",
    :file "src/clj/clojure/java/process.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L111",
-   :line 111,
+   "https://github.com/clojure/clojure/blob/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj#L114",
+   :line 114,
    :var-type "function",
    :arglists ([process]),
    :doc
@@ -10518,12 +10519,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.process-api.html#clojure.java.process/exit-ref"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj",
+   "https://github.com/clojure/clojure/raw/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj",
    :added "1.12",
    :name "from-file",
    :file "src/clj/clojure/java/process.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L46",
+   "https://github.com/clojure/clojure/blob/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj#L46",
    :line 46,
    :var-type "function",
    :arglists ([f]),
@@ -10533,12 +10534,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.process-api.html#clojure.java.process/from-file"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj",
+   "https://github.com/clojure/clojure/raw/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj",
    :added "1.12",
    :name "start",
    :file "src/clj/clojure/java/process.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L53",
+   "https://github.com/clojure/clojure/blob/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj#L53",
    :line 53,
    :var-type "function",
    :arglists ([& opts+args]),
@@ -10548,12 +10549,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.process-api.html#clojure.java.process/start"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj",
+   "https://github.com/clojure/clojure/raw/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj",
+   :added "1.12",
    :name "stderr",
    :file "src/clj/clojure/java/process.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L106",
-   :line 106,
+   "https://github.com/clojure/clojure/blob/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj#L108",
+   :line 108,
    :var-type "function",
    :arglists ([process]),
    :doc
@@ -10562,11 +10564,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.process-api.html#clojure.java.process/stderr"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj",
+   "https://github.com/clojure/clojure/raw/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj",
+   :added "1.12",
    :name "stdin",
    :file "src/clj/clojure/java/process.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L96",
+   "https://github.com/clojure/clojure/blob/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj#L96",
    :line 96,
    :var-type "function",
    :arglists ([process]),
@@ -10576,12 +10579,13 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.process-api.html#clojure.java.process/stdin"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj",
+   "https://github.com/clojure/clojure/raw/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj",
+   :added "1.12",
    :name "stdout",
    :file "src/clj/clojure/java/process.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L101",
-   :line 101,
+   "https://github.com/clojure/clojure/blob/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj#L102",
+   :line 102,
    :var-type "function",
    :arglists ([process]),
    :doc
@@ -10590,12 +10594,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.process-api.html#clojure.java.process/stdout"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj",
+   "https://github.com/clojure/clojure/raw/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj",
    :added "1.12",
    :name "to-file",
    :file "src/clj/clojure/java/process.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/38958061a4cf3631c7e12e76251e49b0415f1810/src/clj/clojure/java/process.clj#L36",
+   "https://github.com/clojure/clojure/blob/afbd2098bf741234ec9efaa25480d02b14863e8c/src/clj/clojure/java/process.clj#L36",
    :line 36,
    :var-type "function",
    :arglists ([f & {:keys [append], :as opts}]),
@@ -14640,8 +14644,8 @@
       {valf read-string,
        readf
        (fn*
-        [p1__6804# p2__6805#]
-        (read p1__6804# false p2__6805#))}}]),
+        [p1__6806# p2__6807#]
+        (read p1__6806# false p2__6807#))}}]),
    :doc
    "Implements a prepl on in-reader and out-fn by forwarding to a\nremote [io-]prepl over a socket.  Messages will be read by readf, a\nfn of a LineNumberingPushbackReader and EOF value or a symbol naming\nsame (default #(read %1 false %2)),\n:ret and :tap vals will be processed by valf, a fn of one argument\nor a symbol naming same (default read-string). If that function\nthrows, :val will be unprocessed.\n\nAlpha, subject to change.",
    :namespace "clojure.core.server",
@@ -15106,7 +15110,7 @@
    (tuple
     (and
      qualified-keyword?
-     (fn* [p1__4838#] (-> p1__4838# name #{"syms" "keys"})))
+     (fn* [p1__4840#] (-> p1__4840# name #{"syms" "keys"})))
     (coll-of simple-symbol? :kind vector?)),
    :var-type "spec",
    :namespace "clojure.core.specs.alpha",
@@ -15374,12 +15378,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.java.basis-api.html#clojure.java.basis.impl/update-basis!"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/5ae95872738b3e0aacfa5d38069d528b590a5059/src/clj/clojure/repl/deps.clj",
+   "https://github.com/clojure/clojure/raw/be32516234961396581685b485ed8a88f8fe17e6/src/clj/clojure/repl/deps.clj",
    :added "1.12",
    :name "add-lib",
    :file "src/clj/clojure/repl/deps.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/5ae95872738b3e0aacfa5d38069d528b590a5059/src/clj/clojure/repl/deps.clj#L59",
+   "https://github.com/clojure/clojure/blob/be32516234961396581685b485ed8a88f8fe17e6/src/clj/clojure/repl/deps.clj#L59",
    :line 59,
    :var-type "function",
    :arglists ([lib coord] [lib]),
@@ -15389,12 +15393,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl.deps/add-lib"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/5ae95872738b3e0aacfa5d38069d528b590a5059/src/clj/clojure/repl/deps.clj",
+   "https://github.com/clojure/clojure/raw/be32516234961396581685b485ed8a88f8fe17e6/src/clj/clojure/repl/deps.clj",
    :added "1.12",
    :name "add-libs",
    :file "src/clj/clojure/repl/deps.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/5ae95872738b3e0aacfa5d38069d528b590a5059/src/clj/clojure/repl/deps.clj#L35",
+   "https://github.com/clojure/clojure/blob/be32516234961396581685b485ed8a88f8fe17e6/src/clj/clojure/repl/deps.clj#L35",
    :line 35,
    :var-type "function",
    :arglists ([lib-coords]),
@@ -15404,12 +15408,12 @@
    :wiki-url
    "https://clojure.github.io/clojure//clojure.repl-api.html#clojure.repl.deps/add-libs"}
   {:raw-source-url
-   "https://github.com/clojure/clojure/raw/5ae95872738b3e0aacfa5d38069d528b590a5059/src/clj/clojure/repl/deps.clj",
+   "https://github.com/clojure/clojure/raw/be32516234961396581685b485ed8a88f8fe17e6/src/clj/clojure/repl/deps.clj",
    :added "1.12",
    :name "sync-deps",
    :file "src/clj/clojure/repl/deps.clj",
    :source-url
-   "https://github.com/clojure/clojure/blob/5ae95872738b3e0aacfa5d38069d528b590a5059/src/clj/clojure/repl/deps.clj#L85",
+   "https://github.com/clojure/clojure/blob/be32516234961396581685b485ed8a88f8fe17e6/src/clj/clojure/repl/deps.clj#L85",
    :line 85,
    :var-type "function",
    :arglists ([& {:as opts}]),
