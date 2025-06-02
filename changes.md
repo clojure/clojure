@@ -1,5 +1,13 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.12.1
+
+* [CLJ-2899](https://clojure.atlassian.net/browse/CLJ-2899) - Revert change in semantics of qualified symbol in invocation position if field and method of same name
+* [CLJ-2898](https://clojure.atlassian.net/browse/CLJ-2898) - Objects that are both IFn and FunctionalInterface unnecessarily get converted to FI
+* [CLJ-2888](https://clojure.atlassian.net/browse/CLJ-2888) - `gen-class` - did not support new array class symbol syntax
+* [CLJ-2886](https://clojure.atlassian.net/browse/CLJ-2886) - `add-libs` - send only procurer keys to tool invocation
+* [CLJ-2906](https://clojure.atlassian.net/browse/CLJ-2906) - Add missing :added metadata to 1.12 functions
+
 # Changes to Clojure in Version 1.12.0
 
 ## 1 Compatibility
