@@ -11,13 +11,10 @@ Docs: https://clojure.org
 Feedback: https://ask.clojure.org
 Getting Started: https://clojure.org/guides/getting_started
 
-To build and run locally with Ant:
-
-   One-time setup:    ./antsetup.sh
-   To build:          ant local
-   To run:            java -jar clojure.jar
-
 To build locally with Maven:
+
+  To test:
+    mvn test
 
   To build (output JARs in target/):
     mvn package
