@@ -884,3 +884,8 @@
       ;; reflective call to TakesFIOverloaded.call()
       ;; as above, should not be adapted and use Supplier.get()
       (is (= 100 (.call tfio (identity f)))))))
+
+(deftest CLJ-2914-Qualified-Method-Expr-NPE
+  (is (fails-with-cause? IllegalArgumentException
+        #"Malformed method expression.*String/\.length"
+        (eval '(fn [] (java.lang.String/.length))))))

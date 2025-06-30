@@ -1342,6 +1342,13 @@ static class QualifiedMethodExpr implements Expr {
 				+ " insufficient to resolve "
 				+ methodDescription(c, methodName));
 	}
+
+	public static IllegalArgumentException instanceNoTargetException(QualifiedMethodExpr qmexpr) {
+		return new IllegalArgumentException(
+				"Malformed method expression, expecting (" +
+				qmexpr.c.getName() + "/." + qmexpr.methodName +
+				" target ...)");
+	}
 }
 
 final static Symbol PARAM_TAG_ANY = Symbol.intern(null, "_");
@@ -4411,7 +4418,12 @@ static class InvokeExpr implements Expr{
 		}
 
 		if(fexpr instanceof QualifiedMethodExpr)
-			return toHostExpr((QualifiedMethodExpr)fexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
+		{
+			QualifiedMethodExpr qmexpr = (QualifiedMethodExpr)fexpr;
+			if (qmexpr.kind == QualifiedMethodExpr.MethodKind.INSTANCE && RT.count(args) == 0)
+				throw QualifiedMethodExpr.instanceNoTargetException(qmexpr);
+			return toHostExpr(qmexpr, (String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form), tailPosition, args);
+		}
 
 //		if(args.count() > MAX_POSITIONAL_ARITY)
 //			throw new IllegalArgumentException(
