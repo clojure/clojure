@@ -8397,7 +8397,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		for(int i = 0; i < objx.constants.count(); i++)
 			{
             if(objx.usedConstants.contains(i))
-			    cv.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, objx.constantName(i), objx.constantType(i).getDescriptor(),
+			    cv.visitField(ACC_PUBLIC + ACC_STATIC, objx.constantName(i), objx.constantType(i).getDescriptor(),
 			              null, null);
 			}
 
