@@ -131,7 +131,7 @@
               (. gen (endMethod))))]
     
                                         ;start class definition
-    (. cv (visit (. Opcodes V1_8) (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
+    (. cv (visit clojure.lang.Compiler/JVM_BYTECODE_VERSION (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_SUPER))
                  cname nil (iname super) 
                  (into-array (map iname (cons IProxy interfaces)))))
                                         ;add field for fn mappings

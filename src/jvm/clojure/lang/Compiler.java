@@ -348,6 +348,8 @@ static final public Var CLEAR_SITES = Var.create(null).setDynamic();
 	EVAL
 }
 
+public static final int JVM_BYTECODE_VERSION = V17;
+
 private class Recur {};
 static final public Class RECUR_CLASS = Recur.class;
     
@@ -4881,7 +4883,7 @@ static public class ObjExpr implements Expr{
 		ClassVisitor cv = cw;
 //		ClassVisitor cv = new TraceClassVisitor(new CheckClassAdapter(cw), new PrintWriter(System.out));
 		//ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-		cv.visit(V1_8, ACC_PUBLIC + ACC_SUPER + ACC_FINAL, internalName, null,superName,interfaceNames);
+		cv.visit(JVM_BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER + ACC_FINAL, internalName, null,superName,interfaceNames);
 //		         superName != null ? superName :
 //		         (isVariadic() ? "clojure/lang/RestFn" : "clojure/lang/AFunction"), null);
 		String source = (String) SOURCE.deref();
@@ -8373,7 +8375,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		objx.objtype = Type.getObjectType(objx.internalName);
 		ClassWriter cw = classWriter();
 		ClassVisitor cv = cw;
-		cv.visit(V1_8, ACC_PUBLIC + ACC_SUPER, objx.internalName, null, "java/lang/Object", null);
+		cv.visit(JVM_BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, objx.internalName, null, "java/lang/Object", null);
 
 		//static load method
 		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_STATIC,
@@ -8695,7 +8697,7 @@ static public class NewInstanceExpr extends ObjExpr{
 	static Class compileStub(String superName, NewInstanceExpr ret, String[] interfaceNames, Object frm){
 	    ClassWriter cw = classWriter();
 	    ClassVisitor cv = cw;
-		cv.visit(V1_8, ACC_PUBLIC + ACC_SUPER, COMPILE_STUB_PREFIX + "/" + ret.internalName,
+		cv.visit(JVM_BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, COMPILE_STUB_PREFIX + "/" + ret.internalName,
 		         null,superName,interfaceNames);
 
 		//instance fields for closed-overs
