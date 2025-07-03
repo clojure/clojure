@@ -226,7 +226,7 @@ public class TypeReference {
    * @return a reference to the given generic class or method type parameter bound.
    */
   public static TypeReference newTypeParameterBoundReference(
-      final int sort, final int paramIndex, final int boundIndex) {
+          final int sort, final int paramIndex, final int boundIndex) {
     return new TypeReference((sort << 24) | (paramIndex << 16) | (boundIndex << 8));
   }
 

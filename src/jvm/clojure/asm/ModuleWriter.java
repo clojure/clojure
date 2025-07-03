@@ -94,7 +94,7 @@ final class ModuleWriter extends ModuleVisitor {
   private int mainClassIndex;
 
   ModuleWriter(final SymbolTable symbolTable, final int name, final int access, final int version) {
-    super(Opcodes.ASM6);
+    super(/* latest api = */ Opcodes.ASM9);
     this.symbolTable = symbolTable;
     this.moduleNameIndex = name;
     this.moduleFlags = access;
@@ -121,9 +121,9 @@ final class ModuleWriter extends ModuleVisitor {
   @Override
   public void visitRequire(final String module, final int access, final String version) {
     requires
-        .putShort(symbolTable.addConstantModule(module).index)
-        .putShort(access)
-        .putShort(version == null ? 0 : symbolTable.addConstantUtf8(version));
+            .putShort(symbolTable.addConstantModule(module).index)
+            .putShort(access)
+            .putShort(version == null ? 0 : symbolTable.addConstantUtf8(version));
     requiresCount++;
   }
 
@@ -196,7 +196,7 @@ final class ModuleWriter extends ModuleVisitor {
     symbolTable.addConstantUtf8(Constants.MODULE);
     // 6 attribute header bytes, 6 bytes for name, flags and version, and 5 * 2 bytes for counts.
     int size =
-        22 + requires.length + exports.length + opens.length + usesIndex.length + provides.length;
+            22 + requires.length + exports.length + opens.length + usesIndex.length + provides.length;
     if (packageCount > 0) {
       symbolTable.addConstantUtf8(Constants.MODULE_PACKAGES);
       // 6 attribute header bytes, and 2 bytes for package_count.
@@ -219,35 +219,35 @@ final class ModuleWriter extends ModuleVisitor {
   void putAttributes(final ByteVector output) {
     // 6 bytes for name, flags and version, and 5 * 2 bytes for counts.
     int moduleAttributeLength =
-        16 + requires.length + exports.length + opens.length + usesIndex.length + provides.length;
+            16 + requires.length + exports.length + opens.length + usesIndex.length + provides.length;
     output
-        .putShort(symbolTable.addConstantUtf8(Constants.MODULE))
-        .putInt(moduleAttributeLength)
-        .putShort(moduleNameIndex)
-        .putShort(moduleFlags)
-        .putShort(moduleVersionIndex)
-        .putShort(requiresCount)
-        .putByteArray(requires.data, 0, requires.length)
-        .putShort(exportsCount)
-        .putByteArray(exports.data, 0, exports.length)
-        .putShort(opensCount)
-        .putByteArray(opens.data, 0, opens.length)
-        .putShort(usesCount)
-        .putByteArray(usesIndex.data, 0, usesIndex.length)
-        .putShort(providesCount)
-        .putByteArray(provides.data, 0, provides.length);
+            .putShort(symbolTable.addConstantUtf8(Constants.MODULE))
+            .putInt(moduleAttributeLength)
+            .putShort(moduleNameIndex)
+            .putShort(moduleFlags)
+            .putShort(moduleVersionIndex)
+            .putShort(requiresCount)
+            .putByteArray(requires.data, 0, requires.length)
+            .putShort(exportsCount)
+            .putByteArray(exports.data, 0, exports.length)
+            .putShort(opensCount)
+            .putByteArray(opens.data, 0, opens.length)
+            .putShort(usesCount)
+            .putByteArray(usesIndex.data, 0, usesIndex.length)
+            .putShort(providesCount)
+            .putByteArray(provides.data, 0, provides.length);
     if (packageCount > 0) {
       output
-          .putShort(symbolTable.addConstantUtf8(Constants.MODULE_PACKAGES))
-          .putInt(2 + packageIndex.length)
-          .putShort(packageCount)
-          .putByteArray(packageIndex.data, 0, packageIndex.length);
+              .putShort(symbolTable.addConstantUtf8(Constants.MODULE_PACKAGES))
+              .putInt(2 + packageIndex.length)
+              .putShort(packageCount)
+              .putByteArray(packageIndex.data, 0, packageIndex.length);
     }
     if (mainClassIndex > 0) {
       output
-          .putShort(symbolTable.addConstantUtf8(Constants.MODULE_MAIN_CLASS))
-          .putInt(2)
-          .putShort(mainClassIndex);
+              .putShort(symbolTable.addConstantUtf8(Constants.MODULE_MAIN_CLASS))
+              .putInt(2)
+              .putShort(mainClassIndex);
     }
   }
 }

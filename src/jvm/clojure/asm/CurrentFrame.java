@@ -47,7 +47,7 @@ final class CurrentFrame extends Frame {
    */
   @Override
   void execute(
-      final int opcode, final int arg, final Symbol symbolArg, final SymbolTable symbolTable) {
+          final int opcode, final int arg, final Symbol symbolArg, final SymbolTable symbolTable) {
     super.execute(opcode, arg, symbolArg, symbolTable);
     Frame successor = new Frame(null);
     merge(symbolTable, successor, 0);

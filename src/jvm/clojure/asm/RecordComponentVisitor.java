@@ -28,42 +28,44 @@
 package clojure.asm;
 
 /**
- * A visitor to visit a Java field. The methods of this class must be called in the following order:
- * ( {@code visitAnnotation} | {@code visitTypeAnnotation} | {@code visitAttribute} )* {@code
+ * A visitor to visit a record component. The methods of this class must be called in the following
+ * order: ( {@code visitAnnotation} | {@code visitTypeAnnotation} | {@code visitAttribute} )* {@code
  * visitEnd}.
  *
+ * @author Remi Forax
  * @author Eric Bruneton
  */
-public abstract class FieldVisitor {
-
+public abstract class RecordComponentVisitor {
   /**
-   * The ASM API version implemented by this visitor. The value of this field must be one of the
-   * {@code ASM}<i>x</i> values in {@link Opcodes}.
+   * The ASM API version implemented by this visitor. The value of this field must be one of {@link
+   * Opcodes#ASM8} or {@link Opcodes#ASM9}.
    */
   protected final int api;
 
-  /** The field visitor to which this visitor must delegate method calls. May be {@literal null}. */
-  protected FieldVisitor fv;
+  /**
+   * The record visitor to which this visitor must delegate method calls. May be {@literal null}.
+   */
+  protected RecordComponentVisitor delegate;
 
   /**
-   * Constructs a new {@link FieldVisitor}.
+   * Constructs a new {@link RecordComponentVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be one of the {@code
-   *     ASM}<i>x</i> values in {@link Opcodes}.
+   * @param api the ASM API version implemented by this visitor. Must be one of {@link Opcodes#ASM8}
+   *     or {@link Opcodes#ASM9}.
    */
-  protected FieldVisitor(final int api) {
+  protected RecordComponentVisitor(final int api) {
     this(api, null);
   }
 
   /**
-   * Constructs a new {@link FieldVisitor}.
+   * Constructs a new {@link RecordComponentVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be one of the {@code
-   *     ASM}<i>x</i> values in {@link Opcodes}.
-   * @param fieldVisitor the field visitor to which this visitor must delegate method calls. May be
-   *     null.
+   * @param api the ASM API version implemented by this visitor. Must be {@link Opcodes#ASM8}.
+   * @param recordComponentVisitor the record component visitor to which this visitor must delegate
+   *     method calls. May be null.
    */
-  protected FieldVisitor(final int api, final FieldVisitor fieldVisitor) {
+  protected RecordComponentVisitor(
+          final int api, final RecordComponentVisitor recordComponentVisitor) {
     if (api != Opcodes.ASM9
             && api != Opcodes.ASM8
             && api != Opcodes.ASM7
@@ -77,20 +79,21 @@ public abstract class FieldVisitor {
       Constants.checkAsmExperimental(this);
     }
     this.api = api;
-    this.fv = fieldVisitor;
+    this.delegate = recordComponentVisitor;
   }
 
   /**
-   * The field visitor to which this visitor must delegate method calls. May be {@literal null}.
+   * The record visitor to which this visitor must delegate method calls. May be {@literal null}.
    *
-   * @return the field visitor to which this visitor must delegate method calls, or {@literal null}.
+   * @return the record visitor to which this visitor must delegate method calls, or {@literal
+   *     null}.
    */
-  public FieldVisitor getDelegate() {
-    return fv;
+  public RecordComponentVisitor getDelegate() {
+    return delegate;
   }
 
   /**
-   * Visits an annotation of the field.
+   * Visits an annotation of the record component.
    *
    * @param descriptor the class descriptor of the annotation class.
    * @param visible {@literal true} if the annotation is visible at runtime.
@@ -98,17 +101,19 @@ public abstract class FieldVisitor {
    *     interested in visiting this annotation.
    */
   public AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible) {
-    if (fv != null) {
-      return fv.visitAnnotation(descriptor, visible);
+    if (delegate != null) {
+      return delegate.visitAnnotation(descriptor, visible);
     }
     return null;
   }
 
   /**
-   * Visits an annotation on the type of the field.
+   * Visits an annotation on a type in the record component signature.
    *
    * @param typeRef a reference to the annotated type. The sort of this type reference must be
-   *     {@link TypeReference#FIELD}. See {@link TypeReference}.
+   *     {@link TypeReference#CLASS_TYPE_PARAMETER}, {@link
+   *     TypeReference#CLASS_TYPE_PARAMETER_BOUND} or {@link TypeReference#CLASS_EXTENDS}. See
+   *     {@link TypeReference}.
    * @param typePath the path to the annotated type argument, wildcard bound, array element type, or
    *     static inner type within 'typeRef'. May be {@literal null} if the annotation targets
    *     'typeRef' as a whole.
@@ -119,33 +124,30 @@ public abstract class FieldVisitor {
    */
   public AnnotationVisitor visitTypeAnnotation(
           final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
-    if (api < Opcodes.ASM5) {
-      throw new UnsupportedOperationException("This feature requires ASM5");
-    }
-    if (fv != null) {
-      return fv.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
+    if (delegate != null) {
+      return delegate.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
     }
     return null;
   }
 
   /**
-   * Visits a non standard attribute of the field.
+   * Visits a non standard attribute of the record component.
    *
    * @param attribute an attribute.
    */
   public void visitAttribute(final Attribute attribute) {
-    if (fv != null) {
-      fv.visitAttribute(attribute);
+    if (delegate != null) {
+      delegate.visitAttribute(attribute);
     }
   }
 
   /**
-   * Visits the end of the field. This method, which is the last one to be called, is used to inform
-   * the visitor that all the annotations and attributes of the field have been visited.
+   * Visits the end of the record component. This method, which is the last one to be called, is
+   * used to inform the visitor that everything have been visited.
    */
   public void visitEnd() {
-    if (fv != null) {
-      fv.visitEnd();
+    if (delegate != null) {
+      delegate.visitEnd();
     }
   }
 }

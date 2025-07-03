@@ -29,20 +29,21 @@ package clojure.asm;
 
 /**
  * A visitor to visit a Java method. The methods of this class must be called in the following
- * order: ( <tt>visitParameter</tt> )* [ <tt>visitAnnotationDefault</tt> ] (
- * <tt>visitAnnotation</tt> | <tt>visitAnnotableParameterCount</tt> |
- * <tt>visitParameterAnnotation</tt> <tt>visitTypeAnnotation</tt> | <tt>visitAttribute</tt> )* [
- * <tt>visitCode</tt> ( <tt>visitFrame</tt> | <tt>visit<i>X</i>Insn</tt> | <tt>visitLabel</tt> |
- * <tt>visitInsnAnnotation</tt> | <tt>visitTryCatchBlock</tt> | <tt>visitTryCatchAnnotation</tt> |
- * <tt>visitLocalVariable</tt> | <tt>visitLocalVariableAnnotation</tt> | <tt>visitLineNumber</tt> )*
- * <tt>visitMaxs</tt> ] <tt>visitEnd</tt>. In addition, the <tt>visit<i>X</i>Insn</tt> and
- * <tt>visitLabel</tt> methods must be called in the sequential order of the bytecode instructions
- * of the visited code, <tt>visitInsnAnnotation</tt> must be called <i>after</i> the annotated
- * instruction, <tt>visitTryCatchBlock</tt> must be called <i>before</i> the labels passed as
- * arguments have been visited, <tt>visitTryCatchBlockAnnotation</tt> must be called <i>after</i>
- * the corresponding try catch block has been visited, and the <tt>visitLocalVariable</tt>,
- * <tt>visitLocalVariableAnnotation</tt> and <tt>visitLineNumber</tt> methods must be called
- * <i>after</i> the labels passed as arguments have been visited.
+ * order: ( {@code visitParameter} )* [ {@code visitAnnotationDefault} ] ( {@code visitAnnotation} |
+ * {@code visitAnnotableParameterCount} | {@code visitParameterAnnotation} | {@code
+ * visitTypeAnnotation} | {@code visitAttribute} )* [ {@code visitCode} ( {@code visitFrame} |
+ * {@code visit<i>X</i>Insn} | {@code visitLabel} | {@code visitInsnAnnotation} | {@code
+ * visitTryCatchBlock} | {@code visitTryCatchAnnotation} | {@code visitLocalVariable} | {@code
+ * visitLocalVariableAnnotation} | {@code visitLineNumber} | {@code visitAttribute} )* {@code
+ * visitMaxs} ] {@code visitEnd}. In addition, the {@code visit<i>X</i>Insn} and {@code visitLabel}
+ * methods must be called in the sequential order of the bytecode instructions of the visited code,
+ * {@code visitInsnAnnotation} must be called <i>after</i> the annotated instruction, {@code
+ * visitTryCatchBlock} must be called <i>before</i> the labels passed as arguments have been
+ * visited, {@code visitTryCatchBlockAnnotation} must be called <i>after</i> the corresponding try
+ * catch block has been visited, and the {@code visitLocalVariable}, {@code
+ * visitLocalVariableAnnotation} and {@code visitLineNumber} methods must be called <i>after</i> the
+ * labels passed as arguments have been visited. Finally, the {@code visitAttribute} method must be
+ * called before {@code visitCode} for non-code attributes, and after it for code attributes.
  *
  * @author Eric Bruneton
  */
@@ -51,43 +52,59 @@ public abstract class MethodVisitor {
   private static final String REQUIRES_ASM5 = "This feature requires ASM5";
 
   /**
-   * The ASM API version implemented by this visitor. The value of this field must be one of {@link
-   * Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7_EXPERIMENTAL}.
+   * The ASM API version implemented by this visitor. The value of this field must be one of the
+   * {@code ASM}<i>x</i> values in {@link Opcodes}.
    */
   protected final int api;
 
-  /** The method visitor to which this visitor must delegate method calls. May be null. */
+  /**
+   * The method visitor to which this visitor must delegate method calls. May be {@literal null}.
+   */
   protected MethodVisitor mv;
 
   /**
    * Constructs a new {@link MethodVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link
-   *     Opcodes#ASM7_EXPERIMENTAL}.
+   * @param api the ASM API version implemented by this visitor. Must be one of the {@code
+   *     ASM}<i>x</i> values in {@link Opcodes}.
    */
-  public MethodVisitor(final int api) {
+  protected MethodVisitor(final int api) {
     this(api, null);
   }
 
   /**
    * Constructs a new {@link MethodVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link
-   *     Opcodes#ASM7_EXPERIMENTAL}.
+   * @param api the ASM API version implemented by this visitor. Must be one of the {@code
+   *     ASM}<i>x</i> values in {@link Opcodes}.
    * @param methodVisitor the method visitor to which this visitor must delegate method calls. May
    *     be null.
    */
-  public MethodVisitor(final int api, final MethodVisitor methodVisitor) {
-    if (api != Opcodes.ASM6
-        && api != Opcodes.ASM5
-        && api != Opcodes.ASM4
-        && api != Opcodes.ASM7_EXPERIMENTAL) {
-      throw new IllegalArgumentException();
+  protected MethodVisitor(final int api, final MethodVisitor methodVisitor) {
+    if (api != Opcodes.ASM9
+            && api != Opcodes.ASM8
+            && api != Opcodes.ASM7
+            && api != Opcodes.ASM6
+            && api != Opcodes.ASM5
+            && api != Opcodes.ASM4
+            && api != Opcodes.ASM10_EXPERIMENTAL) {
+      throw new IllegalArgumentException("Unsupported api " + api);
+    }
+    if (api == Opcodes.ASM10_EXPERIMENTAL) {
+      Constants.checkAsmExperimental(this);
     }
     this.api = api;
     this.mv = methodVisitor;
+  }
+
+  /**
+   * The method visitor to which this visitor must delegate method calls. May be {@literal null}.
+   *
+   * @return the method visitor to which this visitor must delegate method calls, or {@literal
+   *     null}.
+   */
+  public MethodVisitor getDelegate() {
+    return mv;
   }
 
   // -----------------------------------------------------------------------------------------------
@@ -97,9 +114,9 @@ public abstract class MethodVisitor {
   /**
    * Visits a parameter of this method.
    *
-   * @param name parameter name or null if none is provided.
-   * @param access the parameter's access flags, only <tt>ACC_FINAL</tt>, <tt>ACC_SYNTHETIC</tt>
-   *     or/and <tt>ACC_MANDATED</tt> are allowed (see {@link Opcodes}).
+   * @param name parameter name or {@literal null} if none is provided.
+   * @param access the parameter's access flags, only {@code ACC_FINAL}, {@code ACC_SYNTHETIC}
+   *     or/and {@code ACC_MANDATED} are allowed (see {@link Opcodes}).
    */
   public void visitParameter(final String name, final int access) {
     if (api < Opcodes.ASM5) {
@@ -114,9 +131,9 @@ public abstract class MethodVisitor {
    * Visits the default value of this annotation interface method.
    *
    * @return a visitor to the visit the actual default value of this annotation interface method, or
-   *     <tt>null</tt> if this visitor is not interested in visiting this default value. The 'name'
-   *     parameters passed to the methods of this annotation visitor are ignored. Moreover, exacly
-   *     one visit method must be called on this annotation visitor, followed by visitEnd.
+   *     {@literal null} if this visitor is not interested in visiting this default value. The
+   *     'name' parameters passed to the methods of this annotation visitor are ignored. Moreover,
+   *     exactly one visit method must be called on this annotation visitor, followed by visitEnd.
    */
   public AnnotationVisitor visitAnnotationDefault() {
     if (mv != null) {
@@ -129,8 +146,8 @@ public abstract class MethodVisitor {
    * Visits an annotation of this method.
    *
    * @param descriptor the class descriptor of the annotation class.
-   * @param visible <tt>true</tt> if the annotation is visible at runtime.
-   * @return a visitor to visit the annotation values, or <tt>null</tt> if this visitor is not
+   * @param visible {@literal true} if the annotation is visible at runtime.
+   * @return a visitor to visit the annotation values, or {@literal null} if this visitor is not
    *     interested in visiting this annotation.
    */
   public AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible) {
@@ -149,15 +166,15 @@ public abstract class MethodVisitor {
    *     TypeReference#METHOD_RECEIVER}, {@link TypeReference#METHOD_FORMAL_PARAMETER} or {@link
    *     TypeReference#THROWS}. See {@link TypeReference}.
    * @param typePath the path to the annotated type argument, wildcard bound, array element type, or
-   *     static inner type within 'typeRef'. May be <tt>null</tt> if the annotation targets
+   *     static inner type within 'typeRef'. May be {@literal null} if the annotation targets
    *     'typeRef' as a whole.
    * @param descriptor the class descriptor of the annotation class.
-   * @param visible <tt>true</tt> if the annotation is visible at runtime.
-   * @return a visitor to visit the annotation values, or <tt>null</tt> if this visitor is not
+   * @param visible {@literal true} if the annotation is visible at runtime.
+   * @return a visitor to visit the annotation values, or {@literal null} if this visitor is not
    *     interested in visiting this annotation.
    */
   public AnnotationVisitor visitTypeAnnotation(
-      final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
+          final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
     if (api < Opcodes.ASM5) {
       throw new UnsupportedOperationException(REQUIRES_ASM5);
     }
@@ -177,8 +194,8 @@ public abstract class MethodVisitor {
    *     be strictly less when a method has synthetic parameters and when these parameters are
    *     ignored when computing parameter indices for the purpose of parameter annotations (see
    *     https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.18).
-   * @param visible <tt>true</tt> to define the number of method parameters that can have
-   *     annotations visible at runtime, <tt>false</tt> to define the number of method parameters
+   * @param visible {@literal true} to define the number of method parameters that can have
+   *     annotations visible at runtime, {@literal false} to define the number of method parameters
    *     that can have annotations invisible at runtime.
    */
   public void visitAnnotableParameterCount(final int parameterCount, final boolean visible) {
@@ -197,12 +214,12 @@ public abstract class MethodVisitor {
    *     descriptor</i>, in particular in case of synthetic parameters (see
    *     https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.18).
    * @param descriptor the class descriptor of the annotation class.
-   * @param visible <tt>true</tt> if the annotation is visible at runtime.
-   * @return a visitor to visit the annotation values, or <tt>null</tt> if this visitor is not
+   * @param visible {@literal true} if the annotation is visible at runtime.
+   * @return a visitor to visit the annotation values, or {@literal null} if this visitor is not
    *     interested in visiting this annotation.
    */
   public AnnotationVisitor visitParameterAnnotation(
-      final int parameter, final String descriptor, final boolean visible) {
+          final int parameter, final String descriptor, final boolean visible) {
     if (mv != null) {
       return mv.visitParameterAnnotation(parameter, descriptor, visible);
     }
@@ -248,15 +265,15 @@ public abstract class MethodVisitor {
    *         <li>{@link Opcodes#F_SAME} representing frame with exactly the same locals as the
    *             previous frame and with the empty stack.
    *         <li>{@link Opcodes#F_SAME1} representing frame with exactly the same locals as the
-   *             previous frame and with single value on the stack ( <code>nStack</code> is 1 and
+   *             previous frame and with single value on the stack ( <code>numStack</code> is 1 and
    *             <code>stack[0]</code> contains value for the type of the stack item).
    *         <li>{@link Opcodes#F_APPEND} representing frame with current locals are the same as the
    *             locals in the previous frame, except that additional locals are defined (<code>
-   *             nLocal</code> is 1, 2 or 3 and <code>local</code> elements contains values
+   *             numLocal</code> is 1, 2 or 3 and <code>local</code> elements contains values
    *             representing added types).
    *         <li>{@link Opcodes#F_CHOP} representing frame with current locals are the same as the
    *             locals in the previous frame, except that the last 1-3 locals are absent and with
-   *             the empty stack (<code>nLocals</code> is 1, 2 or 3).
+   *             the empty stack (<code>numLocal</code> is 1, 2 or 3).
    *         <li>{@link Opcodes#F_FULL} representing complete frame data.
    *       </ul>
    * </ul>
@@ -269,15 +286,17 @@ public abstract class MethodVisitor {
    * @param type the type of this stack map frame. Must be {@link Opcodes#F_NEW} for expanded
    *     frames, or {@link Opcodes#F_FULL}, {@link Opcodes#F_APPEND}, {@link Opcodes#F_CHOP}, {@link
    *     Opcodes#F_SAME} or {@link Opcodes#F_APPEND}, {@link Opcodes#F_SAME1} for compressed frames.
-   * @param nLocal the number of local variables in the visited frame.
+   * @param numLocal the number of local variables in the visited frame. Long and double values
+   *     count for one variable.
    * @param local the local variable types in this frame. This array must not be modified. Primitive
    *     types are represented by {@link Opcodes#TOP}, {@link Opcodes#INTEGER}, {@link
    *     Opcodes#FLOAT}, {@link Opcodes#LONG}, {@link Opcodes#DOUBLE}, {@link Opcodes#NULL} or
    *     {@link Opcodes#UNINITIALIZED_THIS} (long and double are represented by a single element).
-   *     Reference types are represented by String objects (representing internal names), and
-   *     uninitialized types by Label objects (this label designates the NEW instruction that
-   *     created this uninitialized value).
-   * @param nStack the number of operand stack elements in the visited frame.
+   *     Reference types are represented by String objects (representing internal names, see {@link
+   *     Type#getInternalName()}), and uninitialized types by Label objects (this label designates
+   *     the NEW instruction that created this uninitialized value).
+   * @param numStack the number of operand stack elements in the visited frame. Long and double
+   *     values count for one stack element.
    * @param stack the operand stack types in this frame. This array must not be modified. Its
    *     content has the same format as the "local" array.
    * @throws IllegalStateException if a frame is visited just after another one, without any
@@ -285,13 +304,13 @@ public abstract class MethodVisitor {
    *     is silently ignored).
    */
   public void visitFrame(
-      final int type,
-      final int nLocal,
-      final Object[] local,
-      final int nStack,
-      final Object[] stack) {
+          final int type,
+          final int numLocal,
+          final Object[] local,
+          final int numStack,
+          final Object[] stack) {
     if (mv != null) {
-      mv.visitFrame(type, nLocal, local, nStack, stack);
+      mv.visitFrame(type, numLocal, local, numStack, stack);
     }
   }
 
@@ -345,18 +364,18 @@ public abstract class MethodVisitor {
    *
    * @param opcode the opcode of the local variable instruction to be visited. This opcode is either
    *     ILOAD, LLOAD, FLOAD, DLOAD, ALOAD, ISTORE, LSTORE, FSTORE, DSTORE, ASTORE or RET.
-   * @param var the operand of the instruction to be visited. This operand is the index of a local
-   *     variable.
+   * @param varIndex the operand of the instruction to be visited. This operand is the index of a
+   *     local variable.
    */
-  public void visitVarInsn(final int opcode, final int var) {
+  public void visitVarInsn(final int opcode, final int varIndex) {
     if (mv != null) {
-      mv.visitVarInsn(opcode, var);
+      mv.visitVarInsn(opcode, varIndex);
     }
   }
 
   /**
    * Visits a type instruction. A type instruction is an instruction that takes the internal name of
-   * a class as parameter.
+   * a class as parameter (see {@link Type#getInternalName()}).
    *
    * @param opcode the opcode of the type instruction to be visited. This opcode is either NEW,
    *     ANEWARRAY, CHECKCAST or INSTANCEOF.
@@ -380,7 +399,7 @@ public abstract class MethodVisitor {
    * @param descriptor the field's descriptor (see {@link Type}).
    */
   public void visitFieldInsn(
-      final int opcode, final String owner, final String name, final String descriptor) {
+          final int opcode, final String owner, final String name, final String descriptor) {
     if (mv != null) {
       mv.visitFieldInsn(opcode, owner, name, descriptor);
     }
@@ -395,19 +414,13 @@ public abstract class MethodVisitor {
    *     Type#getInternalName()}).
    * @param name the method's name.
    * @param descriptor the method's descriptor (see {@link Type}).
-   * @deprecated
+   * @deprecated use {@link #visitMethodInsn(int, String, String, String, boolean)} instead.
    */
   @Deprecated
   public void visitMethodInsn(
-      final int opcode, final String owner, final String name, final String descriptor) {
-    if (api >= Opcodes.ASM5) {
-      boolean isInterface = opcode == Opcodes.INVOKEINTERFACE;
-      visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-      return;
-    }
-    if (mv != null) {
-      mv.visitMethodInsn(opcode, owner, name, descriptor);
-    }
+          final int opcode, final String owner, final String name, final String descriptor) {
+    int opcodeAndSource = opcode | (api < Opcodes.ASM5 ? Opcodes.SOURCE_DEPRECATED : 0);
+    visitMethodInsn(opcodeAndSource, owner, name, descriptor, opcode == Opcodes.INVOKEINTERFACE);
   }
 
   /**
@@ -422,20 +435,20 @@ public abstract class MethodVisitor {
    * @param isInterface if the method's owner class is an interface.
    */
   public void visitMethodInsn(
-      final int opcode,
-      final String owner,
-      final String name,
-      final String descriptor,
-      final boolean isInterface) {
-    if (api < Opcodes.ASM5) {
+          final int opcode,
+          final String owner,
+          final String name,
+          final String descriptor,
+          final boolean isInterface) {
+    if (api < Opcodes.ASM5 && (opcode & Opcodes.SOURCE_DEPRECATED) == 0) {
       if (isInterface != (opcode == Opcodes.INVOKEINTERFACE)) {
-        throw new IllegalArgumentException("INVOKESPECIAL/STATIC on interfaces requires ASM5");
+        throw new UnsupportedOperationException("INVOKESPECIAL/STATIC on interfaces requires ASM5");
       }
       visitMethodInsn(opcode, owner, name, descriptor);
       return;
     }
     if (mv != null) {
-      mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+      mv.visitMethodInsn(opcode & ~Opcodes.SOURCE_MASK, owner, name, descriptor, isInterface);
     }
   }
 
@@ -451,10 +464,10 @@ public abstract class MethodVisitor {
    *     the content of the array so a caller should expect that this array may change.
    */
   public void visitInvokeDynamicInsn(
-      final String name,
-      final String descriptor,
-      final Handle bootstrapMethodHandle,
-      final Object... bootstrapMethodArguments) {
+          final String name,
+          final String descriptor,
+          final Handle bootstrapMethodHandle,
+          final Object... bootstrapMethodArguments) {
     if (api < Opcodes.ASM5) {
       throw new UnsupportedOperationException(REQUIRES_ASM5);
     }
@@ -523,7 +536,7 @@ public abstract class MethodVisitor {
    *     }
    * } else if (cst instanceof Handle) {
    *     // ...
-   * } else if (cst instanceof Condy) {
+   * } else if (cst instanceof ConstantDynamic) {
    *     // ...
    * } else {
    *     // throw an exception
@@ -532,18 +545,18 @@ public abstract class MethodVisitor {
    *
    * @param value the constant to be loaded on the stack. This parameter must be a non null {@link
    *     Integer}, a {@link Float}, a {@link Long}, a {@link Double}, a {@link String}, a {@link
-   *     Type} of OBJECT or ARRAY sort for <tt>.class</tt> constants, for classes whose version is
+   *     Type} of OBJECT or ARRAY sort for {@code .class} constants, for classes whose version is
    *     49, a {@link Type} of METHOD sort for MethodType, a {@link Handle} for MethodHandle
    *     constants, for classes whose version is 51 or a {@link ConstantDynamic} for a constant
    *     dynamic for classes whose version is 55.
    */
   public void visitLdcInsn(final Object value) {
     if (api < Opcodes.ASM5
-        && (value instanceof Handle
+            && (value instanceof Handle
             || (value instanceof Type && ((Type) value).getSort() == Type.METHOD))) {
       throw new UnsupportedOperationException(REQUIRES_ASM5);
     }
-    if (api != Opcodes.ASM7_EXPERIMENTAL && value instanceof ConstantDynamic) {
+    if (api < Opcodes.ASM7 && value instanceof ConstantDynamic) {
       throw new UnsupportedOperationException("This feature requires ASM7");
     }
     if (mv != null) {
@@ -554,12 +567,12 @@ public abstract class MethodVisitor {
   /**
    * Visits an IINC instruction.
    *
-   * @param var index of the local variable to be incremented.
+   * @param varIndex index of the local variable to be incremented.
    * @param increment amount to increment the local variable by.
    */
-  public void visitIincInsn(final int var, final int increment) {
+  public void visitIincInsn(final int varIndex, final int increment) {
     if (mv != null) {
-      mv.visitIincInsn(var, increment);
+      mv.visitIincInsn(varIndex, increment);
     }
   }
 
@@ -569,11 +582,11 @@ public abstract class MethodVisitor {
    * @param min the minimum key value.
    * @param max the maximum key value.
    * @param dflt beginning of the default handler block.
-   * @param labels beginnings of the handler blocks. <tt>labels[i]</tt> is the beginning of the
-   *     handler block for the <tt>min + i</tt> key.
+   * @param labels beginnings of the handler blocks. {@code labels[i]} is the beginning of the
+   *     handler block for the {@code min + i} key.
    */
   public void visitTableSwitchInsn(
-      final int min, final int max, final Label dflt, final Label... labels) {
+          final int min, final int max, final Label dflt, final Label... labels) {
     if (mv != null) {
       mv.visitTableSwitchInsn(min, max, dflt, labels);
     }
@@ -583,9 +596,9 @@ public abstract class MethodVisitor {
    * Visits a LOOKUPSWITCH instruction.
    *
    * @param dflt beginning of the default handler block.
-   * @param keys the values of the keys.
-   * @param labels beginnings of the handler blocks. <tt>labels[i]</tt> is the beginning of the
-   *     handler block for the <tt>keys[i]</tt> key.
+   * @param keys the values of the keys. Keys must be sorted in increasing order.
+   * @param labels beginnings of the handler blocks. {@code labels[i]} is the beginning of the
+   *     handler block for the {@code keys[i]} key.
    */
   public void visitLookupSwitchInsn(final Label dflt, final int[] keys, final Label[] labels) {
     if (mv != null) {
@@ -617,15 +630,15 @@ public abstract class MethodVisitor {
    *     TypeReference#CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT}, or {@link
    *     TypeReference#METHOD_REFERENCE_TYPE_ARGUMENT}. See {@link TypeReference}.
    * @param typePath the path to the annotated type argument, wildcard bound, array element type, or
-   *     static inner type within 'typeRef'. May be <tt>null</tt> if the annotation targets
+   *     static inner type within 'typeRef'. May be {@literal null} if the annotation targets
    *     'typeRef' as a whole.
    * @param descriptor the class descriptor of the annotation class.
-   * @param visible <tt>true</tt> if the annotation is visible at runtime.
-   * @return a visitor to visit the annotation values, or <tt>null</tt> if this visitor is not
+   * @param visible {@literal true} if the annotation is visible at runtime.
+   * @return a visitor to visit the annotation values, or {@literal null} if this visitor is not
    *     interested in visiting this annotation.
    */
   public AnnotationVisitor visitInsnAnnotation(
-      final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
+          final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
     if (api < Opcodes.ASM5) {
       throw new UnsupportedOperationException(REQUIRES_ASM5);
     }
@@ -645,13 +658,14 @@ public abstract class MethodVisitor {
    * @param start the beginning of the exception handler's scope (inclusive).
    * @param end the end of the exception handler's scope (exclusive).
    * @param handler the beginning of the exception handler's code.
-   * @param type the internal name of the type of exceptions handled by the handler, or
-   *     <tt>null</tt> to catch any exceptions (for "finally" blocks).
+   * @param type the internal name of the type of exceptions handled by the handler (see {@link
+   *     Type#getInternalName()}), or {@literal null} to catch any exceptions (for "finally"
+   *     blocks).
    * @throws IllegalArgumentException if one of the labels has already been visited by this visitor
    *     (by the {@link #visitLabel} method).
    */
   public void visitTryCatchBlock(
-      final Label start, final Label end, final Label handler, final String type) {
+          final Label start, final Label end, final Label handler, final String type) {
     if (mv != null) {
       mv.visitTryCatchBlock(start, end, handler, type);
     }
@@ -665,15 +679,15 @@ public abstract class MethodVisitor {
    * @param typeRef a reference to the annotated type. The sort of this type reference must be
    *     {@link TypeReference#EXCEPTION_PARAMETER}. See {@link TypeReference}.
    * @param typePath the path to the annotated type argument, wildcard bound, array element type, or
-   *     static inner type within 'typeRef'. May be <tt>null</tt> if the annotation targets
+   *     static inner type within 'typeRef'. May be {@literal null} if the annotation targets
    *     'typeRef' as a whole.
    * @param descriptor the class descriptor of the annotation class.
-   * @param visible <tt>true</tt> if the annotation is visible at runtime.
-   * @return a visitor to visit the annotation values, or <tt>null</tt> if this visitor is not
+   * @param visible {@literal true} if the annotation is visible at runtime.
+   * @return a visitor to visit the annotation values, or {@literal null} if this visitor is not
    *     interested in visiting this annotation.
    */
   public AnnotationVisitor visitTryCatchAnnotation(
-      final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
+          final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
     if (api < Opcodes.ASM5) {
       throw new UnsupportedOperationException(REQUIRES_ASM5);
     }
@@ -688,7 +702,7 @@ public abstract class MethodVisitor {
    *
    * @param name the name of a local variable.
    * @param descriptor the type descriptor of this local variable.
-   * @param signature the type signature of this local variable. May be <tt>null</tt> if the local
+   * @param signature the type signature of this local variable. May be {@literal null} if the local
    *     variable type does not use generic types.
    * @param start the first instruction corresponding to the scope of this local variable
    *     (inclusive).
@@ -698,12 +712,12 @@ public abstract class MethodVisitor {
    *     visitor (by the {@link #visitLabel} method).
    */
   public void visitLocalVariable(
-      final String name,
-      final String descriptor,
-      final String signature,
-      final Label start,
-      final Label end,
-      final int index) {
+          final String name,
+          final String descriptor,
+          final String signature,
+          final Label start,
+          final Label end,
+          final int index) {
     if (mv != null) {
       mv.visitLocalVariable(name, descriptor, signature, start, end, index);
     }
@@ -716,7 +730,7 @@ public abstract class MethodVisitor {
    *     {@link TypeReference#LOCAL_VARIABLE} or {@link TypeReference#RESOURCE_VARIABLE}. See {@link
    *     TypeReference}.
    * @param typePath the path to the annotated type argument, wildcard bound, array element type, or
-   *     static inner type within 'typeRef'. May be <tt>null</tt> if the annotation targets
+   *     static inner type within 'typeRef'. May be {@literal null} if the annotation targets
    *     'typeRef' as a whole.
    * @param start the fist instructions corresponding to the continuous ranges that make the scope
    *     of this local variable (inclusive).
@@ -725,24 +739,24 @@ public abstract class MethodVisitor {
    * @param index the local variable's index in each range. This array must have the same size as
    *     the 'start' array.
    * @param descriptor the class descriptor of the annotation class.
-   * @param visible <tt>true</tt> if the annotation is visible at runtime.
-   * @return a visitor to visit the annotation values, or <tt>null</tt> if this visitor is not
+   * @param visible {@literal true} if the annotation is visible at runtime.
+   * @return a visitor to visit the annotation values, or {@literal null} if this visitor is not
    *     interested in visiting this annotation.
    */
   public AnnotationVisitor visitLocalVariableAnnotation(
-      final int typeRef,
-      final TypePath typePath,
-      final Label[] start,
-      final Label[] end,
-      final int[] index,
-      final String descriptor,
-      final boolean visible) {
+          final int typeRef,
+          final TypePath typePath,
+          final Label[] start,
+          final Label[] end,
+          final int[] index,
+          final String descriptor,
+          final boolean visible) {
     if (api < Opcodes.ASM5) {
       throw new UnsupportedOperationException(REQUIRES_ASM5);
     }
     if (mv != null) {
       return mv.visitLocalVariableAnnotation(
-          typeRef, typePath, start, end, index, descriptor, visible);
+              typeRef, typePath, start, end, index, descriptor, visible);
     }
     return null;
   }
@@ -753,7 +767,7 @@ public abstract class MethodVisitor {
    * @param line a line number. This number refers to the source file from which the class was
    *     compiled.
    * @param start the first instruction corresponding to this line number.
-   * @throws IllegalArgumentException if <tt>start</tt> has not already been visited by this visitor
+   * @throws IllegalArgumentException if {@code start} has not already been visited by this visitor
    *     (by the {@link #visitLabel} method).
    */
   public void visitLineNumber(final int line, final Label start) {

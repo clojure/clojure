@@ -66,6 +66,15 @@ public class ByteVector {
   }
 
   /**
+   * Returns the actual number of bytes in this vector.
+   *
+   * @return the actual number of bytes in this vector.
+   */
+  public int size() {
+    return length;
+  }
+
+  /**
    * Puts a byte into this byte vector. The byte vector is automatically enlarged if necessary.
    *
    * @param byteValue a byte.
@@ -239,10 +248,11 @@ public class ByteVector {
    * @param stringValue a String whose UTF8 encoded length must be less than 65536.
    * @return this byte vector.
    */
+  // DontCheck(AbbreviationAsWordInName): can't be renamed (for backward binary compatibility).
   public ByteVector putUTF8(final String stringValue) {
     int charLength = stringValue.length();
     if (charLength > 65535) {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("UTF8 string too large");
     }
     int currentLength = length;
     if (currentLength + 2 + charLength > data.length) {
@@ -261,7 +271,7 @@ public class ByteVector {
         currentData[currentLength++] = (byte) charValue;
       } else {
         length = currentLength;
-        return encodeUTF8(stringValue, i, 65535);
+        return encodeUtf8(stringValue, i, 65535);
       }
     }
     length = currentLength;
@@ -280,21 +290,21 @@ public class ByteVector {
    *     encoded characters.
    * @return this byte vector.
    */
-  final ByteVector encodeUTF8(final String stringValue, final int offset, final int maxByteLength) {
+  final ByteVector encodeUtf8(final String stringValue, final int offset, final int maxByteLength) {
     int charLength = stringValue.length();
     int byteLength = offset;
     for (int i = offset; i < charLength; ++i) {
       char charValue = stringValue.charAt(i);
-      if (charValue >= '\u0001' && charValue <= '\u007F') {
+      if (charValue >= 0x0001 && charValue <= 0x007F) {
         byteLength++;
-      } else if (charValue <= '\u07FF') {
+      } else if (charValue <= 0x07FF) {
         byteLength += 2;
       } else {
         byteLength += 3;
       }
     }
     if (byteLength > maxByteLength) {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("UTF8 string too large");
     }
     // Compute where 'byteLength' must be stored in 'data', and store it at this location.
     int byteLengthOffset = length - offset - 2;
@@ -308,9 +318,9 @@ public class ByteVector {
     int currentLength = length;
     for (int i = offset; i < charLength; ++i) {
       char charValue = stringValue.charAt(i);
-      if (charValue >= '\u0001' && charValue <= '\u007F') {
+      if (charValue >= 0x0001 && charValue <= 0x007F) {
         data[currentLength++] = (byte) charValue;
-      } else if (charValue <= '\u07FF') {
+      } else if (charValue <= 0x07FF) {
         data[currentLength++] = (byte) (0xC0 | charValue >> 6 & 0x1F);
         data[currentLength++] = (byte) (0x80 | charValue & 0x3F);
       } else {
@@ -327,14 +337,14 @@ public class ByteVector {
    * Puts an array of bytes into this byte vector. The byte vector is automatically enlarged if
    * necessary.
    *
-   * @param byteArrayValue an array of bytes. May be <tt>null</tt> to put <tt>byteLength</tt> null
+   * @param byteArrayValue an array of bytes. May be {@literal null} to put {@code byteLength} null
    *     bytes into this byte vector.
    * @param byteOffset index of the first byte of byteArrayValue that must be copied.
    * @param byteLength number of bytes of byteArrayValue that must be copied.
    * @return this byte vector.
    */
   public ByteVector putByteArray(
-      final byte[] byteArrayValue, final int byteOffset, final int byteLength) {
+          final byte[] byteArrayValue, final int byteOffset, final int byteLength) {
     if (length + byteLength > data.length) {
       enlarge(byteLength);
     }
@@ -351,6 +361,9 @@ public class ByteVector {
    * @param size number of additional bytes that this byte vector should be able to receive.
    */
   private void enlarge(final int size) {
+    if (length > data.length) {
+      throw new AssertionError("Internal error");
+    }
     int doubleCapacity = 2 * data.length;
     int minimalCapacity = length + size;
     byte[] newData = new byte[doubleCapacity > minimalCapacity ? doubleCapacity : minimalCapacity];
