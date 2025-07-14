@@ -182,8 +182,7 @@
     (agent nil)
 
     ;; stateful seqs
-    (enumeration-seq (java.util.Collections/enumeration (range 50)))
-    (iterator-seq (.iterator (range 50)))))
+    (enumeration-seq (java.util.Collections/enumeration (range 50)))))
 
 ;; necessary for CVE-2024-22871
 (deftest CLJ-2839

@@ -22,7 +22,7 @@ public final class LazySeq extends Obj implements ISeq, Sequential, List, IPendi
 
 private static final long serialVersionUID = -7345643944998411680L;
 
-private IFn fn;
+private transient IFn fn;
 private Object sv;
 private ISeq s;
 private Lock lock;
@@ -300,5 +300,15 @@ public boolean isRealized(){
 	}
 	return true;
 }
+
+// custom Serializable implementation - ensure seq is fully-realized before writing
+private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+	ISeq s = this;
+	while(s != null) {
+		s = s.next();
+	}
+	out.defaultWriteObject();
+}
+
 }
 
