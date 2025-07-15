@@ -20,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public final class LazySeq extends Obj implements ISeq, Sequential, List, IPending, IHashEq{
 
-private static final long serialVersionUID = -7345643944998411680L;
+private static final long serialVersionUID = -7531333024710395876L;
 
 private transient IFn fn;
 private Object sv;
