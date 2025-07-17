@@ -92,6 +92,7 @@
     ; lazy seqs
     (lazy-seq nil)
     (lazy-seq (list* (range 50)))
+    (iterator-seq (.iterator (range 50)))
 
     ; transient / persistent! round-trip
     (build-via-transient [])
@@ -182,8 +183,7 @@
     (agent nil)
 
     ;; stateful seqs
-    (enumeration-seq (java.util.Collections/enumeration (range 50)))
-    (iterator-seq (.iterator (range 50)))))
+    (enumeration-seq (java.util.Collections/enumeration (range 50)))))
 
 ;; necessary for CVE-2024-22871
 (deftest CLJ-2839
