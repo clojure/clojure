@@ -235,15 +235,15 @@ It is implemented with a number of custom enlive templates.\"
 (defrecord pprint-test-rec [a b c])
 
 (simple-tests pprint-datastructures-tests
- (tst-pprint 20 future-filled) #"#<Future@[0-9a-f]+: \r?\n  100>"
- (tst-pprint 20 future-unfilled) #"#<Future@[0-9a-f]+: \r?\n  :pending>"
- (tst-pprint 20 promise-filled) #"#<Promise@[0-9a-f]+: \r?\n  \(first\r?\n   second\r?\n   third\)>"
+ (tst-pprint 20 future-filled) #"#object\[clojure\.core\$future_call\$reify__\w+ 0x[0-9a-f]+ \{:status\s*:ready,\s*:val\s+100\}\]"
+ (tst-pprint 20 future-unfilled) #"(?s)#object\[clojure\.core\$future_call\$reify__\w+ 0x[0-9a-f]+.*:status\s*:pending.*:val\s*nil.*\]"
+ (tst-pprint 20 promise-filled) #"(?s)#object\[clojure\.core\$promise\$reify__\w+ 0x[0-9a-f]+.*:status\s*:ready.*:val\s*\(first\s*second\s*third\).*\]"
  ;; This hangs currently, cause we can't figure out whether a promise is filled
  ;;(tst-pprint 20 promise-unfilled) #"#<Promise@[0-9a-f]+: \r?\n  :pending>"
- (tst-pprint 20 basic-agent) #"#<Agent@[0-9a-f]+: \r?\n  \(first\r?\n   second\r?\n   third\)>"
- (tst-pprint 20 basic-atom) #"#<Atom@[0-9a-f]+: \r?\n  \(first\r?\n   second\r?\n   third\r?\)>"
- (tst-pprint 20 basic-ref) #"#<Ref@[0-9a-f]+: \r?\n  \(first\r?\n   second\r?\n   third\)>"
- (tst-pprint 20 delay-forced) #"#<Delay@[0-9a-f]+: \r?\n  \(first\r?\n   second\r?\n   third\)>"
+ (tst-pprint 20 basic-agent) #"(?s)#object\[clojure\.lang\.Agent 0x[0-9a-f]+.*:status\s*:ready.*:val\s*\(first\s*second\s*third\).*\]"
+ (tst-pprint 20 basic-atom) #"(?s)#object\[clojure\.lang\.Atom 0x[0-9a-f]+.*:status\s*:ready.*:val\s*\(first\s*second\s*third\).*\]"
+ (tst-pprint 20 basic-ref) #"(?s)#object\[clojure\.lang\.Ref 0x[0-9a-f]+.*:status\s*:ready.*:val\s*\(first\s*second\s*third\).*\]"
+ (tst-pprint 20 delay-forced) #"(?s)#object\[clojure\.lang\.Delay 0x[0-9a-f]+.*:status\s*:ready.*:val\s*\(first\s*second\s*third\).*\]"
  ;; Currently no way not to force the delay
  ;;(tst-pprint 20 delay-unforced) #"#<Delay@[0-9a-f]+: \n  :pending>"
  (tst-pprint 20 (pprint-test-rec. 'first 'second 'third)) "{:a first,\n :b second,\n :c third}"

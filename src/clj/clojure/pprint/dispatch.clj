@@ -135,32 +135,10 @@
           (pprint-newline :linear)
           (recur (next aseq)))))))
 
-(def ^{:private true} 
-     type-map {"core$future_call" "Future",
-               "core$promise" "Promise"})
-
-(defn- map-ref-type 
-  "Map ugly type names to something simpler"
-  [name]
-  (or (when-let [match (re-find #"^[^$]+\$[^$]+" name)]
-        (type-map match))
-      name))
-
 (defn- pprint-ideref [o]
-  (let [prefix (format "#<%s@%x%s: "
-                       (map-ref-type (.getSimpleName (class o)))
-                       (System/identityHashCode o)
-                       (if (and (instance? clojure.lang.Agent o)
-                                (agent-error o))
-                         " FAILED"
-                         ""))]
-    (pprint-logical-block  :prefix prefix :suffix ">"
-                           (pprint-indent :block (-> (count prefix) (- 2) -))
-                           (pprint-newline :linear)
-                           (write-out (cond 
-                                       (and (future? o) (not (future-done? o))) :pending
-                                       (and (instance? clojure.lang.IPending o) (not (.isRealized ^clojure.lang.IPending o))) :not-delivered
-                                       :else @o)))))
+  (.write ^java.io.Writer *out* (str "#object[" (.getName (class o)) " " (format "0x%x" (System/identityHashCode o)) " "))
+  (write-out (#'clojure.core/deref-as-map o))
+  (.write ^java.io.Writer *out* "]"))
 
 (def ^{:private true} pprint-pqueue (formatter-out "~<<-(~;~@{~w~^ ~_~}~;)-<~:>"))
 
