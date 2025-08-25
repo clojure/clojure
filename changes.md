@@ -1,5 +1,12 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.12.2
+
+* [CLJ-2914](https://clojure.atlassian.net/browse/CLJ-2914) - Compiler - syntax error if qualified instance method expression is missing instance
+* [CLJ-1798](https://clojure.atlassian.net/browse/CLJ-1798) - Refs - avoid creating RetryEx in LockingTransaction on every transaction
+* [CLJ-2916](https://clojure.atlassian.net/browse/CLJ-2916) - LazySeq - realize before serializing and do not serialize IFn
+* [CLJ-2917](https://clojure.atlassian.net/browse/CLJ-2917) - Iterate - de/serialization no longer supported, throw
+
 # Changes to Clojure in Version 1.12.1
 
 * [CLJ-2899](https://clojure.atlassian.net/browse/CLJ-2899) - Revert change in semantics of qualified symbol in invocation position if field and method of same name
