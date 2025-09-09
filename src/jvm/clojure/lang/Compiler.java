@@ -211,7 +211,7 @@ static final public Var CONSTANTS = Var.create().setDynamic();
 static final public Var CONSTANT_IDS = Var.create().setDynamic();
 
 //vector<keyword>
-static final public Var KEYWORD_CALLSITES = Var.create().setDynamic();
+static final public Var KEYWORD_CALLSITES = Var.create(null).setDynamic();
 
 //vector<var>
 static final public Var PROTOCOL_CALLSITES = Var.create().setDynamic();
@@ -4389,7 +4389,7 @@ static class InvokeExpr implements Expr{
 				}
 			}
 
-		if(fexpr instanceof KeywordExpr && RT.count(form) == 2 && KEYWORD_CALLSITES.isBound())
+		if(fexpr instanceof KeywordExpr && RT.count(form) == 2 && KEYWORD_CALLSITES.deref() != null)
 			{
 //			fexpr = new ConstantExpr(new KeywordCallSite(((KeywordExpr)fexpr).k));
 			Expr target = analyze(context, RT.second(form));
@@ -7800,9 +7800,6 @@ private static KeywordExpr registerKeyword(Keyword keyword){
 }
 
 private static int registerKeywordCallsite(Keyword keyword){
-	if(!KEYWORD_CALLSITES.isBound())
-		throw new IllegalAccessError("KEYWORD_CALLSITES is not bound");
-
 	IPersistentVector keywordCallsites = (IPersistentVector) KEYWORD_CALLSITES.deref();
 
 	keywordCallsites = keywordCallsites.cons(keyword);
@@ -8348,6 +8345,7 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 			       COLUMN_AFTER, pushbackReader.getColumnNumber(),
 			       CONSTANTS, PersistentVector.EMPTY,
 			       CONSTANT_IDS, new IdentityHashMap(),
+			       KEYWORD_CALLSITES, null,
 			       KEYWORDS, PersistentHashMap.EMPTY,
 			       VARS, PersistentHashMap.EMPTY
 					,RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()
