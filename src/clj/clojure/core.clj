@@ -3678,7 +3678,7 @@
        (ratio? x) (/ (BigDecimal. (.numerator ^clojure.lang.Ratio x)) (.denominator ^clojure.lang.Ratio x))
        (instance? clojure.lang.BigInt x) (.toBigDecimal ^clojure.lang.BigInt x)
        (instance? BigInteger x) (BigDecimal. ^BigInteger x)
-       (number? x) (BigDecimal/valueOf (long x))
+       (number? x) (BigDecimal/valueOf (double x))
        :else (BigDecimal. x)))
 
 (def ^:dynamic ^{:private true} print-initialized false)
