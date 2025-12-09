@@ -25,7 +25,7 @@ private static final long serialVersionUID = -7531333024710395876L;
 private transient IFn fn;
 private Object sv;
 private ISeq s;
-private Lock lock;
+private volatile Lock lock;
 
 public LazySeq(IFn f){
 	fn = f;
@@ -52,24 +52,22 @@ final private void force() {
 	}
 }
 
-final private void lockAndForce() {
-	Lock l = lock;
-	if(l != null) {
-		l.lock();
-		try {
-			force();
-		} finally {
-			l.unlock();
-		}
-	}
-}
-
 final private Object sval() {
-	if(fn != null)
-	    lockAndForce();
-	if(sv != null)
-		return sv;
-	return s;
+    Lock l = lock;
+    if(l != null) {
+        l.lock();
+        try {
+            //must re-examine under lock
+            if(lock != null) { //unrealized
+                force();
+                return sv;
+            }
+        } finally {
+            l.unlock();
+        }
+    }
+    // realized, read of lock above guarantees visibility of s
+    return s;
 }
 
 final private Object unwrap(Object ls){
@@ -287,18 +285,7 @@ public boolean addAll(int index, Collection c){
 }
 
 public boolean isRealized(){
-	if(lock != null) {
-		Lock l = lock;
-		if(l != null) {
-			l.lock();
-			try {
-				return lock == null;
-			} finally {
-				l.unlock();
-			}
-		}
-	}
-	return true;
+    return lock == null;
 }
 
 // custom Serializable implementation - ensure seq is fully-realized before writing
