@@ -1,5 +1,9 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.12.4
+
+* [CLJ-2924](https://clojure.atlassian.net/browse/CLJ-2924) - LazySeq - fix visibility issues with non-volatile reads
+
 # Changes to Clojure in Version 1.12.3
 
 * [CLJ-2919](https://clojure.atlassian.net/browse/CLJ-2919) - Compiler - fix nested compilation emitting for keyword and protocol call sites
