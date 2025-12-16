@@ -359,7 +359,8 @@
   (are [err msg form] (thrown-with-msg? err msg (read-string form))
        Exception #"Invalid token: foo:" "foo:"
        Exception #"Invalid token: :bar/" ":bar/"
-       Exception #"Invalid token: ::does.not/exist" "::does.not/exist"))
+       Exception #"Invalid token: ::does.not/exist" "::does.not/exist"
+       Exception #"Invalid token: :/-/-" ":/-/-"))
 ;; Lists
 
 (deftest t-Lists)
@@ -775,6 +776,10 @@
   (is (thrown-with-msg? Exception #"Invalid token" (edn/read-string "##5")))
   (is (thrown-with-msg? Exception #"Unknown symbolic value" (read-string "##Foo")))
   (is (thrown-with-msg? Exception #"Unknown symbolic value" (edn/read-string "##Foo"))))
+
+(deftest keywords-with-empty-namespace
+  (is (thrown-with-msg? Exception #"Invalid token" (read-string ":/-/-")))
+  (is (thrown-with-msg? Exception #"Invalid token" (edn/read-string ":/-/-"))))
 
 (defn str->lnpr
   [s]
