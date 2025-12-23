@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest] # macOS-latest, windows-latest]
-        java-version: ["8", "11", "17", "21"]
+        java-version: ["8", "11", "17", "21", "25"]
         distribution: ["temurin", "corretto"]
         profile: ["test-direct", "test-no-direct"]
     runs-on: ${{ matrix.os }}
