@@ -1,5 +1,8 @@
 name: Snapshot on demand
 
+permissions:
+  contents: read
+
 on: [workflow_dispatch]
 
 jobs:

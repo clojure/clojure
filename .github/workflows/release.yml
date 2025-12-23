@@ -1,5 +1,8 @@
 name: Release on demand
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
     inputs:
