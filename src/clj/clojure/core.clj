@@ -7026,6 +7026,20 @@ fails, attempts to require sym's namespace and retries."
                  (clojure.core.protocols/coll-reduce coll f init))]
        (f ret))))
 
+(defn str!
+  "Reducing function for efficiently building a string in linear
+  time within a reduce/transduce call, avoiding the overhead of
+  repeated intermediate string creation and copying that can occur
+  when using clojure.core/str."
+  {:added "1.13"}
+  (^StringBuilder [] (StringBuilder.))
+  (^String [sb] (str sb))
+  (^StringBuilder [maybe-sb x]
+   (let [^StringBuilder sb (if (instance? StringBuilder maybe-sb)
+                             maybe-sb
+                             (StringBuilder. ^CharSequence maybe-sb))]
+     (.append sb x))))
+
 (defn into
   "Returns a new coll consisting of to with all of the items of
   from conjoined. A transducer may be supplied.

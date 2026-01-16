@@ -408,3 +408,22 @@
                (halt-when :anomaly #(assoc %2 :partial-results %1))
                [1 2 {:anomaly :oh-no!} 3 4]))))
 
+(deftest test-str!
+  (is (= "0123456789"
+         (transduce identity str! (range 0 10))))
+
+  (is (= "0123456789"
+         (transduce identity (completing str! str) (range 0 10))))
+
+  (is (instance? StringBuilder (str!)))
+
+  (let [^StringBuilder interim-sb1 (reduce str! "A" (range 0 10))
+        ^StringBuilder interim-sb2 (reduce str! (StringBuffer. "A") (range 0 10))]
+    (is (= "A0123456789" (str! interim-sb1)))
+    (is (= "A0123456789" (str! interim-sb2))))
+
+  (is (= "0123456789,0123456789"
+         (transduce (interpose \,)
+             str!
+             (map #(reduce str! (str!) %)
+                  [(range 0 10) (range 0 10)])))))
