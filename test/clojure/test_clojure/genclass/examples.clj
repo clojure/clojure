@@ -11,6 +11,8 @@
       :author "Stuart Halloway, Daniel Solano Gómez"}
   clojure.test-clojure.genclass.examples)
 
+(import java.util.Map)
+
 (definterface ExampleInterface
   (foo [a])
   (foo [a b])
@@ -78,6 +80,10 @@
   (^clojure.test-clojure.genclass.examples.ArrayDefInterface
    identity
    [^clojure.test-clojure.genclass.examples.ArrayDefInterface a]))
+
+(definterface ImportedTypeHintInterface
+  (^Map returnsImportedType [])
+  (^void takesImportedType [^Map m]))
 
 (gen-interface
   :name clojure.test_clojure.genclass.examples.ArrayGenInterface

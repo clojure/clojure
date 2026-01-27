@@ -16,7 +16,8 @@
             ExampleAnnotationClass
             ProtectedFinalTester
             ArrayDefInterface
-            ArrayGenInterface]
+            ArrayGenInterface
+            ImportedTypeHintInterface]
 
            [java.lang.annotation ElementType
                                  Retention
@@ -116,7 +117,11 @@
                "returnsLongArray"    :longs
                "returnsFloatArray"   :floats
                "returnsDoubleArray"  :doubles
-               "returnsBooleanArray" :booleans))))
+               "returnsBooleanArray" :booleans)))
+      (testing "imported class type hints"
+        (let [method-with-name #(method-with-name % (.getMethods ImportedTypeHintInterface))]
+          (is (= java.util.Map (return-type (method-with-name "returnsImportedType"))))
+          (is (= java.util.Map (parameter-type (method-with-name "takesImportedType")))))))
     (testing "gen-interface"
       (let [method-with-name #(method-with-name % (.getMethods ArrayGenInterface))]
         (testing "sugar primitive array hints"
