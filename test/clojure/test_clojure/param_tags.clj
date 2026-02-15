@@ -194,6 +194,11 @@
     (is (= "int-int" (clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2))))
     (is (= "int-int" (apply clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2) [])))))
 
+(deftest field-overload-propagates-type
+  (testing "field overload without param-tags propagates field type"
+    (should-not-reflect
+     (let [a clojure.test.SwissArmy/doppelganger] (.substring a 0)))))
+
 (defmacro arg-tags-called-in-macro
   [a-type b-type a b]
   `(^[~a-type ~b-type] SwissArmy/staticArityOverloadMethod ~a ~b))

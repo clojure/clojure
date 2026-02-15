@@ -1188,7 +1188,7 @@ static class QualifiedMethodExpr implements Expr {
 	public QualifiedMethodExpr(Class methodClass, Symbol sym, StaticFieldExpr fieldOL) {
 		c = methodClass;
 		methodSymbol = sym;
-		tagClass = tagOf(sym) != null ? HostExpr.tagToClass(tagOf(sym)) : AFn.class;
+		tagClass = tagOf(sym) != null ? HostExpr.tagToClass(tagOf(sym)) : null;
 		hintedSig = tagsToClasses(paramTagsOf(sym));
 		if(sym.name.startsWith(".")) {
 			kind = MethodKind.INSTANCE;
@@ -1227,7 +1227,7 @@ static class QualifiedMethodExpr implements Expr {
 			buildThunk(context, this).emit(context, objx, gen);
 	}
 
-	// Expr impl - method value, always an AFn
+	// Expr impl - method value is an AFn, field overload has field type
 
 	@Override
 	public boolean hasJavaClass() {
@@ -1236,7 +1236,12 @@ static class QualifiedMethodExpr implements Expr {
 
 	@Override
 	public Class getJavaClass() {
-		return tagClass;
+      if (tagClass != null)
+        return tagClass;
+      else if (preferOverloadedField())
+        return fieldOverload.getJavaClass();
+      else
+        return AFn.class;
 	}
 
 	// TBD: caching/reuse of thunks
