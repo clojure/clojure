@@ -8548,9 +8548,11 @@ static public class NewInstanceExpr extends ObjExpr{
 
 
 		ObjExpr ret = build(interfaces, null, null, classname, Symbol.intern(classname), null, rform, frm, null);
-		if(frm instanceof IObj && ((IObj) frm).meta() != null)
-			return new MetaExpr(ret, MapExpr
-					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) frm).meta()));
+		IPersistentMap fmeta = RT.meta(frm);
+		if(fmeta != null)
+			fmeta = fmeta.without(RT.LINE_KEY).without(RT.COLUMN_KEY).without(RT.FILE_KEY);
+		if (RT.count(fmeta) > 0)
+			return new MetaExpr(ret, MapExpr.parse(context == C.EVAL ? context : C.EXPRESSION, fmeta));
 		else
 			return ret;
 	}
