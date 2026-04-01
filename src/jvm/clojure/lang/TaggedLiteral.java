@@ -48,8 +48,8 @@ public boolean equals(Object o) {
 
 	TaggedLiteral that = (TaggedLiteral) o;
 
-	if (form != null ? !form.equals(that.form) : that.form != null) return false;
 	if (tag != null ? !tag.equals(that.tag) : that.tag != null) return false;
+	if (form != null ? !form.equals(that.form) : that.form != null) return false;
 
 	return true;
 }
