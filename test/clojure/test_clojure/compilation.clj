@@ -182,12 +182,21 @@
   (^long [])
   (^double [a]))
 
+(defn primfn-returns-string ^String [^long n]
+  (str n))
+
 (deftest primitive-return-decl
   (should-not-reflect #(loop [k 5] (recur (clojure.test-clojure.compilation/primfn))))
   (should-not-reflect #(loop [k 5.0] (recur (clojure.test-clojure.compilation/primfn 0))))
 
   (should-print-err-message #"(?s).*k is not matching primitive.*"
-    #(loop [k (clojure.test-clojure.compilation/primfn)] (recur :foo))))
+    #(loop [k (clojure.test-clojure.compilation/primfn)] (recur :foo)))
+
+  (testing "in primitive function, non-primitive return type hint is preserved (CLJ-2817)"
+    ;; The bug didn't reproduce with direct linking on.
+    (prn *compiler-options*)
+    (binding [*compiler-options* (assoc *compiler-options* :direct-linking false)]
+      (should-not-reflect #(.length (clojure.test-clojure.compilation/primfn-returns-string 0))))))
 
 #_(deftest CLJ-1154-use-out-after-compile
   ;; This test creates a dummy file to compile, sets up a dummy
