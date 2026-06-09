@@ -783,7 +783,10 @@ static public Object req(Object coll, Object key){
 		v = ((ILookup) coll).valAt(key, REQ_NOT_FOUND);
 		if(v != REQ_NOT_FOUND) return v;
 	}
-	return reqFrom(coll, key, REQ_NOT_FOUND);
+	v = reqFrom(coll, key, REQ_NOT_FOUND);
+	if(v == REQ_NOT_FOUND)
+		throw new IllegalArgumentException("Expected key: " + key);
+	return v;
 }
 
 static Object reqFrom(Object coll, Object key, Object notFound){
