@@ -783,22 +783,10 @@ static public Object req(Object coll, Object key){
 		v = ((ILookup) coll).valAt(key, REQ_NOT_FOUND);
 		if(v != REQ_NOT_FOUND) return v;
 	}
-	v = reqFrom(coll, key, REQ_NOT_FOUND);
+	v = getFrom(coll, key, REQ_NOT_FOUND);
 	if(v == REQ_NOT_FOUND)
 		throw new IllegalArgumentException("Expected key: " + key);
 	return v;
-}
-
-static Object reqFrom(Object coll, Object key, Object notFound){
-	if(coll == null)
-		return notFound;
-	else if(coll instanceof Map) {
-		Map m = (Map) coll;
-		if(m.containsKey(key))
-			return m.get(key);
-		return notFound;
-	}
-	return notFound;
 }
 
 static public Object get(Object coll, Object key){
