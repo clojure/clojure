@@ -775,6 +775,29 @@ static public Object pop(Object x){
 	return ((IPersistentStack) x).pop();
 }
 
+private static final Object REQ_NOT_FOUND = new Object();
+
+static public Object req(Object coll, Object key){
+	Object v;
+	if(coll instanceof ILookup) {
+		v = ((ILookup) coll).valAt(key, REQ_NOT_FOUND);
+		if(v != REQ_NOT_FOUND) return v;
+	}
+	return reqFrom(coll, key, REQ_NOT_FOUND);
+}
+
+static Object reqFrom(Object coll, Object key, Object notFound){
+	if(coll == null)
+		return notFound;
+	else if(coll instanceof Map) {
+		Map m = (Map) coll;
+		if(m.containsKey(key))
+			return m.get(key);
+		return notFound;
+	}
+	return notFound;
+}
+
 static public Object get(Object coll, Object key){
 	if(coll instanceof ILookup)
 		return ((ILookup) coll).valAt(key);
