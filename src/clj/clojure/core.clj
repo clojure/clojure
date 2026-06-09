@@ -8275,6 +8275,12 @@ fails, attempts to require sym's namespace and retries."
   (force tap-loop)
   (.offer tapq (if (nil? x) ::tap-nil x)))
 
+(defn tap->
+  "Sends x to any taps, drops if tap queue is full, returns x."
+  {:added "1.13"}
+  [x]
+  (doto x tap>))
+
 (defn update-vals
   "m f => {k (f v) ...}
 
