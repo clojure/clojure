@@ -86,6 +86,11 @@
   (is (thrown-with-cause-msg? Exception #"Unable to resolve symbol: b"
                         (eval '(let [{:keys [a] :or {b 2}} {:a 1}] [a b])))))
 
+(deftest amp-not-allowed-as-let-or-loop*-binding-name
+  (is (thrown? Exception (eval '(let [& 42] &))))
+  (is (thrown? Exception (eval '(let* [& 42] &))))
+  (is (thrown? Exception (eval '(loop* [& 42] &)))))
+
 (require '[clojure.string :as s])
 (deftest resolve-keyword-ns-alias-in-destructuring
   (let [{:keys [::s/x ::s/y ::s/z] :or {z 3}} {:clojure.string/x 1 :clojure.string/y 2}]
