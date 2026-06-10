@@ -16,12 +16,17 @@
   (str (format url-pattern-str module-name) url-suffix))
 
 (deftest javadoc-url-test
+
   (testing "for a core api"
-    (binding [*feeling-lucky* false]
-      (are [x y] (= x (#'j/javadoc-url y))
-           nil "foo.Bar"
-           (correct-url *core-java-api* "java.base" "java/lang/String.html") "java.lang.String"
-           (correct-url *core-java-api* "java.sql" "java/sql/Connection.html") "java.sql.Connection")))
+    (are [x y] (= x (#'j/javadoc-url y))
+         nil "foo.Bar"
+         (correct-url *core-java-api* "java.base" "java/lang/String.html") "java.lang.String"
+         (correct-url *core-java-api* "java.sql" "java/sql/Connection.html") "java.sql.Connection"))
+
   (testing "for a remote javadoc"
     (binding [*remote-javadocs* (ref (sorted-map "java." "http://example.com/"))]
-      (is (= "http://example.com/java/lang/Number.html" (#'j/javadoc-url "java.lang.Number"))))))
+      (is (= "http://example.com/java/lang/Number.html" (#'j/javadoc-url "java.lang.Number")))))
+
+  (testing "javadoc-url strips out inner classes"
+    (is (= (correct-url *core-java-api* "java.base" "java/util/Map.html")
+           (#'j/javadoc-url "java.util.Map$Entry")))))

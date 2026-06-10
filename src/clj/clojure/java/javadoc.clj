@@ -9,40 +9,33 @@
   ^{:author "Christophe Grand, Stuart Sierra",
      :doc "A repl helper to quickly open javadocs."}
   clojure.java.javadoc
-  (:use [clojure.java.browse :only (browse-url)] )
+  (:use [clojure.java.browse :only (browse-url)])
+  (:require [clojure.string :as str])
   (:import
    (java.io File)))
 
-(def ^:dynamic *feeling-lucky-url* "http://www.google.com/search?btnI=I%27m%20Feeling%20Lucky&q=allinurl:")
-(def ^:dynamic *feeling-lucky* true)
+(def ^{:dynamic true :deprecated "1.13"} *feeling-lucky-url* nil)
+(def ^{:dynamic true :deprecated "1.13"} *feeling-lucky* false)
 
 (def ^:dynamic *local-javadocs* (ref (list)))
  
 (def ^:dynamic *core-java-api*
-  (case (System/getProperty "java.specification.version")
-    "1.8" "http://docs.oracle.com/javase/8/docs/api/"
-    "9" "http://docs.oracle.com/javase/9/docs/api/"
-    "10" "http://docs.oracle.com/javase/10/docs/api/"
-    "11" "https://docs.oracle.com/en/java/javase/11/docs/api/%s/"
-    "12" "https://docs.oracle.com/en/java/javase/12/docs/api/%s/"
-    "13" "https://docs.oracle.com/en/java/javase/13/docs/api/%s/"
-    "14" "https://docs.oracle.com/en/java/javase/14/docs/api/%s/"
-    "15" "https://docs.oracle.com/en/java/javase/15/docs/api/%s/"
-    "http://docs.oracle.com/javase/8/docs/api/"))
+  (let [java-version (System/getProperty "java.specification.version")]
+    (str "https://docs.oracle.com/en/java/javase/" java-version "/docs/api/%s/")))
 
 (def ^:dynamic *remote-javadocs*
  (ref (sorted-map
-       "com.google.common." "http://google.github.io/guava/releases/23.0/api/docs/"
+       "com.google.common." "https://guava.dev/releases/snapshot-jre/api/docs/"
        "java." *core-java-api*
        "javax." *core-java-api*
        "org.ietf.jgss." *core-java-api*
        "org.omg." *core-java-api*
        "org.w3c.dom." *core-java-api*
        "org.xml.sax." *core-java-api*
-       "org.apache.commons.codec." "http://commons.apache.org/proper/commons-codec/apidocs/"
-       "org.apache.commons.io." "http://commons.apache.org/proper/commons-io/javadocs/api-release/"
-       "org.apache.commons.lang." "http://commons.apache.org/proper/commons-lang/javadocs/api-2.6/"
-       "org.apache.commons.lang3." "http://commons.apache.org/proper/commons-lang/javadocs/api-release/")))
+       "org.apache.commons.codec." "https://commons.apache.org/proper/commons-codec/apidocs/"
+       "org.apache.commons.io." "https://commons.apache.org/proper/commons-io/apidocs/"
+       "org.apache.commons.lang." "https://commons.apache.org/proper/commons-lang/javadocs/api-2.6/"
+       "org.apache.commons.lang3." "https://commons.apache.org/proper/commons-lang/apidocs/")))
 
 (defn add-local-javadoc
   "Adds to the list of local Javadoc paths."
@@ -67,13 +60,14 @@
       (format url module-name))
     url))
 
-(defn- javadoc-url
+(defn javadoc-url
   "Searches for a URL for the given class name.  Tries
   *local-javadocs* first, then *remote-javadocs*.  Returns a string."
   {:tag String,
    :added "1.2"}
   [^String classname]
-  (let [file-path (.replace classname \. File/separatorChar)
+  (let [classname (str/replace classname #"\$.*" "")
+        file-path (.replace classname \. File/separatorChar)
         url-path (.replace classname \. \/)]
     (if-let [file ^File (first
                            (filter #(.exists ^File %)
@@ -81,13 +75,11 @@
                                @*local-javadocs*)))]
       (-> file .toURI str)
       ;; If no local file, try remote URLs:
-      (or (some (fn [[prefix url]]
+      (some (fn [[prefix url]]
                   (when (.startsWith classname prefix)
                     (str (fill-in-module-name url classname)
                          url-path ".html")))
-            @*remote-javadocs*)
-        ;; if *feeling-lucky* try a web search
-        (when *feeling-lucky* (str *feeling-lucky-url* url-path ".html"))))))
+            @*remote-javadocs*))))
 
 (defn javadoc
   "Opens a browser window displaying the javadoc for the argument.
