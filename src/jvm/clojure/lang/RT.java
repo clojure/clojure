@@ -775,6 +775,16 @@ static public Object pop(Object x){
 	return ((IPersistentStack) x).pop();
 }
 
+private static final Object REQ_NOT_FOUND = new Object();
+
+static public Object req(Object coll, Object key){
+    Object v = get(coll, key, REQ_NOT_FOUND);
+    if(v == REQ_NOT_FOUND)
+        throw new IllegalArgumentException("Missing required key: " + key);
+    else
+        return v;
+}
+
 static public Object get(Object coll, Object key){
 	if(coll instanceof ILookup)
 		return ((ILookup) coll).valAt(key);

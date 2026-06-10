@@ -188,8 +188,8 @@ static public boolean isPrimitive(Class c){
 }
 
 static public boolean isInteger(Object x){
-	return x instanceof Integer
-			|| x instanceof Long
+	return x instanceof Long
+			|| x instanceof Integer
 	        || x instanceof BigInt
 			|| x instanceof BigInteger;
 }
