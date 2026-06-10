@@ -777,7 +777,7 @@ static public Object pop(Object x){
 
 private static final Object REQ_NOT_FOUND = new Object();
 
-static public Object req(Object coll, Object key){
+static public Object req1(Object coll, Object key){
 	Object v;
 	if(coll instanceof ILookup) {
 		v = ((ILookup) coll).valAt(key, REQ_NOT_FOUND);
@@ -787,6 +787,14 @@ static public Object req(Object coll, Object key){
 	if(v == REQ_NOT_FOUND)
 		throw new IllegalArgumentException("Expected key: " + key);
 	return v;
+}
+
+static public Object req(Object coll, Object key){
+	Object v = get(coll, key, REQ_NOT_FOUND);
+	if(v != REQ_NOT_FOUND)
+		return v;
+	else
+		throw new IllegalArgumentException("Expected key: " + key);
 }
 
 static public Object get(Object coll, Object key){
