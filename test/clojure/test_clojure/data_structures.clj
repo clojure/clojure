@@ -710,6 +710,15 @@
          (get-in m [] 0) m
          (get-in m nil 0) m)))
 
+(deftest test-req!
+  (let [m {:a 1, :b 2, :f nil, :g false, nil "nil"}]
+    (is (thrown? Exception (req! m :e)))
+    (are [x y] (= x y)
+         (req! m :a)  1
+         (req! m nil) "nil"
+         (req! m :b)  2
+         (req! m :f)  nil)))
+
 (deftest test-nested-map-destructuring
   (let [sample-map {:a 1 :b {:a 2}}
         {ao1 :a {ai1 :a} :b} sample-map

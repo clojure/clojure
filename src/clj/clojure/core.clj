@@ -1520,6 +1520,14 @@
   ([map key not-found]
    (. clojure.lang.RT (get map key not-found))))
 
+(defn req!
+  "Like arity-2 'get', but throws if key not present."
+  {:inline (fn  [m k] `(clojure.lang.RT/req ~m ~k))
+   :inline-arities #{2}
+   :added "1.13"}
+  [m k]
+  (clojure.lang.RT/req m k))
+
 (defn dissoc
   "dissoc[iate]. Returns a new map of the same (hashed/sorted) type,
   that does not contain a mapping for key(s)."
