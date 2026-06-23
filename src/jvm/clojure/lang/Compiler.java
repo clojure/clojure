@@ -6962,6 +6962,8 @@ public static class LetExpr implements Expr, MaybePrimitiveExpr{
 						Symbol sym = (Symbol) bindings.nth(i);
 						if(sym.getNamespace() != null)
 							throw Util.runtimeException("Can't let qualified name: " + sym);
+						if(sym.equals(_AMP_))
+							throw Util.runtimeException("Can't use & as a local binding");
 						Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
 						if(isLoop)
 							{
