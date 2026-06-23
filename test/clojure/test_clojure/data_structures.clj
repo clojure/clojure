@@ -942,7 +942,20 @@
       (into-array [1 2]) #{1 2}
 
       "" #{}
-      "abc" #{\a \b \c} ))
+      "abc" #{\a \b \c} )
+
+  ; get, get not-found, invoke on sets and transient sets
+  (are [e enf s k] (and
+                     (= e (get s k))
+                     (= enf (get (transient s) k 1))
+                     (= e (s k))
+                     (= enf ((transient s) k 1))
+                     (= e (k s))
+                     (= enf (k s 1)))
+    :a :a #{:a} :a
+    nil 1 #{:a} :b
+    nil 1 #{} :a
+    nil 1 #{nil} :a))
 
 
 (deftest test-disj

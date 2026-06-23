@@ -806,19 +806,11 @@ static Object getFrom(Object coll, Object key){
 		Map m = (Map) coll;
 		return m.get(key);
 	}
-	else if(coll instanceof IPersistentSet) {
-		IPersistentSet set = (IPersistentSet) coll;
-		return set.get(key);
-	}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray())) {
 		int n = ((Number) key).intValue();
 		if(n >= 0 && n < count(coll))
 			return nth(coll, n);
 		return null;
-	}
-	else if(coll instanceof ITransientSet) {
-		ITransientSet set = (ITransientSet) coll;
-		return set.get(key);
 	}
 
 	return null;
@@ -839,21 +831,9 @@ static Object getFrom(Object coll, Object key, Object notFound){
 			return m.get(key);
 		return notFound;
 	}
-	else if(coll instanceof IPersistentSet) {
-		IPersistentSet set = (IPersistentSet) coll;
-		if(set.contains(key))
-			return set.get(key);
-		return notFound;
-	}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray())) {
 		int n = ((Number) key).intValue();
 		return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
-	}
-	else if(coll instanceof ITransientSet) {
-		ITransientSet set = (ITransientSet) coll;
-		if(set.contains(key))
-			return set.get(key);
-		return notFound;
 	}
 	return notFound;
 

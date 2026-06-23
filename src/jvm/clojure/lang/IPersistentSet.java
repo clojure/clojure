@@ -12,8 +12,20 @@
 
 package clojure.lang;
 
-public interface IPersistentSet extends IPersistentCollection, Counted{
+public interface IPersistentSet extends IPersistentCollection, Counted, ILookup{
 	public IPersistentSet disjoin(Object key) ;
 	public boolean contains(Object key);
 	public Object get(Object key);
+
+	@Override
+	default Object valAt(Object key) {
+		return get(key);
+	}
+
+	@Override
+	default Object valAt(Object key, Object notFound) {
+		if(contains(key))
+			return get(key);
+		return notFound;
+	}
 }

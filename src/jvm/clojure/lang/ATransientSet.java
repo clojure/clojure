@@ -50,5 +50,14 @@ public abstract class ATransientSet extends AFn implements ITransientSet{
 	public Object invoke(Object key)  {
 		return impl.valAt(key);	
 	}
-	
+
+	@Override
+	public Object valAt(Object key) {
+		return impl.valAt(key);
+	}
+
+	@Override
+	public Object valAt(Object key, Object notFound) {
+		return impl.valAt(key, notFound);
+	}
 }
