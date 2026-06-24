@@ -4436,97 +4436,110 @@
     (if (seq s) (first s) clojure.lang.PersistentArrayMap/EMPTY)))
 
 ;;redefine let and loop  with destructuring
+(defn ^:private destvec*
+  [pb bvec b val]
+  (let [gvec (gensym "vec__")
+        gseq (gensym "seq__")
+        gfirst (gensym "first__")
+        has-rest (some #{'&} b)]
+    (loop [ret (let [ret (conj bvec gvec val)]
+                 (if has-rest
+                   (conj ret gseq (list `seq gvec))
+                   ret))
+           n 0
+           bs b
+           seen-rest? false]
+      (if (seq bs)
+        (let [firstb (first bs)]
+          (cond
+            (= firstb '&) (recur (pb ret (second bs) gseq)
+                                 n
+                                 (nnext bs)
+                                 true)
+            (= firstb :as) (pb ret (second bs) gvec)
+            :else (if seen-rest?
+                    (throw (new Exception "Unsupported binding form, only :as can follow & parameter"))
+                    (recur (pb (if has-rest
+                                 (conj ret
+                                       gfirst `(first ~gseq)
+                                       gseq `(next ~gseq))
+                                 ret)
+                               firstb
+                               (if has-rest
+                                 gfirst
+                                 (list `nth gvec n nil)))
+                           (inc n)
+                           (next bs)
+                           seen-rest?))))
+        ret))))
+
+(defn ^:private destmap*
+  [pb bvec b v]
+  (let [gmap (gensym "map__")
+        gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
+        gignore (gensym "ignore__")
+        defaults (:or b)
+        xf (fn [mk]
+             (let [mkns (namespace mk)
+                   mkn (name mk)]
+               (cond (.startsWith mkn "keys") #(keyword (or mkns (namespace %)) (name %))
+                     (.startsWith mkn "syms") #(list `quote (symbol (or mkns (namespace %)) (name %)))
+                     (.startsWith mkn "strs") str
+                     :else (throw (new Exception (str "Unsupported map directive: " mk) )))))
+        ret (-> bvec (conj gmap) (conj v)
+                (conj gmap) (conj `(if (seq? ~gmap)
+                                     (if (next ~gmapseq)
+                                       (clojure.lang.PersistentArrayMap/createAsIfByAssoc (to-array ~gmapseq))
+                                       (if (seq ~gmapseq) (first ~gmapseq) clojure.lang.PersistentArrayMap/EMPTY))
+                                     ~gmap))
+                ((fn [ret]
+                   (if (:as b)
+                     (conj ret (:as b) gmap)
+                     ret))))
+        bes (dissoc b :as :or)
+        push1 (fn [ret bb bk req?]
+                (let [getter (if req? `req! `get)
+                      local (if (instance? clojure.lang.Named bb) (with-meta (symbol nil (name bb)) (meta bb)) bb)
+                      bv (if (contains? defaults local)
+                           (if req?
+                             (throw (new Exception (str "Can't supply default value for required binding: " local)))
+                             (list `get gmap bk (defaults local)))
+                           (list getter gmap bk))]
+                  (if (ident? bb)
+                    (-> ret (conj local bv))
+                    (pb ret bb bv))))]
+    (reduce1
+     (fn [ret be]
+       (let [bb (key be)
+             bk (val be)]
+         (if (keyword? bb)
+           (let [tr (xf bb)
+                 req? (.endsWith (name bb) "!")]
+             (loop [ret ret
+                    bbs (seq bk)
+                    preamp? true]
+               (if (seq bbs)
+                 (let [bb (first bbs)]
+                   (when-not (or preamp? (keyword? bb))
+                     (throw (new Exception (str "Non-binding entry must be keyword: " bb))))
+                   (if (= bb '&)
+                     (recur ret (next bbs) false)
+                     (recur (if (or preamp? req?)
+                              (push1 ret (if preamp? bb gignore) (tr bb) req?)
+                              ret)
+                            (next bbs) preamp?)))
+                 ret)))
+           (push1 ret bb bk false))))
+     ret bes)))
+
 (defn destructure [bindings]
   (let [bents (partition 2 bindings)
         pb (fn pb [bvec b v]
-             (let [pvec
-                   (fn [bvec b val]
-                     (let [gvec (gensym "vec__")
-                           gseq (gensym "seq__")
-                           gfirst (gensym "first__")
-                           has-rest (some #{'&} b)]
-                       (loop [ret (let [ret (conj bvec gvec val)]
-                                    (if has-rest
-                                      (conj ret gseq (list `seq gvec))
-                                      ret))
-                              n 0
-                              bs b
-                              seen-rest? false]
-                         (if (seq bs)
-                           (let [firstb (first bs)]
-                             (cond
-                              (= firstb '&) (recur (pb ret (second bs) gseq)
-                                                   n
-                                                   (nnext bs)
-                                                   true)
-                              (= firstb :as) (pb ret (second bs) gvec)
-                              :else (if seen-rest?
-                                      (throw (new Exception "Unsupported binding form, only :as can follow & parameter"))
-                                      (recur (pb (if has-rest
-                                                   (conj ret
-                                                         gfirst `(first ~gseq)
-                                                         gseq `(next ~gseq))
-                                                   ret)
-                                                 firstb
-                                                 (if has-rest
-                                                   gfirst
-                                                   (list `nth gvec n nil)))
-                                             (inc n)
-                                             (next bs)
-                                             seen-rest?))))
-                           ret))))
-                   pmap
-                   (fn [bvec b v]
-                     (let [gmap (gensym "map__")
-                           gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
-                           defaults (:or b)]
-                       (loop [ret (-> bvec (conj gmap) (conj v)
-                                      (conj gmap) (conj `(if (seq? ~gmap)
-                                                           (if (next ~gmapseq)
-                                                             (clojure.lang.PersistentArrayMap/createAsIfByAssoc (to-array ~gmapseq))
-                                                             (if (seq ~gmapseq) (first ~gmapseq) clojure.lang.PersistentArrayMap/EMPTY))
-                                                           ~gmap))
-                                      ((fn [ret]
-                                         (if (:as b)
-                                           (conj ret (:as b) gmap)
-                                           ret))))
-                              bes (let [transforms
-                                          (reduce1
-                                            (fn [transforms mk]
-                                              (if (keyword? mk)
-                                                (let [mkns (namespace mk)
-                                                      mkn (name mk)]
-                                                  (cond (= mkn "keys") (assoc transforms mk #(keyword (or mkns (namespace %)) (name %)))
-                                                        (= mkn "syms") (assoc transforms mk #(list `quote (symbol (or mkns (namespace %)) (name %))))
-                                                        (= mkn "strs") (assoc transforms mk str)
-                                                        :else transforms))
-                                                transforms))
-                                            {}
-                                            (keys b))]
-                                    (reduce1
-                                        (fn [bes entry]
-                                          (reduce1 #(assoc %1 %2 ((val entry) %2))
-                                                   (dissoc bes (key entry))
-                                                   ((key entry) bes)))
-                                        (dissoc b :as :or)
-                                        transforms))]
-                         (if (seq bes)
-                           (let [bb (key (first bes))
-                                 bk (val (first bes))
-                                 local (if (instance? clojure.lang.Named bb) (with-meta (symbol nil (name bb)) (meta bb)) bb)
-                                 bv (if (contains? defaults local)
-                                      (list `get gmap bk (defaults local))
-                                      (list `get gmap bk))]
-                             (recur (if (ident? bb)
-                                      (-> ret (conj local bv))
-                                      (pb ret bb bv))
-                                    (next bes)))
-                           ret))))]
-               (cond
-                (symbol? b) (-> bvec (conj b) (conj v))
-                (vector? b) (pvec bvec b v)
-                (map? b) (pmap bvec b v)
-                :else (throw (new Exception (str "Unsupported binding form: " b))))))
+             (cond
+               (symbol? b) (-> bvec (conj b) (conj v))
+               (vector? b) (destvec* pb bvec b v)
+               (map? b) (destmap* pb bvec b v)
+               :else (throw (new Exception (str "Unsupported binding form: " b)))))
         process-entry (fn [bvec b] (pb bvec (first b) (second b)))]
     (if (every? symbol? (map first bents))
       bindings
