@@ -777,10 +777,18 @@ static public Object pop(Object x){
 
 private static final Object REQ_NOT_FOUND = new Object();
 
+static public String reqmsg(Object key){
+    String msg = "Missing required key: ";
+    if(key instanceof String)
+        return msg + "\"" + key + "\"";
+    else
+        return msg + key;
+}
+
 static public Object req(Object coll, Object key){
     Object v = get(coll, key, REQ_NOT_FOUND);
     if(v == REQ_NOT_FOUND)
-        throw new IllegalArgumentException("Missing required key: " + key);
+        throw new IllegalArgumentException(reqmsg(key));
     else
         return v;
 }
