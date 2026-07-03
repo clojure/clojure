@@ -4479,6 +4479,7 @@
         gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
         gignore (gensym "ignore__")
         defaults (:or b)
+        select (:select b)
         xf (fn [mk]
              (let [mkns (namespace mk)
                    mkn (name mk)]
@@ -4496,7 +4497,7 @@
                    (if (:as b)
                      (conj ret (:as b) gmap)
                      ret))))
-        bes (dissoc b :as :or)
+        bes (dissoc b :as :or :select)
         push1 (fn [ret bb bk req?]
                 (let [getter (if req? `req! `get)
                       local (if (instance? clojure.lang.Named bb) (with-meta (symbol nil (name bb)) (meta bb)) bb)
@@ -4507,28 +4508,40 @@
                            (list getter gmap bk))]
                   (if (ident? bb)
                     (-> ret (conj local bv))
-                    (pb ret bb bv))))]
-    (reduce1
-     (fn [ret be]
-       (let [bb (key be)
-             bk (val be)]
-         (if (keyword? bb)
-           (let [tr (xf bb)
-                 req? (.endsWith (name bb) "!")]
-             (loop [ret ret
-                    bbs (seq bk)
-                    preamp? true]
-               (if (seq bbs)
-                 (let [bb (first bbs)]
-                   (if (= bb '&)
-                     (recur ret (next bbs) false)
-                     (recur (if (or preamp? req?)
-                              (push1 ret (if preamp? bb gignore) (tr bb) req?)
-                              ret)
-                            (next bbs) preamp?)))
-                 ret)))
-           (push1 ret bb bk false))))
-     ret bes)))
+                    (pb ret bb bv))))
+        retsel
+        (loop [ret ret, sel [], bes bes]
+          (if (seq bes)
+            (let [be (first bes)
+                  bb (key be)
+                  bk (val be)]
+              (if (keyword? bb)
+                (let [dir bb
+                      tr (xf bb)
+                      req? (.endsWith (name bb) "!")
+                      retsel
+                      (loop [ret ret, sel sel, bbs (seq bk), preamp? true]
+                        (if (seq bbs)
+                          (let [bb (first bbs)
+                                bk (tr bb)]
+                            (if (= bb '&)
+                              (if preamp?
+                                (recur ret sel (next bbs) false)
+                                (throw (new IllegalArgumentException (str "& can only appear once in " dir))))
+                              (recur (if (or preamp? req?)
+                                       (push1 ret (if preamp? bb gignore) bk req?)
+                                       ret)
+                                     (conj sel bk)
+                                     (next bbs) preamp?)))
+                          [ret sel]))]
+                  (recur (first retsel) (second retsel) (next bes)))
+                (recur (push1 ret bb bk false) (conj sel bk) (next bes))))
+            [ret sel]))
+        ret (first retsel)
+        sel (second retsel)]
+    (if select
+      (conj ret select `(select-keys ~gmap ~sel))
+      ret)))
 
 (defn destructure [bindings]
   (let [bents (partition 2 bindings)
