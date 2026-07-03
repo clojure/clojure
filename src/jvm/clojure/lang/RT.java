@@ -1626,7 +1626,7 @@ static public double uncheckedDoubleCast(double x){
 static public IPersistentMap map(Object... init){
 	if(init == null || init.length == 0)
 		return PersistentArrayMap.EMPTY;
-	else if(init.length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
+	else if(PersistentArrayMap.canBePAM(init))
 		return PersistentArrayMap.createWithCheck(init);
 	return PersistentHashMap.createWithCheck(init);
 }
@@ -1634,7 +1634,7 @@ static public IPersistentMap map(Object... init){
 static public IPersistentMap mapUniqueKeys(Object... init){
 	if(init == null)
 		return PersistentArrayMap.EMPTY;
-	else if(init.length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
+	else if(PersistentArrayMap.canBePAM(init))
 		return new PersistentArrayMap(init);
 	return PersistentHashMap.create(init);
 }

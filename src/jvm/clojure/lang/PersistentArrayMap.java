@@ -67,6 +67,19 @@ IPersistentMap createHT(Object[] init){
 	return PersistentHashMap.create(meta(), init);
 }
 
+static public boolean canBePAM(Object[] init){
+	if(init.length <= HASHTABLE_THRESHOLD)
+		return true;
+	else if(init.length <= KW_HASHTABLE_THRESHOLD) {
+		for(int i = HASHTABLE_THRESHOLD;i < init.length; i+=2){
+			if(!(init[i] instanceof Keyword))
+				return false;
+			}
+		return true;
+		}
+	return false;
+}
+
 static public PersistentArrayMap createWithCheck(Object[] init){
 	for(int i=0;i< init.length;i += 2)
 		{
