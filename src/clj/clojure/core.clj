@@ -1564,21 +1564,6 @@
    :static true}
   [map key] (. clojure.lang.RT (find map key)))
 
-(defn select-keys
-  "Returns a map containing only those entries in map whose key is in keys"
-  {:added "1.0"
-   :static true}
-  [map keyseq]
-    (loop [ret {} keys (seq keyseq)]
-      (if keys
-        (let [entry (. clojure.lang.RT (find map (first keys)))]
-          (recur
-           (if entry
-             (conj ret entry)
-             ret)
-           (next keys)))
-        (with-meta ret (meta map)))))
-
 (defn keys
   "Returns a sequence of the map's keys, in the same order as (seq map)."
   {:added "1.0"
@@ -2807,7 +2792,7 @@
   {:added "1.0"}
   [& names] `(do ~@(map #(list 'def (vary-meta % assoc :declared true)) names)))
 
-(declare cat)
+(declare cat select-keys)
 
 (defn mapcat
   "Returns the result of applying concat to the result of applying map
@@ -7111,6 +7096,19 @@ fails, attempts to require sym's namespace and retries."
               (transient [])
               coll)
       persistent!))
+
+(defn select-keys
+  "Returns a map containing only those entries in map whose key is in keyseq"
+  {:added "1.0"}
+  [map keyseq]
+  (with-meta
+    (persistent!
+      (reduce (fn [ret k]
+                (if-let [entry (clojure.lang.RT/find map k)]
+                  (conj! ret entry)
+                  ret))
+        (transient {}) keyseq))
+    (meta map)))
 
 (require '[clojure.java.io :as jio])
 
