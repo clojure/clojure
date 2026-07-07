@@ -1462,3 +1462,60 @@
     (testing "that right of & is unbound (compile-time errors)"
       (is (thrown? Exception (eval '(let [{:strs! [a & b]} sample-map] b))))
       (is (thrown? Exception (eval '(let [{a "a" {aa "a" :as m :keys [b c & e]} "b"} sample-map] e)))))))
+
+(deftest select-directive
+  (let [m {:a 1 :b 2 :c 3 :d 4
+           'sa 10 'sb 20 'sc 30 'sd 40
+           "stra" 100 "strb" 200 "strc" 300 "strd" 400
+           :foo/x 1000 :foo/y 2000 :foo/z 3000
+           ::x 10000 ::y 20000 ::z 30000
+           :nested {:aa 1 'saa 10 "straa" 100}}
+
+        {:keys [a b & c z]
+         :keys! [d]
+         :select keys-sel} m
+
+        {:syms [sa sb & sc sz]
+         :syms! [sd]
+         :select syms-sel} m
+        
+        {:strs [stra strb & strc strz]
+         :strs! [strd]
+         :select strs-sel} m
+
+        {:foo/keys [x & y zz]
+         :foo/keys! [z]
+         :select qkeys-sel} m
+
+        {::keys [x & y zz]
+         ::keys! [z]
+         :select aqkeys-sel} m
+
+        {{aa :aa saa 'saa
+          :select nest-sel} :nested
+         aqx ::x
+         :select tl-sel} m
+
+        {:keys! [a b & c]
+         :keys [d & z]
+         :or {z 42}
+         :select or-sel} m
+
+        {:keys [a b c d]
+         :syms [sa sb sc sd]
+         :strs [stra strb strc strd]
+         :foo/keys! [x y z]
+         ::keys [x y z]
+         nest :nested
+         :as mm
+         :select sel-mm} m]
+    (are [expected result] (= expected result)
+      keys-sel {:a 1 :b 2 :c 3 :d 4}
+      syms-sel '{sa 10 sb 20 sc 30 sd 40}
+      strs-sel {"stra" 100 "strb" 200 "strc" 300 "strd" 400}
+      qkeys-sel {:foo/x 1000 :foo/y 2000 :foo/z 3000}
+      aqkeys-sel {::x 10000 ::y 20000 ::z 30000}
+      nest-sel '{:aa 1, saa 10}
+      tl-sel '{:nested {:aa 1, saa 10, "straa" 100} ::x 10000}
+      or-sel {:a 1 :b 2 :c 3 :d 4}
+      sel-mm mm)))
