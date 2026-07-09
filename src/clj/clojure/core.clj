@@ -4480,6 +4480,7 @@
         defaults (:or b)
         defaults-as (:as defaults)
         defaults (dissoc defaults :as)
+        gdefaults (zipmap (keys defaults) (map #(gensym (str "default__" (name %))) (keys defaults)))
         select (:select b)
         xf (fn [mk]
              (let [mkns (namespace mk)
@@ -4488,7 +4489,10 @@
                      (.startsWith mkn "syms") #(list `quote (symbol (or mkns (namespace %)) (name %)))
                      (.startsWith mkn "strs") str
                      :else (throw (new Exception (str "Unsupported map directive: " mk) )))))
-        ret (-> bvec (conj gmap) (conj v)
+        ret (reduce1 (fn [ret e]
+                       (conj ret (val e) (defaults (key e))))
+                     bvec gdefaults)
+        ret (-> ret (conj gmap) (conj v)
                 (conj gmap)
                 (conj `(if (seq? ~gmap)
                          (if (next ~gmapseq)
@@ -4511,7 +4515,7 @@
                            (if req?
                              (throw (new Exception
                                          (str "Can't supply default value for required binding: " local)))
-                             (list `get gmap bk (defaults local)))
+                             (list `get gmap bk (gdefaults local)))
                            (list getter gmap bk))]
                   (if (ident? bb)
                     (-> ret (conj local bv))
@@ -4551,7 +4555,7 @@
         b->k (:b->k retsel)
         ret (if select (conj ret select `(select-keys ~gmap ~sel)) ret)
         ret (if defaults-as
-              (let [dm (zipmap (map b->k (keys defaults)) (vals defaults))]
+              (let [dm (zipmap (map b->k (keys gdefaults)) (vals gdefaults))]
                 (conj ret defaults-as dm))
               ret)
         ]
