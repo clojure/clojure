@@ -4553,9 +4553,10 @@
         ret (:ret retsel)
         sel (:sel retsel)
         b->k (:b->k retsel)
+        bk #(or (b->k %) (throw (new IllegalArgumentException (str % " is used in :or but not bound"))))
         ret (if select (conj ret select `(select-keys ~gmap ~sel)) ret)
         ret (if defaults-as
-              (let [dm (zipmap (map b->k (keys gdefaults)) (vals gdefaults))]
+              (let [dm (zipmap (map bk (keys gdefaults)) (vals gdefaults))]
                 (conj ret defaults-as dm))
               ret)
         ]
