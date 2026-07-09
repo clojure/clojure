@@ -451,3 +451,12 @@
       (meta ^:foo (reify clojure.lang.ILookup)) #{:foo}
       (meta (macroexpand-1 '(reify clojure.lang.ILookup))) #{:line :column}
       (meta (macroexpand-1 '^:foo (reify clojure.lang.ILookup))) #{:line :column :foo})))
+
+(deftest CLJ-2959
+  (testing "CLJ-2959 Closed over fields are emitted deterministically"
+    (let [field-order (fn []
+                        (map #(.getName %)
+                             (.getDeclaredFields
+                               (class (eval '(let [a 0 b 1 c 2 d 3 e 4 f 5 g 6 h 7]
+                                               (fn [] [a b c d e f g h])))))))]
+      (is (= (field-order) (field-order) (field-order))))))
