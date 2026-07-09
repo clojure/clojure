@@ -4478,9 +4478,9 @@
         gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
         gignore (gensym "ignore__")
         defaults (:or b)
-        defaults-as (:as defaults)
-        defaults (dissoc defaults :as)
-        gdefaults (zipmap (keys defaults) (map #(gensym (str "default__" (name %))) (keys defaults)))
+        defaults-as (:defaults b)
+        b (dissoc b :defaults)
+        gdefaults (zipmap (keys defaults) (map #(gensym (str "default__" (name %) "_")) (keys defaults)))
         select (:select b)
         xf (fn [mk]
              (let [mkns (namespace mk)
@@ -4553,7 +4553,10 @@
         ret (:ret retsel)
         sel (:sel retsel)
         b->k (:b->k retsel)
-        bk #(or (b->k %) (throw (new IllegalArgumentException (str % " is used in :or but not bound"))))
+        bk #(or (b->k %)
+                (throw
+                 (new IllegalArgumentException
+                      (str "'" % "' is used in :or but not in a binding, can't map to a key for :defaults"))))
         ret (if select (conj ret select `(select-keys ~gmap ~sel)) ret)
         ret (if defaults-as
               (let [dm (zipmap (map bk (keys gdefaults)) (vals gdefaults))]
