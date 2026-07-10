@@ -4425,6 +4425,15 @@
                (next vs))
         (persistent! map))))
 
+(defn repeatedly
+  "Takes a function of no args, presumably with side effects, and
+  returns an infinite (or length n if supplied) lazy sequence of calls
+  to it"
+  {:added "1.0"
+   :static true}
+  ([f] (lazy-seq (cons (f) (repeatedly f))))
+  ([n f] (take n (repeatedly f))))
+
 (defn seq-to-map-for-destructuring
   "Builds a map from a seq as described in
   https://clojure.org/reference/special_forms#keyword-arguments"
@@ -4480,7 +4489,7 @@
         defaults (:or b)
         defaults-as (:defaults b)
         b (dissoc b :defaults)
-        gdefaults (zipmap (keys defaults) (map #(gensym (str "default__" (name %) "_")) (keys defaults)))
+        gdefaults (zipmap (keys defaults) (repeatedly #(gensym "default__")))
         select (:select b)
         xf (fn [mk]
              (let [mkns (namespace mk)
@@ -4511,21 +4520,24 @@
         push1 (fn [ret bb bk req?]
                 (let [getter (if req? `req! `get)
                       local (localize bb)
-                      bv (if (contains? defaults local)
-                           (if req?
+                      local-default? (contains? defaults local)
+                      key-default? (contains? defaults bk)
+                      bv (if (or local-default? key-default?)
+                           (if (and local-default? key-default?)
                              (throw (new Exception
-                                         (str "Can't supply default value for required binding: " local)))
-                             (list `get gmap bk (gdefaults local)))
+                                         (str "Multiple :or defaults for same key: " bk " '" local "'")))
+                             (if req?
+                               (throw (new Exception
+                                           (str "Can't supply default value for required binding: " local)))
+                               (list `get gmap bk (if local-default? (gdefaults local) (gdefaults bk)))))
                            (list getter gmap bk))]
                   (if (ident? bb)
                     (-> ret (conj local bv))
                     (pb ret bb bv))))
         retsel
-        (loop [ret ret, sel #{}, bes bes, b->k {}]
+        (loop [ret ret, sel #{}, bes bes, b->k {}, subs {}]
           (if (seq bes)
-            (let [be (first bes)
-                  bb (key be)
-                  bk (val be)]
+            (let [be (first bes), bb (key be), bk (val be)]
               (if (keyword? bb)
                 (let [dir bb
                       tr (xf bb)
@@ -4533,36 +4545,39 @@
                       retsel
                       (loop [ret ret, sel sel, bbs (seq bk), preamp? true, b->k b->k]
                         (if (seq bbs)
-                          (let [bb (first bbs)
-                                bk (tr bb)]
+                          (let [bb (first bbs)]
                             (if (= bb '&)
                               (if preamp?
                                 (recur ret sel (next bbs) false b->k)
-                                (throw (new IllegalArgumentException
-                                            (str "& can only appear once in " dir))))
-                              (recur (if (or preamp? req?)
-                                       (push1 ret (if preamp? bb gignore) bk req?)
-                                       ret)
-                                     (conj sel bk)
-                                     (next bbs) preamp?
-                                     (if preamp? (assoc b->k (localize bb) bk) b->k))))
+                                (throw (new IllegalArgumentException (str "& can only appear once in " dir))))
+                              (let [_
+                                    (when (and (not preamp?) (symbol? bb))
+                                      (throw
+                                       (new IllegalArgumentException
+                                            (str "'" bb
+                                                 "' - binding symbols can only appear before '&', use keys after"))))
+                                    bk (tr bb)]
+                                (recur (if (or preamp? req?)
+                                         (push1 ret (if preamp? bb gignore) bk req?)
+                                         ret)
+                                       (conj sel bk)
+                                       (next bbs) preamp?
+                                       (if preamp? (assoc b->k (localize bb) bk) b->k)))))
                           {:ret ret, :sel sel, :b->k b->k}))]
-                  (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel)))
-                (recur (push1 ret bb bk false) (conj sel bk) (next bes) (assoc b->k (localize bb) bk))))
-            {:ret ret, :sel sel, :b->k b->k}))
-        ret (:ret retsel)
-        sel (:sel retsel)
-        b->k (:b->k retsel)
-        bk #(or (b->k %)
-                (throw
-                 (new IllegalArgumentException
-                      (str "'" % "' is used in :or but not in a binding, can't map to a key for :defaults"))))
-        ret (if select (conj ret select `(select-keys ~gmap ~sel)) ret)
-        ret (if defaults-as
-              (let [dm (zipmap (map bk (keys gdefaults)) (vals gdefaults))]
-                (conj ret defaults-as dm))
-              ret)
-        ]
+                  (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel) subs))
+                (let [subsel? (and select (map? bb))
+                      bb (if (or (not subsel?) (:select bb))
+                           bb
+                           (assoc bb :select (gensym "select__")))
+                      subs (if subsel? (assoc subs bk (:select bb)) subs)
+                      b->k (if (symbol? bb) (assoc b->k bb bk) b->k)]
+                  (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs))))
+            {:ret ret, :sel sel, :b->k b->k :subs subs}))
+        ret (:ret retsel), sel (:sel retsel), b->k (:b->k retsel)
+        bk #(if (symbol? %) (b->k %) %)
+        dm (dissoc (zipmap (map bk (keys gdefaults)) (vals gdefaults)) nil)
+        ret (if select (conj ret select `(select-keys (merge ~dm ~gmap ~(:subs retsel)) ~sel)) ret)
+        ret (if defaults-as (conj ret defaults-as dm) ret)]
     ret))
 
 (defn destructure [bindings]
@@ -5250,15 +5265,6 @@
    (when-let [[e :as s] (. sc seqFrom end-key false)]
      (take-while (mk-bound-fn sc start-test start-key)
                  (if ((mk-bound-fn sc end-test end-key) e) s (next s))))))
-
-(defn repeatedly
-  "Takes a function of no args, presumably with side effects, and
-  returns an infinite (or length n if supplied) lazy sequence of calls
-  to it"
-  {:added "1.0"
-   :static true}
-  ([f] (lazy-seq (cons (f) (repeatedly f))))
-  ([n f] (take n (repeatedly f))))
 
 (defn add-classpath
   "DEPRECATED 

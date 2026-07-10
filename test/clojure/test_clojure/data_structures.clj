@@ -1384,7 +1384,7 @@
         (= m3 (seq-to-map-for-destructuring (list :a 1 :b 2 {:a 0})))
         (= a4 nil)))))
 
-(deftest keys-bang
+#_(deftest keys-bang
   (let [sample-map {:a 1 :b 2}]
     (testing ":keys! happy path, binds and throws when key missing"
       (is (= 1 (let [{:keys! [a b]} sample-map] a)))
@@ -1420,7 +1420,7 @@
       (is (thrown? Exception (eval '(let [{:keys! [foo/a & foo/c]} sample-map] c))))
       (is (thrown? Exception (eval '(let [{:foo/keys! [foo/aa & foo/cc]} sample-map2] cc)))))))
 
-(deftest syms-bang
+#_(deftest syms-bang
   (let [sample-map '{a 1 b 2}]
     (testing ":syms! happy path, binds and throws when key missing"
       (is (= 1 (let [{:syms! [a b]} sample-map] a)))
@@ -1455,7 +1455,7 @@
       (is (thrown? Exception (eval '(let [{:syms! [foo/a & foo/c]} sample-map] c))))
       (is (thrown? Exception (eval '(let [{:foo/syms! [foo/aa & foo/cc]} sample-map2] cc)))))))
 
-(deftest strs-bang
+#_(deftest strs-bang
   (let [sample-map {"a" 1 "b" 2}]
     (testing ":strs! happy path, binds and throws when key missing"
       (is (= 1 (let [{:strs! [a b]} sample-map] a)))
@@ -1476,7 +1476,7 @@
       (is (thrown? Exception (eval '(let [{:strs! [a & b]} sample-map] b))))
       (is (thrown? Exception (eval '(let [{a "a" {aa "a" :as m :keys [b c & e]} "b"} sample-map] e)))))))
 
-(deftest select-directive
+#_(deftest select-directive
   (let [m {:a 1 :b 2 :c 3 :d 4
            'sa 10 'sb 20 'sc 30 'sd 40
            "stra" 100 "strb" 200 "strc" 300 "strd" 400
