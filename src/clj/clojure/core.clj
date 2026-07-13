@@ -4528,7 +4528,7 @@
                                          (str "Multiple :or defaults for same key: " bk " '" local "'")))
                              (if req?
                                (throw (new Exception
-                                           (str "Can't supply default value for required binding: " local)))
+                                           (str "Can't supply default value for required key: " bk)))
                                (list `get gmap bk (if local-default? (gdefaults local) (gdefaults bk)))))
                            (list getter gmap bk))]
                   (if (ident? bb)
