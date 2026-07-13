@@ -1384,97 +1384,102 @@
         (= m3 (seq-to-map-for-destructuring (list :a 1 :b 2 {:a 0})))
         (= a4 nil)))))
 
-#_(deftest keys-bang
+(deftest keys-bang
   (let [sample-map {:a 1 :b 2}]
     (testing ":keys! happy path, binds and throws when key missing"
       (is (= 1 (let [{:keys! [a b]} sample-map] a)))
       (is (thrown? Exception (let [{:keys! [a b]} {:a 1}] a))))
     (testing ":keys! with & bind and don't bind"
-      (is (= 1 (let [{:keys! [a & b]} sample-map] a)))
-      (is (thrown? Exception (let [{:keys! [a & b]} {:a 1}] a))))
+      (is (= 1 (let [{:keys! [a & :b]} sample-map] a)))
+      (is (thrown? Exception (let [{:keys! [a & :b]} {:a 1}] a))))
     (testing "nested maps with :keys! &"
       (let [sample-map {:a 1 :b {:a 2 :b 3 :c 4 :d 42}}
-            {a :a {aa :a :as m :keys! [b c & d]} :b} sample-map]
+            {a :a {aa :a :as m :keys! [b c & :d]} :b} sample-map]
         (is (= m (:b sample-map)))
         (is (= a 1))
         (is (= aa 2))
         (is (= b 3))
         (is (= c 4))
-        (is (thrown? Exception (let [{a :a {aa :a :as m :keys! [b c & d e]} :b} (dissoc sample-map :c)] a)))))
+        (is (thrown? Exception (let [{a :a {aa :a :as m :keys! [b c & :d :e]} :b} sample-map] a)))
+        (is (thrown? Exception (let [{a :a {aa :a :as m :keys! [b c & :d]} :b} (update sample-map :b dissoc :c)] a)))))
     (testing "a broad range of qualified names/declarators with :keys! &"
       (let [sample-map {:foo/a 1 :b 2 :foo/c 3}
-            {:keys! [foo/a & b]} sample-map
-            {:keys! [b & foo/c]} sample-map
+            {:keys! [foo/a & :b]} sample-map
+            {:keys! [b & :foo/c]} sample-map
             sample-map2 {:foo/aa 1 :bb 2 :foo/cc 3}
-            {:foo/keys! [aa & cc]} sample-map2]
+            {:foo/keys! [aa & :foo/cc]} sample-map2]
         (is (= a 1))
         (is (= b 2))
-        (is (thrown? Exception (let [{:keys! [b & foo/c]} (dissoc sample-map :b)] b)))
-        (is (thrown? Exception (let [{:keys! [b & foo/c]} (dissoc sample-map :foo/c)] b)))
-        (is (thrown? Exception (let [{:foo/keys! [aa & bb]} sample-map2] aa)))
+        (is (thrown? Exception (let [{:keys! [b & :foo/c]} (dissoc sample-map :b)] b)))
+        (is (thrown? Exception (let [{:keys! [b & :foo/c]} (dissoc sample-map :foo/c)] b)))
+        (is (= 1 (let [{:foo/keys! [aa & :bb]} sample-map2] aa)))
         (is (= aa 1))
         (is (= 1 (let [{:keys! [::a & ::b]} {::a 1 , ::b 2}] a)))))
     (testing "that right of & is unbound (compile-time errors)"
-      (is (thrown? Exception (eval '(let [{:keys! [a & b]} sample-map] b))))
-      (is (thrown? Exception (eval '(let [{a :a {aa :a :as m :keys [b c & e]} :b} sample-map] e))))
-      (is (thrown? Exception (eval '(let [{:keys! [foo/a & foo/c]} sample-map] c))))
-      (is (thrown? Exception (eval '(let [{:foo/keys! [foo/aa & foo/cc]} sample-map2] cc)))))))
+      (is (thrown? Exception (eval '(let [{:keys! [a & :b]} sample-map] b))))
+      (is (thrown? Exception (eval '(let [{a :a {aa :a :as m :keys [b c & :e]} :b} sample-map] e))))
+      (is (thrown? Exception (eval '(let [{:keys! [foo/a & :foo/c]} sample-map] c))))
+      (let [sample-map2 {:foo/aa 1 :bb 2 :foo/cc 3}]
+        (is (thrown? Exception (eval '(let [{:foo/keys! [foo/aa & :foo/cc]} sample-map2] cc))))))))
 
-#_(deftest syms-bang
+(deftest syms-bang
   (let [sample-map '{a 1 b 2}]
     (testing ":syms! happy path, binds and throws when key missing"
       (is (= 1 (let [{:syms! [a b]} sample-map] a)))
       (is (thrown? Exception (let [{:syms! [a b]} {:a 1}] a))))
     (testing ":syms! with & bind and don't bind"
-      (is (= 1 (let [{:syms! [a & b]} sample-map] a)))
-      (is (thrown? Exception (let [{:syms! [a & b]} {:a 1}] a))))
+      (is (= 1 (let [{:syms! [a & 'b]} sample-map] a)))
+      (is (thrown? Exception (let [{:syms! [a & 'b]} {:a 1}] a))))
     (testing "nested maps with :syms! &"
       (let [sample-map '{a 1 b {a 2 b 3 c 4 d 42}}
-            {a 'a {aa 'a :as m :syms! [b c & d]} 'b} sample-map]
+            {a 'a {aa 'a :as m :syms! [b c & 'd]} 'b} sample-map]
         (is (= m ('b sample-map)))
         (is (= a 1))
         (is (= aa 2))
         (is (= b 3))
         (is (= c 4))
-        (is (thrown? Exception (let [{a a {aa a :as m :syms! [b c & d e]} :b} (dissoc sample-map :c)] a)))))
+        (is (thrown? Exception (let [{a 'a {aa :a :as m :syms! [b c & 'd 'e]} 'b} sample-map] a)))
+        (is (thrown? Exception (let [{a 'a {aa :a :as m :syms! [b c & 'd]} 'b} (update sample-map 'b dissoc 'c)] a)))))
     (testing "a broad range of qualified names/declarators with :syms! &"
       (let [sample-map '{foo/a 1 b 2 foo/c 3}
-            {:syms! [foo/a & b]} sample-map
-            {:syms! [b & foo/c]} sample-map
+            {:syms! [foo/a & 'b]} sample-map
+            {:syms! [b & 'foo/c]} sample-map
             sample-map2 '{foo/aa 1 bb 2 foo/cc 3}
-            {:foo/syms! [aa & cc]} sample-map2]
+            {:foo/syms! [aa & 'foo/cc]} sample-map2]
         (is (= a 1))
         (is (= b 2))
-        (is (thrown? Exception (let [{:syms! [b & foo/c]} (dissoc sample-map 'b)] b)))
-        (is (thrown? Exception (let [{:syms! [b & foo/c]} (dissoc sample-map 'foo/c)] b)))
+        (is (thrown? Exception (let [{:syms! [b & 'foo/c]} (dissoc sample-map 'b)] b)))
+        (is (thrown? Exception (let [{:syms! [b & 'foo/c]} (dissoc sample-map 'foo/c)] b)))
         (is (= aa 1))
-        (is (thrown? Exception (let [{:foo/syms! [aa & bb]} sample-map2] aa)))))
+        (is (= 1 (let [{:foo/syms! [aa & 'bb]} sample-map2] aa)))))
     (testing "that right of & is unbound (compile-time errors)"
-      (is (thrown? Exception (eval '(let [{:syms! [a & b]} sample-map] b))))
-      (is (thrown? Exception (eval '(let [{a a {aa a :as m :keys [b c & e]} :b} sample-map] e))))
-      (is (thrown? Exception (eval '(let [{:syms! [foo/a & foo/c]} sample-map] c))))
-      (is (thrown? Exception (eval '(let [{:foo/syms! [foo/aa & foo/cc]} sample-map2] cc)))))))
+      (is (thrown? Exception (eval '(let [{:syms! [a & 'b]} sample-map] b))))
+      (is (thrown? Exception (eval '(let [{a a {aa a :as m :syms [b c & 'e]} :b} sample-map] e))))
+      (is (thrown? Exception (eval '(let [{:syms! [foo/a & 'foo/c]} sample-map] c))))
+      (let [sample-map2 '{foo/aa 1 bb 2 foo/cc 3}]
+        (is (thrown? Exception (eval '(let [{:foo/syms! [foo/aa & 'foo/cc]} sample-map2] cc))))))))
 
-#_(deftest strs-bang
+(deftest strs-bang
   (let [sample-map {"a" 1 "b" 2}]
     (testing ":strs! happy path, binds and throws when key missing"
       (is (= 1 (let [{:strs! [a b]} sample-map] a)))
       (is (thrown? Exception (let [{:strs! [a b]} {:a 1}] a))))
     (testing ":strs! with & bind and don't bind"
-      (is (= 1 (let [{:strs! [a & b]} sample-map] a)))
-      (is (thrown? Exception (let [{:strs! [a & b]} {:a 1}] a))))
+      (is (= 1 (let [{:strs! [a & "b"]} sample-map] a)))
+      (is (thrown? Exception (let [{:strs! [a & "b"]} {:a 1}] a))))
     (testing "nested maps with :strs! &"
       (let [sample-map {"a" 1 "b" {"a" 2 "b" 3 "c" 4 "d" 42}}
-            {a "a" {aa "a" :as m :strs! [b c & d]} "b"} sample-map]
+            {a "a" {aa "a" :as m :strs! [b c & "d"]} "b"} sample-map]
         (is (= m (get sample-map "b")))
         (is (= a 1))
         (is (= aa 2))
         (is (= b 3))
         (is (= c 4))
-        (is (thrown? Exception (let [{a "a" {aa "a" :as m :strs! [b c & d e]} :b} (dissoc sample-map "c")] a)))))
+        (is (thrown? Exception (let [{a "a" {aa "a" :as m :strs! [b c & "d" "e"]} "b"} sample-map] a)))
+        (is (thrown? Exception (let [{a "a" {aa "a" :as m :strs! [b c & "d"]} "b"} (update sample-map "b" dissoc "c")] a)))))
     (testing "that right of & is unbound (compile-time errors)"
-      (is (thrown? Exception (eval '(let [{:strs! [a & b]} sample-map] b))))
-      (is (thrown? Exception (eval '(let [{a "a" {aa "a" :as m :keys [b c & e]} "b"} sample-map] e)))))))
+      (is (thrown? Exception (eval '(let [{:strs! [a & "b"]} sample-map] b))))
+      (is (thrown? Exception (eval '(let [{a "a" {aa "a" :as m :keys [b c & "e"]} "b"} sample-map] e)))))))
 
 #_(deftest select-directive
   (let [m {:a 1 :b 2 :c 3 :d 4
