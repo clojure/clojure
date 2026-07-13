@@ -4488,6 +4488,8 @@
         gignore (gensym "ignore__")
         defaults (:or b)
         defaults-as (:defaults b)
+        _ (when (and defaults-as (not defaults))
+            (throw (new IllegalArgumentException "Can't specify :defaults without :or")))
         b (dissoc b :defaults)
         gdefaults (zipmap (keys defaults) (repeatedly #(gensym "default__")))
         select (:select b)
