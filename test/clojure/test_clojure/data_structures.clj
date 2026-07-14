@@ -1481,7 +1481,7 @@
       (is (thrown? Exception (eval '(let [{:strs! [a & "b"]} sample-map] b))))
       (is (thrown? Exception (eval '(let [{a "a" {aa "a" :as m :keys [b c & "e"]} "b"} sample-map] e)))))))
 
-#_(deftest select-directive
+(deftest select-directive
   (let [m {:a 1 :b 2 :c 3 :d 4
            'sa 10 'sb 20 'sc 30 'sd 40
            "stra" 100 "strb" 200 "strc" 300 "strd" 400
@@ -1489,23 +1489,23 @@
            ::x 10000 ::y 20000 ::z 30000
            :nested {:aa 1 'saa 10 "straa" 100}}
 
-        {:keys [a b & c z]
+        {:keys [a b & :c :z]
          :keys! [d]
          :select keys-sel} m
 
-        {:syms [sa sb & sc sz]
+        {:syms [sa sb & 'sc 'sz]
          :syms! [sd]
          :select syms-sel} m
         
-        {:strs [stra strb & strc strz]
+        {:strs [stra strb & "strc" "strz"]
          :strs! [strd]
          :select strs-sel} m
 
-        {:foo/keys [x & y zz]
+        {:foo/keys [x & :y :zz]
          :foo/keys! [z]
          :select qkeys-sel} m
 
-        {::keys [x & y zz]
+        {::keys [x & :y :zz]
          ::keys! [z]
          :select aqkeys-sel} m
 
@@ -1514,8 +1514,8 @@
          aqx ::x
          :select tl-sel} m
 
-        {:keys! [a b & c]
-         :keys [d & z]
+        {:keys! [a b & :c]
+         :keys [d & :z]
          :or {z 42}
          :select or-sel} m
 
@@ -1531,9 +1531,62 @@
       keys-sel {:a 1 :b 2 :c 3 :d 4}
       syms-sel '{sa 10 sb 20 sc 30 sd 40}
       strs-sel {"stra" 100 "strb" 200 "strc" 300 "strd" 400}
-      qkeys-sel {:foo/x 1000 :foo/y 2000 :foo/z 3000}
-      aqkeys-sel {::x 10000 ::y 20000 ::z 30000}
+      qkeys-sel {:foo/x 1000 :foo/z 3000}
+      aqkeys-sel {::x 10000 ::z 30000}
       nest-sel '{:aa 1, saa 10}
-      tl-sel '{:nested {:aa 1, saa 10, "straa" 100} ::x 10000}
+      tl-sel '{:nested {:aa 1, saa 10} ::x 10000}
       or-sel {:a 1 :b 2 :c 3 :d 4}
       sel-mm mm)))
+
+(deftest select-or-defaults
+  (let [sample-map {:a 1, :b 2, :c  {:aa 10 :bb 20},
+                    'd 4  'e 5  'f  {'dd 40 'ee 50},
+                    "g" 6 "h" 7 "i" {"gg" 60 "hh" 70},}]
+    (testing "happy path"
+      (testing ":defaults"
+        (is (empty? (let [{:defaults d :or {}} {}] d)))
+        (is (= {:a 1} (let [{:defaults d :or {:a 1}} {}] d)))
+        (is (= {:a 1} (let [{:keys [a] :defaults d :or {:a 1}} {}] d)))
+        (is (= {:a 1} (let [{:keys [a] :defaults d :or {a 1}} {}] d)))
+        (is (= {:a 1, 'b 2, "c" 3} (let [{:keys [a] :defaults d :or {:a 1, 'b 2, "c" 3}} {}] d))))
+      
+      (testing ":keys + :select + :or + defaults"
+        (let [{:keys [a b z & :c] {:keys! [aa & :bb]} :c
+               :or {c 0, :d 42, z :or-z}
+               :select m
+               :defaults dfs} sample-map]
+          (is (= 1 a))
+          (is (= 2 b))
+          (is (= 10 aa))
+          (is (= {:c {:aa 10, :bb 20}, :b 2, :a 1, :z :or-z} m))
+          (is (= {:d 42, :z :or-z} dfs))))
+
+      (testing ":syms + :select + :or + defaults"
+        (let [{:syms [d e z & 'f] {:syms! [dd & 'ee]} 'f
+               :or {c 0, 'd 42, z :or-z}
+               :select m
+               :defaults dfs} sample-map]
+          (is (= 4 d))
+          (is (= 5 e))
+          (is (= 40 dd))
+          (is (= '{f {dd 40, ee 50}, e 5, d 4, z :or-z} m))
+          (is (= '{d 42, z :or-z} dfs))))
+
+      (testing ":strs + :select + :or + defaults"
+        (let [{:strs [g h z & "i"] {:strs! [gg & "hh"]} "i"
+               :or {c 0, "d" 42, z :or-z}
+               :select m
+               :defaults dfs} sample-map]
+          (is (= 6 g))
+          (is (= 7 h))
+          (is (= 60 gg))
+          (is (= {"i" {"gg" 60, "hh" 70}, "g" 6, "h" 7, "z" :or-z} m))
+          (is (= {"d" 42, "z" :or-z} dfs))))
+
+      (testing "mixed things after &"
+        (is (= 1 (let [{:keys [a & 'b]} {:a 1}] a)))
+        (is (= 1 (let [{:keys! [a & 'b "c"]} {:a 1, 'b 2, "c" 3}] a))))
+
+      (testing "known compile-time errors"
+        (is (thrown? Exception (eval '(let [{:keys [a] :defaults d :or {:a 1, a 1}} {}] d))))
+        (is (thrown? Exception (eval '(let [{:defaults d} {}] d))))))))
