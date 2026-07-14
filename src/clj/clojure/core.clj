@@ -4434,6 +4434,18 @@
   ([f] (lazy-seq (cons (f) (repeatedly f))))
   ([n f] (take n (repeatedly f))))
 
+(declare reduce-kv)
+
+(defn some-vals
+  "Returns a map with only the non-nil values of map m. Returns nil if
+  m has no non-nil vals."
+  {:added "1.13"
+   :static true}
+  [m]
+  (reduce-kv
+   (fn [m k v] (if (some? v) (assoc m k v) m))
+   nil m))
+
 (defn seq-to-map-for-destructuring
   "Builds a map from a seq as described in
   https://clojure.org/reference/special_forms#keyword-arguments"
@@ -4491,7 +4503,7 @@
         _ (when (and defaults-as (not defaults))
             (throw (new IllegalArgumentException "Can't specify :defaults without :or")))
         b (dissoc b :defaults)
-        gdefaults (zipmap (keys defaults) (repeatedly #(gensym "default__")))
+        gdefaults (when defaults (zipmap (keys defaults) (repeatedly #(gensym "default__"))))
         select (:select b)
         xf (fn [mk]
              (let [mkns (namespace mk)
@@ -4537,7 +4549,7 @@
                     (-> ret (conj local bv))
                     (pb ret bb bv))))
         retsel
-        (loop [ret ret, sel #{}, bes bes, b->k {}, subs {}]
+        (loop [ret ret, sel #{}, bes bes, b->k {}, subs nil]
           (if (seq bes)
             (let [be (first bes), bb (key be), bk (val be)]
               (if (keyword? bb)
@@ -4577,8 +4589,11 @@
             {:ret ret, :sel sel, :b->k b->k :subs subs}))
         ret (:ret retsel), sel (:sel retsel), b->k (:b->k retsel)
         bk #(if (symbol? %) (b->k %) %)
-        dm (dissoc (zipmap (map bk (keys gdefaults)) (vals gdefaults)) nil)
-        ret (if select (conj ret select `(select-keys (merge ~dm ~gmap ~(:subs retsel)) ~sel)) ret)
+        dm (when defaults (dissoc (zipmap (map bk (keys gdefaults)) (vals gdefaults)) nil))
+        ret (if select
+              (conj ret select `(when-let [mm# (merge ~dm ~gmap (some-vals ~(:subs retsel)))]
+                                  (select-keys mm# ~sel)))
+              ret)
         ret (if defaults-as (conj ret defaults-as dm) ret)]
     ret))
 
