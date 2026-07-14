@@ -4591,7 +4591,9 @@
         bk #(if (symbol? %) (b->k %) %)
         dm (when defaults (dissoc (zipmap (map bk (keys gdefaults)) (vals gdefaults)) nil))
         ret (if select
-              (conj ret select `(when-let [mm# (merge ~dm ~gmap (some-vals ~(:subs retsel)))]
+              (conj ret select `(when-let [mm# (merge (some-vals (select-keys ~dm ~sel))
+                                                      ~gmap
+                                                      (some-vals ~(:subs retsel)))]
                                   (select-keys mm# ~sel)))
               ret)
         ret (if defaults-as (conj ret defaults-as dm) ret)]
