@@ -1496,7 +1496,7 @@
         {:syms [sa sb & 'sc 'sz]
          :syms! [sd]
          :select syms-sel} m
-        
+
         {:strs [stra strb & "strc" "strz"]
          :strs! [strd]
          :select strs-sel} m
@@ -1536,7 +1536,19 @@
       nest-sel '{:aa 1, saa 10}
       tl-sel '{:nested {:aa 1, saa 10} ::x 10000}
       or-sel {:a 1 :b 2 :c 3 :d 4}
-      sel-mm mm)))
+      sel-mm mm))
+  (testing "base cases"
+    (is (nil? (let [{{a :a} :n :select s} nil] s))
+        "if you haven't supplied a map, select won't make one for no reason")
+
+    (testing "you get what you supplied if nothing else"
+      (is (= {} (let [{{a :a} :n :select s} {}] s)))
+      (is (= {:n nil} (let [{{a :a} :n :select s} {:n nil}] s)))
+      (is (= {:n {}} (let [{{a :a} :n :select s} {:n {}}] s))))
+
+    (testing "defaults can turn nothing into something"
+      (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :select s} nil] s)))
+      (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :select s} {:n nil}] s))))))
 
 (deftest select-or-defaults
   (let [sample-map {:a 1, :b 2, :c  {:aa 10 :bb 20},
