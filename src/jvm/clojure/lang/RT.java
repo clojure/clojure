@@ -25,8 +25,6 @@ import java.lang.reflect.Array;
 import java.lang.IllegalArgumentException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.net.URL;
 import java.net.JarURLConnection;
 import java.nio.charset.Charset;
@@ -2158,19 +2156,13 @@ static public Object[] setValues(Object... vals){
 }
 
 
-static public ClassLoader makeClassLoader(){
-	return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction(){
-		public Object run(){
-            try{
-            Var.pushThreadBindings(RT.map(USE_CONTEXT_CLASSLOADER, RT.T));
-//			getRootClassLoader();
-			return new DynamicClassLoader(baseLoader());
-            }
-                finally{
-            Var.popThreadBindings();
-            }
-		}
-	});
+static public ClassLoader makeClassLoader() {
+	try {
+		Var.pushThreadBindings(RT.map(USE_CONTEXT_CLASSLOADER, RT.T));
+		return new DynamicClassLoader(baseLoader());
+	} finally {
+		Var.popThreadBindings();
+	}
 }
 
 static public ClassLoader baseLoader(){
