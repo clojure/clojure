@@ -15,7 +15,7 @@ on:
 
 jobs:
   call-release:
-    uses: clojure/build.ci/.github/workflows/release.yml@master
+    uses: clojure/build.ci/.github/workflows/release17.yml@master
     with:
       releaseVersion: ${{ github.event.inputs.releaseVersion }}
       snapshotVersion: ${{ github.event.inputs.snapshotVersion }}

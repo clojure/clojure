@@ -7,5 +7,5 @@ on: [workflow_dispatch]
 
 jobs:
   call-snapshot:
-    uses: clojure/build.ci/.github/workflows/snapshot.yml@master
+    uses: clojure/build.ci/.github/workflows/snapshot17.yml@master
     secrets: inherit
