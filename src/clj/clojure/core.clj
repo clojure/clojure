@@ -4505,6 +4505,7 @@
         b (dissoc b :defaults)
         gdefaults (when defaults (zipmap (keys defaults) (repeatedly #(gensym "default__"))))
         select (:select b)
+        all (:all b)
         xf (fn [mk]
              (let [mkns (namespace mk)
                    mkn (name mk)]
@@ -4528,7 +4529,7 @@
                    (if (:as b)
                      (conj ret (:as b) gmap)
                      ret))))
-        bes (dissoc b :as :or :select)
+        bes (dissoc b :as :or :select :all)
         localize (fn [bb] (if (instance? clojure.lang.Named bb)
                             (with-meta (symbol nil (name bb)) (meta bb)) bb))
         push1 (fn [ret bb bk req?]
@@ -4549,7 +4550,7 @@
                     (-> ret (conj local bv))
                     (pb ret bb bv))))
         retsel
-        (loop [ret ret, sel #{}, bes bes, b->k {}, subs nil]
+        (loop [ret ret, sel #{}, bes bes, b->k {}, subs nil, suba nil]
           (if (seq bes)
             (let [be (first bes), bb (key be), bk (val be)]
               (if (keyword? bb)
@@ -4578,21 +4579,28 @@
                                        (next bbs) preamp?
                                        (if preamp? (assoc b->k (localize bb) bk) b->k)))))
                           {:ret ret, :sel sel, :b->k b->k}))]
-                  (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel) subs))
+                  (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel) subs suba))
                 (let [subsel? (and select (map? bb))
                       bb (if (or (not subsel?) (:select bb))
                            bb
                            (assoc bb :select (gensym "select__")))
                       subs (if subsel? (assoc subs bk (:select bb)) subs)
+
+                      suball? (and all (map? bb))
+                      bb (if (or (not suball?) (:all bb))
+                           bb
+                           (assoc bb :all (gensym "all__")))
+                      suba (if suball? (assoc suba bk (:all bb)) suba)
+                      
                       b->k (if (symbol? bb) (assoc b->k bb bk) b->k)]
-                  (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs))))
-            {:ret ret, :sel sel, :b->k b->k :subs subs}))
+                  (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs suba))))
+            {:ret ret, :sel sel, :b->k b->k :subs subs :suba suba}))
         ret (:ret retsel), sel (:sel retsel), b->k (:b->k retsel)
-        new-or-code (and defaults (or defaults-as select))
+        new-or-code (and defaults (or defaults-as select all))
         bk #(if (symbol? %)
               (let [bk (b->k %)]
                 (when (and new-or-code (not bk))
-                     (throw (new IllegalArgumentException (str "symbol " % " in :or does not refer to a binding"))))
+                  (throw (new IllegalArgumentException (str "symbol " % " in :or does not refer to a binding"))))
                 bk)
               %)
         dm (when defaults (dissoc (zipmap (map bk (keys gdefaults)) (vals gdefaults)) nil))
@@ -4601,10 +4609,11 @@
                                                          (apply disj (set (keys dm)) sel)
                                                          " appear only in :or"))))
         ret (if select
-              (conj ret select `(when-let [mm# (merge (some-vals (select-keys ~dm ~sel))
-                                                      ~gmap
-                                                      (some-vals ~(:subs retsel)))]
+              (conj ret select `(when-let [mm# (merge (some-vals ~dm) ~gmap (some-vals ~(:subs retsel)))]
                                   (select-keys mm# ~sel)))
+              ret)
+        ret (if all
+              (conj ret all `(merge (some-vals ~dm) ~gmap (some-vals ~(:suba retsel))))
               ret)
         ret (if defaults-as (conj ret defaults-as dm) ret)]
     ret))
