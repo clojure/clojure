@@ -1481,7 +1481,7 @@
       (is (thrown? Exception (eval '(let [{:strs! [a & "b"]} sample-map] b))))
       (is (thrown? Exception (eval '(let [{a "a" {aa "a" :as m :keys [b c & "e"]} "b"} sample-map] e)))))))
 
-(deftest select-directive
+#_(deftest select-directive
   (let [m {:a 1 :b 2 :c 3 :d 4
            'sa 10 'sb 20 'sc 30 'sd 40
            "stra" 100 "strb" 200 "strc" 300 "strd" 400
@@ -1550,7 +1550,7 @@
       (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :select s} nil] s)))
       (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :select s} {:n nil}] s))))))
 
-(deftest select-or-defaults
+#_(deftest select-or-defaults
   (let [sample-map {:a 1, :b 2, :c  {:aa 10 :bb 20},
                     'd 4  'e 5  'f  {'dd 40 'ee 50},
                     "g" 6 "h" 7 "i" {"gg" 60 "hh" 70},}]

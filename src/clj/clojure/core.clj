@@ -4588,8 +4588,18 @@
                   (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs))))
             {:ret ret, :sel sel, :b->k b->k :subs subs}))
         ret (:ret retsel), sel (:sel retsel), b->k (:b->k retsel)
-        bk #(if (symbol? %) (b->k %) %)
+        new-or-code (and defaults (or defaults-as select))
+        bk #(if (symbol? %)
+              (let [bk (b->k %)]
+                (when (and new-or-code (not bk))
+                     (throw (new IllegalArgumentException (str "symbol " % " in :or does not refer to a binding"))))
+                bk)
+              %)
         dm (when defaults (dissoc (zipmap (map bk (keys gdefaults)) (vals gdefaults)) nil))
+        _ (and new-or-code (not= (count (select-keys dm sel)) (count defaults))
+               (throw (new IllegalArgumentException (str "keys "
+                                                         (apply disj (set (keys dm)) sel)
+                                                         " appear only in :or"))))
         ret (if select
               (conj ret select `(when-let [mm# (merge (some-vals (select-keys ~dm ~sel))
                                                       ~gmap
