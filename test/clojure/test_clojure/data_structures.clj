@@ -1602,3 +1602,97 @@
       (testing "known compile-time errors"
         (is (thrown? Exception (eval '(let [{:keys [a] :defaults d :or {:a 1, a 1}} {}] d))))
         (is (thrown? Exception (eval '(let [{:defaults d} {}] d))))))))
+
+(deftest all-directive
+  (testing "base cases"
+    (testing "you get what you supplied if nothing else"
+      (is (= {:a 1 :b 2 :c 3}
+             (let [{:keys [a] :all m} {:a 1 :b 2 :c 3}] m)))
+      (is (nil? (let [{:keys [a] :all m} nil] m)))
+      (is (= {} (let [{:keys [a] :all m} {}] m)))
+      (is (nil? (let [{{a :a} :n :all m} nil] m)))
+      (is (= {} (let [{{a :a} :n :all m} {}] m)))
+      (is (= {:n nil} (let [{{a :a} :n :all m} {:n nil}] m)))
+      (is (= {:n {}} (let [{{a :a} :n :all m} {:n {}}] m)))
+      (testing "with binding names"
+        (is (= {:a 42} (let [{a :a :or {a 42} :all m} {}] m)))
+        (is (= {:a 1 :b 2} (let [{a :a :or {a 42} :all m} {:a 1 :b 2}] m)))))
+    (testing "empty :or"
+      (is (nil? (let [{:keys [a] :or {} :all m} nil] m)))
+      (is (= {} (let [{:keys [a] :or {} :all m} {}] m)))
+      (is (= {:n {}} (let [{{a :a :or {}} :n :or {} :all m} {:n {}}] m))))
+    (testing "all turns nothing into something"
+      (is (= {:a 42} (let [{:keys [a] :or {a 42} :all m} nil] m)))
+      (is (= {:a 42} (let [{:keys [a] :or {a 42} :all m} {}] m)))
+      (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :all m} {:n nil}] m))))
+    (testing ":or defaults must correspond to binding with :all"
+      (is (thrown? Exception (eval '(let [{:keys [a] :or {a 1 z 2} :all m} {}] m))))))
+  (testing "defaults applied in :all"
+    (is (= {:a 1}       (let [{:keys [a] :or {a 42} :all m} {:a 1}] m)))
+    (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :all m} nil] m)))
+    (is (= {:n {:nn {:a 1 :b 2}}}
+           (let [{{{a :a :or {a 1}} :nn :or {}} :n :or {} :all m} {:n {:nn {:b 2}}}] m)))
+    (is (= [{:n1 {:a 1}, :n2 {:b 20, :c 30}} {:a 1} {:b 20 :c 30}]
+           (let [{{a :a :or {a 1} :all all-n1} :n1
+                  {b :b :or {b 2} :all all-n2} :n2
+                  :all outer-all}
+                 {:n1 {} :n2 {:b 20 :c 30}}]
+             [outer-all all-n1 all-n2]))))
+  (testing "paired with &"
+    (is (= {:z 42 :a 1 :b 2}
+           (let [{:keys [a b & :c :z] :or {:z 42} :all m} {:a 1 :b 2}] m)))
+    (is (= {:z 100 :a 1 :b 2}
+           (let [{:keys [a b & :c :z] :or {:z 42} :all m} {:a 1 :b 2 :z 100}] m)))
+    (testing ":or defaults must correspond to binding with :all plus &"
+      (is (thrown? Exception (eval '(let [{:keys [a b & :c] :or {c 42} :all m} {:a 1 :b 2}] m))))))
+  (testing ":all with :defaults"
+      (is (= [{:a 1} {:a 1}]
+             (let [{:keys [a] :or {a 1} :all all-m :defaults dfs} {}]
+               [all-m dfs])))
+      (is (= [{:a 5 :b 2} {:a 1}]
+             (let [{:keys [a] :or {a 1} :all all-m :defaults dfs} {:a 5 :b 2}]
+               [all-m dfs]))))
+  (testing "combinations"
+    (let [sample-map {:a 1, :b 2, :c {:aa 10},
+                      'd 4, 'e 5, 'f {'dd 40},
+                      "g" 6, "h" 7, "i" {"gg" 60},
+                      :foo/x 1000, :foo/y 2000,
+                      ::z 3000,
+                      :extra 42}
+          {:keys [a & :missing]
+           :keys! [b]
+           {:keys [aa & :bb] :or {:bb 200} :all all-c} :c
+           :syms [d]
+           :syms! [e]
+           {:syms [dd & 'ee] :or {'ee 500} :all all-f} 'f
+           :strs [g]
+           :strs! [h]
+           {:strs [gg & "hh"] :or {"hh" 700} :all all-i} "i"
+           :foo/keys [x]
+           ::keys [z]
+           :or {:missing :default-missing}
+           :all all-m
+           :select sel-m
+           :defaults dfs
+           :as as-m} sample-map]
+
+      (is (= 1 a)) (is (= 2 b))
+      (is (= 4 d)) (is (= 5 e))
+      (is (= 6 g)) (is (= 7 h))
+      (is (= 1000 x)) (is (= 3000 z))
+      (is (= {:aa 10 :bb 200} all-c))
+      (is (= '{dd 40 ee 500} all-f))
+      (is (= {"gg" 60 "hh" 700} all-i))
+      (is (= as-m sample-map))
+      (is (= {:missing :default-missing} dfs))
+
+      (testing ":all merges manually"
+        (is (= all-m (merge sample-map
+                            {:missing :default-missing
+                             :c all-c
+                             'f all-f
+                             "i" all-i})))
+        (is (contains? all-m :extra))
+        (is (contains? all-m :foo/y))
+        (is (= sel-m (dissoc all-m :extra :foo/y)))))))
+
