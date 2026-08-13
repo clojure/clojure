@@ -56,6 +56,11 @@
                                      (not (Modifier/isStatic mods))))))]
     (filter-methods c not-exposable?)))
 
+(defn- instance-methods [^Class c]
+  (remove (fn [^java.lang.reflect.Method meth]
+            (Modifier/isStatic (.getModifiers meth)))
+          (.getMethods c)))
+
 (defn- ctor-sigs [^Class super]
   (for [^Constructor ctor (. super (getDeclaredConstructors))
         :when (not (. Modifier (isPrivate (. ctor (getModifiers)))))]
@@ -201,6 +206,14 @@
                            (. gen (throwException ex-type (str (. m (getName)) " ("
                                                                impl-pkg-name "/" prefix (.getName m)
                                                                " not defined?)"))))
+        emit-super-call (fn [^Class target-class ^GeneratorAdapter gen ^Method m]
+                          (. gen (loadThis))
+                          (. gen (loadArgs))
+                          (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL)
+                                                  (iname target-class)
+                                                  (. m (getName))
+                                                  (. m (getDescriptor))
+                                                  (.isInterface target-class))))
         emit-forwarding-method
         (fn [name pclasses rclass as-static else-gen]
           (let [mname (str name)
@@ -414,24 +427,18 @@
     (let [mm (non-private-methods super)]
       (doseq [^java.lang.reflect.Method meth (vals mm)]
              (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
-                                     (fn [^GeneratorAdapter gen ^Method m]
-                                       (. gen (loadThis))
-                                        ;push args
-                                       (. gen (loadArgs))
-                                        ;call super
-                                       (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL) 
-                                                               (. super-type (getInternalName))
-                                                               (. m (getName))
-                                                               (. m (getDescriptor)))))))
+                                     (partial emit-super-call super)))
                                         ;add methods matching interfaces', if no fn -> throw
       (reduce1 (fn [mm ^java.lang.reflect.Method meth]
                 (if (contains? mm (method-sig meth))
                   mm
                   (do
                     (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
-                                            emit-unsupported)
+                                            (if (.isDefault meth)
+                                              (partial emit-super-call (.getDeclaringClass meth))
+                                              emit-unsupported))
                     (assoc mm (method-sig meth) meth))))
-              mm (mapcat #(.getMethods ^Class %) interfaces))
+              mm (mapcat instance-methods interfaces))
                                         ;extra methods
        (doseq [[mname pclasses rclass :as msig] methods]
          (emit-forwarding-method mname pclasses rclass (:static (meta msig))
