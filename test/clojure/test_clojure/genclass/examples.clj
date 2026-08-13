@@ -54,6 +54,12 @@
   [_ name]
   clojure.lang.RT)
 
+(gen-class :name clojure.test_clojure.genclass.examples.InterfaceDefaultTest
+           :implements [compilation.JDK8InterfaceMethods]
+           :prefix "intf-")
+
+(defn intf-bar [_] "bar impl")
+
 (definterface ArrayDefInterface
   ; primitive array sugar
   (^void takesByteArray [^bytes a])
