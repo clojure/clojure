@@ -12,6 +12,11 @@
 
 package clojure.lang;
 
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 public class FnLoaderThunk extends RestFn{
 
 private static final long serialVersionUID = 2194257205455463687L;
@@ -74,4 +79,15 @@ public IObj withMeta(IPersistentMap meta){
 public IPersistentMap meta(){
 	return null;
 }
+
+// Throw on serialization / deserialization
+
+private void readObject(ObjectInputStream in) throws IOException {
+	throw new NotSerializableException();
+}
+
+private void writeObject(ObjectOutputStream oos) throws IOException {
+	throw new NotSerializableException();
+}
+
 }
