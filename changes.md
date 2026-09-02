@@ -1,5 +1,10 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.12.6
+
+* [CLJ-2794](https://clojure.atlassian.net/browse/CLJ-2794) - gen-class - incorrectly treats interface default methods as abstract, throwing when the var delegate is unbound
+* [CLJ-2974](https://clojure.atlassian.net/browse/CLJ-2974) - FnLoaderThunk - de/serialization no longer supported, throw
+
 # Changes to Clojure in Version 1.12.5
 
 * [CLJ-2945](https://clojure.atlassian.net/browse/CLJ-2945) - reify - incorrectly transfers reader metadata to runtime object
