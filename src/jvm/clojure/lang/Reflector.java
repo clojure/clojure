@@ -534,18 +534,10 @@ static public List<Method> getMethods(Class c, int arity, String name, boolean g
 		   && Modifier.isStatic(method.getModifiers()) == getStatics
 		   && method.getParameterTypes().length == arity)
 			{
-			try
-				{
-				if(method.isBridge()
-				   && c.getMethod(method.getName(), method.getParameterTypes())
-						.equals(method))
+				if(method.isBridge())
 					bridgeMethods.add(method);
 				else
 					methods.add(method);
-				}
-			catch(NoSuchMethodException e)
-				{
-				}
 			}
 //			   && (!method.isBridge()
 //			       || (c == StringBuilder.class &&

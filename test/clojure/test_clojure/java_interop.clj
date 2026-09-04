@@ -663,6 +663,13 @@
   (is (= `java.lang.String/1 'java.lang.String/1))
   (is (= ['long/2] `[~'long/2])))
 
+(deftest test-bridge-methods-omitted-CLJ-2883
+  ;; internal call that looks for method matches
+  (is (= 1 (count (clojure.lang.Reflector/getMethods java.util.concurrent.CompletableFuture 1 "exceptionallyAsync" false))))
+
+  ;; if bridge methods are omitted, this is unambiguous and does not reflect
+  (should-not-reflect
+      (defn dummy-method [^java.util.concurrent.CompletableFuture p] (.exceptionallyAsync p identity))))
 
 (defn make-test-files []
   (let [id (str (UUID/randomUUID))
