@@ -4513,7 +4513,7 @@
   [pb bvec b v]
   (let [gmap (gensym "map__")
         gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
-        gignore (gensym "ignore__")
+        gtemp (gensym "temp__")
         defaults (:or b)
         defaults-as (:defaults b)
         _ (when (and defaults-as (not defaults))
@@ -4523,6 +4523,9 @@
         select (:select b)
         all (:all b)
         excess (:excess b)
+        missing (:missing b)
+        gnotfound (when missing (gensym "notfound__"))
+        gnotfound? (when missing (gensym "notfound?__"))
         xf (fn [mk]
              (let [mkns (namespace mk)
                    mkn (name mk)]
@@ -4546,7 +4549,12 @@
                    (if (:as b)
                      (conj ret (:as b) gmap)
                      ret))))
-        bes (dissoc b :as :or :select :all :excess)
+        ret (if missing
+              (conj ret
+                    missing nil
+                    gnotfound (list 'new 'Object))
+              ret)
+        bes (dissoc b :as :or :select :all :excess :missing)
         localize (fn [bb] (if (instance? clojure.lang.Named bb)
                             (with-meta (symbol nil (name bb)) (meta bb)) bb))
         push1 (fn [ret bb bk req?]
@@ -4562,12 +4570,22 @@
                                (throw (new Exception
                                            (str "Can't supply default value for required key: " bk)))
                                (list `get gmap bk (if local-default? (gdefaults local) (gdefaults bk)))))
-                           (list getter gmap bk))]
+                           (if req?
+                             (if missing
+                               (list `get gmap bk gnotfound)
+                               (list `req! gmap bk))
+                             (list `get gmap bk)))]
                   (if (ident? bb)
-                    (-> ret (conj local bv))
+                    (if (and req? missing)
+                      (conj ret
+                            gtemp bv
+                            gnotfound? `(identical? ~gtemp ~gnotfound)
+                            missing `(if ~gnotfound? (assoc ~missing ~bk nil) ~missing)
+                            local `(when-not ~gnotfound? ~gtemp))
+                      (-> ret (conj local bv)))
                     (pb ret bb bv))))
         retsel
-        (loop [ret ret, sel #{}, bes bes, b->k {}, subs nil, suba nil, subd nil]
+        (loop [ret ret, sel #{}, bes bes, b->k {}, subs nil, suba nil, subexcess nil, submissing nil]
           (if (seq bes)
             (let [be (first bes), bb (key be), bk (val be)]
               (if (keyword? bb)
@@ -4590,13 +4608,13 @@
                                                  "' - binding symbols can only appear before '&', use keys after"))))
                                     bk (if preamp? (tr bb) bb)]
                                 (recur (if (or preamp? req?)
-                                         (push1 ret (if preamp? bb gignore) bk req?)
+                                         (push1 ret (if preamp? bb gtemp) bk req?)
                                          ret)
                                        (conj sel bk)
                                        (next bbs) preamp?
                                        (if preamp? (assoc b->k (localize bb) bk) b->k)))))
                           {:ret ret, :sel sel, :b->k b->k}))]
-                  (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel) subs suba subd))
+                  (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel) subs suba subexcess submissing))
                 (let [subsel? (and select (map? bb))
                       bb (if (or (not subsel?) (:select bb))
                            bb
@@ -4613,11 +4631,17 @@
                       bb (if (or (not subexcess?) (:excess bb))
                            bb
                            (assoc bb :excess (gensym "excess__")))
-                      subd (if subexcess? (assoc subd bk (:excess bb)) subd)
+                      subexcess (if subexcess? (assoc subexcess bk (:excess bb)) subexcess)
+
+                      submissing? (and missing (map? bb))
+                      bb (if (or (not submissing?) (:missing bb))
+                           bb
+                           (assoc bb :missing (gensym "missing__")))
+                      submissing (if submissing? (assoc submissing bk (:missing bb)) submissing)
 
                       b->k (if (symbol? bb) (assoc b->k bb bk) b->k)]
-                  (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs suba subd))))
-            {:ret ret, :sel sel, :b->k b->k :subs subs :suba suba :subd subd}))
+                  (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs suba subexcess submissing))))
+            {:ret ret, :sel sel, :b->k b->k :subs subs :suba suba :subexcess subexcess :submissing submissing}))
         ret (:ret retsel), sel (:sel retsel), b->k (:b->k retsel)
         new-or-code (and defaults (or defaults-as select all))
         bk #(if (symbol? %)
@@ -4641,9 +4665,13 @@
               ret)
 
         ret (if excess
-              (conj ret excess `(merge (not-empty (apply dissoc ~gmap ~sel)) (some-vals ~(:subd retsel))))
+              (conj ret excess `(merge (not-empty (apply dissoc ~gmap ~sel)) (some-vals ~(:subexcess retsel))))
               ret)
 
+        ret (if missing
+              (conj ret missing `(merge ~missing (some-vals ~(:submissing retsel))))
+              ret)
+        
         ret (if defaults-as (conj ret defaults-as dm) ret)]
     ret))
 
