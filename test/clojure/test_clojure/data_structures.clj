@@ -1696,3 +1696,65 @@
         (is (contains? all-m :foo/y))
         (is (= sel-m (dissoc all-m :extra :foo/y)))))))
 
+(deftest excess
+  (let [sample-map {:a 1, :b 2, :c  {:aa 10},
+                    'd 4  'e 5  'f  {'dd 40 'ee 50},
+                    "g" 6 "h" 7 "i" {"gg" 60 "hh" 70}}]
+    (testing "happy path"
+      (let [{:keys [a] :excess exa} (select-keys sample-map [:a :b :c])
+            {:keys [a b c] :excess exnil} (select-keys sample-map [:a :b :c])
+            {{:excess exnest} :c} sample-map
+            {:keys [a c] :excess exkws} (select-keys sample-map [:a :b :c])
+            {:syms [d f] :excess exsyms} (select-keys sample-map '[d e f])
+            {:strs [g i] :excess exstrs} (select-keys sample-map ["g" "h" "i"])]
+        (is (= {:b 2 :c {:aa 10}} exa))
+        (is (= {:aa 10} exnest))
+        (is (= {:b 2} exkws))
+        (is (= '{e 5} exsyms))
+        (is (= {"h" 7} exstrs))
+
+        (testing ":excess predicative use"
+          (is (nil? exnil))
+          (is (nil? (let [{:excess ex} {}] ex)))
+          (is (nil? (let [{:keys [a] :excess ex} nil] ex)))
+
+          (let [{:keys [a] :excess ex-some} (select-keys sample-map [:a :b :c])
+                {:keys [a b c] :excess ex-none} (assoc (select-keys sample-map [:a :b :c]) :b nil)]
+            (is (some-vals ex-some))
+            (is (not (some-vals ex-none)))))))
+
+    (testing ":excess retains nil values"
+      (let [{:keys [a] :excess ex-nil1} (assoc (select-keys sample-map [:a :b :c]) :b nil)
+            {{:keys [aa] :excess ex-nil2} :c} (assoc-in sample-map [:c :bb] nil)]
+        (is (= {:b nil :c {:aa 10}} ex-nil1))
+        (is (= {:bb nil} ex-nil2))))
+
+    (testing ":excess and :or to ensure that defaults do not show up"
+      (let [{:keys [a z] :or {z 99} :excess exor} (select-keys sample-map [:a :b :c])]
+        (is (= {:b 2 :c {:aa 10}} exor))))
+
+    (testing "nested :excess, also with &"
+      (let [{:keys [a] {:keys [aa] :excess exc} :c} sample-map
+            {:keys! [a & :b :c]
+             :syms! [& 'd 'e 'f]
+             :strs! [&  "g" "h" "i"]
+             {:keys [zz] :or {:zz 999} :excess exinner1} :c
+             {:syms [yy] :or {'yy 999} :excess exinner2} 'f
+             {:strs [xx] :or {"xx" 999} :excess exinner3} "i"
+             :excess exouter} sample-map]
+        (is (nil? exc))
+        (is (= {:aa 10} exinner1))
+        (is (= {'dd 40 'ee 50} exinner2))
+        (is (= {"gg" 60 "hh" 70} exinner3))
+        (is (= '{:c {:aa 10}, f {dd 40, ee 50}, "i" {"gg" 60, "hh" 70}} exouter))))
+
+    (testing ":excess with namespace-qualification"
+      (let [nsmap {:foo/x 1000, :foo/y 2000, ::z 3000}
+            {:foo/keys [x] :excess exfoo} nsmap
+            {::keys [z] :excess exauto} nsmap
+            {:foo/keys [x] ::keys [z] :excess exmix} nsmap
+            {:foo/keys [x y] ::keys [z] :excess exall} nsmap]
+        (is (= {:foo/y 2000 ::z 3000} exfoo))
+        (is (= {:foo/x 1000 :foo/y 2000} exauto))
+        (is (= {:foo/y 2000} exmix))
+        (is (nil? exall))))))
