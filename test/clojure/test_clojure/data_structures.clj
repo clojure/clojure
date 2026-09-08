@@ -719,6 +719,12 @@
          (req! m :b)  2
          (req! m :f)  nil)))
 
+(deftest test-select-keys
+  (are [x y] (= x y)
+       (select-keys {:a 1 :b 2 :c nil} [:a :c :d]) {:a 1 :c nil}
+       (select-keys nil [:a]) {}
+       (select-keys #{:a :b} [:a :c]) {:a :a}))
+
 (deftest test-nested-map-destructuring
   (let [sample-map {:a 1 :b {:a 2}}
         {ao1 :a {ai1 :a} :b} sample-map

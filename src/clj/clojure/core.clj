@@ -7205,18 +7205,22 @@ fails, attempts to require sym's namespace and retries."
               coll)
       persistent!))
 
-(defn select-keys
-  "Returns a map containing only those entries in map whose key is in keyseq"
-  {:added "1.0"}
-  [map keyseq]
-  (with-meta
-    (persistent!
-      (reduce (fn [ret k]
-                (if-let [entry (clojure.lang.RT/find map k)]
-                  (conj! ret entry)
-                  ret))
-        (transient {}) keyseq))
-    (meta map)))
+(def
+ ^{:arglists '([map keyseq])
+   :doc "Returns a map containing only those entries in map whose key is in keyseq"
+   :added "1.0"}
+ select-keys
+  (let [nf (Object.)]
+    (fn select-keys [map keyseq]
+      (with-meta
+        (persistent!
+          (reduce (fn [ret k]
+                    (let [v (get map k nf)]
+                      (if (identical? v nf)
+                        ret
+                        (assoc! ret k v))))
+            (transient {}) keyseq))
+        (meta map)))))
 
 (require '[clojure.java.io :as jio])
 
