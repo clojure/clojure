@@ -1481,6 +1481,77 @@
       (is (thrown? Exception (eval '(let [{:strs! [a & "b"]} sample-map] b))))
       (is (thrown? Exception (eval '(let [{a "a" {aa "a" :as m :keys [b c & "e"]} "b"} sample-map] e)))))))
 
+(deftest missing-directive
+  (let [keys-map {:a 1 :b 2 :nest {:aa 10}}
+        {:keys! [a b], :missing mkeys-nil} keys-map
+        {:keys! [a b c], :missing mkeys-c} keys-map
+        {:keys! [a b & :c], :missing mkeys-c&} keys-map
+      
+        syms-map '{a 1 b 2 nest {aa 10}}
+        {:syms! [a b], :missing msyms-nil} syms-map
+        {:syms! [a b c], :missing msyms-c} syms-map
+        {:syms! [a b & 'c], :missing msyms-c&} syms-map
+
+        strs-map {"a" 1 "b" 2 "nest" {"aa" 10}}
+        {:strs! [a b], :missing mstrs-nil} strs-map
+        {:strs! [a b c], :missing mstrs-c} strs-map
+        {:strs! [a b & "c"], :missing mstrs-c&} strs-map
+
+        q-map {:foo/a 1 :b 2 :foo/c 3 ::d 4}
+        {:keys! [foo/a :foo/c] :missing mq-nil} q-map
+        {:keys! [b & :foo/d] :missing mq-d} q-map
+        {:keys! [foo/a & :foo/d] :missing mq-d&} q-map
+        {:foo/keys! [a c] :missing q-nil} q-map
+        {:foo/keys! [a & :foo/d] :missing q-d} q-map
+        {:foo/keys! [a & :foo/d] :missing q-d&} q-map
+        {::keys! [d] :missing aq-nil} q-map]
+
+    (testing "1-level :missing keys for keys/qkeys/syms/strs"
+      (is (nil? mkeys-nil))
+      (is (= mkeys-c {:c nil}))
+      (is (= mkeys-c& {:c nil}))
+
+      (is (nil? msyms-nil))
+      (is (= msyms-c '{c nil}))
+      (is (= msyms-c& '{c nil}))
+
+      (is (nil? mstrs-nil))
+      (is (= mstrs-c {"c" nil}))
+      (is (= mstrs-c& {"c" nil}))
+      
+      (is (nil? mq-nil))
+      (is (= mq-d #:foo{:d nil}))
+      (is (= mq-d& #:foo{:d nil}))
+      (is (nil? q-nil))
+      (is (= q-d #:foo{:d nil}))
+      (is (= q-d& #:foo{:d nil}))
+      (is (nil? aq-nil)))
+
+    (testing "required nested map that also has required keys, covering the following cases:
+               - :nest is missing
+               - :nest is nil
+               - :nest is a map missing :x and/or :y
+               - :nest is a map having everything that's required"
+      (let [sample-nest {:a 0 :b 0}]
+        (are [input-map expected] (= expected
+                                     (let [{:keys! [a b & :nest]
+                                            {:keys! [x y]} :nest
+                                            :missing mkeys-missing}
+                                           input-map]
+                                       mkeys-missing))
+
+          sample-nest {:nest {:x nil, :y nil}}
+          
+          (assoc sample-nest :nest nil) {:nest {:x nil, :y nil}}
+          
+          (assoc sample-nest :nest {:x 1}) {:nest {:y nil}}
+
+          (assoc sample-nest :nest {:x 1 :y 2}) nil)))
+
+    (testing "that a nested map required keys is captured with the outer :missing"
+      (let [{:keys! [a b], {:keys! [bb]} :nest :missing mkeys-outer} keys-map]
+        (is (= mkeys-outer {:nest {:bb nil}}))))))
+
 (deftest select-directive
   (let [m {:a 1 :b 2 :c 3 :d 4
            'sa 10 'sb 20 'sc 30 'sd 40
