@@ -79,7 +79,14 @@
     (is (thrown-with-cause-msg?
          Exception
          #"Function m in protocol badprotdef was redefined. Specify all arities in single definition."
-         (eval '(defprotocol badprotdef (m [this arg]) (m [this arg1 arg2]))))))
+         (eval '(defprotocol badprotdef (m [this arg]) (m [this arg1 arg2])))))
+    (doseq [e ['(extend-protocol clojure.test-clojure.protocols.examples/ExampleProtocol String (fooo [this]))
+               '(extend-type String clojure.test-clojure.protocols.examples/ExampleProtocol (fooo [this]))
+               '(extend String clojure.test-clojure.protocols.examples/ExampleProtocol {:fooo (fn [this])})]]
+      (is (thrown-with-cause-msg?
+            Exception
+            #"Can't extend unknown method fooo"
+            (eval e)))))
   (testing "you can redefine a protocol with different methods"
     (eval '(defprotocol Elusive (old-method [x])))
     (eval '(defprotocol Elusive (new-method [x])))

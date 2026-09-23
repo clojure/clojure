@@ -829,6 +829,11 @@
       (throw (IllegalArgumentException. 
               (str atype " already directly implements " (:on-interface proto) " for protocol:"  
                    (:var proto)))))
+    (let [proto-methods (set (keys (:sigs proto)))]
+      (doseq [m (keys mmap)]
+        (when (not (contains? proto-methods m))
+          (throw (IllegalArgumentException.
+                   (str "Can't extend unknown method " (name m) " of protocol " (:var proto)))))))
     (-reset-methods (alter-var-root (:var proto) assoc-in [:impls atype] mmap))))
 
 (defn- emit-impl [[p fs]]
