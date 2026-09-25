@@ -930,11 +930,11 @@
 
 ;; reduce is defined again later after InternalReduce loads
 (defn ^:private ^:static
-  reduce1
+  reduce0
        ([f coll]
              (let [s (seq coll)]
                (if s
-         (reduce1 f (first s) (next s))
+         (reduce0 f (first s) (next s))
                  (f))))
        ([f val coll]
           (let [s (seq coll)]
@@ -945,6 +945,8 @@
                        (chunk-next s))
                 (recur f (f val (first s)) (next s)))
          val))))
+
+(def ^:private ^:dynamic reduce1 reduce0)
 
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
@@ -3432,15 +3434,17 @@
        ret))))
 
 ;redef into with batch support
-(defn ^:private into1
+(defn ^:private into0
   "Returns a new coll consisting of to-coll with all of the items of
   from-coll conjoined."
   {:added "1.0"
    :static true}
   [to from]
   (if (instance? clojure.lang.IEditableCollection to)
-    (persistent! (reduce1 conj! (transient to) from))
-    (reduce1 conj to from)))
+    (persistent! (reduce0 conj! (transient to) from))
+    (reduce0 conj to from)))
+
+(def ^:private ^:dynamic into1 into0)
 
 (defn merge
   "Returns a map that consists of the rest of the maps conj-ed onto
@@ -4147,7 +4151,7 @@
     (with-meta coll nil)
     (if (instance? clojure.lang.IReduceInit coll)
       (persistent! (.reduce ^clojure.lang.IReduceInit coll conj! (transient #{})))
-      (persistent! (reduce1 conj! (transient #{}) coll)))))
+      (persistent! (reduce0 conj! (transient #{}) coll)))))
 
 (defn ^{:private true
    :static true}
@@ -5784,7 +5788,7 @@
   (loop [ret (set (bases class)) cs ret]
     (if (seq cs)
       (let [c (first cs) bs (bases c)]
-        (recur (into1 ret bs) (into1 (disj cs c) bs)))
+        (recur (into0 ret bs) (into0 (disj cs c) bs)))
       (not-empty ret))))
 
 (defn isa?
@@ -7107,6 +7111,8 @@ fails, attempts to require sym's namespace and retries."
        (.reduce ^clojure.lang.IReduceInit coll f val)
        (clojure.core.protocols/coll-reduce coll f val))))
 
+(alter-var-root #'reduce1 (fn [_] reduce))
+
 (extend-protocol clojure.core.protocols/IKVReduce
  nil
  (kv-reduce
@@ -7189,6 +7195,8 @@ fails, attempts to require sym's namespace and retries."
                   ([coll v] (conj! coll v)))]
          (transduce xform rf (transient to) from))
        (transduce xform conj to from))))
+
+(alter-var-root #'into1 (fn [_] into))
 
 (defn mapv
   "Returns a vector consisting of the result of applying f to the
