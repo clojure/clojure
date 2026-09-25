@@ -205,7 +205,9 @@
  ^{:arglists '([obj])
    :doc "Returns the metadata of obj, returns nil if there is no metadata."
    :added "1.0"
-   :static true}
+   :static true
+   :inline (fn [x] (list 'if (list 'instance? 'clojure.lang.IMeta x) (list 'clojure.lang.IMeta/.meta x)))
+   }
  meta (fn ^:static meta [x]
         (if (instance? clojure.lang.IMeta x)
           (. ^clojure.lang.IMeta x (meta)))))
@@ -7239,7 +7241,7 @@ fails, attempts to require sym's namespace and retries."
                            ret
                            (assoc! ret k v))))
                      (transient {}) keyseq))]
-    (if-let [md (and (instance? clojure.lang.IMeta map) (clojure.lang.IMeta/.meta map))]
+    (if-let [md (meta map)]
       (with-meta ret md)
       ret)))
 
