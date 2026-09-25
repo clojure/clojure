@@ -112,7 +112,7 @@ public PersistentHashSet withMeta(IPersistentMap meta){
 }
 
 public ITransientCollection asTransient() {
-	return new TransientHashSet(((PersistentHashMap) impl).asTransient());
+	return new TransientHashSet(_meta, ((PersistentHashMap) impl).asTransient());
 }
 
 public IPersistentMap meta(){
@@ -120,12 +120,15 @@ public IPersistentMap meta(){
 }
 
 static final class TransientHashSet extends ATransientSet {
-	TransientHashSet(ITransientMap impl) {
+	private final IPersistentMap _meta;
+
+	TransientHashSet(IPersistentMap _meta, ITransientMap impl) {
 		super(impl);
+		this._meta = _meta;
 	}
 
 	public IPersistentCollection persistent() {
-		return new PersistentHashSet(null, impl.persistent());
+		return new PersistentHashSet(_meta, impl.persistent());
 	}
 }
 

@@ -299,18 +299,20 @@ static final class TransientHashMap extends ATransientMap {
 	volatile boolean hasNull;
 	volatile Object nullValue;
 	final Box leafFlag = new Box(null);
-
+	private final IPersistentMap _meta;
 
 	TransientHashMap(PersistentHashMap m) {
-		this(new AtomicReference<Thread>(Thread.currentThread()), m.root, m.count, m.hasNull, m.nullValue);
+		this(new AtomicReference<Thread>(Thread.currentThread()), m.root, m.count, m.hasNull, m.nullValue, m._meta);
 	}
 	
-	TransientHashMap(AtomicReference<Thread> edit, INode root, int count, boolean hasNull, Object nullValue) {
+	TransientHashMap(AtomicReference<Thread> edit, INode root, int count, boolean hasNull, Object nullValue,
+	                 IPersistentMap _meta) {
 		this.edit = edit;
 		this.root = root; 
 		this.count = count; 
 		this.hasNull = hasNull;
 		this.nullValue = nullValue;
+		this._meta = _meta;
 	}
 
 	ITransientMap doAssoc(Object key, Object val) {
@@ -353,7 +355,7 @@ static final class TransientHashMap extends ATransientMap {
 
 	IPersistentMap doPersistent() {
 		edit.set(null);
-		return new PersistentHashMap(count, root, hasNull, nullValue);
+		return new PersistentHashMap(_meta, count, root, hasNull, nullValue);
 	}
 
 	Object doValAt(Object key, Object notFound) {

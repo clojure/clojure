@@ -672,16 +672,18 @@ static final class TransientVector extends AFn implements ITransientVector, ITra
 	volatile int shift;
 	volatile Node root;
 	volatile Object[] tail;
+	private final IPersistentMap _meta;
 
-	TransientVector(int cnt, int shift, Node root, Object[] tail){
+	TransientVector(int cnt, int shift, Node root, Object[] tail, IPersistentMap _meta){
 		this.cnt = cnt;
 		this.shift = shift;
 		this.root = root;
 		this.tail = tail;
+		this._meta = _meta;
 	}
 
 	TransientVector(PersistentVector v){
-		this(v.cnt, v.shift, editableRoot(v.root), editableTail(v.tail));
+		this(v.cnt, v.shift, editableRoot(v.root), editableTail(v.tail),v._meta);
 	}
 
 	public int count(){
@@ -717,7 +719,7 @@ static final class TransientVector extends AFn implements ITransientVector, ITra
 		root.edit.set(null);
 		Object[] trimmedTail = new Object[cnt-tailoff()];
 		System.arraycopy(tail,0,trimmedTail,0,trimmedTail.length);
-		return new PersistentVector(cnt, shift, root, trimmedTail);
+		return new PersistentVector(_meta, cnt, shift, root, trimmedTail);
 	}
 
 	static Object[] editableTail(Object[] tl){

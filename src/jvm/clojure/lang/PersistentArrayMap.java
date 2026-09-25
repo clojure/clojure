@@ -10,7 +10,6 @@
 
 package clojure.lang;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -498,19 +497,21 @@ public Object kvreduce(IFn f, Object init){
 }
 
 public ITransientMap asTransient(){
-	return new TransientArrayMap(array);
+	return new TransientArrayMap(_meta, array);
 }
 
 static final class TransientArrayMap extends ATransientMap {
 	volatile int len;
 	final Object[] array;
 	volatile Thread owner;
+	private final IPersistentMap _meta;
 
-	public TransientArrayMap(Object[] array){
+	public TransientArrayMap(IPersistentMap meta, Object[] array){
 		this.owner = Thread.currentThread();
 		this.array = new Object[Math.max(HASHTABLE_THRESHOLD, array.length)];
 		System.arraycopy(array, 0, this.array, 0, array.length);
 		this.len = array.length;
+		this._meta = meta;
 	}
 	
 	private int indexOf(Object key){
@@ -569,7 +570,7 @@ static final class TransientArrayMap extends ATransientMap {
 		owner = null;
 		Object[] a = new Object[len];
 		System.arraycopy(array,0,a,0,len);
-		return new PersistentArrayMap(a);
+		return new PersistentArrayMap(_meta, a);
 	}
 
 	void ensureEditable(){

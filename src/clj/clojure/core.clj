@@ -3059,16 +3059,6 @@
      (clojure.lang.LongRange/create start end step)
      (clojure.lang.Range/create start end step))))
 
-(defn merge
-  "Returns a map that consists of the rest of the maps conj-ed onto
-  the first.  If a key occurs in more than one map, the mapping from
-  the latter (left-to-right) will be the mapping in the result."
-  {:added "1.0"
-   :static true}
-  [& maps]
-  (when (some identity maps)
-    (reduce1 #(conj (or %1 {}) %2) maps)))
-
 (defn merge-with
   "Returns a map that consists of the rest of the maps conj-ed onto
   the first.  If a key occurs in more than one map, the mapping(s)
@@ -3076,16 +3066,22 @@
   the result by calling (f val-in-result val-in-latter)."
   {:added "1.0"
    :static true}
-  [f & maps]
-  (when (some identity maps)
-    (let [merge-entry (fn [m e]
-			(let [k (key e) v (val e)]
-			  (if (contains? m k)
-			    (assoc m k (f (get m k) v))
-			    (assoc m k v))))
-          merge2 (fn [m1 m2]
-		   (reduce1 merge-entry (or m1 {}) (seq m2)))]
-      (reduce1 merge2 maps))))
+  ([f x] x)
+  ([f x y]
+     (if (and x y)
+       (let [merge-kv
+             (fn this [m k v]
+               (let [mv (get m k this)]
+                 (if (identical? mv this)
+                   (assoc m k v)
+                   (assoc m k (f mv v)))))]
+         (if (instance? clojure.lang.IKVReduce y)
+           (clojure.lang.IKVReduce/.kvreduce y merge-kv x)
+           (reduce1 (fn [m e] (merge-kv m (key e) (val e))) x y)))
+       (or x y)))
+  ([f x y & maps]
+     (let [merge2 (fn [x y] (merge-with f x y))]
+       (reduce1 merge2 (merge2 x y) maps))))
 
 (defn line-seq
   "Returns the lines of text from rdr as a lazy sequence of strings.
@@ -3444,6 +3440,21 @@
   (if (instance? clojure.lang.IEditableCollection to)
     (persistent! (reduce1 conj! (transient to) from))
     (reduce1 conj to from)))
+
+(defn merge
+  "Returns a map that consists of the rest of the maps conj-ed onto
+  the first.  If a key occurs in more than one map, the mapping from
+  the latter (left-to-right) will be the mapping in the result."
+  {:added "1.0"
+   :static true}
+  ([x] x)
+  ([x y] (if (and x y)
+           (if (instance? clojure.lang.IKVReduce y)
+             (clojure.lang.IKVReduce/.kvreduce y assoc x)
+             (into1 x y))
+           (or x y)))
+  ([x y & maps]
+     (reduce1 merge (merge x y) maps)))
 
 (defmacro import 
   "import-list => (package-symbol class-name-symbols*)
@@ -4458,9 +4469,10 @@
   {:added "1.13"
    :static true}
   [m]
-  (reduce-kv
-   (fn [m k v] (if (some? v) (assoc m k v) m))
-   nil m))
+  (when m
+    (reduce-kv
+     (fn [m k v] (if (some? v) (assoc m k v) m))
+     nil m)))
 
 (defn seq-to-map-for-destructuring
   "Builds a map from a seq as described in
@@ -4538,7 +4550,7 @@
                      bvec gdefaults)
         ret (-> ret (conj gmap) (conj v)
                 (conj gmap)
-                (conj `(if (seq? ~gmap)
+                (conj `(if (instance? clojure.lang.ISeq ~gmap)
                          (if (next ~gmapseq)
                            (clojure.lang.PersistentArrayMap/createAsIfByAssoc (to-array ~gmapseq))
                            (if (seq ~gmapseq)
@@ -4642,7 +4654,7 @@
                       b->k (if (symbol? bb) (assoc b->k bb bk) b->k)]
                   (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs suba subexcess submissing))))
             {:ret ret, :sel sel, :b->k b->k :subs subs :suba suba :subexcess subexcess :submissing submissing}))
-        ret (:ret retsel), sel (:sel retsel), b->k (:b->k retsel)
+        ret (:ret retsel), sel (vec (:sel retsel)), b->k (:b->k retsel)
         new-or-code (and defaults (or defaults-as select all))
         bk #(if (symbol? %)
               (let [bk (b->k %)]
@@ -7019,11 +7031,11 @@ fails, attempts to require sym's namespace and retries."
   {:added "1.12"}
   ([to ^java.util.stream.BaseStream stream]
    (if (instance? clojure.lang.IEditableCollection to)
-     (with-meta (persistent! (stream-reduce! conj! (transient to) stream)) (meta to))
+     (persistent! (stream-reduce! conj! (transient to) stream))
      (stream-reduce! conj to stream)))
   ([to xform ^java.util.stream.BaseStream stream]
    (if (instance? clojure.lang.IEditableCollection to)
-     (with-meta (persistent! (stream-transduce! xform conj! (transient to) stream)) (meta to))
+     (persistent! (stream-transduce! xform conj! (transient to) stream))
      (stream-transduce! xform conj to stream))))
 
 (defmacro ^:private when-class [class-name & body]
@@ -7165,7 +7177,7 @@ fails, attempts to require sym's namespace and retries."
   ([to] to)
   ([to from]
      (if (instance? clojure.lang.IEditableCollection to)
-       (with-meta (persistent! (reduce conj! (transient to) from)) (meta to))
+       (persistent! (reduce conj! (transient to) from))
        (reduce conj to from)))
   ([to xform from]
      (if (instance? clojure.lang.IEditableCollection to)
@@ -7205,22 +7217,21 @@ fails, attempts to require sym's namespace and retries."
               coll)
       persistent!))
 
-(def
- ^{:arglists '([map keyseq])
+(defn select-keys
+  {:arglists '([map keyseq])
    :doc "Returns a map containing only those entries in map whose key is in keyseq"
    :added "1.0"}
- select-keys
-  (let [nf (Object.)]
-    (fn select-keys [map keyseq]
-      (with-meta
-        (persistent!
-          (reduce (fn [ret k]
-                    (let [v (get map k nf)]
-                      (if (identical? v nf)
-                        ret
-                        (assoc! ret k v))))
-            (transient {}) keyseq))
-        (meta map)))))
+  [map keyseq]
+  (let [ret (persistent!
+             (reduce (fn this [ret k]
+                       (let [v (get map k this)]
+                         (if (identical? v this)
+                           ret
+                           (assoc! ret k v))))
+                     (transient {}) keyseq))]
+    (if-let [md (and (instance? clojure.lang.IMeta map) (clojure.lang.IMeta/.meta map))]
+      (with-meta ret md)
+      ret)))
 
 (require '[clojure.java.io :as jio])
 
