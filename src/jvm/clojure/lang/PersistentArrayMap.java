@@ -508,19 +508,33 @@ static final class TransientArrayMap extends ATransientMap {
 
 	public TransientArrayMap(IPersistentMap meta, Object[] array){
 		this.owner = Thread.currentThread();
-		this.array = new Object[Math.max(HASHTABLE_THRESHOLD, array.length)];
+		this.array = new Object[Math.max(KW_HASHTABLE_THRESHOLD, array.length)];
 		System.arraycopy(array, 0, this.array, 0, array.length);
 		this.len = array.length;
 		this._meta = meta;
 	}
 	
-	private int indexOf(Object key){
+	private int indexOfObject(Object key){
 		for(int i = 0; i < len; i += 2)
 			{
 			if(equalKey(array[i], key))
 				return i;
 			}
 		return -1;
+	}
+
+	private int indexOf(Object key){
+		if(key instanceof Keyword)
+		{
+			for(int i = 0; i < len; i += 2)
+			{
+				if(key == array[i])
+					return i;
+			}
+			return -1;
+		}
+		else
+			return indexOfObject(key);
 	}
 
 	ITransientMap doAssoc(Object key, Object val){
@@ -534,6 +548,9 @@ static final class TransientArrayMap extends ATransientMap {
 			{
 			if(len >= array.length)
 				return PersistentHashMap.create(array).asTransient().assoc(key, val);
+			if(len >= HASHTABLE_THRESHOLD && !(key instanceof Keyword))
+				return PersistentHashMap.create(Arrays.copyOfRange(array, 0, len)).asTransient().assoc(key, val);
+
 			array[len++] = key;
 			array[len++] = val;
 			}
