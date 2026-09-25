@@ -3066,6 +3066,7 @@
   the result by calling (f val-in-result val-in-latter)."
   {:added "1.0"
    :static true}
+  ([f] nil)
   ([f x] x)
   ([f x y]
      (if (and x y)
@@ -3447,6 +3448,7 @@
   the latter (left-to-right) will be the mapping in the result."
   {:added "1.0"
    :static true}
+  ([] nil)
   ([x] x)
   ([x y] (if (and x y)
            (if (instance? clojure.lang.IKVReduce y)
