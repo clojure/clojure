@@ -1911,3 +1911,109 @@
         (is (= {:foo/x 1000 :foo/y 2000} exauto))
         (is (= {:foo/y 2000} exmix))
         (is (nil? exall))))))
+
+(deftest selector-test
+  (let [sample-map {:a 1 :b 2 :c 3 :d 4
+                    :e 5
+                    ::x 10000
+                    :nested {:aa 1 'saa 10}}]
+    (testing "error cases"
+      (is (thrown? Exception (eval '(selector {:keys [a b]}))))
+      (is (thrown? Exception (eval '(selector sample-map))))
+      (is (thrown? Exception (eval '(selector nil))))
+      (is (thrown? Exception (eval '(selector {})))))
+
+    (testing "single directives return their values directly"
+      (let [ex1 (selector {:keys [a b & :c :z]
+                           :keys! [d]
+                           :select keys-sel})]
+        (is (= {:a 1 :b 2 :c 3 :d 4}
+               (ex1 sample-map)))
+
+        (testing "checked keys without :missing should throw"
+          (is (thrown? Exception (ex1 (dissoc sample-map :d)))))
+
+        (testing ":select with :or"
+          (let [ex1 (selector {:keys [a b & :c :z]
+                               :keys! [d]
+                               :select keys-sel
+                               :or {:z 42}})]
+            (is (= {:a 1 :b 2 :c 3 :d 4 :z 42}
+                   (ex1 sample-map))))))
+
+      (let [ex1 (selector {:keys [a b & :c :z]
+                           :keys! [d]
+                           :all keys-all})]
+        (is (= sample-map (ex1 sample-map))))
+
+      (let [ex1 (selector {:keys [a b & :c :z]
+                           :keys! [d]
+                           :missing keys-missing})]
+        (is (nil? (ex1 sample-map)))
+        (is (= {:d nil} (ex1 (dissoc sample-map :d)))))
+
+      (let [ex1 (selector {:keys [a b & :c :z]
+                           :keys! [d]
+                           :excess keys-excess})]
+        (is (= (dissoc sample-map :a :b :c :d) (ex1 sample-map)))))
+
+    (testing ":select plus :missing, but nothing missing"
+      (let [ex2 (selector {:keys [a b & :c :z]
+                           :keys! [d]
+                           :select keys-sel
+                           :missing keys-missing})]
+        (is (= {:select {:a 1 :b 2 :c 3 :d 4}}
+               (ex2 sample-map)))))
+
+    (testing ":select plus :all"
+      (let [ex3 (selector {:keys [a b & :c :z]
+                           :keys! [d]
+                           :select keys-sel
+                           :missing keys-missing
+                           :all keys-all})]
+        (is (= {:select {:a 1 :b 2 :c 3 :d 4}
+                :all sample-map}
+               (ex3 sample-map)))))
+
+    (testing ":select, :all, and :excess"
+      (let [ex4 (selector {:keys [a b & :c :z]
+                           :keys! [d]
+                           :select keys-sel
+                           :missing keys-missing
+                           :all keys-all
+                           :excess keys-excess})]
+        (is (= {:select {:a 1 :b 2 :c 3 :d 4}
+                :excess (dissoc sample-map :a :b :c :d)
+                :all sample-map}
+               (ex4 sample-map)))
+        (testing "plus :missing"
+          (is (= {:d nil}
+                 (:missing (ex4 (dissoc sample-map :d))))))))
+
+    (testing "directive names bound to _"
+      (let [ex_ (selector {:keys [a b & :c :z]
+                           :keys! [d]
+                           :select _
+                           :missing _
+                           :all _
+                           :excess _})]
+        (is (= {:select {:a 1 :b 2 :c 3 :d 4}
+                :excess (dissoc sample-map :a :b :c :d)
+                :all sample-map}
+               (ex_ sample-map)))))
+
+    (testing "nested :select"
+      (let [exnest (selector {{aa :aa saa 'saa
+                               :select nest-sel} :nested
+                              aqx ::x
+                              :select tl-sel})]
+        (is (= {::x 10000 :nested {:aa 1 'saa 10}}
+               (exnest sample-map)))))
+
+    (testing "nested selection behavior with _ bindings"
+      (let [exnest_ (selector {{aa :aa saa 'saa
+                                :select _} :nested
+                               aqx ::x
+                               :select _})]
+        (is (= {::x 10000 :nested {:aa 1 'saa 10}}
+               (exnest_ sample-map)))))))
