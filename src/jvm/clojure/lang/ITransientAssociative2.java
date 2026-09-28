@@ -10,7 +10,7 @@
 
 package clojure.lang;
 
-public interface ITransientAssociative2 extends ITransientAssociative {
+public interface ITransientAssociative2 {
     boolean containsKey(Object key);
     IMapEntry entryAt(Object key);
 }

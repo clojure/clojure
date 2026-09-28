@@ -55,42 +55,44 @@ public abstract class ATransientMap extends AFn implements ITransientMap, ITrans
 		return valAt(arg1, notFound);
 	}
 
-	public final Object valAt(Object key) {
+	public Object valAt(Object key) {
 		return valAt(key, null);
 	}
 
-	public final ITransientMap assoc(Object key, Object val) {
+	public ITransientMap assoc(Object key, Object val) {
 		ensureEditable();
 		return doAssoc(key, val);
 	}
 
-	public final ITransientMap without(Object key) {
+	public ITransientMap without(Object key) {
 		ensureEditable();
 		return doWithout(key);
 	}
 
-	public final IPersistentMap persistent() {
+	public IPersistentMap persistent() {
 		ensureEditable();
 		return doPersistent();
 	}
 
-	public final Object valAt(Object key, Object notFound) {
+	public Object valAt(Object key, Object notFound) {
 		ensureEditable();
 		return doValAt(key, notFound);
 	}
 
 	private static final Object NOT_FOUND = new Object();
-	public final boolean containsKey(Object key){
+	public boolean containsKey(Object key){
+		ensureEditable();
 		return valAt(key, NOT_FOUND) != NOT_FOUND;
 	}
-	public final IMapEntry entryAt(Object key){
+	public IMapEntry entryAt(Object key){
+		ensureEditable();
 		Object v = valAt(key, NOT_FOUND);
 		if(v != NOT_FOUND)
 			return MapEntry.create(key, v);
 		return null;
 	}
 
-	public final int count() {
+	public int count() {
 		ensureEditable();
 		return doCount();
 	}
