@@ -1133,6 +1133,65 @@
   (is (thrown? IllegalArgumentException (assoc [] 0 5 1)))
   (is (thrown? IllegalArgumentException (assoc {} :b -2 :a))))
 
+(deftest test-merge-deep
+  ;; 0 arity
+  (is (nil? (merge-deep)))
+
+  ;; 1 arity
+  (is (nil? (merge-deep nil)))
+  (is (= {:a 1} (merge-deep {:a 1})))
+
+  ;; 2 arity
+  (are [expected x y] (= expected (merge-deep x y))
+    nil nil nil
+    {} {} nil
+    {} nil {}
+    ;; latter value wins at same key if not both maps
+    {:a 1} {:a 1} nil ;; non-map + missing
+    {:a 1} nil {:a 1} ;; missing + non-map
+    {:a nil} {:a 1} {:a nil} ;; non-map + nil
+    {:a 1} {:a nil} {:a 1} ;; nil + non-map
+    {:a 2} {:a 1} {:a 2} ;; non-map + non-map
+    {:a {:x 1}} nil {:a {:x 1}} ;; missing + map
+    {:a {:x 1}} {:a {:x 1}} nil ;; map + missing
+    {:a {:x 1}} {:a nil} {:a {:x 1}} ;; nil + map
+    {:a nil} {:a {:x 1}} {:a nil} ;; map + nil
+    {:a {:x 2}} {:a {:x 1}} {:a {:x 2}} ;; map + map
+    ;; more nesting
+    {:a {:b {:c 2}}} {:a {:b {:c 1}}} {:a {:b {:c 2}}}
+    ;; vector is associative, but not a map - first arg dominates
+    [:c :d] [:a :b] {0 :c 1 :d}
+    {0 :a 1 :b} {0 :c 1 :d} [:a :b])
+
+  ;; 3 arity
+  (are [expected x y z] (= expected (merge-deep x y z))
+    nil nil nil nil
+    {} {} nil nil
+    ;; missing
+    {:a 3} nil {:a 2} {:a 3}
+    {:a 3} {:a 1} nil {:a 3}
+    {:a 2} {:a 1} {:a 2} nil
+    ;; nil
+    {:a 3} {:a nil} {:a 2} {:a 3}
+    {:a nil} {:a 1} {:a 2} {:a nil}
+    ;; non-maps
+    {:a 3} {:a 1} {:a 2} {:a 3}
+    ;; mix - last wins
+    {:a nil} {:a 1} {:a {:x 1}} {:a nil}
+    ;; maps
+    {:a {:x 3}} {:a {:x 1}} {:a {:x 2}} {:a {:x 3}}))
+
+(deftest test-merge-deep-with
+  (are [expected x y] (= expected (merge-deep-with vector x y))
+    {:a nil} nil {:a nil}
+    {:a 1} nil {:a 1}
+    {:a [1 nil]} {:a 1} {:a nil}
+    {:a [1 2]} {:a 1} {:a 2})
+  (let [vectorizer (fn [x y] (if (vector? x) (conj x y) [x y]))]
+    (are [expected x y z] (= expected (merge-deep-with vectorizer x y z))
+      {:a [1 2 3]} {:a 1} {:a 2} {:a 3}
+      {:a [1 2]} {:a 1} {:a 2} nil)))
+
 (defn is-same-collection [a b]
   (let [msg (format "(class a)=%s (class b)=%s a=%s b=%s"
                     (.getName (class a)) (.getName (class b)) a b)]
@@ -1643,34 +1702,43 @@
         (let [{:keys [a b z & :c :d] {:keys! [aa & :bb]} :c
                :or {:d 42, z :or-z}
                :select m
+               :excess excess
+               :all all
                :defaults dfs} sample-map]
           (is (= 1 a))
           (is (= 2 b))
           (is (= 10 aa))
           (is (= {:z :or-z, :c {:aa 10, :bb 20}, :b 2, :d 42, :a 1} m))
-          (is (= {:d 42, :z :or-z} dfs))))
+          (is (= {:d 42, :z :or-z} dfs))
+          (is (= all (merge-deep excess all)))))
 
       (testing ":syms + :select + :or + defaults"
         (let [{:syms [d e z & 'd 'f] {:syms! [dd & 'ee]} 'f
                :or {'d 42, z :or-z}
                :select m
+               :excess excess
+               :all all
                :defaults dfs} sample-map]
           (is (= 4 d))
           (is (= 5 e))
           (is (= 40 dd))
           (is (= '{f {dd 40, ee 50}, e 5, d 4, z :or-z} m))
-          (is (= '{d 42, z :or-z} dfs))))
+          (is (= '{d 42, z :or-z} dfs))
+          (is (= all (merge-deep excess all)))))
 
       (testing ":strs + :select + :or + defaults"
         (let [{:strs [g h z & "d" "i"] {:strs! [gg & "hh"]} "i"
                :or {"d" 42, z :or-z}
                :select m
+               :excess excess
+               :all all
                :defaults dfs} sample-map]
           (is (= 6 g))
           (is (= 7 h))
           (is (= 60 gg))
           (is (= {"d" 42, "z" :or-z, "i" {"gg" 60, "hh" 70}, "g" 6, "h" 7} m))
-          (is (= {"d" 42, "z" :or-z} dfs))))
+          (is (= {"d" 42, "z" :or-z} dfs))
+          (is (= all (merge-deep excess all)))))
 
       (testing "mixed things after &"
         (is (= 1 (let [{:keys [a & 'b]} {:a 1}] a)))
@@ -1750,6 +1818,7 @@
            :or {:missing :default-missing}
            :all all-m
            :select sel-m
+           :excess excess-m
            :defaults dfs
            :as as-m} sample-map]
 
@@ -1762,6 +1831,7 @@
       (is (= {"gg" 60 "hh" 700} all-i))
       (is (= as-m sample-map))
       (is (= {:missing :default-missing} dfs))
+      (is (= all-m (merge-deep sel-m excess-m)))
 
       (testing ":all merges manually"
         (is (= all-m (merge sample-map
@@ -1780,15 +1850,19 @@
     (testing "happy path"
       (let [{:keys [a] :excess exa} (select-keys sample-map [:a :b :c])
             {:keys [a b c] :excess exnil} (select-keys sample-map [:a :b :c])
-            {{:excess exnest} :c} sample-map
-            {:keys [a c] :excess exkws} (select-keys sample-map [:a :b :c])
-            {:syms [d f] :excess exsyms} (select-keys sample-map '[d e f])
-            {:strs [g i] :excess exstrs} (select-keys sample-map ["g" "h" "i"])]
+            {{:excess exnest :select selnest :all allnest} :c} sample-map
+            {:keys [a c] :excess exkws :select selkws :all allkws} (select-keys sample-map [:a :b :c])
+            {:syms [d f] :excess exsyms :select selsyms :all allsyms} (select-keys sample-map '[d e f])
+            {:strs [g i] :excess exstrs :select selstrs :all allstrs} (select-keys sample-map ["g" "h" "i"])]
         (is (= {:b 2 :c {:aa 10}} exa))
         (is (= {:aa 10} exnest))
+        (is (= allnest (merge-deep selnest exnest)))
         (is (= {:b 2} exkws))
+        (is (= allkws (merge-deep selkws exkws)))
         (is (= '{e 5} exsyms))
+        (is (= allsyms (merge-deep selsyms exsyms)))
         (is (= {"h" 7} exstrs))
+        (is (= allstrs (merge-deep selstrs exstrs)))
 
         (testing ":excess predicative use"
           (is (nil? exnil))
@@ -1807,8 +1881,10 @@
         (is (= {:bb nil} ex-nil2))))
 
     (testing ":excess and :or to ensure that defaults do not show up"
-      (let [{:keys [a z] :or {z 99} :excess exor} (select-keys sample-map [:a :b :c])]
-        (is (= {:b 2 :c {:aa 10}} exor))))
+      (let [{:keys [a z] :or {z 99} :excess exor :select selor :all allor}
+            (select-keys sample-map [:a :b :c])]
+        (is (= {:b 2 :c {:aa 10}} exor))
+        (is (= allor (merge-deep selor exor)))))
 
     (testing "nested :excess, also with &"
       (let [{:keys [a] {:keys [aa] :excess exc} :c} sample-map
