@@ -506,15 +506,20 @@ static final class TransientArrayMap extends ATransientMap {
 	volatile Thread owner;
 	private final IPersistentMap _meta;
 
-	public TransientArrayMap(IPersistentMap meta, Object[] array){
+	// capacity must be >= array.length
+	private TransientArrayMap(IPersistentMap meta, Object[] array, int capacity){
 		this.owner = Thread.currentThread();
-		this.array = new Object[Math.max(HASHTABLE_THRESHOLD, array.length)];
+		this.array = new Object[capacity];
 		System.arraycopy(array, 0, this.array, 0, array.length);
 		this.len = array.length;
 		this._meta = meta;
 	}
+
+	public TransientArrayMap(IPersistentMap meta, Object[] array){
+		this(meta, array, Math.max(2*HASHTABLE_THRESHOLD, array.length));
+	}
 	
-	private int indexOf(Object key){
+	private int indexOfObject(Object key){
 		for(int i = 0; i < len; i += 2)
 			{
 			if(equalKey(array[i], key))
@@ -523,7 +528,22 @@ static final class TransientArrayMap extends ATransientMap {
 		return -1;
 	}
 
-	ITransientMap doAssoc(Object key, Object val){
+	private int indexOf(Object key){
+		if(key instanceof Keyword)
+		{
+			for(int i = 0; i < len; i += 2)
+			{
+				if(key == array[i])
+					return i;
+			}
+			return -1;
+		}
+		else
+			return indexOfObject(key);
+	}
+
+	public ITransientMap assoc(Object key, Object val){
+		ensureEditable();
 		int i = indexOf(key);
 		if(i >= 0) //already have key,
 			{
@@ -532,15 +552,27 @@ static final class TransientArrayMap extends ATransientMap {
 			}
 		else //didn't have key, grow
 			{
-			if(len >= array.length)
+			int currentLen = len;
+			if(currentLen < array.length) { // have capacity, add
+				array[len++] = key;
+				array[len++] = val;
+			} else if(key instanceof Keyword) {
+				if ((2 * array.length) <= KW_HASHTABLE_THRESHOLD)  // can grow TAM
+					return new TransientArrayMap(_meta, array, 2 * array.length).assoc(key, val);
+				else // grow to THM
+					return PersistentHashMap.create(array).asTransient().assoc(key, val);
+			} else { // not keyword, so grow to THM
 				return PersistentHashMap.create(array).asTransient().assoc(key, val);
-			array[len++] = key;
-			array[len++] = val;
+			}
 			}
 		return this;
 	}
+	ITransientMap doAssoc(Object key, Object val){
+		return assoc(key, val);
+	}
 
-	ITransientMap doWithout(Object key) {
+	public ITransientMap without(Object key) {
+		ensureEditable();
 		int i = indexOf(key);
 		if(i >= 0) //have key, will remove
 			{
@@ -553,24 +585,51 @@ static final class TransientArrayMap extends ATransientMap {
 			}
 		return this;
 	}
+	ITransientMap doWithout(Object key) {
+		return without(key);
+	}
 
-	Object doValAt(Object key, Object notFound) {
+	public Object valAt(Object key, Object notFound) {
+		ensureEditable();
 		int i = indexOf(key);
 		if (i >= 0)
 			return array[i + 1];
 		return notFound;
 	}
+	Object doValAt(Object key, Object notFound) {
+		return valAt(key, notFound);
+	}
 
-	int doCount() {
+	private static final Object NOT_FOUND = new Object();
+	public boolean containsKey(Object key){
+		ensureEditable();
+		return valAt(key, NOT_FOUND) != NOT_FOUND;
+	}
+	public IMapEntry entryAt(Object key){
+		ensureEditable();
+		Object v = valAt(key, NOT_FOUND);
+		if(v != NOT_FOUND)
+			return MapEntry.create(key, v);
+		return null;
+	}
+
+	public int count() {
+		ensureEditable();
 		return len / 2;
 	}
+	int doCount() {
+		return count();
+	}
 	
-	IPersistentMap doPersistent(){
+	public IPersistentMap persistent(){
 		ensureEditable();
 		owner = null;
 		Object[] a = new Object[len];
 		System.arraycopy(array,0,a,0,len);
 		return new PersistentArrayMap(_meta, a);
+	}
+	IPersistentMap doPersistent(){
+		return persistent();
 	}
 
 	void ensureEditable(){
