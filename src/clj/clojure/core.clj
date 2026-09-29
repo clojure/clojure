@@ -3065,30 +3065,7 @@
      (clojure.lang.LongRange/create start end step)
      (clojure.lang.Range/create start end step))))
 
-(defn merge-with
-  "Returns a map that consists of the rest of the maps conj-ed onto
-  the first.  If a key occurs in more than one map, the mapping(s)
-  from the latter (left-to-right) will be combined with the mapping in
-  the result by calling (f val-in-result val-in-latter)."
-  {:added "1.0"
-   :static true}
-  ([f] nil)
-  ([f x] x)
-  ([f x y]
-     (if (and x y)
-       (let [merge-kv
-             (fn this [m k v]
-               (let [mv (get m k this)]
-                 (if (identical? mv this)
-                   (assoc m k v)
-                   (assoc m k (f mv v)))))]
-         (if (instance? clojure.lang.IKVReduce y)
-           (clojure.lang.IKVReduce/.kvreduce y merge-kv x)
-           (reduce1 (fn [m e] (merge-kv m (key e) (val e))) x y)))
-       (or x y)))
-  ([f x y & maps]
-     (let [merge2 (fn [x y] (merge-with f x y))]
-       (reduce1 merge2 (merge2 x y) maps))))
+
 
 (defn line-seq
   "Returns the lines of text from rdr as a lazy sequence of strings.
@@ -3437,6 +3414,39 @@
        (recur ret (first ks) (next ks))
        ret))))
 
+(defn merge-with
+  "Returns a map that consists of the rest of the maps conj-ed onto
+  the first.  If a key occurs in more than one map, the mapping(s)
+  from the latter (left-to-right) will be combined with the mapping in
+  the result by calling (f val-in-result val-in-latter)."
+  {:added "1.0"
+   :static true}
+  ([f] nil)
+  ([f x] x)
+  ([f x y]
+     (if (and x y)
+       (let [merge-kv
+             (fn this [m k v]
+               (let [mv (get m k this)]
+                 (if (identical? mv this)
+                   (assoc m k v)
+                   (assoc m k (f mv v)))))
+             merge-kv!
+             (fn this [m k v]
+               (let [mv (clojure.lang.ILookup/.valAt m k this)]
+                 (if (identical? mv this)
+                   (assoc! m k v)
+                   (assoc! m k (f mv v)))))]
+         (if (instance? clojure.lang.IKVReduce y)
+           (if (instance? clojure.lang.IEditableCollection x)
+             (persistent! (clojure.lang.IKVReduce/.kvreduce y merge-kv! (transient x)))
+             (clojure.lang.IKVReduce/.kvreduce y merge-kv x))
+           (reduce1 (fn [m e] (merge-kv m (key e) (val e))) x y)))
+       (or x y)))
+  ([f x y & maps]
+     (let [merge2 (fn [x y] (merge-with f x y))]
+       (reduce1 merge2 (merge2 x y) maps))))
+
 ;redef into with batch support
 (defn ^:private into0
   "Returns a new coll consisting of to-coll with all of the items of
@@ -3458,13 +3468,9 @@
    :static true}
   ([] nil)
   ([x] x)
-  ([x y] (if (and x y)
-           (if (instance? clojure.lang.IKVReduce y)
-             (clojure.lang.IKVReduce/.kvreduce y assoc x)
-             (into1 x y))
-           (or x y)))
+  ([x y] (if (and x y) (into1 x y) (or x y)))
   ([x y & maps]
-     (reduce1 merge (merge x y) maps)))
+   (reduce1 merge (merge x y) maps)))
 
 (defmacro import 
   "import-list => (package-symbol class-name-symbols*)
@@ -7148,7 +7154,9 @@ fails, attempts to require sym's namespace and retries."
   where the keys will be the ordinals."  
   {:added "1.4"}
   ([f init coll]
-     (clojure.core.protocols/kv-reduce coll f init)))
+   (if (instance? clojure.lang.IKVReduce coll)
+     (clojure.lang.IKVReduce/.kvreduce coll f init)
+     (clojure.core.protocols/kv-reduce coll f init))))
 
 (defn completing
   "Takes a reducing function f of 2 args and returns a fn suitable for
@@ -7188,9 +7196,15 @@ fails, attempts to require sym's namespace and retries."
   ([] [])
   ([to] to)
   ([to from]
+   (if (and (instance? clojure.lang.IKVReduce from)
+            (instance? clojure.lang.IPersistentMap from)
+            (instance? clojure.lang.IPersistentMap to))
+     (if (instance? clojure.lang.IEditableCollection to)
+       (persistent! (clojure.lang.IKVReduce/.kvreduce from assoc! (transient to)))
+       (clojure.lang.IKVReduce/.kvreduce from assoc to))
      (if (instance? clojure.lang.IEditableCollection to)
        (persistent! (reduce conj! (transient to) from))
-       (reduce conj to from)))
+       (reduce conj to from))))
   ([to xform from]
      (if (instance? clojure.lang.IEditableCollection to)
        (let [tm (meta to)
