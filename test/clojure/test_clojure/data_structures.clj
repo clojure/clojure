@@ -1192,6 +1192,43 @@
       {:a [1 2 3]} {:a 1} {:a 2} {:a 3}
       {:a [1 2]} {:a 1} {:a 2} nil)))
 
+(deftest test-merge
+  (testing "`nil` and empty map behavior"
+    (is (nil? (merge)))
+    (is (nil? (merge nil)))
+    (is (nil? (merge nil nil)))
+    (is (nil? (merge nil nil nil)))
+    (is (= {} (merge {})))
+    (is (= {} (merge {} nil)))
+    (is (= {} (merge nil {})))
+    (is (= {} (merge nil {} nil)))
+    (is (= {[2 3] :foo} (merge {[2 3] :foo} nil {})))
+    (is (= {1 11} (merge {1 11} {} nil))))
+  (testing "lattermost mapping wins"
+    (is (= {:a "aaaaa"} (merge {:a "a"} {:a "aaaaa"})))
+    (is (= {:a "a" :b "b"} (merge {:a "aaaa"} {:a "a" :b "b"})))
+    (is (= {:a "a" :b "b"} (merge {:a "aaaa"}
+                             {:a "a" :b "bbbb"}
+                             {:a "a" :b "b"})))
+    (is (= {:a nil :b "b" :c "c"} (merge {:a "aaaa"}
+                                    {:a "a" :b "bbbb" :c "c"}
+                                    {:a nil :b "b"})))
+    (is (= {:x 1 :y 10 :z 100} (merge {:x 1 :y 5555}
+                                 {:y 10 :z 100}))))
+  (testing "nested maps are replaced, not 'deep-merged'"
+    (is (= {:ceo {:name "Alice"},
+            :cto {:name "Brenda"}}
+          (merge {:ceo {:salary 1000000}} ; salary values are overwritten
+            {:cto {:salary  500000}}
+            {:ceo {:name "Alice"}}
+            {:cto {:name "Brenda"}}))))
+  (testing "non-map values in position 2 throw"
+    (are [b] (is (thrown? Exception (apply merge {} b)))
+      [1]
+      [1 2]
+      [:foo]
+      ["str"])))
+
 (defn is-same-collection [a b]
   (let [msg (format "(class a)=%s (class b)=%s a=%s b=%s"
                     (.getName (class a)) (.getName (class b)) a b)]
