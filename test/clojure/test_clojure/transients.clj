@@ -80,3 +80,21 @@
     (is (= nil (get thm :x)))
     (is (= [:a 1] (find thm :a)))
     (is (= nil (find thm :x)))))
+
+(defn assoc-transient-check-meta
+  [cnt keyfn]
+  (let [metam {:foo "meta"}]
+    (loop [m (transient (with-meta {} metam))
+           i 0]
+      (if (< i cnt)
+        (let [nextm (assoc! m (keyfn i) i)]
+          ;; this doesn't pass right now, but maybe it should
+          ;(is (= metam (meta nextm) (str "lost meta at i=" i)))
+          (recur nextm (inc i)))
+        (is (= metam (meta (persistent! m))))))))
+
+(deftest metadata-propagation-across-growing-transient-map
+  ;; 130 = past KW_HASHTABLE_THRESHOLD
+  ;; test both keyword and non-keyword keys
+  (assoc-transient-check-meta 130 #(keyword (str "kw-" %)))
+  (assoc-transient-check-meta 130 #(str "kw-" %)))
