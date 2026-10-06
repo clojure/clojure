@@ -4540,9 +4540,6 @@
         gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
         gtemp (gensym "temp__")
         defaults (:or b)
-        defaults-as (:defaults b)
-        _ (when (and defaults-as (not defaults))
-            (throw (new IllegalArgumentException "Can't specify :defaults without :or")))
         b (dissoc b :defaults)
         gdefaults (when defaults (zipmap (keys defaults) (repeatedly #(gensym "default__"))))
         select (:select b)
@@ -4668,7 +4665,7 @@
                   (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs suba subexcess submissing))))
             {:ret ret, :sel sel, :b->k b->k :subs subs :suba suba :subexcess subexcess :submissing submissing}))
         ret (:ret retsel), sel (vec (:sel retsel)), b->k (:b->k retsel)
-        new-or-code (and defaults (or defaults-as select all))
+        new-or-code (and defaults (or select all))
         bk #(if (symbol? %)
               (let [bk (b->k %)]
                 (when (and new-or-code (not bk))
@@ -4695,9 +4692,7 @@
 
         ret (if missing
               (conj ret missing `(merge ~missing (some-vals ~(:submissing retsel))))
-              ret)
-        
-        ret (if defaults-as (conj ret defaults-as dm) ret)]
+              ret)]
     ret))
 
 (defn destructure [bindings]
