@@ -206,13 +206,10 @@
    :doc "Returns the metadata of obj, returns nil if there is no metadata."
    :added "1.0"
    :static true
-   :inline (fn [x]
-             (list 'let ['G__x x]
-                   (list 'if (list 'instance? 'clojure.lang.IMeta 'G__x) (list 'clojure.lang.IMeta/.meta 'G__x))))
+   :inline (fn [x] (list 'clojure.lang.RT/meta x))
    }
- meta (fn ^:static meta [x]
-        (if (instance? clojure.lang.IMeta x)
-          (. ^clojure.lang.IMeta x (meta)))))
+  meta (fn ^:static meta [x]
+         (clojure.lang.RT/meta x)))
 
 (def
  ^{:arglists '([^clojure.lang.IObj obj m])
