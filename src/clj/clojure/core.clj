@@ -7198,13 +7198,12 @@ fails, attempts to require sym's namespace and retries."
        (persistent! (reduce conj! (transient to) from))
        (reduce conj to from))))
   ([to xform from]
-     (if (instance? clojure.lang.IEditableCollection to)
-       (let [tm (meta to)
-             rf (fn
-                  ([coll] (-> (persistent! coll) (with-meta tm)))
-                  ([coll v] (conj! coll v)))]
-         (transduce xform rf (transient to) from))
-       (transduce xform conj to from))))
+   (if (instance? clojure.lang.IEditableCollection to)
+     (let [rf (fn
+                ([coll] (persistent! coll))
+                ([coll v] (conj! coll v)))]
+       (transduce xform rf (transient to) from))
+     (transduce xform conj to from))))
 
 (alter-var-root #'into1 (fn [_] into))
 
@@ -8347,14 +8346,13 @@ fails, attempts to require sym's namespace and retries."
   are mapped to result of applying f to the corresponding values of m."
   {:added "1.11"}
   [m f]
-  (with-meta
-    (persistent!
-     (reduce-kv (fn [acc k v] (assoc! acc k (f v)))
-                (if (instance? clojure.lang.IEditableCollection m)
-                  (transient m)
-                  (transient {}))
-                m))
-    (meta m)))
+  (persistent!
+   (reduce-kv
+    (fn [acc k v] (assoc! acc k (f v)))
+    (transient
+     (if (instance? clojure.lang.IEditableCollection m) m
+         (with-meta {} (meta m))))
+    m)))
 
 (defn update-keys
   "m f => {(f k) v ...}
