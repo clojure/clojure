@@ -950,7 +950,7 @@
                 (recur f (f val (first s)) (next s)))
          val))))
 
-(def ^:private ^:dynamic reduce1 reduce0)
+(def ^:private ^:redef reduce1 reduce0)
 
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
@@ -3458,7 +3458,7 @@
     (persistent! (reduce0 conj! (transient to) from))
     (reduce0 conj to from)))
 
-(def ^:private ^:dynamic into1 into0)
+(def ^:private ^:redef into1 into0)
 
 (defn merge
   "Returns a map that consists of the rest of the maps conj-ed onto
