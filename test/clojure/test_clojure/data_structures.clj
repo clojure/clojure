@@ -1719,74 +1719,55 @@
       (is (= {:n nil} (let [{{a :a} :n :select s} {:n nil}] s)))
       (is (= {:n {}} (let [{{a :a} :n :select s} {:n {}}] s))))
 
-    (testing "defaults can turn nothing into something"
+    (testing ":or defaults can turn nothing into something"
       (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :select s} nil] s)))
       (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :select s} {:n nil}] s))))))
 
-(deftest select-or-defaults
+(deftest select-or
   (let [sample-map {:a 1, :b 2, :c  {:aa 10 :bb 20},
                     'd 4  'e 5  'f  {'dd 40 'ee 50},
                     "g" 6 "h" 7 "i" {"gg" 60 "hh" 70},}]
     (testing "happy path"
-      #_(testing ":defaults"
-        (is (empty? (let [{:defaults d :or {}} {}] d)))
-        (is (thrown? Exception (eval '(let [{:defaults d :or {:a 1}} {}] d))))
-        (is (= {:a 1} (let [{:keys [a] :defaults d :or {:a 1}} {}] d)))
-        (is (= {:a 1} (let [{:keys [a] :defaults d :or {a 1}} {}] d)))
-        (is (= {:a 1, 'b 2, "c" 3} (let [{b 'b, c "c", :keys [a] :defaults d :or {:a 1, 'b 2, "c" 3}} {}] d))))
       
-      (testing ":keys + :select + :or + defaults"
+      (testing ":keys + :select + :or"
         (let [{:keys [a b z & :c :d] {:keys! [aa & :bb]} :c
                :or {:d 42, z :or-z}
                :select m
                :excess excess
-               :all all
-               ;;:defaults dfs
-               } sample-map]
+               :all all} sample-map]
           (is (= 1 a))
           (is (= 2 b))
           (is (= 10 aa))
           (is (= {:z :or-z, :c {:aa 10, :bb 20}, :b 2, :d 42, :a 1} m))
-          ;;(is (= {:d 42, :z :or-z} dfs))
           (is (= all (merge-deep excess all)))))
 
-      (testing ":syms + :select + :or + defaults"
+      (testing ":syms + :select + :or"
         (let [{:syms [d e z & 'd 'f] {:syms! [dd & 'ee]} 'f
                :or {'d 42, z :or-z}
                :select m
                :excess excess
-               :all all
-               ;;:defaults dfs
-               } sample-map]
+               :all all} sample-map]
           (is (= 4 d))
           (is (= 5 e))
           (is (= 40 dd))
           (is (= '{f {dd 40, ee 50}, e 5, d 4, z :or-z} m))
-          ;;(is (= '{d 42, z :or-z} dfs))
           (is (= all (merge-deep excess all)))))
 
-      (testing ":strs + :select + :or + defaults"
+      (testing ":strs + :select + :or"
         (let [{:strs [g h z & "d" "i"] {:strs! [gg & "hh"]} "i"
                :or {"d" 42, z :or-z}
                :select m
                :excess excess
-               :all all
-               ;;:defaults dfs
-               } sample-map]
+               :all all} sample-map]
           (is (= 6 g))
           (is (= 7 h))
           (is (= 60 gg))
           (is (= {"d" 42, "z" :or-z, "i" {"gg" 60, "hh" 70}, "g" 6, "h" 7} m))
-          ;;(is (= {"d" 42, "z" :or-z} dfs))
           (is (= all (merge-deep excess all)))))
 
       (testing "mixed things after &"
         (is (= 1 (let [{:keys [a & 'b]} {:a 1}] a)))
-        (is (= 1 (let [{:keys! [a & 'b "c"]} {:a 1, 'b 2, "c" 3}] a))))
-
-      #_(testing "known compile-time errors"
-        (is (thrown? Exception (eval '(let [{:keys [a] :defaults d :or {:a 1, a 1}} {}] d))))
-        (is (thrown? Exception (eval '(let [{:defaults d} {}] d))))))))
+        (is (= 1 (let [{:keys! [a & 'b "c"]} {:a 1, 'b 2, "c" 3}] a)))))))
 
 (deftest all-directive
   (testing "base cases"
@@ -1812,7 +1793,7 @@
       (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :all m} {:n nil}] m))))
     (testing ":or defaults must correspond to binding with :all"
       (is (thrown? Exception (eval '(let [{:keys [a] :or {a 1 z 2} :all m} {}] m))))))
-  (testing "defaults applied in :all"
+  (testing ":or defaults applied in :all"
     (is (= {:a 1}       (let [{:keys [a] :or {a 42} :all m} {:a 1}] m)))
     (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :all m} nil] m)))
     (is (= {:n {:nn {:a 1 :b 2}}}
@@ -1830,13 +1811,6 @@
            (let [{:keys [a b & :c :z] :or {:z 42} :all m} {:a 1 :b 2 :z 100}] m)))
     (testing ":or defaults must correspond to binding with :all plus &"
       (is (thrown? Exception (eval '(let [{:keys [a b & :c] :or {c 42} :all m} {:a 1 :b 2}] m))))))
-  #_(testing ":all with :defaults"
-      (is (= [{:a 1} {:a 1}]
-             (let [{:keys [a] :or {a 1} :all all-m :defaults dfs} {}]
-               [all-m dfs])))
-      (is (= [{:a 5 :b 2} {:a 1}]
-             (let [{:keys [a] :or {a 1} :all all-m :defaults dfs} {:a 5 :b 2}]
-               [all-m dfs]))))
   (testing "combinations"
     (let [sample-map {:a 1, :b 2, :c {:aa 10},
                       'd 4, 'e 5, 'f {'dd 40},
@@ -1859,7 +1833,6 @@
            :all all-m
            :select sel-m
            :excess excess-m
-           ;;:defaults dfs
            :as as-m} sample-map]
 
       (is (= 1 a)) (is (= 2 b))
@@ -1870,7 +1843,6 @@
       (is (= '{dd 40 ee 500} all-f))
       (is (= {"gg" 60 "hh" 700} all-i))
       (is (= as-m sample-map))
-      ;;(is (= {:missing :default-missing} dfs))
       (is (= all-m (merge-deep sel-m excess-m)))
 
       (testing ":all merges manually"
