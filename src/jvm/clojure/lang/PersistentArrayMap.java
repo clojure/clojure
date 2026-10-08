@@ -542,7 +542,12 @@ static final class TransientArrayMap extends ATransientMap {
 			return indexOfObject(key);
 	}
 
-	private static final double GROW_FACTOR = 1.5;
+	private static final double GROW_FACTOR = 1.65;
+
+	static int newCapacity(int currentCapacity){
+		int cap = Math.min((int)Math.ceil(currentCapacity * GROW_FACTOR), KW_HASHTABLE_THRESHOLD);
+		return cap + (cap & 1);
+	}
 
 	public ITransientMap assoc(Object key, Object val){
 		ensureEditable();
@@ -552,25 +557,18 @@ static final class TransientArrayMap extends ATransientMap {
 			if(array[i + 1] != val) //no change, no op
 				array[i + 1] = val;
 			}
-		else //didn't have key, grow
-			{
-			if(len < array.length) { // have capacity, add
-				array[len] = key;
-				array[len+1] = val;
-				len = len+2;
-			} else if(key instanceof Keyword) {
-				int growCap = (int)Math.ceil(array.length * GROW_FACTOR);
-				growCap += growCap & 1;
-				if (growCap <= KW_HASHTABLE_THRESHOLD)  // can grow TAM
-					return new TransientArrayMap(_meta, array, growCap).assoc(key, val);
-				else// too big, use THM
-					return PersistentHashMap.create(_meta, array).asTransient().assoc(key, val);
-			} else { // not keyword, use THM
-				return PersistentHashMap.create(_meta, array).asTransient().assoc(key, val);
-			}
-			}
+		else if(len < array.length) {
+			array[len] = key;
+			array[len+1] = val;
+			len = len+2;
+		} else if(len >= KW_HASHTABLE_THRESHOLD || !(key instanceof Keyword)) {
+			return PersistentHashMap.create(_meta, array).asTransient().assoc(key, val);
+		} else {
+			return new TransientArrayMap(_meta, array, newCapacity(array.length)).assoc(key, val);
+		}
 		return this;
 	}
+
 	ITransientMap doAssoc(Object key, Object val){
 		return assoc(key, val);
 	}

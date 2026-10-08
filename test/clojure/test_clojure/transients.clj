@@ -1,5 +1,8 @@
 (ns clojure.test-clojure.transients
-  (:use clojure.test))
+  (:use clojure.test)
+  (:require [clojure.test.check :as chk]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]))
 
 (deftest popping-off
   (testing "across a node boundary"
@@ -98,3 +101,46 @@
   ;; test both keyword and non-keyword keys
   (assoc-transient-check-meta 130 #(keyword (str "kw-" %)))
   (assoc-transient-check-meta 130 #(str "kw-" %)))
+
+(defn through-transient [r1 r2]
+  (loop [acc (transient r1)
+         i 0]
+    (if (< i (count r2))
+      (recur (conj! acc (nth r2 i)) (inc i))
+      (persistent! acc))))
+
+(deftest fill-transient
+  (let [res (chk/quick-check
+              5000
+              (prop/for-all [cnt (gen/resize 130 gen/nat)]
+                (let [v (range cnt)]
+                  (= v (through-transient [] v)))))]
+    (when-not (:result res)
+      (is
+        (:result res)
+        (->
+          res
+          :shrunk
+          :smallest
+          first
+          clojure.pprint/pprint
+          with-out-str)))))
+
+(deftest fill-transient-adopt
+  (let [res (chk/quick-check
+              5000
+              (prop/for-all [cnts (gen/tuple (gen/resize 130 gen/nat) (gen/resize 130 gen/nat))]
+                (let [[c1 c2] cnts
+                      r1 (vec (range c1))
+                      r2 (vec (range c2))]
+                  (= (concat r1 r2) (through-transient r1 r2)))))]
+    (when-not (:result res)
+      (is
+        (:result res)
+        (->
+          res
+          :shrunk
+          :smallest
+          first
+          clojure.pprint/pprint
+          with-out-str)))))
