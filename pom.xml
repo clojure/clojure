@@ -35,7 +35,6 @@
 
   <properties>
     <directlinking>true</directlinking>
-    <project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
   </properties>
 
   <dependencies>
@@ -105,29 +104,6 @@
     <testSourceDirectory>test/java</testSourceDirectory>
     <plugins>
       <plugin>
-        <groupId>io.github.git-commit-id</groupId>
-        <artifactId>git-commit-id-maven-plugin</artifactId>
-        <version>9.2.0</version>
-        <executions>
-          <execution>
-            <id>get-the-git-infos</id>
-            <goals>
-              <goal>revision</goal>
-            </goals>
-            <phase>initialize</phase>
-          </execution>
-        </executions>
-        <configuration>
-          <generateGitPropertiesFile>true</generateGitPropertiesFile>
-          <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-	  <commitIdGenerationMode>full</commitIdGenerationMode>
-	  <dateFormatTimeZone>UTC</dateFormatTimeZone>
-          <excludeProperties>
-           <excludeProperty>git.build.time</excludeProperty>
-          </excludeProperties>
-        </configuration>
-      </plugin>
-      <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-compiler-plugin</artifactId>
 	<version>3.13.0</version>
@@ -138,7 +114,7 @@
       </plugin>
       <plugin>
 	<artifactId>maven-antrun-plugin</artifactId>
-	<version>3.2.0</version>
+	<version>3.1.0</version>
 	<executions>
 	  <execution>
 	    <id>clojure-compile</id>
@@ -172,7 +148,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.6.1</version>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <id>add-clojure-source-dirs</id>
@@ -190,7 +166,7 @@
       </plugin>
       <plugin>
 	<artifactId>maven-assembly-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>3.7.1</version>
 	<executions>
 	  <execution>
 	    <id>clojure-slim-jar</id>
@@ -208,11 +184,11 @@
       </plugin>
       <plugin>
 	<artifactId>maven-jar-plugin</artifactId>
-	<version>3.5.0</version>
+	<version>3.4.1</version>
       </plugin>
       <plugin>
 	<artifactId>maven-source-plugin</artifactId>
-	<version>3.4.0</version>
+	<version>3.3.1</version>
 	<executions>
 	  <execution>
 	    <id>attach-sources</id>
@@ -234,7 +210,7 @@
 	     instead, push SCM changes in Hudson configuration -->
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-release-plugin</artifactId>
-	<version>3.3.1</version>
+	<version>3.0.1</version>
 	<configuration>
 	  <pushChanges>false</pushChanges>
 	  <localCheckout>true</localCheckout>
@@ -244,7 +220,7 @@
 	<!-- disable the Surefire testing plugin -->
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-surefire-plugin</artifactId>
-	<version>3.5.6</version>
+	<version>3.2.5</version>
 	<configuration>
 	  <skip>true</skip>
 	</configuration>
@@ -254,7 +230,7 @@
 	<!-- create and attach javadoc jar -->
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-javadoc-plugin</artifactId>
-	<version>3.12.0</version>
+	<version>3.11.2</version>
   <executions>
     <execution>
       <id>attach-javadocs</id>
@@ -272,7 +248,7 @@
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.11.0</version>
+        <version>0.7.0</version>
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
@@ -304,7 +280,7 @@
 	<plugins>
 	  <plugin>
 	    <artifactId>maven-assembly-plugin</artifactId>
-	    <version>3.8.0</version>
+	    <version>3.7.1</version>
 	    <executions>
 	      <execution>
 		<id>clojure-distribution</id>
@@ -332,7 +308,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.8</version>
+            <version>3.2.4</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -366,7 +342,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>3.6.2</version>
+            <version>3.5.3</version>
             <executions>
               <execution>
                 <phase>package</phase>
