@@ -4607,37 +4607,45 @@
                       (-> ret (conj local bv)))
                     (pb ret bb bv))))
         retsel
-        (loop [ret ret, sel #{}, bes bes, b->k {}, subs nil, suba nil, subexcess nil, submissing nil]
+        (loop [ret ret, sel #{}, bes (seq bes), b->k {}, subs nil, suba nil, subexcess nil, submissing nil]
           (if (seq bes)
             (let [be (first bes), bb (key be), bk (val be)]
               (if (keyword? bb)
-                (let [dir bb
-                      tr (xf bb)
-                      req? (.endsWith (name bb) "!")
-                      retsel
-                      (loop [ret ret, sel sel, bbs (seq bk), preamp? true, b->k b->k]
-                        (if (seq bbs)
-                          (let [bb (first bbs)]
-                            (if (= bb '&)
-                              (if preamp?
-                                (recur ret sel (next bbs) false b->k)
-                                (throw (new IllegalArgumentException (str "& can only appear once in " dir))))
-                              (let [_
-                                    (when (and (not preamp?) (symbol? bb))
-                                      (throw
-                                       (new IllegalArgumentException
-                                            (str "'" bb
-                                                 "' - binding symbols can only appear before '&', use keys after"))))
-                                    bk (if preamp? (tr bb) bb)]
-                                (recur (if (or preamp? req?)
-                                         (push1 ret (if preamp? bb gtemp) bk req?)
-                                         ret)
-                                       (conj sel bk)
-                                       (next bbs) preamp?
-                                       (if preamp? (assoc b->k (localize bb) bk) b->k)))))
-                          {:ret ret, :sel sel, :b->k b->k}))]
-                  (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel) subs suba subexcess submissing))
-                (let [subsel? (and select (map? bb))
+                (if (= :req! bb)
+                  (let [bes (reduce1 conj (next bes)
+                                     (map #(clojure.lang.MapEntry/create
+                                            (vary-meta (key %) assoc ::impl-detail-42 true) (val %))
+                                          bk))]
+                    (recur ret sel bes b->k subs suba subexcess submissing))
+                  ;;presume binding list directive
+                  (let [dir bb
+                        tr (xf bb)
+                        req? (.endsWith (name bb) "!")
+                        retsel
+                        (loop [ret ret, sel sel, bbs (seq bk), preamp? true, b->k b->k]
+                          (if (seq bbs)
+                            (let [bb (first bbs)]
+                              (if (= bb '&)
+                                (if preamp?
+                                  (recur ret sel (next bbs) false b->k)
+                                  (throw (new IllegalArgumentException (str "& can only appear once in " dir))))
+                                (let [_
+                                      (when (and (not preamp?) (symbol? bb))
+                                        (throw
+                                         (new IllegalArgumentException
+                                              (str "'" bb
+                                                   "' - binding symbols can only appear before '&', use keys after"))))
+                                      bk (if preamp? (tr bb) bb)]
+                                  (recur (if (or preamp? req?)
+                                           (push1 ret (if preamp? bb gtemp) bk req?)
+                                           ret)
+                                         (conj sel bk)
+                                         (next bbs) preamp?
+                                         (if preamp? (assoc b->k (localize bb) bk) b->k)))))
+                            {:ret ret, :sel sel, :b->k b->k}))]
+                    (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel) subs suba subexcess submissing)))
+                (let [req? (-> bb meta ::impl-detail-42)
+                      subsel? (and select (map? bb))
                       bb (if (or (not subsel?) (:select bb))
                            bb
                            (assoc bb :select (gensym "select__")))
@@ -4662,7 +4670,7 @@
                       submissing (if submissing? (assoc submissing bk (:missing bb)) submissing)
 
                       b->k (if (symbol? bb) (assoc b->k bb bk) b->k)]
-                  (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs suba subexcess submissing))))
+                  (recur (push1 ret bb bk req?) (conj sel bk) (next bes) b->k subs suba subexcess submissing))))
             {:ret ret, :sel sel, :b->k b->k :subs subs :suba suba :subexcess subexcess :submissing submissing}))
         ret (:ret retsel), sel (vec (:sel retsel)), b->k (:b->k retsel)
         new-or-code (and defaults (or select all))
