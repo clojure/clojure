@@ -7689,8 +7689,11 @@ private static Expr analyzeSeq(C context, ISeq form, String name) {
 		if(op == null)
 			throw new IllegalArgumentException("Can't call nil, form: " + form);
 		IFn inline = isInline(op, RT.count(RT.next(form)));
-		if(inline != null)
-			return analyze(context, preserveTag(form, inline.applyTo(RT.next(form))));
+		if(inline != null){
+			Object iform = inline.applyTo(RT.next(form));
+			if(iform != null)
+				return analyze(context, preserveTag(form, iform));
+			}
 		IParser p;
 		if(op.equals(FN))
 			return FnExpr.parse(context, form, name);
