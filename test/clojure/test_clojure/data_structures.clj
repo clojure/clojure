@@ -1514,7 +1514,7 @@
         (is (= b 2))
         (is (thrown? Exception (let [{:keys! [b & :foo/c]} (dissoc sample-map :b)] b)))
         (is (thrown? Exception (let [{:keys! [b & :foo/c]} (dissoc sample-map :foo/c)] b)))
-        (is (= 1 (let [{:foo/keys! [aa & :bb]} sample-map2] aa)))
+        (is (= 1 (let [{:foo/keys! [aa & :bb]} (assoc sample-map2 :foo/bb 42)] aa)))
         (is (= aa 1))
         (is (= 1 (let [{:keys! [::a & ::b]} {::a 1 , ::b 2}] a)))))
     (testing "that right of & is unbound (compile-time errors)"
@@ -1704,8 +1704,8 @@
       keys-sel {:a 1 :b 2 :c 3 :d 4}
       syms-sel '{sa 10 sb 20 sc 30 sd 40}
       strs-sel {"stra" 100 "strb" 200 "strc" 300 "strd" 400}
-      qkeys-sel {:foo/x 1000 :foo/z 3000}
-      aqkeys-sel {::x 10000 ::z 30000}
+      qkeys-sel #:foo{:x 1000 :y 2000 :z 3000}
+      aqkeys-sel #::{:x 10000 :y 20000 :z 30000}
       nest-sel '{:aa 1, saa 10}
       tl-sel '{:nested {:aa 1, saa 10} ::x 10000}
       or-sel {:a 1 :b 2 :c 3 :d 4}

@@ -4551,10 +4551,18 @@
         xf (fn [mk]
              (let [mkns (namespace mk)
                    mkn (name mk)]
-               (cond (.startsWith mkn "keys") #(keyword (or mkns (namespace %)) (name %))
-                     (.startsWith mkn "syms") #(list `quote (symbol (or mkns (namespace %)) (name %)))
+               (cond (.startsWith mkn "keys") #(keyword (or (namespace %) mkns) (name %))
+                     (.startsWith mkn "syms") #(list `quote (symbol (or (namespace %) mkns) (name %)))
                      (.startsWith mkn "strs") str
                      :else (throw (new Exception (str "Unsupported map directive: " mk) )))))
+        xfk (fn [mk]
+              (let [mkns (namespace mk)
+                    mkn (name mk)]
+                (if (and (.startsWith mkn "keys") mkns)
+                  #(if (keyword? %)
+                     (keyword (or (namespace %) mkns) (name %))
+                     %)
+                  identity)))
         ret (reduce1 (fn [ret e]
                        (conj ret (val e) (defaults (key e))))
                      bvec gdefaults)
@@ -4620,6 +4628,7 @@
                   ;;presume binding list directive
                   (let [dir bb
                         tr (xf bb)
+                        trk (xfk bb)
                         req? (.endsWith (name bb) "!")
                         retsel
                         (loop [ret ret, sel sel, bbs (seq bk), preamp? true, b->k b->k]
@@ -4635,7 +4644,7 @@
                                          (new IllegalArgumentException
                                               (str "'" bb
                                                    "' - binding symbols can only appear before '&', use keys after"))))
-                                      bk (if preamp? (tr bb) bb)]
+                                      bk (if preamp? (tr bb) (trk bb))]
                                   (recur (if (or preamp? req?)
                                            (push1 ret (if preamp? bb gtemp) bk req?)
                                            ret)
