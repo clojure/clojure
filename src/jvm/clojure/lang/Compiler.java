@@ -7591,7 +7591,11 @@ public static Object macroexpand1(Object x) {
 				try
 					{
                     ISeq args = RT.cons(form, RT.cons(Compiler.LOCAL_ENV.get(), form.next()));
-					return v.applyTo(args);
+					Object exp = v.applyTo(args);
+					Symbol tag = tagOf(form);
+					if(RT.booleanCast(tag) && !tag.equals(tagOf(exp)))
+						exp = ((IObj)RT.list(IDENTITY, exp)).withMeta(RT.meta(form));
+					return exp;
 					}
 				catch(ArityException e)
 					{
