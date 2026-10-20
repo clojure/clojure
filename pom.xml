@@ -47,7 +47,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>core.specs.alpha</artifactId>
-      <version>0.6.133-alpha10</version>
+      <version>0.6.148-alpha12</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
