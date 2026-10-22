@@ -4402,7 +4402,6 @@ static class InvokeExpr implements Expr{
 				}
 			}
 
-		/*
 		if(fexpr instanceof KeywordExpr && RT.count(form) == 2 && shouldRegisterCallsites(KEYWORD_CALLSITES))
 			{
 //			fexpr = new ConstantExpr(new KeywordCallSite(((KeywordExpr)fexpr).k));
@@ -4410,7 +4409,7 @@ static class InvokeExpr implements Expr{
 			return new KeywordInvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form),
 			                             (KeywordExpr) fexpr, target);
 			}
-		*/
+
 		PersistentVector args = PersistentVector.EMPTY;
 		for(ISeq s = RT.seq(form.next()); s != null; s = s.next())
 			{
