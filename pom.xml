@@ -5,7 +5,7 @@
   <artifactId>clojure</artifactId>
   <name>clojure</name>
   <packaging>jar</packaging>
-  <version>1.13.0-alpha10</version>
+  <version>1.13.0-master-SNAPSHOT</version>
 
   <url>http://clojure.org/</url>
   <description>Clojure core environment and runtime library.</description>
@@ -30,12 +30,12 @@
     <connection>scm:git:git@github.com:clojure/clojure.git</connection>
     <developerConnection>scm:git:git@github.com:clojure/clojure.git</developerConnection>
     <url>git@github.com:clojure/clojure.git</url>
-    <tag>clojure-1.13.0-alpha10</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
     <directlinking>true</directlinking>
-    <project.build.outputTimestamp>2026-10-22T16:25:30Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-10-22T16:27:22Z</project.build.outputTimestamp>
   </properties>
 
   <dependencies>
