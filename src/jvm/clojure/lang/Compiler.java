@@ -3839,7 +3839,50 @@ static class KeywordInvokeExpr implements Expr{
 			}
 	}
 
-    public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+	//*
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
+		Label endLabel = gen.newLabel();
+		Label getLabel = gen.newLabel();
+		Label faultLabel = gen.newLabel();
+
+		gen.visitLineNumber(line, gen.mark());
+		target.emit(C.EXPRESSION, objx, gen); //target
+		gen.dup(); //target, target
+		gen.instanceOf(ObjExpr.IKEYWORD_LOOKUP_TYPE); //target, cmp
+		gen.ifZCmp(GeneratorAdapter.EQ, getLabel); //target
+
+		gen.getStatic(objx.objtype, objx.siteNameStatic(siteIndex),ObjExpr.KEYWORD_LOOKUPSITE_TYPE);  //target,site
+		gen.dupX1(); //site,target,site
+		gen.invokeVirtual(ObjExpr.KEYWORD_LOOKUPSITE_TYPE,ObjExpr.thunkMethod); //site, target, thunk
+		gen.dup2();  //site, target, thunk, target, thunk
+		gen.swap(); //site, target, thunk, thunk, target
+		gen.invokeInterface(ObjExpr.ILOOKUP_THUNK_TYPE, Method.getMethod("Object get(Object)")); //site,target,thunk,result
+		gen.dupX2();                          //site,result,target,thunk,result
+		gen.visitJumpInsn(IF_ACMPEQ, faultLabel); //site,result,target
+		gen.pop(); //site,result
+		gen.swap(); //result, site
+		gen.pop();  //result
+		gen.goTo(endLabel);
+
+		gen.mark(faultLabel);    //site, result, target
+		gen.swap();              //site, target, result
+		gen.pop(); //site,target
+		gen.invokeVirtual(ObjExpr.KEYWORD_LOOKUPSITE_TYPE,ObjExpr.faultMethod); //result
+		gen.goTo(endLabel);
+
+		gen.mark(getLabel);    //target
+		kw.emit(C.EXPRESSION, objx, gen); //target, kw
+		gen.visitLineNumber(line, gen.mark());
+		gen.invokeStatic(RT_TYPE, Method.getMethod("Object get(Object,Object)")); //result
+
+		gen.mark(endLabel);
+		if(context == C.STATEMENT)
+			gen.pop();
+	}
+	//*/
+
+	/*
+	public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
         Label endLabel = gen.newLabel();
         Label faultLabel = gen.newLabel();
 
@@ -3872,6 +3915,7 @@ static class KeywordInvokeExpr implements Expr{
         if(context == C.STATEMENT)
             gen.pop();
     }
+	//*/
 
 	public boolean hasJavaClass() {
 		return tag != null;
@@ -4846,7 +4890,10 @@ static public class ObjExpr implements Expr{
 
 	final static Type ILOOKUP_SITE_TYPE = Type.getType(ILookupSite.class);
 	final static Type ILOOKUP_THUNK_TYPE = Type.getType(ILookupThunk.class);
-	final static Type KEYWORD_LOOKUPSITE_TYPE = Type.getType(KeywordLookupSite.class);
+	final static Type IKEYWORD_LOOKUP_TYPE = Type.getType(IKeywordLookup.class);
+	final static Type KEYWORD_LOOKUPSITE_TYPE = Type.getType(KeywordLookupSite2.class);
+	final static Method thunkMethod = Method.getMethod("clojure.lang.ILookupThunk thunk()");
+	final static Method faultMethod = Method.getMethod("Object fault(clojure.lang.IKeywordLookup)");
 
 	private DynamicClassLoader loader;
 	private byte[] bytecode;
@@ -5175,8 +5222,6 @@ static public class ObjExpr implements Expr{
             cv.visitField(ACC_FINAL
                           + ACC_STATIC, siteNameStatic(i), KEYWORD_LOOKUPSITE_TYPE.getDescriptor(),
                           null, null);
-            cv.visitField(ACC_STATIC, thunkNameStatic(i), ILOOKUP_THUNK_TYPE.getDescriptor(),
-                          null, null);
             }
 
         //static init for constants, keywords and vars
@@ -5264,7 +5309,6 @@ static public class ObjExpr implements Expr{
 			                            Method.getMethod("void <init>(clojure.lang.Keyword)"));
 			clinitgen.dup();
 			clinitgen.putStatic(objtype, siteNameStatic(i), KEYWORD_LOOKUPSITE_TYPE);
-			clinitgen.putStatic(objtype, thunkNameStatic(i), ILOOKUP_THUNK_TYPE);
 			}
 	}
 
