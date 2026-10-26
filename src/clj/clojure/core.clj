@@ -4605,15 +4605,17 @@
                                (list `get gmap bk gnotfound)
                                (list `req! gmap bk))
                              (list `get gmap bk)))]
-                  (if (ident? bb)
-                    (if (and req? missing)
-                      (conj ret
-                            gtemp bv
-                            gnotfound? `(identical? ~gtemp ~gnotfound)
-                            missing `(if ~gnotfound? (assoc ~missing ~bk nil) ~missing)
-                            local `(when-not ~gnotfound? ~gtemp))
-                      (-> ret (conj local bv)))
-                    (pb ret bb bv))))
+                  (if (and req? missing)
+                    (let [ret
+                          (conj ret
+                                gtemp bv
+                                gnotfound? `(identical? ~gtemp ~gnotfound)
+                                missing `(if ~gnotfound? (assoc ~missing ~bk nil) ~missing)
+                                (if (ident? bb) local gtemp) `(when-not ~gnotfound? ~gtemp))]
+                      (if (ident? bb) ret (pb ret bb gtemp)))                    
+                    (if (ident? bb)
+                      (-> ret (conj local bv))
+                      (pb ret bb bv)))))
         retsel
         (loop [ret ret, sel #{}, bes (seq bes), b->k {}, subs nil, suba nil, subexcess nil, submissing nil]
           (if (seq bes)
