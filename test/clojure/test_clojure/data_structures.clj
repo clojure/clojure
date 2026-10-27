@@ -1980,7 +1980,15 @@
       (is (= '{nested {c 3}}
              (let [{:syms! [b], :syms [d], :req! {a 'long-a}, :or {d 42}, :excess exc} sym-map] exc)))
       (is (= {"nested" {"c" 3}}
-             (let [{:strs! [b], :strs [d], :req! {a "long-a"}, :or {d 42}, :excess exc} str-map] exc))))))
+             (let [{:strs! [b], :strs [d], :req! {a "long-a"}, :or {d 42}, :excess exc} str-map] exc))))
+
+    (testing ":req! with :all"
+      (is (= {:d 42, :long-a 1, :b 2, :nested {:c 3}}
+             (let [{:keys! [b], :keys [d], :req! {a :long-a}, :or {d 42}, :all all} kw-map] all)))
+      (is (= '{d 42, long-a 1, b 2, nested {c 3}}
+             (let [{:syms! [b], :syms [d], :req! {a 'long-a}, :or {d 42}, :all all} sym-map] all)))
+      (is (= {"d" 42, "long-a" 1, "b" 2, "nested" {"c" 3}}
+             (let [{:strs! [b], :strs [d], :req! {a "long-a"}, :or {d 42}, :all all} str-map] all))))))
 
 (deftest selector-test
   (let [sample-map {:a 1 :b 2 :c 3 :d 4
@@ -2027,13 +2035,23 @@
                            :excess keys-excess})]
         (is (= (dissoc sample-map :a :b :c :d) (ex1 sample-map)))))
 
-    (testing ":select plus :missing, but nothing missing"
-      (let [ex2 (selector {:keys [a b & :c :z]
-                           :keys! [d]
-                           :select keys-sel
-                           :missing keys-missing})]
-        (is (= {:select {:a 1 :b 2 :c 3 :d 4}}
-               (ex2 sample-map)))))
+    (testing ":select plus :missing"
+      (testing "but nothing missing"
+        (let [ex2 (selector {:keys [a b & :c :z]
+                             :keys! [d]
+                             :select keys-sel
+                             :missing keys-missing})]
+          (is (= {:select {:a 1 :b 2 :c 3 :d 4}}
+                 (ex2 sample-map)))))
+
+      (testing "nested with :missing regression"
+        (let [f (selector {:req! {{:as c} :card}
+                           :missing m})]
+          (are [m exp] (= exp (f m))
+            {}  {:card nil}
+            nil {:card nil}
+            {:card {}} nil
+            {:card {:n 42}} nil))))
 
     (testing ":select plus :all"
       (let [ex3 (selector {:keys [a b & :c :z]
@@ -2078,7 +2096,28 @@
                               aqx ::x
                               :select tl-sel})]
         (is (= {::x 10000 :nested {:aa 1 'saa 10}}
-               (exnest sample-map)))))
+               (exnest sample-map))))
+
+      (testing "nested with :select regression"
+        (let [f (selector {:req! {{:keys [a]} :card}
+                           :missing m
+                           :select  s})]
+          (are [m exp] (= exp (f m))
+            {}  {:missing {:card nil} :select {}}
+            nil {:missing {:card nil}}
+            {:card {}} {:select {:card {}}}
+            {:card {:n 42}} {:select {:card {}}}
+            {:card {:a 42}} {:select {:card {:a 42}}}))
+
+        (let [f! (selector {:req! {{:keys! [a]} :card}
+                            :missing m
+                            :select  s})]
+          (are [m exp] (= exp (f! m))
+            {} {:missing {:card {:a nil}} :select {}}
+            nil {:missing {:card {:a nil}}}
+            {:card {}} {:missing {:card {:a nil}} :select {:card {}}}
+            {:card {:n 42}} {:missing {:card {:a nil}} :select {:card {}}}
+            {:card {:a 42}} {:select {:card {:a 42}}}))))
 
     (testing "nested selection behavior with _ bindings"
       (let [exnest_ (selector {{aa :aa saa 'saa
