@@ -35,7 +35,7 @@
 
   <properties>
     <directlinking>true</directlinking>
-    <project.build.outputTimestamp>2026-10-27T20:09:24Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
   </properties>
 
   <dependencies>
