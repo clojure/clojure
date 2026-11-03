@@ -109,8 +109,8 @@
             (let [t (transient {})]
               (persistent! t)
               t))]
-    (:foo
-     (get-map))))
+    (:foo (get-map))))
+
 
 (defn invoke-cast
   "I throw an exception casting to IFn in an invoke form."

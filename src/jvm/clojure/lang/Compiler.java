@@ -20,9 +20,7 @@ import clojure.asm.commons.GeneratorAdapter;
 import clojure.asm.commons.Method;
 
 import java.io.*;
-import java.lang.invoke.CallSite;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
+import java.lang.invoke.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Executable;
@@ -4310,6 +4308,7 @@ static class InvokeExpr implements Expr{
 
     public void emitVarCallSite(C context, ObjExpr objx, GeneratorAdapter gen){
         Var v = ((VarExpr) fexpr).var;
+        gen.visitLineNumber(line, gen.mark());
         if(args.count() > MAX_POSITIONAL_ARITY)
             throw new IllegalArgumentException("Can't cache calls > MAX_POSITIONAL_ARITY");
         for(int i = 0; i < args.count(); i++){
@@ -4326,11 +4325,12 @@ static class InvokeExpr implements Expr{
                                                     String.class, MethodType.class,
                                                     String.class, int.class);
         Handle mh = new Handle(Opcodes.H_INVOKESTATIC,
-                                       "clojure/lang/VarCallSite",
-                                       "bootstrap", mt.toMethodDescriptorString(),
+                                       "clojure/lang/Compiler",
+                                       "vcsBootstrap", mt.toMethodDescriptorString(),
                                        false);
         gen.invokeDynamic("vcs", MethodType.genericMethodType(args.count()).toMethodDescriptorString(),
                           mh, varName, args.count());
+        gen.visitLineNumber(line, gen.mark());
     }
 
     public void emitProto(C context, ObjExpr objx, GeneratorAdapter gen){
@@ -4482,10 +4482,13 @@ static class InvokeExpr implements Expr{
 
 		if(fexpr instanceof KeywordExpr && RT.count(form) == 2 && shouldRegisterCallsites(KEYWORD_CALLSITES))
 			{
+            return analyze(context,(RT.list(Symbol.intern("clojure.core/get-const-kw")
+                                                    .withMeta(RT.map(cacheKey, RT.T)),
+                                            RT.second(form), RT.first(form))));
 //			fexpr = new ConstantExpr(new KeywordCallSite(((KeywordExpr)fexpr).k));
-			Expr target = analyze(context, RT.second(form));
-			return new KeywordInvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form),
-			                             (KeywordExpr) fexpr, target);
+//			Expr target = analyze(context, RT.second(form));
+//			return new KeywordInvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form),
+//			                             (KeywordExpr) fexpr, target);
 			}
 
 		PersistentVector args = PersistentVector.EMPTY;
@@ -9777,4 +9780,28 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 		    }
 		};
     }
+
+public static CallSite vcsBootstrap(MethodHandles.Lookup lookup, String instruction, MethodType type,
+                                 String varName, int arity) {
+    MethodType mt = MethodType.genericMethodType(arity);
+    try {
+        MethodHandle ifnmh = lookup.findVirtual(IFn.class, "invoke", mt);
+        MutableCallSite vcs = new MutableCallSite(mt);
+        Symbol sym = Symbol.intern(varName);
+        IFn var = Var.intern(Symbol.intern(sym.ns), Symbol.intern(sym.name));
+        IFn rebinder = new AFn(){
+            public Object invoke(Object invokeFn){
+                vcs.setTarget(ifnmh.bindTo(invokeFn));
+                return null;
+            }
+        };
+
+        IFn init = (IFn) var.invoke(); //no-arg call returns (f rebinder)->faultFn
+        rebinder.invoke(init.invoke(rebinder)); //initial invokeFn is fault
+        return vcs;
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
+
