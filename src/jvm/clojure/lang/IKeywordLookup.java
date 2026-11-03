@@ -14,4 +14,16 @@ package clojure.lang;
 
 public interface IKeywordLookup{
 ILookupThunk getLookupThunk(Keyword k);
+
+default IFn getLookupFn(Object k, IFn fault){
+    ILookupThunk t = getLookupThunk((Keyword) k);
+    return new AFn(){
+        final public Object invoke(Object m, Object k) {
+            Object ret = t.get(m);
+            if(ret == t)
+                return fault.invoke(m, k);
+            return ret;
+        }
+    };
+}
 }

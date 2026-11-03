@@ -6331,7 +6331,7 @@ public static class FnMethod extends ObjMethod{
 	public void doEmit(ObjExpr fn, ClassVisitor cv){
 		Method m = new Method(getMethodName(), getReturnType(), getArgTypes());
 
-		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
+		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_FINAL,
 		                                            m,
 		                                            null,
 		                                            //todo don't hardwire this
@@ -9285,7 +9285,7 @@ public static class NewInstanceMethod extends ObjMethod{
 			for(int i=0;i<exclasses.length;i++)
 				extypes[i] = Type.getType(exclasses[i]);
 			}
-		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
+		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + (obj.isDeftype()?0:ACC_FINAL),
 		                                            m,
 		                                            null,
 		                                            extypes,
