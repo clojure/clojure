@@ -16,29 +16,31 @@ import java.lang.invoke.*;
 
 public class VarCallSite extends MutableCallSite{
 
-final MethodHandle ifnmh;
-
 public VarCallSite(MethodType mt){
     super(mt);
-    try {
-        this.ifnmh = MethodHandles.lookup().findVirtual(IFn.class, "invoke", mt);
-    } catch(Exception e) {
-        throw new RuntimeException(e);
-    }
-}
-
-public void rebind(Object invokeFn){
-    setTarget(ifnmh.bindTo(invokeFn));
 }
 
 public static CallSite bootstrap(MethodHandles.Lookup lookup, String instruction, MethodType type,
                                  String varName, int arity) {
     MethodType mt = MethodType.genericMethodType(arity);
-    VarCallSite vcs = new VarCallSite(mt);
-    Symbol sym = Symbol.intern(varName);
-    IFn var = Var.intern(Symbol.intern(sym.ns), Symbol.intern(sym.name));
-    IFn getFault = (IFn) var.invoke(); //no-arg call returns (f callsite)->faultFn
-    vcs.rebind(getFault.invoke(vcs)); //initial invokeFn is fault
-    return vcs;
+    try {
+        MethodHandle ifnmh = MethodHandles.lookup().findVirtual(IFn.class, "invoke", mt);
+        VarCallSite vcs = new VarCallSite(mt);
+        Symbol sym = Symbol.intern(varName);
+        IFn var = Var.intern(Symbol.intern(sym.ns), Symbol.intern(sym.name));
+        IFn rebinder = new AFn(){
+            public Object invoke(Object invokeFn){
+                vcs.setTarget(ifnmh.bindTo(invokeFn));
+                return null;
+            }
+        };
+
+        IFn init = (IFn) var.invoke(); //no-arg call returns (f rebinder)->faultFn
+        rebinder.invoke(init.invoke(rebinder)); //initial invokeFn is fault
+        return vcs;
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+    }
+
 }
 }
