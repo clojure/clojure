@@ -17,8 +17,19 @@ ILookupThunk getLookupThunk(Keyword k);
 
 default IFn getLookupFn(Object k, IFn fault){
     ILookupThunk t = getLookupThunk((Keyword) k);
+    if(t == null){
+        Class c = this.getClass();
+        return new AFn(){
+            public Object invoke(Object m, Object k){
+                if(m.getClass() == c)
+                    return RT.get(m, k);
+                return fault.invoke(m, k);
+            }
+        };
+    }
+
     return new AFn(){
-        final public Object invoke(Object m, Object k) {
+        public Object invoke(Object m, Object k) {
             Object ret = t.get(m);
             if(ret == t)
                 return fault.invoke(m, k);
