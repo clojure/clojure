@@ -120,3 +120,16 @@
     (defn foo
       [{:keys [^String s]}]
       (.indexOf s "boo"))))
+
+(deftest leftfn-field-patching
+  (is (= :x (letfn [(kw [] :x) (acc [] (kw))] (acc)))))
+
+(defn tail-fibo [n]
+  (letfn [(fib[current next n]
+            (if (zero? n)
+              current
+              (fib next (+ current next) (dec n))))]
+    (fib 0N 1N n)))
+
+(deftest test-letfn-fib
+  (is (= 55N (tail-fibo 10))))
