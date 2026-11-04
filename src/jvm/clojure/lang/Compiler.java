@@ -346,7 +346,8 @@ static final public Var CLEAR_SITES = Var.create(null).setDynamic();
 	STATEMENT,  //value ignored
 	EXPRESSION, //value required
 	RETURN,      //tail position relative to enclosing recur frame
-	EVAL
+	EVAL,
+        LETFN_EXPRESSION
 }
 
 public static final int JVM_BYTECODE_VERSION = V17;
@@ -4624,6 +4625,10 @@ static public class FnExpr extends ObjExpr{
 	static Expr parse(C context, ISeq form, String name) {
 		ISeq origForm = form;
 		FnExpr fn = new FnExpr(tagOf(form));
+        if(context == C.LETFN_EXPRESSION){
+            fn.letfn = true;
+            context = C.EXPRESSION;
+            }
 		Keyword retkey = Keyword.intern(null, "rettag");
 		Object rettag = RT.get(RT.meta(form), retkey);
 		fn.src = form;
@@ -6913,8 +6918,7 @@ public static class LetFnExpr implements Expr{
 				for(int i = 0; i < bindings.count(); i += 2)
 					{
 					Symbol sym = (Symbol) bindings.nth(i);
-					Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
-                    ((ObjExpr)init).letfn = true;
+					Expr init = analyze(C.LETFN_EXPRESSION, bindings.nth(i + 1), sym.name);
 					LocalBinding lb = (LocalBinding) lbs.nth(i / 2);
 					lb.init = init;
 					BindingInit bi = new BindingInit(lb, init);
