@@ -11,9 +11,12 @@
 
 package clojure.lang;
 
+import java.io.FilterWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 // Compiles libs and generates class files stored within the directory
 // named by the Java System property "clojure.compile.path". Arguments are
@@ -30,6 +33,24 @@ private static final Var compile_path = RT.var("clojure.core", "*compile-path*")
 private static final Var compile = RT.var("clojure.core", "compile");
 private static final Var warn_on_reflection = RT.var("clojure.core", "*warn-on-reflection*");
 private static final Var unchecked_math = RT.var("clojure.core", "*unchecked-math*");
+private static final Var err = RT.var("clojure.core", "*err*");
+
+public static class ReflectionWarningCheckingWriter extends FilterWriter{
+	final AtomicBoolean sawReflectionWarning;
+
+	public ReflectionWarningCheckingWriter(Writer out, AtomicBoolean rws){
+		super(out);
+		this.sawReflectionWarning = rws;
+	}
+
+	public void write(String str, int off, int len) throws IOException{
+		out.write(str, off, len);
+		if(str.substring(off, off + len).contains("Reflection warning"))
+			{
+			sawReflectionWarning.set(true);
+			}
+	}
+}
 
 public static void main(String[] args) throws IOException, ClassNotFoundException{
 	RT.init();
@@ -57,11 +78,15 @@ public static void main(String[] args) throws IOException, ClassNotFoundExceptio
     // force load to avoid transitive compilation during lazy load
     RT.load("clojure/core/specs/alpha");
 
+    AtomicBoolean reflectionWarningSeen = new AtomicBoolean(false);
+    PrintWriter wrappedErr = new PrintWriter(new ReflectionWarningCheckingWriter((Writer) Compile.err.deref(), reflectionWarningSeen), true);
+
 	try
 		{
                Var.pushThreadBindings(RT.map(compile_path, path,
                        warn_on_reflection, warnOnReflection,
-                       unchecked_math, uncheckedMath));
+                       unchecked_math, uncheckedMath,
+					   Compile.err, wrappedErr));
 
 		for(String lib : args)
         {
@@ -76,11 +101,18 @@ public static void main(String[] args) throws IOException, ClassNotFoundExceptio
 		try
 			{
 			out.flush();
+			wrappedErr.flush();
 			}
 		catch(IOException e)
 			{
 			e.printStackTrace(err);
 			}
+		}
+
+	if(warnOnReflection && reflectionWarningSeen.get())
+		{
+		err.println("ERROR: Reflection warnings were found during compilation; failing build.");
+		System.exit(1);
 		}
 }
 }
