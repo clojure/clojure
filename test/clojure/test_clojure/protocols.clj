@@ -584,6 +584,26 @@
     (is (= (RecordToTestBoolHint. true) (->RecordToTestBoolHint true))))
   (testing "covariant hints -- deferred"))
 
+(deftest test-record-extmap
+  (testing "record with extmap key works like normal maps"
+    (doseq [r [(->TestRecord 1 2) (->RecordToTestLongHint 1)
+               (->RecordToTestByteHint 1) (->RecordToTestBoolHint true)
+               (->RecordToTestCovariantHint "abc")]]
+      (let [k :NEW
+            v :VALUE
+            rc (assoc r k v)]
+        (is (contains? rc k))
+        (is (= v (get rc k)))
+        (is (= v (k rc)))
+        (is (= v (:NEW rc))) ;; constant key
+        (is (some #{k} (keys rc)))
+        (is (some #{v} (vals rc))))))
+  (testing "record with missing extmap key works the same"
+    (let [r (->TestRecord 1 2)]
+      (is (nil? (get :MISSING r)))
+      (is (nil? (:MISSING r)))
+      (is (false? (contains? r :MISSING))))))
+
 (deftest reify-test
   (testing "of an interface"
     (let [s :foo
