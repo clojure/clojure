@@ -15,7 +15,7 @@ package clojure.lang;
 import java.io.Serializable;
 import java.util.Comparator;
 
-public abstract class AFunction extends AFn implements IObj, Comparator, Fn, Serializable {
+public abstract class AFunction extends AFn implements IObj, Comparator, Fn {
 
 private static final long serialVersionUID = 4469383498184457675L;
 

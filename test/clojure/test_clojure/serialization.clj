@@ -160,15 +160,15 @@
       ;; but it is unbound
       (is (not (.hasRoot v2))))))
 
-(deftest function-serialization
-  (let [capture 5]
-    (are [f] (= capture ((-> f serialize deserialize)))
-      (constantly 5)
-      (fn [] 5)
-      #(do 5)
-      (constantly capture)
-      (fn [] capture)
-      #(do capture))))
+;(deftest function-serialization
+;  (let [capture 5]
+;    (are [f] (= capture ((-> f serialize deserialize)))
+;      (constantly 5)
+;      (fn [] 5)
+;      #(do 5)
+;      (constantly capture)
+;      (fn [] capture)
+;      #(do capture))))
 
 (deftest check-unserializable-objects
   (are [t] (thrown? java.io.NotSerializableException (serialize t))
