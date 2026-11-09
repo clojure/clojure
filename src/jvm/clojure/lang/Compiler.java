@@ -4326,8 +4326,8 @@ static class InvokeExpr implements Expr{
                                                     String.class, MethodType.class,
                                                     String.class, int.class);
         Handle mh = new Handle(Opcodes.H_INVOKESTATIC,
-                                       "clojure/lang/Compiler",
-                                       "vcsBootstrap", mt.toMethodDescriptorString(),
+                                       "clojure/lang/VarCallSite",
+                                       "bootstrap", mt.toMethodDescriptorString(),
                                        false);
         gen.invokeDynamic("vcs", MethodType.genericMethodType(args.count()).toMethodDescriptorString(),
                           mh, varName, args.count());
@@ -9786,27 +9786,5 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 		};
     }
 
-public static CallSite vcsBootstrap(MethodHandles.Lookup lookup, String instruction, MethodType type,
-                                 String varName, int arity) {
-    MethodType mt = MethodType.genericMethodType(arity);
-    try {
-        MethodHandle ifnmh = lookup.findVirtual(IFn.class, "invoke", mt);
-        MutableCallSite vcs = new MutableCallSite(mt);
-        Symbol sym = Symbol.intern(varName);
-        IFn var = Var.intern(Symbol.intern(sym.ns), Symbol.intern(sym.name));
-        IFn rebinder = new AFn(){
-            public Object invoke(Object invokeFn){
-                vcs.setTarget(ifnmh.bindTo(invokeFn));
-                return null;
-            }
-        };
-
-        IFn init = (IFn) var.invoke(); //no-arg call returns (f rebinder)->faultFn
-        rebinder.invoke(init.invoke(rebinder)); //initial invokeFn is fault
-        return vcs;
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
 
