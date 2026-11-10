@@ -230,7 +230,7 @@
   get-const-kw
   (fn*
    ([]
-    (fn [rebind]
+    (fn [cache]
       (fn fault [m k]
         (let [invoke
               (if (instance? clojure.lang.IKeywordLookup m)
@@ -239,7 +239,7 @@
                   (if (instance? clojure.lang.IKeywordLookup m)
                     (fault m k)
                     (clojure.lang.RT/get m k))))]
-          (rebind invoke)
+          (cache invoke)
           (invoke m k)))))
    ([m k]
     (clojure.lang.RT/get m k))))

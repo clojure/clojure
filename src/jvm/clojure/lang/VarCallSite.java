@@ -19,13 +19,14 @@ MethodHandle ifnmh;
 IFn faultFn;
 
 static final int NSTATS = 8;
-IFn[] fns = new IFn[NSTATS];
-long[] counts = new long[NSTATS];
-boolean sampling = true;
-long faultCount = 0;
+volatile IFn[] fns;
+volatile long[] counts;
+volatile boolean sampling = false;
+volatile long faultCount = 0;
+volatile long sampleWindow = 1000;
 
-long sampleWindow = 10000;
-long runWindow = 10000; //will grow
+static final long MAX_RUN_WINDOW = 10000000;
+volatile long runWindow = 1000; //will grow
 
 public VarCallSite(MethodType mt, MethodHandle ifnmh, IFn init){
     super(mt);
@@ -45,9 +46,16 @@ private final MethodHandle invoker(Object invokeFn){
 }
 
 private final void maybeCache(IFn invokeFn){
-    if(sampling) {
+    if(faultCount++ == 0){ //first fault starts as target
+        setTarget(invoker(invokeFn));
+    }
+    else if(sampling) {
+        if(fns == null){
+            fns = new IFn[NSTATS];
+            counts = new long[NSTATS];
+        }
         //if sampling is over, pick a winner and install
-        if(++faultCount >= sampleWindow){
+        if(faultCount >= sampleWindow){
             faultCount = 0;
             sampling = false;
             int winner = 0;
@@ -80,8 +88,9 @@ private final void maybeCache(IFn invokeFn){
     }
     else {
         //if we've seen enough faults, start sampling
-        if(++faultCount >= runWindow){
-            runWindow *= 2;
+        if(faultCount >= runWindow){
+            if(runWindow < MAX_RUN_WINDOW)
+                runWindow *= 2;
             faultCount = 0;
             sampling = true;
         }
