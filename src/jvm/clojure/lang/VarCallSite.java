@@ -15,8 +15,8 @@ package clojure.lang;
 import java.lang.invoke.*;
 
 public class VarCallSite extends MutableCallSite{
-MethodHandle ifnmh;
-IFn faultFn;
+private final MethodHandle ifnmh;
+private final IFn faultFn;
 
 static final int NSTATS = 8;
 volatile IFn[] fns;
@@ -75,7 +75,9 @@ private final void maybeCache(IFn invokeFn){
                     min = i;
                     break;
                 }
-                if(fns[i].getClass() == invokeFn.getClass()){
+                IFn fi = fns[i];
+                if(fi.getClass() == invokeFn.getClass()
+                    && Util.equals(basis(fi), basis(invokeFn))){
                     counts[i]++;
                     found = true;
                 }
@@ -98,17 +100,17 @@ private final void maybeCache(IFn invokeFn){
 }
 
 private static Object basis(IFn invokeFn){
-    return invokeFn.getClass();
+    return invokeFn.invoke();
 }
 
 public static CallSite bootstrap(MethodHandles.Lookup lookup, String instruction, MethodType type,
-                                    String varName, int arity) {
-    MethodType mt = MethodType.genericMethodType(arity);
+                                    String varName) {
+    MethodType mt = type;
     try {
         MethodHandle ifnmh = lookup.findVirtual(IFn.class, "invoke", mt);
         Symbol sym = Symbol.intern(varName);
         IFn var = Var.intern(Symbol.intern(sym.ns), Symbol.intern(sym.name));
-        IFn init = (IFn) var.invoke(); //no-arg call returns (f rebinder)->faultFn
+        IFn init = (IFn) var.invoke(); //no-arg call returns (f cachefn)->faultFn
         return new VarCallSite(mt,ifnmh,init);
     } catch(Exception e) {
         throw new RuntimeException(e);

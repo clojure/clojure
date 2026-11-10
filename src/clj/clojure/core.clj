@@ -228,17 +228,19 @@
           intended for other use"
     :added "1.13"}
   get-const-kw
-  (fn*
+  (fn
    ([]
     (fn [cache]
       (fn fault [m k]
         (let [invoke
               (if (instance? clojure.lang.IKeywordLookup m)
                 (.getLookupFn ^clojure.lang.IKeywordLookup m ^clojure.lang.Keyword k fault)
-                (fn [m k]
-                  (if (instance? clojure.lang.IKeywordLookup m)
-                    (fault m k)
-                    (clojure.lang.RT/get m k))))]
+                (fn
+                  ([])
+                  ([m k]
+                     (if (instance? clojure.lang.IKeywordLookup m)
+                       (fault m k)
+                       (clojure.lang.RT/get m k)))))]
           (cache invoke)
           (invoke m k)))))
    ([m k]

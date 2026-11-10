@@ -4324,13 +4324,13 @@ static class InvokeExpr implements Expr{
         String varName = v.ns.toString() + "/" + v.sym.toString();
         MethodType mt = MethodType.methodType(CallSite.class, MethodHandles.Lookup.class,
                                                     String.class, MethodType.class,
-                                                    String.class, int.class);
+                                                    String.class);
         Handle mh = new Handle(Opcodes.H_INVOKESTATIC,
                                        "clojure/lang/VarCallSite",
                                        "bootstrap", mt.toMethodDescriptorString(),
                                        false);
         gen.invokeDynamic("vcs", MethodType.genericMethodType(args.count()).toMethodDescriptorString(),
-                          mh, varName, args.count());
+                          mh, varName);
         gen.visitLineNumber(line, gen.mark());
     }
 

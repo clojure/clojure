@@ -600,7 +600,7 @@
         (is (some #{v} (vals rc))))))
   (testing "record with missing extmap key works the same"
     (let [r (->TestRecord 1 2)]
-      (is (nil? (get :MISSING r)))
+      (is (nil? (get r :MISSING)))
       (is (nil? (:MISSING r)))
       (is (false? (contains? r :MISSING))))))
 
