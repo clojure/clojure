@@ -39,7 +39,7 @@ private static AFn getFieldFn(IFn fault, ILookupThunk t){
 private static AFn getNonFieldFn(IFn fault, Class c){
     return new AFn(){
         public Object invoke(Object m, Object k){
-            if(m.getClass() == c)
+            if(Util.classOf(m) == c)
                 return RT.get(m, k);
             return fault.invoke(m, k);
         }

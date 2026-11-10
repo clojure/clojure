@@ -56,7 +56,7 @@ private final void maybeCache(IFn invokeFn){
         }
         //if sampling is over, pick a winner and install
         if(faultCount >= sampleWindow){
-            faultCount = 0;
+            faultCount = 1;
             sampling = false;
             int winner = 0;
             for(int i = 0;i<NSTATS;i++){
@@ -71,15 +71,19 @@ private final void maybeCache(IFn invokeFn){
             int min = 0;
             boolean found = false;
             for(int i = 0;i<NSTATS;i++){
-                if(fns[i] == null){
+                IFn fi = fns[i];
+                if(fi == null){
                     min = i;
                     break;
                 }
-                IFn fi = fns[i];
+                else if(counts[i] < counts[min]){
+                    min = i;
+                }
                 if(fi.getClass() == invokeFn.getClass()
                     && Util.equals(basis(fi), basis(invokeFn))){
                     counts[i]++;
                     found = true;
+                    break;
                 }
             }
             if(!found){
@@ -93,7 +97,7 @@ private final void maybeCache(IFn invokeFn){
         if(faultCount >= runWindow){
             if(runWindow < MAX_RUN_WINDOW)
                 runWindow *= 2;
-            faultCount = 0;
+            faultCount = 1;
             sampling = true;
         }
     }
@@ -109,7 +113,9 @@ public static CallSite bootstrap(MethodHandles.Lookup lookup, String instruction
     try {
         MethodHandle ifnmh = lookup.findVirtual(IFn.class, "invoke", mt);
         Symbol sym = Symbol.intern(varName);
-        IFn var = Var.intern(Symbol.intern(sym.ns), Symbol.intern(sym.name));
+        IFn var = Var.find(sym);
+        if(var == null)
+            throw new IllegalArgumentException("Can't find var to bind callsite: " + sym.toString());
         IFn init = (IFn) var.invoke(); //no-arg call returns (f cachefn)->faultFn
         return new VarCallSite(mt,ifnmh,init);
     } catch(Exception e) {

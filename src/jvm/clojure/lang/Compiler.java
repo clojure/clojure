@@ -4309,7 +4309,6 @@ static class InvokeExpr implements Expr{
 
     public void emitVarCallSite(C context, ObjExpr objx, GeneratorAdapter gen){
         Var v = ((VarExpr) fexpr).var;
-        gen.visitLineNumber(line, gen.mark());
         if(args.count() > MAX_POSITIONAL_ARITY)
             throw new IllegalArgumentException("Can't cache calls > MAX_POSITIONAL_ARITY");
         for(int i = 0; i < args.count(); i++){
