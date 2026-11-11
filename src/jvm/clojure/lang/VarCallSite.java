@@ -65,7 +65,10 @@ private final void maybeCache(IFn invokeFn){
                 if(counts[i] > counts[winner])
                     winner = i;
             }
-            setTarget(invoker(fns[winner]));
+            IFn wfn = fns[winner];
+            long cnt = counts[winner];
+            //System.out.println("callsite reset: " + wfn.getClass() + ", basis: " + wfn.invoke() + ", count: " + cnt);
+            setTarget(invoker(wfn));
         }
         else { //add to count for fn
             int min = 0;
@@ -99,6 +102,7 @@ private final void maybeCache(IFn invokeFn){
                 runWindow *= 2;
             faultCount = 1;
             sampling = true;
+            setTarget(invoker(faultFn));
         }
     }
 }
