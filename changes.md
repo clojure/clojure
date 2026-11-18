@@ -1,5 +1,15 @@
 <!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.12.7
+
+Security note: This release addresses the serialization issue detailed in [GHSA-x4c4-68gp-vrhc](https://github.com/clojure/clojure/security/advisories/GHSA-x4c4-68gp-vrhc).
+
+Reading serialized Java data from untrusted streams is inherently unsafe and Clojure function classes could be used in such an attack (in combination with standard JDK classes).
+
+As of Clojure 1.12.7, Clojure functions will throw on serialization and deserialization by default. The system property `-Dclojure.serializable.fns=true` can be set to allow these operations in a context you know is safe.
+
+* [CLJ-2993](https://clojure.atlassian.net/browse/CLJ-2993) - AFunction can be used to craft a serialized object that runs arbitrary code on deserialization
+
 # Changes to Clojure in Version 1.12.6
 
 * [CLJ-2794](https://clojure.atlassian.net/browse/CLJ-2794) - gen-class - incorrectly treats interface default methods as abstract, throwing when the var delegate is unbound
