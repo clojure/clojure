@@ -12,11 +12,12 @@
 
 package clojure.lang;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.Comparator;
 
 public abstract class AFunction extends AFn implements IObj, Comparator, Fn, Serializable {
 
+private static final boolean SERIALIZATION_ALLOWED = Boolean.getBoolean("clojure.serializable.fns");
 private static final long serialVersionUID = 4469383498184457675L;
 
 public volatile MethodImplCache __methodImplCache;
@@ -62,4 +63,24 @@ public int compare(Object o1, Object o2){
         Number n = (Number) o;
         return n.intValue();
 }
+
+private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+	if(SERIALIZATION_ALLOWED)
+		in.defaultReadObject();
+	else
+		throw new NotSerializableException();
+}
+
+private void readObjectNoData() throws ObjectStreamException {
+	if(!SERIALIZATION_ALLOWED)
+		throw new NotSerializableException();
+}
+
+private void writeObject(ObjectOutputStream oos) throws IOException {
+	if(SERIALIZATION_ALLOWED)
+		oos.defaultWriteObject();
+	else
+		throw new NotSerializableException();
+}
+
 }
