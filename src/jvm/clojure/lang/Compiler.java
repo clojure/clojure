@@ -4590,7 +4590,7 @@ static public class FnExpr extends ObjExpr{
 	}
 
 	boolean supportsMeta(){
-		return hasMeta;
+		return true;
 	}
 
 	public Class getJavaClass() {
@@ -4782,7 +4782,7 @@ static public class FnExpr extends ObjExpr{
 			}
 		fn.getCompiledClass();
 
-		if(fn.supportsMeta())
+		if(fn.hasMeta)
 			{
 			//System.err.println(name + " supports meta");
 			return new MetaExpr(fn, MapExpr
