@@ -15,100 +15,38 @@ package clojure.lang;
 import java.lang.invoke.*;
 
 public class VarCallSite extends MutableCallSite{
+
+final static Keyword FN_K = Keyword.intern(null, "fn");
+final static Keyword STATE_K = Keyword.intern(null, "state");
+
 private final MethodHandle ifnmh;
-private final IFn faultFn;
-
-static final int NSTATS = 8;
-volatile IFn[] fns;
-volatile long[] counts;
-volatile boolean sampling = false;
-volatile long faultCount = 0;
-volatile long sampleWindow = 1000;
-
-static final long MAX_RUN_WINDOW = 10000000;
-volatile long runWindow = 1000; //will grow
+private Object cache; //a map with :fn and optional :state
 
 public VarCallSite(MethodType mt, MethodHandle ifnmh, IFn init){
     super(mt);
     this.ifnmh  = ifnmh;
     IFn cacheFn = new AFn(){
-        public Object invoke(Object invokeFn){
-            maybeCache((IFn) invokeFn);
+        public Object invoke() {
+            return cache;
+        }
+        public Object invoke(Object cmap){
+            var tfn = RT.get(cmap,FN_K);
+            var state = RT.get(cmap,STATE_K);
+            var nextCache = RT.assoc(cache, STATE_K, state);
+            if(tfn != null){
+                setInvoker(tfn);
+                nextCache = RT.assoc(nextCache, FN_K, tfn);
+                }
+            cache = nextCache;
             return null;
         }
     };
-    this.faultFn = (IFn) init.invoke(cacheFn);
-    setTarget(invoker(faultFn));
+    this.cache = init.invoke(cacheFn);
+    setInvoker(RT.get(cache, FN_K));
 }
 
-private final MethodHandle invoker(Object invokeFn){
-    return ifnmh.bindTo(invokeFn);
-}
-
-private final void maybeCache(IFn invokeFn){
-    if(faultCount++ == 0){ //first fault starts as target
-        setTarget(invoker(invokeFn));
-    }
-    else if(sampling) {
-        if(fns == null){
-            fns = new IFn[NSTATS];
-            counts = new long[NSTATS];
-        }
-        //if sampling is over, pick a winner and install
-        if(faultCount >= sampleWindow){
-            faultCount = 1;
-            sampling = false;
-            int winner = 0;
-            for(int i = 0;i<NSTATS;i++){
-                if(fns[i] == null)
-                    break;
-                if(counts[i] > counts[winner])
-                    winner = i;
-            }
-            IFn wfn = fns[winner];
-            long cnt = counts[winner];
-            //System.out.println("callsite reset: " + wfn.getClass() + ", basis: " + wfn.invoke() + ", count: " + cnt);
-            setTarget(invoker(wfn));
-        }
-        else { //add to count for fn
-            int min = 0;
-            boolean found = false;
-            for(int i = 0;i<NSTATS;i++){
-                IFn fi = fns[i];
-                if(fi == null){
-                    min = i;
-                    break;
-                }
-                else if(counts[i] < counts[min]){
-                    min = i;
-                }
-                if(fi.getClass() == invokeFn.getClass()
-                    && Util.equals(basis(fi), basis(invokeFn))){
-                    counts[i]++;
-                    found = true;
-                    break;
-                }
-            }
-            if(!found){
-                counts[min] = 1;
-                fns[min] = invokeFn;
-            }
-        }
-    }
-    else {
-        //if we've seen enough faults, start sampling
-        if(faultCount >= runWindow){
-            if(runWindow < MAX_RUN_WINDOW)
-                runWindow *= 2;
-            faultCount = 1;
-            sampling = true;
-            setTarget(invoker(faultFn));
-        }
-    }
-}
-
-private static Object basis(IFn invokeFn){
-    return invokeFn.invoke();
+private void setInvoker(Object invokeFn){
+    setTarget(ifnmh.bindTo(invokeFn));
 }
 
 public static CallSite bootstrap(MethodHandles.Lookup lookup, String instruction, MethodType type,

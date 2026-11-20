@@ -229,22 +229,27 @@
     :added "1.13"}
   get-const-kw
   (fn
-   ([]
-    (fn [cache]
-      (fn fault [m k]
-        (let [invoke
-              (if (instance? clojure.lang.IKeywordLookup m)
-                (.getLookupFn ^clojure.lang.IKeywordLookup m ^clojure.lang.Keyword k fault)
-                (fn
-                  ([])
-                  ([m k]
-                     (if (instance? clojure.lang.IKeywordLookup m)
-                       (fault m k)
-                       (clojure.lang.RT/get m k)))))]
-          (cache invoke)
-          (invoke m k)))))
-   ([m k]
-    (clojure.lang.RT/get m k))))
+    ([]
+     (fn [cache!]
+       {:state 0
+        :fn
+        (fn [m k]
+          (let [cache (cache!)
+                len (clojure.lang.RT/get cache :state)
+                fault (clojure.lang.RT/get cache :fn)]
+            (let [invoke
+                  (if (clojure.lang.Numbers/gte len 8)
+                    #(clojure.lang.RT/get %1 %2)
+                    (if (instance? clojure.lang.IKeywordLookup m)
+                      (.getLookupFn ^clojure.lang.IKeywordLookup m ^clojure.lang.Keyword k fault)
+                      (fn [m k]
+                        (if (instance? clojure.lang.IKeywordLookup m)
+                          (fault m k)
+                          (clojure.lang.RT/get m k)))))]
+              (cache! {:fn invoke :state (clojure.lang.Numbers/inc len)})
+              (invoke m k))))}))
+    ([m k]
+     (clojure.lang.RT/get m k))))
 
 (def
  ^{:private true}
