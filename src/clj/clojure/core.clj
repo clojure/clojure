@@ -3535,7 +3535,8 @@
 (defn class
   "Returns the Class of x"
   {:added "1.0"
-   :static true}
+   :static true
+   :inline (fn [x] `(clojure.lang.Util/classOf ~x))}
   ^Class [^Object x] (if (nil? x) x (. x (getClass))))
 
 (defn type 
