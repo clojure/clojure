@@ -30,9 +30,10 @@ public VarCallSite(MethodType mt, MethodHandle ifnmh, IFn init){
             return cache;
         }
         public Object invoke(Object cmap){
+            var nextCache = cache;
+            if(RT.booleanCast(RT.contains(cmap,STATE_K)))
+                nextCache = RT.assoc(cache, STATE_K, RT.get(cmap,STATE_K));
             var tfn = RT.get(cmap,FN_K);
-            var state = RT.get(cmap,STATE_K);
-            var nextCache = RT.assoc(cache, STATE_K, state);
             if(tfn != null){
                 setInvoker(tfn);
                 nextCache = RT.assoc(nextCache, FN_K, tfn);
