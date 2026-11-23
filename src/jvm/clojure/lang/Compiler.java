@@ -20,7 +20,7 @@ import clojure.asm.commons.GeneratorAdapter;
 import clojure.asm.commons.Method;
 
 import java.io.*;
-import java.lang.invoke.MethodType;
+import java.lang.invoke.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Executable;
@@ -89,6 +89,7 @@ static final Keyword inlineAritiesKey = Keyword.intern(null, "inline-arities");
 static final Keyword staticKey = Keyword.intern(null, "static");
 static final Keyword arglistsKey = Keyword.intern(null, "arglists");
 static final Symbol INVOKE_STATIC = Symbol.intern("invokeStatic");
+static final Keyword cacheKey = Keyword.intern(null, "cache");
 
 static final Keyword volatileKey = Keyword.intern(null, "volatile");
 static final Keyword implementsKey = Keyword.intern(null, "implements");
@@ -345,7 +346,8 @@ static final public Var CLEAR_SITES = Var.create(null).setDynamic();
 	STATEMENT,  //value ignored
 	EXPRESSION, //value required
 	RETURN,      //tail position relative to enclosing recur frame
-	EVAL
+	EVAL,
+        LETFN_EXPRESSION
 }
 
 public static final int JVM_BYTECODE_VERSION = V17;
@@ -635,14 +637,16 @@ public static class AssignExpr implements Expr{
 public static class VarExpr implements Expr, AssignableExpr{
 	public final Var var;
 	public final Object tag;
+    public final IPersistentMap meta;
 	final static Method getMethod = Method.getMethod("Object get()");
 	final static Method setMethod = Method.getMethod("Object set(Object)");
 
     Class jc;
 
-	public VarExpr(Var var, Symbol tag){
+	public VarExpr(Var var, Symbol tag, IPersistentMap meta){
 		this.var = var;
 		this.tag = tag != null ? tag : var.getTag();
+        this.meta = meta;
 	}
 
 	public Object eval() {
@@ -4287,7 +4291,11 @@ static class InvokeExpr implements Expr{
 			gen.visitLineNumber(line, gen.mark());
 			emitProto(context,objx,gen);
 			}
-
+        else if(fexpr instanceof VarExpr &&
+                RT.booleanCast(RT.get(((VarExpr)fexpr).meta, cacheKey))){
+            gen.visitLineNumber(line, gen.mark());
+            emitVarCallSite(context,objx,gen);
+        }
 		else
 			{
 			fexpr.emit(C.EXPRESSION, objx, gen);
@@ -4299,7 +4307,33 @@ static class InvokeExpr implements Expr{
 			gen.pop();		
 	}
 
-	public void emitProto(C context, ObjExpr objx, GeneratorAdapter gen){
+    public void emitVarCallSite(C context, ObjExpr objx, GeneratorAdapter gen){
+        Var v = ((VarExpr) fexpr).var;
+        if(args.count() > MAX_POSITIONAL_ARITY)
+            throw new IllegalArgumentException("Can't cache calls > MAX_POSITIONAL_ARITY");
+        for(int i = 0; i < args.count(); i++){
+            Expr e = (Expr) args.nth(i);
+            e.emit(C.EXPRESSION, objx, gen);
+            }
+        gen.visitLineNumber(line, gen.mark());
+        if(tailPosition && !objx.canBeDirect) {
+            ObjMethod method = (ObjMethod) METHOD.deref();
+            method.emitClearThis(gen);
+            }
+        String varName = v.ns.toString() + "/" + v.sym.toString();
+        MethodType mt = MethodType.methodType(CallSite.class, MethodHandles.Lookup.class,
+                                                    String.class, MethodType.class,
+                                                    String.class);
+        Handle mh = new Handle(Opcodes.H_INVOKESTATIC,
+                                       "clojure/lang/VarCallSite",
+                                       "bootstrap", mt.toMethodDescriptorString(),
+                                       false);
+        gen.invokeDynamic("vcs", MethodType.genericMethodType(args.count()).toMethodDescriptorString(),
+                          mh, varName);
+        gen.visitLineNumber(line, gen.mark());
+    }
+
+    public void emitProto(C context, ObjExpr objx, GeneratorAdapter gen){
 		Label onLabel = gen.newLabel();
 		Label callLabel = gen.newLabel();
 		Label endLabel = gen.newLabel();
@@ -4448,10 +4482,14 @@ static class InvokeExpr implements Expr{
 
 		if(fexpr instanceof KeywordExpr && RT.count(form) == 2 && shouldRegisterCallsites(KEYWORD_CALLSITES))
 			{
+            return analyze(context,((IObj)RT.list(Symbol.intern("clojure.core/get-const-kw")
+                                                    .withMeta(RT.map(cacheKey, RT.T)),
+                                            RT.second(form), RT.first(form)))
+                    .withMeta((IPersistentMap)RT.meta(form)));
 //			fexpr = new ConstantExpr(new KeywordCallSite(((KeywordExpr)fexpr).k));
-			Expr target = analyze(context, RT.second(form));
-			return new KeywordInvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form),
-			                             (KeywordExpr) fexpr, target);
+//			Expr target = analyze(context, RT.second(form));
+//			return new KeywordInvokeExpr((String) SOURCE.deref(), lineDeref(), columnDeref(), tagOf(form),
+//			                             (KeywordExpr) fexpr, target);
 			}
 
 		PersistentVector args = PersistentVector.EMPTY;
@@ -4552,7 +4590,7 @@ static public class FnExpr extends ObjExpr{
 	}
 
 	boolean supportsMeta(){
-		return hasMeta;
+		return true;
 	}
 
 	public Class getJavaClass() {
@@ -4586,6 +4624,10 @@ static public class FnExpr extends ObjExpr{
 	static Expr parse(C context, ISeq form, String name) {
 		ISeq origForm = form;
 		FnExpr fn = new FnExpr(tagOf(form));
+        if(context == C.LETFN_EXPRESSION){
+            fn.letfn = true;
+            context = C.EXPRESSION;
+            }
 		Keyword retkey = Keyword.intern(null, "rettag");
 		Object rettag = RT.get(RT.meta(form), retkey);
 		fn.src = form;
@@ -4740,7 +4782,7 @@ static public class FnExpr extends ObjExpr{
 			}
 		fn.getCompiledClass();
 
-		if(fn.supportsMeta())
+		if(fn.hasMeta)
 			{
 			//System.err.println(name + " supports meta");
 			return new MetaExpr(fn, MapExpr
@@ -4816,6 +4858,7 @@ static public class ObjExpr implements Expr{
 	IPersistentVector protocolCallsites;
 	//IPersistentSet varCallsites;
 	boolean onceOnly = false;
+    boolean letfn = false;
 
 	Object src;
 
@@ -4999,13 +5042,14 @@ static public class ObjExpr implements Expr{
 				}
 			else
 				{
-				//todo - only enable this non-private+writability for letfns where we need it
+                boolean mutableClose = onceOnly || letfn;
+				//only enable writability for once and letfns where we need it
 				if(lb.getPrimitiveType() != null)
-					cv.visitField(0 + (isVolatile(lb) ? ACC_VOLATILE : 0)
+					cv.visitField(0 + (isVolatile(lb) ? ACC_VOLATILE : 0) + (mutableClose ? 0 : ACC_FINAL)
 							, lb.name, Type.getType(lb.getPrimitiveType()).getDescriptor(),
 								  null, null);
 				else
-					cv.visitField(0 //+ (oneTimeUse ? 0 : ACC_FINAL)
+					cv.visitField(0 + (mutableClose ? 0 : ACC_FINAL)
 							, lb.name, OBJECT_TYPE.getDescriptor(), null, null);
 				}
 			}
@@ -6295,7 +6339,7 @@ public static class FnMethod extends ObjMethod{
 	public void doEmit(ObjExpr fn, ClassVisitor cv){
 		Method m = new Method(getMethodName(), getReturnType(), getArgTypes());
 
-		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
+		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + ACC_FINAL,
 		                                            m,
 		                                            null,
 		                                            //todo don't hardwire this
@@ -6873,7 +6917,7 @@ public static class LetFnExpr implements Expr{
 				for(int i = 0; i < bindings.count(); i += 2)
 					{
 					Symbol sym = (Symbol) bindings.nth(i);
-					Expr init = analyze(C.EXPRESSION, bindings.nth(i + 1), sym.name);
+					Expr init = analyze(C.LETFN_EXPRESSION, bindings.nth(i + 1), sym.name);
 					LocalBinding lb = (LocalBinding) lbs.nth(i / 2);
 					lb.init = init;
 					BindingInit bi = new BindingInit(lb, init);
@@ -7970,7 +8014,7 @@ private static Expr analyzeSymbol(Symbol sym) {
 		if(RT.booleanCast(RT.get(v.meta(),RT.CONST_KEY)))
 			return analyze(C.EXPRESSION, RT.list(QUOTE, v.get()));
 		registerVar(v);
-		return new VarExpr(v, tag);
+		return new VarExpr(v, tag, sym.meta());
 		}
 	else if(o instanceof Class)
 		return new ConstantExpr(o);
@@ -9248,7 +9292,7 @@ public static class NewInstanceMethod extends ObjMethod{
 			for(int i=0;i<exclasses.length;i++)
 				extypes[i] = Type.getType(exclasses[i]);
 			}
-		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC,
+		GeneratorAdapter gen = new GeneratorAdapter(ACC_PUBLIC + (obj.isDeftype()?0:ACC_FINAL),
 		                                            m,
 		                                            null,
 		                                            extypes,
@@ -9740,4 +9784,6 @@ static IPersistentCollection emptyVarCallSites(){return PersistentHashSet.EMPTY;
 		    }
 		};
     }
+
 }
+

@@ -222,7 +222,24 @@
                                                   (. ~hinted-target ~(symbol (str "-" fld)))
                                                   ~'thunk)))])
                                 base-fields))
-                           nil))))])
+                           nil)))
+                `(getLookupFn [this# k# fault#]
+                   (let [~'gclass (class this#)
+                         ~'gfault fault#]              
+                     (case k#
+                           ~@(let [hinted-target (with-meta 'gtarget {:tag tagname})] 
+                               (mapcat 
+                                (fn [fld]
+                                  [(keyword fld)
+                                   `(fn [~'gtarget ~'gk]
+                                      (if (identical? (class ~'gtarget) ~'gclass)
+                                        (. ~hinted-target ~(symbol (str "-" fld)))
+                                        (~'gfault ~'gtarget ~'gk)))])
+                                base-fields))
+                           (fn [~'gtarget ~'gk]
+                             (if (identical? (class ~'gtarget) ~'gclass)
+                               (clojure.lang.RT/get (~'.-__extmap ~(with-meta 'gtarget {:tag tagname})) ~'gk)
+                               (~'gfault ~'gtarget ~'gk)))))))])
       (imap [[i m]] 
             [(conj i 'clojure.lang.IPersistentMap)
              (conj m 
