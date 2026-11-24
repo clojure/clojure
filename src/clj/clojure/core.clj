@@ -237,7 +237,8 @@
                     fault (clojure.lang.RT/get cache :fn)
                     invoke
                     (if (clojure.lang.Numbers/gte len 8)
-                      #(clojure.lang.RT/get %1 %2)
+                      (fn ([m k] (clojure.lang.RT/get m k))
+                          ([m k nf] (clojure.lang.RT/get m k nf)))
                       (if (instance? clojure.lang.IKeywordLookup m)
                         (.getLookupFn ^clojure.lang.IKeywordLookup m ^clojure.lang.Keyword k fault)
                         (fn
