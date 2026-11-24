@@ -227,29 +227,40 @@
   ^{:doc "this fn exists to support keyword callsites and is not
           intended for other use"
     :added "1.13"}
-  get-const-kw
-  (fn
-    ([]
-     (fn [cache!]
-       {:state 0
-        :fn
-        (fn [m k]
-          (let [cache (cache!)
-                len (clojure.lang.RT/get cache :state)
-                fault (clojure.lang.RT/get cache :fn)]
-            (let [invoke
-                  (if (clojure.lang.Numbers/gte len 8)
-                    #(clojure.lang.RT/get %1 %2)
-                    (if (instance? clojure.lang.IKeywordLookup m)
-                      (.getLookupFn ^clojure.lang.IKeywordLookup m ^clojure.lang.Keyword k fault)
-                      (fn [m k]
-                        (if (instance? clojure.lang.IKeywordLookup m)
-                          (fault m k)
-                          (clojure.lang.RT/get m k)))))]
-              (cache! {:fn invoke :state (clojure.lang.Numbers/inc len)})
-              (invoke m k))))}))
-    ([m k]
-     (clojure.lang.RT/get m k))))
+  get-const-kw-callsite
+  (fn []
+    (fn [cache!]
+      (let [find-and-cache-invoker
+            (fn [m k]
+              (let [cache (cache!)
+                    len (clojure.lang.RT/get cache :state)
+                    fault (clojure.lang.RT/get cache :fn)
+                    invoke
+                    (if (clojure.lang.Numbers/gte len 8)
+                      #(clojure.lang.RT/get %1 %2)
+                      (if (instance? clojure.lang.IKeywordLookup m)
+                        (.getLookupFn ^clojure.lang.IKeywordLookup m ^clojure.lang.Keyword k fault)
+                        (fn
+                          ([m k]
+                           (if (instance? clojure.lang.IKeywordLookup m)
+                             (fault m k)
+                             (clojure.lang.RT/get m k)))
+                          ([m k nf]
+                           (if (instance? clojure.lang.IKeywordLookup m)
+                             (fault m k nf)
+                             (clojure.lang.RT/get m k nf))))))]
+                (cache! {:fn invoke :state (clojure.lang.Numbers/inc len)})
+                invoke))]
+        {:state 0
+         :fn
+         (fn
+           ([m k]
+            (let [invoke (find-and-cache-invoker m k)]               
+              (invoke m k)))
+           ([m k nf]
+            (let [invoke (find-and-cache-invoker m k)]
+              (invoke m k nf))))}))))
+
 
 (def
  ^{:private true}

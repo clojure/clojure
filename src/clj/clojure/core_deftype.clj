@@ -231,15 +231,25 @@
                                (mapcat 
                                 (fn [fld]
                                   [(keyword fld)
-                                   `(fn [~'gtarget ~'gk]
-                                      (if (identical? (class ~'gtarget) ~'gclass)
-                                        (. ~hinted-target ~(symbol (str "-" fld)))
-                                        (~'gfault ~'gtarget ~'gk)))])
+                                   `(fn
+                                      ([~'gtarget ~'gk]
+                                       (if (identical? (class ~'gtarget) ~'gclass)
+                                         (. ~hinted-target ~(symbol (str "-" fld)))
+                                         (~'gfault ~'gtarget ~'gk)))
+                                      ([~'gtarget ~'gk ~'gnf]
+                                       (if (identical? (class ~'gtarget) ~'gclass)
+                                         (. ~hinted-target ~(symbol (str "-" fld)))
+                                         (~'gfault ~'gtarget ~'gk ~'gnf))))])
                                 base-fields))
-                           (fn [~'gtarget ~'gk]
-                             (if (identical? (class ~'gtarget) ~'gclass)
-                               (clojure.lang.RT/get (~'.-__extmap ~(with-meta 'gtarget {:tag tagname})) ~'gk)
-                               (~'gfault ~'gtarget ~'gk)))))))])
+                           (fn
+                             ([~'gtarget ~'gk]
+                                (if (identical? (class ~'gtarget) ~'gclass)
+                                  (clojure.lang.RT/get (~'.-__extmap ~(with-meta 'gtarget {:tag tagname})) ~'gk)
+                                  (~'gfault ~'gtarget ~'gk)))
+                             ([~'gtarget ~'gk ~'gnf]
+                                (if (identical? (class ~'gtarget) ~'gclass)
+                                  (clojure.lang.RT/get (~'.-__extmap ~(with-meta 'gtarget {:tag tagname})) ~'gk ~'gnf)
+                                  (~'gfault ~'gtarget ~'gk ~'gnf))))))))])
       (imap [[i m]] 
             [(conj i 'clojure.lang.IPersistentMap)
              (conj m 

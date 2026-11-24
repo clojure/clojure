@@ -4436,11 +4436,13 @@ static class InvokeExpr implements Expr{
 				}
 			}
 
-		if(fexpr instanceof KeywordExpr && RT.count(form) == 2 && shouldRegisterCallsites(KEYWORD_CALLSITES))
+		if(fexpr instanceof KeywordExpr
+           && (RT.count(form) == 2 || RT.count(form) == 3)
+           && shouldRegisterCallsites(KEYWORD_CALLSITES))
 			{
-            return analyze(context,((IObj)RT.list(Symbol.intern("clojure.core/get-const-kw")
+            return analyze(context,((IObj)RT.listStar(Symbol.intern("clojure.core/get-const-kw-callsite")
                                                     .withMeta(RT.map(cacheKey, RT.T)),
-                                            RT.second(form), RT.first(form)))
+                                            RT.second(form), RT.first(form), RT.next(RT.next(form))))
                     .withMeta((IPersistentMap)RT.meta(form)));
 //			fexpr = new ConstantExpr(new KeywordCallSite(((KeywordExpr)fexpr).k));
 //			Expr target = analyze(context, RT.second(form));
