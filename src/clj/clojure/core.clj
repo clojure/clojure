@@ -1554,7 +1554,9 @@
 (defn get
   "Returns the value mapped to key, not-found or nil if key not present
   in associative collection, set, string, array, or ILookup instance."
-  {:inline (fn  [m k & nf] `(. clojure.lang.RT (get ~m ~k ~@nf)))
+  {:inline (fn  [m k & nf] (if (keyword? k)
+                             `(^:cache get-const-kw-callsite ~m ~k ~@nf)
+                             `(clojure.lang.RT/get ~m ~k ~@nf)))
    :inline-arities #{2 3}
    :added "1.0"}
   ([map key]
