@@ -228,7 +228,10 @@
           intended for other use"
     :added "1.13"}
   get-const-kw-callsite
-  (fn []
+  (fn
+   ([m k] (clojure.lang.RT/get m k))
+   ([m k nf] (clojure.lang.RT/get m k nf))
+   ([]
     (fn [cache!]
       (let [find-and-cache-invoker
             (fn [m k]
@@ -260,7 +263,7 @@
               (invoke m k)))
            ([m k nf]
             (let [invoke (find-and-cache-invoker m k)]
-              (invoke m k nf))))}))))
+              (invoke m k nf))))})))))
 
 
 (def
